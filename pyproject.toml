@@ -1,0 +1,20 @@
+[project]
+name = "npc_sessions"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org"},
+]
+dependencies = [
+    "universal-pathlib>=0.0.23",
+    "pandas[pyarrow]>=2.0.3",
+    "pyarrow>=12.0.1",
+    "pydantic>=2.0.3",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
