@@ -21,7 +21,7 @@ class MetadataKey(pydantic.BaseModel):
     1
     >>> str(a)
     '1'
-    >>> a == 1 == '1'
+    >>> a == 1 and a == '1'
     True
     >>> b = MetadataKey(id=1)
     >>> c = MetadataKey(id=2)
@@ -37,7 +37,7 @@ class MetadataKey(pydantic.BaseModel):
     """A unique identifier for this object. Immutable, and type at assignment is preserved."""
     
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(id={self.id})'
+        return f'{self.__class__.__name__}(id={repr(self.id)})'
 
     def __str__(self) -> str:
         return str(self.id)
@@ -46,11 +46,9 @@ class MetadataKey(pydantic.BaseModel):
         return hash(self.id) ^ hash(self.__class__.__name__)
 
     def __eq__(self, other: Any) -> bool:
-        if isinstance(other, self.__class__):
-            return self.id == other.id
         try:
             # allow comparison of obj with str or int via obj.id
-            return str(self) < str(other)
+            return str(self) == str(other)
         except TypeError:
             return NotImplemented
 
@@ -89,14 +87,24 @@ class Subject(MetadataKey):
     >>> sub = Subject(id=366122)
     >>> sub
     Subject(id=366122)
-    >>> sub == 366122 == '366122'
+    >>> sub == 366122 and sub == '366122'
     True
+    >>> sub.project = 1
+    >>> sub = Subject(id=366122, project=1)
+    >>> sub.project
+    
     """
 
     @pydantic.computed_field(alias='project_id', repr=False)
-    @functools.cached_property
-    def project(self) -> Project: 
+    @property
+    def project(self) -> Project:
+        if hasattr(self, '_project'):
+            return self._project
         raise NotImplementedError
+
+    @project.setter
+    def project(self, value: Union[int, str, Project]) -> None:
+        self._project = value
 
     @functools.cached_property
     def sessions(self) -> Iterable[Union[int, str]]:
@@ -117,7 +125,7 @@ class Session(MetadataKey):
 
     Sorting is based on id, not dt:
     >>> d = Session(id=2, subject=1, project=1, dt=0650924157.0)
-    >>> sort([d, c])
+    >>> sorted([d, c])
     [Session(id=1), Session(id=2)]
     """
 
@@ -149,14 +157,15 @@ def cast_to_dt(v: Union[int, float, datetime.datetime]) -> datetime.datetime:
     if isinstance(v, datetime.datetime):
         return v
     elif isinstance(v, float) or (isinstance(v, int) and len(str(v)) == 10):
-        # int len=10 corresponds to year range 2001 - 2286
+        # int len=10 timestamp (from `time.time()``)corresponds to date in year range 2001 - 2286
         return datetime.datetime.fromtimestamp(v)
-    elif not isinstance(v, str):
-        raise ValueError(f'Input must be a datetime.datetime, float, int or str. Got {type(v)}')
-    
     with contextlib.suppress(Exception):
         return datetime.datetime.fromisoformat(v)
-    s = str(v)
+    try:
+        s = str(v)
+    except TypeError as exc:
+        raise ValueError(f'Input must be a datetime.datetime, float, int or str. Got {type(v)}') from exc
+    
     with contextlib.suppress(Exception):
         return datetime.datetime.fromisoformat(
             f'{s[:4]}-{s[4:6]}-{s[6:8]}T{s[8:10]}:{s[10:12]}:{s[12:14]}'
