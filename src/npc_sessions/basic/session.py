@@ -1,9 +1,8 @@
 from __future__ import annotations
 import contextlib
 
-import dataclasses
 import datetime
-from typing import Any, Collection, Iterable, Mapping, NamedTuple, Optional, Sequence, TypeAlias, Union
+from typing import Any, Iterable, Union
 
 import pydantic
 
@@ -30,13 +29,13 @@ class Metadata(pydantic.BaseModel):
 
     id: Union[int, str]
     """A unique identifier for this object."""
-    
+
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(id={self.id})'
+        return f"{self.__class__.__name__}(id={self.id})"
 
     def __str__(self) -> str:
         return str(self.id)
-    
+
     def __hash__(self) -> int:
         return hash(self.id) ^ hash(self.__class__.__name__)
 
@@ -65,7 +64,6 @@ class Project(Metadata):
         return NotImplemented
 
 
-
 class Subject(Metadata):
     """A subject has a project and a collection of sessions."""
 
@@ -79,7 +77,7 @@ class Subject(Metadata):
 
 class Session(Metadata):
     """A session comprises, at the very least, a subject, a datetime and a project.
-    
+
     >>> s = Session(id=1, subject_id=1, project_id=1, dt=20220425150237)
     >>> s.date
     datetime.date(2022, 4, 25)
@@ -90,8 +88,10 @@ class Session(Metadata):
     dt: datetime.datetime
     """will be cast as datetime.datetime objects"""
 
-    @pydantic.field_validator('dt', mode='before')
-    def _validate_dt(cls, v: Any) -> datetime.datetime: # pylint: disable=no-self-argument
+    @pydantic.field_validator("dt", mode="before")
+    def _validate_dt(
+        cls, v: Any
+    ) -> datetime.datetime:  # pylint: disable=no-self-argument
         return cast_to_dt(v)
 
     @property
@@ -111,21 +111,25 @@ def cast_to_dt(v: Union[int, float, datetime.datetime]) -> datetime.datetime:
         # int len=10 corresponds to year range 2001 - 2286
         return datetime.datetime.fromtimestamp(v)
     elif not isinstance(v, str):
-        raise ValueError(f'Input must be a datetime.datetime, float, int or str. Got {type(v)}')
-    
+        raise ValueError(
+            f"Input must be a datetime.datetime, float, int or str. Got {type(v)}"
+        )
+
     with contextlib.suppress(Exception):
         return datetime.datetime.fromisoformat(v)
     s = str(v)
     with contextlib.suppress(Exception):
         return datetime.datetime.fromisoformat(
-            f'{s[:4]}-{s[4:6]}-{s[6:8]}T{s[8:10]}:{s[10:12]}:{s[12:14]}'
-            )
+            f"{s[:4]}-{s[4:6]}-{s[6:8]}T{s[8:10]}:{s[10:12]}:{s[12:14]}"
+        )
     with contextlib.suppress(Exception):
         return datetime.datetime.fromisoformat(
-            f'{s[:4]}-{s[4:6]}-{s[6:8]}T{s[8:10]}:{s[10:12]}'
-            )
-    raise ValueError(f'Could not convert {v} to datetime.datetime')
+            f"{s[:4]}-{s[4:6]}-{s[6:8]}T{s[8:10]}:{s[10:12]}"
+        )
+    raise ValueError(f"Could not convert {v} to datetime.datetime")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
