@@ -3,18 +3,20 @@ from __future__ import annotations
 import collections.abc
 import contextlib
 import datetime
-import functools
 import inspect
 import itertools
 import operator
 import re
-from typing import Any, ClassVar, Collection, Container, Iterable, Mapping, Optional, Protocol, Sequence, Set, Sized, TypeAlias, TypeVar, Union
+from typing import Any, ClassVar, Iterable, Optional, Protocol, Sequence, TypeAlias, TypeVar, Union
 
 from typing_extensions import Self
 
+import npc_sessions.utils as utils
+
 
 class SupportsID(Protocol):
-    id: int | str
+    @property
+    def id(self) -> int | str: ...
     
 class MetadataRecord:
     """A base class for minimal info to define a record, using a unique `id`
@@ -45,7 +47,7 @@ class MetadataRecord:
         if isinstance(id, MetadataRecord):
             id = id.id
         if not isinstance(id, (int, str)):
-            raise TypeError(f"{__class__.__name__}.id must be int or str, not {type(id)}")
+            raise TypeError(f"{self.__class__.__name__}.id must be int or str, not {type(id)}")
         self.id = id
 
     @property
@@ -61,7 +63,7 @@ class MetadataRecord:
         Read-only, and type at assignment is preserved.
         """
         if hasattr(self, "_id"):
-            raise AttributeError(f"{__class__.__name__}.id is read-only")
+            raise AttributeError(f"{self.__class__.__name__}.id is read-only")
         if isinstance(value, MetadataRecord):
             value = value.id
         self._id = value
@@ -236,7 +238,7 @@ class SessionSpec:
         with contextlib.suppress(TypeError, ValueError):
             self.is_date_from_id = False
             if not kwargs['dt']:
-                kwargs['dt'] = cast_to_dt(kwargs['id'], self.IS_DEFAULT_TIME_ALLOWED)
+                kwargs['dt'] = utils.cast_to_dt(kwargs['id'], self.IS_DEFAULT_TIME_ALLOWED)
                 self.is_date_from_id = True
         return kwargs
     
@@ -298,7 +300,7 @@ class SessionSpec:
 
     def __eq__(self, other: Any) -> bool:
         if self.id is not None:
-            return MetadataRecord(self.id) == other
+            return str(self.id) == str(other)
         if (
             self.dt is not None 
             and isinstance(other, datetime.datetime)
@@ -339,9 +341,10 @@ class SessionSpec:
     @id.setter
     def id(self, value: int | str | SupportsID) -> None:
         self._raise_if_assigned("id")
-        if hasattr(value, "id"):
-            value = value.id
-        self._id = value if value is not None else None
+        with contextlib.suppress(AttributeError):
+            value = value.id    # type: ignore
+        assert isinstance(value, (int, str)), f"{type(value)=}"
+        self._id = value
     
     @property
     def dt(self) -> datetime.datetime | None:
@@ -353,7 +356,7 @@ class SessionSpec:
     @dt.setter
     def dt(self, value: int | float | str | datetime.datetime) -> None:
         self._raise_if_assigned("dt")
-        self._dt = cast_to_dt(value, self.IS_DEFAULT_TIME_ALLOWED) if value is not None else None
+        self._dt = utils.cast_to_dt(value, self.IS_DEFAULT_TIME_ALLOWED) if value is not None else None
         
     @property
     def project(self) -> ProjectRecord | None:
@@ -384,7 +387,7 @@ class SessionSpec:
             return None
         return self.dt.time()
     
-    ArgsT: TypeAlias = Union[
+    ArgTypes: TypeAlias = Union[
         int, str, datetime.datetime, SupportsID,
     ]
 
@@ -393,7 +396,7 @@ class SessionMapping(collections.abc.Mapping):
     
     _cache: dict[SessionSpec, Any]
 
-    def __getitem__(self, key: SessionSpec.ArgsT | SessionSpec) -> Any:
+    def __getitem__(self, key: SessionSpec.ArgTypes | SessionSpec) -> Any:
         if key is None:
             raise KeyError("Cannot get a session with a null key")
         key = SessionSpec(id=key) if not isinstance(key, SessionSpec) else key
@@ -404,92 +407,10 @@ class SessionMapping(collections.abc.Mapping):
     def __len__(self):
         ...
 
-def cast_to_dt(
-        v: str | int | float | datetime.datetime | datetime.date,
-        allow_missing_time: bool = True,
-        ) -> datetime.datetime:
-    """Try to create a datetime object from the input that is sensible as a 
-    timestamp for a session.
-    
-    >>> a = cast_to_dt(20220425150237)
-    >>> b = cast_to_dt('2022-04-25T15:02:37')
-    >>> c = cast_to_dt(1650924157.0)
-    >>> d = cast_to_dt(datetime.datetime(2022, 4, 25, 15, 2, 37))
-    >>> e = cast_to_dt('366122_20220425_150237')
-    >>> f = cast_to_dt('366122_2022-04-25T15:02:37')
-    >>> a == b == c == d == e == f
-    True
 
-    >>> cast_to_dt(20220425, allow_missing_time=True)
-    datetime.datetime(2022, 4, 25, 0, 0)
-    >>> cast_to_dt(20220425, allow_missing_time=False) # doctest: +IGNORE_EXCEPTION_DETAIL
-    Traceback (most recent call last):      
-    ...
-    ValueError: Cannot convert 20220425 to datetime.datetime when allow_missing_time=False
-
-    """
-    def validate(dt: datetime.datetime) -> datetime.datetime:
-        if not 2015 < dt.year < 2030:
-            raise ValueError(f"Invalid year: {dt.year}")
-        return dt
-    if not v:
-        raise ValueError(f'Null type not an accepted input: {type(v) = }')
-    if isinstance(v, datetime.datetime):
-        return v
-    elif isinstance(v, datetime.date):
-        if not allow_missing_time:
-            raise ValueError("Cannot convert datetime.date to datetime.datetime when ALLOW_TIMELESS_DT=False")
-        return datetime.datetime.combine(v, datetime.time())
-    elif isinstance(v, float) or (isinstance(v, int) and len(str(v)) == 10):
-        # int len=10 timestamp (from time.time()) corresponds to date in year range 2001 - 2286
-        return validate(datetime.datetime.fromtimestamp(v))
-        
-    try:
-        s = str(v)
-    except TypeError as exc:
-        raise ValueError(
-            f"Input must be a datetime.datetime, float, int or str. Got {type(v)}"
-        ) from exc
-
-    substrings = sorted(subslices(s.split('_')), key=lambda x: len(x), reverse=True)
-    # convention is date then time (20220425_150237), but if we pass the unsorted 
-    # substrings when `allow_missing_time` is True, the date with default time will
-    # be returned
-    for strings in substrings:
-        with contextlib.suppress(Exception):
-            return cast_to_dt(
-                re.sub("[^0-9]", "", ''.join(strings)), 
-                allow_missing_time,
-                )
-    with contextlib.suppress(Exception):
-        return datetime.datetime.fromisoformat(
-            f"{s[:8]}T{s[8:14]}"
-        )
-    with contextlib.suppress(Exception):
-        return datetime.datetime.fromisoformat(
-            f"{s[:8]}T{s[8:12]}"
-        )
-    with contextlib.suppress(Exception):
-        if allow_missing_time:
-            return validate(datetime.datetime.fromisoformat(f"{s[:8]}"))
-    raise ValueError(f"Cannot convert {v!r} to datetime.datetime: possibly because {allow_missing_time=}")
-
-T = TypeVar('T')
-def subslices(seq: Sequence[T]) -> tuple[Sequence[T], ...]:
-    """Return all contiguous non-empty subslices of a sequence.
-    >>> subslices('ABCD')
-    ('A', 'AB', 'ABC', 'ABCD', 'B', 'BC', 'BCD', 'C', 'CD', 'D')
-    >>> subslices([1, 2]) 
-    ([1], [1, 2], [2]) 
-    """
-    slices = itertools.starmap(slice, itertools.combinations(range(len(seq) + 1), 2))
-    return tuple(map(operator.getitem, itertools.repeat(seq), slices))
 
 if __name__ == "__main__":
-    # cast_to_dt(20220425, allow_missing_time=True)
-    cast_to_dt('2022-04-25T15:02:37')
     import doctest
     doctest.testmod(optionflags=(
         doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE
     ))
-    SessionSpec(id=1, subject=1),
