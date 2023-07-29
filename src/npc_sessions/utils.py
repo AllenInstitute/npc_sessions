@@ -7,6 +7,16 @@ import operator
 import re
 from typing import Sequence, TypeVar
 
+def extract_subject(filename: str) -> int:
+    """Extract subject ID from filename.
+
+    >>> extract_subject('Name_366122_2021-06-01_10-00-00_1.hdf5')
+    366122
+    """
+    for sub in filename.split('_'):
+        if sub.isnumeric() and len(sub) in (6, 7):
+            return int(sub)
+    raise ValueError(f'Could not find subject ID in {filename}')
 
 def cast_to_dt(
         v: str | int | float | datetime.datetime | datetime.date,

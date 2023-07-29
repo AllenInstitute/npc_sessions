@@ -1,35 +1,37 @@
+import dataclasses
 import datetime
+import pathlib
 from typing import Optional
+import uuid
 
 import upath
 import pydantic
 
-from npc_sessions.db.sqlite import SqliteTable
-import npc_sessions.utils as utils
+import npc_sessions
+import npc_sessions.project.dynamicrouting as dynamicrouting
 
-S3_RESPOSITORY = upath.UPath('s3://aind-scratch-data/ben.hardcastle/DynamicRoutingTask/Data')
-ALLEN_REPOSITORY = upath.UPath('//allen/programs/mindscope/workgroups/dynamicrouting/DynamicRoutingTask/Data')
 
-@pydantic.dataclasses.dataclass
+@dataclasses.dataclass
 class StimFile:
-    filename: str
     datetime: datetime.datetime
-    subject: Optional[str] = None
+    subject: int
+    name: str
+    """Filename stripped of subject, datetime, suffix..."""
+    size: int
     session: Optional[str] = None
     path_s3: Optional[str] = None
     path_allen: Optional[str] = None
+    # id: str = pydantic.Field(default_factory=uuid.uuid4)
+
     
-    @pydantic.field_validator('datetime')
-    def _cast(cls, v) -> datetime.datetime:
-        return utils.cast_to_dt(v)
-    
-class StimFilesTable(SqliteTable):
+class StimFilesTable(npc_sessions.SqliteTable):
     table_name = 'stim_files'
     column_definitions: dict[str, str] = {
-        'id': 'INTEGER PRIMARY KEY',
-        'filename': 'TEXT NOT NULL',
-        'datetime': 'DATETIME NOT NULL',
-        'subject': 'TEXT DEFAULT NULL',
+        'datetime': 'DATETIME NOT NULL PRIMARY KEY',
+        # 'id': 'INTEGER PRIMARY KEY',
+        'name': 'TEXT NOT NULL',
+        'subject': 'INTEGER DEFAULT NULL',
+        'size': 'INTEGER DEFAULT NULL',
         'session': 'TEXT DEFAULT NULL',
         'path_s3': 'TEXT DEFAULT NULL',
         'path_allen': 'TEXT DEFAULT NULL',
@@ -37,10 +39,11 @@ class StimFilesTable(SqliteTable):
     
     @property
     def columns(self) -> tuple[str, ...]:
-        return tuple(key for key in self.column_definitions.keys() if key != 'id')
+        return tuple(self.column_definitions.keys())
     
     def insert_stim_file(self, stim_file: StimFile):
         with self.cursor() as c:
+            # existing = c.execute('SELECT * FROM stim_files WHERE datetime = ?', (str(stim_file.datetime), )).fetchall()
             c.execute(
                 (
                     f'INSERT OR REPLACE INTO {self.table_name} (' +
@@ -48,29 +51,34 @@ class StimFilesTable(SqliteTable):
                     ', '.join('?'* len(self.columns)) + ')'
                 ),
                 (
-                    *stim_file.__dict__.values(),
+                    *(stim_file.__dict__[key] for key in self.columns),
                 ),
             )
             
-def path_to_stim_file(path: upath.UPath) -> StimFile:
-    return StimFile(
-        filename=path.name,
-        subject=next(
-            (substring for substring in path.name.split('_') if substring != 'test' and substring.isnumeric()),
-            None,
-        ),
-        session=None,
-        datetime=utils.cast_to_dt(path.name),
-        path_s3=path.as_posix(),
-        path_allen=(ALLEN_REPOSITORY / path.relative_to(S3_RESPOSITORY)).as_posix(),
-    )
+
+
     
+def parse_dynamicrouting_hdf5_file(path: pathlib.Path | upath.UPath) -> StimFile:
+    """Collect metadata from a DynamicRouting hdf5 filename."""
+    (name, subject, datetime) = dynamicrouting.parse_stim_filename(path.stem)
+    return StimFile(
+        name=path.name.split('_')[0],
+        size=path.stat()['size'] if isinstance(path, upath.UPath) else path.stat().st_size,
+        subject=npc_sessions.extract_subject(path.stem),
+        session=None,
+        datetime=npc_sessions.cast_to_dt(path.name),
+        path_s3=path.as_posix(),
+        path_allen=(dynamicrouting.ALLEN_REPOSITORY / path.relative_to(dynamicrouting.S3_RESPOSITORY)).as_posix(),
+    )
+
 def main():
     db = StimFilesTable()
-    for path in S3_RESPOSITORY.glob('**/*.hdf5'):
-        if any(exclude in path.as_posix() for exclude in ('test', 'retired', '366122', '000000', '555555')):
+    for path in dynamicrouting.S3_RESPOSITORY.glob('**/*.hdf5'):
+        if any(exclude in path.as_posix() for exclude in (
+            'test', 'retired', '366122', '000000', '555555', 'soundMeasure',
+            )):
             continue
-        stim_file = path_to_stim_file(path)
+        stim_file = parse_dynamicrouting_hdf5_file(path)
         db.insert_stim_file(stim_file)
     
 # - find all subjects with entries in the last 30 days
@@ -78,4 +86,5 @@ def main():
 # - skip folders with subject ID < lowest subject ID in last 30 days
 
 if __name__ == "__main__":
+    StimFilesTable().drop()
     main()

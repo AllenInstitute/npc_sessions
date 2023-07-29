@@ -103,7 +103,7 @@ def get_job(*args, job_type: Type[JobT] = JobDataclass, **kwargs: SessionArgs | 
         )
 
 
-def sql_table(column_name_to_definition_mapping: dict[str, str]) -> str:
+def sql_table_columns(column_name_to_definition_mapping: dict[str, str]) -> str:
     """
     Define table in sqlite3.
     
@@ -146,7 +146,7 @@ class SqliteTable:
             setattr(self, key, value)
         self.create_db()
         self.setup_db_connection()
-        self.setup_table()
+        self.create()
         
     def create_db(self) -> None:
         if not pathlib.Path(self.sqlite_db_path).exists():
@@ -161,7 +161,7 @@ class SqliteTable:
             self.db.execute('pragma journal_mode="delete"')
             self.db.execute('pragma synchronous=2')
             
-    def setup_table(self) -> None:
+    def create(self) -> None:
         """
         Create table with `self.table_name` if it doesn't exist.    
         
@@ -174,9 +174,13 @@ class SqliteTable:
         with self.cursor() as c:
             c.execute(
                 f'CREATE TABLE IF NOT EXISTS {self.table_name} '
-                + sql_table(self.column_definitions),
+                + sql_table_columns(self.column_definitions),
             )
-
+            
+    def drop(self) -> None:
+        with self.cursor() as c:
+            c.execute(f'DROP TABLE IF EXISTS {self.table_name}')
+            
     @contextlib.contextmanager
     def cursor(self) -> Generator[sqlite3.Cursor, None, None]:
         """
