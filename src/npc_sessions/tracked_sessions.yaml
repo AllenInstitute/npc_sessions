@@ -27,7 +27,6 @@ ephys:
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-07-26_14-09-36_620263
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-07-27_13-57-17_620263
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-08-02_15-40-19_620264
-    - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-08-12_11-56-57_626791_test # keep?
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-09-19_13-48-26_628801
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-09-20_13-21-35_628801
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-09-20_14-10-18_628801
@@ -37,8 +36,8 @@ ephys:
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-12-06_12-35-35_644547
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-01-17_11-39-17_646318
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-01-18_10-44-55_646318
-    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-02-13_08-29-45_649943 # keep?
-    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-02-27_08-14-30_649944 # keep?
+    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-02-13_08-29-45_649943
+    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-02-27_08-14-30_649944
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-05-15_09-50-06_662983
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-05-16_10-25-25_662983
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-11_10-07-43_668759
@@ -46,18 +45,17 @@ ephys:
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-13_09-35-31_668759
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-18_10-05-51_670181
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-19_10-00-22_670181
-    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-20_12-21-41_670181
+    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-20_12-21-41_670181 # task only, mapping recording is in `stopped_early` subfolder
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-25_09-47-29_670180
+    # recording stops mid-task: main recording incls mapping and some of task.
+    # subfolder has rest of task. could be stitched together, add 'unobserved interval'
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-26_09-55-57_670180
-    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-27_09-36-37_670180 # ephys subfolder empty
+    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-27_09-36-37_670180
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-08-01_09-28-08_670248
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-08-02_09-58-44_670248
-hab:
+    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-08-03_09-39-59_670248 # recording truncated ~5 mins before end
+behavior_with_sync: # hab sessions with sync + video, or sync + opto, etc.
   DRPilotSession:
-    - //allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_660023_20230731
-    - //allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_660023_20230801
-    - //allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_660023_20230731
-    - //allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_660023_20230801
-training:
+behavior:
   DRPilotSession:
   TempletonPilotSession:

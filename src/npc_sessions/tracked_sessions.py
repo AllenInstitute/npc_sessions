@@ -14,8 +14,6 @@ class SessionInfo(NamedTuple):
     idx: int
     project: records.ProjectRecord
     is_ephys: bool
-    is_hab: bool
-    is_training: bool
     is_behavior: bool = True
 
 
@@ -33,15 +31,15 @@ def get_session_info() -> tuple[SessionInfo, ...]:
     """
     return _get_session_info_from_local_yaml()
 
-_local_sessions_file = pathlib.Path(__file__).parent / "sessions.yaml"
-FileContents: TypeAlias = dict[Literal['ephys', 'hab', 'training'], dict[str, str]]
+_LOCAL_FILE = pathlib.Path(__file__).parent / "tracked_sessions.yaml"
+FileContents: TypeAlias = dict[Literal['ephys', 'behavior_with_sync', 'behavior'], dict[str, str]]
 
 def _get_session_info_from_local_yaml() -> tuple[SessionInfo, ...]:
     """Load yaml and parse sessions. 
     - currently assumes all sessions include behavior data
     """
     sessions_from_file: FileContents = (
-        yaml.load(_local_sessions_file.with_suffix('.yaml').read_bytes(), 
+        yaml.load(_LOCAL_FILE.with_suffix('.yaml').read_bytes(),
                   Loader=yaml.FullLoader
                   )
     )
@@ -52,7 +50,7 @@ def _get_session_info_from_local_json() -> tuple[SessionInfo, ...]:
     - currently assumes all sessions include behavior data
     """
     sessions_from_file: FileContents = (
-        json.loads(_local_sessions_file.with_suffix('.json').read_text())
+        json.loads(_LOCAL_FILE.with_suffix('.json').read_text())
     )
     return _session_info_from_file_contents(sessions_from_file)
 
@@ -71,8 +69,6 @@ def _session_info_from_file_contents(contents: FileContents) -> tuple[SessionInf
                         *(s, s.subject, s.date, s.idx),
                         project=records.ProjectRecord(project_name),
                         is_ephys="ephys" in session_type,
-                        is_hab="hab" in session_type,
-                        is_training="training" in session_type,
                         is_behavior=True,
                     )
             )
