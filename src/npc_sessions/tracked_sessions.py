@@ -33,7 +33,7 @@ def get_session_info() -> tuple[SessionInfo, ...]:
     """
     return _get_session_info_from_local_yaml()
 
-_local_sessions_file = pathlib.Path(__file__).parent / "npc_sessions.yaml"
+_local_sessions_file = pathlib.Path(__file__).parent / "sessions.yaml"
 FileContents: TypeAlias = dict[Literal['ephys', 'hab', 'training'], dict[str, str]]
 
 def _get_session_info_from_local_yaml() -> tuple[SessionInfo, ...]:
