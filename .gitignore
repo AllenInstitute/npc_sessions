@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 *.sqlite
+.misc
+.ruff_cache
