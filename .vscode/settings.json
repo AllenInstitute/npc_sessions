@@ -1,0 +1,14 @@
+{
+    "workbench.colorCustomizations": {
+        "commandCenter.border": "#e7e7e799",
+        "panel.border": "#bf25c4",
+        "sash.hoverBorder": "#bf25c4",
+        "titleBar.activeBackground": "#951d99",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#951d9999",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "#951d99",
+    "python.linting.mypyEnabled": true,
+    "python.linting.enabled": true
+}
