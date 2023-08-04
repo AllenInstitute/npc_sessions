@@ -27,7 +27,7 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
-dev = [ 
+dev = [
     "universal-pathlib>=0.0.23",
     "pandas[aws,excel,fss,hdf5,performance,plot]>=2.0.3",
     "pyarrow>=12.0.1",
@@ -38,4 +38,91 @@ dev = [
     "httpx>=0.24.1",
     "pydbhub>=0.0.4",
     "requests>=2.31.0",
+    "pytest>=7.4.0",
+    "coverage[toml]>=7.2.7",
+    "ruff>=0.0.282",
+    "pytest-cov>=4.1.0",
+]
+
+[tool.pdm.scripts]
+# usage: pdm run <script> [args]
+ruff = "ruff check src --fix-only"
+black = "black src"
+test = "pytest"
+prebuild = {composite = ["black", "ruff", "test"]}
+bump = "pdm bump -p pyproject.toml" # defaults to patch; `pdm run bump -m` to bump minor
+build = {composite = ["prebuild", "pdm build"]}
+dryrun = {composite = ["prebuild", "pdm build", "pdm publish --no-build --repository https://test.pypi.org/simple"]}
+publish = {composite = ["prebuild", "pdm build", "pdm publish --no-build"]}
+pub = {composite = ["bump", "pdm publish"]}
+
+[tool.ruff]
+fix = true
+ignore-init-module-imports = true
+# See https://github.com/charliermarsh/ruff#rules for error code definitions.
+select = [
+    "ANN", # annotations
+    "B", # bugbear
+    "C", # comprehensions
+    "E", # style errors
+    "F", # flakes
+    "I", # import sorting
+    "RUF100", # meta
+    "N", # naming
+    "U", # upgrade
+    "W", # style warnings
+    "YTT", # sys.version
+]
+extend-exclude = ["tests"]
+src = ["src", "tests"]
+target-version = "py39"
+
+[tool.black]
+target-version = ['py39']
+
+[tool.ruff.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
+
+[tool.coverage.paths]
+source = ["src"]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
+skip_empty = true
+exclude_also = [
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+    # Don't complain if non-runnable code isn't run:
+    "if __name__ == .__main__.:",
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc.)?abstractmethod",
+    "@typing.runtime_checkable",
+    ]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+    "--doctest-modules",
+    "--ignore-glob=*scripts*,*examples*",
+    "--cov",
+    "--doctest-glob=*README.md",
+]
+
+doctest_optionflags = [
+    "NORMALIZE_WHITESPACE",
+    "IGNORE_EXCEPTION_DETAIL",
+    "ELLIPSIS",
+]
+
+testpaths = [
+    ".",
+    "src",
+    "tests",
 ]
