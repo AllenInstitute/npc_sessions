@@ -1,6 +1,7 @@
 import json
 import pathlib
-from typing import Literal, MutableSequence, NamedTuple, TypeAlias
+from collections.abc import MutableSequence
+from typing import Literal, NamedTuple, TypeAlias
 
 import yaml
 
@@ -14,12 +15,13 @@ class SessionInfo(NamedTuple):
     idx: int
     project: records.ProjectRecord
     is_ephys: bool
-    is_behavior: bool = True
+    is_sync: bool
+    """The session has sync data, implying more than a behavior-box."""
 
 
 def get_session_info() -> tuple[SessionInfo, ...]:
-    """Quickly get a sequence of all tracked sessions. 
-    
+    """Quickly get a sequence of all tracked sessions.
+
     Each object in the sequence has info about one session:
     >>> sessions = get_session_info()
     >>> sessions[0].__class__.__name__
@@ -29,36 +31,32 @@ def get_session_info() -> tuple[SessionInfo, ...]:
     >>> any(s for s in sessions if s.date.year < 2021)
     False
     """
-    return _get_session_info_from_local_yaml()
+    return _get_session_info_from_local_file()
+
 
 _LOCAL_FILE = pathlib.Path(__file__).parent / "tracked_sessions.yaml"
-FileContents: TypeAlias = dict[Literal['ephys', 'behavior_with_sync', 'behavior'], dict[str, str]]
+FileContents: TypeAlias = dict[
+    Literal["ephys", "behavior_with_sync", "behavior"], dict[str, str]
+]
 
-def _get_session_info_from_local_yaml() -> tuple[SessionInfo, ...]:
-    """Load yaml and parse sessions. 
+def _get_session_info_from_local_file() -> tuple[SessionInfo, ...]:
+    """Load yaml and parse sessions.
     - currently assumes all sessions include behavior data
     """
-    sessions_from_file: FileContents = (
-        yaml.load(_LOCAL_FILE.with_suffix('.yaml').read_bytes(),
-                  Loader=yaml.FullLoader
-                  )
-    )
-    return _session_info_from_file_contents(sessions_from_file)
-
-def _get_session_info_from_local_json() -> tuple[SessionInfo, ...]:
-    """Load json and parse sessions. 
-    - currently assumes all sessions include behavior data
-    """
-    sessions_from_file: FileContents = (
-        json.loads(_LOCAL_FILE.with_suffix('.json').read_text())
-    )
-    return _session_info_from_file_contents(sessions_from_file)
+    f = _session_info_from_file_contents
+    if _LOCAL_FILE.suffix == ".json":
+        return f(json.loads(_LOCAL_FILE.read_text()))
+    if _LOCAL_FILE.suffix == ".yaml":
+        return f(yaml.load(_LOCAL_FILE.read_bytes(), yaml.FullLoader))
+    raise ValueError(f"Add loader for {_LOCAL_FILE.suffix}") # pragma: no cover
 
 def _session_info_from_file_contents(contents: FileContents) -> tuple[SessionInfo, ...]:
     sessions: MutableSequence[SessionInfo] = []
     for session_type, projects in contents.items():
         if not projects:
             continue
+        sync = any(tag in session_type for tag in ("sync", "ephys"))
+        ephys = "ephys" in session_type
         for project_name, session_ids in projects.items():
             if not session_ids:
                 continue
@@ -68,14 +66,16 @@ def _session_info_from_file_contents(contents: FileContents) -> tuple[SessionInf
                     SessionInfo(
                         *(s, s.subject, s.date, s.idx),
                         project=records.ProjectRecord(project_name),
-                        is_ephys="ephys" in session_type,
-                        is_behavior=True,
+                        is_ephys=ephys,
+                        is_sync=sync,
                     )
-            )
+                )
     return tuple(sessions)
+
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(
         optionflags=(doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE)
     )

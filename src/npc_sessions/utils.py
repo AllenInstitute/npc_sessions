@@ -5,19 +5,8 @@ import datetime
 import itertools
 import operator
 import re
-from typing import Sequence, TypeVar
-
-
-def extract_subject(filename: str) -> int:
-    """Extract subject ID from filename.
-
-    >>> extract_subject('Name_366122_2021-06-01_10-00-00_1.hdf5')
-    366122
-    """
-    for sub in filename.split("_"):
-        if sub.isnumeric() and len(sub) in (6, 7):
-            return int(sub)
-    raise ValueError(f"Could not find subject ID in {filename}")
+from collections.abc import Sequence
+from typing import TypeVar
 
 
 def cast_to_dt(
@@ -121,9 +110,7 @@ def validate_dt(dt: datetime.datetime) -> datetime.datetime:
         raise ValueError(f"Invalid year: {dt.year}")
     return dt
 
-
 T = TypeVar("T")
-
 
 def subslices(seq: Sequence[T]) -> tuple[Sequence[T], ...]:
     """Return all contiguous non-empty subslices of a sequence.

@@ -67,6 +67,8 @@ def extract_isoformat_time(s: str) -> str | None:
     '10:12:03'
     >>> extract_isoformat_time('20210601_101203')
     '10:12:03'
+    >>> extract_isoformat_time('20209900_251203') == None
+    True
     """
     match = re.search(PARSE_DATETIME, s)
     if not match:
@@ -141,6 +143,7 @@ def extract_session_id(s: str, include_null_index: bool = False) -> str:
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(
         optionflags=(doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE)
     )
