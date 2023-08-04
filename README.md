@@ -5,23 +5,21 @@ Tools and interfaces for working with behavior and epyhys sessions from the
 Mindscope Neuropixels team, in the cloud.
 
 ## quickstart
-To get minimal info on all tracked sessions:
 
 ```bash
 pip install npc_sessions
 ```
-```python
->>> import npc_sessions
->>> npc_sessions.tracked
-```
 
-Each object in the returned sequence has info about one session:
+Get some minimal info on all the tracked sessions available to work with:
 ```python
->>> sessions = npc_sessions.tracked
->>> sessions[0].__class__.__name__
-'SessionInfo'
->>> sessions[0].is_ephys
+>>> from npc_sessions import tracked as tracked_sessions;
+
+# each record in the sequence has info about one session:
+>>> tracked_sessions[0]._fields
+('session', 'subject', 'date', 'idx', 'project', 'is_ephys', 'is_sync')
+>>> tracked_sessions[0].is_ephys
 True
->>> any(s for s in sessions if s.date.year < 2021)
-False
+>>> all(s.date.year >= 2022 for s in tracked_sessions)
+True
+
 ```
