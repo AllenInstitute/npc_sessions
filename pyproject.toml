@@ -1,6 +1,6 @@
 [project]
 name = "npc_sessions"
-version = "0.1.0"
+version = "0.0.0"
 description = "Tools and interfaces for working with behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 authors = [
     {name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org"},
@@ -8,6 +8,8 @@ authors = [
 dependencies = [
     "typing-extensions>=4.7.1",
     "pyyaml>=6.0.1",
+    "npc-session>=0.1.1",
+    "types-PyYAML>=6.0.12.11",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
@@ -42,19 +44,22 @@ dev = [
     "coverage[toml]>=7.2.7",
     "ruff>=0.0.282",
     "pytest-cov>=4.1.0",
+    "pdm-bump>=0.7.3",
+    "types-PyYAML>=6.0.12.11",
+    "mypy>=1.4.1",
 ]
 
 [tool.pdm.scripts]
 # usage: pdm run <script> [args]
 ruff = "ruff check src --fix-only"
 black = "black src"
-test = "pytest"
-prebuild = {composite = ["black", "ruff", "test"]}
-bump = "pdm bump -p pyproject.toml" # defaults to patch; `pdm run bump -m` to bump minor
+test = "pytest --cov"
+mypy = "mypy src"
+bump = "pdm bump micro"
+prebuild = {composite = ["black", "ruff", "test", "mypy"]}
 build = {composite = ["prebuild", "pdm build"]}
-dryrun = {composite = ["prebuild", "pdm build", "pdm publish --no-build --repository https://test.pypi.org/simple"]}
-publish = {composite = ["prebuild", "pdm build", "pdm publish --no-build"]}
-pub = {composite = ["bump", "pdm publish"]}
+dryrun = {composite = ["build", "pdm publish --no-build --repository https://test.pypi.org/simple"]}
+pub = {composite = ["build", "bump", "pdm publish --no-build"]}
 
 [tool.ruff]
 fix = true
