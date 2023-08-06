@@ -3,7 +3,7 @@ import pathlib
 from collections.abc import MutableSequence
 from typing import Literal, NamedTuple, TypeAlias
 
-import npc_session # type: ignore
+import npc_session  # type: ignore
 import yaml
 
 
