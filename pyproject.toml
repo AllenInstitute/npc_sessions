@@ -54,6 +54,12 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"npc_sessions" = ["py.typed"]
+
 [tool.pdm.scripts]
 ruff = "ruff check src --fix-only"
 black = "black src"
