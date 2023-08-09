@@ -24,6 +24,8 @@ ephys:
     - //allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_649943_20230215
     - //allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_649943_20230216
     - //allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_660023_20230808
+    # ^ first DR ephys in a while - is this still 'DRpilot'? 
+    # ^ first session with 'surface_channels' after main recording, middle probe bank
   TempletonPilotSession:
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-07-26_14-09-36_620263
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2022-07-27_13-57-17_620263
@@ -46,15 +48,17 @@ ephys:
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-13_09-35-31_668759
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-18_10-05-51_670181
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-19_10-00-22_670181
-    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-20_12-21-41_670181 # task only, mapping recording is in `stopped_early` subfolder
+    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-20_12-21-41_670181 
+    # ^ task only, mapping recording is in `stopped_early` subfolder
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-25_09-47-29_670180
-    # recording stops mid-task: main recording incls mapping and some of task.
+    # ^ recording stops mid-task: main recording incls mapping and some of task.
     # subfolder has rest of task. could be stitched together, add 'unobserved interval'
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-26_09-55-57_670180
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-07-27_09-36-37_670180
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-08-01_09-28-08_670248
     - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-08-02_09-58-44_670248
-    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-08-03_09-39-59_670248 # recording truncated ~5 mins before end
+    - //allen/programs/mindscope/workgroups/templeton/TTOC/2023-08-03_09-39-59_670248
+    # ^ recording truncated ~5 mins before end
 behavior_with_sync: # hab sessions with sync + video, or sync + opto, etc.
   DRPilotSession:
 behavior:
