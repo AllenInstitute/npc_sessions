@@ -26,7 +26,11 @@ classifiers = [
 [project.license]
 text = "MIT"
 
-[project.optional-dependencies]
+[project.urls]
+Repository = "https://github.com/AllenInstitute/npc_sessions"
+Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
+
+[tool.pdm.dev-dependencies]
 dev = [
     "universal-pathlib>=0.0.23",
     "pandas[aws,excel,fss,hdf5,performance,plot]>=2.0.3",
@@ -65,7 +69,8 @@ ruff = "ruff check src --fix-only"
 black = "black src"
 test = "pytest --cov"
 mypy = "mypy src"
-bump = "pdm bump micro"
+bumpver = "pdm bump micro"
+tag = "pdm bump tag"
 
 [tool.pdm.scripts.prebuild]
 composite = [
@@ -75,23 +80,17 @@ composite = [
     "mypy",
 ]
 
-[tool.pdm.scripts.build]
-composite = [
-    "prebuild",
-    "pdm build",
-]
-
 [tool.pdm.scripts.dryrun]
 composite = [
-    "build",
-    "pdm publish --no-build --repository https://test.pypi.org/simple",
+    "prebuild",
+    "pdm publish --repository testpypi",
 ]
 
 [tool.pdm.scripts.pub]
 composite = [
-    "build",
-    "bump",
-    "pdm publish --no-build",
+    "prebuild",
+    "bumpver",
+    "pdm publish",
 ]
 
 [tool.ruff]
