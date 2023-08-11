@@ -1,6 +1,6 @@
 [project]
 name = "npc_sessions"
-version = "0.0.1"
+version = "0.0.2"
 description = "Tools and interfaces for working with behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 authors = [
     { name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org" },
@@ -32,16 +32,6 @@ Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 
 [tool.pdm.dev-dependencies]
 dev = [
-    # "universal-pathlib>=0.0.23",
-    # "pandas[aws,excel,fss,hdf5,performance,plot]>=2.0.3",
-    # "pyarrow>=12.0.1",
-    # "pydantic>=2.0.3",
-    # "s3fs>=2023.6.0",
-    # "aiopath>=0.5.12",
-    # "aiofiles>=23.1.0",
-    # "httpx>=0.24.1",
-    # "pydbhub>=0.0.4",
-    # "requests>=2.31.0",
     "pytest>=7.4.0",
     "ruff>=0.0.282",
     "pdm-bump>=0.7.3",
@@ -49,19 +39,6 @@ dev = [
     "pytest-cov>=4.1.0",
     "black>=23.7.0",
 ]
-
-[build-system]
-requires = [
-    "setuptools>=61",
-    "wheel",
-]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-data]
-"npc_sessions" = ["py.typed"]
 
 [tool.pdm.scripts]
 ruff = "ruff check src --fix-only"
@@ -90,6 +67,16 @@ composite = [
     "prebuild",
     "bumpver",
     "pdm publish",
+]
+
+[tool.setuptools.packages.find]
+where = [
+    "src",
+]
+
+[tool.setuptools.package-data]
+npc_sessions = [
+    "py.typed",
 ]
 
 [tool.ruff]
@@ -166,3 +153,10 @@ testpaths = [
     "src",
     "tests",
 ]
+
+[build-system]
+requires = [
+    "setuptools>=61",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
