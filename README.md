@@ -19,7 +19,7 @@ Get some minimal info on all the tracked sessions available to work with:
 
 # each record in the sequence has info about one session:
 >>> tracked_sessions[0]._fields
-('session', 'subject', 'date', 'idx', 'project', 'is_ephys', 'is_sync')
+('session', 'subject', 'date', 'idx', 'project', 'is_ephys', 'is_sync', 'allen_path')
 >>> tracked_sessions[0].is_ephys
 True
 >>> all(s.date.year >= 2022 for s in tracked_sessions)

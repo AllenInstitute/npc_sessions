@@ -6,10 +6,10 @@ authors = [
     { name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org" },
 ]
 dependencies = [
-    "typing-extensions>=4.7.1",
-    "pyyaml>=6.0.1",
-    "npc-session>=0.1.1",
-    "types-PyYAML>=6.0.12.11",
+    "npc-lims>=0.1.0",
+    "polars[all]>=0.18.14",
+    "h5py>=3.9.0",
+    "pandas[aws,excel,fss,hdf5,performance,plot]>=2.0.3",
     "universal-pathlib>=0.1.1",
     "s3fs>=2023.6.0",
 ]
@@ -32,6 +32,10 @@ text = "MIT"
 Repository = "https://github.com/AllenInstitute/npc_sessions"
 Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 
+[project.optional-dependencies]
+onsite = [
+    "np-session>=0.5.4",
+]
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest>=7.4.0",
