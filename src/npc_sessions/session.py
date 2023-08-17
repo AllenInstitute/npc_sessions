@@ -10,6 +10,7 @@ import upath
 import npc_session
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
+import npc_sessions.parse_settings_xml as parse_settings_xml
 import upath
 
 
@@ -58,7 +59,7 @@ class Session:
         return self.info.is_ephys
     
     @property
-    def raw(self) -> tuple[upath.UPath]:
+    def raw(self) -> tuple[upath.UPath, ...]:
         return npc_lims.get_raw_data_paths_from_s3(self.record)
 
     @functools.cached_property
@@ -79,7 +80,21 @@ class Session:
         if len(paths) > 1:
             raise ValueError(f"Expected 1 sync file, found {paths}")
         return paths[0]
+    
+    @property
+    def settings_xml_path(self) -> upath.UPath | None:
+        settings_xml_path = npc_lims.get_settings_xml_path_from_s3(self.record)
+        if not settings_xml_path:
+            return None
         
+        return settings_xml_path
+    
+    @functools.cached_property
+    def settings_xml_info(self) -> parse_settings_xml.SettingsXmlInfo | None:
+        if self.settings_xml_path is None:
+            return None
+        
+        return parse_settings_xml.settings_xml_info_from_path(self.settings_xml_path)
         
     # paths: Sequence[upath.UPath]
     # trials: pl.DataFrame
