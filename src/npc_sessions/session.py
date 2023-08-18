@@ -92,10 +92,6 @@ class Session:
             raise ValueError(f"{self.record} is not a session with a raw ephys upload")
         return npc_lims.get_raw_data_paths_from_s3(self.record)
 
-    @property
-    def sorted(self) -> tuple[upath.UPath, ...]:
-        return npc_lims.get_sorted_data_paths_from_s3(self.record)
-
     @functools.cached_property
     def sorted_paths(self) -> tuple[upath.UPath]:
         if not self.is_ephys:
