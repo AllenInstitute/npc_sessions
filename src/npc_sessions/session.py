@@ -62,6 +62,10 @@ class Session:
     def raw(self) -> tuple[upath.UPath, ...]:
         return npc_lims.get_raw_data_paths_from_s3(self.record)
 
+    @property
+    def sorted(self) -> tuple[upath.UPath, ...]:
+        return npc_lims.get_sorted_data_paths_from_s3(self.record)
+
     @functools.cached_property
     def sync_file(self) -> upath.UPath | None:
         """
@@ -96,6 +100,30 @@ class Session:
         
         return parse_settings_xml.settings_xml_info_from_path(self.settings_xml_path)
         
+    @property
+    def devices(self) -> tuple[int, ...] | None:
+        """
+        >>> session = Session('668759_20230711')
+        >>> assert len(session.devices) > 0
+        """
+        if self.settings_xml_info is None:
+            return None
+
+        return self.settings_xml_info.probe_serial_numbers
+    
+    # better way to do this?, electrode group has device
+    @property
+    def electrode_group(self) -> dict[str, int] | None:
+        """
+        >>> session = Session('668759_20230711')
+        >>> assert len(session.electrode_group.keys()) == len(session.electrode_group.values())
+        """
+        if self.devices is None:
+            return None
+        
+        return dict(zip(self.settings_xml_info.probe_letters, self.devices))
+
+
     # paths: Sequence[upath.UPath]
     # trials: pl.DataFrame
     # intervals: Sequence[pl.DataFrame]
