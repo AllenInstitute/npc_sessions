@@ -261,20 +261,17 @@ class Session:
     def epochs(self) -> pl.DataFrame:
         return pl.DataFrame._from_records(self.epoch_records)
     
-    
     @property
-    def settings_xml_path(self) -> upath.UPath | None:
+    def settings_xml_path(self) -> upath.UPath:
+        if not self.is_ephys:
+            raise ValueError(f"{self.record} is not an ephys session (required for settings.xml)")
         settings_xml_path = npc_lims.get_settings_xml_path_from_s3(self.record)
         if not settings_xml_path:
-            return None
-        
+            raise ValueError(f"settings.xml not found for {self.record} on s3 - check status of raw upload")
         return settings_xml_path
     
     @functools.cached_property
-    def settings_xml_info(self) -> parse_settings_xml.SettingsXmlInfo | None:
-        if self.settings_xml_path is None:
-            return None
-        
+    def settings_xml_data(self) -> parse_settings_xml.SettingsXmlInfo:
         return parse_settings_xml.settings_xml_info_from_path(self.settings_xml_path)
         
     @property
@@ -283,10 +280,10 @@ class Session:
         >>> session = Session('668759_20230711')
         >>> assert len(session.devices) > 0
         """
-        if self.settings_xml_info is None:
+        if self.settings_xml_data is None:
             return None
 
-        return self.settings_xml_info.probe_serial_numbers
+        return self.settings_xml_data.probe_serial_numbers
     
     # better way to do this?, electrode group has device
     @property
@@ -298,7 +295,7 @@ class Session:
         if self.devices is None:
             return None
         
-        return dict(zip(self.settings_xml_info.probe_letters, self.devices))
+        return dict(zip(self.settings_xml_data.probe_letters, self.devices))
 
 
     # paths: Sequence[upath.UPath]
