@@ -281,7 +281,19 @@ class Session:
     @functools.cached_property
     def settings_xml_data(self) -> parse_settings_xml.SettingsXmlInfo:
         return parse_settings_xml.settings_xml_info_from_path(self.settings_xml_path)
-        
+    
+    @functools.cached_property
+    def settings_xml_file_record(self) -> npc_lims.File:
+        return npc_lims.File(
+            session_id=self.record,
+            name="openephys-settings",
+            suffix=".xml",
+            timestamp=self.settings_xml_data.start_time.isoformat(timespec='seconds'),
+            size=self.settings_xml_path.stat()["size"],
+            s3_path=self.settings_xml_path.as_posix(),
+            data_asset_id=self.raw_data_asset_id,
+        )
+    
     @property
     def devices(self) -> tuple[int, ...] | None:
         """
