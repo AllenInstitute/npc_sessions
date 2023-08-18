@@ -8,7 +8,8 @@ True
 S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
 >>> s.stim_paths[0]
 S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
-
+>>> s.devices['device_id'][0] == s.electrode_groups['device'][0]
+True
 """
 from __future__ import annotations
 
