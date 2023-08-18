@@ -123,7 +123,6 @@ class Session:
     @functools.cached_property
     def sync_file_record(self) -> npc_lims.File:
         path = self.sync_path
-        data_asset = npc_lims.get_session_raw_data_asset(self.record)
         return npc_lims.File(
             session_id=self.record,
             name='sync',
@@ -131,7 +130,7 @@ class Session:
             timestamp=npc_session.extract_isoformat_datetime(path.stem),
             size=path.stat()["size"],
             s3_path=path.as_posix(),
-            data_asset_id=None if not data_asset else data_asset["id"],
+            data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
             )
 
     @functools.cached_property
@@ -156,7 +155,7 @@ class Session:
                 timestamp=npc_session.extract_isoformat_datetime(path.stem),
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
-                data_asset_id=None,
+                data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
                 )
             for path in self.stim_paths
         )
@@ -205,7 +204,7 @@ class Session:
                 ),
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
-                data_asset_id=None,
+                data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
                 )
             for path in self.video_paths
         )
@@ -222,7 +221,7 @@ class Session:
                 ),
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
-                data_asset_id=None,
+                data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
                 )
             for path in self.video_info_paths
         )
