@@ -294,6 +294,23 @@ class Session:
             data_asset_id=self.raw_data_asset_id,
         )
     
+    @functools.cached_property
+    def device_records(self) -> tuple[npc_lims.Device, ...]:
+        return tuple(
+            npc_lims.Device(
+                device_id=serial_number,
+                description=probe_type,
+            )
+            for serial_number, probe_type in zip(
+                self.settings_xml_data.probe_serial_numbers,
+                self.settings_xml_data.probe_types,
+            )
+        )
+    
+    @property
+    def devices(self) -> pl.DataFrame:
+        return pl.from_records(self.device_records)
+    
     @property
     def devices(self) -> tuple[int, ...] | None:
         """
