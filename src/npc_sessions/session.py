@@ -259,7 +259,7 @@ class Session:
 
     @functools.cached_property
     def epochs(self) -> pl.DataFrame:
-        return pl.DataFrame._from_records(self.epoch_records)
+        return pl.from_records(self.epoch_records)
     
     @property
     def settings_xml_path(self) -> upath.UPath:
