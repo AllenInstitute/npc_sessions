@@ -312,27 +312,30 @@ class Session:
         return pl.from_records(self.device_records)
     
     @property
-    def devices(self) -> tuple[int, ...] | None:
-        """
-        >>> session = Session('668759_20230711')
-        >>> assert len(session.devices) > 0
-        """
-        if self.settings_xml_data is None:
-            return None
-
-        return self.settings_xml_data.probe_serial_numbers
+    def electrode_group_description(self) -> str:
+        # TODO get correct channels range from settings xml
+        return 'Neuropixels 1.0 lower channels (1:384)'
     
-    # better way to do this?, electrode group has device
+    @functools.cached_property
+    def electrode_group_records(self) -> tuple[npc_lims.ElectrodeGroup, ...]:
+        return tuple(
+            npc_lims.ElectrodeGroup(
+                session_id=self.record,
+                device=serial_number,
+                name=f'probe{probe_letter}',
+                description=probe_type,
+                location=None, # TODO get location from insertion record if available
+            )
+            for serial_number, probe_type, probe_letter in zip(
+                self.settings_xml_data.probe_serial_numbers,
+                self.settings_xml_data.probe_types,
+                self.settings_xml_data.probe_letters,
+            )
+        )
+    
     @property
-    def electrode_group(self) -> dict[str, int] | None:
-        """
-        >>> session = Session('668759_20230711')
-        >>> assert len(session.electrode_group.keys()) == len(session.electrode_group.values())
-        """
-        if self.devices is None:
-            return None
-        
-        return dict(zip(self.settings_xml_data.probe_letters, self.devices))
+    def electrode_groups(self) -> pl.DataFrame:
+        return pl.from_records(self.electrode_group_records)
 
 
     # paths: Sequence[upath.UPath]
@@ -344,7 +347,6 @@ class Session:
     # session: MutableMapping[str, Any]
     # stimuli: pl.DataFrame
     # units: pl.DataFrame
-
 
 
 if __name__ == "__main__":
