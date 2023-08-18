@@ -27,6 +27,7 @@ import doctest
 import functools
 import hashlib
 import io
+from typing import Literal
 import xml.etree.ElementTree as ET
 
 import upath
@@ -39,7 +40,7 @@ class SettingsXmlInfo:
     path: upath.UPath
     probe_serial_numbers: tuple[int, ...]
     probe_types: tuple[str, ...]
-    probe_letters: tuple[str, ...]
+    probe_letters: Literal["A", "B", "C", "D", "E", "F"]
     hostname: str
     date: datetime.date
     start_time: datetime.time
@@ -143,8 +144,8 @@ def probe_idx(et: ET.ElementTree) -> tuple[int, ...]:
     return result
 
 
-def probe_letters(et: ET.ElementTree) -> tuple[str, ...]:
-    return tuple("ABCDEF"[idx] for idx in probe_idx(et))
+def probe_letters(et: ET.ElementTree) -> Literal["A", "B", "C", "D", "E", "F"]:
+    return tuple("ABCDEF"[idx] for idx in probe_idx(et)) # type: ignore
 
 
 def open_ephys_version(et: ET.ElementTree) -> str:
