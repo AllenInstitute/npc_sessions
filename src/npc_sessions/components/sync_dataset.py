@@ -842,7 +842,7 @@ class Dataset(object):
 
         Examples
         --------
-        >>> with Dataset('my_data.h5') as d:
+        >>> with Dataset('my_data.h5') as d: # doctest: +SKIP
         ...     d.stats()
 
         """
