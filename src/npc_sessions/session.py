@@ -112,6 +112,15 @@ class Session:
         return paths[0]
 
     @functools.cached_property
+    def raw_data_asset_id(self) -> str:
+        if not self.is_ephys: # currently only ephys sessions have raw data assets
+            raise ValueError(f"{self.record} is not a session with ephys raw data")
+        asset_info = npc_lims.get_session_raw_data_asset(self.record)
+        if not asset_info:
+            raise ValueError(f"{self.record} does not have a raw data asset yet")
+        return asset_info['id']
+    
+    @functools.cached_property
     def sync_file_record(self) -> npc_lims.File:
         path = self.sync_path
         data_asset = npc_lims.get_session_raw_data_asset(self.record)
