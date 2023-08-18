@@ -128,7 +128,7 @@ class Session:
             session_id=self.record,
             name='sync',
             suffix=path.suffix,
-            timestamp=npc_session.extract_isoformat_datetime(path.stem),
+            timestamp=npc_session.TimeRecord.parse_id(path.stem),
             size=path.stat()["size"],
             s3_path=path.as_posix(),
             data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
@@ -153,7 +153,7 @@ class Session:
                 session_id=self.record,
                 name=path.stem.split("_")[0],
                 suffix=path.suffix,
-                timestamp=npc_session.extract_isoformat_datetime(path.stem),
+                timestamp=npc_session.TimeRecord.parse_id(path.stem),
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
                 data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
@@ -200,7 +200,7 @@ class Session:
                 session_id=self.record,
                 name=utils.extract_video_file_name(path.stem),
                 suffix=path.suffix,
-                timestamp=npc_session.extract_isoformat_datetime(
+                timestamp=npc_session.TimeRecord.parse_id(
                     self.video_info_data[utils.extract_video_file_name(path.stem)]["TimeStart"]
                 ),
                 size=path.stat()["size"],
@@ -217,7 +217,7 @@ class Session:
                 session_id=self.record,
                 name=utils.extract_video_file_name(path.stem),
                 suffix=path.suffix,
-                timestamp=npc_session.extract_isoformat_datetime(
+                timestamp=npc_session.TimeRecord.parse_id(
                     self.video_info_data[path.stem]["TimeStart"]
                 ),
                 size=path.stat()["size"],
@@ -323,7 +323,7 @@ class Session:
             npc_lims.ElectrodeGroup(
                 session_id=self.record,
                 device=serial_number,
-                name=f'probe{probe_letter}',
+                name=f'probe{probe_letter}', # type: ignore
                 description=probe_type,
                 location=None, # TODO get location from insertion record if available
             )
