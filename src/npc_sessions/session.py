@@ -10,7 +10,7 @@ import upath
 import npc_session
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
-import npc_sessions.parse_settings_xml as parse_settings_xml
+import npc_sessions.components.parse_settings_xml as parse_settings_xml
 import upath
 
 
