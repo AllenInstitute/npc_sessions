@@ -13,26 +13,24 @@ True
 """
 from __future__ import annotations
 
-import collections.abc
-import operator
 import datetime
 import functools
 import io
 import json
+import operator
 from collections.abc import Mapping
 from typing import Any
 
 import h5py
-import polars as pl
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
-import npc_sessions.components.parse_settings_xml as parse_settings_xml
 import npc_session
+import polars as pl
 import upath
 
+import npc_sessions.components.parse_settings_xml as parse_settings_xml
 import npc_sessions.components.sync_dataset as sync_dataset
 import npc_sessions.utils as utils
-
 
 # class SupportsDataFrame(Protocol):
 
@@ -80,21 +78,23 @@ class Session:
     def session_start_time(self) -> npc_session.DatetimeRecord:
         if self.is_sync:
             return npc_session.DatetimeRecord(self.sync_path.stem)
-        return npc_session.DatetimeRecord(f"{self.record.date} {self.epochs['start_time'].min()}")
-    
+        start_time = self.epochs['start_time'].min()
+        start_time = start_time.decode() if isinstance(start_time, bytes) else start_time
+        return npc_session.DatetimeRecord(f"{self.record.date} {start_time}")
+
     @property
     def epoch_tags(self) -> tuple[str, ...]:
         return tuple(set(functools.reduce(operator.add, self.epochs['tags'].to_list())))
 
-    
+
     @functools.cached_property
-    def raw_paths(self) -> tuple[upath.UPath]:
+    def raw_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
             raise ValueError(f"{self.record} is not a session with a raw ephys upload")
         return npc_lims.get_raw_data_paths_from_s3(self.record)
 
     @functools.cached_property
-    def sorted_paths(self) -> tuple[upath.UPath]:
+    def sorted_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
             raise ValueError(f"{self.record} is not a session with ephys")
         return npc_lims.get_sorted_data_paths_from_s3(self.record)
@@ -120,7 +120,7 @@ class Session:
         if not asset_info:
             raise ValueError(f"{self.record} does not have a raw data asset yet")
         return asset_info['id']
-    
+
     @functools.cached_property
     def sync_file_record(self) -> npc_lims.File:
         path = self.sync_path
@@ -135,8 +135,8 @@ class Session:
             )
 
     @functools.cached_property
-    def sync_data(self) -> sync_dataset.Dataset:
-        return sync_dataset.Dataset(io.BytesIO(self.sync_path.read_bytes()))
+    def sync_data(self) -> sync_dataset.SyncDataset:
+        return sync_dataset.SyncDataset(io.BytesIO(self.sync_path.read_bytes()))
 
     @property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
@@ -231,12 +231,12 @@ class Session:
     @property
     def task_data(self) -> h5py.File:
         return next(self.stim_data[k] for k in self.stim_data if "DynamicRouting" in k)
-    
+
     @property
     def task_version(self) -> str:
-        return self.task_data['taskVersion'].asstr()[()] # type: ignore
+        return str(self.task_data['taskVersion'].asstr()[()])
 
-                
+
     def get_epoch_record(self, stim_file_name: str) -> npc_lims.Epoch:
         h5 = self.stim_data[stim_file_name]
         tags = [stim_file_name.split("_")[0]]
@@ -245,13 +245,13 @@ class Session:
         if any(h5['rewardFrames'][:]):
             tags.append('rewards')
         hdf5_start = npc_session.extract_isoformat_datetime(
-                h5['startTime'].asstr()[()] # type: ignore
+                h5['startTime'].asstr()[()]
             )
         assert hdf5_start is not None
         start = datetime.datetime.fromisoformat(
             hdf5_start
         )
-        stop = start + datetime.timedelta(seconds=sum(h5['frameIntervals'][:])) # type: ignore
+        stop = start + datetime.timedelta(seconds=sum(h5['frameIntervals'][:]))
         start_time = start.time().isoformat(timespec='seconds')
         stop_time = stop.time().isoformat(timespec='seconds')
         assert start_time != stop_time
@@ -261,7 +261,7 @@ class Session:
             stop_time=stop_time,
             tags=tags,
         )
-            
+
     @functools.cached_property
     def epoch_records(self) -> tuple[npc_lims.Epoch, ...]:
         return tuple(self.get_epoch_record(stim) for stim in self.stim_data)
@@ -269,7 +269,7 @@ class Session:
     @functools.cached_property
     def epochs(self) -> pl.DataFrame:
         return pl.from_records(self.epoch_records)
-    
+
     @property
     def settings_xml_path(self) -> upath.UPath:
         if not self.is_ephys:
@@ -278,11 +278,11 @@ class Session:
         if not settings_xml_path:
             raise ValueError(f"settings.xml not found for {self.record} on s3 - check status of raw upload")
         return settings_xml_path
-    
+
     @functools.cached_property
     def settings_xml_data(self) -> parse_settings_xml.SettingsXmlInfo:
         return parse_settings_xml.settings_xml_info_from_path(self.settings_xml_path)
-    
+
     @functools.cached_property
     def settings_xml_file_record(self) -> npc_lims.File:
         return npc_lims.File(
@@ -294,7 +294,7 @@ class Session:
             s3_path=self.settings_xml_path.as_posix(),
             data_asset_id=self.raw_data_asset_id,
         )
-    
+
     @functools.cached_property
     def device_records(self) -> tuple[npc_lims.Device, ...]:
         return tuple(
@@ -307,16 +307,16 @@ class Session:
                 self.settings_xml_data.probe_types,
             )
         )
-    
+
     @property
     def devices(self) -> pl.DataFrame:
         return pl.from_records(self.device_records)
-    
+
     @property
     def electrode_group_description(self) -> str:
         # TODO get correct channels range from settings xml
         return 'Neuropixels 1.0 lower channels (1:384)'
-    
+
     @functools.cached_property
     def electrode_group_records(self) -> tuple[npc_lims.ElectrodeGroup, ...]:
         return tuple(
@@ -333,7 +333,7 @@ class Session:
                 self.settings_xml_data.probe_letters,
             )
         )
-    
+
     @property
     def electrode_groups(self) -> pl.DataFrame:
         return pl.from_records(self.electrode_group_records)
