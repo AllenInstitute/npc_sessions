@@ -27,8 +27,8 @@ import doctest
 import functools
 import hashlib
 import io
-from typing import Literal
 import xml.etree.ElementTree as ET
+from typing import Literal
 
 import upath
 
@@ -145,7 +145,7 @@ def probe_idx(et: ET.ElementTree) -> tuple[int, ...]:
 
 
 def probe_letters(et: ET.ElementTree) -> Literal["A", "B", "C", "D", "E", "F"]:
-    return tuple("ABCDEF"[idx] for idx in probe_idx(et)) # type: ignore
+    return tuple("ABCDEF"[idx] for idx in probe_idx(et))  # type: ignore
 
 
 def open_ephys_version(et: ET.ElementTree) -> str:

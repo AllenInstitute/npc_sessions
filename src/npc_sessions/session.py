@@ -40,9 +40,8 @@ import npc_sessions.utils as utils
 # db = npc_lims.get_db(Optional[path])
 # db = npc_lims.NWBSqliteDBHub()
 
+
 class Session:
-
-
     def __init__(self, session: str) -> None:
         self.record = npc_session.SessionRecord(str(session))
 
@@ -54,13 +53,9 @@ class Session:
     @functools.cached_property
     def info(self) -> tracked_sessions.SessionInfo | None:
         return next(
-            (
-                info
-                for info in npc_lims.tracked
-                if info.session == self.record
-            ),
+            (info for info in npc_lims.tracked if info.session == self.record),
             None,
-            )
+        )
 
     @property
     def is_sync(self) -> bool:
@@ -78,14 +73,15 @@ class Session:
     def session_start_time(self) -> npc_session.DatetimeRecord:
         if self.is_sync:
             return npc_session.DatetimeRecord(self.sync_path.stem)
-        start_time = self.epochs['start_time'].min()
-        start_time = start_time.decode() if isinstance(start_time, bytes) else start_time
+        start_time = self.epochs["start_time"].min()
+        start_time = (
+            start_time.decode() if isinstance(start_time, bytes) else start_time
+        )
         return npc_session.DatetimeRecord(f"{self.record.date} {start_time}")
 
     @property
     def epoch_tags(self) -> tuple[str, ...]:
-        return tuple(set(functools.reduce(operator.add, self.epochs['tags'].to_list())))
-
+        return tuple(set(functools.reduce(operator.add, self.epochs["tags"].to_list())))
 
     @functools.cached_property
     def raw_paths(self) -> tuple[upath.UPath, ...]:
@@ -104,9 +100,10 @@ class Session:
         if not self.is_sync:
             raise ValueError(f"{self.record} is not a session with sync data")
         paths = tuple(
-            p for p in self.raw_paths
-            if p.suffix in (".h5", ".sync") and
-            p.stem.startswith(f"{self.record.date.replace('-', '')}T")
+            p
+            for p in self.raw_paths
+            if p.suffix in (".h5", ".sync")
+            and p.stem.startswith(f"{self.record.date.replace('-', '')}T")
         )
         if not len(paths) == 1:
             raise ValueError(f"Expected 1 sync file, found {paths = }")
@@ -114,25 +111,25 @@ class Session:
 
     @functools.cached_property
     def raw_data_asset_id(self) -> str:
-        if not self.is_ephys: # currently only ephys sessions have raw data assets
+        if not self.is_ephys:  # currently only ephys sessions have raw data assets
             raise ValueError(f"{self.record} is not a session with ephys raw data")
         asset_info = npc_lims.get_session_raw_data_asset(self.record)
         if not asset_info:
             raise ValueError(f"{self.record} does not have a raw data asset yet")
-        return asset_info['id']
+        return asset_info["id"]
 
     @functools.cached_property
     def sync_file_record(self) -> npc_lims.File:
         path = self.sync_path
         return npc_lims.File(
             session_id=self.record,
-            name='sync',
+            name="sync",
             suffix=path.suffix,
             timestamp=npc_session.TimeRecord.parse_id(path.stem),
             size=path.stat()["size"],
             s3_path=path.as_posix(),
             data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
-            )
+        )
 
     @functools.cached_property
     def sync_data(self) -> sync_dataset.SyncDataset:
@@ -141,9 +138,19 @@ class Session:
     @property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
-            p for p in self.raw_paths
-            if (p.suffix in (".pkl") and any(label in p.stem for label in ("stim", "mapping", "opto", "behavior")))
-            or (p.suffix in (".hdf5") and f"{self.record.subject}_{self.record.date.replace('-', '')}" in p.stem)
+            p
+            for p in self.raw_paths
+            if (
+                p.suffix in (".pkl")
+                and any(
+                    label in p.stem for label in ("stim", "mapping", "opto", "behavior")
+                )
+            )
+            or (
+                p.suffix in (".hdf5")
+                and f"{self.record.subject}_{self.record.date.replace('-', '')}"
+                in p.stem
+            )
         )
 
     @functools.cached_property
@@ -157,7 +164,7 @@ class Session:
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
                 data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
-                )
+            )
             for path in self.stim_paths
         )
 
@@ -165,6 +172,7 @@ class Session:
     def stim_data(self) -> Mapping[str, Any]:
         def h5_dataset(path: upath.UPath) -> h5py.File:
             return h5py.File(io.BytesIO(path.read_bytes()), "r")
+
         return utils.LazyDict(
             (path.stem, (h5_dataset, path)) for path in self.stim_paths
         )
@@ -172,22 +180,30 @@ class Session:
     @property
     def video_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_sync:
-            raise ValueError(f"{self.record} is not a session with sync data (required for video)")
+            raise ValueError(
+                f"{self.record} is not a session with sync data (required for video)"
+            )
         return tuple(
-            p for p in self.raw_paths
+            p
+            for p in self.raw_paths
             if p.suffix in (".avi", ".mp4", ".zip")
             and any(label in p.stem.lower() for label in ("eye", "face", "beh"))
         )
+
     @property
     def video_info_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
-            p.with_suffix(".json").with_stem(p.stem.replace(".mp4", "").replace(".avi", "")) for p in self.video_paths
+            p.with_suffix(".json").with_stem(
+                p.stem.replace(".mp4", "").replace(".avi", "")
+            )
+            for p in self.video_paths
         )
 
     @functools.cached_property
     def video_info_data(self) -> Mapping[str, Any]:
         def recording_report(path: upath.UPath) -> dict[str, str | int | float]:
             return json.loads(path.read_bytes())["RecordingReport"]
+
         return utils.LazyDict(
             (utils.extract_video_file_name(path.stem), (recording_report, path))
             for path in self.video_info_paths
@@ -201,12 +217,14 @@ class Session:
                 name=utils.extract_video_file_name(path.stem),
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
-                    self.video_info_data[utils.extract_video_file_name(path.stem)]["TimeStart"]
+                    self.video_info_data[utils.extract_video_file_name(path.stem)][
+                        "TimeStart"
+                    ]
                 ),
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
                 data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
-                )
+            )
             for path in self.video_paths
         )
 
@@ -223,10 +241,9 @@ class Session:
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
                 data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
-                )
+            )
             for path in self.video_info_paths
         )
-
 
     @property
     def task_data(self) -> h5py.File:
@@ -234,26 +251,21 @@ class Session:
 
     @property
     def task_version(self) -> str:
-        return str(self.task_data['taskVersion'].asstr()[()])
-
+        return str(self.task_data["taskVersion"].asstr()[()])
 
     def get_epoch_record(self, stim_file_name: str) -> npc_lims.Epoch:
         h5 = self.stim_data[stim_file_name]
         tags = [stim_file_name.split("_")[0]]
-        if any(label in h5 for label in ('optoRegions', 'optoParams')):
-            tags.append('opto')
-        if any(h5['rewardFrames'][:]):
-            tags.append('rewards')
-        hdf5_start = npc_session.extract_isoformat_datetime(
-                h5['startTime'].asstr()[()]
-            )
+        if any(label in h5 for label in ("optoRegions", "optoParams")):
+            tags.append("opto")
+        if any(h5["rewardFrames"][:]):
+            tags.append("rewards")
+        hdf5_start = npc_session.extract_isoformat_datetime(h5["startTime"].asstr()[()])
         assert hdf5_start is not None
-        start = datetime.datetime.fromisoformat(
-            hdf5_start
-        )
-        stop = start + datetime.timedelta(seconds=sum(h5['frameIntervals'][:]))
-        start_time = start.time().isoformat(timespec='seconds')
-        stop_time = stop.time().isoformat(timespec='seconds')
+        start = datetime.datetime.fromisoformat(hdf5_start)
+        stop = start + datetime.timedelta(seconds=sum(h5["frameIntervals"][:]))
+        start_time = start.time().isoformat(timespec="seconds")
+        stop_time = stop.time().isoformat(timespec="seconds")
         assert start_time != stop_time
         return npc_lims.Epoch(
             session_id=self.record,
@@ -273,10 +285,14 @@ class Session:
     @property
     def settings_xml_path(self) -> upath.UPath:
         if not self.is_ephys:
-            raise ValueError(f"{self.record} is not an ephys session (required for settings.xml)")
+            raise ValueError(
+                f"{self.record} is not an ephys session (required for settings.xml)"
+            )
         settings_xml_path = npc_lims.get_settings_xml_path_from_s3(self.record)
         if not settings_xml_path:
-            raise ValueError(f"settings.xml not found for {self.record} on s3 - check status of raw upload")
+            raise ValueError(
+                f"settings.xml not found for {self.record} on s3 - check status of raw upload"
+            )
         return settings_xml_path
 
     @functools.cached_property
@@ -289,7 +305,7 @@ class Session:
             session_id=self.record,
             name="openephys-settings",
             suffix=".xml",
-            timestamp=self.settings_xml_data.start_time.isoformat(timespec='seconds'),
+            timestamp=self.settings_xml_data.start_time.isoformat(timespec="seconds"),
             size=self.settings_xml_path.stat()["size"],
             s3_path=self.settings_xml_path.as_posix(),
             data_asset_id=self.raw_data_asset_id,
@@ -315,7 +331,7 @@ class Session:
     @property
     def electrode_group_description(self) -> str:
         # TODO get correct channels range from settings xml
-        return 'Neuropixels 1.0 lower channels (1:384)'
+        return "Neuropixels 1.0 lower channels (1:384)"
 
     @functools.cached_property
     def electrode_group_records(self) -> tuple[npc_lims.ElectrodeGroup, ...]:
@@ -323,9 +339,9 @@ class Session:
             npc_lims.ElectrodeGroup(
                 session_id=self.record,
                 device=serial_number,
-                name=f'probe{probe_letter}', # type: ignore
+                name=f"probe{probe_letter}",  # type: ignore
                 description=probe_type,
-                location=None, # TODO get location from insertion record if available
+                location=None,  # TODO get location from insertion record if available
             )
             for serial_number, probe_type, probe_letter in zip(
                 self.settings_xml_data.probe_serial_numbers,
@@ -337,7 +353,6 @@ class Session:
     @property
     def electrode_groups(self) -> pl.DataFrame:
         return pl.from_records(self.electrode_group_records)
-
 
     # paths: Sequence[upath.UPath]
     # trials: pl.DataFrame

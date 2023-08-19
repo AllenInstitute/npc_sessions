@@ -1,6 +1,6 @@
 [project]
 name = "npc_sessions"
-version = "0.0.3"
+version = "0.0.4"
 description = "Tools and interfaces for working with behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 authors = [
     { name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org" },
@@ -36,6 +36,7 @@ Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 onsite = [
     "np-session>=0.6.34",
 ]
+
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest>=7.4.0",
