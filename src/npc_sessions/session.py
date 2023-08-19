@@ -334,8 +334,20 @@ class Session:
         return "Neuropixels 1.0 lower channels (1:384)"
 
     @functools.cached_property
-    def electrode_group_records(self) -> tuple[npc_lims.ElectrodeGroup, ...]:
-        return tuple(
+    def probe_insertions(self) -> dict[str, Any] | None:
+        path = next((path for path in self.raw_data_paths if "probe_insertions" in path.stem), None)
+        if not path:
+            return None
+        return json.loads(path.read_text())['probe_insertions']
+
+    @property
+    def implant(self) -> str:
+        if self.probe_insertions is None:
+            # TODO get from sharepoint
+            return "unknown implant"
+        implant: str = self.probe_insertions['implant']
+        return '2002' if '2002' in implant else implant
+    
             npc_lims.ElectrodeGroup(
                 session_id=self.record,
                 device=serial_number,
