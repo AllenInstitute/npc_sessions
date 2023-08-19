@@ -8,7 +8,7 @@ True
 S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
 >>> s.stim_paths[0]
 S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
->>> s.devices['device_id'][0] == s.electrode_groups['device'][0]
+>>> s.devices.df['device_id'][0] == s.electrode_groups.df['device'][0]
 True
 """
 from __future__ import annotations
@@ -25,11 +25,11 @@ import h5py
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
-import polars as pl
 import upath
 
 import npc_sessions.components.parse_settings_xml as parse_settings_xml
 import npc_sessions.components.sync_dataset as sync_dataset
+import npc_sessions.nwb as nwb
 import npc_sessions.utils as utils
 
 # class SupportsDataFrame(Protocol):
@@ -73,7 +73,7 @@ class Session:
     def session_start_time(self) -> npc_session.DatetimeRecord:
         if self.is_sync:
             return npc_session.DatetimeRecord(self.sync_path.stem)
-        start_time = self.epochs["start_time"].min()
+        start_time = self.epochs.df["start_time"].min()
         start_time = (
             start_time.decode() if isinstance(start_time, bytes) else start_time
         )
@@ -81,16 +81,16 @@ class Session:
 
     @property
     def epoch_tags(self) -> tuple[str, ...]:
-        return tuple(set(functools.reduce(operator.add, self.epochs["tags"].to_list())))
+        return tuple(set(functools.reduce(operator.add, self.epochs.df["tags"].to_list())))
 
     @functools.cached_property
-    def raw_paths(self) -> tuple[upath.UPath, ...]:
+    def raw_data_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
             raise ValueError(f"{self.record} is not a session with a raw ephys upload")
         return npc_lims.get_raw_data_paths_from_s3(self.record)
 
     @functools.cached_property
-    def sorted_paths(self) -> tuple[upath.UPath, ...]:
+    def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
             raise ValueError(f"{self.record} is not a session with ephys")
         return npc_lims.get_sorted_data_paths_from_s3(self.record)
@@ -101,7 +101,7 @@ class Session:
             raise ValueError(f"{self.record} is not a session with sync data")
         paths = tuple(
             p
-            for p in self.raw_paths
+            for p in self.raw_data_paths
             if p.suffix in (".h5", ".sync")
             and p.stem.startswith(f"{self.record.date.replace('-', '')}T")
         )
@@ -139,7 +139,7 @@ class Session:
     def stim_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
             p
-            for p in self.raw_paths
+            for p in self.raw_data_paths
             if (
                 p.suffix in (".pkl")
                 and any(
@@ -185,7 +185,7 @@ class Session:
             )
         return tuple(
             p
-            for p in self.raw_paths
+            for p in self.raw_data_paths
             if p.suffix in (".avi", ".mp4", ".zip")
             and any(label in p.stem.lower() for label in ("eye", "face", "beh"))
         )
@@ -275,12 +275,8 @@ class Session:
         )
 
     @functools.cached_property
-    def epoch_records(self) -> tuple[npc_lims.Epoch, ...]:
-        return tuple(self.get_epoch_record(stim) for stim in self.stim_data)
-
-    @functools.cached_property
-    def epochs(self) -> pl.DataFrame:
-        return pl.from_records(self.epoch_records)
+    def epochs(self) -> nwb.NWBContainerWithDF:
+        return nwb.Epochs(self.get_epoch_record(stim) for stim in self.stim_data)
 
     @property
     def settings_xml_path(self) -> upath.UPath:
@@ -312,8 +308,8 @@ class Session:
         )
 
     @functools.cached_property
-    def device_records(self) -> tuple[npc_lims.Device, ...]:
-        return tuple(
+    def devices(self) -> nwb.NWBContainerWithDF:
+        return nwb.Devices(
             npc_lims.Device(
                 device_id=serial_number,
                 description=probe_type,
@@ -324,9 +320,6 @@ class Session:
             )
         )
 
-    @property
-    def devices(self) -> pl.DataFrame:
-        return pl.from_records(self.device_records)
 
     @property
     def electrode_group_description(self) -> str:
@@ -348,12 +341,20 @@ class Session:
         implant: str = self.probe_insertions['implant']
         return '2002' if '2002' in implant else implant
     
+    @functools.cached_property
+    def electrode_groups(self) -> nwb.NWBContainerWithDF:
+        locations = {
+            v['letter']: f"{self.implant} {v['hole']}"
+            for k, v in self.probe_insertions.items()
+            if k.startswith('probe') and 'hole' in v and 'letter' in v
+        } if self.probe_insertions else {}
+        return nwb.ElectrodeGroups(
             npc_lims.ElectrodeGroup(
                 session_id=self.record,
                 device=serial_number,
                 name=f"probe{probe_letter}",  # type: ignore
                 description=probe_type,
-                location=None,  # TODO get location from insertion record if available
+                location=locations.get(probe_letter, None)
             )
             for serial_number, probe_type, probe_letter in zip(
                 self.settings_xml_data.probe_serial_numbers,
@@ -362,9 +363,6 @@ class Session:
             )
         )
 
-    @property
-    def electrode_groups(self) -> pl.DataFrame:
-        return pl.from_records(self.electrode_group_records)
 
     # paths: Sequence[upath.UPath]
     # trials: pl.DataFrame
