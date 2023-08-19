@@ -50,7 +50,7 @@ dev = [
 ruff = "ruff check src --fix-only"
 black = "black src"
 test = "pytest --cov"
-mypy = "mypy src"
+mypy = "mypy src --install-types --non-interactive"
 bumpver = "pdm bump micro"
 tag = "pdm bump tag"
 
@@ -159,6 +159,18 @@ testpaths = [
     "src",
     "tests",
 ]
+
+[tool.mypy]
+check_untyped_defs = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_decorators = false
+disallow_any_unimported = false
+warn_return_any = false
+warn_unused_ignores = true
+no_implicit_optional = true
+show_error_codes = true
+ignore_missing_imports = true
 
 [build-system]
 requires = [
