@@ -81,7 +81,9 @@ class Session:
 
     @property
     def epoch_tags(self) -> tuple[str, ...]:
-        return tuple(set(functools.reduce(operator.add, self.epochs.df["tags"].to_list())))
+        return tuple(
+            set(functools.reduce(operator.add, self.epochs.df["tags"].to_list()))
+        )
 
     @functools.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
@@ -320,7 +322,6 @@ class Session:
             )
         )
 
-
     @property
     def electrode_group_description(self) -> str:
         # TODO get correct channels range from settings xml
@@ -328,33 +329,40 @@ class Session:
 
     @functools.cached_property
     def probe_insertions(self) -> dict[str, Any] | None:
-        path = next((path for path in self.raw_data_paths if "probe_insertions" in path.stem), None)
+        path = next(
+            (path for path in self.raw_data_paths if "probe_insertions" in path.stem),
+            None,
+        )
         if not path:
             return None
-        return json.loads(path.read_text())['probe_insertions']
+        return json.loads(path.read_text())["probe_insertions"]
 
     @property
     def implant(self) -> str:
         if self.probe_insertions is None:
             # TODO get from sharepoint
             return "unknown implant"
-        implant: str = self.probe_insertions['implant']
-        return '2002' if '2002' in implant else implant
-    
+        implant: str = self.probe_insertions["implant"]
+        return "2002" if "2002" in implant else implant
+
     @functools.cached_property
     def electrode_groups(self) -> nwb.NWBContainerWithDF:
-        locations = {
-            v['letter']: f"{self.implant} {v['hole']}"
-            for k, v in self.probe_insertions.items()
-            if k.startswith('probe') and 'hole' in v and 'letter' in v
-        } if self.probe_insertions else {}
+        locations = (
+            {
+                v["letter"]: f"{self.implant} {v['hole']}"
+                for k, v in self.probe_insertions.items()
+                if k.startswith("probe") and "hole" in v and "letter" in v
+            }
+            if self.probe_insertions
+            else {}
+        )
         return nwb.ElectrodeGroups(
             npc_lims.ElectrodeGroup(
                 session_id=self.record,
                 device=serial_number,
                 name=f"probe{probe_letter}",  # type: ignore
                 description=probe_type,
-                location=locations.get(probe_letter, None)
+                location=locations.get(probe_letter, None),
             )
             for serial_number, probe_type, probe_letter in zip(
                 self.settings_xml_data.probe_serial_numbers,
@@ -362,7 +370,6 @@ class Session:
                 self.settings_xml_data.probe_letters,
             )
         )
-
 
     # paths: Sequence[upath.UPath]
     # trials: pl.DataFrame

@@ -1399,7 +1399,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.38"
+version = "0.1.39"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -1415,21 +1415,21 @@ dependencies = [
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.38-py3-none-any.whl", hash = "sha256:9df69a43cd6d5846779a8194c5f54355b110394c826f9d3067a80981b21bf591"},
-    {file = "npc_lims-0.1.38.tar.gz", hash = "sha256:80eb697a8dbeabbe65e5dc49f23626c245c49923215e19ba24b1e8d3e8a191ac"},
+    {file = "npc_lims-0.1.39-py3-none-any.whl", hash = "sha256:c78c23e94a458b123eb7a1375b5312d2600ab4bde1c9a00f12937230aeba620d"},
+    {file = "npc_lims-0.1.39.tar.gz", hash = "sha256:49612aa13007471ccfcd22547e3af2c960b459ae16feb17198723461b7ed79f1"},
 ]
 
 [[package]]
 name = "npc-session"
-version = "0.1.15"
+version = "0.1.16"
 requires_python = ">=3.9"
 summary = "Interfaces for working with behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 dependencies = [
     "typing-extensions>=4.7.1",
 ]
 files = [
-    {file = "npc_session-0.1.15-py3-none-any.whl", hash = "sha256:3095292aaebd8dba233c3dcdb0f3dc30ca63407b2c4f1d2abf02c736e3bfbe88"},
-    {file = "npc_session-0.1.15.tar.gz", hash = "sha256:9dc6550373063e65f9e6439144e1275275029b85f6566ffe971f0168f01e3a63"},
+    {file = "npc_session-0.1.16-py3-none-any.whl", hash = "sha256:ea66d1091a97623f65e34b765890bb582e04c70704ed90093353778601f12d2a"},
+    {file = "npc_session-0.1.16.tar.gz", hash = "sha256:90bd674bd00483916981396f6582b3a1b0fcb9b8ec0a00fc5809ab7b9a491c21"},
 ]
 
 [[package]]
