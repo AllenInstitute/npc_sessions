@@ -19,12 +19,13 @@ import io
 import json
 import operator
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Optional
 
 import h5py
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
+import pynwb
 import upath
 
 import npc_sessions.components.parse_settings_xml as parse_settings_xml
@@ -32,28 +33,31 @@ import npc_sessions.components.sync_dataset as sync_dataset
 import npc_sessions.nwb as nwb
 import npc_sessions.utils as utils
 
-# class SupportsDataFrame(Protocol):
-
-#     @abc.abstractmethod
-#     def to_df(self) -> pl.DataFrame:
-#         pass
-# db = npc_lims.get_db(Optional[path])
-# db = npc_lims.NWBSqliteDBHub()
-
 
 class Session:
-    def __init__(self, session: str) -> None:
-        self.record = npc_session.SessionRecord(str(session))
-
+    
+    trials_interval_name: str = 'dynamic_routing_task'
+        
+    experimenter: Optional[str] = None
+    experiment_description: Optional[str] = None
+    identifier: Optional[str] = None
+    notes: Optional[str] = None
+    source_script: Optional[str] = None
+    
+    def __init__(self, session: str, **kwargs) -> None:
+        self.id = npc_session.SessionRecord(str(session))
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+            
     def __getattribute__(self, __name: str) -> Any:
         if __name in ("date", "subject", "idx"):
-            return self.record.__getattribute__(__name)
+            return self.id.__getattribute__(__name)
         return super().__getattribute__(__name)
 
     @functools.cached_property
     def info(self) -> tracked_sessions.SessionInfo | None:
         return next(
-            (info for info in npc_lims.tracked if info.session == self.record),
+            (info for info in npc_lims.tracked if info.session == self.id),
             None,
         )
 
@@ -77,8 +81,47 @@ class Session:
         start_time = (
             start_time.decode() if isinstance(start_time, bytes) else start_time
         )
-        return npc_session.DatetimeRecord(f"{self.record.date} {start_time}")
-
+        return npc_session.DatetimeRecord(f"{self.date} {start_time}")
+    
+    def get_record(self) -> npc_lims.Session:
+        return npc_lims.Session(
+            session_id=self.id,
+            subject_id=self.subject,
+            session_start_time=self.session_start_time,
+            stimulus_notes=self.task_version,
+            experimenter=self.experimenter,
+            experiment_description=self.experiment_description,
+            epoch_tags=list(self.epoch_tags),
+            source_script=self.source_script,
+            identifier=self.identifier,
+            notes=self.notes,
+        )
+    
+    @functools.cached_property
+    def record(self) -> npc_lims.Session:
+        return self.get_record()
+    
+    def to_nwb(self, nwb: pynwb.NWBFile) -> None:
+        for attr in self.record.__dict__:
+            if attr in nwb.__dict__:
+                nwb.__setattr__(attr, self.record.__getattribute__(attr))
+    
+    class Subject(npc_lims.Subject):
+        
+        def __init__(self, session: Session):
+            self.session = session
+            self.record = npc_lims.Subject(session.subject)
+        
+        @property
+        def age(self) -> str:
+            if self.record.date_of_birth is None:
+                raise ValueError(f"{self.record} does not have a date of birth")
+            dob = npc_session.DatetimeRecord(self.record.date_of_birth)
+            return f"P{(self.session.session_start_time.dt - dob.dt).days}D"
+        
+        def to_nwb(self, nwb: pynwb.NWBFile) -> None:
+            nwb.subject = pynwb.file.Subject(**self.record.__dict__) # type: ignore
+        
     @property
     def epoch_tags(self) -> tuple[str, ...]:
         return tuple(
@@ -88,24 +131,24 @@ class Session:
     @functools.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
-            raise ValueError(f"{self.record} is not a session with a raw ephys upload")
-        return npc_lims.get_raw_data_paths_from_s3(self.record)
+            raise ValueError(f"{self.id} is not a session with a raw ephys upload")
+        return npc_lims.get_raw_data_paths_from_s3(self.id)
 
     @functools.cached_property
     def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
-            raise ValueError(f"{self.record} is not a session with ephys")
-        return npc_lims.get_sorted_data_paths_from_s3(self.record)
+            raise ValueError(f"{self.id} is not a session with ephys")
+        return npc_lims.get_sorted_data_paths_from_s3(self.id)
 
     @property
     def sync_path(self) -> upath.UPath:
         if not self.is_sync:
-            raise ValueError(f"{self.record} is not a session with sync data")
+            raise ValueError(f"{self.id} is not a session with sync data")
         paths = tuple(
             p
             for p in self.raw_data_paths
             if p.suffix in (".h5", ".sync")
-            and p.stem.startswith(f"{self.record.date.replace('-', '')}T")
+            and p.stem.startswith(f"{self.id.date.replace('-', '')}T")
         )
         if not len(paths) == 1:
             raise ValueError(f"Expected 1 sync file, found {paths = }")
@@ -114,17 +157,17 @@ class Session:
     @functools.cached_property
     def raw_data_asset_id(self) -> str:
         if not self.is_ephys:  # currently only ephys sessions have raw data assets
-            raise ValueError(f"{self.record} is not a session with ephys raw data")
-        asset_info = npc_lims.get_session_raw_data_asset(self.record)
+            raise ValueError(f"{self.id} is not a session with ephys raw data")
+        asset_info = npc_lims.get_session_raw_data_asset(self.id)
         if not asset_info:
-            raise ValueError(f"{self.record} does not have a raw data asset yet")
+            raise ValueError(f"{self.id} does not have a raw data asset yet")
         return asset_info["id"]
 
     @functools.cached_property
     def sync_file_record(self) -> npc_lims.File:
         path = self.sync_path
         return npc_lims.File(
-            session_id=self.record,
+            session_id=self.id,
             name="sync",
             suffix=path.suffix,
             timestamp=npc_session.TimeRecord.parse_id(path.stem),
@@ -150,7 +193,7 @@ class Session:
             )
             or (
                 p.suffix in (".hdf5")
-                and f"{self.record.subject}_{self.record.date.replace('-', '')}"
+                and f"{self.subject}_{self.date.replace('-', '')}"
                 in p.stem
             )
         )
@@ -159,7 +202,7 @@ class Session:
     def stim_file_records(self) -> tuple[npc_lims.File, ...]:
         return tuple(
             npc_lims.File(
-                session_id=self.record,
+                session_id=self.id,
                 name=path.stem.split("_")[0],
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(path.stem),
@@ -183,7 +226,7 @@ class Session:
     def video_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_sync:
             raise ValueError(
-                f"{self.record} is not a session with sync data (required for video)"
+                f"{self.id} is not a session with sync data (required for video)"
             )
         return tuple(
             p
@@ -215,7 +258,7 @@ class Session:
     def video_file_records(self) -> tuple[npc_lims.File, ...]:
         return tuple(
             npc_lims.File(
-                session_id=self.record,
+                session_id=self.id,
                 name=utils.extract_video_file_name(path.stem),
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
@@ -234,7 +277,7 @@ class Session:
     def video_info_file_records(self) -> tuple[npc_lims.File, ...]:
         return tuple(
             npc_lims.File(
-                session_id=self.record,
+                session_id=self.id,
                 name=utils.extract_video_file_name(path.stem),
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
@@ -270,7 +313,7 @@ class Session:
         stop_time = stop.time().isoformat(timespec="seconds")
         assert start_time != stop_time
         return npc_lims.Epoch(
-            session_id=self.record,
+            session_id=self.id,
             start_time=start_time,
             stop_time=stop_time,
             tags=tags,
@@ -284,12 +327,12 @@ class Session:
     def settings_xml_path(self) -> upath.UPath:
         if not self.is_ephys:
             raise ValueError(
-                f"{self.record} is not an ephys session (required for settings.xml)"
+                f"{self.id} is not an ephys session (required for settings.xml)"
             )
-        settings_xml_path = npc_lims.get_settings_xml_path_from_s3(self.record)
+        settings_xml_path = npc_lims.get_settings_xml_path_from_s3(self.id)
         if not settings_xml_path:
             raise ValueError(
-                f"settings.xml not found for {self.record} on s3 - check status of raw upload"
+                f"settings.xml not found for {self.id} on s3 - check status of raw upload"
             )
         return settings_xml_path
 
@@ -300,7 +343,7 @@ class Session:
     @functools.cached_property
     def settings_xml_file_record(self) -> npc_lims.File:
         return npc_lims.File(
-            session_id=self.record,
+            session_id=self.id,
             name="openephys-settings",
             suffix=".xml",
             timestamp=self.settings_xml_data.start_time.isoformat(timespec="seconds"),
@@ -358,7 +401,7 @@ class Session:
         )
         return nwb.ElectrodeGroups(
             npc_lims.ElectrodeGroup(
-                session_id=self.record,
+                session_id=self.id,
                 device=serial_number,
                 name=f"probe{probe_letter}",  # type: ignore
                 description=probe_type,
@@ -371,10 +414,25 @@ class Session:
             )
         )
 
-    # paths: Sequence[upath.UPath]
-    # trials: pl.DataFrame
-    # intervals: Sequence[pl.DataFrame]
-    # epochs: pl.DataFrame
+    def get_intervals(self) -> tuple[nwb.Intervals, ...]:
+        return ()
+    
+    @functools.cached_property
+    def intervals(self) -> dict[str, nwb.NWBContainerWithDF]:
+        return {
+            interval.name: interval
+            for interval in self.get_intervals()
+        }
+    
+    @property
+    def trials(self) -> nwb.NWBContainerWithDF:
+        trials = self.intervals.get(self.trials_interval_name)
+        if trials is None:
+            raise ValueError(
+                f"no intervals named {self.trials_interval_name} found for {self.id}"
+                )
+        return trials
+    
     # state: MutableMapping[str | int, Any]
     # subject: MutableMapping[str, Any]
     # session: MutableMapping[str, Any]
