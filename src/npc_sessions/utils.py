@@ -44,7 +44,7 @@ def is_stim_file(
     )
     is_correct = True
     if subject_spec:
-        is_correct &= (subject_from_path == npc_session.SubjectRecord(subject_spec))
+        is_correct &= (subject_from_path == npc_session.SubjectRecord(str(subject_spec)))
     if date_spec:
         is_correct &= (date_from_path == npc_session.DateRecord(date_spec))
     if time_spec:
