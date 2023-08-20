@@ -49,7 +49,7 @@ class Session:
             setattr(self, key, value)
 
     def __getattribute__(self, __name: str) -> Any:
-        if __name in ("date", "subject", "idx"):
+        if __name in ("date", "idx"):
             return self.id.__getattribute__(__name)
         return super().__getattribute__(__name)
 
@@ -85,7 +85,7 @@ class Session:
     def get_record(self) -> npc_lims.Session:
         return npc_lims.Session(
             session_id=self.id,
-            subject_id=self.subject,
+            subject_id=self.id.subject,
             session_start_time=self.session_start_time,
             stimulus_notes=self.task_version,
             experimenter=self.experimenter,
@@ -179,21 +179,20 @@ class Session:
         return sync_dataset.SyncDataset(io.BytesIO(self.sync_path.read_bytes()))
 
     @property
+    def stim_path_root(self) -> upath.UPath:
+        return npc_lims.DR_DATA_REPO / str(self.id.subject)
+    
+    @property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
-        return tuple(
-            p
-            for p in self.raw_data_paths
-            if (
-                p.suffix in (".pkl")
-                and any(
-                    label in p.stem for label in ("stim", "mapping", "opto", "behavior")
+        def is_valid_stim_file(p) -> bool:
+            return utils.is_stim_file(
+                p,
+                subject_spec=self.id.subject,
+                date_spec=self.id.date
                 )
-            )
-            or (
-                p.suffix in (".hdf5")
-                and f"{self.subject}_{self.date.replace('-', '')}" in p.stem
-            )
-        )
+        if self.is_ephys:
+            return tuple(p for p in self.raw_data_paths if is_valid_stim_file(p))
+        return tuple(p for p in self.stim_path_root.iterdir() if is_valid_stim_file(p))
 
     @functools.cached_property
     def stim_file_records(self) -> tuple[npc_lims.File, ...]:
