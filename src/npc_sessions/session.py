@@ -28,9 +28,9 @@ import npc_session
 import pynwb
 import upath
 
+import npc_sessions.nwb as nwb
 import npc_sessions.tools.parse_settings_xml as parse_settings_xml
 import npc_sessions.tools.sync_dataset as sync_dataset
-import npc_sessions.nwb as nwb
 import npc_sessions.utils as utils
 
 
@@ -181,15 +181,14 @@ class Session:
     @property
     def stim_path_root(self) -> upath.UPath:
         return npc_lims.DR_DATA_REPO / str(self.id.subject)
-    
+
     @property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
         def is_valid_stim_file(p) -> bool:
             return utils.is_stim_file(
-                p,
-                subject_spec=self.id.subject,
-                date_spec=self.id.date
-                )
+                p, subject_spec=self.id.subject, date_spec=self.id.date
+            )
+
         if self.is_ephys:
             return tuple(p for p in self.raw_data_paths if is_valid_stim_file(p))
         return tuple(p for p in self.stim_path_root.iterdir() if is_valid_stim_file(p))

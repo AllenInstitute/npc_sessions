@@ -1,23 +1,23 @@
 from __future__ import annotations
 
 import collections.abc
-from collections.abc import Iterator
-from typing import Any, Iterable, Literal, Optional, Sequence
 import pathlib
+from collections.abc import Iterable, Iterator, Sequence
+from typing import Any, Literal
 
 import npc_session
-import upath
 import numpy as np
+import upath
 
 
 def is_stim_file(
     path: str | upath.UPath | pathlib.Path,
-    subject_spec: Optional[str | int | npc_session.SubjectRecord] = None,
-    date_spec: Optional[str | npc_session.DateRecord] = None,
-    time_spec: Optional[str | npc_session.TimeRecord] = None,
-    ) -> bool:
+    subject_spec: str | int | npc_session.SubjectRecord | None = None,
+    date_spec: str | npc_session.DateRecord | None = None,
+    time_spec: str | npc_session.TimeRecord | None = None,
+) -> bool:
     """Does the string or path match a known stimulus file pattern.
-    
+
     Optional arguments can be used to check the subject, date, and time.
     >>> is_stim_file("366122_20230101_120000.hdf5")
     True
@@ -32,25 +32,23 @@ def is_stim_file(
     subject_from_path = npc_session.extract_subject(path.stem)
     date_from_path = npc_session.extract_isoformat_date(path.stem)
     time_from_path = npc_session.extract_isoformat_time(path.stem)
-    
+
     is_stim = False
-    is_stim |= (
-        path.suffix in (".pkl", ) and any(
+    is_stim |= path.suffix in (".pkl",) and any(
         label in path.stem for label in ("stim", "mapping", "opto", "behavior")
-        )
     )
     is_stim |= (
-        path.suffix in (".hdf5", ) and bool(subject_from_path) and bool(date_from_path)
+        path.suffix in (".hdf5",) and bool(subject_from_path) and bool(date_from_path)
     )
     is_correct = True
     if subject_spec:
-        is_correct &= (subject_from_path == npc_session.SubjectRecord(str(subject_spec)))
+        is_correct &= subject_from_path == npc_session.SubjectRecord(str(subject_spec))
     if date_spec:
-        is_correct &= (date_from_path == npc_session.DateRecord(date_spec))
+        is_correct &= date_from_path == npc_session.DateRecord(date_spec)
     if time_spec:
-        is_correct &= (time_from_path == npc_session.TimeRecord(time_spec))
+        is_correct &= time_from_path == npc_session.TimeRecord(time_spec)
     return is_stim and is_correct
-        
+
 
 def extract_video_file_name(path: str) -> Literal["eye", "face", "behavior"]:
     names: dict[str, Literal["eye", "face", "behavior"]] = {
@@ -60,10 +58,13 @@ def extract_video_file_name(path: str) -> Literal["eye", "face", "behavior"]:
     }
     return names[next(n for n in names if n in str(path).lower())]
 
-def check_array_indices(indices: int | float | Iterable[int | float]) -> Iterable[int | float]:
+
+def check_array_indices(
+    indices: int | float | Iterable[int | float],
+) -> Iterable[int | float]:
     """Check indices can be safely converted from float to int (i.e. all
     are integer values). Makes a single int/float index iterable.
-    
+
     >>> check_array_indices(1)
     (1,)
     >>> check_array_indices([1, 2, 3.0])
@@ -75,19 +76,20 @@ def check_array_indices(indices: int | float | Iterable[int | float]) -> Iterabl
     """
     if not isinstance(indices, Iterable):
         indices = (indices,)
-        
+
     for idx in indices:
         if (
             isinstance(idx, (float, np.floating))
             and not np.isnan(idx)
             and int(idx) != idx
         ):
-            raise TypeError('Non-integer `float` used as an index')
+            raise TypeError("Non-integer `float` used as an index")
     return indices
+
 
 def reshape_into_blocks(
     indices: Sequence[float],
-    min_gap: Optional[int | float] = None,
+    min_gap: int | float | None = None,
 ) -> tuple[Sequence[float], ...]:
     """
     Find the large gaps in indices and split at each gap.
@@ -111,17 +113,19 @@ def reshape_into_blocks(
     )
 
     gaps_between_blocks = []
-    for interval_index, interval in zip(intervals.argsort()[::-1], sorted(intervals)[::-1]):
+    for interval_index, interval in zip(
+        intervals.argsort()[::-1], sorted(intervals)[::-1]
+    ):
         if interval > long_interval_threshold:
             # large interval found
             gaps_between_blocks.append(interval_index + 1)
         else:
             break
 
-    if not gaps_between_blocks: 
+    if not gaps_between_blocks:
         # a single block of timestamps
         return (indices,)
-        
+
     # create blocks as intervals [start:end]
     gaps_between_blocks.sort()
     blocks = []
@@ -131,13 +135,15 @@ def reshape_into_blocks(
         start = end
     # add end of last block
     blocks.append(indices[start:])
-    
+
     # filter out blocks with a single sample (not a block)
     blocks = [block for block in blocks if len(block) > 1]
-    
+
     # filter out blocks with long avg timstamp interval (a few, widely-spaced timestamps)
-    blocks = [block for block in blocks if np.median(np.diff(block)) < long_interval_threshold]
-    
+    blocks = [
+        block for block in blocks if np.median(np.diff(block)) < long_interval_threshold
+    ]
+
     return tuple(blocks)
 
 

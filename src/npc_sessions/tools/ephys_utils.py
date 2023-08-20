@@ -6,7 +6,6 @@ Created on Wed Aug 22 16:40:36 2018
 from the ecephys repo (https://github.com/AllenInstitute/ecephys_pipeline
 """
 
-import pathlib
 import numpy as np
 
 
