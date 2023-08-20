@@ -28,8 +28,8 @@ import npc_session
 import pynwb
 import upath
 
-import npc_sessions.components.parse_settings_xml as parse_settings_xml
-import npc_sessions.components.sync_dataset as sync_dataset
+import npc_sessions.tools.parse_settings_xml as parse_settings_xml
+import npc_sessions.tools.sync_dataset as sync_dataset
 import npc_sessions.nwb as nwb
 import npc_sessions.utils as utils
 
