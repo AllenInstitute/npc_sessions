@@ -120,7 +120,7 @@ class Session:
             return f"P{(self.session.session_start_time.dt - dob.dt).days}D"
         
         def to_nwb(self, nwb: pynwb.NWBFile) -> None:
-            nwb.subject = pynwb.file.Subject(**self.record.__dict__) # type: ignore
+            nwb.subject = pynwb.file.Subject(**self.record.__dict__)
         
     @property
     def epoch_tags(self) -> tuple[str, ...]:
