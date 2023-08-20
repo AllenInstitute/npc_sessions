@@ -19,7 +19,7 @@ import io
 import json
 import operator
 from collections.abc import Mapping
-from typing import Any, Optional
+from typing import Any
 
 import h5py
 import npc_lims
@@ -35,20 +35,19 @@ import npc_sessions.utils as utils
 
 
 class Session:
-    
-    trials_interval_name: str = 'dynamic_routing_task'
-        
-    experimenter: Optional[str] = None
-    experiment_description: Optional[str] = None
-    identifier: Optional[str] = None
-    notes: Optional[str] = None
-    source_script: Optional[str] = None
-    
+    trials_interval_name: str = "dynamic_routing_task"
+
+    experimenter: str | None = None
+    experiment_description: str | None = None
+    identifier: str | None = None
+    notes: str | None = None
+    source_script: str | None = None
+
     def __init__(self, session: str, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session))
         for key, value in kwargs.items():
             setattr(self, key, value)
-            
+
     def __getattribute__(self, __name: str) -> Any:
         if __name in ("date", "subject", "idx"):
             return self.id.__getattribute__(__name)
@@ -82,7 +81,7 @@ class Session:
             start_time.decode() if isinstance(start_time, bytes) else start_time
         )
         return npc_session.DatetimeRecord(f"{self.date} {start_time}")
-    
+
     def get_record(self) -> npc_lims.Session:
         return npc_lims.Session(
             session_id=self.id,
@@ -96,32 +95,31 @@ class Session:
             identifier=self.identifier,
             notes=self.notes,
         )
-    
+
     @functools.cached_property
     def record(self) -> npc_lims.Session:
         return self.get_record()
-    
+
     def to_nwb(self, nwb: pynwb.NWBFile) -> None:
         for attr in self.record.__dict__:
             if attr in nwb.__dict__:
                 nwb.__setattr__(attr, self.record.__getattribute__(attr))
-    
+
     class Subject(npc_lims.Subject):
-        
-        def __init__(self, session: Session):
+        def __init__(self, session: Session) -> None:
             self.session = session
             self.record = npc_lims.Subject(session.subject)
-        
+
         @property
         def age(self) -> str:
             if self.record.date_of_birth is None:
                 raise ValueError(f"{self.record} does not have a date of birth")
             dob = npc_session.DatetimeRecord(self.record.date_of_birth)
             return f"P{(self.session.session_start_time.dt - dob.dt).days}D"
-        
+
         def to_nwb(self, nwb: pynwb.NWBFile) -> None:
             nwb.subject = pynwb.file.Subject(**self.record.__dict__)
-        
+
     @property
     def epoch_tags(self) -> tuple[str, ...]:
         return tuple(
@@ -193,8 +191,7 @@ class Session:
             )
             or (
                 p.suffix in (".hdf5")
-                and f"{self.subject}_{self.date.replace('-', '')}"
-                in p.stem
+                and f"{self.subject}_{self.date.replace('-', '')}" in p.stem
             )
         )
 
@@ -416,23 +413,20 @@ class Session:
 
     def get_intervals(self) -> tuple[nwb.Intervals, ...]:
         return ()
-    
+
     @functools.cached_property
     def intervals(self) -> dict[str, nwb.NWBContainerWithDF]:
-        return {
-            interval.name: interval
-            for interval in self.get_intervals()
-        }
-    
+        return {interval.name: interval for interval in self.get_intervals()}
+
     @property
     def trials(self) -> nwb.NWBContainerWithDF:
         trials = self.intervals.get(self.trials_interval_name)
         if trials is None:
             raise ValueError(
                 f"no intervals named {self.trials_interval_name} found for {self.id}"
-                )
+            )
         return trials
-    
+
     # state: MutableMapping[str | int, Any]
     # subject: MutableMapping[str, Any]
     # session: MutableMapping[str, Any]
