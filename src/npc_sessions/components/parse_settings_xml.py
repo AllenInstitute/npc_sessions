@@ -45,7 +45,6 @@ class SettingsXmlInfo:
     date: datetime.date
     start_time: datetime.time
     open_ephys_version: str
-    settings_xml_md5: str
 
 
 def settings_xml_info_from_path(path: str | upath.UPath) -> SettingsXmlInfo:
@@ -61,7 +60,6 @@ def settings_xml_info_from_path(path: str | upath.UPath) -> SettingsXmlInfo:
         date=date_time(et)[0],
         start_time=date_time(et)[1],
         open_ephys_version=open_ephys_version(et),
-        settings_xml_md5=settings_xml_md5(path),
     )
 
 
