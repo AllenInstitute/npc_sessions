@@ -157,7 +157,7 @@ def find_matching_index(
         else:
             probe_barcode_index += direction
 
-    if foundMatch and master_barcode_index:
+    if foundMatch and master_barcode_index is not None:
         return master_barcode_index[0], probe_barcode_index
     else:
         return None, None
