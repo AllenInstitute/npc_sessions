@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:8b8bece35b35500b29dfc708d8375fc8021726ace5f5a4e94841c7d630480d06"
+content_hash = "sha256:8f5a682f6df7329190dd570a11da6f12f9735df1db185a6d7dae528bc25435ca"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -846,6 +846,23 @@ summary = "Distribution utilities"
 files = [
     {file = "distlib-0.3.7-py2.py3-none-any.whl", hash = "sha256:2e24928bc811348f0feb63014e97aaae3037f2cf48712d51ae61df7fd6075057"},
     {file = "distlib-0.3.7.tar.gz", hash = "sha256:9dafe54b34a028eafd95039d5e5d4851a13734540f1331060d31c9916e7147a8"},
+]
+
+[[package]]
+name = "dynamicroutingtask"
+version = "0.1.0"
+requires_python = ">=3.9"
+summary = ""
+dependencies = [
+    "h5py",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scipy",
+]
+files = [
+    {file = "DynamicRoutingTask-0.1.0-py3-none-any.whl", hash = "sha256:81e231248f4455ce30a640b0907a94f493e7ed620d7e0b86b325c9e3ec66b339"},
+    {file = "DynamicRoutingTask-0.1.0.tar.gz", hash = "sha256:c13c1f11c95616954bcb8912ef55c24daf25ed3b20545ad199d122b200db65d3"},
 ]
 
 [[package]]
