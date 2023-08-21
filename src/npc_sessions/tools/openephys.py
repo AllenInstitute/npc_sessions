@@ -85,7 +85,7 @@ def get_ephys_timing_on_pxi(recording_dirs: Iterable[upath.UPath] , only_devices
     30000
     """
     if not isinstance(recording_dirs, Iterable):
-        recording_dir = (recording_dirs,)
+        recording_dirs = (recording_dirs,)
 
     for recording_dir in recording_dirs:
         device_to_first_sample_number = get_sync_messages_data(recording_dir / 'sync_messages.txt') # includes name of each input device used (probe, nidaq)
