@@ -39,22 +39,23 @@ def checksum(path: PathLike, show_progress_bar=True) -> str:
         for chunk in iter(
             lambda: f.read(blocks_per_chunk), b''
         ):  
-            progress.update(task, advance=blocks_per_chunk) # type: ignore
+            progress.update(task, advance=blocks_per_chunk)
             hash = hasher(chunk, hash)
     progress.update(task, visible=False)
     return formatted(hash)
 
 def get_progress() -> rich.progress.Progress | contextlib.nullcontext[None]:
-    progress_context = contextlib.nullcontext()
     if 'progress' not in globals():
-        progress_context = globals()['progress'] = rich.progress.Progress(
+        globals()['progress'] = rich.progress.Progress(
             rich.progress.TextColumn("{task.description}", justify="right"),
             rich.progress.BarColumn(),
             rich.progress.TimeRemainingColumn(),
             rich.progress.FileSizeColumn(),
             rich.progress.TotalFileSizeColumn(),
         )
-    return progress_context
+        return globals()['progress']
+    else:
+        return contextlib.nullcontext()
 
 def get_copy_task(src) -> rich.progress.TaskID:
     get_progress()

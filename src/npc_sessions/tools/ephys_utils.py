@@ -107,7 +107,7 @@ def find_matching_index(
     master_barcodes:np.ndarray,
     probe_barcodes:np.ndarray,
     alignment_type:Literal['start', 'end']="start"
-    ) -> tuple[int, int]:
+    ) -> tuple[int, int] | tuple[None, None]:
     """Given a set of barcodes for the master clock and the probe clock, find the
     indices of a matching set, either starting from the beginning or the end
     of the list.
@@ -125,6 +125,14 @@ def find_matching_index(
         matching index for master barcodes (None if not found)
     probe_barcode_index : int
         matching index for probe barcodes (None if not found)
+        
+        
+    >>> find_matching_index(np.array([1, 2, 3]), np.array([1, 2, 3]), alignment_type="start")
+    (0, 0)
+    >>> find_matching_index(np.array([1, 2, 3]), np.array([1, 2, 3]), alignment_type="end")
+    (2, -1)
+    >>> find_matching_index(np.array([1, 2, 3]), np.array([4, 5, 6]), alignment_type="start")
+    (None, None)
     """
 
     foundMatch = False
@@ -149,8 +157,8 @@ def find_matching_index(
         else:
             probe_barcode_index += direction
 
-    if foundMatch:
-        return master_barcode_index, probe_barcode_index
+    if foundMatch and master_barcode_index:
+        return master_barcode_index[0], probe_barcode_index
     else:
         return None, None
 

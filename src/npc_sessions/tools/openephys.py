@@ -10,6 +10,7 @@ import re
 import tempfile
 from collections.abc import Generator, Iterable, Sequence
 from typing import Any, Literal, NamedTuple, Optional
+import typing
 
 import numpy as np
 import numpy.typing as npt
@@ -77,19 +78,19 @@ class EphysTimingInfoOnSync(NamedTuple):
     start_time: float
     """First sample time (sec) relative to the start of the sync clock"""
 
-def get_ephys_timing_on_pxi(recording_dir: upath.UPath | Iterable[upath.UPath] , only_dirs_including: str = '') -> Generator[EphysTimingInfoOnPXI, None, None]:
+def get_ephys_timing_on_pxi(recording_dirs: Iterable[upath.UPath] , only_devices_including: str = '') -> Generator[EphysTimingInfoOnPXI, None, None]:
     """
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
     >>> next(get_ephys_timing_on_pxi(path)).sampling_rate
     30000
     """
-    
-    if not isinstance(recording_dir, Iterable):
-        recording_dir = (recording_dir,)
-    for recording_dir in recording_dir:
+    if not isinstance(recording_dirs, Iterable):
+        recording_dir = (recording_dirs,)
+
+    for recording_dir in recording_dirs:
         device_to_first_sample_number = get_sync_messages_data(recording_dir / 'sync_messages.txt') # includes name of each input device used (probe, nidaq)
         for device in device_to_first_sample_number:
-            if only_dirs_including not in device:
+            if only_devices_including not in device:
                 continue
             continuous = recording_dir / 'continuous' / device
             if not continuous.exists():
@@ -141,7 +142,7 @@ def clipped_path_to_compressed(path: upath.UPath) -> upath.UPath:
 
 
 def get_pxi_nidaq_data(
-    recording_dir: upath.UPath | Iterable[upath.UPath],
+    recording_dirs: Iterable[upath.UPath],
     num_channels_total: int = 8,
     device_name: str | None = None,
     ) -> npt.NDArray[np.int16]:
@@ -159,9 +160,9 @@ def get_pxi_nidaq_data(
     (142823472, 8)
     """
     if device_name:
-        device = next(get_ephys_timing_on_pxi(recording_dir, only_dirs_including=device_name))
+        device = next(get_ephys_timing_on_pxi(recording_dirs, only_devices_including=device_name))
     else:
-        device = get_pxi_nidaq_device(recording_dir)
+        device = get_pxi_nidaq_device(recording_dirs)
     if device.compressed:
         data = zarr.open(device.compressed, mode="r")
         return data['traces_seg0']
@@ -178,7 +179,7 @@ def get_pxi_nidaq_device(recording_dir: upath.UPath | Iterable[upath.UPath]) -> 
     >>> get_pxi_nidaq_device(path).ttl.parent.name
     'NI-DAQmx-105.PXI-6133'
     """
-    device = tuple(get_ephys_timing_on_pxi(recording_dir, only_dirs_including='NI-DAQmx-'))
+    device = tuple(get_ephys_timing_on_pxi(recording_dir, only_devices_including='NI-DAQmx-'))
     if not device:
         raise FileNotFoundError(f'No */continuous/NI-DAQmx-*/ dir found in {recording_dir = }')
     if device and len(device) != 1:
@@ -188,8 +189,8 @@ def get_pxi_nidaq_device(recording_dir: upath.UPath | Iterable[upath.UPath]) -> 
 
 def get_ephys_timing_on_sync(
     sync: upath.UPath | sync_dataset.SyncDataset,
-    recording_dir: Optional[upath.UPath | Iterable[upath.UPath]] = None,
-    devices: Optional[EphysTimingInfoOnPXI | Iterable[EphysTimingInfoOnPXI]] = None
+    recording_dirs: Optional[Iterable[upath.UPath]] = None,
+    devices: Optional[Iterable[EphysTimingInfoOnPXI]] = None
 ) -> Generator[EphysTimingInfoOnSync, None, None]:
     """
     One of `recording_dir` or `devices` must be supplied:
@@ -204,7 +205,7 @@ def get_ephys_timing_on_sync(
     >>> device.sampling_rate, device.start_time
     (30000.07066388302, 0.7318752524919077)
     """
-    if not (recording_dir or devices):
+    if not (recording_dirs or devices):
         raise ValueError('Must specify recording_dir or devices')
 
     if not isinstance(sync, sync_dataset.SyncDataset):
@@ -217,13 +218,13 @@ def get_ephys_timing_on_sync(
     if devices and not isinstance(devices, Iterable):
         devices = (devices,)
         
-    if recording_dir and not isinstance(recording_dir, Iterable):
-        recording_dir = (recording_dir,)
+    if recording_dirs and not isinstance(recording_dirs, Iterable):
+        recording_dirs = (recording_dirs,)
 
-    if recording_dir and not devices:
-        devices = get_ephys_timing_on_pxi(recording_dir)
+    if recording_dirs and not devices:
+        devices = get_ephys_timing_on_pxi(recording_dirs)
 
-    assert devices
+    assert devices is not None
     for device in devices:
 
         ephys_barcode_times, ephys_barcode_ids = ephys_utils.extract_barcodes_from_times(
