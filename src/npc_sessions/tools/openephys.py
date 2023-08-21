@@ -9,7 +9,7 @@ import pathlib
 import re
 import tempfile
 from collections.abc import Generator, Iterable, Sequence
-from typing import Any, Literal, NamedTuple
+from typing import Any, Literal, NamedTuple, Optional
 
 import numpy as np
 import numpy.typing as npt
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_PROBES = 'ABCDEF'
 
 
-def get_ephys_timing_info(sync_messages_path: str | pathlib.Path | upath.UPath) -> dict[str, dict[Literal['start', 'rate'], int]]:
+def get_sync_messages_data(sync_messages_path: str | pathlib.Path | upath.UPath) -> dict[str, dict[Literal['start', 'rate'], int]]:
     """
     Start Time for Neuropix-PXI (107) - ProbeA-AP @ 30000 Hz: 210069564
     Start Time for Neuropix-PXI (107) - ProbeA-LFP @ 2500 Hz: 17505797
@@ -51,7 +51,7 @@ def get_ephys_timing_info(sync_messages_path: str | pathlib.Path | upath.UPath) 
         for line in upath.UPath(sync_messages_path).read_text().splitlines()[1:]
     }
 
-class EphysTimingOnPXI(NamedTuple):
+class EphysTimingInfoOnPXI(NamedTuple):
     name: str
     continuous: upath.UPath
     """Abs path to device's folder within raw data/continuous/"""
@@ -60,6 +60,7 @@ class EphysTimingOnPXI(NamedTuple):
     ttl: upath.UPath
     """Abs path to device's folder within events/"""
     compressed: upath.UPath | None
+    """Abs path to device's zarr storage within ecephys_compressed/, or None if not found"""
     sampling_rate: float
     """Nominal sample rate reported in sync_messages.txt"""
     ttl_sample_numbers: npt.NDArray
@@ -68,43 +69,54 @@ class EphysTimingOnPXI(NamedTuple):
     ttl_states: npt.NDArray
     """Contents of ttl/states.npy"""
 
-class EphysTimingOnSync(NamedTuple):
-    # device: EphysDevice
-    # """Info with paths"""
+class EphysTimingInfoOnSync(NamedTuple):
     name: str
+    device: EphysTimingInfoOnPXI
+    """Info with paths"""
     sampling_rate: float
     """Sample rate assessed on the sync clock"""
     start_time: float
     """First sample time (sec) relative to the start of the sync clock"""
 
-def get_ephys_timing_on_pxi(recording_dir: upath.UPath, only_dirs_including: str = '') -> Generator[EphysTimingOnPXI, None, None]:
+def get_ephys_timing_on_pxi(recording_dir: upath.UPath | Iterable[upath.UPath] , only_dirs_including: str = '') -> Generator[EphysTimingInfoOnPXI, None, None]:
     """
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
     >>> next(get_ephys_timing_on_pxi(path)).sampling_rate
     30000
     """
-    device_to_first_sample_number = get_ephys_timing_info(recording_dir / 'sync_messages.txt') # includes name of each input device used (probe, nidaq)
-    for device in device_to_first_sample_number:
-        if only_dirs_including not in device:
-            continue
-        continuous = recording_dir / 'continuous' / device
-        if not continuous.exists():
-            continue
-        events = recording_dir / 'events' / device
-        ttl = next(events.glob('TTL*'))
-        first_sample_on_ephys_clock = device_to_first_sample_number[device]['start']
-        sampling_rate = device_to_first_sample_number[device]['rate']
-        ttl_sample_numbers = np.load(io.BytesIO((ttl / 'sample_numbers.npy').read_bytes())) - first_sample_on_ephys_clock
-        ttl_states = np.load(io.BytesIO((ttl / 'states.npy').read_bytes()))
-        try:
-            compressed = clipped_path_to_compressed(continuous)
-        except ValueError:
-            logger.warning(f'No compressed data found for {continuous}')
-            compressed = None
-        yield EphysTimingOnPXI(
-            device, continuous, events, ttl, compressed, sampling_rate, ttl_sample_numbers, ttl_states
-        )
-
+    
+    if not isinstance(recording_dir, Iterable):
+        recording_dir = (recording_dir,)
+    for recording_dir in recording_dir:
+        device_to_first_sample_number = get_sync_messages_data(recording_dir / 'sync_messages.txt') # includes name of each input device used (probe, nidaq)
+        for device in device_to_first_sample_number:
+            if only_dirs_including not in device:
+                continue
+            continuous = recording_dir / 'continuous' / device
+            if not continuous.exists():
+                continue
+            events = recording_dir / 'events' / device
+            ttl = next(events.glob('TTL*'))
+            first_sample_on_ephys_clock = device_to_first_sample_number[device]['start']
+            sampling_rate = device_to_first_sample_number[device]['rate']
+            ttl_sample_numbers = np.load(io.BytesIO((ttl / 'sample_numbers.npy').read_bytes())) - first_sample_on_ephys_clock
+            ttl_states = np.load(io.BytesIO((ttl / 'states.npy').read_bytes()))
+            try:
+                compressed = clipped_path_to_compressed(continuous)
+            except ValueError:
+                logger.warning(f'No compressed data found for {continuous}')
+                compressed = None
+            yield EphysTimingInfoOnPXI(
+                name=device,
+                continuous=continuous,
+                events=events,
+                ttl=ttl,
+                compressed=compressed,
+                sampling_rate=sampling_rate,
+                ttl_sample_numbers=ttl_sample_numbers,
+                ttl_states=ttl_states,
+            )
+    
 def clipped_path_to_compressed(path: upath.UPath) -> upath.UPath:
     """
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1/continuous/Neuropix-PXI-100.ProbeA-AP')
@@ -130,8 +142,7 @@ def clipped_path_to_compressed(path: upath.UPath) -> upath.UPath:
 
 
 def get_pxi_nidaq_data(
-    recording_dir: upath.UPath,
-    # channel_idx: int = 1,
+    recording_dir: upath.UPath | Iterable[upath.UPath],
     num_channels_total: int = 8,
     device_name: str | None = None,
     ) -> npt.NDArray[np.int16]:
@@ -149,7 +160,7 @@ def get_pxi_nidaq_data(
     (142823472, 8)
     """
     if device_name:
-        device = get_ephys_timing_on_pxi(recording_dir, only_dirs_including=device_name)
+        device = next(get_ephys_timing_on_pxi(recording_dir, only_dirs_including=device_name))
     else:
         device = get_pxi_nidaq_device(recording_dir)
     if device.compressed:
@@ -161,7 +172,7 @@ def get_pxi_nidaq_data(
         # return dat[channel_idx:-1:num_channels_total]
 
 
-def get_pxi_nidaq_device(recording_dir: upath.UPath) -> EphysTimingOnPXI:
+def get_pxi_nidaq_device(recording_dir: upath.UPath | Iterable[upath.UPath]) -> EphysTimingInfoOnPXI:
     """NI-DAQmx device info
 
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
@@ -175,12 +186,19 @@ def get_pxi_nidaq_device(recording_dir: upath.UPath) -> EphysTimingOnPXI:
         raise FileNotFoundError(f'Expected a single NI-DAQmx folder to exist, but found: {[d.continuous for d in device]}')
     return device[0]
 
+
 def get_ephys_timing_on_sync(
-    sync_file: upath.UPath,
-    recording_dir: upath.UPath | None = None,
-    devices: EphysTimingOnPXI | Iterable[EphysTimingOnPXI] | None = None
-) -> Generator[EphysTimingOnSync, None, None]:
+    sync: upath.UPath | sync_dataset.SyncDataset,
+    recording_dir: Optional[upath.UPath | Iterable[upath.UPath]] = None,
+    devices: Optional[EphysTimingInfoOnPXI | Iterable[EphysTimingInfoOnPXI]] = None
+) -> Generator[EphysTimingInfoOnSync, None, None]:
     """
+    One of `recording_dir` or `devices` must be supplied:
+        - all devices in `recording_dir` will be returned
+        - or just those specified in `devices`
+        (use `get_ephys_timing_on_pxi()` to get a filtered iterable of devices
+        in a recording_dir)
+        
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
     >>> sync = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
     >>> device = next(get_ephys_timing_on_sync(sync, path))
@@ -190,14 +208,18 @@ def get_ephys_timing_on_sync(
     if not (recording_dir or devices):
         raise ValueError('Must specify recording_dir or devices')
 
-    sync = sync_dataset.SyncDataset(sync_file)
+    if not isinstance(sync, sync_dataset.SyncDataset):
+        sync = sync_dataset.SyncDataset(sync)
 
     sync_barcode_times, sync_barcode_ids = ephys_utils.extract_barcodes_from_times(
         on_times=sync.get_rising_edges('barcode_ephys', units='seconds'),
         off_times=sync.get_falling_edges('barcode_ephys', units='seconds'),
     )
-    if isinstance(devices, EphysTimingOnPXI):
+    if devices and not isinstance(devices, Iterable):
         devices = (devices,)
+        
+    if recording_dir and not isinstance(recording_dir, Iterable):
+        recording_dir = (recording_dir,)
 
     if recording_dir and not devices:
         devices = get_ephys_timing_on_pxi(recording_dir)
@@ -222,8 +244,11 @@ def get_ephys_timing_on_sync(
         if (np.isnan(sampling_rate)) | (~np.isfinite(sampling_rate)):
             sampling_rate = device.sampling_rate
 
-        yield EphysTimingOnSync(
-            device, sampling_rate, start_time
+        yield EphysTimingInfoOnSync(
+            name=device.name,
+            device=device,
+            sampling_rate=sampling_rate, 
+            start_time=start_time,
         )
 
 
@@ -456,7 +481,7 @@ def assert_xml_files_match(*paths: upath.UPath) -> None:
 
 def get_merged_oebin_file(
     paths: Sequence[upath.UPath], exclude_probe_names: Sequence[str] | None = None
-) -> upath.UPath:
+) -> dict[Literal['continuous', 'events', 'spikes'], list[dict[str, Any]]]:
     """Merge two or more structure.oebin files into one.
 
     For recordings split across multiple locations e.g. A:/*_probeABC,
@@ -507,10 +532,7 @@ def get_merged_oebin_file(
 
     if not merged_oebin:
         raise ValueError('No data found in structure.oebin files')
-
-    merged_oebin_path = upath.UPath(tempfile.gettempdir()) / 'structure.oebin'
-    merged_oebin_path.write_text(json.dumps(merged_oebin, indent=4))
-    return merged_oebin_path
+    return merged_oebin
 
 
 def read_oebin(path: str | pathlib.Path | upath.UPath) -> dict[str, Any]:
