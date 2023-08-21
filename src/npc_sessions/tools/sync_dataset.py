@@ -15,11 +15,10 @@ from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Any, Literal
 
 import h5py
-
-import numpy.typing as npt
-from typing_extensions import Self
 import numpy as np
+import numpy.typing as npt
 import upath
+from typing_extensions import Self
 
 if TYPE_CHECKING:
     import matplotlib.figure as fig
@@ -155,9 +154,7 @@ class SyncDataset:
         try:
             self.dfile = h5py.File(path, "r")
         except OSError:
-            self.dfile = h5py.File(
-                io.BytesIO(upath.UPath(path).read_bytes()), "r"
-            )
+            self.dfile = h5py.File(io.BytesIO(upath.UPath(path).read_bytes()), "r")
         self.meta_data: dict[str, Any] = eval(self.dfile["meta"][()])
         self.line_labels: Sequence[str] = self.meta_data["line_labels"]
         self.times = self._process_times()

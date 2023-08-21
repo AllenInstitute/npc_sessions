@@ -7,10 +7,8 @@ import json
 import logging
 import pathlib
 import re
-import tempfile
 from collections.abc import Generator, Iterable, Sequence
-from typing import Any, Literal, NamedTuple, Optional
-import typing
+from typing import Any, Literal, NamedTuple
 
 import numpy as np
 import numpy.typing as npt
@@ -23,10 +21,12 @@ import npc_sessions.tools.sync_dataset as sync_dataset
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_PROBES = 'ABCDEF'
+DEFAULT_PROBES = "ABCDEF"
 
 
-def get_sync_messages_data(sync_messages_path: str | pathlib.Path | upath.UPath) -> dict[str, dict[Literal['start', 'rate'], int]]:
+def get_sync_messages_data(
+    sync_messages_path: str | pathlib.Path | upath.UPath,
+) -> dict[str, dict[Literal["start", "rate"], int]]:
     """
     Start Time for Neuropix-PXI (107) - ProbeA-AP @ 30000 Hz: 210069564
     Start Time for Neuropix-PXI (107) - ProbeA-LFP @ 2500 Hz: 17505797
@@ -37,19 +37,29 @@ def get_sync_messages_data(sync_messages_path: str | pathlib.Path | upath.UPath)
     >>> dirname_to_sample['NI-DAQmx-105.PXI-6133']
     {'start': 257417001, 'rate': 30000}
     """
+
     def label(line) -> str:
-        return ''.join(line.split('Start Time for ')[-1].split(' @')[0].replace(') - ', '.').replace(' (', '-'))
+        return "".join(
+            line.split("Start Time for ")[-1]
+            .split(" @")[0]
+            .replace(") - ", ".")
+            .replace(" (", "-")
+        )
+
     def start(line) -> int:
-        return int(line.strip(' ').split('Hz:')[-1])
+        return int(line.strip(" ").split("Hz:")[-1])
+
     def rate(line) -> int:
-        return int(line.split('@ ')[-1].split(' Hz')[0])
+        return int(line.split("@ ")[-1].split(" Hz")[0])
+
     return {
         label(line): {
-            'start': start(line),
-            'rate': rate(line),
+            "start": start(line),
+            "rate": rate(line),
         }
         for line in upath.UPath(sync_messages_path).read_text().splitlines()[1:]
     }
+
 
 class EphysTimingInfoOnPXI(NamedTuple):
     name: str
@@ -69,6 +79,7 @@ class EphysTimingInfoOnPXI(NamedTuple):
     ttl_states: npt.NDArray
     """Contents of ttl/states.npy"""
 
+
 class EphysTimingInfoOnSync(NamedTuple):
     name: str
     device: EphysTimingInfoOnPXI
@@ -78,7 +89,10 @@ class EphysTimingInfoOnSync(NamedTuple):
     start_time: float
     """First sample time (sec) relative to the start of the sync clock"""
 
-def get_ephys_timing_on_pxi(recording_dirs: Iterable[upath.UPath] , only_devices_including: str = '') -> Generator[EphysTimingInfoOnPXI, None, None]:
+
+def get_ephys_timing_on_pxi(
+    recording_dirs: Iterable[upath.UPath], only_devices_including: str = ""
+) -> Generator[EphysTimingInfoOnPXI, None, None]:
     """
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
     >>> next(get_ephys_timing_on_pxi(path)).sampling_rate
@@ -88,23 +102,28 @@ def get_ephys_timing_on_pxi(recording_dirs: Iterable[upath.UPath] , only_devices
         recording_dirs = (recording_dirs,)
 
     for recording_dir in recording_dirs:
-        device_to_first_sample_number = get_sync_messages_data(recording_dir / 'sync_messages.txt') # includes name of each input device used (probe, nidaq)
+        device_to_first_sample_number = get_sync_messages_data(
+            recording_dir / "sync_messages.txt"
+        )  # includes name of each input device used (probe, nidaq)
         for device in device_to_first_sample_number:
             if only_devices_including not in device:
                 continue
-            continuous = recording_dir / 'continuous' / device
+            continuous = recording_dir / "continuous" / device
             if not continuous.exists():
                 continue
-            events = recording_dir / 'events' / device
-            ttl = next(events.glob('TTL*'))
-            first_sample_on_ephys_clock = device_to_first_sample_number[device]['start']
-            sampling_rate = device_to_first_sample_number[device]['rate']
-            ttl_sample_numbers = np.load(io.BytesIO((ttl / 'sample_numbers.npy').read_bytes())) - first_sample_on_ephys_clock
-            ttl_states = np.load(io.BytesIO((ttl / 'states.npy').read_bytes()))
+            events = recording_dir / "events" / device
+            ttl = next(events.glob("TTL*"))
+            first_sample_on_ephys_clock = device_to_first_sample_number[device]["start"]
+            sampling_rate = device_to_first_sample_number[device]["rate"]
+            ttl_sample_numbers = (
+                np.load(io.BytesIO((ttl / "sample_numbers.npy").read_bytes()))
+                - first_sample_on_ephys_clock
+            )
+            ttl_states = np.load(io.BytesIO((ttl / "states.npy").read_bytes()))
             try:
                 compressed = clipped_path_to_compressed(continuous)
             except ValueError:
-                logger.warning(f'No compressed data found for {continuous}')
+                logger.warning(f"No compressed data found for {continuous}")
                 compressed = None
             yield EphysTimingInfoOnPXI(
                 name=device,
@@ -116,36 +135,43 @@ def get_ephys_timing_on_pxi(recording_dirs: Iterable[upath.UPath] , only_devices
                 ttl_sample_numbers=ttl_sample_numbers,
                 ttl_states=ttl_states,
             )
-    
+
+
 def clipped_path_to_compressed(path: upath.UPath) -> upath.UPath:
     """
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1/continuous/Neuropix-PXI-100.ProbeA-AP')
     >>> clipped_path_to_compressed(path)
     S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_compressed/experiment1_Record Node 102#Neuropix-PXI-100.ProbeA-AP.zarr')
     """
-    if 'ecephys_clipped' not in path.as_posix():
+    if "ecephys_clipped" not in path.as_posix():
         raise ValueError(f'Expected path to contain "ecephys_clipped", got {path}')
-    experiment_re = re.search(r'.*(experiment\d+)', path.as_posix())
-    record_node_re = re.search(r'.*(Record Node \d+)', path.as_posix())
+    experiment_re = re.search(r".*(experiment\d+)", path.as_posix())
+    record_node_re = re.search(r".*(Record Node \d+)", path.as_posix())
     # /recording?/ isn't part of compressed path: assumes 1 recording per folder, or concats multiple recordings
     if not (experiment_re and record_node_re):
-        raise ValueError(f'Could not parse experiment and record node from {path}')
+        raise ValueError(f"Could not parse experiment and record node from {path}")
     experiment, record_node = experiment_re.groups()[0], record_node_re.groups()[0]
-    device_re = re.match(rf'.*{record_node}/{experiment}/recording\d+/[^/]+/(.*)', path.as_posix())
+    device_re = re.match(
+        rf".*{record_node}/{experiment}/recording\d+/[^/]+/(.*)", path.as_posix()
+    )
     if not device_re:
-        raise ValueError(f'Could not parse device from {path}')
-    compressed_name = f'{experiment}_{record_node}#{device_re.groups()[0]}.zarr'
-    root_path = next(p for p in path.parents if p.name == 'ecephys_clipped')
+        raise ValueError(f"Could not parse device from {path}")
+    compressed_name = f"{experiment}_{record_node}#{device_re.groups()[0]}.zarr"
+    root_path = next(p for p in path.parents if p.name == "ecephys_clipped")
     # cannot construct S3Path de novo from a string including `#`, but we can return
     # the actual path that exists
-    return next(path for path in root_path.with_name('ecephys_compressed').iterdir() if path.name == compressed_name)
+    return next(
+        path
+        for path in root_path.with_name("ecephys_compressed").iterdir()
+        if path.name == compressed_name
+    )
 
 
 def get_pxi_nidaq_data(
     recording_dirs: Iterable[upath.UPath],
     num_channels_total: int = 8,
     device_name: str | None = None,
-    ) -> npt.NDArray[np.int16]:
+) -> npt.NDArray[np.int16]:
     """
     -channel_idx: 0-indexed
     - if device_name not specified, first and only (assumed) NI-DAQ will be used
@@ -160,14 +186,18 @@ def get_pxi_nidaq_data(
     (142823472, 8)
     """
     if device_name:
-        device = next(get_ephys_timing_on_pxi(recording_dirs, only_devices_including=device_name))
+        device = next(
+            get_ephys_timing_on_pxi(recording_dirs, only_devices_including=device_name)
+        )
     else:
         device = get_pxi_nidaq_device(recording_dirs)
     if device.compressed:
         data = zarr.open(device.compressed, mode="r")
-        return data['traces_seg0']
+        return data["traces_seg0"]
     else:
-        dat = np.frombuffer((device.continuous / 'continuous.dat').read_bytes(), dtype=np.int16)
+        dat = np.frombuffer(
+            (device.continuous / "continuous.dat").read_bytes(), dtype=np.int16
+        )
         return np.reshape(dat, (int(dat.size / num_channels_total), -1))
         # return dat[channel_idx:-1:num_channels_total]
 
@@ -179,18 +209,24 @@ def get_pxi_nidaq_device(recording_dir: Iterable[upath.UPath]) -> EphysTimingInf
     >>> get_pxi_nidaq_device(path).ttl.parent.name
     'NI-DAQmx-105.PXI-6133'
     """
-    device = tuple(get_ephys_timing_on_pxi(recording_dir, only_devices_including='NI-DAQmx-'))
+    device = tuple(
+        get_ephys_timing_on_pxi(recording_dir, only_devices_including="NI-DAQmx-")
+    )
     if not device:
-        raise FileNotFoundError(f'No */continuous/NI-DAQmx-*/ dir found in {recording_dir = }')
+        raise FileNotFoundError(
+            f"No */continuous/NI-DAQmx-*/ dir found in {recording_dir = }"
+        )
     if device and len(device) != 1:
-        raise FileNotFoundError(f'Expected a single NI-DAQmx folder to exist, but found: {[d.continuous for d in device]}')
+        raise FileNotFoundError(
+            f"Expected a single NI-DAQmx folder to exist, but found: {[d.continuous for d in device]}"
+        )
     return device[0]
 
 
 def get_ephys_timing_on_sync(
     sync: upath.UPath | sync_dataset.SyncDataset,
-    recording_dirs: Optional[Iterable[upath.UPath]] = None,
-    devices: Optional[Iterable[EphysTimingInfoOnPXI]] = None
+    recording_dirs: Iterable[upath.UPath] | None = None,
+    devices: Iterable[EphysTimingInfoOnPXI] | None = None,
 ) -> Generator[EphysTimingInfoOnSync, None, None]:
     """
     One of `recording_dir` or `devices` must be supplied:
@@ -198,7 +234,7 @@ def get_ephys_timing_on_sync(
         - or just those specified in `devices`
         (use `get_ephys_timing_on_pxi()` to get a filtered iterable of devices
         in a recording_dir)
-        
+
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
     >>> sync = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
     >>> device = next(get_ephys_timing_on_sync(sync, path))
@@ -206,18 +242,18 @@ def get_ephys_timing_on_sync(
     (30000.07066388302, 0.7318752524919077)
     """
     if not (recording_dirs or devices):
-        raise ValueError('Must specify recording_dir or devices')
+        raise ValueError("Must specify recording_dir or devices")
 
     if not isinstance(sync, sync_dataset.SyncDataset):
         sync = sync_dataset.SyncDataset(sync)
 
     sync_barcode_times, sync_barcode_ids = ephys_utils.extract_barcodes_from_times(
-        on_times=sync.get_rising_edges('barcode_ephys', units='seconds'),
-        off_times=sync.get_falling_edges('barcode_ephys', units='seconds'),
+        on_times=sync.get_rising_edges("barcode_ephys", units="seconds"),
+        off_times=sync.get_falling_edges("barcode_ephys", units="seconds"),
     )
     if devices and not isinstance(devices, Iterable):
         devices = (devices,)
-        
+
     if recording_dirs and not isinstance(recording_dirs, Iterable):
         recording_dirs = (recording_dirs,)
 
@@ -226,11 +262,15 @@ def get_ephys_timing_on_sync(
 
     assert devices is not None
     for device in devices:
-
-        ephys_barcode_times, ephys_barcode_ids = ephys_utils.extract_barcodes_from_times(
-            on_times=device.ttl_sample_numbers[device.ttl_states > 0] / device.sampling_rate,
-            off_times=device.ttl_sample_numbers[device.ttl_states < 0] / device.sampling_rate,
-            )
+        (
+            ephys_barcode_times,
+            ephys_barcode_ids,
+        ) = ephys_utils.extract_barcodes_from_times(
+            on_times=device.ttl_sample_numbers[device.ttl_states > 0]
+            / device.sampling_rate,
+            off_times=device.ttl_sample_numbers[device.ttl_states < 0]
+            / device.sampling_rate,
+        )
 
         timeshift, sampling_rate, _ = ephys_utils.get_probe_time_offset(
             master_times=sync_barcode_times,
@@ -239,7 +279,7 @@ def get_ephys_timing_on_sync(
             probe_barcodes=ephys_barcode_ids,
             acq_start_index=0,
             local_probe_rate=device.sampling_rate,
-            )
+        )
         start_time = -timeshift
         if (np.isnan(sampling_rate)) | (~np.isfinite(sampling_rate)):
             sampling_rate = device.sampling_rate
@@ -247,7 +287,7 @@ def get_ephys_timing_on_sync(
         yield EphysTimingInfoOnSync(
             name=device.name,
             device=device,
-            sampling_rate=sampling_rate, 
+            sampling_rate=sampling_rate,
             start_time=start_time,
         )
 
@@ -256,10 +296,10 @@ def is_new_ephys_folder(path: upath.UPath) -> bool:
     """Look for any hallmarks of a v0.6.x Open Ephys recording in path or subfolders."""
 
     globs = (
-        'Record Node*',
-        'structure*.oebin',
+        "Record Node*",
+        "structure*.oebin",
     )
-    components = tuple(_.replace('*', '') for _ in globs)
+    components = tuple(_.replace("*", "") for _ in globs)
 
     if any(_.lower() in path.as_posix().lower() for _ in components):
         return True
@@ -275,22 +315,25 @@ def is_complete_ephys_folder(path: upath.UPath) -> bool:
     # TODO use structure.oebin to check for completeness
     if not is_new_ephys_folder(path):
         return False
-    for glob in ('continuous.dat', 'spike_times.npy', 'spike_clusters.npy'):
+    for glob in ("continuous.dat", "spike_times.npy", "spike_clusters.npy"):
         if not next(path.rglob(glob), None):
-            logger.debug(f'Could not find {glob} in {path}')
+            logger.debug(f"Could not find {glob} in {path}")
             return False
     return True
 
 
 def is_valid_ephys_folder(
-    path: upath.UPath, min_size_gb: int | float | None = None,
+    path: upath.UPath,
+    min_size_gb: int | float | None = None,
 ) -> bool:
     """Check a single dir of raw data for size and v0.6.x+ Open Ephys."""
     if not path.is_dir():
         return False
     if not is_new_ephys_folder(path):
         return False
-    if min_size_gb is not None and file_io.dir_size(path) < min_size_gb * 1024**3: # GB
+    if (
+        min_size_gb is not None and file_io.dir_size(path) < min_size_gb * 1024**3
+    ):  # GB
         return False
     return True
 
@@ -302,21 +345,18 @@ def get_ephys_root(path: upath.UPath) -> upath.UPath:
     >>> get_ephys_root(upath.UPath('A:/test/Record Node 0/Record Node test')).as_posix()
     'A:/test'
     """
-    if 'Record Node' not in path.as_posix():
+    if "Record Node" not in path.as_posix():
         raise ValueError(
             f"Could not find 'Record Node' in {path} - is this a valid raw ephys path?"
         )
     return next(
-        p.parent
-        for p in path.parents
-        if 'Record Node'.lower() in p.name.lower()
+        p.parent for p in path.parents if "Record Node".lower() in p.name.lower()
     )
 
 
-
 def get_filtered_ephys_paths_relative_to_record_node_parents(
-    toplevel_ephys_path: upath.UPath
-    ) -> Generator[tuple[upath.UPath, upath.UPath], None, None]:
+    toplevel_ephys_path: upath.UPath,
+) -> Generator[tuple[upath.UPath, upath.UPath], None, None]:
     """For restructuring the raw ephys data in a session folder, we want to
     discard superfluous recording folders and only keep the "good" data, but
     with the overall directory structure relative to `Record Node*` folders intact.
@@ -358,17 +398,20 @@ def get_filtered_ephys_paths_relative_to_record_node_parents(
     - contents of expected ephys subfolders directly deposited in npexp_path
 
     """
-    record_nodes = toplevel_ephys_path.rglob('Record Node*')
+    record_nodes = toplevel_ephys_path.rglob("Record Node*")
 
     for record_node in record_nodes:
-
         superfluous_recording_dirs = tuple(
             _.parent for _ in get_superfluous_oebin_paths(record_node)
         )
-        logger.debug(f'Found {len(superfluous_recording_dirs)} superfluous recording dirs to exclude: {superfluous_recording_dirs}')
+        logger.debug(
+            f"Found {len(superfluous_recording_dirs)} superfluous recording dirs to exclude: {superfluous_recording_dirs}"
+        )
 
-        for abs_path in record_node.rglob('*'):
-            is_superfluous_path = any(_ in abs_path.parents for _ in superfluous_recording_dirs)
+        for abs_path in record_node.rglob("*"):
+            is_superfluous_path = any(
+                _ in abs_path.parents for _ in superfluous_recording_dirs
+            )
 
             if is_superfluous_path:
                 continue
@@ -386,14 +429,13 @@ def get_raw_ephys_subfolders(
 
     subfolders = set()
 
-    for f in upath.UPath(path).rglob('continuous.dat'):
-
+    for f in upath.UPath(path).rglob("continuous.dat"):
         if any(
             k in f.as_posix().lower()
             for k in [
-                'sorted',
-                'extracted',
-                'curated',
+                "sorted",
+                "extracted",
+                "curated",
             ]
         ):
             # skip sorted/extracted folders
@@ -402,7 +444,9 @@ def get_raw_ephys_subfolders(
         subfolders.add(get_ephys_root(f))
 
     if min_size_gb is not None:
-        subfolders = {_ for _ in subfolders if file_io.dir_size(_) < min_size_gb * 1024**3}
+        subfolders = {
+            _ for _ in subfolders if file_io.dir_size(_) < min_size_gb * 1024**3
+        }
 
     return tuple(sorted(subfolders, key=lambda s: str(s)))
 
@@ -420,12 +464,12 @@ def get_single_oebin_path(path: upath.UPath) -> upath.UPath:
         good folder - the largest - plus some small dummy / accidental recordings
     """
     if not path.is_dir():
-        raise ValueError(f'{path} is not a directory')
+        raise ValueError(f"{path} is not a directory")
 
-    oebin_paths = tuple(path.rglob('structure*.oebin'))
+    oebin_paths = tuple(path.rglob("structure*.oebin"))
 
     if not oebin_paths:
-        raise FileNotFoundError(f'No structure.oebin file found in {path}')
+        raise FileNotFoundError(f"No structure.oebin file found in {path}")
 
     if len(oebin_paths) == 1:
         return oebin_paths[0]
@@ -442,7 +486,7 @@ def get_superfluous_oebin_paths(path: upath.UPath) -> tuple[upath.UPath, ...]:
     Companion to `get_single_oebin_path`.
     """
 
-    all_oebin_paths = tuple(path.rglob('structure*.oebin'))
+    all_oebin_paths = tuple(path.rglob("structure*.oebin"))
 
     if len(all_oebin_paths) == 1:
         return ()
@@ -458,30 +502,29 @@ def assert_xml_files_match(*paths: upath.UPath) -> None:
     Update: xml files on two nodes can be created at slightly different times, so their `date`
     fields may differ. Everything else should be identical.
     """
-    if not all(s == '.xml' for s in [p.suffix for p in paths]):
-        raise ValueError('Not all paths are XML files')
+    if not all(s == ".xml" for s in [p.suffix for p in paths]):
+        raise ValueError("Not all paths are XML files")
     if not all(p.is_file() for p in paths):
-        raise FileNotFoundError(
-            'Not all paths are files, or they do not exist'
-        )
+        raise FileNotFoundError("Not all paths are files, or they do not exist")
     if not file_io.checksums_match(*paths):
-
         # if the files are the same size and were created within +/- 1 second
         # of each other, we'll assume they're the same
 
         created_times = tuple(file_io.ctime(p) for p in paths)
-        created_times_equal = all(created_times[0] - 1 <= t <= created_times[0] + 1 for t in created_times[1:])
+        created_times_equal = all(
+            created_times[0] - 1 <= t <= created_times[0] + 1 for t in created_times[1:]
+        )
 
         sizes = tuple(file_io.file_size(p) for p in paths)
         sizes_equal = all(s == sizes[0] for s in sizes[1:])
 
         if not (sizes_equal and created_times_equal):
-            raise AssertionError('XML files do not match')
+            raise AssertionError("XML files do not match")
 
 
 def get_merged_oebin_file(
     paths: Sequence[file_io.PathLike], exclude_probe_names: Sequence[str] | None = None
-) -> dict[Literal['continuous', 'events', 'spikes'], list[dict[str, Any]]]:
+) -> dict[Literal["continuous", "events", "spikes"], list[dict[str, Any]]]:
     """Merge two or more structure.oebin files into one.
 
     For recordings split across multiple locations e.g. A:/*_probeABC,
@@ -494,21 +537,20 @@ def get_merged_oebin_file(
     oebin_paths = tuple(file_io.from_pathlike(p) for p in paths)
     if len(oebin_paths) == 1:
         return read_oebin(oebin_paths[0])
-    
+
     # ensure oebin files can be merged - if from the same exp they will have the same settings.xml file
-    if any(p.suffix != '.oebin' for p in oebin_paths):
-        raise ValueError(f'Not all paths are .oebin files: {oebin_paths}')
+    if any(p.suffix != ".oebin" for p in oebin_paths):
+        raise ValueError(f"Not all paths are .oebin files: {oebin_paths}")
     assert_xml_files_match(
-        *[p / 'settings.xml' for p in [o.parent.parent.parent for o in oebin_paths]]
+        *[p / "settings.xml" for p in [o.parent.parent.parent for o in oebin_paths]]
     )
 
-    logger.debug(f'Creating merged oebin file from {oebin_paths}')
+    logger.debug(f"Creating merged oebin file from {oebin_paths}")
     merged_oebin: dict = {}
     for oebin_path in sorted(oebin_paths):
         oebin_data = read_oebin(oebin_path)
 
         for key in oebin_data:
-
             # skip if already in merged oebin
             if merged_oebin.get(key) == oebin_data[key]:
                 continue
@@ -516,14 +558,13 @@ def get_merged_oebin_file(
             # 'continuous', 'events', 'spikes' are lists, which we want to concatenate across files
             if isinstance(oebin_data[key], list):
                 for item in oebin_data[key]:
-
                     # skip if already in merged oebin
                     if item in merged_oebin.get(key, []):
                         continue
 
                     # skip probes in excl list (ie. not inserted)
                     if exclude_probe_names and any(
-                        p.lower() in item.get('folder_name', '').lower()
+                        p.lower() in item.get("folder_name", "").lower()
                         for p in exclude_probe_names
                     ):
                         continue
@@ -532,11 +573,13 @@ def get_merged_oebin_file(
                     merged_oebin.setdefault(key, []).append(item)
 
     if not merged_oebin:
-        raise ValueError('No data found in structure.oebin files')
+        raise ValueError("No data found in structure.oebin files")
     return merged_oebin
 
 
-def read_oebin(path: file_io.PathLike) -> dict[Literal['continuous', 'events', 'spikes'], list[dict[str, Any]]]:
+def read_oebin(
+    path: file_io.PathLike,
+) -> dict[Literal["continuous", "events", "spikes"], list[dict[str, Any]]]:
     return json.loads(file_io.from_pathlike(path).read_bytes())
 
 

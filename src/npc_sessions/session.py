@@ -21,8 +21,8 @@ import io
 import itertools
 import json
 import operator
-from collections.abc import Mapping
 import re
+from collections.abc import Mapping
 from typing import Any, Literal
 
 import h5py
@@ -326,33 +326,59 @@ class Session:
     @property
     def ephys_record_node_dirs(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
-            raise ValueError(f'{self.id} is not an ephys session')
-        return tuple(p for p in self.raw_data_paths if re.match(r"^Record Node [0-9]+$", p.name))
-    
+            raise ValueError(f"{self.id} is not an ephys session")
+        return tuple(
+            p for p in self.raw_data_paths if re.match(r"^Record Node [0-9]+$", p.name)
+        )
+
     @functools.cached_property
     def ephys_recording_dirs(self) -> tuple[upath.UPath, ...]:
-        return tuple(p for record_node in self.ephys_record_node_dirs for p in record_node.glob('experiment*/recording*'))
-    
+        return tuple(
+            p
+            for record_node in self.ephys_record_node_dirs
+            for p in record_node.glob("experiment*/recording*")
+        )
+
     @functools.cached_property
     def ephys_timing_data(self) -> tuple[openephys.EphysTimingInfoOnSync, ...]:
         return tuple(
-            itertools.chain(openephys.get_ephys_timing_on_sync(self.sync_data, self.ephys_recording_dirs))
+            itertools.chain(
+                openephys.get_ephys_timing_on_sync(
+                    self.sync_data, self.ephys_recording_dirs
+                )
+            )
         )
-    
-    @functools.cached_property
-    def ephys_sync_messages_path(self) -> upath.UPath:
-        return next(p for p in itertools.chain(*(record_node.iterdir() for record_node in self.ephys_recording_dirs)) if 'sync_messages.txt' == p.name)
-    
-    @functools.cached_property
-    def ephys_structure_oebin_paths(self) -> tuple[upath.UPath, ...]:
-        return tuple(p for p in itertools.chain(*(record_node.iterdir() for record_node in self.ephys_recording_dirs)) if 'structure.oebin' == p.name)
 
     @functools.cached_property
-    def ephys_structure_oebin_data(self) -> dict[Literal['continuous', 'events', 'spikes'], list[dict[str, Any]]]:
+    def ephys_sync_messages_path(self) -> upath.UPath:
+        return next(
+            p
+            for p in itertools.chain(
+                *(record_node.iterdir() for record_node in self.ephys_recording_dirs)
+            )
+            if "sync_messages.txt" == p.name
+        )
+
+    @functools.cached_property
+    def ephys_structure_oebin_paths(self) -> tuple[upath.UPath, ...]:
+        return tuple(
+            p
+            for p in itertools.chain(
+                *(record_node.iterdir() for record_node in self.ephys_recording_dirs)
+            )
+            if "structure.oebin" == p.name
+        )
+
+    @functools.cached_property
+    def ephys_structure_oebin_data(
+        self,
+    ) -> dict[Literal["continuous", "events", "spikes"], list[dict[str, Any]]]:
         return openephys.get_merged_oebin_file(self.ephys_structure_oebin_paths)
 
     @functools.cached_property
-    def ephys_sync_messages_data(self) -> dict[str, dict[Literal['start', 'rate'], int]]:
+    def ephys_sync_messages_data(
+        self,
+    ) -> dict[str, dict[Literal["start", "rate"], int]]:
         return openephys.get_sync_messages_data(self.get_sync_messages_path())
 
     @property
@@ -370,7 +396,9 @@ class Session:
 
     @functools.cached_property
     def ephys_settings_xml_data(self) -> parse_settings_xml.SettingsXmlInfo:
-        return parse_settings_xml.settings_xml_info_from_path(self.ephys_settings_xml_path)
+        return parse_settings_xml.settings_xml_info_from_path(
+            self.ephys_settings_xml_path
+        )
 
     @functools.cached_property
     def ephys_settings_xml_file_record(self) -> npc_lims.File:
@@ -378,7 +406,9 @@ class Session:
             session_id=self.id,
             name="openephys-settings",
             suffix=".xml",
-            timestamp=self.ephys_settings_xml_data.start_time.isoformat(timespec="seconds"),
+            timestamp=self.ephys_settings_xml_data.start_time.isoformat(
+                timespec="seconds"
+            ),
             size=self.ephys_settings_xml_path.stat()["size"],
             s3_path=self.ephys_settings_xml_path.as_posix(),
             data_asset_id=self.raw_data_asset_id,
@@ -452,12 +482,12 @@ class Session:
             (
                 npc_lims.Electrode(
                     session_id=self.id,
-                    group=f'probe{probe}', # type: ignore
+                    group=f"probe{probe}",  # type: ignore
                     channel_index=i,
                     id=i
-                    #TODO: add ccf coordinates
+                    # TODO: add ccf coordinates
                 )
-                for i in range(1, 385) # TODO: get number of channels
+                for i in range(1, 385)  # TODO: get number of channels
             )
             for probe in self.ephys_settings_xml_data.probe_letters
         )
@@ -483,6 +513,7 @@ class Session:
     # session: MutableMapping[str, Any]
     # stimuli: pl.DataFrame
     # units: pl.DataFrame
+
 
 # x = Session('670248_2023-08-03').ephys_structure_oebin_data
 # x

@@ -157,7 +157,6 @@ def settings_xml_md5(path: str | upath.UPath) -> str:
     return hashlib.md5(upath.UPath(path).read_bytes()).hexdigest()
 
 
-
 if __name__ == "__main__":
     import doctest
 

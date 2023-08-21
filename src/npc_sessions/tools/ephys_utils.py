@@ -7,7 +7,8 @@ from the ecephys repo (https://github.com/AllenInstitute/ecephys_pipeline)
 """
 from __future__ import annotations
 
-from typing import Literal, Sequence
+from collections.abc import Sequence
+from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -104,10 +105,10 @@ def extract_barcodes_from_times(
 
 
 def find_matching_index(
-    master_barcodes:np.ndarray,
-    probe_barcodes:np.ndarray,
-    alignment_type:Literal['start', 'end']="start"
-    ) -> tuple[int, int] | tuple[None, None]:
+    master_barcodes: np.ndarray,
+    probe_barcodes: np.ndarray,
+    alignment_type: Literal["start", "end"] = "start",
+) -> tuple[int, int] | tuple[None, None]:
     """Given a set of barcodes for the master clock and the probe clock, find the
     indices of a matching set, either starting from the beginning or the end
     of the list.
@@ -125,8 +126,8 @@ def find_matching_index(
         matching index for master barcodes (None if not found)
     probe_barcode_index : int
         matching index for probe barcodes (None if not found)
-        
-        
+
+
     >>> find_matching_index(np.array([1, 2, 3]), np.array([1, 2, 3]), alignment_type="start")
     (0, 0)
     >>> find_matching_index(np.array([1, 2, 3]), np.array([1, 2, 3]), alignment_type="end")
@@ -163,7 +164,12 @@ def find_matching_index(
         return None, None
 
 
-def match_barcodes(master_times: np.ndarray, master_barcodes: np.ndarray, probe_times: np.ndarray, probe_barcodes: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def match_barcodes(
+    master_times: np.ndarray,
+    master_barcodes: np.ndarray,
+    probe_times: np.ndarray,
+    probe_barcodes: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
     """Given sequences of barcode values and (local) times on a probe line and a master
     line, find the time points on each clock corresponding to the first and last shared
     barcode.
@@ -221,8 +227,7 @@ def match_barcodes(master_times: np.ndarray, master_barcodes: np.ndarray, probe_
 
 
 def linear_transform_from_intervals(
-    master: np.ndarray | Sequence[float], 
-    probe: np.ndarray | Sequence[float]
+    master: np.ndarray | Sequence[float], probe: np.ndarray | Sequence[float]
 ) -> tuple[float, float]:
     # from ecephys repo
     """Find a scale and translation which aligns two 1d segments
@@ -260,7 +265,6 @@ def get_probe_time_offset(
     acq_start_index: int,
     local_probe_rate: float,
 ) -> tuple[float, float, np.ndarray]:
-
     # from ecephys repo
     """Time offset between master clock and recording probes. For converting probe time to master clock.
 
