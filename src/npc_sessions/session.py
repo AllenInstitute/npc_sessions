@@ -425,6 +425,22 @@ class Session:
             )
         )
 
+    @functools.cached_property
+    def electrodes(self) -> nwb.NWBContainerWithDF:
+        return nwb.Electrodes(
+            (
+                npc_lims.Electrode(
+                    session_id=self.id,
+                    group=f'probe{probe}', # type: ignore
+                    channel_index=i,
+                    id=i
+                    #TODO: add ccf coordinates
+                )
+                for i in range(1, 385) # TODO: get number of channels
+            )
+            for probe in self.settings_xml_data.probe_letters
+        )
+    
     def get_intervals(self) -> tuple[nwb.Intervals, ...]:
         return ()
 
