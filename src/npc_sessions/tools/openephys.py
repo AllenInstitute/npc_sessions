@@ -32,20 +32,19 @@ def get_sync_messages_data(sync_messages_path: str | pathlib.Path | upath.UPath)
     Start Time for NI-DAQmx (109) - PXI-6133 @ 30000 Hz: 210265001
 
     >>> path = 's3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1/sync_messages.txt'
-    >>> dirname_to_sample = get_ephys_timing_info(path)
+    >>> dirname_to_sample = get_sync_messages_data(path)
     >>> dirname_to_sample['NI-DAQmx-105.PXI-6133']
     {'start': 257417001, 'rate': 30000}
     """
-    def label(line):
+    def label(line) -> str:
         return ''.join(line.split('Start Time for ')[-1].split(' @')[0].replace(') - ', '.').replace(' (', '-'))
-    def sample(line):
+    def start(line) -> int:
         return int(line.strip(' ').split('Hz:')[-1])
-    def rate(line):
+    def rate(line) -> int:
         return int(line.split('@ ')[-1].split(' Hz')[0])
-
     return {
         label(line): {
-            'start': sample(line),
+            'start': start(line),
             'rate': rate(line),
         }
         for line in upath.UPath(sync_messages_path).read_text().splitlines()[1:]
