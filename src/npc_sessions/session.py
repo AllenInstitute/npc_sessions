@@ -10,6 +10,8 @@ S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/2023080
 S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
 >>> s.devices.df['device_id'][0] == s.electrode_groups.df['device'][0]
 True
+>>> s.ephys_timing_data[0].name, s.ephys_timing_data[0].sampling_rate, s.ephys_timing_data[0].start_time
+('Neuropix-PXI-100.ProbeA-AP', 30000.07066388302, 0.7318752524919077)
 """
 from __future__ import annotations
 
