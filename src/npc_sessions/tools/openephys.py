@@ -479,7 +479,7 @@ def assert_xml_files_match(*paths: upath.UPath) -> None:
 
 
 def get_merged_oebin_file(
-    paths: Sequence[upath.UPath], exclude_probe_names: Sequence[str] | None = None
+    paths: Sequence[file_io.PathLike], exclude_probe_names: Sequence[str] | None = None
 ) -> dict[Literal['continuous', 'events', 'spikes'], list[dict[str, Any]]]:
     """Merge two or more structure.oebin files into one.
 
@@ -488,21 +488,22 @@ def get_merged_oebin_file(
     - if items in the oebin files have 'folder_name' values that match any
     entries in `exclude_probe_names`, they will be removed from the merged oebin
     """
-    if isinstance(paths, upath.UPath):
-        return paths
-    if any(not p.suffix == '.oebin' for p in paths):
-        raise ValueError('Not all paths are .oebin files')
-    if len(paths) == 1:
-        return paths[0]
-
+    if not isinstance(paths, Iterable):
+        paths = tuple(paths)
+    oebin_paths = tuple(file_io.from_pathlike(p) for p in paths)
+    if len(oebin_paths) == 1:
+        return read_oebin(oebin_paths[0])
+    
     # ensure oebin files can be merged - if from the same exp they will have the same settings.xml file
+    if any(p.suffix != '.oebin' for p in oebin_paths):
+        raise ValueError(f'Not all paths are .oebin files: {oebin_paths}')
     assert_xml_files_match(
-        *[p / 'settings.xml' for p in [o.parent.parent.parent for o in paths]]
+        *[p / 'settings.xml' for p in [o.parent.parent.parent for o in oebin_paths]]
     )
 
-    logger.debug(f'Creating merged oebin file from {paths}')
+    logger.debug(f'Creating merged oebin file from {oebin_paths}')
     merged_oebin: dict = {}
-    for oebin_path in sorted(paths):
+    for oebin_path in sorted(oebin_paths):
         oebin_data = read_oebin(oebin_path)
 
         for key in oebin_data:
@@ -534,7 +535,7 @@ def get_merged_oebin_file(
     return merged_oebin
 
 
-def read_oebin(path: str | pathlib.Path | upath.UPath) -> dict[str, Any]:
+def read_oebin(path: file_io.PathLike) -> dict[Literal['continuous', 'events', 'spikes'], list[dict[str, Any]]]:
     return json.loads(file_io.from_pathlike(path).read_bytes())
 
 
