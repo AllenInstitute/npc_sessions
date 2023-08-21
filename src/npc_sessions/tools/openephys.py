@@ -172,7 +172,7 @@ def get_pxi_nidaq_data(
         # return dat[channel_idx:-1:num_channels_total]
 
 
-def get_pxi_nidaq_device(recording_dir: upath.UPath | Iterable[upath.UPath]) -> EphysTimingInfoOnPXI:
+def get_pxi_nidaq_device(recording_dir: Iterable[upath.UPath]) -> EphysTimingInfoOnPXI:
     """NI-DAQmx device info
 
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
