@@ -8,15 +8,18 @@ Allen Institute for Brain Science
 """
 from __future__ import annotations
 
+import io
 import logging
 import warnings
 from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Any, Literal
 
 import h5py
-import numpy as np
+
 import numpy.typing as npt
 from typing_extensions import Self
+import numpy as np
+import upath
 
 if TYPE_CHECKING:
     import matplotlib.figure as fig
@@ -149,9 +152,12 @@ class SyncDataset:
             Path to hdf5 file.
 
         """
-        self.dfile = h5py.File(
-            path, "r"
-        )  # MG edit 3/15 removed 'r' because some sync files were unable to load  # NOQA E501
+        try:
+            self.dfile = h5py.File(path, "r")
+        except OSError:
+            self.dfile = h5py.File(
+                io.BytesIO(upath.UPath(path).read_bytes()), "r"
+            )
         self.meta_data: dict[str, Any] = eval(self.dfile["meta"][()])
         self.line_labels: Sequence[str] = self.meta_data["line_labels"]
         self.times = self._process_times()
@@ -870,4 +876,8 @@ class SyncDataset:
 
 
 if __name__ == "__main__":
-    pass
+    import doctest
+
+    doctest.testmod(
+        optionflags=(doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE)
+    )

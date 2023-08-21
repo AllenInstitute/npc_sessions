@@ -19,7 +19,7 @@ import io
 import json
 import operator
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Literal
 
 import h5py
 import npc_lims
@@ -31,6 +31,7 @@ import upath
 import npc_sessions.nwb as nwb
 import npc_sessions.tools.parse_settings_xml as parse_settings_xml
 import npc_sessions.tools.sync_dataset as sync_dataset
+import npc_sessions.tools.openephys as openephys
 import npc_sessions.utils as utils
 
 
@@ -318,6 +319,21 @@ class Session:
     def epochs(self) -> nwb.NWBContainerWithDF:
         return nwb.Epochs(self.get_epoch_record(stim) for stim in self.stim_data)
 
+    def get_sync_messages_path(self) -> upath.UPath:
+        if not self.is_ephys:
+            raise ValueError(f'{self.id} is not an ephys session (required for sync_messages.txt)')
+        for record_node_folder in (p for p in self.raw_data_paths if 'Record Node' in p.name):
+            largest_recording_folder = openephys.get_single_oebin_path(record_node_folder).parent
+            sync_messages_text = largest_recording_folder / 'sync_messages.txt'
+            if sync_messages_text.exists():
+                return sync_messages_text
+        else:
+            raise FileNotFoundError(f'No sync_messages.txt found in ephys raw data: {session = }')
+    
+    @functools.cached_property
+    def sync_messages_data(self) -> dict[str, dict[Literal['start', 'rate'], int]]: 
+        return openephys.get_ephys_timing_info(self.get_sync_messages_path())
+    
     @property
     def settings_xml_path(self) -> upath.UPath:
         if not self.is_ephys:
@@ -431,6 +447,8 @@ class Session:
     # stimuli: pl.DataFrame
     # units: pl.DataFrame
 
+# x = Session('670248_2023-08-03').sync_messages_data
+# x
 
 if __name__ == "__main__":
     import doctest
