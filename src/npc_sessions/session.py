@@ -31,6 +31,7 @@ import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
 import pynwb
 import upath
+from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
 import npc_sessions.nwb as nwb
 import npc_sessions.tools.openephys as openephys
@@ -213,6 +214,26 @@ class Session:
             for path in self.stim_paths
         )
 
+    @property
+    def sam(self) -> DynRoutData:
+        if not hasattr(self, "_sam"):
+            obj = DynRoutData()
+            obj.loadBehavData(self.task_path.as_posix(), io.BytesIO(self.task_path.read_bytes()))
+            self._sam = obj
+        return self._sam
+
+    @property
+    def task_path(self) -> upath.UPath:
+        return next(path for path in self.stim_paths if "DynamicRouting" in path.stem)
+    
+    @property
+    def task_data(self) -> h5py.File:
+        return next(self.stim_data[k] for k in self.stim_data if "DynamicRouting" in k)
+
+    @property
+    def task_version(self) -> str | None:
+        return self.sam.taskVersion if isinstance(self.sam.taskVersion, str) else None
+
     @functools.cached_property
     def stim_data(self) -> Mapping[str, Any]:
         def h5_dataset(path: upath.UPath) -> h5py.File:
@@ -289,14 +310,6 @@ class Session:
             )
             for path in self.video_info_paths
         )
-
-    @property
-    def task_data(self) -> h5py.File:
-        return next(self.stim_data[k] for k in self.stim_data if "DynamicRouting" in k)
-
-    @property
-    def task_version(self) -> str:
-        return str(self.task_data["taskVersion"].asstr()[()])
 
     def get_epoch_record(self, stim_file_name: str) -> npc_lims.Epoch:
         h5 = self.stim_data[stim_file_name]
