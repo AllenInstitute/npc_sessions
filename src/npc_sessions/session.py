@@ -218,14 +218,16 @@ class Session:
     def sam(self) -> DynRoutData:
         if not hasattr(self, "_sam"):
             obj = DynRoutData()
-            obj.loadBehavData(self.task_path.as_posix(), io.BytesIO(self.task_path.read_bytes()))
+            obj.loadBehavData(
+                self.task_path.as_posix(), io.BytesIO(self.task_path.read_bytes())
+            )
             self._sam = obj
         return self._sam
 
     @property
     def task_path(self) -> upath.UPath:
         return next(path for path in self.stim_paths if "DynamicRouting" in path.stem)
-    
+
     @property
     def task_data(self) -> h5py.File:
         return next(self.stim_data[k] for k in self.stim_data if "DynamicRouting" in k)
