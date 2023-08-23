@@ -503,9 +503,9 @@ def assert_xml_files_match(*paths: upath.UPath) -> None:
     fields may differ. Everything else should be identical.
     """
     if not all(s == ".xml" for s in [p.suffix for p in paths]):
-        raise ValueError("Not all paths are XML files")
+        raise ValueError(f"Not all paths are XML files: {paths}")
     if not all(p.is_file() for p in paths):
-        raise FileNotFoundError("Not all paths are files, or they do not exist")
+        raise FileNotFoundError(f"Not all paths are files, or they do not exist: {paths}")
     if not file_io.checksums_match(*paths):
         # if the files are the same size and were created within +/- 1 second
         # of each other, we'll assume they're the same
@@ -519,7 +519,7 @@ def assert_xml_files_match(*paths: upath.UPath) -> None:
         sizes_equal = all(s == sizes[0] for s in sizes[1:])
 
         if not (sizes_equal and created_times_equal):
-            raise AssertionError("XML files do not match")
+            raise AssertionError(f"XML files do not match: {paths}")
 
 
 def get_merged_oebin_file(
