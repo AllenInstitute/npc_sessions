@@ -1,0 +1,143 @@
+from __future__ import annotations
+
+import json
+import logging
+from collections.abc import Container, Iterable
+from typing import Literal, TypeVar
+
+import numpy as np
+import numpy.typing as npt
+import upath
+
+import npc_sessions.utils.file_io as file_io
+import npc_sessions.utils.sync as sync
+import npc_sessions.utils as utils
+
+logger = logging.getLogger(__name__)
+
+
+def get_video_frame_times(
+    sync_path_or_dataset: file_io.PathLike | sync.SyncDataset,
+    *video_paths: file_io.PathLike,
+) -> dict[upath.UPath, npt.NDArray[np.float64]]:
+    """Returns number of frames on sync line for each video file (after
+    subtracting lost frames).
+    
+    If a single directory is passed, video files in that directory will be
+    found. If multiple paths are passed, the video files will be filtered out.
+    
+    - keys are video file paths
+    - values are arrays of frame times in seconds
+    
+    - if the number of frames in a video file doesn't match the number of frames
+    returned here, just truncate the excess frames in the video file:
+
+        MVR previously ceased all TTL pulses the instant a recording was
+        stopped, resulting in frames in the video that weren't registered
+        in sync. MVR was fixed July 2023 after Corbett discovered the issue.
+
+    >>> sync_path = 's3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5'
+    >>> video_path = 's3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior'
+    >>> frame_times = get_video_frame_times(sync_path, video_path)
+    >>> [len(frames) for frames in frame_times.values()]
+    [304228, 304228, 304228]
+    """
+    videos = get_video_file_paths(*video_paths)
+    jsons = get_video_info_file_paths(*video_paths)
+    camera_to_video_path = {utils.extract_camera_name(path.stem): path for path in videos}
+    camera_to_json_path = {utils.extract_camera_name(path.stem): path for path in jsons}
+    camera_exposing_times = get_cam_exposing_times_on_sync(sync_path_or_dataset)
+    frame_times = {}
+    for camera in camera_exposing_times:
+        if camera in camera_to_video_path:
+            frame_times[camera_to_video_path[camera]] = remove_lost_frame_times(
+                camera_exposing_times[camera],
+                get_lost_frames_from_camera_info(camera_to_json_path[camera]),
+            )
+    return frame_times
+
+
+def get_cam_exposing_times_on_sync(
+    sync_path_or_dataset: file_io.PathLike | sync.SyncDataset,
+) -> dict[Literal['behavior', 'eye', 'face'], npt.NDArray[np.float64]]:
+
+    if isinstance(sync_path_or_dataset, sync.SyncDataset):
+        sync_data = sync_path_or_dataset
+    else:
+        sync_data = sync.SyncDataset(file_io.from_pathlike(sync_path_or_dataset))
+
+    frame_times = {}
+    for line in (line for line in sync_data.line_labels if '_cam_exposing' in line):
+        camera_name = utils.extract_camera_name(line)
+        frame_times[camera_name] = sync_data.get_rising_edges(line, units='seconds')
+    return frame_times
+
+
+def get_lost_frames_from_camera_info(info_path_or_dict: dict | file_io.PathLike) -> npt.NDArray[np.int32]:
+    """
+    >>> get_lost_frames_from_camera_info({'LostFrames': ['1-2,4-5,7']})
+    array([0, 1, 3, 4, 6])
+    """
+    if not isinstance(info_path_or_dict, dict):
+        info = json.loads(file_io.from_pathlike(info_path_or_dict).read_bytes())
+    else:
+        info = info_path_or_dict
+
+    if 'RecordingReport' in info:
+        info = info['RecordingReport']
+
+    if info.get('FramesLostCount') == 0:
+        return np.array([])
+
+    lost_frame_spans: list[str] = info['LostFrames'][0].split(',')
+
+    lost_frames = []
+    for span in lost_frame_spans:
+
+        start_end = span.split('-')
+        if len(start_end) == 1:
+            lost_frames.append(int(start_end[0]))
+        else:
+            lost_frames.extend(
+                np.arange(int(start_end[0]), int(start_end[1]) + 1)
+            )
+
+    return np.subtract(lost_frames, 1) # lost frames in info are 1-indexed
+
+T = TypeVar('T', np.floating, np.integer)
+
+def remove_lost_frame_times(frame_times: Iterable[T], lost_frame_idx: Container[int]) -> npt.NDArray[T]:
+    """
+    >>> remove_lost_frame_times([1., 2., 3., 4., 5.], [1, 3])
+    array([1., 3., 5.])
+    """
+    return np.array([t for idx, t in enumerate(frame_times) if idx not in lost_frame_idx])
+
+
+def get_video_file_paths(*paths: file_io.PathLike) -> tuple[upath.UPath, ...]:
+    if len(paths) == 1 and file_io.from_pathlike(paths[0]).is_dir():
+        upaths = tuple(file_io.from_pathlike(paths[0]).glob('*'))
+    else:
+        upaths = tuple(file_io.from_pathlike(p) for p in paths)
+    return tuple(
+            p
+            for p in upaths
+            if p.suffix in (".avi", ".mp4", ".zip")
+            and any(label in p.stem.lower() for label in ("eye", "face", "beh"))
+        )
+    
+def get_video_info_file_paths(*paths: file_io.PathLike) -> tuple[upath.UPath, ...]:
+    return tuple(
+            p.with_suffix(".json").with_stem(
+                p.stem.replace(".mp4", "").replace(".avi", "")
+            )
+            for p in get_video_file_paths(*paths)
+        )
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(
+        optionflags=(doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE)
+    )
