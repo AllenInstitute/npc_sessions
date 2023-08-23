@@ -67,6 +67,11 @@ class Electrodes(NWBContainerWithDF):
     records: tuple[npc_lims.Electrode, ...]
     add_to_nwb_method = "add_electrode"
 
+class Units(NWBContainerWithDF):
+    records: tuple[npc_lims.Units, ...]
+
+    def add_to_nwb(self, nwb:pynwb.NWBFile):
+        nwb.units = pynwb.misc.Units.from_dataframe(self.to_dataframe(), name='units')
 
 class Intervals(NWBContainerWithDF):
     """Pass `name`, `description` and `column_names_to_descriptions` as kwargs."""

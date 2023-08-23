@@ -523,6 +523,25 @@ class Session:
             )
         return trials
 
+    def get_units(self) -> tuple[nwb.Units, ...]:
+        records = npc_lims.NWBSqliteDBHub().get_records(npc_lims.Units, session_id=self.id)
+        if not records:
+            units_s3_path = npc_lims.get_units_file_from_s3(self.id)
+            if units_s3_path is None:
+                # TODO: DO SOMETHING TO GET UNITS - Right now, run spike nwb capsule, and register units as data asset
+                raw_data_asset = npc_lims.get_session_raw_data_asset(self.id)
+                sorted_data_asset = npc_lims.get_session_sorted_data_asset(self.id)
+                capsule_results = npc_lims.run_capsule_and_get_results('980c5218-abef-41d8-99ed-24798d42313b', 
+                                                                                 (raw_data_asset, sorted_data_asset)) # type: ignore
+                npc_lims.register_session_data_asset(self.id, capsule_results)
+                units_s3_path = npc_lims.get_units_file_from_s3(self.id)
+            else:
+                # TODO: GET UNITS AND INSERT INTO DB
+                units = None
+        
+        return records # type: ignore
+
+
     # state: MutableMapping[str | int, Any]
     # subject: MutableMapping[str, Any]
     # session: MutableMapping[str, Any]
