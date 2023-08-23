@@ -21,9 +21,10 @@ import io
 import itertools
 import json
 import operator
+import pathlib
 import re
 from collections.abc import Mapping
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
 import h5py
 import npc_lims
@@ -49,8 +50,12 @@ class Session:
     notes: str | None = None
     source_script: str | None = None
 
+    local_path: Optional[upath.UPath] = None
+    
     def __init__(self, session: str, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session))
+        if pathlib.Path(session).exists():
+            self.local_path = upath.UPath(session)
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -68,12 +73,16 @@ class Session:
 
     @property
     def is_sync(self) -> bool:
+        if self.local_path and self.get_sync_paths():
+            return True
         if self.info is None:
             return False
         return self.info.is_sync
 
     @property
     def is_ephys(self) -> bool:
+        if self.local_path and self.ephys_record_node_dirs:
+            return True
         if self.info is None:
             return False
         return self.info.is_ephys
@@ -132,8 +141,17 @@ class Session:
             set(functools.reduce(operator.add, self.epochs.df["tags"].to_list()))
         )
 
+    def get_raw_data_paths_from_local(self) -> tuple[upath.UPath, ...]:
+        if not self.local_path:
+            raise ValueError(f"{self.id} does not have a local path assigned yet")
+        ephys_paths = itertools.chain(self.local_path.glob('Record Node *'), self.local_path.glob('*/Record Node *')) 
+        root_level_paths = tuple(p for p in self.local_path.iterdir() if p.is_file())
+        return root_level_paths + tuple(set(ephys_paths))
+
     @functools.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
+        if self.local_path:
+            return self.get_raw_data_paths_from_local()
         if not self.is_ephys:
             raise ValueError(f"{self.id} is not a session with a raw ephys upload")
         return npc_lims.get_raw_data_paths_from_s3(self.id)
@@ -148,15 +166,22 @@ class Session:
     def sync_path(self) -> upath.UPath:
         if not self.is_sync:
             raise ValueError(f"{self.id} is not a session with sync data")
-        paths = tuple(
-            p
-            for p in self.raw_data_paths
-            if p.suffix in (".h5", ".sync")
-            and p.stem.startswith(f"{self.id.date.replace('-', '')}T")
-        )
+        paths = self.get_sync_paths()
         if not len(paths) == 1:
             raise ValueError(f"Expected 1 sync file, found {paths = }")
         return paths[0]
+    
+    @functools.cache
+    def get_sync_paths(self) -> tuple[upath.UPath, ...]:
+        return tuple(
+            p
+            for p in self.raw_data_paths
+            if p.suffix == ".sync"
+            or (
+                p.suffix in (".h5",) and
+                p.stem.startswith(f"{self.id.date.replace('-', '')}T")
+            )
+        )
 
     @functools.cached_property
     def raw_data_asset_id(self) -> str:
@@ -340,8 +365,6 @@ class Session:
 
     @property
     def ephys_record_node_dirs(self) -> tuple[upath.UPath, ...]:
-        if not self.is_ephys:
-            raise ValueError(f"{self.id} is not an ephys session")
         return tuple(
             p for p in self.raw_data_paths if re.match(r"^Record Node [0-9]+$", p.name)
         )
