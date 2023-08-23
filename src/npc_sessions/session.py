@@ -419,18 +419,31 @@ class Session:
     ) -> dict[str, dict[Literal["start", "rate"], int]]:
         return openephys.get_sync_messages_data(self.get_sync_messages_path())
 
-    @property
-    def ephys_settings_xml_path(self) -> upath.UPath:
+    @functools.cached_property
+    def ephys_experiment_dirs(self) -> tuple[upath.UPath, ...]:
+        return tuple(
+                p 
+                for record_node in self.ephys_record_node_dirs
+                for p in record_node.glob("experiment*")
+            )
+    
+    @functools.cached_property
+    def ephys_settings_xml_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
             raise ValueError(
                 f"{self.id} is not an ephys session (required for settings.xml)"
             )
-        settings_xml_path = npc_lims.get_settings_xml_path_from_s3(self.id)
-        if not settings_xml_path:
+        return tuple(record_node / 'settings.xml' for record_node in self.ephys_record_node_dirs)
+    
+    @property
+    def ephys_settings_xml_path(self) -> upath.UPath:
+        """Single settings.xml path, if applicable"""
+        if not self.ephys_settings_xml_paths:
             raise ValueError(
-                f"settings.xml not found for {self.id} on s3 - check status of raw upload"
+                f"settings.xml not found for {self.id} - check status of raw upload"
             )
-        return settings_xml_path
+        openephys.assert_xml_files_match(*self.ephys_settings_xml_paths)
+        return self.ephys_settings_xml_paths[0]
 
     @functools.cached_property
     def ephys_settings_xml_data(self) -> parse_settings_xml.SettingsXmlInfo:
