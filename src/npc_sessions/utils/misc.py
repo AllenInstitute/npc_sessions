@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import collections.abc
 import pathlib
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator
 from typing import Any, Literal
 
 import npc_session
@@ -50,13 +50,16 @@ def is_stim_file(
     return is_stim and is_correct
 
 
-def extract_video_file_name(path: str) -> Literal["eye", "face", "behavior"]:
+def extract_camera_name(path: str) -> Literal["eye", "face", "behavior"]:
     names: dict[str, Literal["eye", "face", "behavior"]] = {
         "eye": "eye",
         "face": "face",
         "beh": "behavior",
     }
-    return names[next(n for n in names if n in str(path).lower())]
+    try:
+        return names[next(n for n in names if n in str(path).lower())]
+    except StopIteration as exc:
+        raise ValueError(f"Could not extract camera name from {path}") from exc
 
 
 def check_array_indices(

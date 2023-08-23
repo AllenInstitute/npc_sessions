@@ -15,9 +15,9 @@ import numpy.typing as npt
 import upath
 import zarr
 
-import npc_sessions.tools.ephys_utils as ephys_utils
-import npc_sessions.tools.file_io as file_io
-import npc_sessions.tools.sync_dataset as sync_dataset
+import npc_sessions.utils.barcodes as barcodes
+import npc_sessions.utils.file_io as file_io
+import npc_sessions.utils.sync as sync
 
 logger = logging.getLogger(__name__)
 
@@ -224,7 +224,7 @@ def get_pxi_nidaq_device(recording_dir: Iterable[upath.UPath]) -> EphysTimingInf
 
 
 def get_ephys_timing_on_sync(
-    sync: upath.UPath | sync_dataset.SyncDataset,
+    sync_path_or_dataset: upath.UPath | sync.SyncDataset,
     recording_dirs: Iterable[upath.UPath] | None = None,
     devices: Iterable[EphysTimingInfoOnPXI] | None = None,
 ) -> Generator[EphysTimingInfoOnSync, None, None]:
@@ -244,12 +244,12 @@ def get_ephys_timing_on_sync(
     if not (recording_dirs or devices):
         raise ValueError("Must specify recording_dir or devices")
 
-    if not isinstance(sync, sync_dataset.SyncDataset):
-        sync = sync_dataset.SyncDataset(sync)
+    if not isinstance(sync_path_or_dataset, sync.SyncDataset):
+        sync_path_or_dataset = sync.SyncDataset(sync_path_or_dataset)
 
-    sync_barcode_times, sync_barcode_ids = ephys_utils.extract_barcodes_from_times(
-        on_times=sync.get_rising_edges("barcode_ephys", units="seconds"),
-        off_times=sync.get_falling_edges("barcode_ephys", units="seconds"),
+    sync_barcode_times, sync_barcode_ids = barcodes.extract_barcodes_from_times(
+        on_times=sync_path_or_dataset.get_rising_edges("barcode_ephys", units="seconds"),
+        off_times=sync_path_or_dataset.get_falling_edges("barcode_ephys", units="seconds"),
     )
     if devices and not isinstance(devices, Iterable):
         devices = (devices,)
@@ -265,14 +265,14 @@ def get_ephys_timing_on_sync(
         (
             ephys_barcode_times,
             ephys_barcode_ids,
-        ) = ephys_utils.extract_barcodes_from_times(
+        ) = barcodes.extract_barcodes_from_times(
             on_times=device.ttl_sample_numbers[device.ttl_states > 0]
             / device.sampling_rate,
             off_times=device.ttl_sample_numbers[device.ttl_states < 0]
             / device.sampling_rate,
         )
 
-        timeshift, sampling_rate, _ = ephys_utils.get_probe_time_offset(
+        timeshift, sampling_rate, _ = barcodes.get_probe_time_offset(
             master_times=sync_barcode_times,
             master_barcodes=sync_barcode_ids,
             probe_times=ephys_barcode_times,

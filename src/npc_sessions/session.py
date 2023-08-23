@@ -24,7 +24,7 @@ import operator
 import pathlib
 import re
 from collections.abc import Mapping
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 import h5py
 import npc_lims
@@ -35,9 +35,6 @@ import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
 import npc_sessions.nwb as nwb
-import npc_sessions.tools.openephys as openephys
-import npc_sessions.tools.parse_settings_xml as parse_settings_xml
-import npc_sessions.tools.sync_dataset as sync_dataset
 import npc_sessions.utils as utils
 
 
@@ -50,8 +47,8 @@ class Session:
     notes: str | None = None
     source_script: str | None = None
 
-    local_path: Optional[upath.UPath] = None
-    
+    local_path: upath.UPath | None = None
+
     def __init__(self, session: str, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session))
         if pathlib.Path(session).exists():
@@ -144,7 +141,7 @@ class Session:
     def get_raw_data_paths_from_local(self) -> tuple[upath.UPath, ...]:
         if not self.local_path:
             raise ValueError(f"{self.id} does not have a local path assigned yet")
-        ephys_paths = itertools.chain(self.local_path.glob('Record Node *'), self.local_path.glob('*/Record Node *')) 
+        ephys_paths = itertools.chain(self.local_path.glob('Record Node *'), self.local_path.glob('*/Record Node *'))
         root_level_paths = tuple(p for p in self.local_path.iterdir() if p.is_file())
         return root_level_paths + tuple(set(ephys_paths))
 
@@ -170,7 +167,7 @@ class Session:
         if not len(paths) == 1:
             raise ValueError(f"Expected 1 sync file, found {paths = }")
         return paths[0]
-    
+
     @functools.cache
     def get_sync_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
@@ -206,8 +203,8 @@ class Session:
         )
 
     @functools.cached_property
-    def sync_data(self) -> sync_dataset.SyncDataset:
-        return sync_dataset.SyncDataset(io.BytesIO(self.sync_path.read_bytes()))
+    def sync_data(self) ->utils.SyncDataset:
+        return utils.SyncDataset(io.BytesIO(self.sync_path.read_bytes()))
 
     @property
     def stim_path_root(self) -> upath.UPath:
@@ -276,21 +273,11 @@ class Session:
             raise ValueError(
                 f"{self.id} is not a session with sync data (required for video)"
             )
-        return tuple(
-            p
-            for p in self.raw_data_paths
-            if p.suffix in (".avi", ".mp4", ".zip")
-            and any(label in p.stem.lower() for label in ("eye", "face", "beh"))
-        )
+        return utils.get_video_file_paths(*self.raw_data_paths)
 
     @property
     def video_info_paths(self) -> tuple[upath.UPath, ...]:
-        return tuple(
-            p.with_suffix(".json").with_stem(
-                p.stem.replace(".mp4", "").replace(".avi", "")
-            )
-            for p in self.video_paths
-        )
+        return utils.get_video_info_file_paths(*self.raw_data_paths)
 
     @functools.cached_property
     def video_info_data(self) -> Mapping[str, Any]:
@@ -298,7 +285,7 @@ class Session:
             return json.loads(path.read_bytes())["RecordingReport"]
 
         return utils.LazyDict(
-            (utils.extract_video_file_name(path.stem), (recording_report, path))
+            (utils.extract_camera_name(path.stem), (recording_report, path))
             for path in self.video_info_paths
         )
 
@@ -307,10 +294,10 @@ class Session:
         return tuple(
             npc_lims.File(
                 session_id=self.id,
-                name=utils.extract_video_file_name(path.stem),
+                name=utils.extract_camera_name(path.stem),
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
-                    self.video_info_data[utils.extract_video_file_name(path.stem)][
+                    self.video_info_data[utils.extract_camera_name(path.stem)][
                         "TimeStart"
                     ]
                 ),
@@ -326,7 +313,7 @@ class Session:
         return tuple(
             npc_lims.File(
                 session_id=self.id,
-                name=utils.extract_video_file_name(path.stem),
+                name=utils.extract_camera_name(path.stem),
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
                     self.video_info_data[path.stem]["TimeStart"]
@@ -378,10 +365,10 @@ class Session:
         )
 
     @functools.cached_property
-    def ephys_timing_data(self) -> tuple[openephys.EphysTimingInfoOnSync, ...]:
+    def ephys_timing_data(self) -> tuple[utils.EphysTimingInfoOnSync, ...]:
         return tuple(
             itertools.chain(
-                openephys.get_ephys_timing_on_sync(
+               utils.get_ephys_timing_on_sync(
                     self.sync_data, self.ephys_recording_dirs
                 )
             )
@@ -411,22 +398,22 @@ class Session:
     def ephys_structure_oebin_data(
         self,
     ) -> dict[Literal["continuous", "events", "spikes"], list[dict[str, Any]]]:
-        return openephys.get_merged_oebin_file(self.ephys_structure_oebin_paths)
+        return utils.get_merged_oebin_file(self.ephys_structure_oebin_paths)
 
     @functools.cached_property
     def ephys_sync_messages_data(
         self,
     ) -> dict[str, dict[Literal["start", "rate"], int]]:
-        return openephys.get_sync_messages_data(self.get_sync_messages_path())
+        return utils.get_sync_messages_data(self.get_sync_messages_path())
 
     @functools.cached_property
     def ephys_experiment_dirs(self) -> tuple[upath.UPath, ...]:
         return tuple(
-                p 
+                p
                 for record_node in self.ephys_record_node_dirs
                 for p in record_node.glob("experiment*")
             )
-    
+
     @functools.cached_property
     def ephys_settings_xml_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
@@ -434,7 +421,7 @@ class Session:
                 f"{self.id} is not an ephys session (required for settings.xml)"
             )
         return tuple(record_node / 'settings.xml' for record_node in self.ephys_record_node_dirs)
-    
+
     @property
     def ephys_settings_xml_path(self) -> upath.UPath:
         """Single settings.xml path, if applicable"""
@@ -442,12 +429,12 @@ class Session:
             raise ValueError(
                 f"settings.xml not found for {self.id} - check status of raw upload"
             )
-        openephys.assert_xml_files_match(*self.ephys_settings_xml_paths)
+        utils.assert_xml_files_match(*self.ephys_settings_xml_paths)
         return self.ephys_settings_xml_paths[0]
 
     @functools.cached_property
-    def ephys_settings_xml_data(self) -> parse_settings_xml.SettingsXmlInfo:
-        return parse_settings_xml.settings_xml_info_from_path(
+    def ephys_settings_xml_data(self) ->utils.SettingsXmlInfo:
+        return utils.settings_xml_info_from_path(
             self.ephys_settings_xml_path
         )
 
@@ -567,14 +554,14 @@ class Session:
                 # TODO: DO SOMETHING TO GET UNITS - Right now, run spike nwb capsule, and register units as data asset
                 raw_data_asset = npc_lims.get_session_raw_data_asset(self.id)
                 sorted_data_asset = npc_lims.get_session_sorted_data_asset(self.id)
-                capsule_results = npc_lims.run_capsule_and_get_results('980c5218-abef-41d8-99ed-24798d42313b', 
+                capsule_results = npc_lims.run_capsule_and_get_results('980c5218-abef-41d8-99ed-24798d42313b',
                                                                                  (raw_data_asset, sorted_data_asset)) # type: ignore
                 npc_lims.register_session_data_asset(self.id, capsule_results)
                 units_s3_path = npc_lims.get_units_file_from_s3(self.id)
             else:
                 # TODO: GET UNITS AND INSERT INTO DB
-                units = None
-        
+                pass
+
         return records # type: ignore
 
 
@@ -585,8 +572,10 @@ class Session:
     # units: pl.DataFrame
 
 
-# x = Session('670248_2023-08-03').ephys_structure_oebin_data
-# x
+# x = Session(r'\\allen\programs\mindscope\workgroups\np-exp\1290510496_681446_20230816')
+# x.sync_data.plot_stim_offsets()
+# # x = Session('670248_2023-08-03')
+# x.sync_data.plot_diode_measured_sync_square_flips()
 
 if __name__ == "__main__":
     import doctest
