@@ -87,66 +87,6 @@ def check_array_indices(
     return indices
 
 
-def reshape_into_blocks(
-    indices: Sequence[float],
-    min_gap: int | float | None = None,
-) -> tuple[Sequence[float], ...]:
-    """
-    Find the large gaps in indices and split at each gap.
-
-    For example, if two blocks of stimuli were recorded in a single sync
-    file, there will be one larger-than normal gap in frame timestamps.
-
-    - default min gap threshold: median + 3 * std (won't work well for short seqs)
-
-    >>> reshape_into_blocks([0, 1, 2, 103, 104, 105], min_gap=100)
-    ([0, 1, 2], [103, 104, 105])
-
-    >>> reshape_into_blocks([0, 1, 2, 3])
-    ([0, 1, 2, 3],)
-    """
-    intervals = np.diff(indices)
-    long_interval_threshold = (
-        min_gap
-        if min_gap is not None
-        else (np.median(intervals) + 3 * np.std(intervals))
-    )
-
-    gaps_between_blocks = []
-    for interval_index, interval in zip(
-        intervals.argsort()[::-1], sorted(intervals)[::-1]
-    ):
-        if interval > long_interval_threshold:
-            # large interval found
-            gaps_between_blocks.append(interval_index + 1)
-        else:
-            break
-
-    if not gaps_between_blocks:
-        # a single block of timestamps
-        return (indices,)
-
-    # create blocks as intervals [start:end]
-    gaps_between_blocks.sort()
-    blocks = []
-    start = 0
-    for end in gaps_between_blocks:
-        blocks.append(indices[start:end])
-        start = end
-    # add end of last block
-    blocks.append(indices[start:])
-
-    # filter out blocks with a single sample (not a block)
-    blocks = [block for block in blocks if len(block) > 1]
-
-    # filter out blocks with long avg timstamp interval (a few, widely-spaced timestamps)
-    blocks = [
-        block for block in blocks if np.median(np.diff(block)) < long_interval_threshold
-    ]
-
-    return tuple(blocks)
-
-
 class LazyDict(collections.abc.Mapping):
     """Dict for postponed evaluation of functions and caching of results.
 
