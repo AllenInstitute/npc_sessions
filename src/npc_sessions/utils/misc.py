@@ -7,6 +7,7 @@ from typing import Any, Literal
 
 import npc_session
 import numpy as np
+import numpy.typing as npt
 import upath
 
 
@@ -62,17 +63,19 @@ def extract_camera_name(path: str) -> Literal["eye", "face", "behavior"]:
         raise ValueError(f"Could not extract camera name from {path}") from exc
 
 
-def check_array_indices(
+def to_array_of_indices(
     indices: int | float | Iterable[int | float],
-) -> Iterable[int | float]:
-    """Check indices can be safely converted from float to int (i.e. all
-    are integer values). Makes a single int/float index iterable.
+) -> npt.NDArray[np.int32]:
+    """Check indices can be safely converted from to int (i.e. all
+    floats are integer values), then do conversion.
+    
+    - also converts a single int/float to an array
 
-    >>> check_array_indices(1)
-    (1,)
-    >>> check_array_indices([1, 2, 3.0])
-    [1, 2, 3.0]
-    >>> check_array_indices([1, 2, 3.1])
+    >>> to_array_of_indices(1)
+    array([1])
+    >>> to_array_of_indices([1, 2, 3.0])
+    array([1, 2, 3])
+    >>> to_array_of_indices([1, 2, 3.1])
     Traceback (most recent call last):
     ...
     TypeError: Non-integer `float` used as an index
@@ -86,8 +89,8 @@ def check_array_indices(
             and not np.isnan(idx)
             and int(idx) != idx
         ):
-            raise TypeError("Non-integer `float` used as an index")
-    return indices
+            raise TypeError(f"Non-integer value {idx} cannot be used as an index")
+    return np.array(indices, dtype=np.int32)
 
 
 class LazyDict(collections.abc.Mapping):
