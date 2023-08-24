@@ -13,7 +13,7 @@ import io
 import logging
 import warnings
 from collections.abc import Iterable, Sequence
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 import h5py
 import numpy as np
@@ -25,7 +25,16 @@ if TYPE_CHECKING:
     import matplotlib.figure as fig
     import matplotlib.pyplot as plt
 
+import npc_sessions.utils as utils
+
 logger = logging.getLogger(__name__)
+
+SyncPathOrDataset: TypeAlias = utils.PathLike | h5py.File | 'SyncDataset'
+
+def get_sync_data(sync_path_or_data: SyncPathOrDataset) -> 'SyncDataset':
+    if isinstance(sync_path_or_data, SyncDataset):
+        return sync_path_or_data
+    return SyncDataset(sync_path_or_data)
 
 def get_bit(uint_array: npt.NDArray, bit: int) -> npt.NDArray[np.uint8]:
     """
@@ -98,7 +107,10 @@ class SyncDataset:
     DEPRECATED_KEYS: set[str] = set()
 
     def __init__(self, path) -> None:
-        self.dfile = self.load(path)
+        if isinstance(path, self.__class__):
+            self = path
+        else:
+            self.dfile = self.load(path)
         self._check_line_labels()
 
     def __repr__(self) -> str:
@@ -149,10 +161,13 @@ class SyncDataset:
             Path to hdf5 file.
 
         """
-        try:
-            self.dfile = h5py.File(path, "r")
-        except OSError:
-            self.dfile = h5py.File(io.BytesIO(upath.UPath(path).read_bytes()), "r")
+        if isinstance(path, h5py.File):
+            self.dfile = path
+        else:
+            try:
+                self.dfile = h5py.File(path, "r")
+            except OSError:
+                self.dfile = h5py.File(io.BytesIO(utils.from_pathlike(path).read_bytes()), "r")
         self.meta_data: dict[str, Any] = eval(self.dfile["meta"][()])
         self.line_labels: Sequence[str] = self.meta_data["line_labels"]
         self.times = self._process_times()
