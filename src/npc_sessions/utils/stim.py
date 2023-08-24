@@ -2,18 +2,25 @@ from __future__ import annotations
 
 import io
 import logging
+from multiprocessing import Value
 import pickle
 from collections.abc import Iterable
-from typing import Callable, NamedTuple, TypeAlias, Mapping, Any, Optional
+from typing import Callable, NamedTuple, TypeAlias, Mapping, Any, Optional, Literal
 
 import numba
 import numpy as np
 import numpy.typing as npt
 import upath
 import h5py
+import io
+import datetime
+import upath
+import warnings
+
+import h5py
+import npc_session
 
 import npc_sessions.utils as utils
-import npc_sessions.utils.sync as sync
 
 StimPathOrDataset: TypeAlias = utils.PathLike | h5py.File | Mapping
 
@@ -72,7 +79,7 @@ class StimRecording(NamedTuple):
 
 
 def get_frame_display_times(
-    stim_path: StimPathOrDataset, sync_file_or_dataset: sync.SyncPathOrDataset
+    stim_path: StimPathOrDataset, sync_file_or_dataset: utils.SyncPathOrDataset
 ) -> npt.NDArray[np.float64]:
     return np.array([])
     # TODO ethan working on it
@@ -130,7 +137,7 @@ def xcorr(
 
 def get_stim_latencies_from_nidaq_recording(
     *stim_files_or_datasets: StimPathOrDataset,
-    sync_file_or_dataset: sync.SyncPathOrDataset,
+    sync_file_or_dataset: utils.SyncPathOrDataset,
     recording_dirs: Iterable[upath.UPath],
     nidaq_device_name: str | None = None,
     correlation_method: Callable[
@@ -149,7 +156,7 @@ def get_stim_latencies_from_nidaq_recording(
 
     nidaq_timing: utils.EphysTimingInfoOnSync = next(
         utils.get_ephys_timing_on_sync(
-            sync_path_or_dataset=sync_file_or_dataset,
+            sync=sync_file_or_dataset,
             recording_dirs=recording_dirs,
             devices=(nidaq_device,),
         )
@@ -210,6 +217,120 @@ def get_stim_latencies_from_nidaq_recording(
         output[stim_file] = recordings
 
     return output
+
+
+def get_stim_frame_times(
+        *stim_paths: utils.StimPathOrDataset,
+        sync: utils.SyncPathOrDataset,
+        frame_time_type: Literal['display_time', 'vsync'] = 'display_time'
+    ) -> npt.NDArray[np.float64] | dict[utils.StimPathOrDataset, None | npt.NDArray[np.float64]]:
+    """
+    
+    - keys are the stim paths provided as inputs
+    
+    >>> bad_stim = 's3://aind-ephys-data/ecephys_670248_2023-08-02_11-30-53/behavior/DynamicRouting1_670248_20230802_120703.hdf5'
+    >>> good_stim_1 = 's3://aind-ephys-data/ecephys_670248_2023-08-02_11-30-53/behavior/Spontaneous_670248_20230802_114611.hdf5'
+    >>> good_stim_2 = 's3://aind-ephys-data/ecephys_670248_2023-08-02_11-30-53/behavior/SpontaneousRewards_670248_20230802_130736.hdf5'
+    >>> sync = 's3://aind-ephys-data/ecephys_670248_2023-08-02_11-30-53/behavior/20230802T113053.h5'
+    
+    Returns the frame times for each stim file based on start time and number
+    of frames - can be provided in any order:
+    >>> frame_times = get_stim_frame_times(good_stim_2, good_stim_1, sync=sync)
+    >>> len(frame_times[good_stim_1])
+    3600
+    Returns None if the stim file can't be opened, or it has no frames:
+    >>> frame_times = get_stim_frame_times(bad_stim, sync=sync)
+    >>> print(frame_times[bad_stim])
+    None
+    """    
+
+    #load sync file once
+    sync_data = utils.get_sync_data(sync)
+    #get vsync_times_in_blocks
+    if 'vsync' in frame_time_type:
+        frame_times_in_blocks = sync_data.vsync_times_in_blocks
+    #get frame_display_time_blocks
+    elif 'display' in frame_time_type:
+        frame_times_in_blocks = sync_data.frame_display_time_blocks
+    else:
+        raise ValueError(f'Unexpected value: {frame_time_type = }')
+    #get num frames in each block
+    n_frames_per_block = np.asarray([len(x) for x in frame_times_in_blocks])
+    #get first frame time in each block
+    first_frame_per_block = np.asarray([x[0] for x in frame_times_in_blocks])
+
+    stim_frame_times: dict[utils.StimPathOrDataset, None | npt.NDArray[np.float64]] = {}
+
+    exception: Optional[Exception] = None
+    #loop through stim files
+    for stim_path in stim_paths:
+        
+        #load each stim file once - may fail if file wasn't saved correctly
+        try:
+            stim_data = get_h5_stim_data(stim_path)
+        except OSError as exc:
+            stim_frame_times[stim_path] = None
+            exception = exc
+            logger.error(exception)
+            continue
+        
+        #get number of frames
+        n_stim_frames = get_total_stim_frames(stim_data)
+        if n_stim_frames == 0:
+            stim_frame_times[stim_path] = None
+            exception = ValueError(f'No frames found in {stim_path = }')
+            logger.error(exception)
+            continue
+            
+        #get first stimulus frame relative to sync start time
+        stim_start_time: datetime.datetime = get_stim_start_time(stim_data)
+        if abs((stim_start_time - sync_data.start_time).days > 0):
+            warnings.warn(f'Skipping {stim_path =}, sync data is from a different day: {stim_start_time = }, {sync_data.start_time = }')
+            continue
+        
+        #try to match to vsyncs by start time
+        stim_start_time_on_sync = (stim_start_time - sync_data.start_time).seconds
+        matching_block = np.argmin(abs(first_frame_per_block - stim_start_time_on_sync))
+        num_frames_match: bool = n_stim_frames == n_frames_per_block[matching_block]
+        if not num_frames_match:
+            frame_diff = n_stim_frames - n_frames_per_block[matching_block]
+            exception = IndexError(f'Closest match with {stim_path} has a mismatch of {frame_diff = } - returning None')
+            logger.error(exception)
+            stim_frame_times[stim_path] = None
+            continue
+        
+        stim_frame_times[stim_path] = frame_times_in_blocks[matching_block]
+
+    if len(stim_frame_times) == 1:
+        single_result = next(iter(stim_frame_times.values()))
+        if single_result is None:
+            if exception is None:
+                raise ValueError('No frames could be found for stim file')
+            raise exception
+        return single_result
+    return stim_frame_times
+
+
+def get_stim_start_time(stim_path_or_data: utils.PathLike | h5py.File) -> datetime.datetime:
+    """Absolute datetime of the first frame, according to the stim file"""
+    # TODO make compatible with pkl files
+    stim_data = get_h5_stim_data(stim_path_or_data)
+    #get stim start time & convert to datetime
+    return npc_session.DatetimeRecord(stim_data['startTime'][()].decode()).dt
+
+
+def get_total_stim_frames(stim_path_or_data: utils.PathLike | h5py.File) -> int:
+    # TODO make compatible with pkl files
+    stim_data = get_h5_stim_data(stim_path_or_data)
+    frame_intervals = stim_data['frameIntervals'][:]
+    if len(frame_intervals) == 0:
+        return 0
+    return len(frame_intervals) + 1
+
+def get_stim_duration(stim_path_or_data: utils.PathLike | h5py.File) -> float:
+    # TODO make compatible with pkl files
+    stim_data = get_h5_stim_data(stim_path_or_data)
+    return np.sum(stim_data['frameIntervals'][:])
 
 
 if __name__ == "__main__":
