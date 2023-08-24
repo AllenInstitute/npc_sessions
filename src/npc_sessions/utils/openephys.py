@@ -224,7 +224,7 @@ def get_pxi_nidaq_device(recording_dir: Iterable[upath.UPath]) -> EphysTimingInf
 
 
 def get_ephys_timing_on_sync(
-    sync_path_or_dataset: upath.UPath | sync.SyncDataset,
+    sync_path_or_dataset: sync.SyncPathOrDataset,
     recording_dirs: Iterable[upath.UPath] | None = None,
     devices: Iterable[EphysTimingInfoOnPXI] | None = None,
 ) -> Generator[EphysTimingInfoOnSync, None, None]:
@@ -244,8 +244,7 @@ def get_ephys_timing_on_sync(
     if not (recording_dirs or devices):
         raise ValueError("Must specify recording_dir or devices")
 
-    if not isinstance(sync_path_or_dataset, sync.SyncDataset):
-        sync_path_or_dataset = sync.SyncDataset(sync_path_or_dataset)
+    sync_path_or_dataset = sync.get_sync_data(sync_path_or_dataset)
 
     sync_barcode_times, sync_barcode_ids = barcodes.extract_barcodes_from_times(
         on_times=sync_path_or_dataset.get_rising_edges("barcode_ephys", units="seconds"),
