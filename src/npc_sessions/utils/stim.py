@@ -78,13 +78,6 @@ class StimRecording(NamedTuple):
         return self.onset_time_on_sync + self.presentation.duration
 
 
-def get_frame_display_times(
-    stim_path: StimPathOrDataset, sync_file_or_dataset: utils.SyncPathOrDataset
-) -> npt.NDArray[np.float64]:
-    return np.array([])
-    # TODO ethan working on it
-
-
 @numba.njit(parallel=True)
 def _xcorr(v, w, t) -> float:
     c = np.correlate(v, w)
@@ -137,7 +130,7 @@ def xcorr(
 
 def get_stim_latencies_from_nidaq_recording(
     *stim_files_or_datasets: StimPathOrDataset,
-    sync_file_or_dataset: utils.SyncPathOrDataset,
+    sync: utils.SyncPathOrDataset,
     recording_dirs: Iterable[upath.UPath],
     nidaq_device_name: str | None = None,
     correlation_method: Callable[
@@ -171,7 +164,7 @@ def get_stim_latencies_from_nidaq_recording(
     for stim_file in stim_files_or_datasets:
         stim = get_h5_stim_data(stim_file)
 
-        vsyncs = get_frame_display_times(stim_file, sync_file_or_dataset)
+        vsyncs = get_stim_frame_times(stim_file, sync=sync_file_or_dataset)
 
         num_trials = len((stim.get("trialEndFrame") or stim.get("trialSoundArray"))[:])
 
