@@ -849,7 +849,7 @@ class SyncDataset:
             # frames are grey then the first frame is a grey-to-black (falling)
             # transition
             falling = diode_falling_edges[diode_falling_edges > vsyncs[0]]
-            rising = diode_rising_edges[diode_rising_edges > falling[0]]
+            rising = diode_rising_edges[diode_rising_edges > vsyncs[0]]
             
             diode_flips = np.sort(np.concatenate((rising, falling)))
             
@@ -900,7 +900,7 @@ class SyncDataset:
             # estimate of actual transition time for each diode flip
             intervals = np.diff(diode_flips)
             interval_deviation = intervals - np.mean(intervals[1:-1]) # the two distributions are symmetric about the mean
-            # first interval length will 
+            # first interval length will set the alternating pattern
             sign = 1 if interval_deviation[1] < 0 else -1 
             for idx in range(1, len(diode_flips) - 1, 2):
                 # alternate on every short/long interval and expand/contract
