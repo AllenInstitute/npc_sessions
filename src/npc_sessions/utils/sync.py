@@ -871,7 +871,7 @@ class SyncDataset:
                 indices = short_interval_indices(diode_flips)
                 diode_flips = np.delete(diode_flips, slice(indices[0], indices[0] + 2))
             
-            if len(diode_flips) - len(vsyncs) == 1:
+            if len(diode_flips) - len(vsyncs) == 1 and len(diode_flips[diode_flips > vsyncs[-1]]) > 1:
                 # likely transition from last frame to grey
                 diode_flips = diode_flips[:-1]
             
