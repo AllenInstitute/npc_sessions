@@ -15,9 +15,7 @@ import numpy.typing as npt
 import upath
 import zarr
 
-import npc_sessions.utils.barcodes as barcodes
-import npc_sessions.utils.file_io as file_io
-import npc_sessions.utils.sync as sync
+import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
@@ -224,7 +222,7 @@ def get_pxi_nidaq_device(recording_dir: Iterable[upath.UPath]) -> EphysTimingInf
 
 
 def get_ephys_timing_on_sync(
-    sync_path_or_dataset: sync.SyncPathOrDataset,
+    sync: utils.SyncPathOrDataset,
     recording_dirs: Iterable[upath.UPath] | None = None,
     devices: Iterable[EphysTimingInfoOnPXI] | None = None,
 ) -> Generator[EphysTimingInfoOnSync, None, None]:
@@ -244,11 +242,11 @@ def get_ephys_timing_on_sync(
     if not (recording_dirs or devices):
         raise ValueError("Must specify recording_dir or devices")
 
-    sync_path_or_dataset = sync.get_sync_data(sync_path_or_dataset)
+    sync = utils.get_sync_data(sync)
 
-    sync_barcode_times, sync_barcode_ids = barcodes.extract_barcodes_from_times(
-        on_times=sync_path_or_dataset.get_rising_edges("barcode_ephys", units="seconds"),
-        off_times=sync_path_or_dataset.get_falling_edges("barcode_ephys", units="seconds"),
+    sync_barcode_times, sync_barcode_ids = utils.extract_barcodes_from_times(
+        on_times=sync.get_rising_edges("barcode_ephys", units="seconds"),
+        off_times=sync.get_falling_edges("barcode_ephys", units="seconds"),
     )
     if devices and not isinstance(devices, Iterable):
         devices = (devices,)
@@ -264,14 +262,14 @@ def get_ephys_timing_on_sync(
         (
             ephys_barcode_times,
             ephys_barcode_ids,
-        ) = barcodes.extract_barcodes_from_times(
+        ) = utils.extract_barcodes_from_times(
             on_times=device.ttl_sample_numbers[device.ttl_states > 0]
             / device.sampling_rate,
             off_times=device.ttl_sample_numbers[device.ttl_states < 0]
             / device.sampling_rate,
         )
 
-        timeshift, sampling_rate, _ = barcodes.get_probe_time_offset(
+        timeshift, sampling_rate, _ = utils.get_probe_time_offset(
             master_times=sync_barcode_times,
             master_barcodes=sync_barcode_ids,
             probe_times=ephys_barcode_times,
@@ -331,7 +329,7 @@ def is_valid_ephys_folder(
     if not is_new_ephys_folder(path):
         return False
     if (
-        min_size_gb is not None and file_io.dir_size(path) < min_size_gb * 1024**3
+        min_size_gb is not None and utils.dir_size(path) < min_size_gb * 1024**3
     ):  # GB
         return False
     return True
@@ -444,7 +442,7 @@ def get_raw_ephys_subfolders(
 
     if min_size_gb is not None:
         subfolders = {
-            _ for _ in subfolders if file_io.dir_size(_) < min_size_gb * 1024**3
+            _ for _ in subfolders if utils.dir_size(_) < min_size_gb * 1024**3
         }
 
     return tuple(sorted(subfolders, key=lambda s: str(s)))
@@ -474,7 +472,7 @@ def get_single_oebin_path(path: upath.UPath) -> upath.UPath:
         return oebin_paths[0]
 
     oebin_parents = (_.parent for _ in oebin_paths)
-    dir_sizes = tuple(file_io.dir_size(_) for _ in oebin_parents)
+    dir_sizes = tuple(utils.dir_size(_) for _ in oebin_parents)
     return oebin_paths[dir_sizes.index(max(dir_sizes))]
 
 
@@ -505,16 +503,16 @@ def assert_xml_files_match(*paths: upath.UPath) -> None:
         raise ValueError(f"Not all paths are XML files: {paths}")
     if not all(p.is_file() for p in paths):
         raise FileNotFoundError(f"Not all paths are files, or they do not exist: {paths}")
-    if not file_io.checksums_match(*paths):
+    if not utils.checksums_match(*paths):
         # if the files are the same size and were created within +/- 1 second
         # of each other, we'll assume they're the same
 
-        created_times = tuple(file_io.ctime(p) for p in paths)
+        created_times = tuple(utils.ctime(p) for p in paths)
         created_times_equal = all(
             created_times[0] - 1 <= t <= created_times[0] + 1 for t in created_times[1:]
         )
 
-        sizes = tuple(file_io.file_size(p) for p in paths)
+        sizes = tuple(utils.file_size(p) for p in paths)
         sizes_equal = all(s == sizes[0] for s in sizes[1:])
 
         if not (sizes_equal and created_times_equal):
@@ -522,7 +520,7 @@ def assert_xml_files_match(*paths: upath.UPath) -> None:
 
 
 def get_merged_oebin_file(
-    paths: Sequence[file_io.PathLike], exclude_probe_names: Sequence[str] | None = None
+    paths: Sequence[utils.PathLike], exclude_probe_names: Sequence[str] | None = None
 ) -> dict[Literal["continuous", "events", "spikes"], list[dict[str, Any]]]:
     """Merge two or more structure.oebin files into one.
 
@@ -533,7 +531,7 @@ def get_merged_oebin_file(
     """
     if not isinstance(paths, Iterable):
         paths = tuple(paths)
-    oebin_paths = tuple(file_io.from_pathlike(p) for p in paths)
+    oebin_paths = tuple(utils.from_pathlike(p) for p in paths)
     if len(oebin_paths) == 1:
         return read_oebin(oebin_paths[0])
 
@@ -577,9 +575,9 @@ def get_merged_oebin_file(
 
 
 def read_oebin(
-    path: file_io.PathLike,
+    path: utils.PathLike,
 ) -> dict[Literal["continuous", "events", "spikes"], list[dict[str, Any]]]:
-    return json.loads(file_io.from_pathlike(path).read_bytes())
+    return json.loads(utils.from_pathlike(path).read_bytes())
 
 
 if __name__ == "__main__":

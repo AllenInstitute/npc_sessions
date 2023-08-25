@@ -9,26 +9,24 @@ import numpy as np
 import numpy.typing as npt
 import upath
 
-import npc_sessions.utils.file_io as file_io
-import npc_sessions.utils.sync as sync
 import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
 
 def get_video_frame_times(
-    sync_path_or_dataset: file_io.PathLike | sync.SyncDataset,
-    *video_paths: file_io.PathLike,
+    sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
+    *video_paths: utils.PathLike,
 ) -> dict[upath.UPath, npt.NDArray[np.float64]]:
     """Returns number of frames on sync line for each video file (after
     subtracting lost frames).
-    
+
     If a single directory is passed, video files in that directory will be
     found. If multiple paths are passed, the video files will be filtered out.
-    
+
     - keys are video file paths
     - values are arrays of frame times in seconds
-    
+
     - if the number of frames in a video file doesn't match the number of frames
     returned here, just truncate the excess frames in the video file:
 
@@ -58,13 +56,13 @@ def get_video_frame_times(
 
 
 def get_cam_exposing_times_on_sync(
-    sync_path_or_dataset: file_io.PathLike | sync.SyncDataset,
+    sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
 ) -> dict[Literal['behavior', 'eye', 'face'], npt.NDArray[np.float64]]:
 
-    if isinstance(sync_path_or_dataset, sync.SyncDataset):
+    if isinstance(sync_path_or_dataset, utils.SyncDataset):
         sync_data = sync_path_or_dataset
     else:
-        sync_data = sync.SyncDataset(file_io.from_pathlike(sync_path_or_dataset))
+        sync_data = utils.SyncDataset(utils.from_pathlike(sync_path_or_dataset))
 
     frame_times = {}
     for line in (line for line in sync_data.line_labels if '_cam_exposing' in line):
@@ -73,13 +71,13 @@ def get_cam_exposing_times_on_sync(
     return frame_times
 
 
-def get_lost_frames_from_camera_info(info_path_or_dict: dict | file_io.PathLike) -> npt.NDArray[np.int32]:
+def get_lost_frames_from_camera_info(info_path_or_dict: dict | utils.PathLike) -> npt.NDArray[np.int32]:
     """
     >>> get_lost_frames_from_camera_info({'LostFrames': ['1-2,4-5,7']})
     array([0, 1, 3, 4, 6])
     """
     if not isinstance(info_path_or_dict, dict):
-        info = json.loads(file_io.from_pathlike(info_path_or_dict).read_bytes())
+        info = json.loads(utils.from_pathlike(info_path_or_dict).read_bytes())
     else:
         info = info_path_or_dict
 
@@ -114,19 +112,19 @@ def remove_lost_frame_times(frame_times: Iterable[T], lost_frame_idx: Container[
     return np.array([t for idx, t in enumerate(frame_times) if idx not in lost_frame_idx])
 
 
-def get_video_file_paths(*paths: file_io.PathLike) -> tuple[upath.UPath, ...]:
-    if len(paths) == 1 and file_io.from_pathlike(paths[0]).is_dir():
-        upaths = tuple(file_io.from_pathlike(paths[0]).glob('*'))
+def get_video_file_paths(*paths: utils.PathLike) -> tuple[upath.UPath, ...]:
+    if len(paths) == 1 and utils.from_pathlike(paths[0]).is_dir():
+        upaths = tuple(utils.from_pathlike(paths[0]).glob('*'))
     else:
-        upaths = tuple(file_io.from_pathlike(p) for p in paths)
+        upaths = tuple(utils.from_pathlike(p) for p in paths)
     return tuple(
             p
             for p in upaths
             if p.suffix in (".avi", ".mp4", ".zip")
             and any(label in p.stem.lower() for label in ("eye", "face", "beh"))
         )
-    
-def get_video_info_file_paths(*paths: file_io.PathLike) -> tuple[upath.UPath, ...]:
+
+def get_video_info_file_paths(*paths: utils.PathLike) -> tuple[upath.UPath, ...]:
     return tuple(
             p.with_suffix(".json").with_stem(
                 p.stem.replace(".mp4", "").replace(".avi", "")
