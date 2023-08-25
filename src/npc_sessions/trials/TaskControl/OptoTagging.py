@@ -23,7 +23,7 @@ class OptoTagging(TaskControl):
     
     _stim_onset_times: npt.NDArray[np.float64]
     """`[1 x num trials]` onset time of each opto stim relative to start of
-    sync, or nan if no stim."""
+    sync. There should be no nans: the times will be used as trial start_time."""
     _stim_offset_times: npt.NDArray[np.float64]
     
     @functools.cached_property
@@ -39,10 +39,7 @@ class OptoTagging(TaskControl):
     def stop_time(self) -> npt.NDArray[np.float64]:
         with contextlib.suppress(AttributeError):
             return self._stim_offset_times
-        return self.get_times(
-            self._frame_times,
-            self.start_time + self._hdf5['trialOptoDur'][:]
-            )
+        return self.start_time + self._hdf5['trialOptoDur'][:]
     
     @functools.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
