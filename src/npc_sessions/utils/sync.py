@@ -872,7 +872,8 @@ class SyncDataset:
                 diode_flips = np.delete(diode_flips, slice(indices[0], indices[0] + 2))
             
             if len(diode_flips) - len(vsyncs) == 1 and len(diode_flips[diode_flips > vsyncs[-1]]) > 1:
-                # likely transition from last frame to grey
+                # likely transition from last frame to grey screen results in
+                # extra diode flip: remove last flip
                 diode_flips = diode_flips[:-1]
             
             if round(np.mean(np.diff(diode_flips)), 1) == round(np.mean(np.diff(vsyncs)), 1):
@@ -889,6 +890,16 @@ class SyncDataset:
                     if len(diode_flips) > len(vsyncs):
                         logger.warning('Cutting excess diode flips at length of vsyncs')
                         diode_flips = diode_flips[:len(vsyncs)]
+                    
+                    elif len(vsyncs) - len(diode_flips) == 1:
+                        #TODO add extra checks for this case
+                        # transition from black to black on first frame results
+                        # in lost diode flip: create one at start based on
+                        # statistics of other intervals. Shouldn't have any
+                        # side-effects and the first frame likely contains nothing important
+                        logger.warning('Creating extra diode flip at start of stim block to account for black-to-black transition')
+                        avg_alternate_flip_interval = np.median(np.diff(diode_flips[1::2]))
+                        diode_flips = np.concatenate(([diode_flips[0] - avg_alternate_flip_interval], diode_flips))
                     else:
                         raise IndexError('Fewer diode flips than vsyncs: needs investigating')
             else:
