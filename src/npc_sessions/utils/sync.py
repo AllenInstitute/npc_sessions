@@ -733,6 +733,7 @@ class SyncDataset:
         >>> reshape_into_blocks([0, 1, 2, 3])
         ([0, 1, 2, 3],)
         """
+        indices = np.array(indices)
         intervals = np.diff(indices)
         long_interval_threshold = (
             min_gap
