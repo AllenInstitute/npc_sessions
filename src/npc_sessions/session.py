@@ -210,7 +210,7 @@ class Session:
     def stim_path_root(self) -> upath.UPath:
         return npc_lims.DR_DATA_REPO / str(self.id.subject)
 
-    @property
+    @functools.cached_property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
         def is_valid_stim_file(p) -> bool:
             return utils.is_stim_file(
@@ -218,7 +218,9 @@ class Session:
             )
 
         if self.is_ephys:
-            return tuple(p for p in self.raw_data_paths if is_valid_stim_file(p))
+            stim_paths = tuple(p for p in self.raw_data_paths if is_valid_stim_file(p))
+            if stim_paths:
+                return stim_paths
         return tuple(p for p in self.stim_path_root.iterdir() if is_valid_stim_file(p))
 
     @functools.cached_property
