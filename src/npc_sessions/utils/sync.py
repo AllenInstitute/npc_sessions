@@ -838,8 +838,8 @@ class SyncDataset:
         diode_falling_edges = self.get_falling_edges('stim_photodiode', units = 'seconds')
         assert abs(len(diode_rising_edges) - len(diode_falling_edges)) < 2
         
-        diode_rising_edges_in_blocks = self.reshape_into_blocks(diode_rising_edges)
-        diode_falling_edges_in_blocks = self.reshape_into_blocks(diode_falling_edges)
+        diode_rising_edges_in_blocks = self.reshape_into_blocks(diode_rising_edges, min_gap=1.0)
+        diode_falling_edges_in_blocks = self.reshape_into_blocks(diode_falling_edges, min_gap=1.0)
         
         frame_display_time_blocks: list[npt.NDArray[np.floating]] = []
         for block_idx, (vsyncs, rising, falling) in enumerate(zip(vsync_falling_edges_in_blocks, diode_rising_edges_in_blocks, diode_falling_edges_in_blocks)):
