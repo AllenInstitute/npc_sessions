@@ -828,7 +828,7 @@ class SyncDataset:
         
         return tuple(vsync_times_in_blocks)
     
-    @property
+    @functools.cached_property
     def frame_display_time_blocks(self) -> tuple[npt.NDArray[np.floating], ...]:
         """Blocks of adjusted diode times: one block per stimulus.
         """
