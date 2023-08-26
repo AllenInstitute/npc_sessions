@@ -164,8 +164,11 @@ def get_stim_latencies_from_nidaq_recording(
     for stim_file in stim_files_or_datasets:
         stim = get_h5_stim_data(stim_file)
 
-        vsyncs = get_stim_frame_times(stim_file, sync=sync)
-
+        vsyncs = get_stim_frame_times(stim, sync=sync, frame_time_type='vsync')[stim]
+        if vsyncs is None:
+            logger.warning(f"Skipping {stim_file} - no vsyncs found")
+            continue
+        
         num_trials = len((stim.get("trialEndFrame") or stim.get("trialSoundArray"))[:])
 
         trigger_frames: npt.NDArray[np.int16] = (
