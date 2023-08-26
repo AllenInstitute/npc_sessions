@@ -296,7 +296,7 @@ def get_stim_frame_times(
             continue
         
         stim_frame_times[stim_path] = frame_times_in_blocks[matching_block]
-    sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: 0 if stim_frame_times[x] is None else stim_frame_times[x][0])
+    sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: stim_frame_times[x][0] if stim_frame_times[x] is not None else 0) # type: ignore[index]
     return {k: stim_frame_times[k] for k in sorted_keys}
 
 
