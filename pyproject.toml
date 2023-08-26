@@ -185,6 +185,7 @@ warn_unused_ignores = true
 no_implicit_optional = true
 show_error_codes = true
 ignore_missing_imports = true
+implicit_reexport = false # imports won't be exported (which causes many "already defined" error in __init__ with wildcard import)
 
 [build-system]
 requires = [
