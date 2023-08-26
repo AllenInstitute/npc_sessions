@@ -102,9 +102,9 @@ def get_lost_frames_from_camera_info(info_path_or_dict: dict | utils.PathLike) -
 
     return np.subtract(lost_frames, 1) # lost frames in info are 1-indexed
 
-T = TypeVar('T', np.floating, np.integer)
+NumericT = TypeVar('NumericT', bound=np.generic, covariant=True)
 
-def remove_lost_frame_times(frame_times: Iterable[T], lost_frame_idx: Container[int]) -> npt.NDArray[T]:
+def remove_lost_frame_times(frame_times: Iterable[NumericT], lost_frame_idx: Container[int]) -> npt.NDArray[NumericT]:
     """
     >>> remove_lost_frame_times([1., 2., 3., 4., 5.], [1, 3])
     array([1., 3., 5.])
