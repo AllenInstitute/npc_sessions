@@ -121,7 +121,7 @@ def get_ephys_timing_on_pxi(
             try:
                 compressed = clipped_path_to_compressed(continuous)
             except ValueError:
-                logger.warning(f"No compressed data found for {continuous}")
+                logger.info(f"No compressed data found for {continuous}")
                 compressed = None
             yield EphysTimingInfoOnPXI(
                 name=device,
