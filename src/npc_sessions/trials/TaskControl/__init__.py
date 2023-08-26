@@ -74,8 +74,4 @@ class TaskControl(trials.PropertyDict):
             self._frame_times = utils.get_stim_frame_times(self._hdf5, sync=self._sync, frame_time_type='vsync')
             self._display_times = utils.get_stim_frame_times(self._hdf5, sync=self._sync, frame_time_type='display_time')
 
-    @staticmethod
-    def get_times(times: npt.NDArray[np.float64], frame_idx: int | float | Iterable[int | float]) -> npt.NDArray[np.float64]:
-        idx = utils.to_array_of_indices(frame_idx)
-        return np.where(np.isnan(idx), np.nan, times[idx])
 

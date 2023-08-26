@@ -3,7 +3,7 @@ from __future__ import annotations
 import collections.abc
 import pathlib
 from collections.abc import Iterable, Iterator
-from typing import Any, Literal
+from typing import Any, Literal, SupportsFloat
 
 import npc_session
 import numpy as np
@@ -62,35 +62,41 @@ def extract_camera_name(path: str) -> Literal["eye", "face", "behavior"]:
     except StopIteration as exc:
         raise ValueError(f"Could not extract camera name from {path}") from exc
 
-
-def to_array_of_indices(
-    indices: int | float | Iterable[int | float],
-) -> npt.NDArray[np.int32]:
-    """Check indices can be safely converted from to int (i.e. all
-    floats are integer values), then do conversion.
+def safe_index(array: npt.ArrayLike, indices: SupportsFloat | Iterable[SupportsFloat]) -> npt.NDArray:
+    """Checks `indices` can be safely used as array indices (i.e. all
+    numerical float values are integers), then indexes into `array` using `np.where`.
     
-    - also converts a single int/float to an array
-
-    >>> to_array_of_indices(1)
-    array([1])
-    >>> to_array_of_indices([1, 2, 3.0])
+    - returns nans where `indices` is nan
+    
+    Type of array is preserved, if possible:
+    >>> array_like = [1, 2, 3]
+    >>> safe_index(array_like, 0)
+    1
+    >>> safe_index(array_like, [0, 1, 2.0])
     array([1, 2, 3])
-    >>> to_array_of_indices([1, 2, 3.1])
-    Traceback (most recent call last):
-    ...
-    TypeError: Non-integer `float` used as an index
+    >>> safe_index(array_like, np.nan)
+    nan
+    
+    Type of array won't be preserved if any indices are nan:
+    >>> safe_index(array_like, [0, np.nan, 2.0])
+    array([ 1., nan,  3.])
     """
+    idx: npt.NDArray = np.array(indices) # copy
+    if not all(idx[~np.isnan(idx)] == idx[~np.isnan(idx)].astype(np.int32)):
+        raise TypeError(f"Non-integer numerical values cannot be used as indices: {idx[np.isnan(idx)][0]}")
+    array = np.array(array) # copy/make sure array can be fancy-indexed
+    int_idx = np.where(np.isnan(idx), -1, idx)
+    result = np.where(np.isnan(idx), np.nan, array[int_idx.astype(np.int32)])
+    # np.where casts indexed array to floats just because of the
+    # possibility of nans being in result, even if they aren't:
+    # cast back if appropriate
+    if not np.isnan(result).any():
+        result = result.astype(array.dtype)
+    # if indices was a scalar, return a scalar instead of a 0d array
     if not isinstance(indices, Iterable):
-        indices = (indices,)
-
-    for idx in indices:
-        if (
-            isinstance(idx, (float, np.floating))
-            and not np.isnan(idx)
-            and int(idx) != idx
-        ):
-            raise TypeError(f"Non-integer value {idx} cannot be used as an index")
-    return np.array(indices, dtype=np.int32)
+        assert result.size == 1
+        return type(indices)(result)     # type: ignore[call-arg]
+    return result
 
 
 class LazyDict(collections.abc.Mapping):

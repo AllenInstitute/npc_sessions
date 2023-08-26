@@ -30,7 +30,7 @@ class OptoTagging(TaskControl):
     def start_time(self) -> npt.NDArray[np.float64]:
         with contextlib.suppress(AttributeError):
             return self._stim_onset_times
-        return self.get_times(
+        return utils.safe_index(
             self._frame_times,
             self._hdf5['trialOptoOnsetFrame'][:]
             )
