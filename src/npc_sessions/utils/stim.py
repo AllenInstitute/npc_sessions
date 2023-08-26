@@ -216,7 +216,7 @@ def get_stim_frame_times(
         *stim_paths: utils.StimPathOrDataset,
         sync: utils.SyncPathOrDataset,
         frame_time_type: Literal['display_time', 'vsync'] = 'display_time'
-    ) -> npt.NDArray[np.float64] | dict[utils.StimPathOrDataset, None | npt.NDArray[np.float64]]:
+    ) -> dict[utils.StimPathOrDataset, None | npt.NDArray[np.float64]]:
     """
     
     - keys are the stim paths provided as inputs
@@ -295,13 +295,6 @@ def get_stim_frame_times(
         
         stim_frame_times[stim_path] = frame_times_in_blocks[matching_block]
 
-    if len(stim_frame_times) == 1:
-        single_result = next(iter(stim_frame_times.values()))
-        if single_result is None:
-            if exception is None:
-                raise ValueError('No frames could be found for stim file')
-            raise exception
-        return single_result
     return {k: stim_frame_times[k] for k in sorted(stim_frame_times.keys(), key=lambda x: stim_frame_times[x][0])}
 
 
