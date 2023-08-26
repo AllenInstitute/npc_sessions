@@ -230,7 +230,8 @@ def get_stim_frame_times(
     of frames - can be provided in any order:
     >>> frame_times = get_stim_frame_times(good_stim_2, good_stim_1, sync=sync)
     >>> len(frame_times[good_stim_1])
-    3600
+    36000
+    
     Returns None if the stim file can't be opened, or it has no frames:
     >>> frame_times = get_stim_frame_times(bad_stim, sync=sync)
     >>> print(frame_times[bad_stim])
