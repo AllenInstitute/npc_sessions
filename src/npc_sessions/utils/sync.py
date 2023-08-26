@@ -814,9 +814,7 @@ class SyncDataset:
         if any(stim_running_rising_edges) and any(stim_running_falling_edges):
             if stim_running_rising_edges[0] > stim_running_falling_edges[0]:
                 stim_running_falling_edges[1:]
-            assert len(stim_running_rising_edges) == len(vsync_times_in_blocks)
-            # TODO filter vsync blocks on stim running
-        
+            assert len(stim_running_rising_edges) == len(vsync_times_in_blocks)        
         return tuple(vsync_times_in_blocks)
     
     @functools.cached_property
@@ -856,10 +854,6 @@ class SyncDataset:
         frame_display_time_blocks: list[npt.NDArray[np.floating]] = []
         for block_idx, (vsyncs, rising, falling) in enumerate(zip(vsync_falling_edges_in_blocks, diode_rising_edges_in_blocks, diode_falling_edges_in_blocks)):
             
-            # diodeBox in Sam's TaskControl script is initially set to 1, but
-            # drawing the first frame inverts to -1, so assuming the pre-stim
-            # frames are grey then the first frame is a grey-to-black (falling)
-            # transition
             falling = diode_falling_edges[diode_falling_edges > vsyncs[0]]
             rising = diode_rising_edges[diode_rising_edges > vsyncs[0]]
             
