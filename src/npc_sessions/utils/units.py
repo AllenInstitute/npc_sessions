@@ -28,7 +28,7 @@ def get_units(session_id: str, method:str='kilosort_codeocean') -> tuple[nwb.Uni
                 run_capsules_for_units_kilosort_codeocean(session_id)
                 units_s3_path = npc_lims.get_units_file_from_s3(session_id)
         
-        if units_s3_path is not None:
+        if units_s3_path is not None: # TODO: change to polars
             units = pd.read_csv(units_s3_path, storage_options={'key': os.getenv('AWS_ACCESS_KEY_ID'),
                                                                 'secret': os.getenv('AWS_SECRET_ACCESS_KEY')})
             print()
