@@ -882,7 +882,7 @@ class SyncDataset:
                             np.diff(diode_flips[1::2])
                         )
                         diode_flips = np.concatenate(
-                            (diode_flips[0] - avg_alternate_flip_interval, diode_flips)
+                            (np.array([diode_flips[0] - avg_alternate_flip_interval]), diode_flips)
                         )
                     else:
                         raise IndexError(
