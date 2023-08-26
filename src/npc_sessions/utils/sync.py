@@ -840,7 +840,7 @@ class SyncDataset:
                         # side-effects and the first frame likely contains nothing important
                         logger.warning('Creating extra diode flip at start of stim block to account for black-to-black transition')
                         avg_alternate_flip_interval = np.median(np.diff(diode_flips[1::2]))
-                        diode_flips = np.concatenate(([diode_flips[0] - avg_alternate_flip_interval], diode_flips))
+                        diode_flips = np.concatenate((diode_flips[0] - avg_alternate_flip_interval, diode_flips))
                     else:
                         raise IndexError('Fewer diode flips than vsyncs: needs investigating')
             else:
