@@ -532,7 +532,7 @@ class SyncDataset:
         total_data_points = len(bit_data)
 
         # get the events
-        events = self.get_events_by_bit(bit)
+        events = self.get_events_by_bit(bit, units="samples")
         total_events = len(events)
 
         # get the rising edges
@@ -693,6 +693,7 @@ class SyncDataset:
         total_time = all_events[-1] - all_events[0]
         return 1.0 * total_high_time / total_time
 
+    @property
     def stats(self) -> list[dict[str, Any]]:
         """
         Quick-and-dirty analysis of all bits.  Prints a few things about each
@@ -700,7 +701,7 @@ class SyncDataset:
         """
         bits = []
         for i in range(32):
-            bits.append(self.line_stats(i, print_results=False))
+            bits.append(self.line_stats(i, print_results=True))
         active_bits = [x for x in bits if x is not None]
         logger.info("Active bits: ", len(active_bits))
         for bit in active_bits:
