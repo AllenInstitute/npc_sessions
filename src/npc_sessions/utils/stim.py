@@ -294,8 +294,8 @@ def get_stim_frame_times(
             continue
         
         stim_frame_times[stim_path] = frame_times_in_blocks[matching_block]
-
-    return {k: stim_frame_times[k] for k in sorted(stim_frame_times.keys(), key=lambda x: stim_frame_times[x][0])}
+    sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: 0 if stim_frame_times[x] is None else stim_frame_times[x][0])
+    return {k: stim_frame_times[k] for k in sorted_keys}
 
 
 def get_stim_start_time(stim_path_or_data: utils.PathLike | h5py.File) -> datetime.datetime:
