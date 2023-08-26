@@ -301,7 +301,7 @@ def get_stim_frame_times(
                 raise ValueError('No frames could be found for stim file')
             raise exception
         return single_result
-    return stim_frame_times
+    return {k: stim_frame_times[k] for k in sorted(stim_frame_times.keys(), key=lambda x: stim_frame_times[x][0])}
 
 
 def get_stim_start_time(stim_path_or_data: utils.PathLike | h5py.File) -> datetime.datetime:
