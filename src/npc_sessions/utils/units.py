@@ -5,16 +5,22 @@ import os
 
 def run_capsules_for_units_kilosort_codeocean(session_id: str) -> None:
     raw_data_asset = npc_lims.get_session_raw_data_asset(session_id)
+    if raw_data_asset is None:
+        raise ValueError(f"Session {session_id} has no raw data asset.") # TODO move to function in npc_lims
     sorted_data_asset = npc_lims.get_session_sorted_data_asset(session_id)
+    if sorted_data_asset is None:
+        raise ValueError(f"Session {session_id} has no sorted data asset.") # TODO move to function in npc_lims
     #capsule_results_units = npc_lims.run_capsule_and_get_results('980c5218-abef-41d8-99ed-24798d42313b',
                                                                         #(raw_data_asset, sorted_data_asset))
     #npc_lims.register_session_data_asset(self.id, capsule_results_units)
 
     units_no_peak_channel_asset = npc_lims.get_session_units_data_asset(session_id)
+    if units_no_peak_channel_asset is None:
+        raise ValueError(f"Session {session_id} has no peak_channel data asset.") # TODO move to function in npc_lims
 
     capsule_result_units_peak_channels = npc_lims.run_capsule_and_get_results('d1a5c3a8-8fb2-4cb0-8e9e-96e6e1d03ff1',
                                                                                 (raw_data_asset, sorted_data_asset, 
-                                                                                units_no_peak_channel_asset)) # type: ignore[arg-type]
+                                                                                units_no_peak_channel_asset)) 
     npc_lims.register_session_data_asset(session_id, capsule_result_units_peak_channels)
     
 def get_units(session_id: str, method:str='kilosort_codeocean') -> tuple[nwb.Units, ...]:
