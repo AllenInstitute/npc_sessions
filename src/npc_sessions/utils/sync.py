@@ -829,6 +829,27 @@ class SyncDataset:
         return tuple(vsync_times_in_blocks)
     
     @functools.cached_property
+    def expected_diode_flip_rate(self) -> int:
+        """Best-guess at what the diode flip period should be, e.g. 1 s for
+        MPE/pipeline recordings, 1/60 s for Sam's TaskControl scripts."""
+        med = np.median(np.diff(self.get_edges('all', 'stim_photodiode', units = 'seconds')))
+        diode_assymmetry = 0.05 #s
+        for period in (1/60, 1):
+            if .9 * period - diode_assymmetry < med < 1.1 * period + diode_assymmetry:
+                return int(1/period)
+        raise ValueError(f'Unexpected diode flip period: {med} sec')
+    
+    @functools.cached_property
+    def expected_frame_display_rate(self) -> int:
+        """Best-guess at what the screen display rate should be. Currently
+        [2023] should only be 60 fps."""
+        med = np.median(np.diff(self.get_falling_edges('vsync_stim', units = 'seconds')))
+        for period in (1/60, 1/120, 1/144, 1/300):
+            if .9 * period < med < 1.1 * period:
+                return int(1 / period)
+        raise ValueError(f'Unexpected vsync period: {med} sec')
+    
+    @functools.cached_property
     def frame_display_time_blocks(self) -> tuple[npt.NDArray[np.floating], ...]:
         """Blocks of adjusted diode times: one block per stimulus.
         """
@@ -1170,14 +1191,8 @@ class SyncDataset:
         all_diode_flips = np.concatenate([self.get_rising_edges('stim_photodiode', units='seconds'), self.get_falling_edges('stim_photodiode', units='seconds')])
         all_vsyncs = self.get_falling_edges('vsync_stim', units='seconds')
         
-        frequency = 2 / np.median(np.diff(all_diode_flips))
-        expected_period: float
-        if 0.95 < frequency < 1.05:
-            expected_period = 1.0
-        elif 59 < frequency < 61:
-            expected_period = 1/60
-        else:
-            raise ValueError(f'Diode-flip frequency outside expected range: {frequency = }')
+        frequency = self.expected_diode_flip_rate
+        expected_period = 1 / frequency
         
         # get the intervals in parts (one for each stimulus)
         diode_flips_per_stim = []
