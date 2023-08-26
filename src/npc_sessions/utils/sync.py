@@ -714,67 +714,6 @@ class SyncDataset:
         logger.info("*" * 70)
         return active_bits
 
-    @staticmethod
-    def reshape_into_blocks(
-        indices: Sequence[float] | npt.NDArray[np.floating],
-        min_gap: int | float | None = None,
-    ) -> tuple[npt.NDArray[np.floating], ...]:
-        """
-        Find the large gaps in indices and split at each gap.
-
-        For example, if two blocks of stimuli were recorded in a single sync
-        file, there will be one larger-than normal gap in frame timestamps.
-
-        - default min gap threshold: median + 3 * std (won't work well for short seqs)
-
-        >>> reshape_into_blocks([0, 1, 2, 103, 104, 105], min_gap=100)
-        ([0, 1, 2], [103, 104, 105])
-
-        >>> reshape_into_blocks([0, 1, 2, 3])
-        ([0, 1, 2, 3],)
-        """
-        indices = np.array(indices)
-        intervals = np.diff(indices)
-        long_interval_threshold = (
-            min_gap
-            if min_gap is not None
-            else (np.median(intervals) + 3 * np.std(intervals))
-        )
-
-        gaps_between_blocks = []
-        for interval_index, interval in zip(
-            intervals.argsort()[::-1], sorted(intervals)[::-1]
-        ):
-            if interval > long_interval_threshold:
-                # large interval found
-                gaps_between_blocks.append(interval_index + 1)
-            else:
-                break
-
-        if not gaps_between_blocks:
-            # a single block of timestamps
-            return (np.array(indices),)
-
-        # create blocks as intervals [start:end]
-        gaps_between_blocks.sort()
-        blocks = []
-        start = 0
-        for end in gaps_between_blocks:
-            blocks.append(indices[start:end])
-            start = end
-        # add end of last block
-        blocks.append(indices[start:])
-
-        # filter out blocks with a single sample (not a block)
-        blocks = [block for block in blocks if len(block) > 1]
-
-        # filter out blocks with long avg timstamp interval (a few, widely-spaced timestamps)
-        blocks = [
-            block for block in blocks if np.median(np.diff(block)) < long_interval_threshold
-        ]
-
-        return tuple(blocks)
-
     @property
     def start_time(self) -> datetime.datetime:
         return datetime.datetime.fromisoformat(self.meta_data['start_time'])
@@ -791,8 +730,8 @@ class SyncDataset:
             
         vsync_times_in_blocks = [] 
         for rising, falling in zip(
-            self.reshape_into_blocks(vsync_rising_edges, min_gap=1.0), 
-            self.reshape_into_blocks(vsync_falling_edges, min_gap=1.0),
+            reshape_into_blocks(vsync_rising_edges, min_gap=1.0), 
+            reshape_into_blocks(vsync_falling_edges, min_gap=1.0),
             ):
             
             long_interval_threshold = np.median(np.diff(falling)) + 3 * np.std(np.diff(falling))
@@ -848,8 +787,8 @@ class SyncDataset:
         diode_falling_edges = self.get_falling_edges('stim_photodiode', units = 'seconds')
         assert abs(len(diode_rising_edges) - len(diode_falling_edges)) < 2
         
-        diode_rising_edges_in_blocks = self.reshape_into_blocks(diode_rising_edges, min_gap=1.0)
-        diode_falling_edges_in_blocks = self.reshape_into_blocks(diode_falling_edges, min_gap=1.0)
+        diode_rising_edges_in_blocks = reshape_into_blocks(diode_rising_edges, min_gap=1.0)
+        diode_falling_edges_in_blocks = reshape_into_blocks(diode_falling_edges, min_gap=1.0)
         
         frame_display_time_blocks: list[npt.NDArray[np.floating]] = []
         for block_idx, (vsyncs, rising, falling) in enumerate(zip(vsync_falling_edges_in_blocks, diode_rising_edges_in_blocks, diode_falling_edges_in_blocks)):
@@ -1253,6 +1192,66 @@ class SyncDataset:
         Exit statement for context manager.
         """
         self.close()
+
+def reshape_into_blocks(
+    indices: Sequence[float] | npt.NDArray[np.floating],
+    min_gap: int | float | None = None,
+) -> tuple[npt.NDArray[np.floating], ...]:
+    """
+    Find the large gaps in indices and split at each gap.
+
+    For example, if two blocks of stimuli were recorded in a single sync
+    file, there will be one larger-than normal gap in frame timestamps.
+
+    - default min gap threshold: median + 3 * std (won't work well for short seqs)
+
+    >>> reshape_into_blocks([0, 1, 2, 103, 104, 105], min_gap=100)
+    (array([0, 1, 2]), array([103, 104, 105]))
+
+    >>> reshape_into_blocks([0, 1, 2, 3])
+    (array([0, 1, 2, 3]),)
+    """
+    indices = np.array(indices)
+    intervals = np.diff(indices)
+    long_interval_threshold = (
+        min_gap
+        if min_gap is not None
+        else (np.median(intervals) + 3 * np.std(intervals))
+    )
+
+    gaps_between_blocks = []
+    for interval_index, interval in zip(
+        intervals.argsort()[::-1], sorted(intervals)[::-1]
+    ):
+        if interval > long_interval_threshold:
+            # large interval found
+            gaps_between_blocks.append(interval_index + 1)
+        else:
+            break
+
+    if not gaps_between_blocks:
+        # a single block of timestamps
+        return (np.array(indices),)
+
+    # create blocks as intervals [start:end]
+    gaps_between_blocks.sort()
+    blocks = []
+    start = 0
+    for end in gaps_between_blocks:
+        blocks.append(indices[start:end])
+        start = end
+    # add end of last block
+    blocks.append(indices[start:])
+
+    # filter out blocks with a single sample (not a block)
+    blocks = [block for block in blocks if len(block) > 1]
+
+    # filter out blocks with long avg timstamp interval (a few, widely-spaced timestamps)
+    blocks = [
+        block for block in blocks if np.median(np.diff(block)) < long_interval_threshold
+    ]
+
+    return tuple(blocks)
 
 
 if __name__ == "__main__":
