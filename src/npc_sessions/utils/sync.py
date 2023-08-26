@@ -909,15 +909,23 @@ class SyncDataset:
             # diode flip intervals have a bimodal distribution due to asymmetry of
             # photodiode thresholding: adjust every other interval to get a closer
             # estimate of actual transition time for each diode flip
-            intervals = np.diff(diode_flips)
-            interval_deviation = intervals - np.mean(intervals[1:-1]) # the two distributions are symmetric about the mean
-            # first interval length will set the alternating pattern
-            sign = 1 if interval_deviation[1] < 0 else -1 
+            original_intervals = np.diff(diode_flips)
+            outliers = np.logical_or(np.percentile(original_intervals, 5) > original_intervals, original_intervals > np.percentile(original_intervals, 95))
+            intervals = original_intervals[~outliers]
+
+            # the two distributions are symmetric about the mean
+            deviation = np.mean(np.abs(intervals - np.mean(intervals)))
+            if np.mean(original_intervals[0::2]) > np.mean(original_intervals[1::2]):
+                sign = 1
+            else:
+                sign = -1
+
             for idx in range(1, len(diode_flips) - 1, 2):
                 # alternate on every short/long interval and expand/contract
                 # interval
-                diode_flips[idx] -= sign * 0.5 * interval_deviation[idx]
-                diode_flips[idx + 1] += sign * 0.5 * interval_deviation[idx]
+                diode_flips[idx] -= sign * .5 * deviation
+                diode_flips[idx + 1] += sign * .5 *deviation
+
                 
             AVERAGE_SCREEN_REFRESH_TIME = 0.008
             """Screen refreshes in stages top-to-bottom, total 16 ms measured by
