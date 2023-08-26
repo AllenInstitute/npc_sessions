@@ -149,7 +149,7 @@ def get_stim_latencies_from_nidaq_recording(
 
     nidaq_timing: utils.EphysTimingInfoOnSync = next(
         utils.get_ephys_timing_on_sync(
-            sync=sync_file_or_dataset,
+            sync=sync,
             recording_dirs=recording_dirs,
             devices=(nidaq_device,),
         )
@@ -164,7 +164,7 @@ def get_stim_latencies_from_nidaq_recording(
     for stim_file in stim_files_or_datasets:
         stim = get_h5_stim_data(stim_file)
 
-        vsyncs = get_stim_frame_times(stim_file, sync=sync_file_or_dataset)
+        vsyncs = get_stim_frame_times(stim_file, sync=sync)
 
         num_trials = len((stim.get("trialEndFrame") or stim.get("trialSoundArray"))[:])
 
