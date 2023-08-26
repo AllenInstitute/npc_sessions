@@ -381,9 +381,8 @@ class SyncDataset:
         elif kind == "rising":
             fn = self.get_rising_edges
         elif kind == "all":
-            rising = (self.get_edges("rising", keys, units),)
+            rising = self.get_edges("rising", keys, units)
             falling = self.get_edges("falling", keys, units)
-            assert rising and falling
             return np.sort(np.concatenate([rising, falling]))
 
         if isinstance(keys, str):
