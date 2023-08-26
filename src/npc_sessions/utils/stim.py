@@ -179,14 +179,13 @@ def get_stim_latencies_from_nidaq_recording(
         for idx, waveform in enumerate(waveforms):
             if not any(waveform):
                 continue
-
-            trigger_time_on_sync = float(vsyncs[trigger_frames[idx]])
+            trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
             trigger_time_on_pxi_nidaq = trigger_time_on_sync - nidaq_timing.start_time
             duration = len(waveform) / waveform_rate
-            onset_sample_on_pxi_nidaq = int(
+            onset_sample_on_pxi_nidaq = round(
                 trigger_time_on_pxi_nidaq * nidaq_timing.sampling_rate
             )
-            offset_sample_on_pxi_nidaq = int(
+            offset_sample_on_pxi_nidaq = round(
                 (trigger_time_on_pxi_nidaq + duration) * nidaq_timing.sampling_rate
             )
             # padding should be done by correlation method, when reading data
