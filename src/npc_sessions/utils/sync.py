@@ -796,15 +796,6 @@ class SyncDataset:
             self.reshape_into_blocks(vsync_falling_edges, min_gap=1.0),
             ):
             
-            # short_interval_threshold = 0.1 * 1/60 # at 60 fps we should never have vsync intervals this small: consider them anomalous
-            # rise_fall_intervals = falling - rising
-            # while any(rise_fall_intervals < short_interval_threshold):
-            #     idx = np.argmin(rise_fall_intervals)
-            #     logger.info(f'Removing anomalous vsync rise-fall event at t = [{rising[idx]}, {falling[idx]}] sec')
-            #     rising = np.delete(rising, idx)
-            #     falling = np.delete(falling, idx)
-            #     rise_fall_intervals = falling - rising
-                
             long_interval_threshold = np.median(np.diff(falling)) + 3 * np.std(np.diff(falling))
             while np.diff(falling)[0] > long_interval_threshold:
                 logger.debug('Removing anomalous vsync interval at start of block')
