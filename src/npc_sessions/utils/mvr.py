@@ -42,7 +42,9 @@ def get_video_frame_times(
     """
     videos = get_video_file_paths(*video_paths)
     jsons = get_video_info_file_paths(*video_paths)
-    camera_to_video_path = {utils.extract_camera_name(path.stem): path for path in videos}
+    camera_to_video_path = {
+        utils.extract_camera_name(path.stem): path for path in videos
+    }
     camera_to_json_path = {utils.extract_camera_name(path.stem): path for path in jsons}
     camera_exposing_times = get_cam_exposing_times_on_sync(sync_path_or_dataset)
     frame_times = {}
@@ -57,21 +59,22 @@ def get_video_frame_times(
 
 def get_cam_exposing_times_on_sync(
     sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
-) -> dict[Literal['behavior', 'eye', 'face'], npt.NDArray[np.float64]]:
-
+) -> dict[Literal["behavior", "eye", "face"], npt.NDArray[np.float64]]:
     if isinstance(sync_path_or_dataset, utils.SyncDataset):
         sync_data = sync_path_or_dataset
     else:
         sync_data = utils.SyncDataset(utils.from_pathlike(sync_path_or_dataset))
 
     frame_times = {}
-    for line in (line for line in sync_data.line_labels if '_cam_exposing' in line):
+    for line in (line for line in sync_data.line_labels if "_cam_exposing" in line):
         camera_name = utils.extract_camera_name(line)
-        frame_times[camera_name] = sync_data.get_rising_edges(line, units='seconds')
+        frame_times[camera_name] = sync_data.get_rising_edges(line, units="seconds")
     return frame_times
 
 
-def get_lost_frames_from_camera_info(info_path_or_dict: dict | utils.PathLike) -> npt.NDArray[np.int32]:
+def get_lost_frames_from_camera_info(
+    info_path_or_dict: dict | utils.PathLike,
+) -> npt.NDArray[np.int32]:
     """
     >>> get_lost_frames_from_camera_info({'LostFrames': ['1-2,4-5,7']})
     array([0, 1, 3, 4, 6])
@@ -81,56 +84,58 @@ def get_lost_frames_from_camera_info(info_path_or_dict: dict | utils.PathLike) -
     else:
         info = info_path_or_dict
 
-    if 'RecordingReport' in info:
-        info = info['RecordingReport']
+    if "RecordingReport" in info:
+        info = info["RecordingReport"]
 
-    if info.get('FramesLostCount') == 0:
+    if info.get("FramesLostCount") == 0:
         return np.array([])
 
-    lost_frame_spans: list[str] = info['LostFrames'][0].split(',')
+    lost_frame_spans: list[str] = info["LostFrames"][0].split(",")
 
     lost_frames = []
     for span in lost_frame_spans:
-
-        start_end = span.split('-')
+        start_end = span.split("-")
         if len(start_end) == 1:
             lost_frames.append(int(start_end[0]))
         else:
-            lost_frames.extend(
-                np.arange(int(start_end[0]), int(start_end[1]) + 1)
-            )
+            lost_frames.extend(np.arange(int(start_end[0]), int(start_end[1]) + 1))
 
-    return np.subtract(lost_frames, 1) # lost frames in info are 1-indexed
+    return np.subtract(lost_frames, 1)  # lost frames in info are 1-indexed
 
-NumericT = TypeVar('NumericT', bound=np.generic, covariant=True)
 
-def remove_lost_frame_times(frame_times: Iterable[NumericT], lost_frame_idx: Container[int]) -> npt.NDArray[NumericT]:
+NumericT = TypeVar("NumericT", bound=np.generic, covariant=True)
+
+
+def remove_lost_frame_times(
+    frame_times: Iterable[NumericT], lost_frame_idx: Container[int]
+) -> npt.NDArray[NumericT]:
     """
     >>> remove_lost_frame_times([1., 2., 3., 4., 5.], [1, 3])
     array([1., 3., 5.])
     """
-    return np.array([t for idx, t in enumerate(frame_times) if idx not in lost_frame_idx])
+    return np.array(
+        [t for idx, t in enumerate(frame_times) if idx not in lost_frame_idx]
+    )
 
 
 def get_video_file_paths(*paths: utils.PathLike) -> tuple[upath.UPath, ...]:
     if len(paths) == 1 and utils.from_pathlike(paths[0]).is_dir():
-        upaths = tuple(utils.from_pathlike(paths[0]).glob('*'))
+        upaths = tuple(utils.from_pathlike(paths[0]).glob("*"))
     else:
         upaths = tuple(utils.from_pathlike(p) for p in paths)
     return tuple(
-            p
-            for p in upaths
-            if p.suffix in (".avi", ".mp4", ".zip")
-            and any(label in p.stem.lower() for label in ("eye", "face", "beh"))
-        )
+        p
+        for p in upaths
+        if p.suffix in (".avi", ".mp4", ".zip")
+        and any(label in p.stem.lower() for label in ("eye", "face", "beh"))
+    )
+
 
 def get_video_info_file_paths(*paths: utils.PathLike) -> tuple[upath.UPath, ...]:
     return tuple(
-            p.with_suffix(".json").with_stem(
-                p.stem.replace(".mp4", "").replace(".avi", "")
-            )
-            for p in get_video_file_paths(*paths)
-        )
+        p.with_suffix(".json").with_stem(p.stem.replace(".mp4", "").replace(".avi", ""))
+        for p in get_video_file_paths(*paths)
+    )
 
 
 if __name__ == "__main__":

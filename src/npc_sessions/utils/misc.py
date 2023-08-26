@@ -62,13 +62,16 @@ def extract_camera_name(path: str) -> Literal["eye", "face", "behavior"]:
     except StopIteration as exc:
         raise ValueError(f"Could not extract camera name from {path}") from exc
 
-def safe_index(array: npt.ArrayLike, indices: SupportsFloat | Iterable[SupportsFloat]) -> npt.NDArray:
+
+def safe_index(
+    array: npt.ArrayLike, indices: SupportsFloat | Iterable[SupportsFloat]
+) -> npt.NDArray:
     """Checks `indices` can be safely used as array indices (i.e. all
     numerical float values are integers), then indexes into `array` using `np.where`.
-    
+
     - returns nans where `indices` is nan
     - returns a scalar if `indices` is a scalar #TODO current type annotation is insufficient
-    
+
     Type of array is preserved, if possible:
     >>> array_like = [1, 2, 3]
     >>> safe_index(array_like, 0)
@@ -77,15 +80,17 @@ def safe_index(array: npt.ArrayLike, indices: SupportsFloat | Iterable[SupportsF
     array([1, 2, 3])
     >>> safe_index(array_like, np.nan)
     nan
-    
+
     Type of array won't be preserved if any indices are nan:
     >>> safe_index(array_like, [0, np.nan, 2.0])
     array([ 1., nan,  3.])
     """
-    idx: npt.NDArray = np.array(indices) # copy
+    idx: npt.NDArray = np.array(indices)  # copy
     if not all(idx[~np.isnan(idx)] == idx[~np.isnan(idx)].astype(np.int32)):
-        raise TypeError(f"Non-integer numerical values cannot be used as indices: {idx[np.isnan(idx)][0]}")
-    array = np.array(array) # copy/make sure array can be fancy-indexed
+        raise TypeError(
+            f"Non-integer numerical values cannot be used as indices: {idx[np.isnan(idx)][0]}"
+        )
+    array = np.array(array)  # copy/make sure array can be fancy-indexed
     int_idx = np.where(np.isnan(idx), -1, idx)
     result = np.where(np.isnan(idx), np.nan, array[int_idx.astype(np.int32)])
     # np.where casts indexed array to floats just because of the
@@ -96,7 +101,7 @@ def safe_index(array: npt.ArrayLike, indices: SupportsFloat | Iterable[SupportsF
     # if indices was a scalar, return a scalar instead of a 0d array
     if not isinstance(indices, Iterable):
         assert result.size == 1
-        return type(indices)(result)     # type: ignore[call-arg, return-value]
+        return type(indices)(result)  # type: ignore[call-arg, return-value]
     return result
 
 

@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 EXCLUDE_IF_ONLY_NANS = False
 """If True, exclude columns with all NaN values from the resulting dict."""
 
+
 class PropertyDict(collections.abc.Mapping):
     """Dict type, where the keys are the class's properties (regular attributes
     and property getters) which don't have a leading underscore, and values are
@@ -33,13 +34,27 @@ class PropertyDict(collections.abc.Mapping):
     def _properties(self) -> tuple[str, ...]:
         """Names of properties without leading underscores. No methods.
         Excludes properties with all NaN values."""
-        self_and_super_attrs = tuple(attr for cls in reversed(self.__class__.__mro__) for attr in cls.__dict__.keys())
+        self_and_super_attrs = tuple(
+            attr
+            for cls in reversed(self.__class__.__mro__)
+            for attr in cls.__dict__.keys()
+        )
         dict_attrs = collections.abc.Mapping.__dict__.keys()
-        no_dict_attrs = tuple(attr for attr in self_and_super_attrs if attr not in dict_attrs)
-        no_leading_underscore = tuple(attr for attr in no_dict_attrs if attr[0] != '_')
-        no_functions = tuple(attr for attr in no_leading_underscore if not callable(getattr(self, attr)))
+        no_dict_attrs = tuple(
+            attr for attr in self_and_super_attrs if attr not in dict_attrs
+        )
+        no_leading_underscore = tuple(attr for attr in no_dict_attrs if attr[0] != "_")
+        no_functions = tuple(
+            attr for attr in no_leading_underscore if not callable(getattr(self, attr))
+        )
+
         def all_nan(attr):
-            return isinstance(a := getattr(self, attr), np.ndarray) and a.dtype == np.floating and all(np.isnan(a))
+            return (
+                isinstance(a := getattr(self, attr), np.ndarray)
+                and a.dtype == np.floating
+                and all(np.isnan(a))
+            )
+
         if EXCLUDE_IF_ONLY_NANS:
             return tuple(attr for attr in no_functions if not all_nan(attr))
         return no_functions
@@ -61,8 +76,8 @@ class PropertyDict(collections.abc.Mapping):
         return reprlib.repr(self._dict)
 
     def to_add_trial_column(
-        self
-    ) -> Generator[dict[Literal['name', 'description'], str], None, None]:
+        self,
+    ) -> Generator[dict[Literal["name", "description"], str], None, None]:
         """Name and description for each trial column.
 
         Does not include `start_time` and `stop_time`: those columns
@@ -79,13 +94,20 @@ class PropertyDict(collections.abc.Mapping):
         descriptions = self._docstrings
         missing = tuple(column for column in attrs if column not in descriptions)
         if any(missing):
-            logger.warning(f'These properties do not have descriptions (add docstrings to their property getters): {missing}')
-        descriptions.update(dict(zip(missing, ('' for _ in missing))))
-        descriptions.pop('start_time', None)
-        descriptions.pop('stop_time', None)
-        return ({'name': name, 'description': description} for name, description in descriptions.items())
+            logger.warning(
+                f"These properties do not have descriptions (add docstrings to their property getters): {missing}"
+            )
+        descriptions.update(dict(zip(missing, ("" for _ in missing))))
+        descriptions.pop("start_time", None)
+        descriptions.pop("stop_time", None)
+        return (
+            {"name": name, "description": description}
+            for name, description in descriptions.items()
+        )
 
-    def to_add_trial(self) -> Generator[dict[str, int | float | str | datetime.datetime], None, None]:
+    def to_add_trial(
+        self,
+    ) -> Generator[dict[str, int | float | str | datetime.datetime], None, None]:
         """Column name and value for each trial.
 
         Iterate over result and unpack each dict:
@@ -94,9 +116,11 @@ class PropertyDict(collections.abc.Mapping):
         ...    nwb_file.add_trial(**trial)
 
         """
-        mandatory_columns = ('start_time', 'stop_time')
+        mandatory_columns = ("start_time", "stop_time")
         if any(mandatory not in self._properties for mandatory in mandatory_columns):
-            raise AttributeError(f'{self} is missing one of {mandatory_columns = } required for nwb trials table')
+            raise AttributeError(
+                f"{self} is missing one of {mandatory_columns = } required for nwb trials table"
+            )
 
         for trial in self.to_dataframe().iterrows():
             yield dict(trial[1])
@@ -111,11 +135,8 @@ class PropertyDict(collections.abc.Mapping):
             return None
 
         return pd.DataFrame(
-            data={
-                k: pd.Series(v, dtype=get_dtype(k))
-                for k, v in self.items()
-                }
-            )
+            data={k: pd.Series(v, dtype=get_dtype(k)) for k, v in self.items()}
+        )
 
     @property
     def _docstrings(self) -> dict[str, str]:
@@ -126,14 +147,35 @@ class PropertyDict(collections.abc.Mapping):
         if we query its docstring in the same way as a property getter/method,
         we'll just receive the docstring for its value's type.
         """
+
         def cls_attr(attr):
             return getattr(self.__class__, attr)
-        {attr: "" for attr in self._properties if not isinstance(cls_attr(attr), (property, functools.cached_property))}
-        property_getters = {attr: cls_attr(attr).__doc__ or "" for attr in self._properties if isinstance(cls_attr(attr), (property, functools.cached_property))}
+
+        {
+            attr: ""
+            for attr in self._properties
+            if not isinstance(cls_attr(attr), (property, functools.cached_property))
+        }
+        property_getters = {
+            attr: cls_attr(attr).__doc__ or ""
+            for attr in self._properties
+            if isinstance(cls_attr(attr), (property, functools.cached_property))
+        }
+
         def fmt(docstring):
-            return docstring.replace('\n', ' ').replace('  ', '').replace('.- ', '; ').replace('- ', '; ').replace(' ; ', '; ').strip('. ')
+            return (
+                docstring.replace("\n", " ")
+                .replace("  ", "")
+                .replace(".- ", "; ")
+                .replace("- ", "; ")
+                .replace(" ; ", "; ")
+                .strip(". ")
+            )
+
         return {
-            attr: fmt(cls_attr(attr).__doc__) if cls_attr(attr).__doc__ else "" # if no docstring present, __doc__ is None
+            attr: fmt(cls_attr(attr).__doc__)
+            if cls_attr(attr).__doc__
+            else ""  # if no docstring present, __doc__ is None
             for attr in property_getters
         }
 
@@ -175,6 +217,7 @@ class TestPropertyDictInheritance(TestPropertyDict):
     >>> obj
     {'no_docstring': True, 'visible_property': True, 'visible_property_getter': True}
     """
+
     pass
 
 
@@ -195,8 +238,9 @@ class TestPropertyDictExports(PropertyDict):
     {'start_time': 0.0, 'stop_time': 1.0, 'test_start_time': 1.0, 'test_stop_time': 1.5}
     {'start_time': 1.0, 'stop_time': 2.0, 'test_start_time': 2.0, 'test_stop_time': 2.5}
     """
-    start_time = [0,1]
-    stop_time = [1,2]
+
+    start_time = [0, 1]
+    stop_time = [1, 2]
 
     @property
     def test_start_time(self) -> Sequence[float]:

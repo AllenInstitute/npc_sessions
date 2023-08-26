@@ -47,7 +47,6 @@ import npc_sessions.utils as utils
 
 
 class TaskControl(trials.PropertyDict):
-
     def __init__(
         self,
         hdf5: utils.StimPathOrDataset,
@@ -62,7 +61,9 @@ class TaskControl(trials.PropertyDict):
             # - all times in nwb are relative to start of first frame in hdf5
             # - there can only be one hdf5 file
             self._sync = None
-            self._frame_times = np.concatenate(([0], np.cumsum(self._hdf5['frameIntervals'][:])))
+            self._frame_times = np.concatenate(
+                ([0], np.cumsum(self._hdf5["frameIntervals"][:]))
+            )
             """Best-estimate time of 'frame' in event loop, in seconds, from start
             of experiment. Uses vsync time if available."""
             self._display_times = self._frame_times
@@ -71,7 +72,9 @@ class TaskControl(trials.PropertyDict):
             # - all times in nwb are relative to start of first sample on sync
             # - there can be multiple hdf5 files, all recorded on sync
             self._sync = utils.get_sync_data(sync)
-            self._frame_times = utils.get_stim_frame_times(self._hdf5, sync=self._sync, frame_time_type='vsync')
-            self._display_times = utils.get_stim_frame_times(self._hdf5, sync=self._sync, frame_time_type='display_time')
-
-
+            self._frame_times = utils.get_stim_frame_times(
+                self._hdf5, sync=self._sync, frame_time_type="vsync"
+            )
+            self._display_times = utils.get_stim_frame_times(
+                self._hdf5, sync=self._sync, frame_time_type="display_time"
+            )

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import functools
-from collections.abc import Iterator
-from typing import ClassVar, Protocol, Iterable
+from collections.abc import Iterable, Iterator
+from typing import ClassVar, Protocol
 
 import npc_lims
 import pandas as pd
@@ -67,11 +67,13 @@ class Electrodes(NWBContainerWithDF):
     records: tuple[npc_lims.Electrode, ...]
     add_to_nwb_method = "add_electrode"
 
+
 class Units(NWBContainerWithDF):
     records: tuple[npc_lims.Units, ...]
 
-    def add_to_nwb(self, nwb:pynwb.NWBFile) -> None:
-        nwb.units = pynwb.misc.Units.from_dataframe(self.to_dataframe(), name='units')
+    def add_to_nwb(self, nwb: pynwb.NWBFile) -> None:
+        nwb.units = pynwb.misc.Units.from_dataframe(self.to_dataframe(), name="units")
+
 
 class Intervals(NWBContainerWithDF):
     """Pass `name`, `description` and `column_names_to_descriptions` as kwargs."""

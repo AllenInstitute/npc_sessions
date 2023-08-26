@@ -328,9 +328,7 @@ def is_valid_ephys_folder(
         return False
     if not is_new_ephys_folder(path):
         return False
-    if (
-        min_size_gb is not None and utils.dir_size(path) < min_size_gb * 1024**3
-    ):  # GB
+    if min_size_gb is not None and utils.dir_size(path) < min_size_gb * 1024**3:  # GB
         return False
     return True
 
@@ -502,7 +500,9 @@ def assert_xml_files_match(*paths: upath.UPath) -> None:
     if not all(s == ".xml" for s in [p.suffix for p in paths]):
         raise ValueError(f"Not all paths are XML files: {paths}")
     if not all(p.is_file() for p in paths):
-        raise FileNotFoundError(f"Not all paths are files, or they do not exist: {paths}")
+        raise FileNotFoundError(
+            f"Not all paths are files, or they do not exist: {paths}"
+        )
     if not utils.checksums_match(*paths):
         # if the files are the same size and were created within +/- 1 second
         # of each other, we'll assume they're the same

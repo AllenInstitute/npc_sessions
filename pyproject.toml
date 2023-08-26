@@ -1,6 +1,6 @@
 [project]
 name = "npc_sessions"
-version = "0.0.10"
+version = "0.0.11"
 description = "Tools and interfaces for working with behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 authors = [
     { name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org" },
@@ -185,7 +185,7 @@ warn_unused_ignores = true
 no_implicit_optional = true
 show_error_codes = true
 ignore_missing_imports = true
-implicit_reexport = false # imports won't be exported (which causes many "already defined" error in __init__ with wildcard import)
+implicit_reexport = false
 
 [build-system]
 requires = [

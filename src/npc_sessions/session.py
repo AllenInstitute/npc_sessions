@@ -141,7 +141,10 @@ class Session:
     def get_raw_data_paths_from_local(self) -> tuple[upath.UPath, ...]:
         if not self.local_path:
             raise ValueError(f"{self.id} does not have a local path assigned yet")
-        ephys_paths = itertools.chain(self.local_path.glob('Record Node *'), self.local_path.glob('*/Record Node *'))
+        ephys_paths = itertools.chain(
+            self.local_path.glob("Record Node *"),
+            self.local_path.glob("*/Record Node *"),
+        )
         root_level_paths = tuple(p for p in self.local_path.iterdir() if p.is_file())
         return root_level_paths + tuple(set(ephys_paths))
 
@@ -175,8 +178,8 @@ class Session:
             for p in self.raw_data_paths
             if p.suffix == ".sync"
             or (
-                p.suffix in (".h5",) and
-                p.stem.startswith(f"{self.id.date.replace('-', '')}T")
+                p.suffix in (".h5",)
+                and p.stem.startswith(f"{self.id.date.replace('-', '')}T")
             )
         )
 
@@ -203,7 +206,7 @@ class Session:
         )
 
     @functools.cached_property
-    def sync_data(self) ->utils.SyncDataset:
+    def sync_data(self) -> utils.SyncDataset:
         return utils.SyncDataset(io.BytesIO(self.sync_path.read_bytes()))
 
     @property
@@ -370,7 +373,7 @@ class Session:
     def ephys_timing_data(self) -> tuple[utils.EphysTimingInfoOnSync, ...]:
         return tuple(
             itertools.chain(
-               utils.get_ephys_timing_on_sync(
+                utils.get_ephys_timing_on_sync(
                     self.sync_data, self.ephys_recording_dirs
                 )
             )
@@ -411,10 +414,10 @@ class Session:
     @functools.cached_property
     def ephys_experiment_dirs(self) -> tuple[upath.UPath, ...]:
         return tuple(
-                p
-                for record_node in self.ephys_record_node_dirs
-                for p in record_node.glob("experiment*")
-            )
+            p
+            for record_node in self.ephys_record_node_dirs
+            for p in record_node.glob("experiment*")
+        )
 
     @functools.cached_property
     def ephys_settings_xml_paths(self) -> tuple[upath.UPath, ...]:
@@ -422,7 +425,9 @@ class Session:
             raise ValueError(
                 f"{self.id} is not an ephys session (required for settings.xml)"
             )
-        return tuple(record_node / 'settings.xml' for record_node in self.ephys_record_node_dirs)
+        return tuple(
+            record_node / "settings.xml" for record_node in self.ephys_record_node_dirs
+        )
 
     @property
     def ephys_settings_xml_path(self) -> upath.UPath:
@@ -435,10 +440,8 @@ class Session:
         return self.ephys_settings_xml_paths[0]
 
     @functools.cached_property
-    def ephys_settings_xml_data(self) ->utils.SettingsXmlInfo:
-        return utils.settings_xml_info_from_path(
-            self.ephys_settings_xml_path
-        )
+    def ephys_settings_xml_data(self) -> utils.SettingsXmlInfo:
+        return utils.settings_xml_info_from_path(self.ephys_settings_xml_path)
 
     @functools.cached_property
     def ephys_settings_xml_file_record(self) -> npc_lims.File:
@@ -525,7 +528,7 @@ class Session:
                     group=f"probe{probe}",  # type: ignore
                     channel_index=i,
                     id=i,
-                    location='Not annotated'
+                    location="Not annotated"
                     # TODO: add ccf coordinates
                 )
                 for i in range(1, 385)  # TODO: get number of channels
@@ -548,7 +551,6 @@ class Session:
                 f"no intervals named {self.trials_interval_name} found for {self.id}"
             )
         return trials
-    
 
     # state: MutableMapping[str | int, Any]
     # subject: MutableMapping[str, Any]
