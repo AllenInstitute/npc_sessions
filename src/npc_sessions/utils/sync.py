@@ -349,8 +349,7 @@ class SyncDataset:
         kind: Literal["rising", "falling", "all"],
         keys: str | Sequence[str],
         units: Literal["seconds", "samples"],
-        permissive: bool = False,
-    ) -> npt.NDArray | None:
+    ) -> npt.NDArray:
         """Utility function for extracting edge times from a line
 
         Parameters
@@ -395,10 +394,7 @@ class SyncDataset:
                 continue
             else:
                 return result
-
-        if not permissive:
-            raise KeyError(f"none of {keys} were found in this dataset's line labels")
-        return None
+        raise KeyError(f"none of {keys} were found in this dataset's line labels")
 
     def get_falling_edges(
         self, line: str | int, units: Literal["samples", "seconds"] = "samples"
