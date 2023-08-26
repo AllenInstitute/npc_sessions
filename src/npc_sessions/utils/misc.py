@@ -67,6 +67,7 @@ def safe_index(array: npt.ArrayLike, indices: SupportsFloat | Iterable[SupportsF
     numerical float values are integers), then indexes into `array` using `np.where`.
     
     - returns nans where `indices` is nan
+    - returns a scalar if `indices` is a scalar #TODO current type annotation is insufficient
     
     Type of array is preserved, if possible:
     >>> array_like = [1, 2, 3]
@@ -95,7 +96,7 @@ def safe_index(array: npt.ArrayLike, indices: SupportsFloat | Iterable[SupportsF
     # if indices was a scalar, return a scalar instead of a 0d array
     if not isinstance(indices, Iterable):
         assert result.size == 1
-        return type(indices)(result)     # type: ignore[call-arg]
+        return type(indices)(result)     # type: ignore[call-arg, return-value]
     return result
 
 
