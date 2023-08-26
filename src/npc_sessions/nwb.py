@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 from collections.abc import Iterator
-from typing import ClassVar, Protocol
+from typing import ClassVar, Protocol, Iterable
 
 import npc_lims
 import pandas as pd
@@ -29,7 +29,7 @@ class NWBContainer(SupportsToNWB):
     def __len__(self) -> int:
         return len(self.records)
 
-    def __init__(self, records: npc_lims.Iterable[npc_lims.Record], **kwargs) -> None:
+    def __init__(self, records: Iterable[npc_lims.Record], **kwargs) -> None:
         self.records = tuple(records)
         for key, value in kwargs.items():
             setattr(self, key, value)
