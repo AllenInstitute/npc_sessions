@@ -160,6 +160,10 @@ def settings_xml_md5(path: str | upath.UPath) -> str:
 if __name__ == "__main__":
     import doctest
 
+    import dotenv
+    dotenv.load_dotenv(
+        dotenv.find_dotenv(usecwd=True)
+    )
     doctest.testmod(
         optionflags=(doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE)
     )

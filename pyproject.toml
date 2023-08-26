@@ -25,6 +25,7 @@ dependencies = [
     "ipywidgets>=8.1.0",
     "ipympl>=0.9.3",
     "opencv-python-headless>=4.8.0.76",
+    "python-dotenv>=1.0.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

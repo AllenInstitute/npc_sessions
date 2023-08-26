@@ -326,6 +326,10 @@ def get_stim_duration(stim_path_or_data: utils.PathLike | h5py.File) -> float:
 if __name__ == "__main__":
     import doctest
 
+    import dotenv
+    dotenv.load_dotenv(
+        dotenv.find_dotenv(usecwd=True)
+    )
     doctest.testmod(
         optionflags=(doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE)
     )

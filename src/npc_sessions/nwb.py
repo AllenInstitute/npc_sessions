@@ -99,3 +99,4 @@ class Intervals(NWBContainerWithDF):
             module.add_row(**record.__dict__)
 
         nwb.add_time_intervals(module)
+
