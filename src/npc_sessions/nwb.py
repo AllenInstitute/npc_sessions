@@ -70,7 +70,7 @@ class Electrodes(NWBContainerWithDF):
 class Units(NWBContainerWithDF):
     records: tuple[npc_lims.Units, ...]
 
-    def add_to_nwb(self, nwb:pynwb.NWBFile):
+    def add_to_nwb(self, nwb:pynwb.NWBFile) -> None:
         nwb.units = pynwb.misc.Units.from_dataframe(self.to_dataframe(), name='units')
 
 class Intervals(NWBContainerWithDF):
