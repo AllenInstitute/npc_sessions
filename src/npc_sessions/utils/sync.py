@@ -1221,6 +1221,10 @@ class SyncDataset:
             ax.set_ylim(
                 bottom=max(0, expected_period - np.max(np.abs(y_deviations_from_expected_period))),
             )
+            ticks_with_period = sorted(set(ax.get_yticks()) | {expected_period})
+            ax.set_yticks(ticks_with_period)
+            if idx == 0:
+                ax.set_yticklabels([f'{_:.3f}' for _ in ticks_with_period])
         fig.set_tight_layout(True)
         
         return fig, fig.axes
