@@ -563,8 +563,6 @@ class Session:
 # x.sync_data.plot_diode_measured_sync_square_flips()
 
 if __name__ == "__main__":
-    session = Session('662892_2023-08-21')
-    session.get_units()
     import doctest
 
     doctest.testmod(
