@@ -9,7 +9,21 @@ import pandas as pd
 import polars as pl
 import pynwb
 
+import npc_sessions.utils as utils
 
+        
+def get_behavior(nwb_file: pynwb.NWBFile) -> pynwb.ProcessingModule:
+    """Get or create `nwb_file['behavior']`"""
+    return nwb_file.processing.get('behavior') or nwb_file.create_processing_module(
+    name="behavior", description="Processed behavioral data",
+    )
+    
+def get_ecephys(nwb_file: pynwb.NWBFile) -> pynwb.ProcessingModule:
+    """Get or create `nwb_file['ecephys']`"""
+    return nwb_file.processing.get('ecephys') or nwb_file.create_processing_module(
+    name="ecephys", description="Processed ecephys data",
+    )
+    
 class SupportsToNWB(Protocol):
     def to_nwb(self, nwb: pynwb.NWBFile) -> None:
         ...
