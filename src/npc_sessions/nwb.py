@@ -74,6 +74,31 @@ class Units(NWBContainerWithDF):
     def add_to_nwb(self, nwb: pynwb.NWBFile) -> None:
         nwb.units = pynwb.misc.Units.from_dataframe(self.to_dataframe(), name="units")
 
+        
+class RunningSpeed(SupportsToNWB):
+    name = 'running'
+    description = (
+        'linear forward running speed on a rotating disk, low-pass filtered '
+        f'at {utils.RUNNING_LOWPASS_FILTER_HZ} Hz with a 3rd order Butterworth filter'
+    )
+    unit = 'm/s'
+    conversion = 100 if utils.RUNNING_SPEED_UNITS == 'cm/s' else 1.
+    # comments = f'Assumes mouse runs at `radius = {utils.RUNNING_DISK_RADIUS} {utils.RUNNING_SPEED_UNITS.split("/")[0]}` on disk.'
+    
+    def __init__(self, *stim: utils.StimPathOrDataset, sync: Optional[utils.SyncPathOrDataset] = None) -> None:
+        self.data, self.timestamps = utils.get_running_speed_from_stim_files(*stim, sync=sync, filt=utils.lowpass_filter)
+     
+    def to_nwb(self, nwb_file: pynwb.NWBFile) -> None:
+        filtered = pynwb.TimeSeries(
+            name=self.name,
+            description=self.description,
+            data=self.data,
+            timestamps=self.timestamps,
+            unit=self.unit,
+            conversion=self.conversion,
+        )
+        get_behavior(nwb_file).add(filtered)
+
 
 class Intervals(NWBContainerWithDF):
     """Pass `name`, `description` and `column_names_to_descriptions` as kwargs."""
