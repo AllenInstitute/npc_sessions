@@ -7,3 +7,4 @@ from npc_sessions.utils.settings_xml import *
 from npc_sessions.utils.stim import *
 from npc_sessions.utils.sync import *
 from npc_sessions.utils.units import *
+from npc_sessions.utils.running import *
