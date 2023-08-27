@@ -3,9 +3,6 @@ import os
 import npc_lims
 import pandas as pd
 
-import npc_sessions.nwb as nwb
-
-
 def run_capsules_for_units_kilosort_codeocean(session_id: str) -> None:
     raw_data_asset = npc_lims.get_session_raw_data_asset(session_id)
     if raw_data_asset is None:
@@ -36,7 +33,7 @@ def run_capsules_for_units_kilosort_codeocean(session_id: str) -> None:
 
 def get_units(
     session_id: str, method: str = "kilosort_codeocean"
-) -> tuple[nwb.Units, ...]:
+) -> tuple:
     records = npc_lims.NWBSqliteDBHub().get_records(
         npc_lims.Units, session_id=session_id
     )
