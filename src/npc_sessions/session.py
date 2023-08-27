@@ -552,6 +552,10 @@ class Session:
             )
         return trials
 
+    @functools.cached_property
+    def _running(self):
+        return nwb.RunningSpeed(*self.stim_data.values(), sync=self.sync_data if self.is_sync else None)
+    
     # state: MutableMapping[str | int, Any]
     # subject: MutableMapping[str, Any]
     # session: MutableMapping[str, Any]
