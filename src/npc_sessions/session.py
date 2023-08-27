@@ -49,6 +49,10 @@ class Session:
 
     local_path: upath.UPath | None = None
 
+    acquisition: Mapping[Literal['licks', 'running'], nwb.NWBContainer]
+    processing: Mapping[Literal['ephys', 'behavior'], nwb.NWBContainer]
+    analysis: Mapping[str, nwb.NWBContainerWithDF] = {}
+
     def __init__(self, session: str, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session))
         if pathlib.Path(session).exists():
