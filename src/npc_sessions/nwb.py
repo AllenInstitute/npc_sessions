@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import functools
 from collections.abc import Iterable, Iterator
-from typing import ClassVar, Protocol
+from typing import ClassVar, Optional, Protocol
 
+import ndx_events
 import npc_lims
 import pandas as pd
 import polars as pl
@@ -88,6 +89,25 @@ class Units(NWBContainerWithDF):
     def add_to_nwb(self, nwb: pynwb.NWBFile) -> None:
         nwb.units = pynwb.misc.Units.from_dataframe(self.to_dataframe(), name="units")
 
+class LickSpout(SupportsToNWB):
+    
+    name = "lick spout",
+    description = (
+        'times at which the subject interacted with a water spout '
+        'putatively licks, but may include other events such as grooming'
+    )
+    
+    def __init__(self, sync_path_or_dataset: utils.SyncPathOrDataset) -> None:
+        self.timestamps = utils.get_sync_data(sync_path_or_dataset).get_rising_edges('lick_sensor', units='seconds')
+    
+    def to_nwb(self, nwb_file: pynwb.NWBFile) -> None:
+        nwb_file.add_acquisition(
+            lick_nwb_data = ndx_events.Events(
+            timestamps=self.timestamps,
+            name=self.name,
+            description=self.description,
+            )
+        )
         
 class RunningSpeed(SupportsToNWB):
     name = 'running'
