@@ -553,6 +553,10 @@ class Session:
         return trials
 
     @functools.cached_property
+    def _licks(self):
+        return nwb.LickSpout(self.sync_data)
+    
+    @functools.cached_property
     def _running(self):
         return nwb.RunningSpeed(*self.stim_data.values(), sync=self.sync_data if self.is_sync else None)
     
