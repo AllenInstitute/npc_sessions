@@ -10,12 +10,18 @@ import functools
 
 import numpy as np
 import numpy.typing as npt
+import DynamicRoutingTask.OptoParams as OptoParams 
 
 import npc_sessions.utils as utils
 from npc_sessions.trials.TaskControl import TaskControl
 
 
 class OptoTagging(TaskControl):
+    """
+    >>> stim = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/OptoTagging_662892_20230821_125915.hdf5'
+    >>> sync = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/20230821T124345.h5'
+    >>> trials = OptoTagging(stim, sync)
+    """
     _stim_onset_times: npt.NDArray[np.float64]
     """`[1 x num trials]` onset time of each opto stim relative to start of
     sync. There should be no nans: the times will be used as trial start_time."""
@@ -39,5 +45,41 @@ class OptoTagging(TaskControl):
         return np.arange(len(self.start_time))
 
     @functools.cached_property
-    def stim_id(self) -> npt.NDArray[np.int32]:
-        return np.full_like(self.start_time, np.nan)
+    def _bregma(self) -> tuple[tuple[np.float64, np.float64], ...]:
+        calibration_data = dict(self._hdf5["bregmaGalvoCalibrationData"])
+        for k in ('bregmaXOffset', 'bregmaYOffset'):
+            calibration_data[k] = calibration_data[k][()]
+        return tuple(
+            OptoParams.galvoToBregma(
+                calibration_data,
+                *voltages,
+                )
+            for voltages in self._hdf5["trialGalvoVoltage"][:]
+        )
+    
+    @functools.cached_property
+    def bregma_x(self) -> npt.NDArray[np.float64]:
+        return np.array([bregma[0] for bregma in self._bregma])
+    
+    @functools.cached_property
+    def bregma_y(self) -> npt.NDArray[np.float64]:
+        return np.array([bregma[1] for bregma in self._bregma])
+    
+    @functools.cached_property
+    def location(self) -> npt.NDArray[np.str_]:
+        return self._hdf5["trialOptoLabel"].asstr()[:]
+      
+    @functools.cached_property
+    def power(self) -> npt.NDArray[np.float64]:
+        return OptoParams.voltsToPower(self._hdf5["optoPowerCalibrationData"], self._hdf5["trialOptoVoltage"][:])
+    
+    
+if __name__ == "__main__":
+    import doctest
+
+    import dotenv
+
+    dotenv.load_dotenv(dotenv.find_dotenv(usecwd=True))
+    doctest.testmod(
+        optionflags=(doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE)
+    )
