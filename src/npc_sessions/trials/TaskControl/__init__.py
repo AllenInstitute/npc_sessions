@@ -47,6 +47,10 @@ import npc_sessions.utils as utils
 
 
 class TaskControl(trials.PropertyDict):
+  
+    _frame_times: npt.NDArray[np.float64]
+    _display_times: npt.NDArray[np.float64]
+    
     def __init__(
         self,
         hdf5: utils.StimPathOrDataset,
@@ -74,7 +78,7 @@ class TaskControl(trials.PropertyDict):
             self._sync = utils.get_sync_data(sync)
             self._frame_times = utils.get_stim_frame_times(
                 self._hdf5, sync=self._sync, frame_time_type="vsync"
-            )
+            )[self._hdf5]
             self._display_times = utils.get_stim_frame_times(
                 self._hdf5, sync=self._sync, frame_time_type="display_time"
-            )
+            )[self._hdf5]
