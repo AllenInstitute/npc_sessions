@@ -10,7 +10,7 @@
     },
     "peacock.color": "#951d99",
     "python.linting.mypyEnabled": true,
-    "python.linting.enabled": false,
+    "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
     "python.analysis.inlayHints.functionReturnTypes": true,
     "python.analysis.typeCheckingMode": "off"
