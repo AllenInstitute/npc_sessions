@@ -4,7 +4,7 @@ Use `np_session.Session` to initialize & add metadata to a `pynwb.NWBFile`.
 from __future__ import annotations
 
 import logging
-from typing import Callable, Literal, Optional, Sequence, TypeVar
+from typing import Callable, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -25,12 +25,10 @@ RUNNING_LOWPASS_FILTER_HZ = 4
 """Frequency for filtering running speed - filtered data stored in NWB `processing`, unfiltered
 in `acquisition`"""
 
-SameT = TypeVar('SameT')
-
 def get_running_speed_from_stim_files(
     *stim_path_or_dataset: utils.StimPathOrDataset,
-    sync: Optional[utils.SyncPathOrDataset] = None,
-    filt: Optional[Callable[[Sequence[SameT]], Sequence[SameT]]] = None,
+    sync: utils.SyncPathOrDataset | None = None,
+    filt: Callable[[npt.NDArray[np.float64]], npt.NDArray[np.float64]] | None = None,
 ) -> tuple[npt.NDArray, npt.NDArray]:
     """Pools running speeds across files. Returns arrays of running speed and
     corresponding timestamps."""
@@ -58,9 +56,9 @@ def get_running_speed_from_stim_files(
             )
         nonlocal running_speed, timestamps
         # we need to filter before pooling discontiguous blocks of samples
-        running_speed = np.concatenate((running_speed, filt(values) if filt else values))
-        timestamps = np.concatenate((timestamps, times))
-    
+        running_speed = np.concatenate([running_speed, filt(values) if filt else values])
+        timestamps = np.concatenate([timestamps, times])
+
     if sync is None:
         _append(
             get_running_speed_from_hdf5(stim_path_or_dataset),
@@ -72,7 +70,7 @@ def get_running_speed_from_stim_files(
         # there may be multiple h5 files with encoder
         # data per sync file: vsyncs are in blocks with a separating gap
         hdf5_to_vsync_times = utils.get_stim_frame_times(
-            *(utils.get_stim_data(hdf5) for hdf5 in stim_path_or_dataset), 
+            *(utils.get_stim_data(hdf5) for hdf5 in stim_path_or_dataset),
             sync=sync,
             frame_time_type='vsync',
             )
@@ -124,7 +122,7 @@ def get_running_speed_from_hdf5(stim_path_or_dataset: utils.StimPathOrDataset) -
         elif RUNNING_SPEED_UNITS == 'cm/s':
             running_disk_radius = wheel_radius_cm
         else:
-            raise ValueError(f'Unexpected units for running speed: {RUNNING_SPEED_UNITS}')   
+            raise ValueError(f'Unexpected units for running speed: {RUNNING_SPEED_UNITS}')
         speed = np.diff(
             wheel_revolutions * 2 * np.pi * running_disk_radius * FRAMERATE
         )
