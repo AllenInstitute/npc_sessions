@@ -208,14 +208,18 @@ def get_stim_latencies_from_nidaq_recording(
 
     return output
 
+def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
+    """Raise exception if result is an exception, otherwise return result"""
+    if isinstance(result, Exception):
+        raise result
+    return result
 
 def get_stim_frame_times(
     *stim_paths: utils.StimPathOrDataset,
     sync: utils.SyncPathOrDataset,
     frame_time_type: Literal["display_time", "vsync"] = "display_time",
-) -> dict[utils.StimPathOrDataset, None | npt.NDArray[np.float64]]:
+) -> dict[utils.StimPathOrDataset, Exception | npt.NDArray[np.float64]]:
     """
-
     - keys are the stim paths provided as inputs
 
     >>> bad_stim = 's3://aind-ephys-data/ecephys_670248_2023-08-02_11-30-53/behavior/DynamicRouting1_670248_20230802_120703.hdf5'
@@ -229,9 +233,10 @@ def get_stim_frame_times(
     >>> len(frame_times[good_stim_1])
     36000
 
-    Returns None if the stim file can't be opened, or it has no frames:
+    Returns Exception if the stim file can't be opened, or it has no frames.
+    Should be used with `assert_stim_times` to raise a possible exception:
     >>> frame_times = get_stim_frame_times(bad_stim, sync=sync)
-    >>> print(frame_times[bad_stim])
+    >>> assert_stim_times(frame_times[bad_stim])
     None
     """
 
@@ -259,23 +264,21 @@ def get_stim_frame_times(
         try:
             stim_data = get_h5_stim_data(stim_path)
         except OSError as exc:
-            stim_frame_times[stim_path] = None
             exception = exc
-            logger.error(exception)
+            stim_frame_times[stim_path] = exception
             continue
 
         # get number of frames
         n_stim_frames = get_total_stim_frames(stim_data)
         if n_stim_frames == 0:
-            stim_frame_times[stim_path] = None
             exception = ValueError(f"No frames found in {stim_path = }")
-            logger.error(exception)
+            stim_frame_times[stim_path] = exception
             continue
 
         # get first stimulus frame relative to sync start time
         stim_start_time: datetime.datetime = get_stim_start_time(stim_data)
         if abs((stim_start_time - sync_data.start_time).days > 0):
-            warnings.warn(
+            logger.error(
                 f"Skipping {stim_path =}, sync data is from a different day: {stim_start_time = }, {sync_data.start_time = }"
             )
             continue
@@ -287,14 +290,13 @@ def get_stim_frame_times(
         if not num_frames_match:
             frame_diff = n_stim_frames - n_frames_per_block[matching_block]
             exception = IndexError(
-                f"Closest match with {stim_path} has a mismatch of {frame_diff = } - returning None"
+                f"Closest match with {stim_path} has a mismatch of {frame_diff = }"
             )
-            logger.error(exception)
-            stim_frame_times[stim_path] = None
+            stim_frame_times[stim_path] = exception
             continue
 
         stim_frame_times[stim_path] = frame_times_in_blocks[matching_block]
-    sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: stim_frame_times[x][0] if stim_frame_times[x] is not None else 0)  # type: ignore[index]
+    sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: stim_frame_times[x][0] if stim_frame_times[x] is not Exception else 0)  # type: ignore[index]
     return {k: stim_frame_times[k] for k in sorted_keys}
 
 
