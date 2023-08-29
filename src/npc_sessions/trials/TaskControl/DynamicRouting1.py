@@ -79,7 +79,7 @@ class DynamicRouting1(TaskControl):
     @functools.cached_property
     def _sam(self) -> DynRoutData:
         obj = DynRoutData()
-        obj.loadBehavData(self._hdf5)
+        obj.loadBehavData(filePath=None, h5pyFile=self._hdf5)
         return obj
 
     @functools.cached_property
