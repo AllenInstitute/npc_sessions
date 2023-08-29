@@ -124,7 +124,7 @@ def xcorr(
 
 
 def get_stim_latencies_from_nidaq_recording(
-    *stim_files_or_datasets: StimPathOrDataset,
+    stim_file_or_dataset: StimPathOrDataset,
     sync: utils.SyncPathOrDataset,
     recording_dirs: Iterable[upath.UPath],
     nidaq_device_name: str | None = None,
@@ -132,7 +132,7 @@ def get_stim_latencies_from_nidaq_recording(
         [npt.NDArray[np.int16], Iterable[StimPresentation]], tuple[StimRecording, ...]
     ] = xcorr,
     correlation_method_kwargs: dict[str, Any] | None = None,
-) -> dict[StimPathOrDataset, tuple[StimRecording, ...]]:
+) -> tuple[StimRecording, ...]:
     if not nidaq_device_name:
         nidaq_device = utils.get_pxi_nidaq_device(recording_dirs)
     else:
@@ -155,64 +155,60 @@ def get_stim_latencies_from_nidaq_recording(
         device_name=nidaq_device_name,
     )
 
-    output = {}
-    for stim_file in stim_files_or_datasets:
-        stim = get_h5_stim_data(stim_file)
+    stim = get_h5_stim_data(stim_file_or_dataset)
 
-        vsyncs = get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim]
-        if vsyncs is None:
-            logger.warning(f"Skipping {stim_file} - no vsyncs found")
+    vsyncs = assert_stim_times(get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim])
+    
+
+    num_trials = len((stim.get("trialEndFrame") or stim.get("trialSoundArray"))[:])
+
+    trigger_frames: npt.NDArray[np.int16] = (
+        stim.get("trialStimStartFrame") or stim.get("stimStartFrame")
+    )[:num_trials]
+    waveform_rate = float(stim["soundSampleRate"][()])
+    waveforms = np.array(stim["trialSoundArray"][:num_trials])
+
+    presentations = []
+
+    for idx, waveform in enumerate(waveforms):
+        if not any(waveform):
             continue
+        trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
+        trigger_time_on_pxi_nidaq = trigger_time_on_sync - nidaq_timing.start_time
+        duration = len(waveform) / waveform_rate
+        onset_sample_on_pxi_nidaq = round(
+            trigger_time_on_pxi_nidaq * nidaq_timing.sampling_rate
+        )
+        offset_sample_on_pxi_nidaq = round(
+            (trigger_time_on_pxi_nidaq + duration) * nidaq_timing.sampling_rate
+        )
+        # padding should be done by correlation method, when reading data
 
-        num_trials = len((stim.get("trialEndFrame") or stim.get("trialSoundArray"))[:])
-
-        trigger_frames: npt.NDArray[np.int16] = (
-            stim.get("trialStimStartFrame") or stim.get("stimStartFrame")
-        )[:num_trials]
-        waveform_rate = float(stim["soundSampleRate"][()])
-        waveforms = np.array(stim["trialSoundArray"][:num_trials])
-
-        presentations = []
-
-        for idx, waveform in enumerate(waveforms):
-            if not any(waveform):
-                continue
-            trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
-            trigger_time_on_pxi_nidaq = trigger_time_on_sync - nidaq_timing.start_time
-            duration = len(waveform) / waveform_rate
-            onset_sample_on_pxi_nidaq = round(
-                trigger_time_on_pxi_nidaq * nidaq_timing.sampling_rate
+        presentations.append(
+            StimPresentation(
+                trial_idx=idx,
+                waveform=waveform,
+                sampling_rate=waveform_rate,
+                onset_sample_on_nidaq=onset_sample_on_pxi_nidaq,
+                offset_sample_on_nidaq=offset_sample_on_pxi_nidaq,
+                trigger_time_on_sync=trigger_time_on_sync,
             )
-            offset_sample_on_pxi_nidaq = round(
-                (trigger_time_on_pxi_nidaq + duration) * nidaq_timing.sampling_rate
-            )
-            # padding should be done by correlation method, when reading data
-
-            presentations.append(
-                StimPresentation(
-                    trial_idx=idx,
-                    waveform=waveform,
-                    sampling_rate=waveform_rate,
-                    onset_sample_on_nidaq=onset_sample_on_pxi_nidaq,
-                    offset_sample_on_nidaq=offset_sample_on_pxi_nidaq,
-                    trigger_time_on_sync=trigger_time_on_sync,
-                )
-            )
-
-        # run the correlation of presentations with nidaq data
-        recordings = correlation_method(
-            nidaq_data, presentations, **(correlation_method_kwargs or {})
         )
 
-        output[stim_file] = recordings
+    # run the correlation of presentations with nidaq data
+    recordings = correlation_method(
+        nidaq_data, presentations, **(correlation_method_kwargs or {})
+    )
 
-    return output
+    return recordings
+
 
 def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
     """Raise exception if result is an exception, otherwise return result"""
     if isinstance(result, Exception):
         raise result from None
     return result
+
 
 def get_stim_frame_times(
     *stim_paths: utils.StimPathOrDataset,
