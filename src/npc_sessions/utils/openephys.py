@@ -166,14 +166,12 @@ def clipped_path_to_compressed(path: upath.UPath) -> upath.UPath:
 
 
 def get_pxi_nidaq_data(
-    recording_dirs: Iterable[upath.UPath],
-    num_channels_total: int = 8,
+    *recording_dirs: upath.UPath,
     device_name: str | None = None,
 ) -> npt.NDArray[np.int16]:
     """
     -channel_idx: 0-indexed
     - if device_name not specified, first and only (assumed) NI-DAQ will be used
-    - total_channels = how many channels in data, for reshaping - not needed for compressed zarr.
 
     ```
     speaker_channel, mic_channel = 1, 3
@@ -193,11 +191,14 @@ def get_pxi_nidaq_data(
         data = zarr.open(device.compressed, mode="r")
         return data["traces_seg0"]
     else:
+        device_metadata = next((_ for _ in get_merged_oebin_file(recording_dirs)["continuous"] if device.name in _["folder_name"]), None)
+        if device_metadata is None:
+            raise ValueError(f"Could not find device metadata for {device.name}: looked for `structure.oebin` files in {recording_dirs}")
+        num_channels: int = device_metadata["num_channels"]
         dat = np.frombuffer(
             (device.continuous / "continuous.dat").read_bytes(), dtype=np.int16
         )
-        return np.reshape(dat, (int(dat.size / num_channels_total), -1))
-        # return dat[channel_idx:-1:num_channels_total]
+        return np.reshape(dat, (int(dat.size / num_channels), -1))
 
 
 def get_pxi_nidaq_device(recording_dir: Iterable[upath.UPath]) -> EphysTimingInfoOnPXI:
@@ -577,7 +578,7 @@ def get_merged_oebin_file(
 def read_oebin(
     path: utils.PathLike,
 ) -> dict[Literal["continuous", "events", "spikes"], list[dict[str, Any]]]:
-    return json.loads(utils.from_pathlike(path).read_bytes())
+    return json.loads(utils.from_pathlike(path).read_text())
 
 
 if __name__ == "__main__":
