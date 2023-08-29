@@ -4,7 +4,6 @@ import datetime
 import io
 import logging
 import pickle
-import warnings
 from collections.abc import Iterable, Mapping
 from typing import Any, Callable, Literal, NamedTuple, TypeAlias
 
@@ -157,8 +156,9 @@ def get_stim_latencies_from_nidaq_recording(
 
     stim = get_h5_stim_data(stim_file_or_dataset)
 
-    vsyncs = assert_stim_times(get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim])
-    
+    vsyncs = assert_stim_times(
+        get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim]
+    )
 
     num_trials = len((stim.get("trialEndFrame") or stim.get("trialSoundArray"))[:])
 
@@ -253,7 +253,9 @@ def get_stim_frame_times(
     # get first frame time in each block
     first_frame_per_block = np.asarray([x[0] for x in frame_times_in_blocks])
 
-    stim_frame_times: dict[utils.StimPathOrDataset, Exception | npt.NDArray[np.float64]] = {}
+    stim_frame_times: dict[
+        utils.StimPathOrDataset, Exception | npt.NDArray[np.float64]
+    ] = {}
 
     exception: Exception | None = None
     # loop through stim files
@@ -294,7 +296,7 @@ def get_stim_frame_times(
             continue
 
         stim_frame_times[stim_path] = frame_times_in_blocks[matching_block]
-    sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: 0 if isinstance(stim_frame_times[x], Exception) else stim_frame_times[x][0]) # type: ignore[index]
+    sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: 0 if isinstance(stim_frame_times[x], Exception) else stim_frame_times[x][0])  # type: ignore[index]
     return {k: stim_frame_times[k] for k in sorted_keys}
 
 

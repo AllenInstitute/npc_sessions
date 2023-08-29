@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 from collections.abc import Iterable, Iterator
-from typing import ClassVar, Optional, Protocol
+from typing import ClassVar, Protocol
 
 import ndx_events
 import npc_lims
@@ -12,19 +12,23 @@ import pynwb
 
 import npc_sessions.utils as utils
 
-        
+
 def get_behavior(nwb_file: pynwb.NWBFile) -> pynwb.ProcessingModule:
     """Get or create `nwb_file['behavior']`"""
-    return nwb_file.processing.get('behavior') or nwb_file.create_processing_module(
-    name="behavior", description="Processed behavioral data",
+    return nwb_file.processing.get("behavior") or nwb_file.create_processing_module(
+        name="behavior",
+        description="Processed behavioral data",
     )
-    
+
+
 def get_ecephys(nwb_file: pynwb.NWBFile) -> pynwb.ProcessingModule:
     """Get or create `nwb_file['ecephys']`"""
-    return nwb_file.processing.get('ecephys') or nwb_file.create_processing_module(
-    name="ecephys", description="Processed ecephys data",
+    return nwb_file.processing.get("ecephys") or nwb_file.create_processing_module(
+        name="ecephys",
+        description="Processed ecephys data",
     )
-    
+
+
 class SupportsToNWB(Protocol):
     def to_nwb(self, nwb: pynwb.NWBFile) -> None:
         ...
@@ -89,39 +93,48 @@ class Units(NWBContainerWithDF):
     def add_to_nwb(self, nwb: pynwb.NWBFile) -> None:
         nwb.units = pynwb.misc.Units.from_dataframe(self.to_dataframe(), name="units")
 
+
 class LickSpout(SupportsToNWB):
-    
-    name = "lick spout",
+    name = ("lick spout",)
     description = (
-        'times at which the subject interacted with a water spout '
-        'putatively licks, but may include other events such as grooming'
+        "times at which the subject interacted with a water spout "
+        "putatively licks, but may include other events such as grooming"
     )
-    
+
     def __init__(self, sync_path_or_dataset: utils.SyncPathOrDataset) -> None:
-        self.timestamps = utils.get_sync_data(sync_path_or_dataset).get_rising_edges('lick_sensor', units='seconds')
-    
+        self.timestamps = utils.get_sync_data(sync_path_or_dataset).get_rising_edges(
+            "lick_sensor", units="seconds"
+        )
+
     def to_nwb(self, nwb_file: pynwb.NWBFile) -> None:
         nwb_file.add_acquisition(
-            lick_nwb_data = ndx_events.Events(
-            timestamps=self.timestamps,
-            name=self.name,
-            description=self.description,
+            lick_nwb_data=ndx_events.Events(
+                timestamps=self.timestamps,
+                name=self.name,
+                description=self.description,
             )
         )
-        
+
+
 class RunningSpeed(SupportsToNWB):
-    name = 'running'
+    name = "running"
     description = (
-        'linear forward running speed on a rotating disk, low-pass filtered '
-        f'at {utils.RUNNING_LOWPASS_FILTER_HZ} Hz with a 3rd order Butterworth filter'
+        "linear forward running speed on a rotating disk, low-pass filtered "
+        f"at {utils.RUNNING_LOWPASS_FILTER_HZ} Hz with a 3rd order Butterworth filter"
     )
-    unit = 'm/s'
-    conversion = 100 if utils.RUNNING_SPEED_UNITS == 'cm/s' else 1.
+    unit = "m/s"
+    conversion = 100 if utils.RUNNING_SPEED_UNITS == "cm/s" else 1.0
     # comments = f'Assumes mouse runs at `radius = {utils.RUNNING_DISK_RADIUS} {utils.RUNNING_SPEED_UNITS.split("/")[0]}` on disk.'
-    
-    def __init__(self, *stim: utils.StimPathOrDataset, sync: Optional[utils.SyncPathOrDataset] = None) -> None:
-        self.data, self.timestamps = utils.get_running_speed_from_stim_files(*stim, sync=sync, filt=utils.lowpass_filter)
-     
+
+    def __init__(
+        self,
+        *stim: utils.StimPathOrDataset,
+        sync: utils.SyncPathOrDataset | None = None,
+    ) -> None:
+        self.data, self.timestamps = utils.get_running_speed_from_stim_files(
+            *stim, sync=sync, filt=utils.lowpass_filter
+        )
+
     def to_nwb(self, nwb_file: pynwb.NWBFile) -> None:
         filtered = pynwb.TimeSeries(
             name=self.name,

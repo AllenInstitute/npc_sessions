@@ -39,21 +39,20 @@ import functools
 from collections.abc import Iterable
 from typing import Optional
 
+import h5py
 import numpy as np
 import numpy.typing as npt
-import h5py
 
 import npc_sessions.trials as trials
 import npc_sessions.utils as utils
 
 
 class TaskControl(trials.PropertyDict):
-    
     _sync: Optional[utils.SyncDataset]
     _hdf5: h5py.File
     _frame_times: npt.NDArray[np.float64]
     _display_times: npt.NDArray[np.float64]
-    
+
     def __init__(
         self,
         hdf5: utils.StimPathOrDataset,
@@ -85,7 +84,7 @@ class TaskControl(trials.PropertyDict):
                 )[self._hdf5],
             )
             self._display_times = utils.assert_stim_times(
-                    utils.get_stim_frame_times(
+                utils.get_stim_frame_times(
                     self._hdf5, sync=self._sync, frame_time_type="display_time"
                 )[self._hdf5],
             )

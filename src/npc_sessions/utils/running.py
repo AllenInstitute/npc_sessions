@@ -18,12 +18,13 @@ FRAMERATE = 60
 """Visual stim f.p.s - assumed to equal running wheel sampling rate. i.e. one
 running wheel sample per camstim vsync"""
 
-RUNNING_SPEED_UNITS: Literal['cm/s', 'm/s'] = 'm/s'
+RUNNING_SPEED_UNITS: Literal["cm/s", "m/s"] = "m/s"
 """How to report in NWB - NWB expects SI, SDK might have previously reported cm/s"""
 
 RUNNING_LOWPASS_FILTER_HZ = 4
 """Frequency for filtering running speed - filtered data stored in NWB `processing`, unfiltered
 in `acquisition`"""
+
 
 def get_running_speed_from_stim_files(
     *stim_path_or_dataset: utils.StimPathOrDataset,
@@ -47,16 +48,16 @@ def get_running_speed_from_stim_files(
         if len(times) == len(values):
             times = times[1:]
             values = values[1:]
-            times = times + 0.5 * np.median(
-                np.diff(times)
-            )
+            times = times + 0.5 * np.median(np.diff(times))
         else:
             raise ValueError(
                 f"Length mismatch between running speed ({len(values)}) and timestamps ({len(times)})"
             )
         nonlocal running_speed, timestamps
         # we need to filter before pooling discontiguous blocks of samples
-        running_speed = np.concatenate([running_speed, filt(values) if filt else values])
+        running_speed = np.concatenate(
+            [running_speed, filt(values) if filt else values]
+        )
         timestamps = np.concatenate([timestamps, times])
 
     if sync is None:
@@ -72,8 +73,8 @@ def get_running_speed_from_stim_files(
         hdf5_to_vsync_times = utils.get_stim_frame_times(
             *(utils.get_stim_data(hdf5) for hdf5 in stim_path_or_dataset),
             sync=sync,
-            frame_time_type='vsync',
-            )
+            frame_time_type="vsync",
+        )
 
         for hdf5, vsync_times in hdf5_to_vsync_times.items():
             if vsync_times is None:
@@ -86,14 +87,18 @@ def get_running_speed_from_stim_files(
     assert len(running_speed) == len(timestamps)
     return running_speed, timestamps
 
-def get_frame_times_from_stim_file(stim_path_or_dataset: utils.StimPathOrDataset) -> npt.NDArray:
+
+def get_frame_times_from_stim_file(
+    stim_path_or_dataset: utils.StimPathOrDataset,
+) -> npt.NDArray:
     return np.concatenate(
-        ([0], np.cumsum(
-            utils.get_stim_data(stim_path_or_dataset)["frameIntervals"][:]
-            ))
+        ([0], np.cumsum(utils.get_stim_data(stim_path_or_dataset)["frameIntervals"][:]))
     )
 
-def get_running_speed_from_hdf5(stim_path_or_dataset: utils.StimPathOrDataset) -> npt.NDArray | None:
+
+def get_running_speed_from_hdf5(
+    stim_path_or_dataset: utils.StimPathOrDataset,
+) -> npt.NDArray | None:
     """
     Running speed in m/s or cm/s (see `UNITS`).
 
@@ -106,29 +111,30 @@ def get_running_speed_from_hdf5(stim_path_or_dataset: utils.StimPathOrDataset) -
     """
     d = utils.get_stim_data(stim_path_or_dataset)
     if (
-        'rotaryEncoder' in d
-        and isinstance(d['rotaryEncoder'][()], bytes)
-        and d['rotaryEncoder'].asstr()[()] == 'digital'
+        "rotaryEncoder" in d
+        and isinstance(d["rotaryEncoder"][()], bytes)
+        and d["rotaryEncoder"].asstr()[()] == "digital"
     ):
-        assert d['frameRate'][()] == FRAMERATE
+        assert d["frameRate"][()] == FRAMERATE
         wheel_revolutions = (
-            d['rotaryEncoderCount'][:] / d['rotaryEncoderCountsPerRev'][()]
+            d["rotaryEncoderCount"][:] / d["rotaryEncoderCountsPerRev"][()]
         )
         if not any(wheel_revolutions):
             return None
-        wheel_radius_cm = d['wheelRadius'][()]
-        if RUNNING_SPEED_UNITS == 'm/s':
+        wheel_radius_cm = d["wheelRadius"][()]
+        if RUNNING_SPEED_UNITS == "m/s":
             running_disk_radius = wheel_radius_cm / 100
-        elif RUNNING_SPEED_UNITS == 'cm/s':
+        elif RUNNING_SPEED_UNITS == "cm/s":
             running_disk_radius = wheel_radius_cm
         else:
-            raise ValueError(f'Unexpected units for running speed: {RUNNING_SPEED_UNITS}')
-        speed = np.diff(
-            wheel_revolutions * 2 * np.pi * running_disk_radius * FRAMERATE
-        )
+            raise ValueError(
+                f"Unexpected units for running speed: {RUNNING_SPEED_UNITS}"
+            )
+        speed = np.diff(wheel_revolutions * 2 * np.pi * running_disk_radius * FRAMERATE)
         # we lost one sample due to diff: pad with nan to keep same number of samples
         return np.concatenate([[np.nan], speed])
     return None
+
 
 def lowpass_filter(running_speed: npt.NDArray) -> npt.NDArray:
     """
@@ -136,6 +142,7 @@ def lowpass_filter(running_speed: npt.NDArray) -> npt.NDArray:
     See
     https://github.com/AllenInstitute/AllenSDK/blob/36e784d007aed079e3cad2b255ca83cdbbeb1330/allensdk/brain_observatory/behavior/data_objects/running_speed/running_processing.py
     """
-    b, a = scipy.signal.butter(3, Wn=RUNNING_LOWPASS_FILTER_HZ, fs=FRAMERATE, btype='lowpass')
+    b, a = scipy.signal.butter(
+        3, Wn=RUNNING_LOWPASS_FILTER_HZ, fs=FRAMERATE, btype="lowpass"
+    )
     return scipy.signal.filtfilt(b, a, np.nan_to_num(running_speed))
-

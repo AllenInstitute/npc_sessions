@@ -49,8 +49,8 @@ class Session:
 
     local_path: upath.UPath | None = None
 
-    acquisition: Mapping[Literal['licks', 'running'], nwb.NWBContainer]
-    processing: Mapping[Literal['ephys', 'behavior'], nwb.NWBContainer]
+    acquisition: Mapping[Literal["licks", "running"], nwb.NWBContainer]
+    processing: Mapping[Literal["ephys", "behavior"], nwb.NWBContainer]
     analysis: Mapping[str, nwb.NWBContainerWithDF] = {}
 
     def __init__(self, session: str, **kwargs) -> None:
@@ -559,11 +559,13 @@ class Session:
     @functools.cached_property
     def _licks(self):
         return nwb.LickSpout(self.sync_data)
-    
+
     @functools.cached_property
     def _running(self):
-        return nwb.RunningSpeed(*self.stim_data.values(), sync=self.sync_data if self.is_sync else None)
-    
+        return nwb.RunningSpeed(
+            *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
+        )
+
     # state: MutableMapping[str | int, Any]
     # subject: MutableMapping[str, Any]
     # session: MutableMapping[str, Any]
