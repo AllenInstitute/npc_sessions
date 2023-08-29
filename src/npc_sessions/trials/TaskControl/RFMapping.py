@@ -39,18 +39,20 @@ class RFMapping(TaskControl):
     def get_trial_aud_onset(
         self, trial: int | npt.NDArray[np.int32]
     ) -> npt.NDArray[np.float64]:
+        if hasattr(self, '_aud_stim_onset_times'):
+            return utils.safe_index(self._aud_stim_onset_times, trial)
+        # TODO remove above when we have precise timing
         return self.get_vis_display_time(self._hdf5["stimStartFrame"][trial])
-        # TODO remove when accurate timing available
-        return utils.safe_index(self._aud_stim_onset_times, trial)
 
     def get_trial_aud_offset(
         self, trial: int | npt.NDArray[np.int32]
     ) -> npt.NDArray[np.float64]:
+        if hasattr(self, '_aud_stim_offset_times'):
+            return utils.safe_index(self._aud_stim_offset_times, trial)
+        # TODO remove above when we have precise timing
         return self.get_vis_display_time(
             self._hdf5["stimStartFrame"][trial] + self._hdf5["stimFrames"][()]
         )
-        # TODO remove when accurate timing available
-        return utils.safe_index(self._aud_stim_offset_times, trial)
 
     @functools.cached_property
     def _len_all_trials(self) -> int:
