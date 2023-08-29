@@ -88,3 +88,13 @@ class TaskControl(trials.PropertyDict):
                     self._hdf5, sync=self._sync, frame_time_type="display_time"
                 )[self._hdf5],
             )
+    
+    def get_script_frame_time(
+        self, frame: int | npt.NDArray[np.int32]
+    ) -> npt.NDArray[np.float64]:
+        return utils.safe_index(self._frame_times, frame)
+
+    def get_vis_display_time(
+        self, frame: int | npt.NDArray[np.int32]
+    ) -> npt.NDArray[np.float64]:
+        return utils.safe_index(self._display_times, frame)
