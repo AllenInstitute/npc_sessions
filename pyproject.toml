@@ -27,6 +27,9 @@ dependencies = [
     "opencv-python-headless>=4.8.0.76",
     "python-dotenv>=1.0.0",
     "ndx-events>=0.2.0",
+    "psychopy==2022.1.2",
+    "psychtoolbox>=3.0.19.0",
+    "nidaqmx==0.6.2",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
@@ -48,9 +51,7 @@ Repository = "https://github.com/AllenInstitute/npc_sessions"
 Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 
 [project.optional-dependencies]
-onsite = [
-    "np-session>=0.6.34",
-]
+onsite = ["np-session>=0.6.34"]
 
 [tool.pdm.dev-dependencies]
 dev = [
@@ -62,6 +63,12 @@ dev = [
     "black>=23.7.0",
 ]
 
+[tool.pdm.resolution.overrides]
+psychopy = "2022.1.2"
+pyglet = "1.5.23"
+nidaqmx = "0.6.2"
+python-vlc = "3.0.11115"
+
 [tool.pdm.scripts]
 ruff = "ruff check src --fix-only"
 black = "black src"
@@ -71,79 +78,40 @@ bumpver = "pdm bump micro"
 tag = "pdm bump tag"
 
 [tool.pdm.scripts.prebuild]
-composite = [
-    "black",
-    "ruff",
-    "test",
-    "mypy",
-]
+composite = ["black", "ruff", "test", "mypy"]
 
 [tool.pdm.scripts.dryrun]
-composite = [
-    "prebuild",
-    "pdm publish --repository testpypi",
-]
+composite = ["prebuild", "pdm publish --repository testpypi"]
 
 [tool.pdm.scripts.pub]
-composite = [
-    "prebuild",
-    "bumpver",
-    "pdm publish",
-]
+composite = ["prebuild", "bumpver", "pdm publish"]
 
 [tool.setuptools.packages.find]
-where = [
-    "src",
-]
+where = ["src"]
 
 [tool.setuptools.package-data]
-npc_sessions = [
-    "py.typed",
-]
+npc_sessions = ["py.typed"]
 
 [tool.ruff]
 fix = true
 ignore-init-module-imports = true
-select = [
-    "ANN",
-    "B",
-    "C",
-    "E",
-    "F",
-    "I",
-    "RUF100",
-    "N",
-    "U",
-    "W",
-    "YTT",
-]
-extend-exclude = [
-    "tests",
-]
-src = [
-    "src",
-    "tests",
-]
+select = ["ANN", "B", "C", "E", "F", "I", "RUF100", "N", "U", "W", "YTT"]
+extend-exclude = ["tests"]
+src = ["src", "tests"]
 target-version = "py39"
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
 
 [tool.black]
-target-version = [
-    "py39",
-]
+target-version = ["py39"]
 
 [tool.coverage.paths]
-source = [
-    "src",
-]
+source = ["src"]
 
 [tool.coverage.run]
 branch = true
-source = [
-    "src",
-]
+source = ["src"]
 
 [tool.coverage.report]
 skip_covered = true
@@ -170,11 +138,7 @@ doctest_optionflags = [
     "IGNORE_EXCEPTION_DETAIL",
     "ELLIPSIS",
 ]
-testpaths = [
-    ".",
-    "src",
-    "tests",
-]
+testpaths = [".", "src", "tests"]
 
 [tool.mypy]
 check_untyped_defs = false
@@ -190,8 +154,5 @@ ignore_missing_imports = true
 implicit_reexport = false
 
 [build-system]
-requires = [
-    "setuptools>=61",
-    "wheel",
-]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
