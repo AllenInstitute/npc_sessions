@@ -211,7 +211,7 @@ def get_stim_latencies_from_nidaq_recording(
 def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
     """Raise exception if result is an exception, otherwise return result"""
     if isinstance(result, Exception):
-        raise result
+        raise result from None
     return result
 
 def get_stim_frame_times(
@@ -237,7 +237,9 @@ def get_stim_frame_times(
     Should be used with `assert_stim_times` to raise a possible exception:
     >>> frame_times = get_stim_frame_times(bad_stim, sync=sync)
     >>> assert_stim_times(frame_times[bad_stim])
-    None
+    Traceback (most recent call last):
+    ...
+    OSError: Unable to open file (bad object header version number)
     """
 
     # load sync file once
