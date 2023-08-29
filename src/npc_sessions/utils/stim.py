@@ -45,18 +45,20 @@ def get_pkl_stim_data(stim_path: StimPathOrDataset, **kwargs) -> dict:
     kwargs.setdefault("encoding", "latin1")
     return pickle.loads(utils.from_pathlike(stim_path).read_bytes())
 
+class Waveform(NamedTuple):
+    waveform: npt.NDArray[np.float64]
+    sampling_rate: float
 
 class StimPresentation(NamedTuple):
     trial_idx: int
-    waveform: npt.NDArray[np.float64]
-    sampling_rate: float
+    waveform: Waveform
     onset_sample_on_nidaq: int
     offset_sample_on_nidaq: int
     trigger_time_on_sync: float
 
     @property
     def duration(self) -> float:
-        return len(self.waveform) / self.sampling_rate
+        return len(self.waveform.waveform) / self.waveform.sampling_rate
 
 
 class StimRecording(NamedTuple):
