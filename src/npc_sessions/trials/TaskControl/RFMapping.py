@@ -37,18 +37,18 @@ class RFMapping(TaskControl):
     ) -> None:
         super().__init__(hdf5, sync, **kwargs)
 
-    def get_script_frame_time(self, frame: int | npt.NDArray[np.int64]) -> npt.NDArray[np.float64]:
+    def get_script_frame_time(self, frame: int | npt.NDArray[np.int32]) -> npt.NDArray[np.float64]:
         return utils.safe_index(self._frame_times, frame)
 
-    def get_vis_display_time(self, frame: int | npt.NDArray[np.int64]) -> npt.NDArray[np.float64]:
+    def get_vis_display_time(self, frame: int | npt.NDArray[np.int32]) -> npt.NDArray[np.float64]:
         return utils.safe_index(self._display_times, frame)
 
-    def get_trial_aud_onset(self, trial: int | npt.NDArray[np.int64]) -> npt.NDArray[np.float64]:
+    def get_trial_aud_onset(self, trial: int | npt.NDArray[np.int32]) -> npt.NDArray[np.float64]:
         return self.get_vis_display_time(self._hdf5['stimStartFrame'][trial])
         #TODO remove when accurate timing available
         return utils.safe_index(self._aud_stim_onset_times, trial)
 
-    def get_trial_aud_offset(self, trial: int | npt.NDArray[np.int64]) -> npt.NDArray[np.float64]:
+    def get_trial_aud_offset(self, trial: int | npt.NDArray[np.int32]) -> npt.NDArray[np.float64]:
         return self.get_vis_display_time(self._hdf5['stimStartFrame'][trial] + self._hdf5['stimFrames'][()])
         #TODO remove when accurate timing available
         return utils.safe_index(self._aud_stim_offset_times, trial)

@@ -127,7 +127,7 @@ def get_running_speed_from_hdf5(stim_path_or_dataset: utils.StimPathOrDataset) -
             wheel_revolutions * 2 * np.pi * running_disk_radius * FRAMERATE
         )
         # we lost one sample due to diff: pad with nan to keep same number of samples
-        return np.concatenate(([np.nan], speed))
+        return np.concatenate([[np.nan], speed])
     return None
 
 def lowpass_filter(running_speed: npt.NDArray) -> npt.NDArray:
