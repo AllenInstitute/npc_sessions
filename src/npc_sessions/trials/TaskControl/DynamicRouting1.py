@@ -46,27 +46,20 @@ class DynamicRouting1(TaskControl):
     (ie. vis stim assumed)."""
     _aud_stim_offset_times: npt.NDArray[np.float64]
 
+    
     def get_trial_aud_onset(
         self, trial: int | npt.NDArray[np.int32]
     ) -> npt.NDArray[np.float64]:
-        if not self._sync:
-            return self.get_script_frame_time(self._hdf5["stimStartFrame"][trial])
-        if hasattr(self, '_aud_stim_onset_times'):
-            return utils.safe_index(self._aud_stim_onset_times, trial)
-        return self.get_script_frame_time(self._hdf5["stimStartFrame"][trial])
+        if not self._sync or not hasattr(self, '_aud_stim_onset_times'):
+            return self.get_script_frame_time(self._hdf5["trialStimStartFrame"][trial])
+        return utils.safe_index(self._aud_stim_onset_times, trial)
         
     def get_trial_aud_offset(
         self, trial: int | npt.NDArray[np.int32]
     ) -> npt.NDArray[np.float64]:
-        if not self._sync:
-            return self.get_script_frame_time(
-                self._hdf5["stimStartFrame"][trial] + self._hdf5["stimFrames"][()]
-            )
-        if hasattr(self, '_aud_stim_offset_times'):
-            return utils.safe_index(self._aud_stim_offset_times, trial)
-        return self.get_script_frame_time(
-            self._hdf5["stimStartFrame"][trial] + self._hdf5["stimFrames"][()]
-        )
+        if not self._sync or not hasattr(self, '_aud_stim_offset_times'):
+            return self.get_trial_aud_onset(trial) + self._hdf5["trialSoundDur"][trial]
+        return utils.safe_index(self._aud_stim_offset_times, trial)
         
     # ---------------------------------------------------------------------- #
     # helper-properties that won't become columns:
@@ -79,7 +72,7 @@ class DynamicRouting1(TaskControl):
     @functools.cached_property
     def _sam(self) -> DynRoutData:
         obj = DynRoutData()
-        obj.loadBehavData(filePath=None, h5pyFile=self._hdf5)
+        obj.loadBehavData(filePath="dummy_366122_", h5pyFile=self._hdf5)
         return obj
 
     @functools.cached_property
@@ -135,6 +128,11 @@ class DynamicRouting1(TaskControl):
         )
 
     @functools.cached_property
+    def stop_time(self) -> npt.NDArray[np.float64]:
+        """latest time in each trial, after all events have occurred"""
+        return self.get_vis_display_time(self._sam.trialEndFrame)
+
+    @functools.cached_property
     def quiescent_start_time(self) -> npt.NDArray[np.float64]:
         """start of interval in which the subject should not lick, otherwise the
         trial will start over.
@@ -144,6 +142,34 @@ class DynamicRouting1(TaskControl):
         return self.get_vis_display_time(
             self._sam.stimStartFrame - self._hdf5['quiescentFrames'][()]
         )
+
+    @functools.cached_property
+    def quiescent_stop_time(self) -> npt.NDArray[np.float64]:
+        """end of interval in which the subject should not lick, otherwise the
+        trial will start over"""
+        return self.stim_start_time
+
+    @functools.cached_property
+    def stim_start_time(self) -> npt.NDArray[np.float64]:
+        """onset of visual or auditory stimulus"""
+        starts = np.nan * np.ones(self._len)
+        for idx in range(self._len):
+            if self.is_vis_stim[idx] or self.is_catch[idx]:
+                starts[idx] = self.get_vis_display_time(self._sam.stimStartFrame[idx])
+            if self.is_aud_stim[idx]:
+                starts[idx] = self.get_trial_aud_onset(idx)
+        return starts
+
+    @functools.cached_property
+    def stim_stop_time(self) -> npt.NDArray[np.float64]:
+        """offset of visual or auditory stimulus"""
+        ends = np.nan * np.ones(self._len)
+        for idx in range(self._len):
+            if self.is_vis_stim[idx] or self.is_catch[idx]:
+                ends[idx] = self.get_vis_display_time(self._sam.stimStartFrame[idx] + self._hdf5['trialVisStimFrames'][idx])
+            if self.is_aud_stim[idx]:
+                ends[idx] = self.get_trial_aud_offset(idx)
+        return ends
 
     @functools.cached_property
     def opto_start_time(self) -> npt.NDArray[np.float64]:
@@ -159,23 +185,11 @@ class DynamicRouting1(TaskControl):
         )
 
     @functools.cached_property
-    def quiescent_stop_time(self) -> npt.NDArray[np.float64]:
-        """end of interval in which the subject should not lick, otherwise the
-        trial will start over"""
-        return self.get_vis_display_time(
-            self._sam.stimStartFrame
-        )
-
-    @functools.cached_property
-    def stim_start_time(self) -> npt.NDArray[np.float64]:
-        """onset of visual or auditory stimulus"""
-        starts = np.nan * np.ones(self._len)
-        for idx in range(self._len):
-            if self.is_vis_stim[idx] or self.is_catch[idx]:
-                starts[idx] = self.get_vis_display_time(self._sam.stimStartFrame[idx])
-            if self.is_aud_stim[idx]:
-                starts[idx] = self.get_trial_aud_onset(idx)
-        return starts
+    def opto_stop_time(self) -> npt.NDArray[np.float64]:
+        """offset of optogenetic inactivation"""
+        if not self._has_opto:
+            return np.nan * np.ones(self._len)
+        return self.opto_start_time + self._sam.trialOptoDur
 
     @functools.cached_property
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
@@ -186,15 +200,14 @@ class DynamicRouting1(TaskControl):
         )
 
     @functools.cached_property
-    def stim_stop_time(self) -> npt.NDArray[np.float64]:
-        """offset of visual or auditory stimulus"""
-        ends = np.nan * np.ones(self._len)
-        for idx in range(self._len):
-            if self.is_vis_stim[idx] or self.is_catch[idx]:
-                ends[idx] = self.get_vis_display_time(self._sam.stimStartFrame[idx] + self._hdf5['trialVisStimFrames'][idx])
-            if self.is_aud_stim[idx]:
-                ends[idx] = self.get_trial_aud_offset(idx)
-        return ends
+    def _response_window_stop_frame(self) -> npt.NDArray[np.float64]:
+        return self._sam.stimStartFrame + self._hdf5['responseWindow'][()][1]
+    
+    @functools.cached_property
+    def response_window_stop_time(self) -> npt.NDArray[np.float64]:
+        """end of interval in which the subject should lick if a GO trial,
+        otherwise should not lick"""
+        return self.get_vis_display_time(self._response_window_stop_frame)
 
     @functools.cached_property
     def response_time(self) -> npt.NDArray[np.float64]:
@@ -206,55 +219,54 @@ class DynamicRouting1(TaskControl):
         )
 
     @functools.cached_property
-    def response_window_stop_time(self) -> npt.NDArray[np.float64]:
-        """end of interval in which the subject should lick if a GO trial,
-        otherwise should not lick"""
-        return self.get_vis_display_time(
-            self._sam.stimStartFrame + self._hdf5['responseWindow'][()][1]
-        )
-
-    @functools.cached_property
-    def opto_stop_time(self) -> npt.NDArray[np.float64]:
-        """offset of optogenetic inactivation"""
-        if not self._has_opto:
-            return np.nan * np.ones(self._len)
-        return self.opto_start_time + self._sam.trialOptoDur
-
-    @functools.cached_property
-    def post_response_window_start_time(self) -> npt.NDArray[np.float64]:
-        """start of null interval in which the subject awaits a new trial or a
-        timeout period; may receive a noncontingent reward if scheduled"""
-        return self.response_window_stop_time
-
-    @functools.cached_property
-    def post_response_window_stop_time(self) -> npt.NDArray[np.float64]:
-        """end of null interval"""
-        return self.get_vis_display_time(
-            self._sam.stimStartFrame + self._hdf5['postResponseWindowFrames'][()]
-        )
-
-    @functools.cached_property
-    def timeout_start_time(self) -> npt.NDArray[np.float64]:
-        """start of extended inter-trial interval added due to a false alarm"""
+    def _timeout_start_frame(self) -> npt.NDArray[np.float64]:
         starts = np.nan * np.ones_like(self.start_time)
         for idx in range(0, self._len - 1):
             if self.is_repeat[idx + 1]:
                 starts[idx] = self.get_vis_display_time(
-                    self._sam.stimStartFrame[idx] + self._hdf5['postResponseWindowFrames'][()]
-                    # TODO + 1?
+                    self._sam.stimStartFrame[idx]
+                    + self._hdf5['responseWindow'][()][1]
+                    + 1
                 )
         return starts
-
+        
+    @functools.cached_property
+    def timeout_start_time(self) -> npt.NDArray[np.float64]:
+        """start of extended inter-trial interval added due to a false alarm"""
+        return self.get_vis_display_time(self._timeout_start_frame)
+    
+    
+    @functools.cached_property
+    def _timeout_stop_frame(self) -> npt.NDArray[np.float64]:
+        return self._timeout_start_frame + self._sam.incorrectTimeoutFrames
+    
     @functools.cached_property
     def timeout_stop_time(self) -> npt.NDArray[np.float64]:
         """end of extended inter-trial interval"""
-        ends = np.nan * np.ones_like(self.start_time)
-        for idx in range(0, self._len - 1):
-            if self.is_repeat[idx + 1]:
-                ends[idx] = self.get_vis_display_time(
-                    self._sam.stimStartFrame[idx] + self._hdf5['postResponseWindowFrames'][()] + self._sam.incorrectTimeoutFrames
-                )
-        return ends
+        return self.get_vis_display_time(self._timeout_stop_frame)
+
+    @functools.cached_property
+    def _post_response_window_start_frame(self) -> npt.NDArray[np.float64]:
+        return np.where(
+            np.isnan(self._timeout_stop_frame),
+            self._response_window_stop_frame, 
+            self._timeout_stop_frame, 
+        )
+        
+    @functools.cached_property
+    def post_response_window_start_time(self) -> npt.NDArray[np.float64]:
+        """start of null interval in which the subject awaits a new trial; 
+        may receive a noncontingent reward if scheduled"""
+        return self.get_vis_display_time(self._post_response_window_start_frame)
+
+    @functools.cached_property
+    def _post_response_window_stop_frame(self) -> npt.NDArray[np.float64]:
+        return self._post_response_window_start_frame + self._hdf5['postResponseWindowFrames'][()]
+    
+    @functools.cached_property
+    def post_response_window_stop_time(self) -> npt.NDArray[np.float64]:
+        """end of null interval"""
+        return self.get_vis_display_time(self._post_response_window_stop_frame)
 
     '''
     @functools.cached_property
@@ -262,11 +274,6 @@ class DynamicRouting1(TaskControl):
         """TODO"""
         return np.nan * np.zeros(self._len)
     '''
-
-    @functools.cached_property
-    def stop_time(self) -> npt.NDArray[np.float64]:
-        """latest time in each trial, after all events have occurred"""
-        return self.get_vis_display_time(self._sam.trialEndFrame)
 
 
     # ---------------------------------------------------------------------- #
@@ -304,15 +311,20 @@ class DynamicRouting1(TaskControl):
         return np.array([name[:-1] for name in self._trial_rewarded_stim_name])
 
     @functools.cached_property
-    def index(self) -> npt.NDArray[np.int32]:
+    def trial_index(self) -> npt.NDArray[np.int32]:
         """0-indexed trial number
-        # for regular trials (with stimuli), increments over
-        # time.
-
-        # - nan for catch trials
-        # - nan for repeats
         """
         return np.arange(self._len)
+    
+    @functools.cached_property
+    def regular_trial_index(self) -> npt.NDArray[np.int32]:
+        """
+        0-indexed trial number for regular trials (with stimuli), increments over
+        time.
+
+        - nan for catch trials
+        - nan for repeats
+        """
         regular_trial_index = np.nan * np.zeros(self._len)
         counter = -1
         for idx in range(self._len):
@@ -323,58 +335,58 @@ class DynamicRouting1(TaskControl):
         return regular_trial_index
 
     @functools.cached_property
-    def index_within_block(self) -> npt.NDArray[np.int32]:
+    def trial_index_in_block(self) -> npt.NDArray[np.int32]:
         """0-indexed trial number within a block, increments over the block.
 
         - nan for catch trials
         - nan for repeats
         """
-        index_within_block = np.full(self._len, np.nan)
+        index_in_block = np.full(self._len, np.nan)
         for i in range(self._len):
-            if np.isnan(self.index[i]):
+            if np.isnan(self.regular_trial_index[i]):
                 continue
-            elif self.index[i] == 0 or self.block_index[i] != self.block_index[i - 1]:
+            elif self.trial_index[i] == 0 or self.block_index[i] != self.block_index[i - 1]:
                 count = 0
             else:
                 count += 1
-            index_within_block[i] = count
-        return index_within_block
+            index_in_block[i] = count
+        return index_in_block
 
     @functools.cached_property
-    def scheduled_reward_index_within_block(self) -> npt.NDArray[np.float64]:
+    def _scheduled_reward_index_in_block(self) -> npt.NDArray[np.float64]:
         """0-indexed trial number within a block for trials in which a
         non-contingent reward was scheduled.
 
          - see `is_reward_scheduled`
         """
-        return np.where(self.is_reward_scheduled is True, self.index_within_block, np.nan * np.ones(self._len))
+        return np.where(self.is_reward_scheduled is True, self.trial_index_in_block, np.nan * np.ones(self._len))
 
     @functools.cached_property
-    def TODO_opto_area_name(self) -> npt.NDArray[np.str_]:
+    def TODO_location_area_name(self) -> npt.NDArray[np.str_]:
         """target location for optogenetic inactivation during the trial"""
         # TODO
         return np.full(self._len, np.nan)
 
     @functools.cached_property
-    def TODO_opto_area_index(self) -> npt.NDArray[np.int32]:
+    def TODO_opto_location_index(self) -> npt.NDArray[np.int32]:
         """0-indexed target location for optogenetic inactivation during the trial"""
         # TODO
         return np.full(self._len, np.nan)
 
     @functools.cached_property
-    def opto_voltage(self) -> npt.NDArray[np.float64]:
+    def _opto_voltage(self) -> npt.NDArray[np.float64]:
         if not any(self.is_opto):
             return np.full(self._len, np.nan)
         return self._sam.trialOptoVoltage
 
     @functools.cached_property
-    def galvo_voltage_x(self) -> npt.NDArray[np.float64]:
+    def _galvo_voltage_x(self) -> npt.NDArray[np.float64]:
         if not any(self.is_opto):
             return np.full(self._len, np.nan)
         return np.array([voltage[0] for voltage in self._sam.trialGalvoVoltage])
 
     @functools.cached_property
-    def galvo_voltage_y(self) -> npt.NDArray[np.float64]:
+    def _galvo_voltage_y(self) -> npt.NDArray[np.float64]:
         if not any(self.is_opto):
             return np.full(self._len, np.nan)
         return np.array([voltage[1] for voltage in self._sam.trialGalvoVoltage])
@@ -387,7 +399,7 @@ class DynamicRouting1(TaskControl):
         - counts repeats due to misses
         - nan for catch trials
         """
-        repeats = np.where(~np.isnan(self.index), np.zeros(self._len), np.full(self._len, np.nan))
+        repeats = np.where(~np.isnan(self.trial_index), np.zeros(self._len), np.full(self._len, np.nan))
         counter = 0
         for idx in np.where(repeats == 0)[0]:
             if self.is_repeat[idx]:
@@ -555,7 +567,7 @@ class DynamicRouting1(TaskControl):
     @functools.cached_property
     def is_context_switch(self) -> npt.NDArray[np.bool_]:
         """the first trial with a stimulus after a change in context"""
-        return np.isin(self.index_within_block, 0) & ~np.isin(self.block_index, 0)
+        return np.isin(self.trial_index_in_block, 0) & ~np.isin(self.block_index, 0)
 
     @functools.cached_property
     def is_repeat(self) -> npt.NDArray[np.bool_]:
