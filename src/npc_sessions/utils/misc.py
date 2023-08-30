@@ -72,17 +72,21 @@ def safe_index(
     - returns nans where `indices` is nan
     - returns a scalar if `indices` is a scalar #TODO current type annotation is insufficient
 
-    Type of array is preserved, if possible:
-    >>> array_like = [1, 2, 3]
-    >>> safe_index(array_like, 0)
+    >>> safe_index([1, 2], 0)
     1
-    >>> safe_index(array_like, [0, 1, 2.0])
-    array([1, 2, 3])
-    >>> safe_index(array_like, np.nan)
+    >>> safe_index([1., 2.], 0)
+    1.0
+    >>> safe_index([1., 2.], np.nan)
     nan
+    >>> safe_index([1., 2., 3.1], [0, np.nan, 2.0])
+    array([1. , nan, 3.1])
 
-    Type of array won't be preserved if any indices are nan:
-    >>> safe_index(array_like, [0, np.nan, 2.0])
+    Type of array is preserved, if possible:
+    >>> safe_index([1, 2, 3], [0., 1., 2.])
+    array([1, 2, 3])
+    
+    Type of array can't be preserved if any indices are nan:
+    >>> safe_index([1, 2, 3], [0, np.nan, 2.0])
     array([ 1., nan,  3.])
     """
     idx: npt.NDArray = np.array(indices)  # copy
@@ -101,7 +105,7 @@ def safe_index(
     # if indices was a scalar, return a scalar instead of a 0d array
     if not isinstance(indices, Iterable):
         assert result.size == 1
-        return type(indices)(result)  # type: ignore[call-arg, return-value]
+        return result.item()
     return result
 
 
