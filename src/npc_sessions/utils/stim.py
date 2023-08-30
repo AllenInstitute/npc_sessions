@@ -96,7 +96,7 @@ class SoundStim(TaskControl):
             self.trialSoundArray = stim_data['trialSoundArray'][:self.nTrials]
 
         elif len(stim_data['trialSoundArray'][:])==0:
-            print('trialSoundArray emtpy; regenerating sound arrays')
+            print('trialSoundArray empty; regenerating sound arrays')
             self.trialSoundArray = self.regenerate_sound_array()
 
     def regenerate_sound_array(self) -> list:
