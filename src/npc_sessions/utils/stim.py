@@ -12,8 +12,10 @@ import npc_session
 import numba
 import numpy as np
 import numpy.typing as npt
+import scipy
 import upath
 
+from DynamicRoutingTask.TaskControl import TaskControl
 import npc_sessions.utils as utils
 
 StimPathOrDataset: TypeAlias = utils.PathLike | h5py.File | Mapping
@@ -73,6 +75,73 @@ class StimRecording(NamedTuple):
     def offset_time_on_sync(self) -> float:
         return self.onset_time_on_sync + self.presentation.duration
 
+class SoundStim(TaskControl):
+    
+    def __init__(self,stim_file_or_dataset):
+
+        stim_data = get_h5_stim_data(stim_file_or_dataset)
+        
+        self.nTrials = len(stim_data['trialEndFrame'][:])
+        self.trialSoundDur = stim_data['trialSoundDur'][:self.nTrials]
+        self.trialSoundFreq = stim_data['trialSoundFreq'][:self.nTrials]
+        self.trialSoundSeed = stim_data['trialSoundSeed'][:self.nTrials]
+        self.trialSoundType = stim_data['trialSoundType'][:self.nTrials]
+        self.trialSoundVolume = stim_data['trialSoundVolume'][:self.nTrials]
+        self.trialSoundAM = stim_data['trialSoundAM'][:self.nTrials]
+        self.soundSampleRate = stim_data['soundSampleRate'][()]
+        self.soundHanningDur = stim_data['soundHanningDur'][()]
+        self.soundMode = stim_data['soundMode'][()].decode()
+
+        if len(stim_data['trialSoundArray'][:])>0:
+            self.trialSoundArray = stim_data['trialSoundArray'][:self.nTrials]
+
+        elif len(stim_data['trialSoundArray'][:])==0:
+            print('trialSoundArray emtpy; regenerating sound arrays')
+            self.trialSoundArray = self.regenerate_sound_array()
+
+    def regenerate_sound_array(self) -> list:
+        trialSoundArray = []
+        for trialnum in range(0,self.nTrials):
+            
+            if self.trialSoundType[trialnum].decode()=='':
+                soundArray=np.array([])
+            else:
+                if self.trialSoundType[trialnum].decode()=='tone':
+                    #accounts for a quirk of how the trial sound frequencies are saved
+                    freq=self.trialSoundFreq[trialnum][0]
+                else:
+                    freq=self.trialSoundFreq[trialnum]
+
+                soundArray=self.makeSoundArray(soundType=self.trialSoundType[trialnum].decode(),
+                                                dur=self.trialSoundDur[trialnum],
+                                                vol=self.trialSoundVolume[trialnum],
+                                                freq=freq,
+                                                AM=self.trialSoundAM[trialnum],
+                                                seed=self.trialSoundSeed[trialnum])
+            
+            trialSoundArray.append(soundArray)
+
+        return trialSoundArray
+    
+    
+def get_waveforms_from_stim_file(
+     stim_file_or_dataset: StimPathOrDataset,
+     waveform_type: str,
+) -> dict[StimPathOrDataset, tuple[Waveform, ...]]:
+
+    waveforms=[]
+    if (waveform_type=='audio')|(waveform_type=='sound'):
+        sound_stim = SoundStim(stim_file_or_dataset=stim_file_or_dataset)
+
+        for trialnum in range(0,sound_stim.nTrials):
+            waveform = Waveform
+            waveform.waveform = sound_stim.trialSoundArray[trialnum]
+            waveform.sampling_rate = sound_stim.soundSampleRate
+            waveforms.append(waveform)
+    
+    #TODO: add opto waveforms
+
+    return dict[StimPathOrDataset, tuple(waveforms)]
 
 @numba.njit(parallel=True)
 def _xcorr(v, w, t) -> float:
