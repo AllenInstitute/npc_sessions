@@ -134,14 +134,12 @@ def get_waveforms_from_stim_file(
         sound_stim = SoundStim(stim_file_or_dataset=stim_file_or_dataset)
 
         for trialnum in range(0,sound_stim.nTrials):
-            waveform = Waveform
-            waveform.waveform = sound_stim.trialSoundArray[trialnum]
-            waveform.sampling_rate = sound_stim.soundSampleRate
-            waveforms.append(waveform)
+            waveforms.append(Waveform(waveform = sound_stim.trialSoundArray[trialnum],
+                                      sampling_rate = sound_stim.soundSampleRate))
     
     #TODO: add opto waveforms
 
-    return dict[StimPathOrDataset, tuple(waveforms)]
+    return {stim_file_or_dataset: tuple(waveforms)}
 
 @numba.njit(parallel=True)
 def _xcorr(v, w, t) -> float:
