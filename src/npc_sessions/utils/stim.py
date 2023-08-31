@@ -4,7 +4,7 @@ import datetime
 import io
 import logging
 import pickle
-from typing import Any, Callable, Literal, NamedTuple, Mapping, Iterable
+from typing import Any, Callable, Literal, NamedTuple, Mapping, Iterable, Union
 
 import h5py
 import npc_session
@@ -16,7 +16,7 @@ from typing_extensions import TypeAlias
 
 import npc_sessions.utils as utils
 
-StimPathOrDataset: TypeAlias = utils.PathLike | h5py.File | Mapping
+StimPathOrDataset: TypeAlias = Union[utils.PathLike, h5py.File, Mapping]
 
 logger = logging.getLogger(__name__)
 
