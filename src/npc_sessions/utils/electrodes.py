@@ -16,7 +16,7 @@ NETWORK_ELECTRODE_PATH = upath.UPath(
 
 def get_acronym_map():
     # TODO get from allen brain map
-    return pickle.load(
+    return pickle.loads(
         upath.UPath(
             "//allen/programs/mindscope/workgroups/np-behavior/tissuecyte/field_reference/acrnm_map.pkl"
         ).read_bytes()
