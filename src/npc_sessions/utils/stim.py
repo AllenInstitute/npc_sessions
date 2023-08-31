@@ -4,8 +4,7 @@ import datetime
 import io
 import logging
 import pickle
-from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Literal, NamedTuple
+from typing import Any, Callable, Literal, NamedTuple, Mapping, Iterable
 
 import h5py
 import npc_session
