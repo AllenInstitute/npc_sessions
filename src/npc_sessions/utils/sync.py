@@ -541,6 +541,9 @@ class SyncDataset:
         falling = self.get_falling_edges(bit)
         total_falling = len(falling)
 
+        # get labels
+        label = self.line_labels[line]
+
         if total_events <= 0:
             if print_results:
                 logger.info("*" * 70)
@@ -581,6 +584,7 @@ class SyncDataset:
                 logger.info("*" * 70)
 
                 logger.info("Quick stats for line: %s" % line)
+                logger.info("Label: %s" % label)
                 logger.info("Bit: %i" % bit)
                 logger.info("Data points: %i" % total_data_points)
                 logger.info("Total transitions: %i" % total_events)
@@ -597,6 +601,7 @@ class SyncDataset:
 
             return {
                 "line": line,
+                "label": label,
                 "bit": bit,
                 "total_data_points": total_data_points,
                 "total_events": total_events,
