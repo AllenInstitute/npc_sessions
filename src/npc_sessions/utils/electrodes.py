@@ -9,10 +9,16 @@ import pickle
 import SimpleITK as sitk
 
 NETWORK_ELECTRODE_PATH = upath.UPath('//allen/programs/mindscope/workgroups/np-behavior/tissuecyte')
-with open(upath.UPath(r"\\allen\programs\mindscope\workgroups\np-behavior\tissuecyte\field_reference\acrnm_map.pkl"), 'rb') as f:
-    ACRONYM_MAP = pickle.load(f)
 
-ANNOTATION_VOLUME = sitk.GetArrayFromImage(sitk.ReadImage(upath.UPath(r"\\allen\programs\mindscope\workgroups\np-behavior\tissuecyte\field_reference\ccf_ano.mhd")))
+def get_acronym_map():
+    # TODO get from allen brain map
+    return pickle.load(
+        upath.UPath("//allen/programs/mindscope/workgroups/np-behavior/tissuecyte/field_reference/acrnm_map.pkl").read_bytes()
+        ) 
+    
+def get_annotation_volume():
+     # TODO get from somewhere in the cloud
+    return sitk.GetArrayFromImage(sitk.ReadImage(upath.UPath("//allen/programs/mindscope/workgroups/np-behavior/tissuecyte/field_reference/ccf_ano.mhd")))
 
 def get_structure_acronym(acronym_map:dict[str, int], annotation_volume:npt.NDArray[np.int64], point:tuple[int, int, int]) -> str:
     if point[1] < 0:
@@ -75,7 +81,7 @@ def get_electrodes_from_network(session: str | npc_session.SessionRecord) -> pd.
 
         for index, row in probe_electrodes.iterrows():
             if pd.isna(row.region):
-                label = get_structure_acronym(ACRONYM_MAP, ANNOTATION_VOLUME, (row.AP, row.DV, row.ML))
+                label = get_structure_acronym(get_acronym_map(), get_annotation_volume(), (row.AP, row.DV, row.ML))
 
                 probe_electrodes.loc[index, 'region'] = label
 
@@ -115,5 +121,12 @@ def get_electrodes_from_network(session: str | npc_session.SessionRecord) -> pd.
     
     return session_electrodes
 
-if __name__ == '__main__':
-    get_electrodes_from_network('668759_20230711')
+if __name__ == "__main__":
+    import doctest
+
+    import dotenv
+
+    dotenv.load_dotenv(dotenv.find_dotenv(usecwd=True))
+    doctest.testmod(
+        optionflags=(doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE)
+    )
