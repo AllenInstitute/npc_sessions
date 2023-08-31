@@ -27,6 +27,7 @@ dependencies = [
     "opencv-python-headless>=4.8.0.76",
     "python-dotenv>=1.0.0",
     "ndx-events>=0.2.0",
+    "SimpleITK>=2.2.1",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
