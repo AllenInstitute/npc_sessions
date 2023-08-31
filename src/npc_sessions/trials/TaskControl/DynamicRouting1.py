@@ -318,7 +318,7 @@ class DynamicRouting1(TaskControl):
         return np.arange(self._len)
     
     @functools.cached_property
-    def regular_trial_index(self) -> npt.NDArray[np.int32]:
+    def _regular_trial_index(self) -> npt.NDArray:
         """
         0-indexed trial number for regular trials (with stimuli), increments over
         time.
@@ -380,8 +380,6 @@ class DynamicRouting1(TaskControl):
     
     @functools.cached_property
     def _opto_location_bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
-        if not any(self.is_opto):
-            return np.full(self._len, np.nan)
         calibration_data = dict(self._hdf5["bregmaGalvoCalibrationData"])
         for k in ("bregmaXOffset", "bregmaYOffset"):
             calibration_data[k] = calibration_data[k][()]
