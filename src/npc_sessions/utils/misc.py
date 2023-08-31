@@ -84,7 +84,7 @@ def safe_index(
     Type of array is preserved, if possible:
     >>> safe_index([1, 2, 3], [0., 1., 2.])
     array([1, 2, 3])
-    
+
     Type of array can't be preserved if any indices are nan:
     >>> safe_index([1, 2, 3], [0, np.nan, 2.0])
     array([ 1., nan,  3.])

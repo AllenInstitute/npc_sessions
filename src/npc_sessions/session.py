@@ -22,19 +22,19 @@ import itertools
 import json
 import operator
 import pathlib
-import numpy as np
-import numpy.typing as npt
-import polars as pl
-import pandas as pd
 import re
+import warnings
 from collections.abc import Mapping
 from typing import Any, Literal
-import warnings
 
 import h5py
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
+import polars as pl
 import pynwb
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
@@ -567,8 +567,10 @@ class Session:
 
     @functools.cached_property
     def _running(self):
-        return nwb.RunningSpeed(*self.stim_data.values(), sync=self.sync_data if self.is_sync else None)
-    
+        return nwb.RunningSpeed(
+            *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
+        )
+
     @functools.cache
     def get_units_spike_paths(self) -> tuple[upath.UPath, ...]:
         # add logic as needed to call function depending on sorting method, etc
@@ -576,48 +578,59 @@ class Session:
 
     @functools.cached_property
     def units_path(self) -> upath.UPath:
-        units_path = next(path for path in self.get_units_spike_paths() if 'csv' in str(path))
+        units_path = next(
+            path for path in self.get_units_spike_paths() if "csv" in str(path)
+        )
         return units_path
-    
+
     @functools.cached_property
     def units(self) -> pd.DataFrame:
         return pl.read_csv(self.units_path.read_bytes()).to_pandas()
 
     @functools.cached_property
     def spike_times_path(self) -> upath.UPath:
-        spike_times_path = next(path for path in self.get_units_spike_paths() if 'spike' in str(path))
+        spike_times_path = next(
+            path for path in self.get_units_spike_paths() if "spike" in str(path)
+        )
         return spike_times_path
-    
+
     @functools.cached_property
     def spike_times(self) -> dict[str, npt.NDArray[np.float64]]:
         spike_times_dict = {}
-        units_names = self.units['unit_name']
+        units_names = self.units["unit_name"]
         with io.BytesIO(self.spike_times_path.read_bytes()) as f:
             spike_times = np.load(f, allow_pickle=True)
-        
+
         for i in range(len(units_names)):
             spike_times_dict[units_names[i]] = spike_times[i]
-        
+
         return spike_times_dict
 
     @functools.cache
     def get_electrodes_df(self) -> pd.DataFrame | None:
         # add logic to call other function when needed depending on method
         return utils.get_electrodes_from_network(self.id)
-    
+
     @functools.cached_property
     def units_electrodes(self) -> pd.DataFrame:
         electrodes_df = self.get_electrodes_df()
         if electrodes_df is not None:
-            units_electrodes = self.units.merge(electrodes_df, left_on=['peak_channel', 'device_name'], 
-                                                right_on=['channel', 'device_name'])
-            
-            units_electrodes.drop(columns=['electrodes', 'channel'], inplace=True)
-            units_electrodes.rename(columns={'region': 'structure_acronym'}, inplace=True)
+            units_electrodes = self.units.merge(
+                electrodes_df,
+                left_on=["peak_channel", "device_name"],
+                right_on=["channel", "device_name"],
+            )
+
+            units_electrodes.drop(columns=["electrodes", "channel"], inplace=True)
+            units_electrodes.rename(
+                columns={"region": "structure_acronym"}, inplace=True
+            )
 
             return units_electrodes
         else:
-            warnings.warn(f'No electrodes for session {self.id}. Returning units with no electrodes')
+            warnings.warn(
+                f"No electrodes for session {self.id}. Returning units with no electrodes"
+            )
             return self.units
 
     # state: MutableMapping[str | int, Any]
@@ -633,7 +646,7 @@ class Session:
 # x.sync_data.plot_diode_measured_sync_square_flips()
 
 if __name__ == "__main__":
-    session = Session('626791_20220817')
+    session = Session("626791_20220817")
     units_electrodes = session.units_electrodes
     import doctest
 

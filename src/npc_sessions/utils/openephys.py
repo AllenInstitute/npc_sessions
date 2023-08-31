@@ -191,9 +191,18 @@ def get_pxi_nidaq_data(
         data = zarr.open(device.compressed, mode="r")
         return data["traces_seg0"]
     else:
-        device_metadata = next((_ for _ in get_merged_oebin_file(recording_dirs)["continuous"] if device.name in _["folder_name"]), None)
+        device_metadata = next(
+            (
+                _
+                for _ in get_merged_oebin_file(recording_dirs)["continuous"]
+                if device.name in _["folder_name"]
+            ),
+            None,
+        )
         if device_metadata is None:
-            raise ValueError(f"Could not find device metadata for {device.name}: looked for `structure.oebin` files in {recording_dirs}")
+            raise ValueError(
+                f"Could not find device metadata for {device.name}: looked for `structure.oebin` files in {recording_dirs}"
+            )
         num_channels: int = device_metadata["num_channels"]
         dat = np.frombuffer(
             (device.continuous / "continuous.dat").read_bytes(), dtype=np.int16
