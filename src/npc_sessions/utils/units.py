@@ -20,7 +20,7 @@ def run_capsules_for_units_kilosort_codeocean(session_id: str) -> None:
     
     capsule_results_units = npc_lims.run_capsule_and_get_results('980c5218-abef-41d8-99ed-24798d42313b',
      (raw_data_asset, sorted_data_asset))
-    response = npc_lims.register_session_data_asset(session_id, capsule_results_units)
+    npc_lims.register_session_data_asset(session_id, capsule_results_units)
 
     units_no_peak_channel_asset = npc_lims.get_session_units_data_asset(session_id)
     if units_no_peak_channel_asset is None:
@@ -32,7 +32,7 @@ def run_capsules_for_units_kilosort_codeocean(session_id: str) -> None:
         "d1a5c3a8-8fb2-4cb0-8e9e-96e6e1d03ff1",
         (raw_data_asset, sorted_data_asset, units_no_peak_channel_asset),
     )
-    response = npc_lims.register_session_data_asset(session_id, capsule_result_units_peak_channels)
+    npc_lims.register_session_data_asset(session_id, capsule_result_units_peak_channels)
 
 def get_units_spike_paths_from_kilosort_codeocean_output(units_s3_path: tuple[upath.UPath, ...]) -> tuple[upath.UPath, ...]:
     units_path = next(path for path in units_s3_path if 'csv' in str(path))
