@@ -16,6 +16,7 @@ import logging
 import numpy as np
 import numpy.typing as npt
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
+import DynamicRoutingTask.OptoParams
 
 import npc_sessions.utils as utils
 from npc_sessions.trials.TaskControl import TaskControl
@@ -361,24 +362,96 @@ class DynamicRouting1(TaskControl):
         """
         return np.where(self.is_reward_scheduled is True, self.trial_index_in_block, np.nan * np.ones(self._len))
 
+    def get_trial_opto_devices(self, trial_idx: int) -> tuple[str, ...]:
+        devices = self._hdf5['trialOptoDevice'].asstr()[trial_idx]
+        if not devices:
+            return ()
+        if devices[0] + devices[-1] != '[]':
+            # basic check before we eval code from the web
+            raise ValueError(f"Invalid opto devices string: {devices}")
+        return tuple(eval(devices))
+    
+    
     @functools.cached_property
-    def TODO_location_area_name(self) -> npt.NDArray[np.str_]:
-        """target location for optogenetic inactivation during the trial"""
-        # TODO
-        return np.full(self._len, np.nan)
+    def _opto_params_index(self) -> npt.NDArray[np.float64]:
+        if not any(self.is_opto):
+            return np.full(self._len, np.nan)
+        return self._hdf5['trialOptoParamsIndex'][()]
+    
+    @functools.cached_property
+    def _opto_location_bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
+        if not any(self.is_opto):
+            return np.full(self._len, np.nan)
+        calibration_data = dict(self._hdf5["bregmaGalvoCalibrationData"])
+        for k in ("bregmaXOffset", "bregmaYOffset"):
+            calibration_data[k] = calibration_data[k][()]
+        return tuple(
+            DynamicRoutingTask.OptoParams.galvoToBregma(
+                calibration_data,
+                *voltages,
+            )
+            for voltages in zip(self._galvo_voltage_x, self._galvo_voltage_y)
+        )
+        
+    @functools.cached_property
+    def opto_location_bregma_x(self) -> npt.NDArray[np.float64]:
+        if not any(self.is_opto):
+            return np.full(self._len, np.nan)
+        return np.array([bregma[0] for bregma in self._opto_location_bregma_xy])
 
     @functools.cached_property
-    def TODO_opto_location_index(self) -> npt.NDArray[np.int32]:
+    def opto_location_bregma_y(self) -> npt.NDArray[np.float64]:
+        if not any(self.is_opto):
+            return np.full(self._len, np.nan)
+        return np.array([bregma[1] for bregma in self._opto_location_bregma_xy])
+
+    @functools.cached_property
+    def opto_location_name(self) -> npt.NDArray[np.str_]:
+        """target location for optogenetic inactivation during the trial"""
+        if not any(self.is_opto):
+            return np.full(self._len, np.nan)
+        labels = self._hdf5['trialOptoLabel'].asstr()[()]
+        return np.where(
+            labels != 'no opto',
+            labels,
+            np.nan,
+        )
+
+    @functools.cached_property
+    def _opto_location_index(self) -> npt.NDArray[np.int32]:
         """0-indexed target location for optogenetic inactivation during the trial"""
         # TODO
+        if not any(self.is_opto):
+            return np.full(self._len, np.nan)
         return np.full(self._len, np.nan)
 
     @functools.cached_property
     def _opto_voltage(self) -> npt.NDArray[np.float64]:
+        voltages = np.full(self._len, np.nan)
+        if not any(self.is_opto):
+            return voltages
+        for idx in range(self._len):
+            v = self._sam.trialOptoVoltage[idx]
+            if v.shape:
+                voltages[idx] = utils.safe_index(v, self._opto_params_index[idx])
+                continue
+            voltages[idx] = v
+        return voltages
+    
+    @functools.cached_property
+    def opto_power(self) -> npt.NDArray[np.float64]:
         if not any(self.is_opto):
             return np.full(self._len, np.nan)
-        return self._sam.trialOptoVoltage
-
+        voltages = self._sam.trialOptoVoltage[self._opto_params_index]
+        return np.where(
+            np.isnan(voltages),
+            np.nan,
+            DynamicRoutingTask.OptoParams.voltsToPower(
+                self._hdf5["optoPowerCalibrationData"],
+                voltages,
+            ),
+        )
+        
     @functools.cached_property
     def _galvo_voltage_x(self) -> npt.NDArray[np.float64]:
         if not any(self.is_opto):
