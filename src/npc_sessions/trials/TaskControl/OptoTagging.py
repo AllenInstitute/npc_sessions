@@ -8,7 +8,7 @@ display times to get stim onset times
 import contextlib
 import functools
 
-import DynamicRoutingTask.OptoParams as OptoParams
+import DynamicRoutingTask.OptoParams
 import numpy as np
 import numpy.typing as npt
 
@@ -51,7 +51,7 @@ class OptoTagging(TaskControl):
         for k in ("bregmaXOffset", "bregmaYOffset"):
             calibration_data[k] = calibration_data[k][()]
         return tuple(
-            OptoParams.galvoToBregma(
+            DynamicRoutingTask.OptoParams.galvoToBregma(
                 calibration_data,
                 *voltages,
             )
@@ -72,7 +72,7 @@ class OptoTagging(TaskControl):
 
     @functools.cached_property
     def power(self) -> npt.NDArray[np.float64]:
-        return OptoParams.voltsToPower(
+        return DynamicRoutingTask.OptoParams.voltsToPower(
             self._hdf5["optoPowerCalibrationData"], self._hdf5["trialOptoVoltage"][:]
         )
 
