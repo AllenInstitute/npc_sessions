@@ -318,6 +318,17 @@ class DynamicRouting1(TaskControl):
         return np.arange(self._len)
     
     @functools.cached_property
+    def trial_index_in_block(self) -> npt.NDArray[np.int32]:
+        index_in_block = np.full(self._len, np.nan)
+        for i in range(self._len):
+            if self.trial_index[i] == 0 or self.block_index[i] != self.block_index[i - 1]:
+                count = 0
+            else:
+                count += 1
+            index_in_block[i] = count
+        return index_in_block
+    
+    @functools.cached_property
     def _regular_trial_index(self) -> npt.NDArray:
         """
         0-indexed trial number for regular trials (with stimuli), increments over
@@ -336,7 +347,7 @@ class DynamicRouting1(TaskControl):
         return regular_trial_index
 
     @functools.cached_property
-    def trial_index_in_block(self) -> npt.NDArray[np.int32]:
+    def _regular_trial_index_in_block(self) -> npt.NDArray[np.int32]:
         """0-indexed trial number within a block, increments over the block.
 
         - nan for catch trials
@@ -344,7 +355,7 @@ class DynamicRouting1(TaskControl):
         """
         index_in_block = np.full(self._len, np.nan)
         for i in range(self._len):
-            if np.isnan(self.regular_trial_index[i]):
+            if np.isnan(self._regular_trial_index[i]):
                 continue
             elif self.trial_index[i] == 0 or self.block_index[i] != self.block_index[i - 1]:
                 count = 0
