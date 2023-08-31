@@ -37,7 +37,7 @@ by just adding trials to an existing nwb table, via `nwb_file.add_trial(**trial)
 """
 import functools
 from collections.abc import Iterable
-from typing import Optional
+from typing import Optional, SupportsFloat
 
 import h5py
 import numpy as np
@@ -90,11 +90,11 @@ class TaskControl(trials.PropertyDict):
             )
 
     def get_script_frame_time(
-        self, frame: int | npt.NDArray[np.int32]
+        self, frame: SupportsFloat | Iterable[SupportsFloat]
     ) -> npt.NDArray[np.float64]:
         return utils.safe_index(self._frame_times, frame)
 
     def get_vis_display_time(
-        self, frame: int | npt.NDArray[np.int32]
+        self, frame: SupportsFloat | Iterable[SupportsFloat]
     ) -> npt.NDArray[np.float64]:
         return utils.safe_index(self._display_times, frame)
