@@ -14,12 +14,12 @@ import io
 import logging
 import warnings
 from collections.abc import Iterable, Sequence
-from typing import TYPE_CHECKING, Any, Literal, TypeAlias
+from typing import TYPE_CHECKING, Any, Literal
 
 import h5py
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self
+from typing_extensions import Self, TypeAlias
 
 if TYPE_CHECKING:
     import matplotlib.figure as fig

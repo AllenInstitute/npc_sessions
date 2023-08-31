@@ -5,7 +5,7 @@ import io
 import logging
 import pickle
 from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Literal, NamedTuple, TypeAlias
+from typing import Any, Callable, Literal, NamedTuple
 
 import h5py
 import npc_session
@@ -13,6 +13,7 @@ import numba
 import numpy as np
 import numpy.typing as npt
 import upath
+from typing_extensions import TypeAlias
 
 import npc_sessions.utils as utils
 
