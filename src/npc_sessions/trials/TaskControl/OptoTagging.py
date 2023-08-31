@@ -46,7 +46,7 @@ class OptoTagging(TaskControl):
         return np.arange(len(self.start_time))
 
     @functools.cached_property
-    def _bregma(self) -> tuple[tuple[np.float64, np.float64], ...]:
+    def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         calibration_data = dict(self._hdf5["bregmaGalvoCalibrationData"])
         for k in ("bregmaXOffset", "bregmaYOffset"):
             calibration_data[k] = calibration_data[k][()]
@@ -60,11 +60,11 @@ class OptoTagging(TaskControl):
 
     @functools.cached_property
     def bregma_x(self) -> npt.NDArray[np.float64]:
-        return np.array([bregma[0] for bregma in self._bregma])
+        return np.array([bregma[0] for bregma in self._bregma_xy])
 
     @functools.cached_property
     def bregma_y(self) -> npt.NDArray[np.float64]:
-        return np.array([bregma[1] for bregma in self._bregma])
+        return np.array([bregma[1] for bregma in self._bregma_xy])
 
     @functools.cached_property
     def location(self) -> npt.NDArray[np.str_]:
