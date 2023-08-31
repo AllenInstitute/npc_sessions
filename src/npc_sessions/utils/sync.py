@@ -14,7 +14,7 @@ import io
 import logging
 import warnings
 from collections.abc import Iterable, Sequence
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Union
 
 import h5py
 import numpy as np
@@ -29,7 +29,7 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
-SyncPathOrDataset: TypeAlias = utils.PathLike | h5py.File | "SyncDataset"
+SyncPathOrDataset: TypeAlias = Union[utils.PathLike, h5py.File, "SyncDataset"]
 
 
 def get_sync_data(sync_path_or_data: SyncPathOrDataset) -> SyncDataset:
