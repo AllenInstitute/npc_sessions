@@ -92,14 +92,14 @@ def xcorr(
 
         times = np.arange(
             presentation.offset_sample_on_nidaq - presentation.onset_sample_on_nidaq
-        ) / (presentation.sampling_rate - padding_sec)
+        ) / (presentation.waveform.sampling_rate - padding_sec)
         values = nidaq_data[
             presentation.onset_sample_on_nidaq : presentation.offset_sample_on_nidaq
         ]
         interp_times = np.arange(
             -padding_sec,
             presentation.duration + padding_sec,
-            1 / presentation.sampling_rate,
+            1 / presentation.waveform.sampling_rate,
         )
         interp_values = np.interp(interp_times, times, values)
 
@@ -152,7 +152,7 @@ def get_stim_latencies_from_nidaq_recording(
     )
 
     nidaq_data = utils.get_pxi_nidaq_data(
-        recording_dirs=recording_dirs,
+        *recording_dirs,
         device_name=nidaq_device_name,
     )
 
@@ -190,7 +190,6 @@ def get_stim_latencies_from_nidaq_recording(
             StimPresentation(
                 trial_idx=idx,
                 waveform=waveform,
-                sampling_rate=waveform_rate,
                 onset_sample_on_nidaq=onset_sample_on_pxi_nidaq,
                 offset_sample_on_nidaq=offset_sample_on_pxi_nidaq,
                 trigger_time_on_sync=trigger_time_on_sync,
