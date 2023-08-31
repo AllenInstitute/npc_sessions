@@ -16,7 +16,7 @@ NETWORK_ELECTRODE_PATH = upath.UPath(
 )
 
 
-def get_acronym_map():
+def get_acronym_map() -> dict[str, int]:
     # TODO get from allen brain map
     return pickle.loads(
         upath.UPath(
@@ -25,7 +25,7 @@ def get_acronym_map():
     )
 
 
-def get_annotation_volume():
+def get_annotation_volume() -> npt.NDArray[np.int64]:
     # TODO get from somewhere in the cloud
     return sitk.GetArrayFromImage(
         sitk.ReadImage(
@@ -100,6 +100,8 @@ def get_electrodes_from_network(
         return None
 
     session_electrodes = None
+    volume = get_annotation_volume()
+    map = get_acronym_map()
 
     for electrode_file in electrode_files:
         string_file = str(electrode_file)
@@ -120,7 +122,7 @@ def get_electrodes_from_network(
         for index, row in probe_electrodes.iterrows():
             if pd.isna(row.region):
                 label = get_structure_acronym(
-                    get_acronym_map(), get_annotation_volume(), (row.AP, row.DV, row.ML)
+                    map, volume, (row.AP, row.DV, row.ML)
                 )
 
                 probe_electrodes.loc[index, "region"] = label
