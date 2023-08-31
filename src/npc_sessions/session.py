@@ -646,8 +646,6 @@ class Session:
 # x.sync_data.plot_diode_measured_sync_square_flips()
 
 if __name__ == "__main__":
-    session = Session("626791_20220817")
-    units_electrodes = session.units_electrodes
     import doctest
 
     import dotenv
