@@ -13,7 +13,7 @@ import numba
 import numpy as np
 import numpy.typing as npt
 import upath
-from DynamicRoutingTask.TaskUtils import makeSoundArray
+from DynamicRoutingTask.TaskUtils import makeSoundArray,getOptoPulseWaveform
 from typing_extensions import TypeAlias
 
 import npc_sessions.utils as utils
@@ -145,14 +145,58 @@ def regenerate_sound_array(
     return tuple(waveforms)
 
 
+def generate_opto_waveforms_from_stim_file(
+    stim_file_or_dataset: StimPathOrDataset,
+) -> tuple[Waveform, ...]:
+    
+    stim_data = get_h5_stim_data(stim_file_or_dataset)
+
+    waveforms=[]
+    nTrials = len(stim_data["trialEndFrame"][:])
+    trialOptoDelay=stim_data['trialOptoDelay'][:]
+    trialOptoDur=stim_data['trialOptoDur'][:]
+    trialOptoOffRamp=stim_data['trialOptoOffRamp'][:]
+    trialOptoOnRamp=stim_data['trialOptoOnRamp'][:]
+    trialOptoSinFreq=stim_data['trialOptoSinFreq'][:]
+    trialOptoVoltage=stim_data['trialOptoVoltage'][:]
+    optoOffsetVoltage=stim_data['optoOffsetVoltage']['laser_488'][()]
+    if 'optoSampleRate' in stim_data.keys():
+        optoSampleRate=stim_data['optoSampleRate'][()]
+    else:
+        optoSampleRate=2000
+
+    if len(trialOptoDur)==0:
+        print('no opto trials found')
+        return tuple(Waveform(waveform=np.array([]), sampling_rate=0))
+
+    for trialnum in range(0,nTrials):
+        if np.isnan(trialOptoDur[trialnum])==True:
+            optoArray = np.array([])
+        else:
+            optoArray = getOptoPulseWaveform(sampleRate=optoSampleRate,
+                                             amp=trialOptoVoltage[trialnum],
+                                             dur=trialOptoDur[trialnum],
+                                             delay=trialOptoDelay[trialnum],
+                                             freq=trialOptoSinFreq[trialnum],
+                                             onRamp=trialOptoOnRamp[trialnum],
+                                             offRamp=trialOptoOffRamp[trialnum],
+                                             offset=optoOffsetVoltage,
+                                             )
+        waveform = Waveform(waveform=optoArray, sampling_rate=optoSampleRate)
+        waveforms.append(waveform)
+    
+    return tuple(waveforms)
+
+
 def get_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
     waveform_type: str,
 ) -> dict[StimPathOrDataset, tuple[Waveform, ...]]:
+    
     if (waveform_type == "audio") | (waveform_type == "sound"):
         waveforms = get_audio_waveforms_from_stim_file(stim_file_or_dataset)
-
-    # TODO: add opto waveforms
+    elif (waveform_type == "opto"):
+        waveforms = generate_opto_waveforms_from_stim_file(stim_file_or_dataset)
 
     return {stim_file_or_dataset: tuple(waveforms)}
 
