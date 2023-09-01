@@ -740,22 +740,7 @@ class SyncDataset:
             else vsync_falling_edges[1:]
         )
 
-        vsync_times_in_blocks = []
-        for _rising, falling in zip(
-            reshape_into_blocks(vsync_rising_edges, min_gap=1.0),
-            reshape_into_blocks(vsync_falling_edges, min_gap=1.0),
-        ):
-            long_interval_threshold = np.median(np.diff(falling)) + 3 * np.std(
-                np.diff(falling)
-            )
-            while np.diff(falling)[0] > long_interval_threshold:
-                logger.debug("Removing anomalous vsync interval at start of block")
-                falling = falling[1:]
-
-            while np.diff(falling)[-1] > long_interval_threshold:
-                logger.debug("Removing anomalous vsync interval at end of block")
-                falling = falling[:-1]
-            vsync_times_in_blocks.append(falling)
+        vsync_times_in_blocks = list(reshape_into_blocks(vsync_falling_edges, min_gap=1.0))
 
         block_lengths = np.array([len(block) for block in vsync_times_in_blocks])
         logger.info(
@@ -773,6 +758,17 @@ class SyncDataset:
             if stim_running_rising_edges[0] > stim_running_falling_edges[0]:
                 stim_running_falling_edges[1:]
             assert len(stim_running_rising_edges) == len(vsync_times_in_blocks)
+            for idx, (stim_running_rising, stim_running_falling) in enumerate(zip(
+                stim_running_rising_edges,
+                stim_running_falling_edges,
+            )):
+                vsync_times_in_blocks[idx] = vsync_times_in_blocks[idx][
+                    stim_running_rising < vsync_times_in_blocks[idx]
+                    ] 
+                vsync_times_in_blocks[idx] = vsync_times_in_blocks[idx][
+                    vsync_times_in_blocks[idx] < stim_running_falling
+                ]
+                
         return tuple(vsync_times_in_blocks)
 
     @functools.cached_property
@@ -801,7 +797,7 @@ class SyncDataset:
     @functools.cached_property
     def frame_display_time_blocks(self) -> tuple[npt.NDArray[np.floating], ...]:
         """Blocks of adjusted diode times: one block per stimulus."""
-        vsync_falling_edges_in_blocks = self.vsync_times_in_blocks
+        vsync_times_in_blocks = self.vsync_times_in_blocks
 
         diode_rising_edges = self.get_rising_edges("stim_photodiode", units="seconds")
         diode_falling_edges = self.get_falling_edges("stim_photodiode", units="seconds")
@@ -817,27 +813,27 @@ class SyncDataset:
         frame_display_time_blocks: list[npt.NDArray[np.floating]] = []
         for block_idx, (vsyncs, rising, falling) in enumerate(
             zip(
-                vsync_falling_edges_in_blocks,
+                vsync_times_in_blocks,
                 diode_rising_edges_in_blocks,
                 diode_falling_edges_in_blocks,
             )
         ):
-            falling = diode_falling_edges[diode_falling_edges > vsyncs[0]]
-            rising = diode_rising_edges[diode_rising_edges > vsyncs[0]]
+            # keep flips after first vsync + an empirically determined min latency
+            # between vsync and screen update
+            MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC = 0.018 # 0.22 is typical
+            falling = diode_falling_edges[diode_falling_edges > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)]
+            rising = diode_rising_edges[diode_rising_edges > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)]
 
+            # keep flips only up to a certain time after the last vsync
+            MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC = 1.0
+            falling = falling[falling < (vsyncs[-1] + MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC)]
+            rising = rising[rising < (vsyncs[-1] + MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC)]
+            
             diode_flips = np.sort(np.concatenate((rising, falling)))
 
             short_interval_threshold = (
                 0.1 * 1 / 60
             )  # at 60 fps we should never have diode-flip intervals this small: consider them anomalous
-            # long_interval_threshold = np.mean(np.diff(diode_flips)) + 3 * np.std(np.diff(diode_flips))
-            # long threshold should only be applied at start or end of timestamps
-
-            # while np.diff(diode_flips)[0] > long_interval_threshold:
-            #     diode_flips = diode_flips[1:]
-
-            # while np.diff(diode_flips)[-1] > long_interval_threshold:
-            #     diode_flips = diode_flips[:-1]
 
             def short_interval_indices(frametimes):
                 intervals = np.diff(frametimes)
@@ -847,83 +843,45 @@ class SyncDataset:
                 indices = short_interval_indices(diode_flips)
                 diode_flips = np.delete(diode_flips, slice(indices[0], indices[0] + 2))
 
-            if (
-                len(diode_flips) - len(vsyncs) == 1
-                and len(diode_flips[diode_flips > vsyncs[-1]]) > 1
-            ):
-                # likely transition from last frame to grey screen results in
-                # extra diode flip: remove last flip
-                diode_flips = diode_flips[:-1]
-
-            if round(np.mean(np.diff(diode_flips)), 1) == round(
+            one_diode_flip_per_vsync: bool = round(np.mean(np.diff(diode_flips)), 1) == round(
                 np.mean(np.diff(vsyncs)), 1
-            ):
-                # diode flip freq == vsync freq
-
-                diode_flips = diode_flips[: len(vsyncs)]
-                # we currently have all diode flips after vsyncs[0]:
-                # take one flip per vsync, then check the intervals look ok
-
-                # np.diff(vsyncs) - np.diff(diode_flips)
+            ) # diode flip freq ~= vsync freq
+            
+            if one_diode_flip_per_vsync:
+                # we have to assume that vsyncs are correct at this point (no
+                # extras, none missing)
+                
+                def score(diode_flips, vsyncs) -> float:
+                    """Similarity between diode and vsync intervals - lower is
+                    more similar"""
+                    common_len = min([len(vsyncs), len(diode_flips)])
+                    return np.mean(np.abs(np.diff(vsyncs[:common_len]) - np.diff(adjust_diode_flip_intervals(diode_flips)[:common_len]))).item()
+                    
+                if score(diode_flips, vsyncs) > score(diode_flips, vsyncs[1:]):
+                    logger.warning("Missing first diode flip")
+                    diode_flips = add_missing_diode_flip_at_stim_onset(diode_flips, vsyncs)
+                    
+                elif score(diode_flips, vsyncs) > score(diode_flips[1:], vsyncs):
+                    logger.warning("Extra first diode flip")
+                    diode_flips = diode_flips[1:]
+                                
+                if len(diode_flips) > len(vsyncs):
+                    diode_flips = discard_erroneous_diode_flips_at_stim_offset(diode_flips, vsyncs)
+            
                 if len(diode_flips) != len(vsyncs):
-                    logger.warning(
+                    import matplotlib.pyplot as plt
+                    plt.plot(vsyncs, np.zeros_like(vsyncs), '|')
+                    plt.plot(diode_flips, np.zeros_like(diode_flips), '|')
+                    plt.show()
+                    raise IndexError(
                         f"Mismatch in stim {block_idx = }: {len(diode_flips) = }, {len(vsyncs) = }"
                     )
-
-                    if len(diode_flips) > len(vsyncs):
-                        logger.warning("Cutting excess diode flips at length of vsyncs")
-                        diode_flips = diode_flips[: len(vsyncs)]
-
-                    elif len(vsyncs) - len(diode_flips) == 1:
-                        # TODO add extra checks for this case
-                        # transition from black to black on first frame results
-                        # in lost diode flip: create one at start based on
-                        # statistics of other intervals. Shouldn't have any
-                        # side-effects and the first frame likely contains nothing important
-                        logger.warning(
-                            "Creating extra diode flip at start of stim block to account for black-to-black transition"
-                        )
-                        avg_alternate_flip_interval = np.median(
-                            np.diff(diode_flips[1::2])
-                        )
-                        diode_flips = np.concatenate(
-                            (
-                                np.array(
-                                    [diode_flips[0] - avg_alternate_flip_interval]
-                                ),
-                                diode_flips,
-                            )
-                        )
-                    else:
-                        raise IndexError(
-                            "Fewer diode flips than vsyncs: needs investigating"
-                        )
+                    
             else:
                 pass
                 # TODO adjust frametimes with diode data when flip is every 1 s
-
-            # diode flip intervals have a bimodal distribution due to asymmetry of
-            # photodiode thresholding: adjust every other interval to get a closer
-            # estimate of actual transition time for each diode flip
-            original_intervals = np.diff(diode_flips)
-            outliers = np.logical_or(
-                np.percentile(original_intervals, 5) > original_intervals,
-                original_intervals > np.percentile(original_intervals, 95),
-            )
-            intervals = original_intervals[~outliers]
-
-            # the two distributions are symmetric about the mean
-            deviation = np.mean(np.abs(intervals - np.mean(intervals)))
-            if np.mean(original_intervals[0::2]) > np.mean(original_intervals[1::2]):
-                sign = 1
-            else:
-                sign = -1
-
-            for idx in range(1, len(diode_flips) - 1, 2):
-                # alternate on every short/long interval and expand/contract
-                # interval
-                diode_flips[idx] -= sign * 0.5 * deviation
-                diode_flips[idx + 1] += sign * 0.5 * deviation
+                
+            diode_flips = adjust_diode_flip_intervals(diode_flips)
 
             AVERAGE_SCREEN_REFRESH_TIME = 0.008
             """Screen refreshes in stages top-to-bottom, total 16 ms measured by
@@ -935,6 +893,7 @@ class SyncDataset:
         assert len(frame_display_time_blocks) == len(self.vsync_times_in_blocks)
         return tuple(frame_display_time_blocks)
 
+    
     def plot_all(
         self,
         start_time: float,
@@ -1351,7 +1310,76 @@ def reshape_into_blocks(
 
     return tuple(blocks)
 
+def adjust_diode_flip_intervals(diode_flips: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:        
+    """
+    diode flip intervals have a bimodal distribution due to asymmetry of
+    photodiode thresholding: adjust every other interval to get a closer
+    estimate of actual transition time for each diode flip
+    """
+    original_intervals = np.diff(diode_flips)
+    outliers = np.logical_or(
+        np.percentile(original_intervals, 5) > original_intervals,
+        original_intervals > np.percentile(original_intervals, 95),
+    )
+    intervals = original_intervals[~outliers]
 
+    # the two distributions are symmetric about the mean
+    deviation = np.mean(np.abs(intervals - np.mean(intervals)))
+    if np.mean(original_intervals[0::2]) > np.mean(original_intervals[1::2]):
+        sign = 1
+    else:
+        sign = -1
+
+    for idx in range(1, len(diode_flips) - 1, 2):
+        # alternate on every short/long interval and expand/contract
+        # interval
+        diode_flips[idx] -= sign * 0.5 * deviation
+        diode_flips[idx + 1] += sign * 0.5 * deviation
+    return diode_flips
+
+
+def add_missing_diode_flip_at_stim_onset(
+    diode_flips: npt.NDArray,
+    vsyncs: npt.NDArray,
+    ) -> npt.NDArray[np.float64]:
+    """
+    Transition from white screen to white sync-square on first frame results
+    in a missing diode flip (same for black-to-black). 
+    Create a flip after the first vsync with an interval
+    based on the statistics of other intervals in the
+    recording. 
+    Shouldn't have any side-effects, and the first frame likely contains nothing important.
+    """
+    logger.info(
+        "Creating extra diode flip at start of stim block to account for white-to-white or black-to-black transition"
+    )
+    common_len = min([len(vsyncs) - 1, len(diode_flips)])
+    avg_vsync_to_flip_interval = np.median(adjust_diode_flip_intervals(diode_flips[:common_len]) - vsyncs[1:common_len + 1])
+    return np.array([vsyncs[0] + avg_vsync_to_flip_interval, *diode_flips])
+                            
+def discard_erroneous_diode_flips_at_stim_offset(diode_flips: npt.NDArray, vsyncs: npt.NDArray):
+    """
+    - after a stimulus the screen usually turns grey, causing
+    the diode to flip at least one more time after all stim
+    vsyncs are finished. 
+    - the grey screen itself may be on the threshold of diode activation, causing
+    multiple additional flips 
+    
+    remove the last flip if doesn't look time-locked with a
+    vsync (ie. vsync-to-flip interval is an outlier)
+    """
+    while len(diode_flips[diode_flips > vsyncs[-1]]) > 1 and len(diode_flips) > len(vsyncs):
+        diode_flips = diode_flips[:-1]
+    # while (
+    #         diode_flips[-1] - vsyncs[-1] > np.percentile((diode_flips[-len(vsyncs)-1:-1] - vsyncs[:]), 99)
+    #         ) or (
+    #         diode_flips[-1] - vsyncs[-1] < np.percentile((diode_flips[:len(vsyncs)] - vsyncs[:]), 1)
+    #     ):
+    #         logger.warning("Removing last diode flip")
+    #         diode_flips = diode_flips[:-1]
+    return diode_flips
+
+                
 if __name__ == "__main__":
     import doctest
 
