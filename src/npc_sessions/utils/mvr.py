@@ -38,7 +38,7 @@ def get_video_frame_times(
     >>> video_path = 's3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior'
     >>> frame_times = get_video_frame_times(sync_path, video_path)
     >>> [len(frames) for frames in frame_times.values()]
-    [304228, 304228, 304228]
+    [304229, 304229, 304229]
     """
     videos = get_video_file_paths(*video_paths)
     jsons = get_video_info_file_paths(*video_paths)
@@ -54,6 +54,8 @@ def get_video_frame_times(
                 camera_exposing_times[camera],
                 get_lost_frames_from_camera_info(camera_to_json_path[camera]),
             )
+            #Insert a nan frame time at the beginning to account for metadata frame
+            frame_times[camera_to_video_path[camera]] = np.insert(frame_times[camera_to_video_path[camera]], 0, np.nan)
     return frame_times
 
 
