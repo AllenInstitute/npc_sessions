@@ -12,6 +12,8 @@ display times to get stim onset times
 >>> assert dict(vis_mapping_trials)
 >>> assert dict(aud_mapping_trials)
 """
+from __future__ import annotations
+
 import functools
 
 import numpy as np
