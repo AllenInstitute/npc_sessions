@@ -35,7 +35,8 @@ by just adding trials to an existing nwb table, via `nwb_file.add_trial(**trial)
    concatenated trials, e.g.  stim_idx 1 in both sets must be the same stim
  - any `trial_idx` type counters might need updating too
 """
-import functools
+from __future__ import annotations
+
 from collections.abc import Iterable
 from typing import Optional, SupportsFloat
 
