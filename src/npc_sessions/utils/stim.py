@@ -76,27 +76,30 @@ class StimRecording(NamedTuple):
     def offset_time_on_sync(self) -> float:
         return self.onset_time_on_sync + self.presentation.duration
 
-def get_audio_waveforms_from_stim_file(stim_file_or_dataset: StimPathOrDataset) -> (list, float):
+def get_audio_waveforms_from_stim_file(stim_file_or_dataset: StimPathOrDataset) -> tuple[Waveform, ...]:
 
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     nTrials = len(stim_data['trialEndFrame'][:])
-    soundSampleRate = stim_data['soundSampleRate'][()]
+    soundSampleRate: int = stim_data['soundSampleRate'][()]
 
     if len(stim_data['trialSoundArray'][:])>0:
-        trialSoundArray = stim_data['trialSoundArray'][:nTrials]
+        trialSoundArray: list[npt.NDArray] = stim_data['trialSoundArray'][:nTrials]
+        waveforms=[]
+        for trialnum in range(0,len(trialSoundArray)):
+            waveforms.append(Waveform(waveform = trialSoundArray[trialnum],
+                                      sampling_rate = soundSampleRate))
+        return tuple(waveforms)
 
-    elif len(stim_data['trialSoundArray'][:])==0:
-        print('trialSoundArray empty; regenerating sound arrays')
-        trialSoundArray = regenerate_sound_array(stim_data)
+    print('trialSoundArray empty; regenerating sound arrays')
+    return regenerate_sound_array(stim_data)
 
-    return trialSoundArray, soundSampleRate
 
-def regenerate_sound_array(stim_file_or_dataset: StimPathOrDataset) -> list:
+def regenerate_sound_array(stim_file_or_dataset: StimPathOrDataset) -> tuple[Waveform, ...]:
     
     stim_data = get_h5_stim_data(stim_file_or_dataset)
     
-    trialSoundArray = []
+    waveforms = []
     nTrials = len(stim_data['trialEndFrame'][:])
     trialSoundDur = stim_data['trialSoundDur'][:nTrials]
     trialSoundFreq = stim_data['trialSoundFreq'][:nTrials]
@@ -126,23 +129,21 @@ def regenerate_sound_array(stim_file_or_dataset: StimPathOrDataset) -> list:
                                       freq=freq,
                                       AM=trialSoundAM[trialnum],
                                       seed=trialSoundSeed[trialnum])
-        
-        trialSoundArray.append(soundArray)
 
-    return trialSoundArray
+            waveform = Waveform(waveform = soundArray,
+                                sampling_rate = soundSampleRate)
+
+        waveforms.append(waveform)
+
+    return tuple(waveforms)
     
 def get_waveforms_from_stim_file(
      stim_file_or_dataset: StimPathOrDataset,
      waveform_type: str,
 ) -> dict[StimPathOrDataset, tuple[Waveform, ...]]:
 
-    waveforms=[]
     if (waveform_type=='audio')|(waveform_type=='sound'):
-        trialSoundArray,soundSampleRate = get_audio_waveforms_from_stim_file(stim_file_or_dataset)
-
-        for trialnum in range(0,len(trialSoundArray)):
-            waveforms.append(Waveform(waveform = trialSoundArray[trialnum],
-                                      sampling_rate = soundSampleRate))
+        waveforms = get_audio_waveforms_from_stim_file(stim_file_or_dataset)
     
     #TODO: add opto waveforms
 
