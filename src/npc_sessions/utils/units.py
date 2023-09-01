@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import io
+import warnings
+
 import npc_lims
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import polars as pl
 import upath
-import warnings
-import io
+
 
 def run_capsules_for_units_kilosort_codeocean(session_id: str) -> None:
     raw_data_asset = npc_lims.get_session_raw_data_asset(session_id)
@@ -20,9 +22,10 @@ def run_capsules_for_units_kilosort_codeocean(session_id: str) -> None:
         raise ValueError(
             f"Session {session_id} has no sorted data asset."
         )  # TODO move to function in npc_lims
-    
-    capsule_results_units = npc_lims.run_capsule_and_get_results('980c5218-abef-41d8-99ed-24798d42313b',
-     (raw_data_asset, sorted_data_asset))
+
+    capsule_results_units = npc_lims.run_capsule_and_get_results(
+        "980c5218-abef-41d8-99ed-24798d42313b", (raw_data_asset, sorted_data_asset)
+    )
     npc_lims.register_session_data_asset(session_id, capsule_results_units)
 
     units_no_peak_channel_asset = npc_lims.get_session_units_data_asset(session_id)
@@ -37,6 +40,7 @@ def run_capsules_for_units_kilosort_codeocean(session_id: str) -> None:
     )
     npc_lims.register_session_data_asset(session_id, capsule_result_units_peak_channels)
 
+
 def get_units_spike_paths_from_kilosort_codeocean_output(
     units_s3_path: tuple[upath.UPath, ...]
 ) -> tuple[upath.UPath, ...]:
@@ -47,15 +51,19 @@ def get_units_spike_paths_from_kilosort_codeocean_output(
 
     return units_path, spike_times_path, mean_waveforms_path, sd_waveforms_path
 
+
 def update_permissions_for_data_asset(session_id):
-    units_data_asset = npc_lims.codeocean.get_session_units_with_peak_channels_data_asset(
-        session_id
+    units_data_asset = (
+        npc_lims.codeocean.get_session_units_with_peak_channels_data_asset(session_id)
     )
 
     if not units_data_asset:
         warnings.warn(f"No units found for session {session_id}", stacklevel=2)
     else:
-        npc_lims.codeocean_client.update_permissions(units_data_asset['id'], everyone='viewer')
+        npc_lims.codeocean_client.update_permissions(
+            units_data_asset["id"], everyone="viewer"
+        )
+
 
 def get_units_spike_paths(
     session_id: str, method: str = "kilosort_codeocean"

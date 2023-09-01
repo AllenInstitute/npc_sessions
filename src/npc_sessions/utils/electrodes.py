@@ -64,9 +64,9 @@ def get_electrode_files_from_network(
     all_subject_sessions = npc_lims.get_subject_data_assets(session.subject)
     raw_subject_assets = sorted(
         asset["name"]
-            for asset in all_subject_sessions
-            if npc_lims.is_raw_data_asset(asset)
-        )
+        for asset in all_subject_sessions
+        if npc_lims.is_raw_data_asset(asset)
+    )
     day = tuple(
         raw_subject_assets.index(asset) + 1
         for asset in raw_subject_assets
@@ -121,9 +121,7 @@ def get_electrodes_from_network(
 
         for index, row in probe_electrodes.iterrows():
             if pd.isna(row.region):
-                label = get_structure_acronym(
-                    map, volume, (row.AP, row.DV, row.ML)
-                )
+                label = get_structure_acronym(map, volume, (row.AP, row.DV, row.ML))
 
                 probe_electrodes.loc[index, "region"] = label
 

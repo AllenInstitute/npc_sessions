@@ -49,7 +49,7 @@ import npc_sessions.utils as utils
 
 
 class TaskControl(trials.PropertyDict):
-    _sync: Optional[utils.SyncDataset]
+    _sync: utils.SyncDataset | None
     _hdf5: h5py.File
     _frame_times: npt.NDArray[np.float64]
     _display_times: npt.NDArray[np.float64]
@@ -57,7 +57,7 @@ class TaskControl(trials.PropertyDict):
     def __init__(
         self,
         hdf5: utils.StimPathOrDataset,
-        sync: Optional[utils.SyncPathOrDataset] = None,
+        sync: utils.SyncPathOrDataset | None = None,
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)

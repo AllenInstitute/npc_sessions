@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:99cc9bf378c89a6377e0d3efc35bc30d8e9c22c61876d2625751f875b63c7835"
+content_hash = "sha256:295edce2f529211c7c87c2eaac7a3a7580f3c0859bc54fde2f85336bca6fb126"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -1052,7 +1052,7 @@ files = [
 
 [[package]]
 name = "dynamicroutingtask"
-version = "0.1.5"
+version = "0.1.7"
 requires_python = ">=3.9"
 summary = ""
 dependencies = [
@@ -1063,8 +1063,8 @@ dependencies = [
     "scipy",
 ]
 files = [
-    {file = "DynamicRoutingTask-0.1.5-py3-none-any.whl", hash = "sha256:d822a7c696d9d9b6f40cb555364e0ddd21fce71f9858f0c003ca972fe345725d"},
-    {file = "DynamicRoutingTask-0.1.5.tar.gz", hash = "sha256:82d9d80e2a08d123f78b456531d867d0e7de8551207e96bf9340aa2387b2d2f5"},
+    {file = "DynamicRoutingTask-0.1.7-py3-none-any.whl", hash = "sha256:cf1a9ffe700d123652a8179c9f87fb81bd3b53357d22e77799fee9a07813f4da"},
+    {file = "DynamicRoutingTask-0.1.7.tar.gz", hash = "sha256:da560849f0fdfb6101a9e89acdf17ad5ffb5eb7d90dcada7f5cdb280574bb400"},
 ]
 
 [[package]]
@@ -1714,7 +1714,7 @@ files = [
 
 [[package]]
 name = "jupyter-server"
-version = "2.7.2"
+version = "2.7.3"
 requires_python = ">=3.8"
 summary = "The backend—i.e. core services, APIs, and REST endpoints—to Jupyter web applications."
 dependencies = [
@@ -1739,8 +1739,8 @@ dependencies = [
     "websocket-client",
 ]
 files = [
-    {file = "jupyter_server-2.7.2-py3-none-any.whl", hash = "sha256:98a375347b580e837e7016007c24680a4261ed8ad7cd35196ac087d229f48e5a"},
-    {file = "jupyter_server-2.7.2.tar.gz", hash = "sha256:d64fb4e593907290e5df916e3c9399c15ab2cd7bdb71cbcd1d36452dbfb30523"},
+    {file = "jupyter_server-2.7.3-py3-none-any.whl", hash = "sha256:8e4b90380b59d7a1e31086c4692231f2a2ea4cb269f5516e60aba72ce8317fc9"},
+    {file = "jupyter_server-2.7.3.tar.gz", hash = "sha256:d4916c8581c4ebbc534cebdaa8eca2478d9f3bfdd88eae29fcab0120eac57649"},
 ]
 
 [[package]]
@@ -2324,7 +2324,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.42"
+version = "0.1.43"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -2340,8 +2340,8 @@ dependencies = [
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.42-py3-none-any.whl", hash = "sha256:0c9712c1f2ec6c63923bf5171898d50309f843532f306c5f174a84a1a6c8af2a"},
-    {file = "npc_lims-0.1.42.tar.gz", hash = "sha256:b1264317727619a5c373693d5801733ec0871ccf720b91a031dc3629add925a7"},
+    {file = "npc_lims-0.1.43-py3-none-any.whl", hash = "sha256:0d1cfc03deeaa7209f3e05a4ca8b16d4fc80ac55ebd67ac977ddb2eab1d60ab2"},
+    {file = "npc_lims-0.1.43.tar.gz", hash = "sha256:713199e4854ff9da3b00672fbfae606ec8ad6ca8f8fdf87f1e7dd2683434d693"},
 ]
 
 [[package]]
@@ -2647,7 +2647,7 @@ files = [
 
 [[package]]
 name = "pdm"
-version = "2.8.2"
+version = "2.9.0"
 requires_python = ">=3.7"
 summary = "A modern Python package and dependency manager supporting the latest PEP standards"
 dependencies = [
@@ -2667,12 +2667,13 @@ dependencies = [
     "shellingham>=1.3.2",
     "tomli>=1.1.0; python_version < \"3.11\"",
     "tomlkit<1,>=0.11.1",
+    "truststore; python_version >= \"3.10\"",
     "unearth>=0.10.0",
     "virtualenv>=20",
 ]
 files = [
-    {file = "pdm-2.8.2-py3-none-any.whl", hash = "sha256:b1de3411d26cc7525741c7f0a84a00e6834f63105c19da13df9a61c229ba45d9"},
-    {file = "pdm-2.8.2.tar.gz", hash = "sha256:b948d00bf620682b0ac4c80d228cb305a2b0150e497ee6931da30e3cc305bfdc"},
+    {file = "pdm-2.9.0-py3-none-any.whl", hash = "sha256:b2c74f2b1685817ee5a3e8b259cf24a11c30ff2e53e31a3a06216157b5651a5f"},
+    {file = "pdm-2.9.0.tar.gz", hash = "sha256:7962656a31e29a126d5f23906528b75e1b14b72952ab8250057a40726ae47d01"},
 ]
 
 [[package]]
@@ -3901,6 +3902,16 @@ summary = "Traitlets Python configuration system"
 files = [
     {file = "traitlets-5.9.0-py3-none-any.whl", hash = "sha256:9e6ec080259b9a5940c797d58b613b5e31441c2257b87c2e795c5228ae80d2d8"},
     {file = "traitlets-5.9.0.tar.gz", hash = "sha256:f6cde21a9c68cf756af02035f72d5a723bf607e862e7be33ece505abf4a3bad9"},
+]
+
+[[package]]
+name = "truststore"
+version = "0.7.0"
+requires_python = ">= 3.10"
+summary = "Verify certificates using native system trust stores"
+files = [
+    {file = "truststore-0.7.0-py3-none-any.whl", hash = "sha256:a4b410a365cafec4c2b386b30df53d89a6a4466cc229c7026e41c2d847f94fe9"},
+    {file = "truststore-0.7.0.tar.gz", hash = "sha256:72e784507a624375434381e4bad3eff8614bc8c845a7f5ae16a25a2624d0683f"},
 ]
 
 [[package]]
