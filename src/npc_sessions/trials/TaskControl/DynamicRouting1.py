@@ -13,7 +13,7 @@ from __future__ import annotations
 import functools
 import logging
 
-import DynamicRoutingTask.OptoParams
+import DynamicRoutingTask.TaskUtils
 import numpy as np
 import numpy.typing as npt
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
@@ -411,7 +411,7 @@ class DynamicRouting1(TaskControl):
         for k in ("bregmaXOffset", "bregmaYOffset"):
             calibration_data[k] = calibration_data[k][()]
         return tuple(
-            DynamicRoutingTask.OptoParams.galvoToBregma(
+            DynamicRoutingTask.TaskUtils.galvoToBregma(
                 calibration_data,
                 *voltages,
             )
@@ -471,7 +471,7 @@ class DynamicRouting1(TaskControl):
         return np.where(
             np.isnan(voltages),
             np.nan,
-            DynamicRoutingTask.OptoParams.voltsToPower(
+            DynamicRoutingTask.TaskUtils.voltsToPower(
                 self._hdf5["optoPowerCalibrationData"],
                 voltages,
             ),
