@@ -81,13 +81,9 @@ def get_units_spike_paths(
             if method == "kilosort_codeocean":
                 run_capsules_for_units_kilosort_codeocean(session_id)
                 update_permissions_for_data_asset(session_id)
-                units_s3_path = npc_lims.get_units_spikes_codeocean_kilosort_top_level_files(session_id)
-
-        if units_s3_path is not None:
-            if method == "kilosort_codeocean":
                 return get_units_spike_paths_from_kilosort_codeocean_output(
-                    units_s3_path
-                )
+                    npc_lims.get_units_spikes_codeocean_kilosort_top_level_files(session_id)
+                ) # TODO @Arjun check this temp fix
 
     return records
 
