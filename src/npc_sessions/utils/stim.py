@@ -116,6 +116,9 @@ def regenerate_sound_array(
     trialSoundAM = stim_data["trialSoundAM"][:nTrials]
     soundSampleRate = stim_data["soundSampleRate"][()]
     soundHanningDur = stim_data["soundHanningDur"][()]
+    
+    if len(trialSoundDur)==0:
+        raise IndexError(f"trialSoundDur is empty - no opto waveforms to generate from {stim_file_or_dataset}")
 
     for trialnum in range(0, nTrials):
         if trialSoundType[trialnum].decode() == "":
@@ -166,8 +169,7 @@ def generate_opto_waveforms_from_stim_file(
         optoSampleRate=2000
 
     if len(trialOptoDur)==0:
-        print('no opto trials found')
-        return tuple(Waveform(waveform=np.array([]), sampling_rate=0))
+        raise IndexError(f"trialOptoDur is empty - no opto waveforms to generate from {stim_file_or_dataset}")
 
     for trialnum in range(0,nTrials):
         if np.isnan(trialOptoDur[trialnum])==True:
