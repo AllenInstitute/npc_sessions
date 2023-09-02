@@ -893,10 +893,41 @@ class SyncDataset:
 
                 if len(diode_flips) != len(vsyncs):
                     import matplotlib.pyplot as plt
+                    fig, _ = plt.subplots(1, 2)
+                    vs = vsyncs
+                    dvs = diode_flips
+                    labels = []
 
-                    plt.plot(vsyncs, np.zeros_like(vsyncs), "|")
-                    plt.plot(diode_flips, np.zeros_like(diode_flips), "|")
+                    # focus on the end of vsyncs if they occur well before the stim-TTL offset
+                    # x0, x1 = min(soff - 2, vs[-1] - 2), min(soff + 1, vs[-1]
+                    # + 1)
+                    for idx, ax in enumerate(fig.axes):
+                        
+                        padding = 5 # seconds
+                        start_time = [min(vsyncs) - padding, max(vsyncs) - padding][idx]
+                        end_time = [min(vsyncs) + padding, max(vsyncs) + padding][idx]
+                        
+                        self.plot_bit(4, start_time=start_time, end_time=end_time, axes=ax, auto_show=False)
+                        labels.append("diode-measured sync square")
+                        self.plot_bit(5, start_time=start_time, end_time=end_time,  axes=ax, auto_show=False)
+                        labels.append("stim running")
+                        ax.plot(vs, 0.5 * np.ones_like(vs), "|")
+                        labels.append("stim vsyncs")
+                        ax.plot(dvs, 0.5 * np.ones_like(dvs), "|", ms=20)
+                        labels.append("diode_flips")
+                        ax.set_xlim([start_time, end_time])
+                        fig.axes[0].legend(
+                            labels,
+                            fontsize=8,
+                            loc="upper center",
+                            bbox_to_anchor=(0.5, 1.05),
+                            ncol=len(labels),
+                            fancybox=True,
+                        )
+
+                    # self.plot_lines(["stim_photodiode"])
                     plt.show()
+                    
                     raise IndexError(
                         f"Mismatch in stim {block_idx = }: {len(diode_flips) = }, {len(vsyncs) = }"
                     )
