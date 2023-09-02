@@ -864,10 +864,10 @@ class SyncDataset:
                 # extras, none missing)
 
                 def score(diode_flips, vsyncs) -> float:
-                    """Similarity between diode and vsync intervals - lower is
+                    """Similarity between diode and vsync intervals - higher is
                     more similar"""
                     common_len = min([len(vsyncs), len(diode_flips)])
-                    return np.mean(
+                    return 1 / np.mean(
                         np.abs(
                             np.diff(vsyncs[:common_len])
                             - np.diff(
@@ -876,14 +876,14 @@ class SyncDataset:
                         )
                     ).item()
 
-                if score(diode_flips, vsyncs) > score(diode_flips, vsyncs[1:]):
+                while score(diode_flips, vsyncs) < score(diode_flips, vsyncs[1:]):
                     logger.warning("Missing first diode flip")
                     diode_flips = add_missing_diode_flip_at_stim_onset(
                         diode_flips, vsyncs
                     )
 
-                elif score(diode_flips, vsyncs) > score(diode_flips[1:], vsyncs):
-                    logger.warning("Extra first diode flip")
+                while score(diode_flips, vsyncs) < score(diode_flips[1:], vsyncs):
+                    logger.warning("Removing extra first diode flip")
                     diode_flips = diode_flips[1:]
 
                 if len(diode_flips) > len(vsyncs):
