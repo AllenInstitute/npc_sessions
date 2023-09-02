@@ -1382,6 +1382,7 @@ def adjust_diode_flip_intervals(
     photodiode thresholding: adjust every other interval to get a closer
     estimate of actual transition time for each diode flip
     """
+    diode_flips = np.array(diode_flips) # make a copy
     original_intervals = np.diff(diode_flips)
     outliers = np.logical_or(
         np.percentile(original_intervals, 5) > original_intervals,
