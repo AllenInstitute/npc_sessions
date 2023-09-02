@@ -825,11 +825,11 @@ class SyncDataset:
             # keep flips after first vsync + an empirically determined min latency
             # between vsync and screen update
             MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC = 0.018  # 0.22 is typical
-            falling = diode_falling_edges[
-                diode_falling_edges > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)
+            falling = falling[
+                falling > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)
             ]
-            rising = diode_rising_edges[
-                diode_rising_edges > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)
+            rising = rising[
+                rising > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)
             ]
 
             # keep flips only up to a certain time after the last vsync
