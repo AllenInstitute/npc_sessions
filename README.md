@@ -8,8 +8,11 @@ Mindscope Neuropixels team - in the cloud.
 Versions](https://img.shields.io/pypi/pyversions/npc_sessions.svg)](https://pypi.python.org/pypi/npc-sessions/)
 
 ## quickstart
+Make a conda environment with python>=3.9 and simply pip install the npc_sessions package:
 
 ```bash
+conda create -n npc_sessions python>=3.9
+conda activate npc_sessions
 pip install npc_sessions
 ```
 
@@ -25,4 +28,21 @@ True
 >>> all(s.date.year >= 2022 for s in tracked_sessions)
 True
 
+```
+
+## to develop with conda
+To install with the intention of contributing to this package:
+
+1) create a conda environment:
+```bash
+conda create -n npc_sessions python>=3.9
+conda activate npc_sessions
+```
+2) clone npc_sessions from github:
+```bash
+git clone git@github.com:AllenInstitute/npc_sessions.git
+```
+3) pip install all dependencies:
+```bash
+pip install -e .
 ```
