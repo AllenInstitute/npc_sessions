@@ -1441,6 +1441,9 @@ def add_missing_diode_flip_at_stim_onset(
         adjust_diode_flip_intervals(diode_flips[:common_len])
         - vsyncs[1 : common_len + 1]
     )
+    # TODO could be more accurate by adding short/long interval as appropriate
+    # - diode_flips are pre-adjustment, but we're currently adding the expected
+    #   post-adjustment interval
     return np.array([vsyncs[0] + avg_vsync_to_flip_interval, *diode_flips])
 
 
