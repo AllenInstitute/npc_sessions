@@ -828,9 +828,7 @@ class SyncDataset:
             falling = falling[
                 falling > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)
             ]
-            rising = rising[
-                rising > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)
-            ]
+            rising = rising[rising > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)]
 
             # keep flips only up to a certain time after the last vsync
             MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC = 0.06
@@ -867,14 +865,19 @@ class SyncDataset:
                     """Similarity between diode and vsync intervals - higher is
                     more similar"""
                     common_len = min([len(vsyncs), len(diode_flips)])
-                    return 1 / np.mean(
-                        np.abs(
-                            np.diff(vsyncs[:common_len])
-                            - np.diff(
-                                adjust_diode_flip_intervals(diode_flips)[:common_len]
+                    return (
+                        1
+                        / np.mean(
+                            np.abs(
+                                np.diff(vsyncs[:common_len])
+                                - np.diff(
+                                    adjust_diode_flip_intervals(diode_flips)[
+                                        :common_len
+                                    ]
+                                )
                             )
-                        )
-                    ).item()
+                        ).item()
+                    )
 
                 while score(diode_flips, vsyncs) < score(diode_flips, vsyncs[1:]):
                     logger.warning("Missing first diode flip")
@@ -887,14 +890,18 @@ class SyncDataset:
                     diode_flips = diode_flips[1:]
 
                 if len(diode_flips) < len(vsyncs):
-                    total_sync_sec = self.meta_data['total_samples'] / self.sample_freq
-                    is_last_vsync_close_to_end_of_sync = abs(total_sync_sec - vsyncs[-1]) < max(np.diff(vsyncs))
+                    total_sync_sec = self.meta_data["total_samples"] / self.sample_freq
+                    is_last_vsync_close_to_end_of_sync = abs(
+                        total_sync_sec - vsyncs[-1]
+                    ) < max(np.diff(vsyncs))
                     if is_last_vsync_close_to_end_of_sync:
-                        logger.warning("Missing last diode flips - sync recording truncated")
+                        logger.warning(
+                            "Missing last diode flips - sync recording truncated"
+                        )
                         diode_flips = add_missing_diode_flips_for_truncated_sync(
                             diode_flips, vsyncs
                         )
-                    
+
                 if len(diode_flips) > len(vsyncs):
                     diode_flips = discard_erroneous_diode_flips_at_stim_offset(
                         diode_flips, vsyncs
@@ -902,6 +909,7 @@ class SyncDataset:
 
                 if len(diode_flips) != len(vsyncs):
                     import matplotlib.pyplot as plt
+
                     fig, _ = plt.subplots(1, 2)
                     vs = vsyncs
                     dvs = diode_flips
@@ -911,14 +919,25 @@ class SyncDataset:
                     # x0, x1 = min(soff - 2, vs[-1] - 2), min(soff + 1, vs[-1]
                     # + 1)
                     for idx, ax in enumerate(fig.axes):
-                        
-                        padding = 5 # seconds
+                        padding = 5  # seconds
                         start_time = [min(vsyncs) - padding, max(vsyncs) - padding][idx]
                         end_time = [min(vsyncs) + padding, max(vsyncs) + padding][idx]
-                        
-                        self.plot_bit(4, start_time=start_time, end_time=end_time, axes=ax, auto_show=False)
+
+                        self.plot_bit(
+                            4,
+                            start_time=start_time,
+                            end_time=end_time,
+                            axes=ax,
+                            auto_show=False,
+                        )
                         labels.append("diode-measured sync square")
-                        self.plot_bit(5, start_time=start_time, end_time=end_time,  axes=ax, auto_show=False)
+                        self.plot_bit(
+                            5,
+                            start_time=start_time,
+                            end_time=end_time,
+                            axes=ax,
+                            auto_show=False,
+                        )
                         labels.append("stim running")
                         ax.plot(vs, 0.5 * np.ones_like(vs), "|")
                         labels.append("stim vsyncs")
@@ -936,7 +955,7 @@ class SyncDataset:
 
                     # self.plot_lines(["stim_photodiode"])
                     plt.show()
-                    
+
                     raise IndexError(
                         f"Mismatch in stim {block_idx = }: {len(diode_flips) = }, {len(vsyncs) = }"
                     )
@@ -1382,7 +1401,7 @@ def adjust_diode_flip_intervals(
     photodiode thresholding: adjust every other interval to get a closer
     estimate of actual transition time for each diode flip
     """
-    diode_flips = np.array(diode_flips) # make a copy
+    diode_flips = np.array(diode_flips)  # make a copy
     original_intervals = np.diff(diode_flips)
     outliers = np.logical_or(
         np.percentile(original_intervals, 5) > original_intervals,
@@ -1420,6 +1439,7 @@ def add_missing_diode_flips_for_truncated_sync(
         )
         diode_flips = np.array([*diode_flips, vsyncs[-1] + avg_vsync_to_flip_interval])
     return diode_flips
+
 
 def add_missing_diode_flip_at_stim_onset(
     diode_flips: npt.NDArray,
