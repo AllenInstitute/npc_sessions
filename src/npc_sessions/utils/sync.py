@@ -1449,7 +1449,7 @@ def add_missing_diode_flip_at_stim_onset(
 
 def discard_erroneous_diode_flips_at_stim_offset(
     diode_flips: npt.NDArray, vsyncs: npt.NDArray
-):
+) -> npt.NDArray[np.float64]:
     """
     - after a stimulus the screen usually turns grey, causing
     the diode to flip at least one more time after all stim
@@ -1464,13 +1464,6 @@ def discard_erroneous_diode_flips_at_stim_offset(
         vsyncs
     ):
         diode_flips = diode_flips[:-1]
-    # while (
-    #         diode_flips[-1] - vsyncs[-1] > np.percentile((diode_flips[-len(vsyncs)-1:-1] - vsyncs[:]), 99)
-    #         ) or (
-    #         diode_flips[-1] - vsyncs[-1] < np.percentile((diode_flips[:len(vsyncs)] - vsyncs[:]), 1)
-    #     ):
-    #         logger.warning("Removing last diode flip")
-    #         diode_flips = diode_flips[:-1]
     return diode_flips
 
 
