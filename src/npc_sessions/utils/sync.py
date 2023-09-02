@@ -886,6 +886,15 @@ class SyncDataset:
                     logger.warning("Removing extra first diode flip")
                     diode_flips = diode_flips[1:]
 
+                if len(diode_flips) < len(vsyncs):
+                    total_sync_sec = self.meta_data['total_samples'] / self.sample_freq
+                    is_last_vsync_close_to_end_of_sync = abs(total_sync_sec - vsyncs[-1]) < max(np.diff(vsyncs))
+                    if is_last_vsync_close_to_end_of_sync:
+                        logger.warning("Missing last diode flips - sync recording truncated")
+                        diode_flips = add_missing_diode_flips_for_truncated_sync(
+                            diode_flips, vsyncs
+                        )
+                    
                 if len(diode_flips) > len(vsyncs):
                     diode_flips = discard_erroneous_diode_flips_at_stim_offset(
                         diode_flips, vsyncs
@@ -1394,6 +1403,22 @@ def adjust_diode_flip_intervals(
         diode_flips[idx + 1] += sign * 0.5 * deviation
     return diode_flips
 
+
+def add_missing_diode_flips_for_truncated_sync(
+    diode_flips: npt.NDArray,
+    vsyncs: npt.NDArray,
+) -> npt.NDArray[np.float64]:
+    while len(diode_flips) < len(vsyncs):
+        logger.info(
+            "Creating extra diode flip at end of stim block to account for truncated sync recording"
+        )
+        common_len = min([len(vsyncs) - 1, len(diode_flips)])
+        avg_vsync_to_flip_interval = np.median(
+            adjust_diode_flip_intervals(diode_flips[:common_len])
+            - vsyncs[1 : common_len + 1]
+        )
+        diode_flips = np.array([*diode_flips, vsyncs[-1] + avg_vsync_to_flip_interval])
+    return diode_flips
 
 def add_missing_diode_flip_at_stim_onset(
     diode_flips: npt.NDArray,
