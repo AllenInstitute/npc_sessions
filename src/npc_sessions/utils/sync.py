@@ -833,7 +833,7 @@ class SyncDataset:
             ]
 
             # keep flips only up to a certain time after the last vsync
-            MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC = 1.0
+            MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC = 0.06
             falling = falling[
                 falling < (vsyncs[-1] + MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC)
             ]
