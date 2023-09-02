@@ -44,5 +44,6 @@ git clone git@github.com:AllenInstitute/npc_sessions.git
 ```
 3) pip install all dependencies:
 ```bash
+cd npc_sessions
 pip install -e .
 ```
