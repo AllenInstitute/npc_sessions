@@ -148,23 +148,27 @@ class Session:
         except FileNotFoundError as exc:
             warnings.warn(f"Could not find subject.json metadata in raw upload: information will be limited")
             return nwb.Subject(
-                npc_lims.Subject(
+                [
+                    npc_lims.Subject(
                     subject_id=self.id.subject,
-                )
+                    )
+                ]
             )
         assert metadata['subject_id'] == self.id.subject
         dob = npc_session.DatetimeRecord(metadata['date_of_birth'])
         return nwb.Subject(
-            npc_lims.Subject(
-                subject_id=metadata['subject_id'],
-                sex=metadata['genotype'][0].upper(),
-                date_of_birth=metadata['date_of_birth'],
-                genotype=metadata['genotype'],
-                description = None,
-                strain=metadata['background_strain'] or metadata['breeding_group'],
-                notes=metadata['notes'],
-                age=f"P{(self.session_start_time.dt - dob.dt).days}D",
-            ),
+            [
+                npc_lims.Subject(
+                    subject_id=metadata['subject_id'],
+                    sex=metadata['sex'][0].upper(),
+                    date_of_birth=metadata['date_of_birth'],
+                    genotype=metadata['genotype'],
+                    description = None,
+                    strain=metadata['background_strain'] or metadata['breeding_group'],
+                    notes=metadata['notes'],
+                    age=f"P{(self.session_start_time.dt - dob.dt).days}D",
+                )
+            ]
         )
 
     @property
