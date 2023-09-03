@@ -2,7 +2,7 @@
 >>> s = Session('670248_2023-08-03')
 >>> s.session_start_time
 '2023-08-03 12:04:15'
->>> 'DynamicRouting1' in s.epoch_tags
+>>> 'DynamicRouting1' in s.stim_tags
 True
 >>> s.sync_path
 S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
@@ -111,7 +111,7 @@ class Session:
             stimulus_notes=self.task_version,
             experimenter=self.experimenter,
             experiment_description=self.experiment_description,
-            epoch_tags=list(self.epoch_tags),
+            epoch_tags=self.epoch_tags,
             source_script=self.source_script,
             identifier=self.identifier,
             notes=self.notes,
@@ -171,10 +171,16 @@ class Session:
             ]
         )
 
+
     @property
     def epoch_tags(self) -> tuple[str, ...]:
+        return tuple(self.epochs.df["tags"].to_list())
+            
+    @property
+    def stim_tags(self) -> tuple[str, ...]:
+        """Currently assumes TaskControl hdf5 files"""
         return tuple(
-            set(functools.reduce(operator.add, self.epochs.df["tags"].to_list()))
+            name.split('_')[0] for name in sorted([p.name for p in self.stim_paths], key=npc_session.DatetimeRecord)
         )
 
     def get_raw_data_paths_from_local(self) -> tuple[upath.UPath, ...]:
