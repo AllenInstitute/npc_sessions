@@ -125,21 +125,22 @@ class Session:
         for attr in self.record.__dict__:
             if attr in nwb.__dict__:
                 nwb.__setattr__(attr, self.record.__getattribute__(attr))
-
-    class Subject(npc_lims.Subject):
-        def __init__(self, session: Session) -> None:
-            self.session = session
-            self.record = npc_lims.Subject(session.subject)
-
-        @property
-        def age(self) -> str:
-            if self.record.date_of_birth is None:
-                raise ValueError(f"{self.record} does not have a date of birth")
-            dob = npc_session.DatetimeRecord(self.record.date_of_birth)
-            return f"P{(self.session.session_start_time.dt - dob.dt).days}D"
-
-        def to_nwb(self, nwb: pynwb.NWBFile) -> None:
-            nwb.subject = pynwb.file.Subject(**self.record.__dict__)
+    
+    @functools.cached_property
+    def _raw_upload_metadata_json_paths(self):
+        return tuple(
+            file for file in npc_lims.get_raw_data_root(self.id).iterdir()
+            if file.suffix == '.json'
+        )
+        
+    @functools.cached_property
+    def _subject_aind_metadata(self) -> dict[str, Any]:
+        try:
+            file = next(f for f in self._raw_upload_metadata_json_paths if f.name == 'subject.json')
+        except StopIteration as exc:
+            raise FileNotFoundError(f"Could not find subject.json for {self.id} in {self._raw_upload_metadata_json_paths}") from exc
+        return json.loads(file.read_text())
+    
 
     @property
     def epoch_tags(self) -> tuple[str, ...]:
