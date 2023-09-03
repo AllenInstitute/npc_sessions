@@ -71,6 +71,9 @@ class NWBContainerWithDF(NWBContainer):
         except AttributeError:
             return pl.from_records(self.records)
 
+class Subject(NWBContainerWithDF):
+    records: tuple[npc_lims.Subject, ...]
+    add_to_nwb_method = "add_subject"
 
 class Epochs(NWBContainerWithDF):
     records: tuple[npc_lims.Epoch, ...]
