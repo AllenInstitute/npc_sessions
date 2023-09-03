@@ -141,6 +141,31 @@ class Session:
             raise FileNotFoundError(f"Could not find subject.json for {self.id} in {self._raw_upload_metadata_json_paths}") from exc
         return json.loads(file.read_text())
     
+    @functools.cached_property
+    def subject(self) -> nwb.SupportsToNWB:
+        try:
+            metadata = self._subject_aind_metadata
+        except FileNotFoundError as exc:
+            warnings.warn(f"Could not find subject.json metadata in raw upload: information will be limited")
+            return nwb.Subject(
+                npc_lims.Subject(
+                    subject_id=self.id.subject,
+                )
+            )
+        assert metadata['subject_id'] == self.id.subject
+        dob = npc_session.DatetimeRecord(metadata['date_of_birth'])
+        return nwb.Subject(
+            npc_lims.Subject(
+                subject_id=metadata['subject_id'],
+                sex=metadata['genotype'][0].upper(),
+                date_of_birth=metadata['date_of_birth'],
+                genotype=metadata['genotype'],
+                description = None,
+                strain=metadata['background_strain'] or metadata['breeding_group'],
+                notes=metadata['notes'],
+                age=f"P{(self.session_start_time.dt - dob.dt).days}D",
+            ),
+        )
 
     @property
     def epoch_tags(self) -> tuple[str, ...]:
