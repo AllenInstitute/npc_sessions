@@ -111,7 +111,7 @@ class Session:
             stimulus_notes=self.task_version,
             experimenter=self.experimenter,
             experiment_description=self.experiment_description,
-            epoch_tags=self.epoch_tags,
+            epoch_tags=list(self.epoch_tags),
             source_script=self.source_script,
             identifier=self.identifier,
             notes=self.notes,
