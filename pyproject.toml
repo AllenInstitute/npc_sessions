@@ -70,7 +70,7 @@ dev = [
 [tool.pdm.scripts]
 ruff = "ruff check src --fix-only"
 black = "black src"
-test = "pytest --cov"
+test = "pytest --cov --cov-report=xml"
 mypy = "mypy src --install-types --non-interactive"
 bumpver = "pdm bump micro"
 tag = "pdm bump tag"
