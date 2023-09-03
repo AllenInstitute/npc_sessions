@@ -67,7 +67,7 @@ class NWBContainerWithDF(NWBContainer):
     @functools.cached_property
     def df(self) -> pl.DataFrame:
         if all(isinstance(record, npc_lims.RecordWithNWB) for record in self.records):
-            return pl.from_records(tuple(record.nwb for record in self.records))      
+            return pl.from_records(tuple(record.nwb for record in self.records)) # type: ignore [attr-defined]      
         return pl.from_records(self.records)
 
 class Subject(NWBContainerWithDF):
