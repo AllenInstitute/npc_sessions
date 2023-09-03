@@ -74,9 +74,7 @@ def get_units_spike_paths(
     records = ()
     if not records:
         try:
-            npc_lims.get_units_codeoean_kilosort_path_from_s3(
-                session_id
-            )
+            npc_lims.get_units_codeoean_kilosort_path_from_s3(session_id)
         except FileNotFoundError:
             # TODO: DO SOMETHING TO GET UNITS - Right now, run spike nwb capsule, and register units as data asset
             if method == "kilosort_codeocean":

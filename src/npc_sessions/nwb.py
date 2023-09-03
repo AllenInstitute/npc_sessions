@@ -60,6 +60,7 @@ class NWBContainer(SupportsToNWB):
             else:
                 getattr(nwb, self.add_to_nwb_method)(**record)
 
+
 class NWBContainerWithDF(NWBContainer):
     def to_dataframe(self) -> pd.DataFrame:
         return self.df.to_pandas()
@@ -67,12 +68,14 @@ class NWBContainerWithDF(NWBContainer):
     @functools.cached_property
     def df(self) -> pl.DataFrame:
         if all(isinstance(record, npc_lims.RecordWithNWB) for record in self.records):
-            return pl.from_records(tuple(record.nwb for record in self.records)) # type: ignore [attr-defined]      
+            return pl.from_records(tuple(record.nwb for record in self.records))  # type: ignore [attr-defined]
         return pl.from_records(self.records)
+
 
 class Subject(NWBContainerWithDF):
     records: tuple[npc_lims.Subject, ...]
     add_to_nwb_method = "add_subject"
+
 
 class Epochs(NWBContainerWithDF):
     records: tuple[npc_lims.Epoch, ...]

@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:295edce2f529211c7c87c2eaac7a3a7580f3c0859bc54fde2f85336bca6fb126"
+content_hash = "sha256:8171635514c03d8292581f8e112f8b804cb4445bf88388d207a9fd6f04b80ae0"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -273,14 +273,14 @@ files = [
 
 [[package]]
 name = "asttokens"
-version = "2.2.1"
+version = "2.3.0"
 summary = "Annotate AST trees with source code positions"
 dependencies = [
-    "six",
+    "six>=1.12.0",
 ]
 files = [
-    {file = "asttokens-2.2.1-py2.py3-none-any.whl", hash = "sha256:6b0ac9e93fb0335014d382b8fa9b3afa7df546984258005da0b9e7095b3deb1c"},
-    {file = "asttokens-2.2.1.tar.gz", hash = "sha256:4622110b2a6f30b77e1473affaa97e711bc2f07d3f10848420ff1898edbe94f3"},
+    {file = "asttokens-2.3.0-py2.py3-none-any.whl", hash = "sha256:bef1a51bc256d349e9f94e7e40e44b705ed1162f55294220dd561d24583d9877"},
+    {file = "asttokens-2.3.0.tar.gz", hash = "sha256:2552a88626aaa7f0f299f871479fc755bd4e7c11e89078965e928fb7bb9a6afe"},
 ]
 
 [[package]]
@@ -2325,7 +2325,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.45"
+version = "0.1.49"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -2341,8 +2341,8 @@ dependencies = [
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.45-py3-none-any.whl", hash = "sha256:5a08d98c2037dd9c81861c0f37639be1b416af6743217d2965610dcc902cd484"},
-    {file = "npc_lims-0.1.45.tar.gz", hash = "sha256:697444d5e15bf85d3a9e8f84429e9144ee287fb126e8f48ea72a4d275eee162c"},
+    {file = "npc_lims-0.1.49-py3-none-any.whl", hash = "sha256:353fa3b19d0e46e0817aa19b0c2f355886d7bafe80031d2e13d99b29e80bcef1"},
+    {file = "npc_lims-0.1.49.tar.gz", hash = "sha256:048b7b2132559916757e402d69073cc40376cd91e9cb99793997f84f06df8903"},
 ]
 
 [[package]]
@@ -3082,7 +3082,7 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "7.4.0"
+version = "7.4.1"
 requires_python = ">=3.7"
 summary = "pytest: simple powerful testing with Python"
 dependencies = [
@@ -3094,8 +3094,8 @@ dependencies = [
     "tomli>=1.0.0; python_version < \"3.11\"",
 ]
 files = [
-    {file = "pytest-7.4.0-py3-none-any.whl", hash = "sha256:78bf16451a2eb8c7a2ea98e32dc119fd2aa758f1d5d66dbf0a59d69a3969df32"},
-    {file = "pytest-7.4.0.tar.gz", hash = "sha256:b4bf8c45bd59934ed84001ad51e11b4ee40d40a1229d2c79f9c592b0a3f6bd8a"},
+    {file = "pytest-7.4.1-py3-none-any.whl", hash = "sha256:460c9a59b14e27c602eb5ece2e47bec99dc5fc5f6513cf924a7d03a578991b1f"},
+    {file = "pytest-7.4.1.tar.gz", hash = "sha256:2f2301e797521b23e4d2585a0a3d7b5e50fdddaaf7e7d6773ea26ddb17c213ab"},
 ]
 
 [[package]]
@@ -3729,12 +3729,12 @@ files = [
 
 [[package]]
 name = "soupsieve"
-version = "2.4.1"
-requires_python = ">=3.7"
+version = "2.5"
+requires_python = ">=3.8"
 summary = "A modern CSS selector implementation for Beautiful Soup."
 files = [
-    {file = "soupsieve-2.4.1-py3-none-any.whl", hash = "sha256:1c1bfee6819544a3447586c889157365a27e10d88cde3ad3da0cf0ddf646feb8"},
-    {file = "soupsieve-2.4.1.tar.gz", hash = "sha256:89d12b2d5dfcd2c9e8c22326da9d9aa9cb3dfab0a83a024f05704076ee8d35ea"},
+    {file = "soupsieve-2.5-py3-none-any.whl", hash = "sha256:eaa337ff55a1579b6549dc679565eac1e3d000563bcb1c8ab0d0fefbc0c2cdc7"},
+    {file = "soupsieve-2.5.tar.gz", hash = "sha256:5663d5a7b3bfaeee0bc4372e7fc48f9cff4940b3eec54a6451cc5299f1097690"},
 ]
 
 [[package]]
