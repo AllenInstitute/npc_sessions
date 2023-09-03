@@ -6,8 +6,8 @@ name: Publish Python package
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
     
 concurrency:
   group: ${{ github.ref }}
