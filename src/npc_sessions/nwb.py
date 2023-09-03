@@ -67,7 +67,7 @@ class NWBContainerWithDF(NWBContainer):
     @functools.cached_property
     def df(self) -> pl.DataFrame:
         try:
-            return pl.from_records(record.nwb for record in self.records)
+            return pl.from_records(tuple(record.nwb for record in self.records))
         except AttributeError:
             return pl.from_records(self.records)
 
