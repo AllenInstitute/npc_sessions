@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-import warnings
+import functools
 
 import npc_lims
 import npc_session
 import pandas as pd
 import upath
-import functools
 
 S3_ELECTRODE_PATH = upath.UPath(
     "s3://aind-scratch-data/arjun.sridhar/tissuecyte_cloud_processed"
 )
+
 
 @functools.cache
 def get_electrode_files_from_s3(
@@ -24,9 +24,9 @@ def get_electrode_files_from_s3(
     all_subject_sessions = npc_lims.get_subject_data_assets(session.subject)
     raw_subject_assets = sorted(
         asset["name"]
-            for asset in all_subject_sessions
-            if npc_lims.is_raw_data_asset(asset)
-        )
+        for asset in all_subject_sessions
+        if npc_lims.is_raw_data_asset(asset)
+    )
     # TODO: fix getting right day
     day = tuple(
         raw_subject_assets.index(asset) + 1
@@ -37,7 +37,9 @@ def get_electrode_files_from_s3(
     subject_electrode_network_path = S3_ELECTRODE_PATH / str(session.subject.id)
 
     if not subject_electrode_network_path.exists():
-        raise FileNotFoundError(f'CCF annotations for {session} have not been uploaded to s3')
+        raise FileNotFoundError(
+            f"CCF annotations for {session} have not been uploaded to s3"
+        )
 
     electrode_files = tuple(
         subject_electrode_network_path.glob(
@@ -47,7 +49,10 @@ def get_electrode_files_from_s3(
 
     return electrode_files
 
-def get_horizontal_vertical_positions(probe_electrodes: pd.DataFrame) -> tuple[list[int], list[int]]:
+
+def get_horizontal_vertical_positions(
+    probe_electrodes: pd.DataFrame,
+) -> tuple[list[int], list[int]]:
     vertical_position = 20
     horizontal_position_even = [43, 59]
     horizontal_position = horizontal_position_even[0]
@@ -58,7 +63,7 @@ def get_horizontal_vertical_positions(probe_electrodes: pd.DataFrame) -> tuple[l
     vertical_positions: list[int] = []
     horizontal_positions: list[int] = []
 
-    for index, row in probe_electrodes.iterrows():
+    for index, _row in probe_electrodes.iterrows():
         if index != 0 and index % 2 == 0:
             vertical_position += 20
 
@@ -91,9 +96,9 @@ def get_horizontal_vertical_positions(probe_electrodes: pd.DataFrame) -> tuple[l
 
         horizontal_positions.append(horizontal_position)
         vertical_positions.append(vertical_position)
-    
+
     return horizontal_positions, vertical_positions
-    
+
 
 @functools.cache
 def create_tissuecyte_electrodes_table(
@@ -105,7 +110,9 @@ def create_tissuecyte_electrodes_table(
 
     for electrode_file in electrode_files:
         string_file = str(electrode_file.stem)
-        probe = string_file[string_file.index("_") + 1 : string_file.index("_") + 2].upper()
+        probe = string_file[
+            string_file.index("_") + 1 : string_file.index("_") + 2
+        ].upper()
 
         probe_electrodes = pd.read_csv(electrode_file)
 
@@ -113,7 +120,9 @@ def create_tissuecyte_electrodes_table(
             f"Probe{probe}" for i in range(len(probe_electrodes))
         ]
 
-        horizontal_positions, vertical_positions = get_horizontal_vertical_positions(probe_electrodes)
+        horizontal_positions, vertical_positions = get_horizontal_vertical_positions(
+            probe_electrodes
+        )
         probe_electrodes["probe_vertical_position"] = vertical_positions
         probe_electrodes["probe_horizontal_position"] = horizontal_positions
 
@@ -123,13 +132,20 @@ def create_tissuecyte_electrodes_table(
             session_electrodes = pd.concat([session_electrodes, probe_electrodes])
 
     if session_electrodes is not None:
-        session_electrodes.rename(columns={'AP': 'anterior_posterior_ccf_coordinate', 'DV': 'dorsal_ventral_ccf_coordinate',
-                                           'ML': 'left_right_ccf_coordinate', 'region': 'structure_acronym', 
-                                           'region_stripped': 'structure_layer'}, inplace=True)
-        
-        session_electrodes['anterior_posterior_ccf_coordinate'] *= 25
-        session_electrodes['dorsal_ventral_ccf_coordinate'] *= 25
-        session_electrodes['left_right_ccf_coordinate'] *= 25
+        session_electrodes.rename(
+            columns={
+                "AP": "anterior_posterior_ccf_coordinate",
+                "DV": "dorsal_ventral_ccf_coordinate",
+                "ML": "left_right_ccf_coordinate",
+                "region": "structure_acronym",
+                "region_stripped": "structure_layer",
+            },
+            inplace=True,
+        )
+
+        session_electrodes["anterior_posterior_ccf_coordinate"] *= 25
+        session_electrodes["dorsal_ventral_ccf_coordinate"] *= 25
+        session_electrodes["left_right_ccf_coordinate"] *= 25
 
     return session_electrodes
 

@@ -30,10 +30,6 @@ import h5py
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
-import numpy as np
-import numpy.typing as npt
-import pandas as pd
-import polars as pl
 import pynwb
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
@@ -616,7 +612,6 @@ class Session:
         return nwb.RunningSpeed(
             *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
         )
-    
 
     # state: MutableMapping[str | int, Any]
     # subject: MutableMapping[str, Any]
