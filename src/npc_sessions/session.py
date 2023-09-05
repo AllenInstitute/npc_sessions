@@ -238,10 +238,7 @@ class Session:
     def raw_data_asset_id(self) -> str:
         if not self.is_ephys:  # currently only ephys sessions have raw data assets
             raise ValueError(f"{self.id} is not a session with ephys raw data")
-        asset_info = npc_lims.get_session_raw_data_asset(self.id)
-        if not asset_info:
-            raise ValueError(f"{self.id} does not have a raw data asset yet")
-        return asset_info["id"]
+        return npc_lims.get_session_raw_data_asset(self.id)["id"]
 
     @functools.cached_property
     def sync_file_record(self) -> npc_lims.File:
