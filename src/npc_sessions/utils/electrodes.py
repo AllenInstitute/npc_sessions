@@ -132,13 +132,20 @@ def create_tissuecyte_electrodes_table(
             session_electrodes = pd.concat([session_electrodes, probe_electrodes])
 
     if session_electrodes is not None:
-        session_electrodes.rename(columns={'AP': 'anterior_posterior_ccf_coordinate', 'DV': 'dorsal_ventral_ccf_coordinate',
-                                           'ML': 'left_right_ccf_coordinate', 'region': 'structure_layer', 
-                                           'region_stripped': 'structure_acronym'}, inplace=True)
-        
-        session_electrodes['anterior_posterior_ccf_coordinate'] *= 25
-        session_electrodes['dorsal_ventral_ccf_coordinate'] *= 25
-        session_electrodes['left_right_ccf_coordinate'] *= 25
+        session_electrodes.rename(
+            columns={
+                "AP": "anterior_posterior_ccf_coordinate",
+                "DV": "dorsal_ventral_ccf_coordinate",
+                "ML": "left_right_ccf_coordinate",
+                "region": "structure_layer",
+                "region_stripped": "structure_acronym",
+            },
+            inplace=True,
+        )
+
+        session_electrodes["anterior_posterior_ccf_coordinate"] *= 25
+        session_electrodes["dorsal_ventral_ccf_coordinate"] *= 25
+        session_electrodes["left_right_ccf_coordinate"] *= 25
 
     return session_electrodes
 
