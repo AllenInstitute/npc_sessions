@@ -489,7 +489,7 @@ class Session:
 
     @functools.cached_property
     def ephys_settings_xml_data(self) -> utils.SettingsXmlInfo:
-        return utils.settings_xml_info_from_path(self.ephys_settings_xml_path)
+        return utils.get_settings_xml_info(self.ephys_settings_xml_path)
 
     @functools.cached_property
     def ephys_settings_xml_file_record(self) -> npc_lims.File:
