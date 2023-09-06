@@ -70,7 +70,7 @@ class EphysTimingInfoOnPXI(NamedTuple):
     compressed: upath.UPath | None
     """Abs path to device's zarr storage within ecephys_compressed/, or None if not found"""
     start_sample: int
-    """Start sample reported in sync_messages.txt""" 
+    """Start sample reported in sync_messages.txt"""
     sampling_rate: float
     """Nominal sample rate reported in sync_messages.txt"""
     ttl_sample_numbers: npt.NDArray

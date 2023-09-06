@@ -1,6 +1,6 @@
 [project]
 name = "npc_sessions"
-version = "0.0.23"
+version = "0.0.24"
 description = "Tools and interfaces for working with behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 authors = [
     { name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org" },
