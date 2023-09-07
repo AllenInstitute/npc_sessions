@@ -14,6 +14,7 @@ True
 ('Neuropix-PXI-100.ProbeA-AP', 30000.070518634246, 20.080209634424037)
 """
 from __future__ import annotations
+import contextlib
 
 import datetime
 import functools
@@ -75,20 +76,23 @@ class Session:
 
     @property
     def is_sync(self) -> bool:
-        if self.local_path and self.get_sync_paths():
-            return True
-        if self.info is None:
-            return False
-        return self.info.is_sync
+        if self.info:
+            return self.info.is_sync
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            if self.get_sync_paths():
+                return True
+        return False
 
     @property
     def is_ephys(self) -> bool:
-        if self.local_path and self.ephys_record_node_dirs:
-            return True
-        if self.info is None:
-            return False
-        return self.info.is_ephys
-
+        if self.info:
+            return self.info.is_ephys
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            if self.get_raw_data_paths_from_local() or npc_lims.get_raw_data_paths_from_s3(self.id):
+                return True
+        return False
+        
+        
     @property
     def session_start_time(self) -> npc_session.DatetimeRecord:
         if self.is_sync:
