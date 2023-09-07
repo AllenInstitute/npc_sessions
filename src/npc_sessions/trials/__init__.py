@@ -7,7 +7,7 @@ from npc_sessions.trials.TaskControl.RFMapping import AudRFMapping, VisRFMapping
 
 import npc_sessions.utils as utils
 
-def get_trials(*stim_path: utils.PathLike, sync_path_or_data: Optional[utils.SyncPathOrDataset], **kwargs) -> tuple[PropertyDict, ...]:
+def get_trials(*stim_path: utils.PathLike, sync_path_or_data: Optional[utils.SyncPathOrDataset], **kwargs) -> tuple[TaskControl, ...]:
     """Get trials for a given stimulus file.
 
     Parameters
@@ -20,7 +20,7 @@ def get_trials(*stim_path: utils.PathLike, sync_path_or_data: Optional[utils.Syn
     PropertyDict
         Trials for the given stimulus file.
     """
-    trials = []
+    trials: list[TaskControl] = []
     for stim in stim_path:
         stim_name = utils.from_pathlike(stim).name
         if "DynamicRouting1" in stim_name:
