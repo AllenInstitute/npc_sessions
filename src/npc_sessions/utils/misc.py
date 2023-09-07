@@ -4,7 +4,7 @@ import collections.abc
 import contextlib
 import pathlib
 from collections.abc import Iterable, Iterator
-from typing import Any, Literal, SupportsFloat
+from typing import Any, Literal, SupportsFloat, TypeVar
 
 import npc_session
 import numpy as np
@@ -109,8 +109,10 @@ def safe_index(
         return result.item()
     return result
 
+K = TypeVar('K')
+V = TypeVar('V')
 
-class LazyDict(collections.abc.Mapping):
+class LazyDict(collections.abc.Mapping[K, V]):
     """Dict for postponed evaluation of functions and caching of results.
 
     Assign values as a tuple of (callable, *args). The callable will be
@@ -133,13 +135,13 @@ class LazyDict(collections.abc.Mapping):
     def __init__(self, *args, **kwargs) -> None:
         self._raw_dict = dict(*args, **kwargs)
 
-    def __getitem__(self, key) -> Any:
+    def __getitem__(self, key) -> V:
         with contextlib.suppress(TypeError):
             func, *args = self._raw_dict.__getitem__(key)
             self._raw_dict.__setitem__(key, func(*args))
         return self._raw_dict.__getitem__(key)
 
-    def __iter__(self) -> Iterator[Any]:
+    def __iter__(self) -> Iterator[K]:
         return iter(self._raw_dict)
 
     def __len__(self) -> int:
