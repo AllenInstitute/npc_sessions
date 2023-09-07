@@ -384,6 +384,38 @@ def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
         raise result from None
     return result
 
+def get_stim_latencies_from_sync(
+    stim_file_or_dataset: StimPathOrDataset,
+    sync: utils.SyncPathOrDataset,
+    waveform_type: Literal["sound", "audio", "opto"],
+    line_index_or_label: Optional[int | str] = None,
+) -> tuple[StimRecording | None, ...]:
+    stim = get_h5_stim_data(stim_file_or_dataset)
+    sync = utils.get_sync_data(sync)
+    if not line_index_or_label:
+        line_index_or_label = get_sync_line_for_stim_onset(waveform_type=waveform_type, date=sync.start_time.date())
+    vsyncs = assert_stim_times(
+        get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim]
+    )
+    trigger_times = tuple(vsyncs[idx] if idx else None for idx in get_stim_trigger_frames(stim))
+    stim_onsets = sync.get_rising_edges(line_index_or_label, units="seconds")
+    recordings: list[StimRecording | None] = []
+    for idx, waveform in enumerate(get_waveforms_from_stim_file(stim, waveform_type)):
+        if not any(waveform.samples):
+            recordings.append(None)
+            continue
+        onset_following_trigger = stim_onsets[np.searchsorted(stim_onsets, trigger_times[idx], side='right')]
+        recordings.append(
+            StimRecording(
+                presentation=StimPresentation(
+                    trial_idx=idx,
+                    waveform=waveform,
+                    trigger_time_on_sync=trigger_times[idx],
+                ),
+                latency=onset_following_trigger-trigger_times[idx],
+            )
+        )
+    return tuple(recordings)
         
 def get_sync_line_for_stim_onset(
     waveform_type: str | Literal['sound', 'audio', 'opto'],
