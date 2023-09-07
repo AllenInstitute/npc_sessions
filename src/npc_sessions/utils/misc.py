@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import collections.abc
+import contextlib
 import pathlib
 from collections.abc import Iterable, Iterator
 from typing import Any, Literal, SupportsFloat
@@ -133,11 +134,10 @@ class LazyDict(collections.abc.Mapping):
         self._raw_dict = dict(*args, **kwargs)
 
     def __getitem__(self, key) -> Any:
-        func, *args = self._raw_dict.__getitem__(key)
-        try:
+        with contextlib.suppress(TypeError):
+            func, *args = self._raw_dict.__getitem__(key)
             self._raw_dict.__setitem__(key, func(*args))
-        finally:
-            return self._raw_dict.__getitem__(key)
+        return self._raw_dict.__getitem__(key)
 
     def __iter__(self) -> Iterator[Any]:
         return iter(self._raw_dict)
