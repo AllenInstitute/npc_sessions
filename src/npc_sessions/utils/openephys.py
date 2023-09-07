@@ -197,7 +197,7 @@ def get_pxi_nidaq_data(
         device_metadata = next(
             (
                 _
-                for _ in get_merged_oebin_file(recording_dirs)["continuous"]
+                for _ in get_merged_oebin_file(next(p.glob('*.oebin')) for p in recording_dirs)["continuous"]
                 if device.name in _["folder_name"]
             ),
             None,
@@ -533,7 +533,7 @@ def assert_xml_files_match(*paths: upath.UPath) -> None:
 
 
 def get_merged_oebin_file(
-    paths: Sequence[utils.PathLike], exclude_probe_names: Sequence[str] | None = None
+    paths: Iterable[utils.PathLike], exclude_probe_names: Sequence[str] | None = None
 ) -> dict[Literal["continuous", "events", "spikes"], list[dict[str, Any]]]:
     """Merge two or more structure.oebin files into one.
 
