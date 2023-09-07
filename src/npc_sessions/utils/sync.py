@@ -813,7 +813,18 @@ class SyncDataset:
         diode_falling_edges_in_blocks = reshape_into_blocks(
             diode_falling_edges, min_gap=1.0
         )
-
+        
+        if not all(len(edges) == len(vsync_times_in_blocks) for edges in (diode_rising_edges_in_blocks, diode_falling_edges_in_blocks)):
+            def is_mismatch(edges, block) -> bool:
+                return edges[-1] < block[0]
+            for idx, block in enumerate(vsync_times_in_blocks):
+                # work through blocks in order,
+                # discard blocks with diode flips that don't match any vsyncs
+                while is_mismatch(diode_rising_edges_in_blocks[idx], block):
+                    diode_rising_edges_in_blocks = tuple(block for i, block in enumerate(diode_rising_edges_in_blocks) if i != idx)
+                while is_mismatch(diode_falling_edges_in_blocks[idx], block):
+                    diode_falling_edges_in_blocks = tuple(block for i, block in enumerate(diode_falling_edges_in_blocks) if i != idx)
+               
         frame_display_time_blocks: list[npt.NDArray[np.floating]] = []
         for block_idx, (vsyncs, rising, falling) in enumerate(
             zip(
