@@ -313,7 +313,7 @@ class Session:
         return self.sam.taskVersion if isinstance(self.sam.taskVersion, str) else None
 
     @functools.cached_property
-    def stim_data(self) -> Mapping[str, Any]:
+    def stim_data(self) -> utils.LazyDict[str, h5py.File]:
         def h5_dataset(path: upath.UPath) -> h5py.File:
             return h5py.File(io.BytesIO(path.read_bytes()), "r")
 
