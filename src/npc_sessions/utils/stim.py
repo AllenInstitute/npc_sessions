@@ -518,7 +518,7 @@ def get_stim_trigger_frames(
         or stim_data.get("trialOptoOnsetFrame")
         or stim_data.get("stimStartFrame")
     )[:get_num_trials(stim_data)]
-    return tuple(int(v) if ~np.isnan(v) else None for v in utils.safe_index(start_frames, np.arange(start_frames)))
+    return tuple(int(v) if ~np.isnan(v) else None for v in utils.safe_index(start_frames, np.arange(len(start_frames))))
     
 if __name__ == "__main__":
     import doctest
