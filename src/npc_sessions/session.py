@@ -35,6 +35,7 @@ import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
 import npc_sessions.nwb as nwb
+import npc_sessions.trials as trials
 import npc_sessions.utils as utils
 
 
@@ -583,14 +584,17 @@ class Session:
             )
             for probe in self.ephys_settings_xml_data.probe_letters
         )
-
-    def get_intervals(self) -> tuple[nwb.Intervals, ...]:
-        return ()
-
+    _intervals_descriptions = {
+        trials.VisRFMapping: "visual receptive-field mapping trials",
+        trials.AudRFMapping: "auditory receptive-field mapping trials",
+        trials.DynamicRouting1: "visual-auditory task-switching behavior trials",
+        trials.OptoTagging: "opto-tagging trials",
+    }
+    
     @functools.cached_property
-    def intervals(self) -> dict[str, nwb.NWBContainerWithDF]:
-        return {interval.name: interval for interval in self.get_intervals()}
-
+    def _intervals(self) -> dict[str, nwb.NWBContainerWithDF]:
+        return trials.get_trials(self.stim_paths, self.sync_data)    
+    
     @property
     def trials(self) -> nwb.NWBContainerWithDF:
         trials = self.intervals.get(self.trials_interval_name)

@@ -145,7 +145,9 @@ class LazyDict(collections.abc.Mapping):
     def __len__(self) -> int:
         return len(self._raw_dict)
 
-
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}(keys={[k for k in self._raw_dict.keys()]})'
+    
 if __name__ == "__main__":
     import doctest
 
