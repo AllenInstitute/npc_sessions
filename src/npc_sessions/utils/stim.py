@@ -257,8 +257,6 @@ def xcorr(
                 latency=_xcorr(nidaq_samples, interp_waveform_samples, nidaq_times),
             )
         )
-        # long padding slows down np.corr: could change dynamically
-        # padding_sec = 2 * recordings[-1].latency
 
         # to verify:
         """
