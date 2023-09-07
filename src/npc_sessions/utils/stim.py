@@ -269,7 +269,7 @@ def get_stim_latencies_from_nidaq_recording(
     waveform_type: str,
     nidaq_device_name: str | None = None,
     correlation_method: Callable[
-        [npt.NDArray[np.int16], utils.EphysTimingInfoOnSync, int, bool, Iterable[StimPresentation]], tuple[StimRecording, ...]
+        [npt.NDArray[np.int16], utils.EphysTimingInfoOnSync, int, Iterable[StimPresentation]], tuple[StimRecording, ...]
     ] = xcorr,
     correlation_method_kwargs: dict[str, Any] | None = None,
 ) -> tuple[StimRecording, ...]:
