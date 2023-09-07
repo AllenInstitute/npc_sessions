@@ -100,7 +100,9 @@ def get_cam_transfer_times_on_sync(
         sync_data = utils.SyncDataset(utils.from_pathlike(sync_path_or_dataset))
 
     frame_times = {}
-    for line in (line for line in sync_data.line_labels if "_cam_frame_readout" in line):
+    for line in (
+        line for line in sync_data.line_labels if "_cam_frame_readout" in line
+    ):
         camera_name = utils.extract_camera_name(line)
         frame_times[camera_name] = sync_data.get_rising_edges(line, units="seconds")
     return frame_times
