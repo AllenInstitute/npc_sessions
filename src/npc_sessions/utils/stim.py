@@ -225,7 +225,7 @@ def xcorr(
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
     for pres_idx, presentation in enumerate(presentations):
         print(f"{pres_idx+1}/{len(tuple(presentations))}\r", flush=True)
-        times = (
+        nidaq_times = (
             np.arange(
                 (presentation.offset_sample_on_nidaq + padding_samples)
                 - (presentation.onset_sample_on_nidaq - padding_samples)
@@ -233,24 +233,23 @@ def xcorr(
             / (nidaq_timing.sampling_rate)
             - padding_sec
         )
-        values = nidaq_data[
+        nidaq_samples = nidaq_data[
             presentation.onset_sample_on_nidaq
             - padding_samples : presentation.offset_sample_on_nidaq
             + padding_samples,
             nidaq_channel,
         ]
-        interp_times = np.arange(
-            -padding_sec,
-            presentation.duration + padding_sec,
-            1 / presentation.waveform.sampling_rate,
+        waveform_times = np.arange(0, presentation.duration, 1 / presentation.waveform.sampling_rate)
+        interp_waveform_times = np.arange(
+            0, presentation.duration,
+            1 / nidaq_timing.sampling_rate,
         )
-        interp_values = np.interp(interp_times, times, values)
-        waveform_values = presentation.waveform.samples
+        interp_waveform_samples = np.interp(interp_waveform_times, waveform_times, presentation.waveform.samples)
 
         recordings.append(
             StimRecording(
                 presentation=presentation,
-                latency=_xcorr(interp_values, waveform_values, interp_times),
+                latency=_xcorr(nidaq_samples, interp_waveform_samples, nidaq_times),
             )
         )
         # long padding slows down np.corr: could change dynamically
@@ -259,11 +258,11 @@ def xcorr(
         # to verify:
         """
         import matplotlib.pyplot as plt
-        norm_values = (interp_values - np.mean(interp_values))
-        norm_values = norm_values / max(abs(norm_values))
-        waveform_times = np.arange(0, presentation.duration, 1 / presentation.waveform.sampling_rate)
-        plt.plot(waveform_times + recordings[-1].latency, presentation.waveform.samples / max(abs(presentation.waveform.samples)))
-        plt.plot(interp_times, norm_values)
+        norm_nidaq_samples = (nidaq_samples - np.mean(nidaq_samples)) / max(abs((nidaq_samples - np.mean(nidaq_samples))))
+        norm_waveform_samples = (interp_waveform_samples - np.mean(interp_waveform_samples)) / max(abs((interp_waveform_samples - np.mean(interp_waveform_samples))))
+        plt.plot(nidaq_times, norm_nidaq_samples)
+        plt.plot(interp_waveform_times + recordings[-1].latency, norm_waveform_samples / max(abs(norm_waveform_samples)))
+        plt.title(f"{recordings[-1].latency = }")
         """
 
     return tuple(recordings)
