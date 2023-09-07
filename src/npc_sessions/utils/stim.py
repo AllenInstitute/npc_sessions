@@ -350,12 +350,8 @@ def get_stim_latencies_from_nidaq_recording(
     )
 
     num_trials = get_num_trials(stim)
+    trigger_frames = get_stim_trigger_frames(stim)
 
-    trigger_frames: npt.NDArray[np.int16] = (
-        stim.get("trialStimStartFrame")
-        or stim.get("trialOptoOnsetFrame")
-        or stim.get("stimStartFrame")
-    )[:num_trials]
 
     presentations = []
 
@@ -363,13 +359,12 @@ def get_stim_latencies_from_nidaq_recording(
     for idx, waveform in enumerate(waveforms):
         if not any(waveform.samples):
             continue
-        trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
         # padding should be done by correlation method, when reading data
         presentations.append(
             StimPresentation(
                 trial_idx=idx,
                 waveform=waveform,
-                trigger_time_on_sync=trigger_time_on_sync,
+                trigger_time_on_sync= vsyncs[trigger_frames[idx]],
             )
         )
 
@@ -513,7 +508,18 @@ def get_stim_duration(stim_path_or_data: utils.PathLike | h5py.File) -> float:
     stim_data = get_h5_stim_data(stim_path_or_data)
     return np.sum(stim_data["frameIntervals"][:])
 
-
+def get_stim_trigger_frames(
+    stim_path_or_data: utils.PathLike | h5py.File,
+) -> tuple[int | None, ...]:
+    """Frame index of stim command being sent. Len == num trials"""
+    stim_data = get_h5_stim_data(stim_path_or_data)
+    start_frames = (
+        stim_data.get("trialStimStartFrame")
+        or stim_data.get("trialOptoOnsetFrame")
+        or stim_data.get("stimStartFrame")
+    )[:get_num_trials(stim_data)]
+    return tuple(int(v) if ~np.isnan(v) else None for v in utils.safe_index(start_frames, np.arange(start_frames)))
+    
 if __name__ == "__main__":
     import doctest
 
