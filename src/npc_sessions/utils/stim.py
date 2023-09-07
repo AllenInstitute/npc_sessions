@@ -259,9 +259,10 @@ def xcorr(
         # to verify:
         """
         import matplotlib.pyplot as plt
-        norm_values = (interp_values - np.mean(interp_values))/max(interp_values)
+        norm_values = (interp_values - np.mean(interp_values))
+        norm_values = norm_values / max(abs(norm_values))
         waveform_times = np.arange(0, presentation.duration, 1 / presentation.waveform.sampling_rate)
-        plt.plot(waveform_times + recordings[-1].latency, presentation.waveform.samples)
+        plt.plot(waveform_times + recordings[-1].latency, presentation.waveform.samples / max(abs(presentation.waveform.samples)))
         plt.plot(interp_times, norm_values)
         """
 
