@@ -92,7 +92,7 @@ def get_audio_waveforms_from_stim_file(
         for trialnum in range(0, len(trialSoundArray)):
             waveforms.append(
                 Waveform(
-                    waveform=trialSoundArray[trialnum], sampling_rate=soundSampleRate
+                    samples=trialSoundArray[trialnum], sampling_rate=soundSampleRate
                 )
             )
         return tuple(waveforms)
@@ -188,7 +188,7 @@ def generate_opto_waveforms_from_stim_file(
                 offRamp=trialOptoOffRamp[trialnum],
                 offset=optoOffsetVoltage,
             )
-        waveform = Waveform(waveform=optoArray, sampling_rate=optoSampleRate)
+        waveform = Waveform(samples=optoArray, sampling_rate=optoSampleRate)
         waveforms.append(waveform)
 
     return tuple(waveforms)
