@@ -78,21 +78,20 @@ class StimRecording(NamedTuple):
 
 def get_audio_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
-) -> tuple[Waveform, ...]:
+) -> tuple[Waveform | None, ...]:
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     nTrials = get_num_trials(stim_data)
     soundSampleRate: int = stim_data["soundSampleRate"][()]
-
-    if len(stim_data["trialSoundArray"][:]) > 0:
-        trialSoundArray: list[npt.NDArray] = stim_data["trialSoundArray"][:nTrials]
-        waveforms = []
-        for trialnum in range(0, len(trialSoundArray)):
-            waveforms.append(
-                Waveform(
-                    samples=trialSoundArray[trialnum], sampling_rate=soundSampleRate
-                )
-            )
+    trialSoundArray: list[npt.NDArray] | None = stim_data.get('trialSoundArray', None)
+    
+    if trialSoundArray and len(trialSoundArray) > 0:
+        waveforms: list[Waveform | None] = [None] * nTrials
+        for trialnum in range(nTrials):
+            if any(trialSoundArray[trialnum]):
+                waveforms[trialnum] = Waveform(
+                        samples=trialSoundArray[trialnum], sampling_rate=soundSampleRate
+                    )
         return tuple(waveforms)
 
     print("trialSoundArray empty; regenerating sound arrays")
@@ -101,11 +100,11 @@ def get_audio_waveforms_from_stim_file(
 
 def regenerate_sound_array(
     stim_file_or_dataset: StimPathOrDataset,
-) -> tuple[Waveform, ...]:
+) -> tuple[Waveform | None, ...]:
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
-    waveforms = []
     nTrials = get_num_trials(stim_data)
+    waveforms: list[Waveform | None]  = [None] * nTrials
     trialSoundDur = stim_data["trialSoundDur"][:nTrials]
     trialSoundFreq = stim_data["trialSoundFreq"][:nTrials]
     trialSoundSeed = stim_data["trialSoundSeed"][:nTrials]
@@ -122,7 +121,7 @@ def regenerate_sound_array(
 
     for trialnum in range(0, nTrials):
         if trialSoundType[trialnum].decode() == "":
-            soundArray = np.array([])
+            waveforms[trialnum] = None
         else:
             if trialSoundType[trialnum].decode() == "tone":
                 # accounts for a quirk of how the trial sound frequencies are saved
@@ -141,19 +140,16 @@ def regenerate_sound_array(
                 seed=trialSoundSeed[trialnum],
             )
 
-        waveform = Waveform(samples=soundArray, sampling_rate=soundSampleRate)
-
-        waveforms.append(waveform)
+            waveforms[trialnum] = Waveform(samples=soundArray, sampling_rate=soundSampleRate)
 
     return tuple(waveforms)
 
 
 def generate_opto_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
-) -> tuple[Waveform, ...]:
+) -> tuple[Waveform | None, ...]:
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
-    waveforms = []
     nTrials = get_num_trials(stim_data)
     if "trialOptoDelay" in stim_data:
         trialOptoDelay = stim_data["trialOptoDelay"][:nTrials]
@@ -196,21 +192,20 @@ def generate_opto_waveforms_from_stim_file(
             f"trialOptoDur is empty - no opto waveforms to generate from {stim_file_or_dataset}"
         )
 
+    waveforms: list[Waveform | None]  = [None] * nTrials
     for trialnum in range(0, nTrials):
         if np.isnan(trialOptoDur[trialnum]) is True:
-            optoArray = np.array([])
-        else:
-            optoArray = getOptoPulseWaveform(
-                sampleRate=optoSampleRate,
-                amp=trialOptoVoltage[trialnum],
-                dur=trialOptoDur[trialnum],
-                delay=trialOptoDelay[trialnum],
-                freq=trialOptoSinFreq[trialnum],
-                onRamp=trialOptoOnRamp[trialnum],
-                offRamp=trialOptoOffRamp[trialnum],
-            )
-        waveform = Waveform(samples=optoArray, sampling_rate=optoSampleRate)
-        waveforms.append(waveform)
+            continue
+        optoArray = getOptoPulseWaveform(
+            sampleRate=optoSampleRate,
+            amp=trialOptoVoltage[trialnum],
+            dur=trialOptoDur[trialnum],
+            delay=trialOptoDelay[trialnum],
+            freq=trialOptoSinFreq[trialnum],
+            onRamp=trialOptoOnRamp[trialnum],
+            offRamp=trialOptoOffRamp[trialnum],
+        )
+        waveforms[trialnum] = Waveform(samples=optoArray, sampling_rate=optoSampleRate)
 
     return tuple(waveforms)
 
@@ -218,7 +213,7 @@ def generate_opto_waveforms_from_stim_file(
 def get_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
     waveform_type: Literal["sound", "audio", "opto"],
-) -> tuple[Waveform, ...]:
+) -> tuple[Waveform | None, ...]:
     if any(s in waveform_type for s in ("sound", "audio")):
         return get_audio_waveforms_from_stim_file(stim_file_or_dataset)
     if "opto" in waveform_type:
@@ -238,14 +233,17 @@ def xcorr(
     nidaq_data: npt.NDArray[np.int16],
     nidaq_timing: utils.EphysTimingInfoOnSync,
     nidaq_channel: int,
-    presentations: Iterable[StimPresentation],
+    presentations: Iterable[StimPresentation | None],
     padding_sec: float = 0.15,
     **kwargs,
-) -> tuple[StimRecording, ...]:
-    recordings: list[StimRecording] = []
+) -> tuple[StimRecording | None, ...]:
+    num_presentations = len(tuple(presentations))
+    recordings: list[StimRecording | None] = [None] * num_presentations
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
-    for pres_idx, presentation in enumerate(presentations):
-        print(f"{pres_idx+1}/{len(tuple(presentations))}\r", flush=True)
+    for idx, presentation in enumerate(presentations):
+        print(f"{idx+1}/{num_presentations}\r", flush=True)
+        if presentation is None:
+            continue
         trigger_time_on_nidaq = presentation.trigger_time_on_sync - nidaq_timing.start_time
         onset_sample_on_nidaq = round(
             trigger_time_on_nidaq * nidaq_timing.sampling_rate
@@ -310,12 +308,12 @@ def get_stim_latencies_from_nidaq_recording(
             npt.NDArray[np.int16],
             utils.EphysTimingInfoOnSync,
             int,
-            Iterable[StimPresentation],
+            Iterable[StimPresentation | None],
         ],
-        tuple[StimRecording, ...],
+        tuple[StimRecording | None, ...],
     ] = xcorr,
     correlation_method_kwargs: dict[str, Any] | None = None,
-) -> tuple[StimRecording, ...]:
+) -> tuple[StimRecording | None, ...]:
     sync = utils.get_sync_data(sync)
     if not nidaq_device_name:
         nidaq_device = utils.get_pxi_nidaq_device(recording_dirs)
@@ -351,20 +349,18 @@ def get_stim_latencies_from_nidaq_recording(
     trigger_frames = get_stim_trigger_frames(stim)
 
 
-    presentations = []
 
+    presentations: list[StimPresentation | None] = [None] * num_trials
     waveforms = get_waveforms_from_stim_file(stim, waveform_type)
     for idx, waveform in enumerate(waveforms):
-        if not any(waveform.samples):
+        if waveform is None:
             continue
         # padding should be done by correlation method, when reading data
-        presentations.append(
-            StimPresentation(
+        presentations[idx] = StimPresentation(
                 trial_idx=idx,
                 waveform=waveform,
                 trigger_time_on_sync= vsyncs[trigger_frames[idx]],
             )
-        )
 
     # run the correlation of presentations with nidaq data
     recordings = correlation_method(
@@ -406,14 +402,12 @@ def get_stim_latencies_from_sync(
     )
     trigger_times = tuple(vsyncs[idx] if idx else None for idx in get_stim_trigger_frames(stim, stim_type=waveform_type))
     stim_onsets = sync.get_rising_edges(line_index_or_label, units="seconds")
-    recordings: list[StimRecording | None] = []
+    recordings: list[StimRecording | None] = [None] * len(trigger_times)
     for idx, waveform in enumerate(get_waveforms_from_stim_file(stim, waveform_type)):
-        if not any(waveform.samples):
-            recordings.append(None)
+        if waveform is None:
             continue
         onset_following_trigger = stim_onsets[np.searchsorted(stim_onsets, trigger_times[idx], side='right')]
-        recordings.append(
-            StimRecording(
+        recordings[idx] = StimRecording(
                 presentation=StimPresentation(
                     trial_idx=idx,
                     waveform=waveform,
@@ -421,7 +415,6 @@ def get_stim_latencies_from_sync(
                 ),
                 latency=onset_following_trigger-trigger_times[idx],
             )
-        )
     return tuple(recordings)
         
 def get_sync_line_for_stim_onset(
