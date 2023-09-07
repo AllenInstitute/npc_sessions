@@ -154,16 +154,40 @@ def generate_opto_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform, ...]:
     stim_data = get_h5_stim_data(stim_file_or_dataset)
-
+    
     waveforms = []
     nTrials = get_num_trials(stim_data)
-    trialOptoDelay = stim_data["trialOptoDelay"][:]
-    trialOptoDur = stim_data["trialOptoDur"][:]
-    trialOptoOffRamp = stim_data["trialOptoOffRamp"][:]
-    trialOptoOnRamp = stim_data["trialOptoOnRamp"][:]
-    trialOptoSinFreq = stim_data["trialOptoSinFreq"][:]
-    trialOptoVoltage = stim_data["trialOptoVoltage"][:]
-    optoOffsetVoltage = stim_data["optoOffsetVoltage"]["laser_488"][()]
+    if "trialOptoDelay" in stim_data:
+        trialOptoDelay = stim_data["trialOptoDelay"][:nTrials]
+    elif "optoDelay" in stim_data:
+        trialOptoDelay = np.ones(nTrials)*stim_data["optoDelay"][()]
+    else: 
+        trialOptoDelay = np.zeros(nTrials)
+
+    if "trialOptoOffRamp" in stim_data:
+        trialOptoOffRamp = stim_data["trialOptoOffRamp"][:nTrials]
+    elif "optoOffRamp" in stim_data:
+        trialOptoOffRamp = np.ones(nTrials)*stim_data["optoOffRamp"]
+    else:
+        trialOptoOffRamp = np.zeros(nTrials)
+
+    if "trialOptoOnRamp" in stim_data:
+        trialOptoOnRamp = stim_data["trialOptoOnRamp"][:nTrials]
+    elif "optoOnRamp" in stim_data:
+        trialOptoOnRamp = np.ones(nTrials)*stim_data["optoOnRamp"]
+    else:
+        trialOptoOnRamp = np.zeros(nTrials)
+
+    if "trialOptoSinFreq" in stim_data:
+        trialOptoSinFreq = stim_data["trialOptoSinFreq"][:nTrials]
+    elif "optoSinFreq" in stim_data:
+        trialOptoSinFreq = np.ones(nTrials)*stim_data["optoSinFreq"]
+    else:
+        trialOptoSinFreq = np.zeros(nTrials)
+
+    trialOptoDur = stim_data["trialOptoDur"][:nTrials]
+    trialOptoVoltage = stim_data["trialOptoVoltage"][:nTrials]
+
     if "optoSampleRate" in stim_data.keys():
         optoSampleRate = stim_data["optoSampleRate"][()]
     else:
@@ -186,7 +210,6 @@ def generate_opto_waveforms_from_stim_file(
                 freq=trialOptoSinFreq[trialnum],
                 onRamp=trialOptoOnRamp[trialnum],
                 offRamp=trialOptoOffRamp[trialnum],
-                offset=optoOffsetVoltage,
             )
         waveform = Waveform(samples=optoArray, sampling_rate=optoSampleRate)
         waveforms.append(waveform)
@@ -312,6 +335,9 @@ def get_stim_latencies_from_nidaq_recording(
 
     if (waveform_type == "audio") | (waveform_type == "sound"):
         nidaq_channel = 1
+    elif (waveform_type == "opto"):
+        nidaq_channel = 5
+
     stim = get_h5_stim_data(stim_file_or_dataset)
 
     vsyncs = assert_stim_times(
@@ -321,7 +347,7 @@ def get_stim_latencies_from_nidaq_recording(
     num_trials = get_num_trials(stim)
 
     trigger_frames: npt.NDArray[np.int16] = (
-        stim.get("trialStimStartFrame") or stim.get("stimStartFrame")
+        stim.get("trialStimStartFrame") or stim.get("trialOptoOnsetFrame") or stim.get("stimStartFrame")
     )[:num_trials]
 
     presentations = []
@@ -464,7 +490,7 @@ def get_num_trials(
     stim_path_or_data: utils.PathLike | h5py.File,
 ) -> int:
     stim_data = get_h5_stim_data(stim_path_or_data)
-    return len((stim_data.get("trialEndFrame") or stim_data.get("trialSoundArray"))[:])
+    return len((stim_data.get("trialEndFrame") or stim_data.get("trialOptoOnsetFrame")))
 
 
 def get_stim_start_time(
