@@ -17,7 +17,7 @@
 ('Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0')
 >>> isinstance(get_settings_xml_info(path), SettingsXmlInfo)
 True
->>> _channel_positions(et)[18194810652]['CH0']
+>>> _probe_serial_number_to_channel_pos_xy(et)[18194810652]['CH0']
 (27, 0)
 """
 
