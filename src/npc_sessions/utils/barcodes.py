@@ -102,7 +102,7 @@ def extract_barcodes_from_times(
 
         barcodes.append(barcode)
 
-    return barcode_start_times, np.array(barcodes)
+    return barcode_start_times, np.array(barcodes, dtype=np.int64)
 
 
 def find_matching_index(
