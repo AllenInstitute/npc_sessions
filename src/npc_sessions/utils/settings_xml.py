@@ -36,6 +36,7 @@ import upath
 
 import npc_sessions.utils as utils
 
+
 @dataclasses.dataclass
 class SettingsXmlInfo:
     """Info from a settings.xml file from an Open Ephys recording."""
@@ -50,9 +51,11 @@ class SettingsXmlInfo:
     open_ephys_version: str
     channel_pos_xy: tuple[dict[str, tuple[int, int]], ...]
 
+
 def get_settings_xml_data(path: utils.PathLike) -> ET.ElementTree:
     """Info from a settings.xml file from an Open Ephys recording."""
     return ET.parse(io.BytesIO(utils.from_pathlike(path).read_bytes()))
+
 
 def get_settings_xml_info(path: utils.PathLike) -> SettingsXmlInfo:
     et = get_settings_xml_data(path)
@@ -67,6 +70,7 @@ def get_settings_xml_info(path: utils.PathLike) -> SettingsXmlInfo:
         open_ephys_version=_open_ephys_version(et),
         channel_pos_xy=tuple(_probe_serial_number_to_channel_pos_xy(et).values()),
     )
+
 
 def _get_tag_text(et: ET.ElementTree, tag: str) -> str | None:
     result = [
@@ -107,6 +111,7 @@ def _date_time(et: ET.ElementTree) -> tuple[datetime.date, datetime.time]:
     dt = datetime.datetime.strptime(result, "%d %b %Y %H:%M:%S")
     return dt.date(), dt.time()
 
+
 @functools.cache
 def _probe_attrib_dicts(et: ET.ElementTree) -> tuple[dict[str, str], ...]:
     return tuple(
@@ -130,17 +135,23 @@ def _probe_types(et: ET.ElementTree) -> tuple[str, ...]:
     except KeyError:
         return tuple("unknown" for _ in _probe_attrib_dicts(et))
 
-def _probe_serial_number_to_channel_pos_xy(et: ET.ElementTree) -> dict[int, dict[str, tuple[int, int]]]:
+
+def _probe_serial_number_to_channel_pos_xy(
+    et: ET.ElementTree,
+) -> dict[int, dict[str, tuple[int, int]]]:
     x_pos_iter = tuple(a for a in et.getroot().iter() if a.tag == "ELECTRODE_XPOS")
     y_pos_iter = tuple(a for a in et.getroot().iter() if a.tag == "ELECTRODE_YPOS")
-    
-    return dict(zip(
-        _probe_serial_numbers(et),
-        (
-            {k: (int(x.attrib[k]), int(y.attrib[k])) for k in x.attrib.keys()} 
-            for x, y in zip(x_pos_iter, y_pos_iter) )
-      )
+
+    return dict(
+        zip(
+            _probe_serial_numbers(et),
+            (
+                {k: (int(x.attrib[k]), int(y.attrib[k])) for k in x.attrib.keys()}
+                for x, y in zip(x_pos_iter, y_pos_iter)
+            ),
+        )
     )
+
 
 def _probe_idx(et: ET.ElementTree) -> tuple[int, ...]:
     """Try to reconstruct index from probe slot and port.
@@ -160,8 +171,11 @@ def _probe_idx(et: ET.ElementTree) -> tuple[int, ...]:
     return result
 
 
-def _probe_letters(et: ET.ElementTree) -> tuple[Literal["A", "B", "C", "D", "E", "F"], ...]:
-    return tuple("ABCDEF"[idx] for idx in _probe_idx(et)) # type: ignore [misc]
+def _probe_letters(
+    et: ET.ElementTree,
+) -> tuple[Literal["A", "B", "C", "D", "E", "F"], ...]:
+    return tuple("ABCDEF"[idx] for idx in _probe_idx(et))  # type: ignore [misc]
+
 
 def _open_ephys_version(et: ET.ElementTree) -> str:
     result = _get_tag_text(et, "version")
@@ -172,6 +186,7 @@ def _open_ephys_version(et: ET.ElementTree) -> str:
 
 def _settings_xml_md5(path: str | upath.UPath) -> str:
     return hashlib.md5(upath.UPath(path).read_bytes()).hexdigest()
+
 
 if __name__ == "__main__":
     import doctest

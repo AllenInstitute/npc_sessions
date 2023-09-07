@@ -221,17 +221,22 @@ def xcorr(
     **kwargs,
 ) -> tuple[StimRecording, ...]:
     recordings: list[StimRecording] = []
-    padding_samples = int(padding_sec*nidaq_timing.sampling_rate)
-    for pres_idx,presentation in enumerate(presentations):
+    padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
+    for pres_idx, presentation in enumerate(presentations):
         print(f"{pres_idx+1}/{len(tuple(presentations))}\r", flush=True)
-        times = np.arange(
-            (presentation.offset_sample_on_nidaq + padding_samples) - 
-            (presentation.onset_sample_on_nidaq - padding_samples)
-        ) / (nidaq_timing.sampling_rate) - padding_sec
+        times = (
+            np.arange(
+                (presentation.offset_sample_on_nidaq + padding_samples)
+                - (presentation.onset_sample_on_nidaq - padding_samples)
+            )
+            / (nidaq_timing.sampling_rate)
+            - padding_sec
+        )
         values = nidaq_data[
-            presentation.onset_sample_on_nidaq - padding_samples : 
-            presentation.offset_sample_on_nidaq + padding_samples,
-            nidaq_channel
+            presentation.onset_sample_on_nidaq
+            - padding_samples : presentation.offset_sample_on_nidaq
+            + padding_samples,
+            nidaq_channel,
         ]
         interp_times = np.arange(
             -padding_sec,
@@ -269,7 +274,13 @@ def get_stim_latencies_from_nidaq_recording(
     waveform_type: str,
     nidaq_device_name: str | None = None,
     correlation_method: Callable[
-        [npt.NDArray[np.int16], utils.EphysTimingInfoOnSync, int, Iterable[StimPresentation]], tuple[StimRecording, ...]
+        [
+            npt.NDArray[np.int16],
+            utils.EphysTimingInfoOnSync,
+            int,
+            Iterable[StimPresentation],
+        ],
+        tuple[StimRecording, ...],
     ] = xcorr,
     correlation_method_kwargs: dict[str, Any] | None = None,
 ) -> tuple[StimRecording, ...]:
@@ -295,7 +306,7 @@ def get_stim_latencies_from_nidaq_recording(
         device_name=nidaq_device_name,
     )
 
-    if (waveform_type == 'audio')|(waveform_type == 'sound'):
+    if (waveform_type == "audio") | (waveform_type == "sound"):
         nidaq_channel = 3
     stim = get_h5_stim_data(stim_file_or_dataset)
 
@@ -311,7 +322,7 @@ def get_stim_latencies_from_nidaq_recording(
 
     presentations = []
 
-    waveforms = get_waveforms_from_stim_file(stim,waveform_type)
+    waveforms = get_waveforms_from_stim_file(stim, waveform_type)
     for idx, waveform in enumerate(waveforms[stim]):
         if not any(waveform.waveform):
             continue
@@ -338,7 +349,11 @@ def get_stim_latencies_from_nidaq_recording(
 
     # run the correlation of presentations with nidaq data
     recordings = correlation_method(
-        nidaq_data, nidaq_timing, nidaq_channel, presentations, **(correlation_method_kwargs or {})
+        nidaq_data,
+        nidaq_timing,
+        nidaq_channel,
+        presentations,
+        **(correlation_method_kwargs or {}),
     )
 
     return recordings
@@ -442,7 +457,7 @@ def get_stim_frame_times(
 
 
 def get_num_trials(
-        stim_path_or_data: utils.PathLike | h5py.File,
+    stim_path_or_data: utils.PathLike | h5py.File,
 ) -> int:
     stim_data = get_h5_stim_data(stim_path_or_data)
     return len((stim_data.get("trialEndFrame") or stim_data.get("trialSoundArray"))[:])

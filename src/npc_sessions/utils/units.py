@@ -60,12 +60,21 @@ def get_unit_spike_times_dict(
 
     return spike_times_dict
 
+
 def get_units_electrodes_spike_times(session: str, *args, **kwargs) -> pd.DataFrame:
     units_df = get_units_electrodes(session, *args, **kwargs)
     unit_ids = units_df["unit_name"].to_list()
-    spike_times_dict = get_unit_spike_times_dict(session, tuple(unit_ids), *args, **kwargs)
-    spike_times_df = pl.DataFrame({"unit_name": tuple(spike_times_dict.keys()), "spike_times": tuple(t for t in spike_times_dict.values())})
+    spike_times_dict = get_unit_spike_times_dict(
+        session, tuple(unit_ids), *args, **kwargs
+    )
+    spike_times_df = pl.DataFrame(
+        {
+            "unit_name": tuple(spike_times_dict.keys()),
+            "spike_times": tuple(t for t in spike_times_dict.values()),
+        }
+    )
     return pl.DataFrame(units_df).join(spike_times_df, on="unit_name")
+
 
 if __name__ == "__main__":
     import doctest

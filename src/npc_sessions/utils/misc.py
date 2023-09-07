@@ -4,7 +4,7 @@ import collections.abc
 import contextlib
 import pathlib
 from collections.abc import Iterable, Iterator
-from typing import Any, Literal, SupportsFloat, TypeVar
+from typing import Literal, SupportsFloat, TypeVar
 
 import npc_session
 import numpy as np
@@ -109,8 +109,10 @@ def safe_index(
         return result.item()
     return result
 
-K = TypeVar('K')
-V = TypeVar('V')
+
+K = TypeVar("K")
+V = TypeVar("V")
+
 
 class LazyDict(collections.abc.Mapping[K, V]):
     """Dict for postponed evaluation of functions and caching of results.
@@ -148,8 +150,9 @@ class LazyDict(collections.abc.Mapping[K, V]):
         return len(self._raw_dict)
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(keys={[k for k in self._raw_dict.keys()]})'
-    
+        return f"{self.__class__.__name__}(keys={list(self._raw_dict.keys())})"
+
+
 if __name__ == "__main__":
     import doctest
 

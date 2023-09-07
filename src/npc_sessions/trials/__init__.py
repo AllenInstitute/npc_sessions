@@ -1,13 +1,18 @@
 from typing import Optional
-from npc_sessions.trials.TaskControl import TaskControl
+
+import npc_sessions.utils as utils
 from npc_sessions.trials.property_dict import PropertyDict
+from npc_sessions.trials.TaskControl import TaskControl
 from npc_sessions.trials.TaskControl.DynamicRouting1 import DynamicRouting1
 from npc_sessions.trials.TaskControl.OptoTagging import OptoTagging
 from npc_sessions.trials.TaskControl.RFMapping import AudRFMapping, VisRFMapping
 
-import npc_sessions.utils as utils
 
-def get_trials(*stim_path: utils.PathLike, sync_path_or_data: Optional[utils.SyncPathOrDataset], **kwargs) -> tuple[TaskControl, ...]:
+def get_trials(
+    *stim_path: utils.PathLike,
+    sync_path_or_data: Optional[utils.SyncPathOrDataset],
+    **kwargs,
+) -> tuple[TaskControl, ...]:
     """Get trials for a given stimulus file.
 
     Parameters
