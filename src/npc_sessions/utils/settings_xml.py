@@ -15,9 +15,9 @@
 ('A', 'B', 'C', 'D', 'E', 'F')
 >>> _probe_types(et)
 ('Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0')
->>> isinstance(settings_xml_info(path), SettingsXmlInfo)
+>>> isinstance(get_settings_xml_info(path), SettingsXmlInfo)
 True
->>> _channel_positions(et)[18194810652]['CH0]
+>>> _channel_positions(et)[18194810652]['CH0']
 (27, 0)
 """
 
