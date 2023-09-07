@@ -143,7 +143,7 @@ def regenerate_sound_array(
                 seed=trialSoundSeed[trialnum],
             )
 
-            waveform = Waveform(waveform=soundArray, sampling_rate=soundSampleRate)
+            waveform = Waveform(samples=soundArray, sampling_rate=soundSampleRate)
 
         waveforms.append(waveform)
 
