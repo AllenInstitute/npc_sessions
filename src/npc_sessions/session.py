@@ -24,7 +24,7 @@ import pathlib
 import re
 import warnings
 from collections.abc import Mapping
-from typing import Any, Literal
+from typing import Any, Callable, Literal, Type
 
 import h5py
 import npc_lims
@@ -592,17 +592,47 @@ class Session:
     }
     
     @functools.cached_property
-    def _intervals(self) -> dict[str, nwb.NWBContainerWithDF]:
-        return trials.get_trials(self.stim_paths, self.sync_data)    
+    def _intervals(self) -> utils.LazyDict[str, trials.TaskControl]:
+        
+        if self.is_sync:
+            sync = self.sync_data
+            stim_paths = tuple(path for path, times in utils.get_stim_frame_times(*self.stim_paths, sync=self.sync_data).items() if not isinstance(times, Exception))
+        else:
+            sync = None
+            stim_paths = self.stim_paths
+            
+        stim_data = self.stim_data # closure on lazy stim_data dict
+        def get_intervals(cls: Type[trials.TaskControl], stim_filename: str, *args) -> trials.TaskControl:
+            return cls(stim_data[stim_filename], sync, *args)
+        
+        filename_to_args: dict[str, tuple[Callable, Type[trials.TaskControl], str]] = {}
+        for stim_path in stim_paths:
+            assert isinstance(stim_path, upath.UPath)
+            stim_filename = stim_path.stem
+            if 'RFMapping' in stim_filename:
+                filename_to_args['Aud' + stim_filename] = (get_intervals, trials.AudRFMapping, stim_filename)
+                filename_to_args['Vis' + stim_filename] = (get_intervals, trials.VisRFMapping, stim_filename)
+            else:
+                try:
+                    cls: Type[trials.TaskControl] = getattr(trials, stim_filename.split('_')[0])
+                except AttributeError:
+                    continue # some stims (e.g. Spontaneous) have no trials class
+                # TODO append stim latencies where required
+                filename_to_args[stim_filename] = (get_intervals, cls, stim_filename)
+            
+        return utils.LazyDict(
+            (k, v) for k, v in filename_to_args.items()
+        )
     
     @property
-    def trials(self) -> nwb.NWBContainerWithDF:
-        trials = self.intervals.get(self.trials_interval_name)
-        if trials is None:
+    def _trials(self) -> trials.TaskControl:
+        """Main behavior task trials"""
+        stim_name = next((_ for _ in self.stim_paths if self.trials_interval_name in _.stem), None)
+        if stim_name is None:
             raise ValueError(
                 f"no intervals named {self.trials_interval_name} found for {self.id}"
             )
-        return trials
+        return self._intervals[stim_name.stem]
 
     @functools.cached_property
     def _licks(self):
