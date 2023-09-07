@@ -316,6 +316,7 @@ def get_stim_latencies_from_nidaq_recording(
     ] = xcorr,
     correlation_method_kwargs: dict[str, Any] | None = None,
 ) -> tuple[StimRecording, ...]:
+    sync = utils.get_sync_data(sync)
     if not nidaq_device_name:
         nidaq_device = utils.get_pxi_nidaq_device(recording_dirs)
     else:
@@ -338,10 +339,7 @@ def get_stim_latencies_from_nidaq_recording(
         device_name=nidaq_device.name,
     )
 
-    if (waveform_type == "audio") | (waveform_type == "sound"):
-        nidaq_channel = 1
-    elif waveform_type == "opto":
-        nidaq_channel = 5
+    nidaq_channel = get_nidaq_channel_for_stim_onset(waveform_type, date=sync.start_time.date())
 
     stim = get_h5_stim_data(stim_file_or_dataset)
 
@@ -386,7 +384,32 @@ def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
         raise result from None
     return result
 
-
+        
+def get_sync_line_for_stim_onset(
+    waveform_type: str | Literal['sound', 'audio', 'opto'],
+    date: Optional[datetime.date] = None,
+    ) -> int:
+    FIRST_SOUND_ON_SYNC_DATE = datetime.date(2023, 8, 31)
+    if any(label in waveform_type for label in ('aud', 'sound')):
+        if date and date < FIRST_SOUND_ON_SYNC_DATE:
+            raise ValueError(f"Sound only recorded on sync since {FIRST_SOUND_ON_SYNC_DATE.isoformat()}: {date = }")
+        return 1
+    elif 'opto' in waveform_type:
+        return 11
+    else:
+        raise ValueError(f"Unexpected value: {waveform_type = }")
+        
+def get_nidaq_channel_for_stim_onset(
+    waveform_type: str | Literal['sound', 'audio', 'opto'],
+    date: Optional[datetime.date] = None,
+    ) -> int:
+    if any(label in waveform_type for label in ('aud', 'sound')):
+        return 1
+    elif 'opto' in waveform_type:
+        return 5
+    else:
+        raise ValueError(f"Unexpected value: {waveform_type = }")
+        
 def get_stim_frame_times(
     *stim_paths: utils.StimPathOrDataset,
     sync: utils.SyncPathOrDataset,
