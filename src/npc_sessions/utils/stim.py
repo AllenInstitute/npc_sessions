@@ -49,7 +49,7 @@ def get_pkl_stim_data(stim_path: StimPathOrDataset, **kwargs) -> dict:
 
 
 class Waveform(NamedTuple):
-    waveform: npt.NDArray[np.float64]
+    samples: npt.NDArray[np.float64]
     sampling_rate: float
 
 
@@ -62,7 +62,7 @@ class StimPresentation(NamedTuple):
 
     @property
     def duration(self) -> float:
-        return len(self.waveform.waveform) / self.waveform.sampling_rate
+        return len(self.waveform.samples) / self.waveform.sampling_rate
 
 
 class StimRecording(NamedTuple):
@@ -242,7 +242,7 @@ def xcorr(
             1 / presentation.waveform.sampling_rate,
         )
         interp_values = np.interp(interp_times, times, values)
-        waveform_values = presentation.waveform.waveform
+        waveform_values = presentation.waveform.samples
 
         recordings.append(
             StimRecording(
@@ -257,8 +257,8 @@ def xcorr(
         """
         import matplotlib.pyplot as plt
         norm_values = (interp_values - np.mean(interp_values))/max(interp_values)
-        waveform_times = np.arange(0, presentation.duration, 1 / presentation.sampling_rate)
-        plt.plot(waveform_times + recordings[-1].latency, presentation.waveform)
+        waveform_times = np.arange(0, presentation.duration, 1 / presentation.waveform.sampling_rate)
+        plt.plot(waveform_times + recordings[-1].latency, presentation.waveform.samples)
         plt.plot(interp_times, norm_values)
         """
 
@@ -322,11 +322,11 @@ def get_stim_latencies_from_nidaq_recording(
 
     waveforms = get_waveforms_from_stim_file(stim, waveform_type)
     for idx, waveform in enumerate(waveforms):
-        if not any(waveform.waveform):
+        if not any(waveform.samples):
             continue
         trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
         trigger_time_on_pxi_nidaq = trigger_time_on_sync - nidaq_timing.start_time
-        duration = len(waveform.waveform) / waveform.sampling_rate
+        duration = len(waveform.samples) / waveform.sampling_rate
         onset_sample_on_pxi_nidaq = round(
             trigger_time_on_pxi_nidaq * nidaq_timing.sampling_rate
         )
