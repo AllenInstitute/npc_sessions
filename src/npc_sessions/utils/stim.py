@@ -326,7 +326,7 @@ def get_stim_latencies_from_nidaq_recording(
             continue
         trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
         trigger_time_on_pxi_nidaq = trigger_time_on_sync - nidaq_timing.start_time
-        duration = len(waveform) / waveform.sampling_rate
+        duration = len(waveform.waveform) / waveform.sampling_rate
         onset_sample_on_pxi_nidaq = round(
             trigger_time_on_pxi_nidaq * nidaq_timing.sampling_rate
         )
