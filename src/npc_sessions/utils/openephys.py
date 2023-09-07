@@ -197,7 +197,9 @@ def get_pxi_nidaq_data(
         device_metadata = next(
             (
                 _
-                for _ in get_merged_oebin_file(next(p.glob('*.oebin')) for p in recording_dirs)["continuous"]
+                for _ in get_merged_oebin_file(
+                    next(p.glob("*.oebin")) for p in recording_dirs
+                )["continuous"]
                 if device.name in _["folder_name"]
             ),
             None,

@@ -196,13 +196,16 @@ def generate_opto_waveforms_from_stim_file(
 
 def get_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
-    waveform_type: Literal['sound', 'audio', 'opto'],
+    waveform_type: Literal["sound", "audio", "opto"],
 ) -> tuple[Waveform, ...]:
-    if any(s in waveform_type for s in ('sound', 'aud')):
+    if any(s in waveform_type for s in ("sound", "aud")):
         return get_audio_waveforms_from_stim_file(stim_file_or_dataset)
     if "opto" in waveform_type:
         return generate_opto_waveforms_from_stim_file(stim_file_or_dataset)
-    raise ValueError(f"Unexpected value: {waveform_type = }. Should be 'sound' or 'opto'.")
+    raise ValueError(
+        f"Unexpected value: {waveform_type = }. Should be 'sound' or 'opto'."
+    )
+
 
 @numba.njit(parallel=True)
 def _xcorr(v, w, t) -> float:
@@ -269,7 +272,7 @@ def get_stim_latencies_from_nidaq_recording(
     stim_file_or_dataset: StimPathOrDataset,
     sync: utils.SyncPathOrDataset,
     recording_dirs: Iterable[upath.UPath],
-    waveform_type: Literal['sound', 'audio', 'opto'],
+    waveform_type: Literal["sound", "audio", "opto"],
     nidaq_device_name: str | None = None,
     correlation_method: Callable[
         [

@@ -54,7 +54,7 @@ def extract_barcodes_from_times(
     start_indices = np.diff(on_times)
     a = np.where(start_indices > inter_barcode_interval)[0]
     if on_times[0] > barcode_duration_ceiling:
-        a = np.insert(a, 0, -1) # to add back first barcode
+        a = np.insert(a, 0, -1)  # to add back first barcode
     barcode_start_times = on_times[a + 1]
 
     barcodes = []
