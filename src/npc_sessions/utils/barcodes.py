@@ -17,11 +17,11 @@ import numpy.typing as npt
 def extract_barcodes_from_times(
     on_times: np.ndarray,
     off_times: np.ndarray,
-    inter_barcode_interval: float = 10,
-    bar_duration: float = 0.03,
+    inter_barcode_interval: float = 29,
+    bar_duration: float = 0.015,
     barcode_duration_ceiling: float = 2,
     nbits: int = 32,
-) -> tuple[np.ndarray, npt.NDArray[np.int64]]:
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.int64]]:
     # from ecephys repo
     """Read barcodes from timestamped rising and falling edges.
     Parameters
@@ -46,7 +46,6 @@ def extract_barcodes_from_times(
         For each detected barcode, the value of that barcode as an integer.
     Notes
     -----
-    ignores first code in prod (ok, but not intended)
     ignores first on pulse (intended - this is needed to identify that a barcode is starting)
     """
     if len(on_times) > len(off_times):
@@ -54,6 +53,8 @@ def extract_barcodes_from_times(
 
     start_indices = np.diff(on_times)
     a = np.where(start_indices > inter_barcode_interval)[0]
+    if on_times[0] > barcode_duration_ceiling:
+        a = np.insert(a, 0, -1) # to add back first barcode
     barcode_start_times = on_times[a + 1]
 
     barcodes = []
