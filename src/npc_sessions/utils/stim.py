@@ -309,7 +309,7 @@ def get_stim_latencies_from_nidaq_recording(
     )
 
     if (waveform_type == "audio") | (waveform_type == "sound"):
-        nidaq_channel = 3
+        nidaq_channel = 1
     stim = get_h5_stim_data(stim_file_or_dataset)
 
     vsyncs = assert_stim_times(
