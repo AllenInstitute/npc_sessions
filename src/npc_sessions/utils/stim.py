@@ -301,7 +301,7 @@ def get_stim_latencies_from_nidaq_recording(
 
     nidaq_data = utils.get_pxi_nidaq_data(
         *recording_dirs,
-        device_name=nidaq_device_name,
+        device_name=nidaq_device.name,
     )
 
     if (waveform_type == "audio") | (waveform_type == "sound"):
