@@ -5,7 +5,7 @@ import io
 import logging
 import pickle
 from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Literal, NamedTuple, Union
+from typing import Any, Callable, Literal, NamedTuple, Optional, Union
 
 import h5py
 import npc_session
@@ -390,6 +390,13 @@ def get_stim_latencies_from_sync(
     waveform_type: Literal["sound", "audio", "opto"],
     line_index_or_label: Optional[int | str] = None,
 ) -> tuple[StimRecording | None, ...]:
+    """
+    >>> stim = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5'
+    >>> sync = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/20230831T123331.h5'
+    >>> latencies = get_stim_latencies_from_sync(stim, sync, waveform_type='sound')
+    >>> assert 0 < next(_.latency for _ in latencies if _ is not None) < 0.1
+    
+    """
     stim = get_h5_stim_data(stim_file_or_dataset)
     sync = utils.get_sync_data(sync)
     if not line_index_or_label:
@@ -535,6 +542,10 @@ def get_stim_frame_times(
 def get_num_trials(
     stim_path_or_data: utils.PathLike | h5py.File,
 ) -> int:
+    """
+    >>> get_num_trials('s3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5')
+    524
+    """
     stim_data = get_h5_stim_data(stim_path_or_data)
     return len(stim_data.get("trialEndFrame") or stim_data.get("trialOptoOnsetFrame"))
 
@@ -542,7 +553,10 @@ def get_num_trials(
 def get_stim_start_time(
     stim_path_or_data: utils.PathLike | h5py.File,
 ) -> datetime.datetime:
-    """Absolute datetime of the first frame, according to the stim file"""
+    """Absolute datetime of the first frame, according to the stim file
+    >>> get_stim_start_time('s3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5')
+    datetime.datetime(2023, 8, 31, 13, 14, 18)
+    """
     # TODO make compatible with pkl files
     stim_data = get_h5_stim_data(stim_path_or_data)
     # get stim start time & convert to datetime
@@ -550,6 +564,10 @@ def get_stim_start_time(
 
 
 def get_total_stim_frames(stim_path_or_data: utils.PathLike | h5py.File) -> int:
+    """
+    >>> get_total_stim_frames('s3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5')
+    217261
+    """
     # TODO make compatible with pkl files
     stim_data = get_h5_stim_data(stim_path_or_data)
     frame_intervals = stim_data["frameIntervals"][:]
@@ -559,6 +577,10 @@ def get_total_stim_frames(stim_path_or_data: utils.PathLike | h5py.File) -> int:
 
 
 def get_stim_duration(stim_path_or_data: utils.PathLike | h5py.File) -> float:
+    """
+    >>> get_stim_duration('s3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5')
+    3647.0994503999827
+    """
     # TODO make compatible with pkl files
     stim_data = get_h5_stim_data(stim_path_or_data)
     return np.sum(stim_data["frameIntervals"][:])
@@ -567,7 +589,17 @@ def get_stim_trigger_frames(
     stim_path_or_data: utils.PathLike | h5py.File,
     stim_type: str | Literal['opto'] = 'stim',
 ) -> tuple[int | None, ...]:
-    """Frame index of stim command being sent. Len == num trials"""
+    """Frame index of stim command being sent. len() == num trials.
+    
+    >>> path = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5'
+    >>> frames = get_stim_trigger_frames(path)
+    >>> len(frames)
+    524
+    
+    >>> frames = get_stim_trigger_frames(path, stim_type='opto')
+    >>> len(frames)
+    0
+    """
     stim_data = get_h5_stim_data(stim_path_or_data)
     start_frames = (
         (stim_data.get("trialStimStartFrame")
