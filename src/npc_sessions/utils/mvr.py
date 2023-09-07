@@ -30,7 +30,7 @@ def get_video_frame_times(
     - if the number of frames in a video file doesn't match the number of frames
     returned here, just truncate the excess frames in the video file:
 
-        MVR previously ceased all TTL pulses the instant a recording was
+        MVR previously ceased all TTL pulses before the recording was
         stopped, resulting in frames in the video that weren't registered
         in sync. MVR was fixed July 2023 after Corbett discovered the issue.
 
@@ -69,6 +69,36 @@ def get_cam_exposing_times_on_sync(
 
     frame_times = {}
     for line in (line for line in sync_data.line_labels if "_cam_exposing" in line):
+        camera_name = utils.extract_camera_name(line)
+        frame_times[camera_name] = sync_data.get_rising_edges(line, units="seconds")
+    return frame_times
+
+
+def get_cam_exposing_falling_edge_times_on_sync(
+    sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
+) -> dict[Literal["behavior", "eye", "face"], npt.NDArray[np.float64]]:
+    if isinstance(sync_path_or_dataset, utils.SyncDataset):
+        sync_data = sync_path_or_dataset
+    else:
+        sync_data = utils.SyncDataset(utils.from_pathlike(sync_path_or_dataset))
+
+    frame_times = {}
+    for line in (line for line in sync_data.line_labels if "_cam_exposing" in line):
+        camera_name = utils.extract_camera_name(line)
+        frame_times[camera_name] = sync_data.get_falling_edges(line, units="seconds")
+    return frame_times
+
+
+def get_cam_transfer_times_on_sync(
+    sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
+) -> dict[Literal["behavior", "eye", "face"], npt.NDArray[np.float64]]:
+    if isinstance(sync_path_or_dataset, utils.SyncDataset):
+        sync_data = sync_path_or_dataset
+    else:
+        sync_data = utils.SyncDataset(utils.from_pathlike(sync_path_or_dataset))
+
+    frame_times = {}
+    for line in (line for line in sync_data.line_labels if "_cam_frame_readout" in line):
         camera_name = utils.extract_camera_name(line)
         frame_times[camera_name] = sync_data.get_rising_edges(line, units="seconds")
     return frame_times
