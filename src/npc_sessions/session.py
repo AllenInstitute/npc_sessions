@@ -40,7 +40,7 @@ import npc_sessions.utils as utils
 
 
 class Session:
-    trials_interval_name: str = "dynamic_routing_task"
+    trials_interval_name: str = "DynamicRouting1"
 
     experimenter: str | None = None
     experiment_description: str | None = None
