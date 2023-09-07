@@ -13,7 +13,7 @@ import numba
 import numpy as np
 import numpy.typing as npt
 import upath
-from DynamicRoutingTask.TaskUtils import makeSoundArray,getOptoPulseWaveform
+from DynamicRoutingTask.TaskUtils import getOptoPulseWaveform, makeSoundArray
 from typing_extensions import TypeAlias
 
 import npc_sessions.utils as utils
@@ -83,7 +83,7 @@ def get_audio_waveforms_from_stim_file(
 ) -> tuple[Waveform, ...]:
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
-    nTrials = len(stim_data["trialEndFrame"][:])
+    nTrials = get_num_trials(stim_data)
     soundSampleRate: int = stim_data["soundSampleRate"][()]
 
     if len(stim_data["trialSoundArray"][:]) > 0:
@@ -107,7 +107,7 @@ def regenerate_sound_array(
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     waveforms = []
-    nTrials = len(stim_data["trialEndFrame"][:])
+    nTrials = get_num_trials(stim_data)
     trialSoundDur = stim_data["trialSoundDur"][:nTrials]
     trialSoundFreq = stim_data["trialSoundFreq"][:nTrials]
     trialSoundSeed = stim_data["trialSoundSeed"][:nTrials]
@@ -116,6 +116,11 @@ def regenerate_sound_array(
     trialSoundAM = stim_data["trialSoundAM"][:nTrials]
     soundSampleRate = stim_data["soundSampleRate"][()]
     soundHanningDur = stim_data["soundHanningDur"][()]
+
+    if len(trialSoundDur) == 0:
+        raise IndexError(
+            f"trialSoundDur is empty - no opto waveforms to generate from {stim_file_or_dataset}"
+        )
 
     for trialnum in range(0, nTrials):
         if trialSoundType[trialnum].decode() == "":
@@ -148,43 +153,44 @@ def regenerate_sound_array(
 def generate_opto_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform, ...]:
-    
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
-    waveforms=[]
-    nTrials = len(stim_data["trialEndFrame"][:])
-    trialOptoDelay=stim_data['trialOptoDelay'][:]
-    trialOptoDur=stim_data['trialOptoDur'][:]
-    trialOptoOffRamp=stim_data['trialOptoOffRamp'][:]
-    trialOptoOnRamp=stim_data['trialOptoOnRamp'][:]
-    trialOptoSinFreq=stim_data['trialOptoSinFreq'][:]
-    trialOptoVoltage=stim_data['trialOptoVoltage'][:]
-    optoOffsetVoltage=stim_data['optoOffsetVoltage']['laser_488'][()]
-    if 'optoSampleRate' in stim_data.keys():
-        optoSampleRate=stim_data['optoSampleRate'][()]
+    waveforms = []
+    nTrials = get_num_trials(stim_data)
+    trialOptoDelay = stim_data["trialOptoDelay"][:]
+    trialOptoDur = stim_data["trialOptoDur"][:]
+    trialOptoOffRamp = stim_data["trialOptoOffRamp"][:]
+    trialOptoOnRamp = stim_data["trialOptoOnRamp"][:]
+    trialOptoSinFreq = stim_data["trialOptoSinFreq"][:]
+    trialOptoVoltage = stim_data["trialOptoVoltage"][:]
+    optoOffsetVoltage = stim_data["optoOffsetVoltage"]["laser_488"][()]
+    if "optoSampleRate" in stim_data.keys():
+        optoSampleRate = stim_data["optoSampleRate"][()]
     else:
-        optoSampleRate=2000
+        optoSampleRate = 2000
 
-    if len(trialOptoDur)==0:
-        print('no opto trials found')
-        return tuple(Waveform(waveform=np.array([]), sampling_rate=0))
+    if len(trialOptoDur) == 0:
+        raise IndexError(
+            f"trialOptoDur is empty - no opto waveforms to generate from {stim_file_or_dataset}"
+        )
 
-    for trialnum in range(0,nTrials):
-        if np.isnan(trialOptoDur[trialnum])==True:
+    for trialnum in range(0, nTrials):
+        if np.isnan(trialOptoDur[trialnum]) is True:
             optoArray = np.array([])
         else:
-            optoArray = getOptoPulseWaveform(sampleRate=optoSampleRate,
-                                             amp=trialOptoVoltage[trialnum],
-                                             dur=trialOptoDur[trialnum],
-                                             delay=trialOptoDelay[trialnum],
-                                             freq=trialOptoSinFreq[trialnum],
-                                             onRamp=trialOptoOnRamp[trialnum],
-                                             offRamp=trialOptoOffRamp[trialnum],
-                                             offset=optoOffsetVoltage,
-                                             )
+            optoArray = getOptoPulseWaveform(
+                sampleRate=optoSampleRate,
+                amp=trialOptoVoltage[trialnum],
+                dur=trialOptoDur[trialnum],
+                delay=trialOptoDelay[trialnum],
+                freq=trialOptoSinFreq[trialnum],
+                onRamp=trialOptoOnRamp[trialnum],
+                offRamp=trialOptoOffRamp[trialnum],
+                offset=optoOffsetVoltage,
+            )
         waveform = Waveform(waveform=optoArray, sampling_rate=optoSampleRate)
         waveforms.append(waveform)
-    
+
     return tuple(waveforms)
 
 
@@ -192,10 +198,9 @@ def get_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
     waveform_type: str,
 ) -> dict[StimPathOrDataset, tuple[Waveform, ...]]:
-    
     if (waveform_type == "audio") | (waveform_type == "sound"):
         waveforms = get_audio_waveforms_from_stim_file(stim_file_or_dataset)
-    elif (waveform_type == "opto"):
+    elif waveform_type == "opto":
         waveforms = generate_opto_waveforms_from_stim_file(stim_file_or_dataset)
 
     return {stim_file_or_dataset: tuple(waveforms)}
@@ -209,19 +214,29 @@ def _xcorr(v, w, t) -> float:
 
 def xcorr(
     nidaq_data: npt.NDArray[np.int16],
+    nidaq_timing: utils.EphysTimingInfoOnSync,
+    nidaq_channel: int,
     presentations: Iterable[StimPresentation],
     padding_sec: float = 0.15,
     **kwargs,
 ) -> tuple[StimRecording, ...]:
     recordings: list[StimRecording] = []
-    for presentation in presentations:
-        print(f"{presentation.trial_idx}/{len(tuple(presentations))}\r", flush=True)
-
-        times = np.arange(
-            presentation.offset_sample_on_nidaq - presentation.onset_sample_on_nidaq
-        ) / (presentation.waveform.sampling_rate - padding_sec)
+    padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
+    for pres_idx, presentation in enumerate(presentations):
+        print(f"{pres_idx+1}/{len(tuple(presentations))}\r", flush=True)
+        times = (
+            np.arange(
+                (presentation.offset_sample_on_nidaq + padding_samples)
+                - (presentation.onset_sample_on_nidaq - padding_samples)
+            )
+            / (nidaq_timing.sampling_rate)
+            - padding_sec
+        )
         values = nidaq_data[
-            presentation.onset_sample_on_nidaq : presentation.offset_sample_on_nidaq
+            presentation.onset_sample_on_nidaq
+            - padding_samples : presentation.offset_sample_on_nidaq
+            + padding_samples,
+            nidaq_channel,
         ]
         interp_times = np.arange(
             -padding_sec,
@@ -229,11 +244,12 @@ def xcorr(
             1 / presentation.waveform.sampling_rate,
         )
         interp_values = np.interp(interp_times, times, values)
+        waveform_values = presentation.waveform.waveform
 
         recordings.append(
             StimRecording(
                 presentation=presentation,
-                latency=_xcorr(interp_values, presentation.waveform, interp_times),
+                latency=_xcorr(interp_values, waveform_values, interp_times),
             )
         )
         # long padding slows down np.corr: could change dynamically
@@ -255,9 +271,16 @@ def get_stim_latencies_from_nidaq_recording(
     stim_file_or_dataset: StimPathOrDataset,
     sync: utils.SyncPathOrDataset,
     recording_dirs: Iterable[upath.UPath],
+    waveform_type: str,
     nidaq_device_name: str | None = None,
     correlation_method: Callable[
-        [npt.NDArray[np.int16], Iterable[StimPresentation]], tuple[StimRecording, ...]
+        [
+            npt.NDArray[np.int16],
+            utils.EphysTimingInfoOnSync,
+            int,
+            Iterable[StimPresentation],
+        ],
+        tuple[StimRecording, ...],
     ] = xcorr,
     correlation_method_kwargs: dict[str, Any] | None = None,
 ) -> tuple[StimRecording, ...]:
@@ -283,28 +306,29 @@ def get_stim_latencies_from_nidaq_recording(
         device_name=nidaq_device_name,
     )
 
+    if (waveform_type == "audio") | (waveform_type == "sound"):
+        nidaq_channel = 3
     stim = get_h5_stim_data(stim_file_or_dataset)
 
     vsyncs = assert_stim_times(
         get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim]
     )
 
-    num_trials = len((stim.get("trialEndFrame") or stim.get("trialSoundArray"))[:])
+    num_trials = get_num_trials(stim)
 
     trigger_frames: npt.NDArray[np.int16] = (
         stim.get("trialStimStartFrame") or stim.get("stimStartFrame")
     )[:num_trials]
-    waveform_rate = float(stim["soundSampleRate"][()])
-    waveforms = np.array(stim["trialSoundArray"][:num_trials])
 
     presentations = []
 
-    for idx, waveform in enumerate(waveforms):
-        if not any(waveform):
+    waveforms = get_waveforms_from_stim_file(stim, waveform_type)
+    for idx, waveform in enumerate(waveforms[stim]):
+        if not any(waveform.waveform):
             continue
         trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
         trigger_time_on_pxi_nidaq = trigger_time_on_sync - nidaq_timing.start_time
-        duration = len(waveform) / waveform_rate
+        duration = len(waveform) / waveform.sampling_rate
         onset_sample_on_pxi_nidaq = round(
             trigger_time_on_pxi_nidaq * nidaq_timing.sampling_rate
         )
@@ -325,7 +349,11 @@ def get_stim_latencies_from_nidaq_recording(
 
     # run the correlation of presentations with nidaq data
     recordings = correlation_method(
-        nidaq_data, presentations, **(correlation_method_kwargs or {})
+        nidaq_data,
+        nidaq_timing,
+        nidaq_channel,
+        presentations,
+        **(correlation_method_kwargs or {}),
     )
 
     return recordings
@@ -426,6 +454,13 @@ def get_stim_frame_times(
         stim_frame_times[stim_path] = frame_times_in_blocks[matching_block]
     sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: 0 if isinstance(stim_frame_times[x], Exception) else stim_frame_times[x][0])  # type: ignore[index]
     return {k: stim_frame_times[k] for k in sorted_keys}
+
+
+def get_num_trials(
+    stim_path_or_data: utils.PathLike | h5py.File,
+) -> int:
+    stim_data = get_h5_stim_data(stim_path_or_data)
+    return len((stim_data.get("trialEndFrame") or stim_data.get("trialSoundArray"))[:])
 
 
 def get_stim_start_time(

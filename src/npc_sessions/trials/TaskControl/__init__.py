@@ -44,11 +44,11 @@ import h5py
 import numpy as np
 import numpy.typing as npt
 
-import npc_sessions.trials as trials
+import npc_sessions.trials.property_dict as property_dict
 import npc_sessions.utils as utils
 
 
-class TaskControl(trials.PropertyDict):
+class TaskControl(property_dict.PropertyDict):
     _sync: utils.SyncDataset | None
     _hdf5: h5py.File
     _frame_times: npt.NDArray[np.float64]

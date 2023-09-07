@@ -69,6 +69,8 @@ class EphysTimingInfoOnPXI(NamedTuple):
     """Abs path to device's folder within events/"""
     compressed: upath.UPath | None
     """Abs path to device's zarr storage within ecephys_compressed/, or None if not found"""
+    start_sample: int
+    """Start sample reported in sync_messages.txt"""
     sampling_rate: float
     """Nominal sample rate reported in sync_messages.txt"""
     ttl_sample_numbers: npt.NDArray
@@ -100,10 +102,10 @@ def get_ephys_timing_on_pxi(
         recording_dirs = (recording_dirs,)
 
     for recording_dir in recording_dirs:
-        device_to_first_sample_number = get_sync_messages_data(
+        device_to_sync_messages_data = get_sync_messages_data(
             recording_dir / "sync_messages.txt"
         )  # includes name of each input device used (probe, nidaq)
-        for device in device_to_first_sample_number:
+        for device in device_to_sync_messages_data:
             if only_devices_including not in device:
                 continue
             continuous = recording_dir / "continuous" / device
@@ -111,8 +113,8 @@ def get_ephys_timing_on_pxi(
                 continue
             events = recording_dir / "events" / device
             ttl = next(events.glob("TTL*"))
-            first_sample_on_ephys_clock = device_to_first_sample_number[device]["start"]
-            sampling_rate = device_to_first_sample_number[device]["rate"]
+            first_sample_on_ephys_clock = device_to_sync_messages_data[device]["start"]
+            sampling_rate = device_to_sync_messages_data[device]["rate"]
             ttl_sample_numbers = (
                 np.load(io.BytesIO((ttl / "sample_numbers.npy").read_bytes()))
                 - first_sample_on_ephys_clock
@@ -129,6 +131,7 @@ def get_ephys_timing_on_pxi(
                 events=events,
                 ttl=ttl,
                 compressed=compressed,
+                start_sample=first_sample_on_ephys_clock,
                 sampling_rate=sampling_rate,
                 ttl_sample_numbers=ttl_sample_numbers,
                 ttl_states=ttl_states,

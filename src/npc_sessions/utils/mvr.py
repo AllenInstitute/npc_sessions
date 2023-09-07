@@ -54,8 +54,10 @@ def get_video_frame_times(
                 camera_exposing_times[camera],
                 get_lost_frames_from_camera_info(camera_to_json_path[camera]),
             )
-            #Insert a nan frame time at the beginning to account for metadata frame
-            frame_times[camera_to_video_path[camera]] = np.insert(frame_times[camera_to_video_path[camera]], 0, np.nan)
+            # Insert a nan frame time at the beginning to account for metadata frame
+            frame_times[camera_to_video_path[camera]] = np.insert(
+                frame_times[camera_to_video_path[camera]], 0, np.nan
+            )
     return frame_times
 
 

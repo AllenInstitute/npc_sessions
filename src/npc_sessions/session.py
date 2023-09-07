@@ -2,7 +2,7 @@
 >>> s = Session('670248_2023-08-03')
 >>> s.session_start_time
 '2023-08-03 12:04:15'
->>> 'DynamicRouting1' in s.epoch_tags
+>>> 'DynamicRouting1' in s.stim_tags
 True
 >>> s.sync_path
 S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
@@ -20,31 +20,27 @@ import functools
 import io
 import itertools
 import json
-import operator
 import pathlib
 import re
 import warnings
 from collections.abc import Mapping
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
 import h5py
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
-import numpy as np
-import numpy.typing as npt
-import pandas as pd
-import polars as pl
 import pynwb
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
 import npc_sessions.nwb as nwb
+import npc_sessions.trials as trials
 import npc_sessions.utils as utils
 
 
 class Session:
-    trials_interval_name: str = "dynamic_routing_task"
+    trials_interval_name: str = "DynamicRouting1"
 
     experimenter: str | None = None
     experiment_description: str | None = None
@@ -126,25 +122,72 @@ class Session:
             if attr in nwb.__dict__:
                 nwb.__setattr__(attr, self.record.__getattribute__(attr))
 
-    class Subject(npc_lims.Subject):
-        def __init__(self, session: Session) -> None:
-            self.session = session
-            self.record = npc_lims.Subject(session.subject)
+    @functools.cached_property
+    def _raw_upload_metadata_json_paths(self):
+        return tuple(
+            file
+            for file in npc_lims.get_raw_data_root(self.id).iterdir()
+            if file.suffix == ".json"
+        )
 
-        @property
-        def age(self) -> str:
-            if self.record.date_of_birth is None:
-                raise ValueError(f"{self.record} does not have a date of birth")
-            dob = npc_session.DatetimeRecord(self.record.date_of_birth)
-            return f"P{(self.session.session_start_time.dt - dob.dt).days}D"
+    @functools.cached_property
+    def _subject_aind_metadata(self) -> dict[str, Any]:
+        try:
+            file = next(
+                f
+                for f in self._raw_upload_metadata_json_paths
+                if f.name == "subject.json"
+            )
+        except StopIteration as exc:
+            raise FileNotFoundError(
+                f"Could not find subject.json for {self.id} in {self._raw_upload_metadata_json_paths}"
+            ) from exc
+        return json.loads(file.read_text())
 
-        def to_nwb(self, nwb: pynwb.NWBFile) -> None:
-            nwb.subject = pynwb.file.Subject(**self.record.__dict__)
+    @functools.cached_property
+    def subject(self) -> nwb.SupportsToNWB:
+        try:
+            metadata = self._subject_aind_metadata
+        except FileNotFoundError:
+            warnings.warn(
+                "Could not find subject.json metadata in raw upload: information will be limited"
+            )
+            return nwb.Subject(
+                [
+                    npc_lims.Subject(
+                        subject_id=self.id.subject,
+                    )
+                ]
+            )
+        assert metadata["subject_id"] == self.id.subject
+        dob = npc_session.DatetimeRecord(metadata["date_of_birth"])
+        return nwb.Subject(
+            [
+                npc_lims.Subject(
+                    subject_id=metadata["subject_id"],
+                    sex=metadata["sex"][0].upper(),
+                    date_of_birth=metadata["date_of_birth"],
+                    genotype=metadata["genotype"],
+                    description=None,
+                    strain=metadata["background_strain"] or metadata["breeding_group"],
+                    notes=metadata["notes"],
+                    age=f"P{(self.session_start_time.dt - dob.dt).days}D",
+                )
+            ]
+        )
 
     @property
     def epoch_tags(self) -> tuple[str, ...]:
+        return tuple(self.epochs.df["tags"].to_list())
+
+    @property
+    def stim_tags(self) -> tuple[str, ...]:
+        """Currently assumes TaskControl hdf5 files"""
         return tuple(
-            set(functools.reduce(operator.add, self.epochs.df["tags"].to_list()))
+            name.split("_")[0]
+            for name in sorted(
+                [p.name for p in self.stim_paths], key=npc_session.DatetimeRecord
+            )
         )
 
     def get_raw_data_paths_from_local(self) -> tuple[upath.UPath, ...]:
@@ -196,10 +239,7 @@ class Session:
     def raw_data_asset_id(self) -> str:
         if not self.is_ephys:  # currently only ephys sessions have raw data assets
             raise ValueError(f"{self.id} is not a session with ephys raw data")
-        asset_info = npc_lims.get_session_raw_data_asset(self.id)
-        if not asset_info:
-            raise ValueError(f"{self.id} does not have a raw data asset yet")
-        return asset_info["id"]
+        return npc_lims.get_session_raw_data_asset(self.id)["id"]
 
     @functools.cached_property
     def sync_file_record(self) -> npc_lims.File:
@@ -273,7 +313,7 @@ class Session:
         return self.sam.taskVersion if isinstance(self.sam.taskVersion, str) else None
 
     @functools.cached_property
-    def stim_data(self) -> Mapping[str, Any]:
+    def stim_data(self) -> utils.LazyDict[str, h5py.File]:
         def h5_dataset(path: upath.UPath) -> h5py.File:
             return h5py.File(io.BytesIO(path.read_bytes()), "r")
 
@@ -450,7 +490,7 @@ class Session:
 
     @functools.cached_property
     def ephys_settings_xml_data(self) -> utils.SettingsXmlInfo:
-        return utils.settings_xml_info_from_path(self.ephys_settings_xml_path)
+        return utils.get_settings_xml_info(self.ephys_settings_xml_path)
 
     @functools.cached_property
     def ephys_settings_xml_file_record(self) -> npc_lims.File:
@@ -545,21 +585,73 @@ class Session:
             for probe in self.ephys_settings_xml_data.probe_letters
         )
 
-    def get_intervals(self) -> tuple[nwb.Intervals, ...]:
-        return ()
+    _intervals_descriptions = {
+        trials.VisRFMapping: "visual receptive-field mapping trials",
+        trials.AudRFMapping: "auditory receptive-field mapping trials",
+        trials.DynamicRouting1: "visual-auditory task-switching behavior trials",
+        trials.OptoTagging: "opto-tagging trials",
+    }
 
     @functools.cached_property
-    def intervals(self) -> dict[str, nwb.NWBContainerWithDF]:
-        return {interval.name: interval for interval in self.get_intervals()}
+    def _intervals(self) -> utils.LazyDict[str, trials.TaskControl]:
+        if self.is_sync:
+            sync = self.sync_data
+            stim_paths = tuple(
+                path
+                for path, times in utils.get_stim_frame_times(
+                    *self.stim_paths, sync=self.sync_data
+                ).items()
+                if not isinstance(times, Exception)
+            )
+        else:
+            sync = None
+            stim_paths = self.stim_paths
+
+        stim_data = self.stim_data  # closure on lazy stim_data dict
+
+        def get_intervals(
+            cls: type[trials.TaskControl], stim_filename: str, *args
+        ) -> trials.TaskControl:
+            return cls(stim_data[stim_filename], sync, *args)
+
+        filename_to_args: dict[str, tuple[Callable, type[trials.TaskControl], str]] = {}
+        for stim_path in stim_paths:
+            assert isinstance(stim_path, upath.UPath)
+            stim_filename = stim_path.stem
+            if "RFMapping" in stim_filename:
+                filename_to_args["Aud" + stim_filename] = (
+                    get_intervals,
+                    trials.AudRFMapping,
+                    stim_filename,
+                )
+                filename_to_args["Vis" + stim_filename] = (
+                    get_intervals,
+                    trials.VisRFMapping,
+                    stim_filename,
+                )
+            else:
+                try:
+                    cls: type[trials.TaskControl] = getattr(
+                        trials, stim_filename.split("_")[0]
+                    )
+                except AttributeError:
+                    continue  # some stims (e.g. Spontaneous) have no trials class
+                # TODO append stim latencies where required
+                filename_to_args[stim_filename] = (get_intervals, cls, stim_filename)
+
+        return utils.LazyDict((k, v) for k, v in filename_to_args.items())
 
     @property
-    def trials(self) -> nwb.NWBContainerWithDF:
-        trials = self.intervals.get(self.trials_interval_name)
-        if trials is None:
+    def _trials(self) -> trials.TaskControl:
+        """Main behavior task trials"""
+        stim_name = next(
+            (_ for _ in self.stim_paths if self.trials_interval_name in _.stem), None
+        )
+        if stim_name is None:
             raise ValueError(
                 f"no intervals named {self.trials_interval_name} found for {self.id}"
             )
-        return trials
+        return self._intervals[stim_name.stem]
 
     @functools.cached_property
     def _licks(self):
@@ -570,68 +662,6 @@ class Session:
         return nwb.RunningSpeed(
             *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
         )
-
-    @functools.cache
-    def get_units_spike_paths(self) -> tuple[upath.UPath, ...]:
-        # add logic as needed to call function depending on sorting method, etc
-        return utils.get_units_spike_paths(self.id)
-
-    @functools.cached_property
-    def units_path(self) -> upath.UPath:
-        units_path = next(
-            path for path in self.get_units_spike_paths() if "csv" in str(path)
-        )
-        return units_path
-
-    @functools.cached_property
-    def units(self) -> pd.DataFrame:
-        return pl.read_csv(self.units_path.read_bytes()).to_pandas()
-
-    @functools.cached_property
-    def spike_times_path(self) -> upath.UPath:
-        spike_times_path = next(
-            path for path in self.get_units_spike_paths() if "spike" in str(path)
-        )
-        return spike_times_path
-
-    @functools.cached_property
-    def spike_times(self) -> dict[str, npt.NDArray[np.float64]]:
-        spike_times_dict = {}
-        units_names = self.units["unit_name"]
-        with io.BytesIO(self.spike_times_path.read_bytes()) as f:
-            spike_times = np.load(f, allow_pickle=True)
-
-        for i in range(len(units_names)):
-            spike_times_dict[units_names[i]] = spike_times[i]
-
-        return spike_times_dict
-
-    @functools.cache
-    def get_electrodes_df(self) -> pd.DataFrame | None:
-        # add logic to call other function when needed depending on method
-        return utils.get_electrodes_from_network(self.id)
-
-    @functools.cached_property
-    def units_electrodes(self) -> pd.DataFrame:
-        electrodes_df = self.get_electrodes_df()
-        if electrodes_df is not None:
-            units_electrodes = self.units.merge(
-                electrodes_df,
-                left_on=["peak_channel", "device_name"],
-                right_on=["channel", "device_name"],
-            )
-
-            units_electrodes.drop(columns=["electrodes", "channel"], inplace=True)
-            units_electrodes.rename(
-                columns={"region": "structure_acronym"}, inplace=True
-            )
-
-            return units_electrodes
-        else:
-            warnings.warn(
-                f"No electrodes for session {self.id}. Returning units with no electrodes"
-            )
-            return self.units
 
     # state: MutableMapping[str | int, Any]
     # subject: MutableMapping[str, Any]

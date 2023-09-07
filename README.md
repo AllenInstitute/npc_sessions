@@ -4,8 +4,13 @@
 Tools for accessing data and metadata for behavior and epyhys sessions from the
 Mindscope Neuropixels team - in the cloud.
 
-[![Python
-Versions](https://img.shields.io/pypi/pyversions/npc_sessions.svg)](https://pypi.python.org/pypi/npc-sessions/)
+[![PyPI](https://img.shields.io/pypi/v/npc-sessions.svg?label=PyPI&color=blue)](https://pypi.org/project/npc-sessions/)
+[![Python version](https://img.shields.io/pypi/pyversions/npc-sessions)](https://pypi.org/project/npc-sessions/)
+
+[![Coverage](https://img.shields.io/codecov/c/github/alleninstitute/npc_sessions?logo=codecov)](https://app.codecov.io/github/AllenInstitute/npc_sessions)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/alleninstitute/npc_sessions/publish.yml?label=CI/CD&logo=github)](https://github.com/alleninstitute/npc_sessions/actions/workflows/publish.yml)
+[![GitHub issues](https://img.shields.io/github/issues/alleninstitute/npc_sessions?logo=github)](https://github.com/alleninstitute/npc_sessions/issues)
+
 
 ## quickstart
 Make a conda environment with python>=3.9 and simply pip install the npc_sessions package:
@@ -44,5 +49,6 @@ git clone git@github.com:AllenInstitute/npc_sessions.git
 ```
 3) pip install all dependencies:
 ```bash
+cd npc_sessions
 pip install -e .
 ```

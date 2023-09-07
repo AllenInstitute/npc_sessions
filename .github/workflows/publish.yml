@@ -6,8 +6,8 @@ name: Publish Python package
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
     
 concurrency:
   group: ${{ github.ref }}
@@ -40,7 +40,6 @@ jobs:
         
     - name: Install dependencies
       run: |
-        rm pdm.lock
         pdm install -G dev
         
     - name: Test, format, lint
@@ -72,3 +71,8 @@ jobs:
       run: |
         pdm tag
         git push --tags
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

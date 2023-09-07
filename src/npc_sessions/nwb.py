@@ -55,7 +55,10 @@ class NWBContainer(SupportsToNWB):
 
     def to_nwb(self, nwb: pynwb.NWBFile) -> None:
         for record in self.records:
-            getattr(nwb, self.add_to_nwb_method)(**record.__dict__)
+            if hasattr(record, "nwb"):
+                getattr(nwb, self.add_to_nwb_method)(**record.nwb)
+            else:
+                getattr(nwb, self.add_to_nwb_method)(**record)
 
 
 class NWBContainerWithDF(NWBContainer):
@@ -64,7 +67,14 @@ class NWBContainerWithDF(NWBContainer):
 
     @functools.cached_property
     def df(self) -> pl.DataFrame:
+        if all(isinstance(record, npc_lims.RecordWithNWB) for record in self.records):
+            return pl.from_records(tuple(record.nwb for record in self.records))  # type: ignore [attr-defined]
         return pl.from_records(self.records)
+
+
+class Subject(NWBContainerWithDF):
+    records: tuple[npc_lims.Subject, ...]
+    add_to_nwb_method = "add_subject"
 
 
 class Epochs(NWBContainerWithDF):
