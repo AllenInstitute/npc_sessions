@@ -954,6 +954,7 @@ class SyncDataset:
                         )
 
                     # self.plot_lines(["stim_photodiode"])
+                    plt.suptitle(f'{len(diode_flips) = }, {len(vsyncs) = }, {block_idx = }')
                     plt.show()
 
                     raise IndexError(
