@@ -119,7 +119,7 @@ def regenerate_sound_array(
 
     if len(trialSoundDur) == 0:
         raise IndexError(
-            f"trialSoundDur is empty - no opto waveforms to generate from {stim_file_or_dataset}"
+            f"trialSoundDur is empty - no sound waveforms to generate from {stim_file_or_dataset}"
         )
 
     for trialnum in range(0, nTrials):
@@ -143,7 +143,7 @@ def regenerate_sound_array(
                 seed=trialSoundSeed[trialnum],
             )
 
-            waveform = Waveform(samples=soundArray, sampling_rate=soundSampleRate)
+        waveform = Waveform(samples=soundArray, sampling_rate=soundSampleRate)
 
         waveforms.append(waveform)
 
@@ -198,7 +198,7 @@ def get_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
     waveform_type: Literal["sound", "audio", "opto"],
 ) -> tuple[Waveform, ...]:
-    if any(s in waveform_type for s in ("sound", "aud")):
+    if any(s in waveform_type for s in ("sound", "audio")):
         return get_audio_waveforms_from_stim_file(stim_file_or_dataset)
     if "opto" in waveform_type:
         return generate_opto_waveforms_from_stim_file(stim_file_or_dataset)
