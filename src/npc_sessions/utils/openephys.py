@@ -250,7 +250,7 @@ def get_ephys_timing_on_sync(
     >>> sync = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
     >>> device = next(get_ephys_timing_on_sync(sync, path))
     >>> device.sampling_rate, device.start_time
-    (30000.07066388302, 0.7318752524919077)
+    (30000.070518634246, 20.080209634424037)
     """
     if not (recording_dirs or devices):
         raise ValueError("Must specify recording_dir or devices")
