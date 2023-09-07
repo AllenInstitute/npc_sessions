@@ -196,15 +196,13 @@ def generate_opto_waveforms_from_stim_file(
 
 def get_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
-    waveform_type: str,
-) -> dict[StimPathOrDataset, tuple[Waveform, ...]]:
-    if (waveform_type == "audio") | (waveform_type == "sound"):
-        waveforms = get_audio_waveforms_from_stim_file(stim_file_or_dataset)
-    elif waveform_type == "opto":
-        waveforms = generate_opto_waveforms_from_stim_file(stim_file_or_dataset)
-
-    return {stim_file_or_dataset: tuple(waveforms)}
-
+    waveform_type: Literal['sound', 'audio', 'opto'],
+) -> tuple[Waveform, ...]:
+    if any(s in waveform_type for s in ('sound', 'aud')):
+        return get_audio_waveforms_from_stim_file(stim_file_or_dataset)
+    if "opto" in waveform_type:
+        return generate_opto_waveforms_from_stim_file(stim_file_or_dataset)
+    raise ValueError(f"Unexpected value: {waveform_type = }. Should be 'sound' or 'opto'.")
 
 @numba.njit(parallel=True)
 def _xcorr(v, w, t) -> float:
@@ -271,7 +269,7 @@ def get_stim_latencies_from_nidaq_recording(
     stim_file_or_dataset: StimPathOrDataset,
     sync: utils.SyncPathOrDataset,
     recording_dirs: Iterable[upath.UPath],
-    waveform_type: str,
+    waveform_type: Literal['sound', 'audio', 'opto'],
     nidaq_device_name: str | None = None,
     correlation_method: Callable[
         [
@@ -323,7 +321,7 @@ def get_stim_latencies_from_nidaq_recording(
     presentations = []
 
     waveforms = get_waveforms_from_stim_file(stim, waveform_type)
-    for idx, waveform in enumerate(waveforms[stim]):
+    for idx, waveform in enumerate(waveforms):
         if not any(waveform.waveform):
             continue
         trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
