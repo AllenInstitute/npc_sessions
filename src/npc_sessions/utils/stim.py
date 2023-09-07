@@ -56,8 +56,6 @@ class Waveform(NamedTuple):
 class StimPresentation(NamedTuple):
     trial_idx: int
     waveform: Waveform
-    onset_sample_on_nidaq: int
-    offset_sample_on_nidaq: int
     trigger_time_on_sync: float
 
     @property
@@ -248,17 +246,24 @@ def xcorr(
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
     for pres_idx, presentation in enumerate(presentations):
         print(f"{pres_idx+1}/{len(tuple(presentations))}\r", flush=True)
+        trigger_time_on_nidaq = presentation.trigger_time_on_sync - nidaq_timing.start_time
+        onset_sample_on_nidaq = round(
+            trigger_time_on_nidaq * nidaq_timing.sampling_rate
+        )
+        offset_sample_on_nidaq = round(
+            (trigger_time_on_nidaq + presentation.duration) * nidaq_timing.sampling_rate
+        )
         nidaq_times = (
             np.arange(
-                (presentation.offset_sample_on_nidaq + padding_samples)
-                - (presentation.onset_sample_on_nidaq - padding_samples)
+                (offset_sample_on_nidaq + padding_samples)
+                - (onset_sample_on_nidaq - padding_samples)
             )
             / (nidaq_timing.sampling_rate)
             - padding_sec
         )
         nidaq_samples = nidaq_data[
-            presentation.onset_sample_on_nidaq
-            - padding_samples : presentation.offset_sample_on_nidaq
+            onset_sample_on_nidaq
+            - padding_samples : offset_sample_on_nidaq
             + padding_samples,
             nidaq_channel,
         ]
@@ -359,22 +364,11 @@ def get_stim_latencies_from_nidaq_recording(
         if not any(waveform.samples):
             continue
         trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
-        trigger_time_on_pxi_nidaq = trigger_time_on_sync - nidaq_timing.start_time
-        duration = len(waveform.samples) / waveform.sampling_rate
-        onset_sample_on_pxi_nidaq = round(
-            trigger_time_on_pxi_nidaq * nidaq_timing.sampling_rate
-        )
-        offset_sample_on_pxi_nidaq = round(
-            (trigger_time_on_pxi_nidaq + duration) * nidaq_timing.sampling_rate
-        )
         # padding should be done by correlation method, when reading data
-
         presentations.append(
             StimPresentation(
                 trial_idx=idx,
                 waveform=waveform,
-                onset_sample_on_nidaq=onset_sample_on_pxi_nidaq,
-                offset_sample_on_nidaq=offset_sample_on_pxi_nidaq,
                 trigger_time_on_sync=trigger_time_on_sync,
             )
         )
