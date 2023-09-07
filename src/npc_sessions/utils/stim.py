@@ -83,7 +83,7 @@ def get_audio_waveforms_from_stim_file(
 ) -> tuple[Waveform, ...]:
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
-    nTrials = len(stim_data["trialEndFrame"][:])
+    nTrials = get_num_trials(stim_data)
     soundSampleRate: int = stim_data["soundSampleRate"][()]
 
     if len(stim_data["trialSoundArray"][:]) > 0:
@@ -107,7 +107,7 @@ def regenerate_sound_array(
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     waveforms = []
-    nTrials = len(stim_data["trialEndFrame"][:])
+    nTrials = get_num_trials(stim_data)
     trialSoundDur = stim_data["trialSoundDur"][:nTrials]
     trialSoundFreq = stim_data["trialSoundFreq"][:nTrials]
     trialSoundSeed = stim_data["trialSoundSeed"][:nTrials]
@@ -156,7 +156,7 @@ def generate_opto_waveforms_from_stim_file(
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     waveforms = []
-    nTrials = len(stim_data["trialEndFrame"][:])
+    nTrials = get_num_trials(stim_data)
     trialOptoDelay = stim_data["trialOptoDelay"][:]
     trialOptoDur = stim_data["trialOptoDur"][:]
     trialOptoOffRamp = stim_data["trialOptoOffRamp"][:]
@@ -303,7 +303,7 @@ def get_stim_latencies_from_nidaq_recording(
         get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim]
     )
 
-    num_trials = len((stim.get("trialEndFrame") or stim.get("trialSoundArray"))[:])
+    num_trials = get_num_trials(stim)
 
     trigger_frames: npt.NDArray[np.int16] = (
         stim.get("trialStimStartFrame") or stim.get("stimStartFrame")
@@ -317,7 +317,7 @@ def get_stim_latencies_from_nidaq_recording(
             continue
         trigger_time_on_sync: float = vsyncs[trigger_frames[idx]]
         trigger_time_on_pxi_nidaq = trigger_time_on_sync - nidaq_timing.start_time
-        duration = len(waveform) / waveform_rate
+        duration = len(waveform) / waveform.sampling_rate
         onset_sample_on_pxi_nidaq = round(
             trigger_time_on_pxi_nidaq * nidaq_timing.sampling_rate
         )
@@ -338,7 +338,7 @@ def get_stim_latencies_from_nidaq_recording(
 
     # run the correlation of presentations with nidaq data
     recordings = correlation_method(
-        nidaq_data, nidaq_timing, nidaq_channel, envelope, presentations, **(correlation_method_kwargs or {})
+        nidaq_data, nidaq_timing, nidaq_channel, presentations, **(correlation_method_kwargs or {})
     )
 
     return recordings
@@ -439,6 +439,13 @@ def get_stim_frame_times(
         stim_frame_times[stim_path] = frame_times_in_blocks[matching_block]
     sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: 0 if isinstance(stim_frame_times[x], Exception) else stim_frame_times[x][0])  # type: ignore[index]
     return {k: stim_frame_times[k] for k in sorted_keys}
+
+
+def get_num_trials(
+        stim_path_or_data: utils.PathLike | h5py.File,
+) -> int:
+    stim_data = get_h5_stim_data(stim_path_or_data)
+    return len((stim_data.get("trialEndFrame") or stim_data.get("trialSoundArray"))[:])
 
 
 def get_stim_start_time(
