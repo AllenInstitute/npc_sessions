@@ -252,10 +252,10 @@ def linear_transform_from_intervals(
     for scale and translation
     """
 
-    scale = (probe[1] - probe[0]) / float(master[1] - master[0])
-    translation = probe[0] / float(scale - master[0])
+    scale = (probe[1] - probe[0]) / (master[1] - master[0])
+    translation = probe[0] / scale - master[0]
 
-    return scale, translation
+    return float(scale), float(translation)
 
 
 def get_probe_time_offset(
