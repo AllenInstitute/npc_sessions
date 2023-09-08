@@ -10,6 +10,7 @@ from collections.abc import Generator, Iterator, Sequence
 from typing import (
     Any,
     Literal,
+    Type,
 )
 
 import numpy as np
@@ -141,7 +142,7 @@ class PropertyDict(collections.abc.Mapping):
 
     @property
     def _df(self) -> pl.DataFrame:
-        def get_dtype(attr: str) -> pl.DataType | None:
+        def get_dtype(attr: str) -> Type[pl.DataType] | None:
             """Get dtype of attribute"""
             if any(key in attr for key in ('index', 'idx', 'number')):
                 return pl.Int64
