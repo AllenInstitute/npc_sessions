@@ -33,6 +33,11 @@ class OptoTagging(TaskControl):
         return None
 
     @functools.cached_property
+    def trial_index(self) -> npt.NDArray[np.int32]:
+        """0-indexed"""
+        return np.arange(len(self._hdf5["trialOptoOnsetFrame"]))
+
+    @functools.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         if self._sync is None:
             return utils.safe_index(
@@ -54,11 +59,6 @@ class OptoTagging(TaskControl):
                 for rec in self._stim_recordings
             ]
         )
-
-    @functools.cached_property
-    def trial_index(self) -> npt.NDArray[np.int32]:
-        """0-indexed"""
-        return np.arange(len(self._hdf5["trialOptoOnsetFrame"]))
 
     @functools.cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
