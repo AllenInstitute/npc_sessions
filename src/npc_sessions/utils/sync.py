@@ -904,13 +904,13 @@ class SyncDataset:
                     )
 
                 while score(diode_flips, vsyncs) < score(diode_flips, vsyncs[1:]):
-                    logger.warning("Missing first diode flip")
+                    logger.debug("Missing first diode flip")
                     diode_flips = add_missing_diode_flip_at_stim_onset(
                         diode_flips, vsyncs
                     )
 
                 while score(diode_flips, vsyncs) < score(diode_flips[1:], vsyncs):
-                    logger.warning("Removing extra first diode flip")
+                    logger.debug("Removing extra first diode flip")
                     diode_flips = diode_flips[1:]
 
                 if len(diode_flips) < len(vsyncs):
@@ -919,7 +919,7 @@ class SyncDataset:
                         total_sync_sec - vsyncs[-1]
                     ) < max(np.diff(vsyncs))
                     if is_last_vsync_close_to_end_of_sync:
-                        logger.warning(
+                        logger.debug(
                             "Missing last diode flips - sync recording truncated"
                         )
                         diode_flips = add_missing_diode_flips_for_truncated_sync(
