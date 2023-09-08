@@ -403,17 +403,18 @@ def get_stim_latencies_from_sync(
     trigger_times = tuple(vsyncs[idx] if idx else None for idx in get_stim_trigger_frames(stim, stim_type=waveform_type))
     stim_onsets = sync.get_rising_edges(line_index_or_label, units="seconds")
     recordings: list[StimRecording | None] = [None] * len(trigger_times)
-    for idx, waveform in enumerate(get_waveforms_from_stim_file(stim, waveform_type)):
+    for idx, (trigger_time, waveform) in enumerate(zip(trigger_times, get_waveforms_from_stim_file(stim, waveform_type))):
         if waveform is None:
             continue
-        onset_following_trigger = stim_onsets[np.searchsorted(stim_onsets, trigger_times[idx], side='right')]
+        assert trigger_time
+        onset_following_trigger = stim_onsets[np.searchsorted(stim_onsets, trigger_time, side='right')]
         recordings[idx] = StimRecording(
                 presentation=StimPresentation(
                     trial_idx=idx,
                     waveform=waveform,
-                    trigger_time_on_sync=trigger_times[idx],
+                    trigger_time_on_sync=float(trigger_time),
                 ),
-                latency=onset_following_trigger-trigger_times[idx],
+                latency=onset_following_trigger-trigger_time,
             )
     return tuple(recordings)
         
