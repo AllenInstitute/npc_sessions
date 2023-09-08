@@ -359,7 +359,7 @@ def get_stim_latencies_from_nidaq_recording(
         presentations[idx] = StimPresentation(
                 trial_idx=idx,
                 waveform=waveform,
-                trigger_time_on_sync= vsyncs[trigger_frames[idx]],
+                trigger_time_on_sync=float(vsyncs[trigger_frames[idx]]),
             )
 
     # run the correlation of presentations with nidaq data
