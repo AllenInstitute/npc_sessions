@@ -5,7 +5,7 @@ import io
 import logging
 import pickle
 from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Literal, NamedTuple, Optional, Union
+from typing import Any, Callable, Literal, NamedTuple, Union
 
 import h5py
 import npc_session
@@ -83,15 +83,15 @@ def get_audio_waveforms_from_stim_file(
 
     nTrials = get_num_trials(stim_data)
     soundSampleRate: int = stim_data["soundSampleRate"][()]
-    trialSoundArray: list[npt.NDArray] | None = stim_data.get('trialSoundArray', None)
-    
+    trialSoundArray: list[npt.NDArray] | None = stim_data.get("trialSoundArray", None)
+
     if trialSoundArray and len(trialSoundArray) > 0:
         waveforms: list[Waveform | None] = [None] * nTrials
         for trialnum in range(nTrials):
             if any(trialSoundArray[trialnum]):
                 waveforms[trialnum] = Waveform(
-                        samples=trialSoundArray[trialnum], sampling_rate=soundSampleRate
-                    )
+                    samples=trialSoundArray[trialnum], sampling_rate=soundSampleRate
+                )
         return tuple(waveforms)
 
     print("trialSoundArray empty; regenerating sound arrays")
@@ -104,7 +104,7 @@ def regenerate_sound_array(
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     nTrials = get_num_trials(stim_data)
-    waveforms: list[Waveform | None]  = [None] * nTrials
+    waveforms: list[Waveform | None] = [None] * nTrials
     trialSoundDur = stim_data["trialSoundDur"][:nTrials]
     trialSoundFreq = stim_data["trialSoundFreq"][:nTrials]
     trialSoundSeed = stim_data["trialSoundSeed"][:nTrials]
@@ -140,7 +140,9 @@ def regenerate_sound_array(
                 seed=trialSoundSeed[trialnum],
             )
 
-            waveforms[trialnum] = Waveform(samples=soundArray, sampling_rate=soundSampleRate)
+            waveforms[trialnum] = Waveform(
+                samples=soundArray, sampling_rate=soundSampleRate
+            )
 
     return tuple(waveforms)
 
@@ -192,7 +194,7 @@ def generate_opto_waveforms_from_stim_file(
             f"trialOptoDur is empty - no opto waveforms to generate from {stim_file_or_dataset}"
         )
 
-    waveforms: list[Waveform | None]  = [None] * nTrials
+    waveforms: list[Waveform | None] = [None] * nTrials
     for trialnum in range(0, nTrials):
         if np.isnan(trialOptoDur[trialnum]) is True:
             continue
@@ -244,7 +246,9 @@ def xcorr(
         print(f"{idx+1}/{num_presentations}\r", flush=True)
         if presentation is None:
             continue
-        trigger_time_on_nidaq = presentation.trigger_time_on_sync - nidaq_timing.start_time
+        trigger_time_on_nidaq = (
+            presentation.trigger_time_on_sync - nidaq_timing.start_time
+        )
         onset_sample_on_nidaq = round(
             trigger_time_on_nidaq * nidaq_timing.sampling_rate
         )
@@ -337,7 +341,9 @@ def get_stim_latencies_from_nidaq_recording(
         device_name=nidaq_device.name,
     )
 
-    nidaq_channel = get_nidaq_channel_for_stim_onset(waveform_type, date=sync.start_time.date())
+    nidaq_channel = get_nidaq_channel_for_stim_onset(
+        waveform_type, date=sync.start_time.date()
+    )
 
     stim = get_h5_stim_data(stim_file_or_dataset)
 
@@ -348,8 +354,6 @@ def get_stim_latencies_from_nidaq_recording(
     num_trials = get_num_trials(stim)
     trigger_frames = get_stim_trigger_frames(stim)
 
-
-
     presentations: list[StimPresentation | None] = [None] * num_trials
     waveforms = get_waveforms_from_stim_file(stim, waveform_type)
     for idx, waveform in enumerate(waveforms):
@@ -357,10 +361,10 @@ def get_stim_latencies_from_nidaq_recording(
             continue
         # padding should be done by correlation method, when reading data
         presentations[idx] = StimPresentation(
-                trial_idx=idx,
-                waveform=waveform,
-                trigger_time_on_sync=float(vsyncs[trigger_frames[idx]]),
-            )
+            trial_idx=idx,
+            waveform=waveform,
+            trigger_time_on_sync=float(vsyncs[trigger_frames[idx]]),
+        )
 
     # run the correlation of presentations with nidaq data
     recordings = correlation_method(
@@ -380,69 +384,84 @@ def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
         raise result from None
     return result
 
+
 def get_stim_latencies_from_sync(
     stim_file_or_dataset: StimPathOrDataset,
     sync: utils.SyncPathOrDataset,
     waveform_type: Literal["sound", "audio", "opto"],
-    line_index_or_label: Optional[int | str] = None,
+    line_index_or_label: int | str | None = None,
 ) -> tuple[StimRecording | None, ...]:
     """
     >>> stim = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5'
     >>> sync = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/20230831T123331.h5'
     >>> latencies = get_stim_latencies_from_sync(stim, sync, waveform_type='sound')
     >>> assert 0 < next(_.latency for _ in latencies if _ is not None) < 0.1
-    
+
     """
     stim = get_h5_stim_data(stim_file_or_dataset)
     sync = utils.get_sync_data(sync)
     if not line_index_or_label:
-        line_index_or_label = get_sync_line_for_stim_onset(waveform_type=waveform_type, date=sync.start_time.date())
+        line_index_or_label = get_sync_line_for_stim_onset(
+            waveform_type=waveform_type, date=sync.start_time.date()
+        )
     vsyncs = assert_stim_times(
         get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim]
     )
-    trigger_times = tuple(vsyncs[idx] if idx else None for idx in get_stim_trigger_frames(stim, stim_type=waveform_type))
+    trigger_times = tuple(
+        vsyncs[idx] if idx else None
+        for idx in get_stim_trigger_frames(stim, stim_type=waveform_type)
+    )
     stim_onsets = sync.get_rising_edges(line_index_or_label, units="seconds")
     recordings: list[StimRecording | None] = [None] * len(trigger_times)
-    for idx, (trigger_time, waveform) in enumerate(zip(trigger_times, get_waveforms_from_stim_file(stim, waveform_type))):
+    for idx, (trigger_time, waveform) in enumerate(
+        zip(trigger_times, get_waveforms_from_stim_file(stim, waveform_type))
+    ):
         if waveform is None:
             continue
         assert trigger_time
-        onset_following_trigger = stim_onsets[np.searchsorted(stim_onsets, trigger_time, side='right')]
+        onset_following_trigger = stim_onsets[
+            np.searchsorted(stim_onsets, trigger_time, side="right")
+        ]
         recordings[idx] = StimRecording(
-                presentation=StimPresentation(
-                    trial_idx=idx,
-                    waveform=waveform,
-                    trigger_time_on_sync=float(trigger_time),
-                ),
-                latency=onset_following_trigger-trigger_time,
-            )
+            presentation=StimPresentation(
+                trial_idx=idx,
+                waveform=waveform,
+                trigger_time_on_sync=float(trigger_time),
+            ),
+            latency=onset_following_trigger - trigger_time,
+        )
     return tuple(recordings)
-        
+
+
 def get_sync_line_for_stim_onset(
-    waveform_type: str | Literal['sound', 'audio', 'opto'],
-    date: Optional[datetime.date] = None,
-    ) -> int:
+    waveform_type: str | Literal["sound", "audio", "opto"],
+    date: datetime.date | None = None,
+) -> int:
     FIRST_SOUND_ON_SYNC_DATE = datetime.date(2023, 8, 31)
-    if any(label in waveform_type for label in ('aud', 'sound')):
+    if any(label in waveform_type for label in ("aud", "sound")):
         if date and date < FIRST_SOUND_ON_SYNC_DATE:
-            raise ValueError(f"Sound only recorded on sync since {FIRST_SOUND_ON_SYNC_DATE.isoformat()}: {date = }")
+            raise ValueError(
+                f"Sound only recorded on sync since {FIRST_SOUND_ON_SYNC_DATE.isoformat()}: {date = }"
+            )
         return 1
-    elif 'opto' in waveform_type:
+    elif "opto" in waveform_type:
         return 11
     else:
         raise ValueError(f"Unexpected value: {waveform_type = }")
-        
+
+
 def get_nidaq_channel_for_stim_onset(
-    waveform_type: str | Literal['sound', 'audio', 'opto'],
-    date: Optional[datetime.date] = None,
-    ) -> int:
-    if any(label in waveform_type for label in ('aud', 'sound')):
+    waveform_type: str | Literal["sound", "audio", "opto"],
+    date: datetime.date | None = None,
+) -> int:
+    if any(label in waveform_type for label in ("aud", "sound")):
         return 1
-    elif 'opto' in waveform_type:
+    elif "opto" in waveform_type:
         return 5
     else:
         raise ValueError(f"Unexpected value: {waveform_type = }")
-        
+
+
 def get_stim_frame_times(
     *stim_paths: utils.StimPathOrDataset,
     sync: utils.SyncPathOrDataset,
@@ -579,29 +598,34 @@ def get_stim_duration(stim_path_or_data: utils.PathLike | h5py.File) -> float:
     stim_data = get_h5_stim_data(stim_path_or_data)
     return np.sum(stim_data["frameIntervals"][:])
 
+
 def get_stim_trigger_frames(
     stim_path_or_data: utils.PathLike | h5py.File,
-    stim_type: str | Literal['opto'] = 'stim',
+    stim_type: str | Literal["opto"] = "stim",
 ) -> tuple[int | None, ...]:
     """Frame index of stim command being sent. len() == num trials.
-    
+
     >>> path = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5'
     >>> frames = get_stim_trigger_frames(path)
     >>> len(frames)
     524
-    
+
     >>> frames = get_stim_trigger_frames(path, stim_type='opto')
     >>> len(frames)
     0
     """
     stim_data = get_h5_stim_data(stim_path_or_data)
     start_frames = (
-        (stim_data.get("trialStimStartFrame")
-        or stim_data.get("stimStartFrame"))
-        if stim_type != 'opto' else stim_data.get("trialOptoOnsetFrame")
-    )[:get_num_trials(stim_data)]
-    return tuple(int(v) if ~np.isnan(v) else None for v in utils.safe_index(start_frames, np.arange(len(start_frames))))
-    
+        (stim_data.get("trialStimStartFrame") or stim_data.get("stimStartFrame"))
+        if stim_type != "opto"
+        else stim_data.get("trialOptoOnsetFrame")
+    )[: get_num_trials(stim_data)]
+    return tuple(
+        int(v) if ~np.isnan(v) else None
+        for v in utils.safe_index(start_frames, np.arange(len(start_frames)))
+    )
+
+
 if __name__ == "__main__":
     import doctest
 

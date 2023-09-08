@@ -7,7 +7,6 @@ display times to get stim onset times
 """
 from __future__ import annotations
 
-import contextlib
 import functools
 
 import DynamicRoutingTask.TaskUtils
@@ -28,22 +27,33 @@ class OptoTagging(TaskControl):
     @functools.cached_property
     def _stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
         if self._sync is not None:
-            return utils.get_stim_latencies_from_sync(self._hdf5, self._sync, waveform_type='opto')
+            return utils.get_stim_latencies_from_sync(
+                self._hdf5, self._sync, waveform_type="opto"
+            )
         return None
-    
+
     @functools.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         if self._sync is None:
-            return utils.safe_index(self._frame_times, self._hdf5["trialOptoOnsetFrame"][self.trial_index])
+            return utils.safe_index(
+                self._frame_times, self._hdf5["trialOptoOnsetFrame"][self.trial_index]
+            )
         assert self._stim_recordings
-        return np.array([rec.onset_time_on_sync if rec else np.nan for rec in self._stim_recordings])
+        return np.array(
+            [rec.onset_time_on_sync if rec else np.nan for rec in self._stim_recordings]
+        )
 
     @functools.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         if self._sync is None:
             return self.start_time + self._hdf5["trialOptoDur"][self.trial_index]
         assert self._stim_recordings
-        return np.array([rec.offset_time_on_sync if rec else np.nan for rec in self._stim_recordings])
+        return np.array(
+            [
+                rec.offset_time_on_sync if rec else np.nan
+                for rec in self._stim_recordings
+            ]
+        )
 
     @functools.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
@@ -79,9 +89,10 @@ class OptoTagging(TaskControl):
     def power(self) -> npt.NDArray[np.float64]:
         calibration_data = self._hdf5["optoPowerCalibrationData"]
         trial_voltages = self._hdf5["trialOptoVoltage"][self.trial_index]
-        if 'poly coefficients' in calibration_data:
+        if "poly coefficients" in calibration_data:
             return DynamicRoutingTask.TaskUtils.voltsToPower(
-                calibration_data, trial_voltages,
+                calibration_data,
+                trial_voltages,
             )
         return np.where(~np.isnan(trial_voltages), self._hdf5["optoPower"], np.nan)
         # return trial_voltages * calibration_data['slope'] + calibration_data['intercept']
