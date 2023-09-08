@@ -14,6 +14,7 @@ from typing import (
 
 import numpy as np
 import pandas as pd
+import polars as pl
 
 logger = logging.getLogger(__name__)
 
@@ -138,6 +139,18 @@ class PropertyDict(collections.abc.Mapping):
             data={k: pd.Series(v, dtype=get_dtype(k)) for k, v in self.items()}
         )
 
+    @property
+    def _df(self) -> pl.DataFrame:
+        def get_dtype(attr: str) -> pl.DataType | None:
+            """Get dtype of attribute"""
+            if any(key in attr for key in ('index', 'idx', 'number')):
+                return pl.Int64
+            if 'time' in attr:
+                return pl.Float64
+            return None
+
+        return pl.DataFrame(pl.Series(k, v, dtype=get_dtype(k), nan_to_null=True) for k, v in self.items())
+        
     @property
     def _docstrings(self) -> dict[str, str]:
         """Docstrings of property getter methods that have no leading
