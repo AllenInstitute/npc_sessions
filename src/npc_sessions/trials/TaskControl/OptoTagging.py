@@ -77,9 +77,14 @@ class OptoTagging(TaskControl):
 
     @functools.cached_property
     def power(self) -> npt.NDArray[np.float64]:
-        return DynamicRoutingTask.TaskUtils.voltsToPower(
-            self._hdf5["optoPowerCalibrationData"], self._hdf5["trialOptoVoltage"][:]
-        )
+        calibration_data = self._hdf5["optoPowerCalibrationData"]
+        trial_voltages = self._hdf5["trialOptoVoltage"][self.trial_index]
+        if 'poly coefficients' in calibration_data:
+            return DynamicRoutingTask.TaskUtils.voltsToPower(
+                calibration_data, trial_voltages,
+            )
+        return np.where(~np.isnan(trial_voltages), self._hdf5["optoPower"], np.nan)
+        # return trial_voltages * calibration_data['slope'] + calibration_data['intercept']
 
 
 if __name__ == "__main__":
