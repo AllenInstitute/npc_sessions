@@ -51,14 +51,15 @@ def get_pkl_stim_data(stim_path: StimPathOrDataset, **kwargs) -> dict:
 class Waveform(NamedTuple):
     samples: npt.NDArray[np.float64]
     sampling_rate: float
-    
+
     @property
     def duration(self) -> float:
         return len(self.samples) / self.sampling_rate
-    
+
     @property
     def timestamps(self) -> npt.NDArray[np.float64]:
         return np.arange(0, self.duration, 1 / self.sampling_rate)
+
 
 class StimPresentation(NamedTuple):
     trial_idx: int
