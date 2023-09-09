@@ -141,16 +141,19 @@ class PropertyDict(collections.abc.Mapping):
 
     @property
     def _df(self) -> pl.DataFrame:
-        def get_dtype(attr: str) -> type[pl.DataType] | None:
+        def get_dtype(attr: str, value: Any) -> type[pl.DataType] | None:
             """Get dtype of attribute"""
             if any(key in attr for key in ("index", "idx", "number")):
                 return pl.Int64
             if "time" in attr:
                 return pl.Float64
-            return None
+            dtype = getattr(value, 'dtype', None)
+            if dtype and dtype in (np.str_, str):
+                return pl.Utf8
+            return None 
 
         return pl.DataFrame(
-            pl.Series(k, v, dtype=get_dtype(k), nan_to_null=True)
+            pl.Series(k, v, dtype=get_dtype(k, v), nan_to_null=True)
             for k, v in self.items()
         )
 
