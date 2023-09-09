@@ -69,12 +69,11 @@ class DynamicRouting1(TaskControl):
         cached = getattr(self, "_cached_aud_stim_recordings", None)
         if cached is not None:
             return cached
-        if self._sync:
-            if self._sync.start_time.date() >= utils.FIRST_SOUND_ON_SYNC_DATE:
-                self._cached_aud_stim_recordings = utils.get_stim_latencies_from_sync(
-                    self._hdf5, self._sync, waveform_type="sound",
-                )
-            # TODO else: get from NI-DAQ
+        if self._sync and self._sync.start_time.date() >= utils.FIRST_SOUND_ON_SYNC_DATE:
+            self._cached_aud_stim_recordings = utils.get_stim_latencies_from_sync(
+                self._hdf5, self._sync, waveform_type="sound",
+            )
+        # TODO else: get from NI-DAQ
         else:
             self._cached_aud_stim_recordings = None
         return self._cached_aud_stim_recordings
