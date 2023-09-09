@@ -613,12 +613,10 @@ class Session:
             sync = None
             stim_paths = self.stim_paths
 
-        stim_data = self.stim_data  # closure on lazy stim_data dict
-
         def get_intervals(
             cls: type[trials.TaskControl], stim_filename: str, *args
         ) -> trials.TaskControl:
-            return cls(stim_data[stim_filename], sync, *args)
+            return cls(self.stim_data[stim_filename], sync, *args)
 
         filename_to_args: dict[str, tuple[Callable, type[trials.TaskControl], str]] = {}
         for stim_path in stim_paths:
