@@ -147,10 +147,10 @@ class PropertyDict(collections.abc.Mapping):
                 return pl.Int64
             if "time" in attr:
                 return pl.Float64
-            dtype = getattr(value, 'dtype', None)
+            dtype = getattr(value, "dtype", None)
             if dtype and dtype in (np.str_, str):
                 return pl.Utf8
-            return None 
+            return None
 
         return pl.DataFrame(
             pl.Series(k, v, dtype=get_dtype(k, v), nan_to_null=True)

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Iterable
+from collections.abc import Iterable
 
 import DynamicRoutingTask.TaskUtils
 import numpy as np
@@ -43,7 +43,7 @@ class DynamicRouting1(TaskControl):
     >>> trials = DynamicRouting1('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
     >>> assert dict(trials)
     """
-    
+
     @property
     def _opto_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
         self._cached_opto_stim_recordings: tuple[utils.StimRecording | None, ...] | None
@@ -52,37 +52,46 @@ class DynamicRouting1(TaskControl):
             return cached
         if self._sync:
             self._cached_opto_stim_recordings = utils.get_stim_latencies_from_sync(
-                self._hdf5, self._sync, waveform_type="opto",
+                self._hdf5,
+                self._sync,
+                waveform_type="opto",
             )
         else:
             self._cached_opto_stim_recordings = None
         return self._cached_opto_stim_recordings
-    
+
     @_opto_stim_recordings.setter
-    def _opto_stim_recordings(self, value: Iterable[utils.StimRecording | None]) -> None:
+    def _opto_stim_recordings(
+        self, value: Iterable[utils.StimRecording | None]
+    ) -> None:
         """Can be set on init by passing as kwarg"""
         self._cached_opto_stim_recordings = tuple(value)
-    
+
     @property
     def _aud_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
         self._cached_aud_stim_recordings: tuple[utils.StimRecording | None, ...] | None
         cached = getattr(self, "_cached_aud_stim_recordings", None)
         if cached is not None:
             return cached
-        if self._sync and self._sync.start_time.date() >= utils.FIRST_SOUND_ON_SYNC_DATE:
+        if (
+            self._sync
+            and self._sync.start_time.date() >= utils.FIRST_SOUND_ON_SYNC_DATE
+        ):
             self._cached_aud_stim_recordings = utils.get_stim_latencies_from_sync(
-                self._hdf5, self._sync, waveform_type="sound",
+                self._hdf5,
+                self._sync,
+                waveform_type="sound",
             )
         # TODO else: get from NI-DAQ
         else:
             self._cached_aud_stim_recordings = None
         return self._cached_aud_stim_recordings
-    
+
     @_aud_stim_recordings.setter
     def _aud_stim_recordings(self, value: Iterable[utils.StimRecording | None]) -> None:
         """Can be set on init by passing as kwarg"""
         self._set_aud_stim_recordings = tuple(value)
-        
+
     _aud_stim_onset_times: npt.NDArray[np.float64]
     """`[1 x num trials]` onset time of each aud stim relative to start of
     sync. Where values are nan, onset times will be taken from display times

@@ -26,6 +26,7 @@ FIRST_SOUND_ON_SYNC_DATE = datetime.date(2023, 8, 31)
 """Prior to this date, there's no sync line with "sound running" signal: need to
 use NI-DAQ analog recording on OpenEphys PXI"""
 
+
 def get_stim_data(stim_path: StimPathOrDataset, **kwargs) -> h5py.File | dict:
     if isinstance(stim_path, h5py.File):
         return stim_path
