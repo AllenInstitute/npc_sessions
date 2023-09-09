@@ -22,6 +22,9 @@ StimPathOrDataset: TypeAlias = Union[utils.PathLike, h5py.File, Mapping]
 
 logger = logging.getLogger(__name__)
 
+FIRST_SOUND_ON_SYNC_DATE = datetime.date(2023, 8, 31)
+"""Prior to this date, there's no sync line with "sound running" signal: need to
+use NI-DAQ analog recording on OpenEphys PXI"""
 
 def get_stim_data(stim_path: StimPathOrDataset, **kwargs) -> h5py.File | dict:
     if isinstance(stim_path, h5py.File):
@@ -445,7 +448,6 @@ def get_sync_line_for_stim_onset(
     waveform_type: str | Literal["sound", "audio", "opto"],
     date: datetime.date | None = None,
 ) -> int:
-    FIRST_SOUND_ON_SYNC_DATE = datetime.date(2023, 8, 31)
     if any(label in waveform_type for label in ("aud", "sound")):
         if date and date < FIRST_SOUND_ON_SYNC_DATE:
             raise ValueError(
