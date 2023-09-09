@@ -83,7 +83,7 @@ class OptoTagging(TaskControl):
 
     @functools.cached_property
     def location(self) -> npt.NDArray[np.str_]:
-        return self._hdf5["trialOptoLabel"].asstr()[self.trial_index]
+        return np.array(self._hdf5["trialOptoLabel"].asstr()[self.trial_index], dtype=str)
 
     @functools.cached_property
     def power(self) -> npt.NDArray[np.float64]:
