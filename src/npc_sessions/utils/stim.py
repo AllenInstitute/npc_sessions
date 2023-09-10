@@ -462,7 +462,7 @@ def xcorr(
     recordings: list[StimRecording | None] = [None] * num_presentations
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
     for idx, presentation in enumerate(presentations):
-        print(f"{idx+1}/{num_presentations}\r", flush=True)
+        # print(f"{idx+1}/{num_presentations}\r", end='', flush=True)
         if presentation is None:
             continue
         trigger_time_on_nidaq = (
@@ -516,7 +516,6 @@ def xcorr(
         plt.plot(interp_waveform_times + recordings[-1].latency, norm_waveform_samples / max(abs(norm_waveform_samples)))
         plt.title(f"{recordings[-1].latency = }")
         """
-
     return tuple(recordings)
 
 
@@ -537,6 +536,17 @@ def get_stim_latencies_from_nidaq_recording(
     ] = xcorr,
     correlation_method_kwargs: dict[str, Any] | None = None,
 ) -> tuple[StimRecording | None, ...]:
+    """
+    >>> stim = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5'
+    >>> sync = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/20230831T123331.h5'
+    >>> recording_dirs = (
+    ...     's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/ecephys_clipped/Record Node 102/experiment2/recording1', 
+    ...     's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/ecephys_clipped/Record Node 103/experiment2/recording1',
+    ... )
+    >>> recordings = get_stim_latencies_from_nidaq_recording(stim, sync, recording_dirs, waveform_type='sound') # doctest:+ELLIPSIS
+    >>> latency = next(_ for _ in recordings if _ is not None).latency
+    >>> assert 0 < latency < 0.1
+    """
     sync = utils.get_sync_data(sync)
     if not nidaq_device_name:
         nidaq_device = utils.get_pxi_nidaq_device(recording_dirs)
@@ -615,7 +625,6 @@ def get_stim_latencies_from_sync(
     >>> sync = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/20230831T123331.h5'
     >>> latencies = get_stim_latencies_from_sync(stim, sync, waveform_type='sound')
     >>> assert 0 < next(_.latency for _ in latencies if _ is not None) < 0.1
-
     """
     stim = get_h5_stim_data(stim_file_or_dataset)
     sync = utils.get_sync_data(sync)
