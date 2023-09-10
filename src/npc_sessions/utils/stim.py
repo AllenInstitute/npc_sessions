@@ -299,6 +299,16 @@ def get_audio_waveforms_from_stim_file(
     print("trialSoundArray empty; regenerating sound arrays")
     return generate_sound_waveforms(stim_data)
 
+def get_opto_waveforms_from_stim_file(
+    stim_file_or_dataset: StimPathOrDataset,
+) -> tuple[Waveform | None, ...]:
+    stim_data = get_h5_stim_data(stim_file_or_dataset)
+    if 'trialOptoDur' not in stim_data or len(stim_data["trialOptoDur"]) == 0:
+        raise ValueError(
+            f"trialOptoDur is empty - no opto waveforms to generate from {stim_file_or_dataset}"
+        )
+    return generate_opto_waveforms(stim_data)
+
 @functools.wraps(DynamicRoutingTask.TaskUtils.makeSoundArray)
 @functools.cache
 def get_cached_sound_waveform(*args, **kwargs) -> npt.NDArray[np.float64]:
@@ -355,13 +365,16 @@ def generate_sound_waveforms(
 
     return tuple(waveforms)
 
-
-def generate_opto_waveforms_from_stim_file(
+def generate_opto_waveforms(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform | None, ...]:
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     nTrials = get_num_trials(stim_data)
+    
+    trialOptoDur = stim_data["trialOptoDur"][:nTrials]
+    trialOptoVoltage = stim_data["trialOptoVoltage"][:nTrials]
+
     if "trialOptoDelay" in stim_data:
         trialOptoDelay = stim_data["trialOptoDelay"][:nTrials]
     elif "optoDelay" in stim_data:
@@ -390,18 +403,10 @@ def generate_opto_waveforms_from_stim_file(
     else:
         trialOptoSinFreq = np.zeros(nTrials)
 
-    trialOptoDur = stim_data["trialOptoDur"][:nTrials]
-    trialOptoVoltage = stim_data["trialOptoVoltage"][:nTrials]
-
     if "optoSampleRate" in stim_data.keys():
         optoSampleRate = stim_data["optoSampleRate"][()]
     else:
         optoSampleRate = 2000
-
-    if len(trialOptoDur) == 0:
-        raise IndexError(
-            f"trialOptoDur is empty - no opto waveforms to generate from {stim_file_or_dataset}"
-        )
 
     waveforms: list[Waveform | None] = [None] * nTrials
     for trialnum in range(0, nTrials):
