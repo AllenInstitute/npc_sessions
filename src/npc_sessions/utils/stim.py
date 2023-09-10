@@ -133,8 +133,21 @@ class LazyWaveform(Waveform):
     def samples(self) -> npt.NDArray[np.float64]:
         return self._fn(*self._args, **self._kwargs)
 
-
-class StimPresentation(NamedTuple):
+    
+@dataclasses.dataclass(frozen=True, eq=True)
+class StimPresentation:
+    """
+    Info about a waveform-stimulus when it was triggered: its waveform (ideal, not actual), the time it was
+    sent, the expected duration, etc.
+    
+    >>> presentation = StimPresentation(
+    ...     trial_idx=0, 
+    ...     waveform=SimpleWaveform(np.array([1, 2, 3]), 1),
+    ...     trigger_time_on_sync=0,
+    ...     )
+    >>> presentation.duration
+    3.0
+    """
     trial_idx: int
     waveform: Waveform
     trigger_time_on_sync: float
@@ -144,17 +157,113 @@ class StimPresentation(NamedTuple):
         return self.waveform.duration
 
 
-class StimRecording(NamedTuple):
-    presentation: StimPresentation
-    latency: float
-
+class StimRecording(Protocol):
+    """Timing information about a waveform-stimulus as recorded.
+    """
     @property
     def onset_time_on_sync(self) -> float:
-        return self.presentation.trigger_time_on_sync + self.latency
-
+        raise NotImplementedError
     @property
     def offset_time_on_sync(self) -> float:
+        raise NotImplementedError
+    @property
+    def latency(self) -> float | None:
+        raise NotImplementedError
+
+class FlexStimRecording(StimRecording):
+    """Information about an actual recording of a waveform-stimulus, mainly for
+    obtaining onset and offset of the stimulus.
+    
+    >>> presentation = StimPresentation(
+    ...     trial_idx=0, 
+    ...     waveform=SimpleWaveform(
+    ...         sampling_rate=1,
+    ...         samples=np.array([1, 2, 3]), 
+    ...     ),
+    ...     trigger_time_on_sync=0,
+    ... )
+    >>> recording = FlexStimRecording(presentation=presentation, latency=0.1)
+    >>> recording.onset_time_on_sync
+    0.1
+    >>> recording.offset_time_on_sync
+    3.1
+
+    >>> recorded_waveform = SimpleWaveform(
+    ...     sampling_rate=1,
+    ...     samples=np.array([1, 2, 3]), 
+    ... )
+    >>> recording = FlexStimRecording(waveform=recorded_waveform, onset_time_on_sync=0.1)
+    >>> recording.offset_time_on_sync
+    3.1
+    """
+
+    def __init__(
+        self, 
+        presentation: Optional[StimPresentation] = None, 
+        waveform: Optional[Waveform] = None,
+        trigger_time_on_sync : Optional[float] = None,
+        latency: Optional[float] = None,
+        onset_time_on_sync: Optional[float] = None,
+        offset_time_on_sync: Optional[float] = None,
+    ) -> None:
+        if presentation is None and waveform is None:
+            raise ValueError(
+                "At least one of `presentation` or `waveform` must be provided"
+            )
+        if latency is None and onset_time_on_sync is None:
+            raise ValueError(
+                "At least one of `latency` or `onset_time_on_sync` must be provided"
+            )
+        if presentation is None and waveform is None and offset_time_on_sync is None:
+            raise ValueError(
+                "At least one of `presentation`, `waveform`, `offset_time_on_sync` must be provided"
+            )
+        # minimum attrs:
+        self.presentation = presentation
+        self.waveform = waveform
+        self.trigger_time_on_sync = trigger_time_on_sync
+        
+        # attrs that can potentially be derived from other attrs:
+        self._latency = latency
+        self._onset_time_on_sync = onset_time_on_sync
+        self._offset_time_on_sync = offset_time_on_sync
+        
+    @property
+    def latency(self) -> float | None:
+        if self._latency is not None:
+            return self._latency
+        assert self._onset_time_on_sync is not None
+        if self.presentation is not None:
+            return self.onset_time_on_sync - self.presentation.trigger_time_on_sync
+        if self.trigger_time_on_sync is not None:
+            return self.onset_time_on_sync - self.trigger_time_on_sync
+        logger.warning("No trigger time available - cannot calculate latency")
+        return None
+    
+    @property
+    def onset_time_on_sync(self) -> float:
+        if self._onset_time_on_sync is not None:
+            return self._onset_time_on_sync
+        assert self.latency is not None
+        if self.presentation is not None:
+            return self.presentation.trigger_time_on_sync + self.latency
+        assert self.trigger_time_on_sync is not None
+        return self.trigger_time_on_sync + self.latency
+        
+    @property
+    def offset_time_on_sync(self) -> float:
+        if self._offset_time_on_sync is not None:
+            return self._offset_time_on_sync
+        if self.waveform is not None:
+            return self.onset_time_on_sync + self.duration
+        assert self.presentation is not None
         return self.onset_time_on_sync + self.presentation.duration
+    
+    @property
+    def duration(self) -> float:
+        if self.waveform is not None:
+            return self.waveform.duration
+        return self.offset_time_on_sync - self.onset_time_on_sync
 
 def get_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
@@ -369,7 +478,7 @@ def xcorr(
         )
 
         recordings.append(
-            StimRecording(
+            FlexStimRecording(
                 presentation=presentation,
                 latency=_xcorr(nidaq_samples, interp_waveform_samples, nidaq_times),
             )
@@ -509,7 +618,7 @@ def get_stim_latencies_from_sync(
         onset_following_trigger = stim_onsets[
             np.searchsorted(stim_onsets, trigger_time, side="right")
         ]
-        recordings[idx] = StimRecording(
+        recordings[idx] = FlexStimRecording(
             presentation=StimPresentation(
                 trial_idx=idx,
                 waveform=waveform,
