@@ -280,10 +280,14 @@ def get_waveforms_from_stim_file(
 def get_audio_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform | None, ...]:
+    """
+    >>> path = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/RFMapping_662892_20230821_124434.hdf5'
+    >>> waveforms = get_audio_waveforms_from_stim_file(path)
+    >>> next(w for w in waveforms if w is not None).duration
+    0.25
+    """
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
-    nTrials = get_num_trials(stim_data)
-    soundSampleRate: int = stim_data["soundSampleRate"][()]
     trialSoundArray: list[npt.NDArray] | None = stim_data.get("trialSoundArray", None)
 
     if trialSoundArray and len(trialSoundArray) > 0:
@@ -322,6 +326,12 @@ def get_cached_opto_pulse_waveform(*args, **kwargs) -> npt.NDArray[np.float64]:
 def generate_sound_waveforms(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform | None, ...]:
+    """
+    >>> path = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/RFMapping_662892_20230821_124434.hdf5'
+    >>> waveforms = generate_sound_waveforms(path)
+    >>> next(w for w in waveforms if w is not None).duration
+    0.25
+    """
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     nTrials = get_num_trials(stim_data)
@@ -368,6 +378,12 @@ def generate_sound_waveforms(
 def generate_opto_waveforms(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform | None, ...]:
+    """
+    >>> path = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/OptoTagging_662892_20230821_125915.hdf5'
+    >>> waveforms = generate_opto_waveforms(path)
+    >>> next(w for w in waveforms if w is not None).duration
+    0.2025
+    """
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     nTrials = get_num_trials(stim_data)
