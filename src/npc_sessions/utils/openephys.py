@@ -91,7 +91,7 @@ class EphysTimingInfoOnSync(NamedTuple):
 
 
 def get_ephys_timing_on_pxi(
-    recording_dirs: Iterable[upath.UPath], only_devices_including: str = ""
+    recording_dirs: Iterable[upath.UPath], only_devices_including: str | None = None,
 ) -> Generator[EphysTimingInfoOnPXI, None, None]:
     """
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
@@ -106,7 +106,7 @@ def get_ephys_timing_on_pxi(
             recording_dir / "sync_messages.txt"
         )  # includes name of each input device used (probe, nidaq)
         for device in device_to_sync_messages_data:
-            if only_devices_including not in device:
+            if only_devices_including and only_devices_including not in device:
                 continue
             continuous = recording_dir / "continuous" / device
             if not continuous.exists():
@@ -240,6 +240,7 @@ def get_ephys_timing_on_sync(
     sync: utils.SyncPathOrDataset,
     recording_dirs: Iterable[upath.UPath] | None = None,
     devices: Iterable[EphysTimingInfoOnPXI] | None = None,
+    only_devices_including: str | None = None,
 ) -> Generator[EphysTimingInfoOnSync, None, None]:
     """
     One of `recording_dir` or `devices` must be supplied:
@@ -270,7 +271,7 @@ def get_ephys_timing_on_sync(
         recording_dirs = (recording_dirs,)
 
     if recording_dirs and not devices:
-        devices = get_ephys_timing_on_pxi(recording_dirs)
+        devices = get_ephys_timing_on_pxi(recording_dirs, only_devices_including)
 
     assert devices is not None
     for device in devices:
