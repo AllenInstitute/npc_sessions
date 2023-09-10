@@ -142,7 +142,7 @@ class StimPresentation:
     
     >>> presentation = StimPresentation(
     ...     trial_idx=0, 
-    ...     waveform=SimpleWaveform(np.array([1, 2, 3]), 1),
+    ...     waveform=SimpleWaveform(sampling_rate=1, samples=np.array([1, 2, 3])),
     ...     trigger_time_on_sync=0,
     ...     )
     >>> presentation.duration
