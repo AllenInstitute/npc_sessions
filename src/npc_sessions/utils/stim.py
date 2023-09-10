@@ -335,10 +335,10 @@ def generate_sound_waveforms(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform | None, ...]:
     """
-    >>> path = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/RFMapping_662892_20230821_124434.hdf5'
+    >>> path = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5'
     >>> waveforms = generate_sound_waveforms(path)
     >>> next(w for w in waveforms if w is not None).duration
-    0.25
+    0.5
     """
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
