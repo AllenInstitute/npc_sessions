@@ -7,15 +7,15 @@ import io
 import logging
 import pickle
 from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Literal, NamedTuple, Optional, Protocol, Union
+from typing import Any, Callable, Literal, Protocol, Union
 
+import DynamicRoutingTask.TaskUtils
 import h5py
 import npc_session
 import numba
 import numpy as np
 import numpy.typing as npt
 import upath
-import DynamicRoutingTask.TaskUtils
 from typing_extensions import TypeAlias
 
 import npc_sessions.utils as utils
@@ -53,12 +53,12 @@ def get_pkl_stim_data(stim_path: StimPathOrDataset, **kwargs) -> dict:
     kwargs.setdefault("encoding", "latin1")
     return pickle.loads(utils.from_pathlike(stim_path).read_bytes())
 
+
 class Waveform(Protocol):
-    
     @property
     def samples(self) -> npt.NDArray[np.float64]:
         raise NotImplementedError
-    
+
     @property
     def sampling_rate(self) -> float:
         raise NotImplementedError
@@ -73,10 +73,13 @@ class Waveform(Protocol):
 
     def __eq__(self, other) -> bool:
         try:
-            return np.array_equal(self.samples, other.samples) and self.sampling_rate == other.sampling_rate
+            return (
+                np.array_equal(self.samples, other.samples)
+                and self.sampling_rate == other.sampling_rate
+            )
         except (AttributeError, TypeError):
             return NotImplemented
-        
+
     def __hash__(self) -> int:
         return hash((self.samples.tobytes(), self.sampling_rate))
 
@@ -87,29 +90,30 @@ class SimpleWaveform(Waveform):
     >>> waveform.duration
     3.0
     >>> waveform.timestamps
-    array([0., 1., 2.])    
+    array([0., 1., 2.])
     """
+
     def __init__(self, sampling_rate: float, samples: npt.NDArray[np.float64]) -> None:
         self._samples = samples
         self._sampling_rate = sampling_rate
-    
+
     @property
     def samples(self) -> npt.NDArray[np.float64]:
         return self._samples
-    
+
     @property
     def sampling_rate(self) -> float:
         return self._sampling_rate
-        
-    
+
+
 class LazyWaveform(Waveform):
     """Pass a function with args and kwargs used to generate the waveform
     on-demand, to avoid carrying round arrays in memory
-    
+
     If the function is wrapped with functools.cache or similar, then we
     waveforms available immediately and stored only once for each unique
     parameter set.
-    
+
     >>> waveform = LazyWaveform(sampling_rate=1, fn=lambda dtype: np.array([1, 2, 3], dtype=dtype), dtype=np.float64)
     >>> waveform.samples
     array([1., 2., 3.])
@@ -118,8 +122,14 @@ class LazyWaveform(Waveform):
     >>> waveform.timestamps
     array([0., 1., 2.])
     """
-    
-    def __init__(self, sampling_rate: float, fn: Callable[[Any], npt.NDArray[np.float64]], *args, **kwargs) -> None:
+
+    def __init__(
+        self,
+        sampling_rate: float,
+        fn: Callable[[Any], npt.NDArray[np.float64]],
+        *args,
+        **kwargs,
+    ) -> None:
         self._sampling_rate = sampling_rate
         self._fn = fn
         self._args = args
@@ -128,31 +138,31 @@ class LazyWaveform(Waveform):
             if isinstance(v, np.ndarray):
                 # convert to tuple to make hashable (for caching)
                 self._kwargs[k] = tuple(v)
-                
-            
+
     @property
     def sampling_rate(self) -> float:
         return self._sampling_rate
-        
+
     @property
     def samples(self) -> npt.NDArray[np.float64]:
         return self._fn(*self._args, **self._kwargs)
 
-    
+
 @dataclasses.dataclass(frozen=True, eq=True)
 class StimPresentation:
     """
     Info about a waveform-stimulus when it was triggered: its waveform (ideal, not actual), the time it was
     sent, the expected duration, etc.
-    
+
     >>> presentation = StimPresentation(
-    ...     trial_idx=0, 
+    ...     trial_idx=0,
     ...     waveform=SimpleWaveform(sampling_rate=1, samples=np.array([1, 2, 3])),
     ...     trigger_time_on_sync=0,
     ...     )
     >>> presentation.duration
     3.0
     """
+
     trial_idx: int
     waveform: Waveform
     trigger_time_on_sync: float
@@ -163,27 +173,30 @@ class StimPresentation:
 
 
 class StimRecording(Protocol):
-    """Timing information about a waveform-stimulus as recorded.
-    """
+    """Timing information about a waveform-stimulus as recorded."""
+
     @property
     def onset_time_on_sync(self) -> float:
         raise NotImplementedError
+
     @property
     def offset_time_on_sync(self) -> float:
         raise NotImplementedError
+
     @property
     def latency(self) -> float | None:
         raise NotImplementedError
 
+
 class FlexStimRecording(StimRecording):
     """Information about an actual recording of a waveform-stimulus, mainly for
     obtaining onset and offset of the stimulus.
-    
+
     >>> presentation = StimPresentation(
-    ...     trial_idx=0, 
+    ...     trial_idx=0,
     ...     waveform=SimpleWaveform(
     ...         sampling_rate=1,
-    ...         samples=np.array([1, 2, 3]), 
+    ...         samples=np.array([1, 2, 3]),
     ...     ),
     ...     trigger_time_on_sync=0,
     ... )
@@ -195,7 +208,7 @@ class FlexStimRecording(StimRecording):
 
     >>> recorded_waveform = SimpleWaveform(
     ...     sampling_rate=1,
-    ...     samples=np.array([1, 2, 3]), 
+    ...     samples=np.array([1, 2, 3]),
     ... )
     >>> recording = FlexStimRecording(waveform=recorded_waveform, onset_time_on_sync=0.1)
     >>> recording.offset_time_on_sync
@@ -203,13 +216,13 @@ class FlexStimRecording(StimRecording):
     """
 
     def __init__(
-        self, 
-        presentation: Optional[StimPresentation] = None, 
-        waveform: Optional[Waveform] = None,
-        trigger_time_on_sync : Optional[float] = None,
-        latency: Optional[float] = None,
-        onset_time_on_sync: Optional[float] = None,
-        offset_time_on_sync: Optional[float] = None,
+        self,
+        presentation: StimPresentation | None = None,
+        waveform: Waveform | None = None,
+        trigger_time_on_sync: float | None = None,
+        latency: float | None = None,
+        onset_time_on_sync: float | None = None,
+        offset_time_on_sync: float | None = None,
     ) -> None:
         if presentation is None and waveform is None:
             raise ValueError(
@@ -227,12 +240,12 @@ class FlexStimRecording(StimRecording):
         self.presentation = presentation
         self.waveform = waveform
         self.trigger_time_on_sync = trigger_time_on_sync
-        
+
         # attrs that can potentially be derived from other attrs:
         self._latency = latency
         self._onset_time_on_sync = onset_time_on_sync
         self._offset_time_on_sync = offset_time_on_sync
-        
+
     @property
     def latency(self) -> float | None:
         if self._latency is not None:
@@ -244,7 +257,7 @@ class FlexStimRecording(StimRecording):
             return self.onset_time_on_sync - self.trigger_time_on_sync
         logger.warning("No trigger time available - cannot calculate latency")
         return None
-    
+
     @property
     def onset_time_on_sync(self) -> float:
         if self._onset_time_on_sync is not None:
@@ -254,7 +267,7 @@ class FlexStimRecording(StimRecording):
             return self.presentation.trigger_time_on_sync + self.latency
         assert self.trigger_time_on_sync is not None
         return self.trigger_time_on_sync + self.latency
-        
+
     @property
     def offset_time_on_sync(self) -> float:
         if self._offset_time_on_sync is not None:
@@ -263,12 +276,13 @@ class FlexStimRecording(StimRecording):
             return self.onset_time_on_sync + self.duration
         assert self.presentation is not None
         return self.onset_time_on_sync + self.presentation.duration
-    
+
     @property
     def duration(self) -> float:
         if self.waveform is not None:
             return self.waveform.duration
         return self.offset_time_on_sync - self.onset_time_on_sync
+
 
 def get_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
@@ -282,6 +296,7 @@ def get_waveforms_from_stim_file(
         f"Unexpected value: {waveform_type = }. Should be 'sound' or 'opto'."
     )
 
+
 def get_audio_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform | None, ...]:
@@ -294,17 +309,21 @@ def get_audio_waveforms_from_stim_file(
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     trialSoundArray: list[npt.NDArray] | None = stim_data.get("trialSoundArray", None)
-    if trialSoundArray is None or len(trialSoundArray) == 0 or all(a.size == 0 for a in trialSoundArray):
+    if (
+        trialSoundArray is None
+        or len(trialSoundArray) == 0
+        or all(a.size == 0 for a in trialSoundArray)
+    ):
         print("trialSoundArray empty; regenerating sound arrays")
         return generate_sound_waveforms(stim_data)
-    
+
     # extract saved waveforms
     waveforms: list[Waveform | None] = [None] * get_num_trials(stim_data)
     for idx in range(len(waveforms)):
         if any(trialSoundArray[idx]):
             waveforms[idx] = SimpleWaveform(
                 sampling_rate=stim_data["soundSampleRate"][()],
-                samples=trialSoundArray[idx], 
+                samples=trialSoundArray[idx],
             )
     return tuple(waveforms)
 
@@ -313,11 +332,12 @@ def get_opto_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform | None, ...]:
     stim_data = get_h5_stim_data(stim_file_or_dataset)
-    if 'trialOptoDur' not in stim_data or len(stim_data["trialOptoDur"]) == 0:
+    if "trialOptoDur" not in stim_data or len(stim_data["trialOptoDur"]) == 0:
         raise ValueError(
             f"trialOptoDur is empty - no opto waveforms to generate from {stim_file_or_dataset}"
         )
     return generate_opto_waveforms(stim_data)
+
 
 @functools.wraps(DynamicRoutingTask.TaskUtils.makeSoundArray)
 @functools.cache
@@ -325,11 +345,13 @@ def get_cached_sound_waveform(*args, **kwargs) -> npt.NDArray[np.float64]:
     # any unhashable args/kwargs (incl np.ndarray) will raise TypeError
     return DynamicRoutingTask.TaskUtils.makeSoundArray(*args, **kwargs)
 
+
 @functools.wraps(DynamicRoutingTask.TaskUtils.getOptoPulseWaveform)
 @functools.cache
 def get_cached_opto_pulse_waveform(*args, **kwargs) -> npt.NDArray[np.float64]:
     # any unhashable args/kwargs (incl np.ndarray) will raise TypeError
     return DynamicRoutingTask.TaskUtils.getOptoPulseWaveform(*args, **kwargs)
+
 
 def generate_sound_waveforms(
     stim_file_or_dataset: StimPathOrDataset,
@@ -363,8 +385,8 @@ def generate_sound_waveforms(
             freq = trialSoundFreq[idx]
 
         waveforms[idx] = LazyWaveform(
-            sampling_rate=soundSampleRate, 
-            fn=get_cached_sound_waveform, 
+            sampling_rate=soundSampleRate,
+            fn=get_cached_sound_waveform,
             soundType=trialSoundType[idx].decode(),
             sampleRate=soundSampleRate,
             dur=trialSoundDur[idx],
@@ -376,6 +398,7 @@ def generate_sound_waveforms(
         )
 
     return tuple(waveforms)
+
 
 def generate_opto_waveforms(
     stim_file_or_dataset: StimPathOrDataset,
@@ -389,7 +412,7 @@ def generate_opto_waveforms(
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     nTrials = get_num_trials(stim_data)
-    
+
     trialOptoDur = stim_data["trialOptoDur"][:nTrials]
     trialOptoVoltage = stim_data["trialOptoVoltage"][:nTrials]
 
@@ -441,14 +464,16 @@ def generate_opto_waveforms(
             freq=trialOptoSinFreq[trialnum],
             onRamp=trialOptoOnRamp[trialnum],
             offRamp=trialOptoOffRamp[trialnum],
-            )
+        )
 
     return tuple(waveforms)
+
 
 @numba.njit(parallel=True)
 def _xcorr(v, w, t) -> float:
     c = np.correlate(v, w)
     return t[np.argmax(c)]
+
 
 def xcorr(
     nidaq_data: npt.NDArray[np.int16],
@@ -461,7 +486,7 @@ def xcorr(
     num_presentations = len(tuple(presentations))
     recordings: list[StimRecording | None] = [None] * num_presentations
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
-    for idx, presentation in enumerate(presentations):
+    for _idx, presentation in enumerate(presentations):
         # print(f"{idx+1}/{num_presentations}\r", end='', flush=True)
         if presentation is None:
             continue
@@ -540,7 +565,7 @@ def get_stim_latencies_from_nidaq_recording(
     >>> stim = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5'
     >>> sync = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/20230831T123331.h5'
     >>> recording_dirs = (
-    ...     's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/ecephys_clipped/Record Node 102/experiment2/recording1', 
+    ...     's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/ecephys_clipped/Record Node 102/experiment2/recording1',
     ...     's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/ecephys_clipped/Record Node 103/experiment2/recording1',
     ... )
     >>> recordings = get_stim_latencies_from_nidaq_recording(stim, sync, recording_dirs, waveform_type='sound') # doctest:+ELLIPSIS
@@ -663,7 +688,7 @@ def get_stim_latencies_from_sync(
 
 def get_sync_line_for_stim_onset(
     waveform_type: str | Literal["sound", "audio", "opto"],
-    date: Optional[datetime.date] = None,
+    date: datetime.date | None = None,
 ) -> int:
     if any(label in waveform_type for label in ("aud", "sound")):
         if date and date < FIRST_SOUND_ON_SYNC_DATE:
@@ -679,7 +704,7 @@ def get_sync_line_for_stim_onset(
 
 def get_nidaq_channel_for_stim_onset(
     waveform_type: str | Literal["sound", "audio", "opto"],
-    date: Optional[datetime.date] = None,
+    date: datetime.date | None = None,
 ) -> int:
     if any(label in waveform_type for label in ("aud", "sound")):
         return 1
@@ -787,7 +812,11 @@ def get_num_trials(
     524
     """
     stim_data = get_h5_stim_data(stim_path_or_data)
-    return len(stim_data.get("trialEndFrame") or stim_data.get("trialOptoOnsetFrame") or stim_data.get("stimStartFrame")) 
+    return len(
+        stim_data.get("trialEndFrame")
+        or stim_data.get("trialOptoOnsetFrame")
+        or stim_data.get("stimStartFrame")
+    )
 
 
 def get_stim_start_time(

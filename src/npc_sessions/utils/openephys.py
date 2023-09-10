@@ -5,7 +5,6 @@ import doctest
 import io
 import json
 import logging
-import pathlib
 import re
 from collections.abc import Generator, Iterable, Sequence
 from typing import Any, Literal, NamedTuple
@@ -91,7 +90,8 @@ class EphysTimingInfoOnSync(NamedTuple):
 
 
 def get_ephys_timing_on_pxi(
-    recording_dirs: Iterable[utils.PathLike], only_devices_including: str | None = None,
+    recording_dirs: Iterable[utils.PathLike],
+    only_devices_including: str | None = None,
 ) -> Generator[EphysTimingInfoOnPXI, None, None]:
     """
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
@@ -217,7 +217,9 @@ def get_pxi_nidaq_data(
         return np.reshape(dat, (int(dat.size / num_channels), -1))
 
 
-def get_pxi_nidaq_device(recording_dir: Iterable[utils.PathLike]) -> EphysTimingInfoOnPXI:
+def get_pxi_nidaq_device(
+    recording_dir: Iterable[utils.PathLike],
+) -> EphysTimingInfoOnPXI:
     """NI-DAQmx device info
 
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
