@@ -343,7 +343,6 @@ def generate_sound_waveforms(
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     nTrials = get_num_trials(stim_data)
-    waveforms: list[Waveform | None] = [None] * nTrials
     trialSoundDur = stim_data["trialSoundDur"][:nTrials]
     trialSoundFreq = stim_data["trialSoundFreq"][:nTrials]
     trialSoundSeed = stim_data["trialSoundSeed"][:nTrials]
@@ -353,28 +352,28 @@ def generate_sound_waveforms(
     soundSampleRate = stim_data["soundSampleRate"][()]
     soundHanningDur = stim_data["soundHanningDur"][()]
 
-    for trialnum in range(0, nTrials):
-        if trialSoundType[trialnum].decode() == "":
-            waveforms[trialnum] = None
+    waveforms: list[Waveform | None] = [None] * nTrials
+    for idx in range(len(waveforms)):
+        if trialSoundType[idx].decode() == "":
+            continue
+        if trialSoundType[idx].decode() == "tone":
+            # accounts for a quirk of how the trial sound frequencies are saved
+            freq = trialSoundFreq[idx][0]
         else:
-            if trialSoundType[trialnum].decode() == "tone":
-                # accounts for a quirk of how the trial sound frequencies are saved
-                freq = trialSoundFreq[trialnum][0]
-            else:
-                freq = trialSoundFreq[trialnum]
+            freq = trialSoundFreq[idx]
 
-            waveforms[trialnum] = LazyWaveform(
-                sampling_rate=soundSampleRate, 
-                fn=get_cached_sound_waveform, 
-                soundType=trialSoundType[trialnum].decode(),
-                sampleRate=soundSampleRate,
-                dur=trialSoundDur[trialnum],
-                hanningDur=soundHanningDur,
-                vol=trialSoundVolume[trialnum],
-                freq=freq,
-                AM=trialSoundAM[trialnum],
-                seed=trialSoundSeed[trialnum],
-            )
+        waveforms[idx] = LazyWaveform(
+            sampling_rate=soundSampleRate, 
+            fn=get_cached_sound_waveform, 
+            soundType=trialSoundType[idx].decode(),
+            sampleRate=soundSampleRate,
+            dur=trialSoundDur[idx],
+            hanningDur=soundHanningDur,
+            vol=trialSoundVolume[idx],
+            freq=freq,
+            AM=trialSoundAM[idx],
+            seed=trialSoundSeed[idx],
+        )
 
     return tuple(waveforms)
 
