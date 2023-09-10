@@ -648,7 +648,7 @@ def get_stim_latencies_from_sync(
 
 def get_sync_line_for_stim_onset(
     waveform_type: str | Literal["sound", "audio", "opto"],
-    date: datetime.date | None = None,
+    date: Optional[datetime.date] = None,
 ) -> int:
     if any(label in waveform_type for label in ("aud", "sound")):
         if date and date < FIRST_SOUND_ON_SYNC_DATE:
@@ -664,7 +664,7 @@ def get_sync_line_for_stim_onset(
 
 def get_nidaq_channel_for_stim_onset(
     waveform_type: str | Literal["sound", "audio", "opto"],
-    date: datetime.date | None = None,
+    date: Optional[datetime.date] = None,
 ) -> int:
     if any(label in waveform_type for label in ("aud", "sound")):
         return 1
