@@ -289,19 +289,20 @@ def get_audio_waveforms_from_stim_file(
     stim_data = get_h5_stim_data(stim_file_or_dataset)
 
     trialSoundArray: list[npt.NDArray] | None = stim_data.get("trialSoundArray", None)
+    if trialSoundArray is None or len(trialSoundArray) == 0 or all(a.size == 0 for a in trialSoundArray):
+        print("trialSoundArray empty; regenerating sound arrays")
+        return generate_sound_waveforms(stim_data)
+    
+    # extract saved waveforms
+    waveforms: list[Waveform | None] = [None] * get_num_trials(stim_data)
+    for idx in range(len(waveforms)):
+        if any(trialSoundArray[idx]):
+            waveforms[idx] = SimpleWaveform(
+                sampling_rate=stim_data["soundSampleRate"][()],
+                samples=trialSoundArray[idx], 
+            )
+    return tuple(waveforms)
 
-    if trialSoundArray and len(trialSoundArray) > 0:
-        waveforms: list[Waveform | None] = [None] * nTrials
-        for trialnum in range(nTrials):
-            if any(trialSoundArray[trialnum]):
-                waveforms[trialnum] = SimpleWaveform(
-                    sampling_rate=soundSampleRate,
-                    samples=trialSoundArray[trialnum], 
-                )
-        return tuple(waveforms)
-
-    print("trialSoundArray empty; regenerating sound arrays")
-    return generate_sound_waveforms(stim_data)
 
 def get_opto_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
@@ -344,11 +345,6 @@ def generate_sound_waveforms(
     trialSoundAM = stim_data["trialSoundAM"][:nTrials]
     soundSampleRate = stim_data["soundSampleRate"][()]
     soundHanningDur = stim_data["soundHanningDur"][()]
-
-    if len(trialSoundDur) == 0:
-        raise IndexError(
-            f"trialSoundDur is empty - no sound waveforms to generate from {stim_file_or_dataset}"
-        )
 
     for trialnum in range(0, nTrials):
         if trialSoundType[trialnum].decode() == "":
