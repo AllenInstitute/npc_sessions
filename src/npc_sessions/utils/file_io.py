@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 PathLike = Union[str, bytes, os.PathLike, pathlib.Path, upath.UPath]
 
 
-def from_pathlike(pathlike) -> upath.UPath:
+def from_pathlike(pathlike: PathLike) -> upath.UPath:
     return upath.UPath(os.fsdecode(pathlike))
 
 
