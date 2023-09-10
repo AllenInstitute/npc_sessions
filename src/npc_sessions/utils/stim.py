@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import dataclasses
 import datetime
+import functools
 import io
 import logging
 import pickle
 from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Literal, NamedTuple, Union
+from typing import Any, Callable, Literal, NamedTuple, Optional, Protocol, Union
 
 import h5py
 import npc_session
@@ -13,7 +15,7 @@ import numba
 import numpy as np
 import numpy.typing as npt
 import upath
-from DynamicRoutingTask.TaskUtils import getOptoPulseWaveform, makeSoundArray
+import DynamicRoutingTask.TaskUtils
 from typing_extensions import TypeAlias
 
 import npc_sessions.utils as utils
@@ -51,10 +53,15 @@ def get_pkl_stim_data(stim_path: StimPathOrDataset, **kwargs) -> dict:
     kwargs.setdefault("encoding", "latin1")
     return pickle.loads(utils.from_pathlike(stim_path).read_bytes())
 
-
-class Waveform(NamedTuple):
-    samples: npt.NDArray[np.float64]
-    sampling_rate: float
+class Waveform(Protocol):
+    
+    @property
+    def samples(self) -> npt.NDArray[np.float64]:
+        raise NotImplementedError
+    
+    @property
+    def sampling_rate(self) -> float:
+        raise NotImplementedError
 
     @property
     def duration(self) -> float:
@@ -63,6 +70,68 @@ class Waveform(NamedTuple):
     @property
     def timestamps(self) -> npt.NDArray[np.float64]:
         return np.arange(0, self.duration, 1 / self.sampling_rate)
+
+    def __eq__(self, other) -> bool:
+        try:
+            return np.array_equal(self.samples, other.samples) and self.sampling_rate == other.sampling_rate
+        except (AttributeError, TypeError):
+            return NotImplemented
+        
+    def __hash__(self) -> int:
+        return hash((self.samples.tobytes(), self.sampling_rate))
+
+
+class SimpleWaveform(Waveform):
+    """
+    >>> waveform = SimpleWaveform(sampling_rate=1, samples=np.array([1, 2, 3]))
+    >>> waveform.duration
+    3.0
+    >>> waveform.timestamps
+    array([0., 1., 2.])    
+    """
+    def __init__(self, sampling_rate: float, samples: npt.NDArray[np.float64]) -> None:
+        self._samples = samples
+        self._sampling_rate = sampling_rate
+    
+    @property
+    def samples(self) -> npt.NDArray[np.float64]:
+        return self._samples
+    
+    @property
+    def sampling_rate(self) -> float:
+        return self._sampling_rate
+        
+    
+class LazyWaveform(Waveform):
+    """Pass a function with args and kwargs used to generate the waveform
+    on-demand, to avoid carrying round arrays in memory
+    
+    If the function is wrapped with functools.cache or similar, then we
+    waveforms available immediately and stored only once for each unique
+    parameter set.
+    
+    >>> waveform = LazyWaveform(sampling_rate=1, fn=lambda dtype: np.array([1, 2, 3], dtype=dtype), dtype=np.float64)
+    >>> waveform.samples
+    array([1., 2., 3.])
+    >>> waveform.duration
+    3.0
+    >>> waveform.timestamps
+    array([0., 1., 2.])
+    """
+    
+    def __init__(self, sampling_rate: float, fn: Callable[[Any], npt.NDArray[np.float64]], *args, **kwargs) -> None:
+        self._sampling_rate = sampling_rate
+        self._fn = fn
+        self._args = args
+        self._kwargs = kwargs
+    
+    @property
+    def sampling_rate(self) -> float:
+        return self._sampling_rate
+        
+    @property
+    def samples(self) -> npt.NDArray[np.float64]:
+        return self._fn(*self._args, **self._kwargs)
 
 
 class StimPresentation(NamedTuple):
@@ -87,6 +156,17 @@ class StimRecording(NamedTuple):
     def offset_time_on_sync(self) -> float:
         return self.onset_time_on_sync + self.presentation.duration
 
+def get_waveforms_from_stim_file(
+    stim_file_or_dataset: StimPathOrDataset,
+    waveform_type: Literal["sound", "audio", "opto"],
+) -> tuple[Waveform | None, ...]:
+    if any(s in waveform_type for s in ("sound", "audio")):
+        return get_audio_waveforms_from_stim_file(stim_file_or_dataset)
+    if "opto" in waveform_type:
+        return get_opto_waveforms_from_stim_file(stim_file_or_dataset)
+    raise ValueError(
+        f"Unexpected value: {waveform_type = }. Should be 'sound' or 'opto'."
+    )
 
 def get_audio_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,
@@ -101,16 +181,26 @@ def get_audio_waveforms_from_stim_file(
         waveforms: list[Waveform | None] = [None] * nTrials
         for trialnum in range(nTrials):
             if any(trialSoundArray[trialnum]):
-                waveforms[trialnum] = Waveform(
-                    samples=trialSoundArray[trialnum], sampling_rate=soundSampleRate
+                waveforms[trialnum] = SimpleWaveform(
+                    sampling_rate=soundSampleRate,
+                    samples=trialSoundArray[trialnum], 
                 )
         return tuple(waveforms)
 
     print("trialSoundArray empty; regenerating sound arrays")
-    return regenerate_sound_array(stim_data)
+    return generate_sound_waveforms(stim_data)
 
+@functools.wraps(DynamicRoutingTask.TaskUtils.makeSoundArray)
+@functools.cache
+def get_cached_sound_waveform(*args, **kwargs) -> npt.NDArray[np.float64]:
+    return DynamicRoutingTask.TaskUtils.makeSoundArray(*args, **kwargs)
 
-def regenerate_sound_array(
+@functools.wraps(DynamicRoutingTask.TaskUtils.getOptoPulseWaveform)
+@functools.cache
+def get_cached_opto_pulse_waveform(*args, **kwargs) -> npt.NDArray[np.float64]:
+    return DynamicRoutingTask.TaskUtils.getOptoPulseWaveform(*args, **kwargs)
+
+def generate_sound_waveforms(
     stim_file_or_dataset: StimPathOrDataset,
 ) -> tuple[Waveform | None, ...]:
     stim_data = get_h5_stim_data(stim_file_or_dataset)
@@ -141,7 +231,9 @@ def regenerate_sound_array(
             else:
                 freq = trialSoundFreq[trialnum]
 
-            soundArray = makeSoundArray(
+            waveforms[trialnum] = LazyWaveform(
+                sampling_rate=soundSampleRate, 
+                fn=get_cached_sound_waveform, 
                 soundType=trialSoundType[trialnum].decode(),
                 sampleRate=soundSampleRate,
                 dur=trialSoundDur[trialnum],
@@ -150,10 +242,6 @@ def regenerate_sound_array(
                 freq=freq,
                 AM=trialSoundAM[trialnum],
                 seed=trialSoundSeed[trialnum],
-            )
-
-            waveforms[trialnum] = Waveform(
-                samples=soundArray, sampling_rate=soundSampleRate
             )
 
     return tuple(waveforms)
@@ -210,7 +298,10 @@ def generate_opto_waveforms_from_stim_file(
     for trialnum in range(0, nTrials):
         if np.isnan(trialOptoDur[trialnum]) is True:
             continue
-        optoArray = getOptoPulseWaveform(
+
+        waveforms[trialnum] = LazyWaveform(
+            sampling_rate=optoSampleRate,
+            fn=get_cached_opto_pulse_waveform,
             sampleRate=optoSampleRate,
             amp=trialOptoVoltage[trialnum],
             dur=trialOptoDur[trialnum],
@@ -218,30 +309,14 @@ def generate_opto_waveforms_from_stim_file(
             freq=trialOptoSinFreq[trialnum],
             onRamp=trialOptoOnRamp[trialnum],
             offRamp=trialOptoOffRamp[trialnum],
-        )
-        waveforms[trialnum] = Waveform(samples=optoArray, sampling_rate=optoSampleRate)
+            )
 
     return tuple(waveforms)
-
-
-def get_waveforms_from_stim_file(
-    stim_file_or_dataset: StimPathOrDataset,
-    waveform_type: Literal["sound", "audio", "opto"],
-) -> tuple[Waveform | None, ...]:
-    if any(s in waveform_type for s in ("sound", "audio")):
-        return get_audio_waveforms_from_stim_file(stim_file_or_dataset)
-    if "opto" in waveform_type:
-        return generate_opto_waveforms_from_stim_file(stim_file_or_dataset)
-    raise ValueError(
-        f"Unexpected value: {waveform_type = }. Should be 'sound' or 'opto'."
-    )
-
 
 @numba.njit(parallel=True)
 def _xcorr(v, w, t) -> float:
     c = np.correlate(v, w)
     return t[np.argmax(c)]
-
 
 def xcorr(
     nidaq_data: npt.NDArray[np.int16],
