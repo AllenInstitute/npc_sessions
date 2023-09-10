@@ -760,7 +760,7 @@ def get_num_trials(
     524
     """
     stim_data = get_h5_stim_data(stim_path_or_data)
-    return len(stim_data.get("trialEndFrame") or stim_data.get("trialOptoOnsetFrame"))
+    return len(stim_data.get("trialEndFrame") or stim_data.get("trialOptoOnsetFrame") or stim_data.get("stimStartFrame")) 
 
 
 def get_stim_start_time(
