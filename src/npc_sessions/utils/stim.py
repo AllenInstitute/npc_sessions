@@ -124,7 +124,12 @@ class LazyWaveform(Waveform):
         self._fn = fn
         self._args = args
         self._kwargs = kwargs
-    
+        for k, v in kwargs.items():
+            if isinstance(v, np.ndarray):
+                # convert to tuple to make hashable (for caching)
+                self._kwargs[k] = tuple(v)
+                
+            
     @property
     def sampling_rate(self) -> float:
         return self._sampling_rate
@@ -317,11 +322,13 @@ def get_opto_waveforms_from_stim_file(
 @functools.wraps(DynamicRoutingTask.TaskUtils.makeSoundArray)
 @functools.cache
 def get_cached_sound_waveform(*args, **kwargs) -> npt.NDArray[np.float64]:
+    # any unhashable args/kwargs (incl np.ndarray) will raise TypeError
     return DynamicRoutingTask.TaskUtils.makeSoundArray(*args, **kwargs)
 
 @functools.wraps(DynamicRoutingTask.TaskUtils.getOptoPulseWaveform)
 @functools.cache
 def get_cached_opto_pulse_waveform(*args, **kwargs) -> npt.NDArray[np.float64]:
+    # any unhashable args/kwargs (incl np.ndarray) will raise TypeError
     return DynamicRoutingTask.TaskUtils.getOptoPulseWaveform(*args, **kwargs)
 
 def generate_sound_waveforms(
