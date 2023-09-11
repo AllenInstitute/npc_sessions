@@ -513,16 +513,13 @@ def xcorr(
             + padding_samples,
             nidaq_channel,
         ]
-        waveform_times = np.arange(
-            0, presentation.duration, 1 / presentation.waveform.sampling_rate
-        )
         interp_waveform_times = np.arange(
             0,
             presentation.duration,
             1 / nidaq_timing.sampling_rate,
         )
         interp_waveform_samples = np.interp(
-            interp_waveform_times, waveform_times, presentation.waveform.samples
+            interp_waveform_times, presentation.waveform.timestamps, presentation.waveform.samples
         )
 
         recordings.append(
