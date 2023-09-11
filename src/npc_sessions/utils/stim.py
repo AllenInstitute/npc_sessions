@@ -486,8 +486,8 @@ def xcorr(
     recordings: list[StimRecording | None] = [None] * num_presentations
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
     xcorr_values = []
-    for _idx, presentation in enumerate(presentations):
-        # print(f"{idx+1}/{num_presentations}\r", end='', flush=True)
+    for idx, presentation in enumerate(presentations):
+        # print(f"{idx+1}/{num_presentations}\r", end=' ', flush=True)
         if presentation is None:
             continue
         trigger_time_on_nidaq = (
@@ -525,12 +525,11 @@ def xcorr(
         )
 
         lag, xcorr = _xcorr(nidaq_samples, interp_waveform_samples, nidaq_times)
-        recordings.append(
-            FlexStimRecording(
-                presentation=presentation,
-                latency=lag,
+        recordings[idx] = FlexStimRecording(
+            presentation=presentation,
+            latency=lag,
             )
-        )
+        
         xcorr_values.append(xcorr)
         # to verify:
         """
