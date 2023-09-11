@@ -8,6 +8,7 @@ display times to get stim onset times
 from __future__ import annotations
 
 import functools
+from typing import Iterable
 
 import DynamicRoutingTask.TaskUtils
 import numpy as np
@@ -24,7 +25,18 @@ class OptoTagging(TaskControl):
     >>> trials = OptoTagging(stim, sync)
     >>> assert trials
     """
-
+    def __init__(
+        self,
+        hdf5: utils.StimPathOrDataset,
+        sync: utils.SyncPathOrDataset,
+        ephys_recording_dirs: Iterable[utils.PathLike] | None = None,
+        **kwargs,
+    ) -> None:
+        if sync is None:
+            raise ValueError(f"sync data is required for {self.__class__.__name__} trials table")
+        super().__init__(hdf5, sync, ephys_recording_dirs=ephys_recording_dirs,
+                         **kwargs)
+        
     @functools.cached_property
     def _stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
         if self._sync is not None:

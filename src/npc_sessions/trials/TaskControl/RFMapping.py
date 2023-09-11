@@ -34,11 +34,14 @@ class RFMapping(TaskControl):
     def __init__(
         self,
         hdf5: utils.StimPathOrDataset,
-        sync: utils.SyncPathOrDataset,  # not optional
+        sync: utils.SyncPathOrDataset,
+        ephys_recording_dirs: Iterable[utils.PathLike] | None = None,
         **kwargs,
     ) -> None:
-        super().__init__(hdf5, sync, **kwargs)
-
+        if sync is None:
+            raise ValueError(f"sync data is required for {self.__class__.__name__} trials table")
+        super().__init__(hdf5, sync, ephys_recording_dirs=ephys_recording_dirs,
+                         **kwargs)
     @property
     def _aud_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
         self._cached_aud_stim_recordings: tuple[utils.StimRecording | None, ...] | None

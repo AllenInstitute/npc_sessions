@@ -43,7 +43,20 @@ class DynamicRouting1(TaskControl):
     >>> trials = DynamicRouting1('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
     >>> assert dict(trials)
     """
-
+    def __init__(
+        self,
+        hdf5: utils.StimPathOrDataset,
+        sync: utils.SyncPathOrDataset | None = None,
+        ephys_recording_dirs: Iterable[utils.PathLike] | None = None,
+        **kwargs,
+    ) -> None:
+        if sync is None and ephys_recording_dirs is not None:
+            raise ValueError(
+                "ephys_recording_dirs was provided: must also provide sync file to get waveform timing from NI-DAQ recordings"
+            )
+        super().__init__(hdf5, sync, ephys_recording_dirs=ephys_recording_dirs,
+                         **kwargs)
+        
     @property
     def _opto_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
         self._cached_opto_stim_recordings: tuple[utils.StimRecording | None, ...] | None
