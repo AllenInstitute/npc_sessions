@@ -95,7 +95,14 @@ class DynamicRouting1(TaskControl):
                 self._sync,
                 waveform_type="sound",
             )
-        # TODO else: get from NI-DAQ
+        elif getattr(self, "_ephys_recording_dirs", None) is not None:
+            recording_dirs = getattr(self, "_ephys_recording_dirs")
+            self._cached_aud_stim_recordings = utils.get_stim_latencies_from_nidaq_recording(
+                self._hdf5,
+                sync=self._sync,
+                recording_dirs=recording_dirs,
+                waveform_type="sound",
+            )
         else:
             self._cached_aud_stim_recordings = None
         return self._cached_aud_stim_recordings
