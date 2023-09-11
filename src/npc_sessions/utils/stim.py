@@ -528,8 +528,8 @@ def xcorr(
         recordings[idx] = FlexStimRecording(
             presentation=presentation,
             latency=lag,
-            )
-        
+        )
+
         xcorr_values.append(xcorr)
         # to verify:
         """
