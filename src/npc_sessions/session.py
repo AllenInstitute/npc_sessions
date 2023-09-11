@@ -563,7 +563,7 @@ class Session:
             npc_lims.ElectrodeGroup(
                 session_id=self.id,
                 device=serial_number,
-                name=f"probe{probe_letter}",  # type: ignore
+                name=f"probe{probe_letter}",  # type: ignore[arg-type]
                 description=probe_type,
                 location=locations.get(probe_letter, None),
             )
@@ -575,18 +575,19 @@ class Session:
         )
 
     @functools.cached_property
-    def electrodes(self) -> nwb.NWBContainerWithDF:
-        return nwb.Electrodes(
+    def electrodes(self) -> tuple[nwb.NWBContainerWithDF, ...]:
+        return tuple(nwb.Electrodes(
             (
                 npc_lims.Electrode(
                     session_id=self.id,
-                    group=f"probe{probe}",  # type: ignore
+                    group=f"probe{probe}",  # type: ignore[arg-type]
                     channel_index=i,
                     id=i,
                     location="Not annotated"
                     # TODO: add ccf coordinates
                 )
                 for i in range(1, 385)  # TODO: get number of channels
+            )
             )
             for probe in self.ephys_settings_xml_data.probe_letters
         )
