@@ -470,9 +470,9 @@ def generate_opto_waveforms(
 
 
 @numba.njit(parallel=True)
-def _xcorr(v, w, t) -> float:
+def _xcorr(v, w, t) -> tuple[float, float]:
     c = np.correlate(v, w)
-    return t[np.argmax(c)]
+    return t[np.argmax(c)], np.max(c)
 
 
 def xcorr(
@@ -486,7 +486,8 @@ def xcorr(
     num_presentations = len(tuple(presentations))
     recordings: list[StimRecording | None] = [None] * num_presentations
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
-    for _idx, presentation in enumerate(presentations):
+    xcorr_values = []
+    for idx, presentation in enumerate(presentations):
         # print(f"{idx+1}/{num_presentations}\r", end='', flush=True)
         if presentation is None:
             continue
@@ -522,13 +523,14 @@ def xcorr(
             interp_waveform_times, presentation.waveform.timestamps, presentation.waveform.samples
         )
 
+        lag, xcorr = _xcorr(nidaq_samples, interp_waveform_samples, nidaq_times)
         recordings.append(
             FlexStimRecording(
                 presentation=presentation,
-                latency=_xcorr(nidaq_samples, interp_waveform_samples, nidaq_times),
+                latency=lag,
             )
         )
-
+        xcorr_values.append(xcorr)
         # to verify:
         """
         import matplotlib.pyplot as plt
@@ -538,6 +540,7 @@ def xcorr(
         plt.plot(interp_waveform_times + recordings[-1].latency, norm_waveform_samples / max(abs(norm_waveform_samples)))
         plt.title(f"{recordings[-1].latency = }")
         """
+    logger.info(f'Cross-correlation values: {max(xcorr_values)=}, {min(xcorr_values)=}, {np.mean(xcorr_values)=}')
     return tuple(recordings)
 
 
