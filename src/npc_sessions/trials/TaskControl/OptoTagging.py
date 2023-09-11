@@ -34,6 +34,7 @@ class OptoTagging(TaskControl):
     ) -> None:
         if sync is None:
             raise ValueError(f"sync data is required for {self.__class__.__name__} trials table")
+        self._ephys_recording_dirs = ephys_recording_dirs
         super().__init__(hdf5, sync, ephys_recording_dirs=ephys_recording_dirs,
                          **kwargs)
         
@@ -42,6 +43,7 @@ class OptoTagging(TaskControl):
         return utils.get_stim_latencies_from_sync(
             self._hdf5, self._sync, waveform_type="opto"
         )
+        # TODO check this works for all older sessions 
 
     @functools.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:

@@ -54,6 +54,7 @@ class DynamicRouting1(TaskControl):
             raise ValueError(
                 "ephys_recording_dirs was provided: must also provide sync file to get waveform timing from NI-DAQ recordings"
             )
+        self._ephys_recording_dirs = ephys_recording_dirs
         super().__init__(hdf5, sync, ephys_recording_dirs=ephys_recording_dirs,
                          **kwargs)
         

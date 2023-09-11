@@ -40,6 +40,7 @@ class RFMapping(TaskControl):
     ) -> None:
         if sync is None:
             raise ValueError(f"sync data is required for {self.__class__.__name__} trials table")
+        self._ephys_recording_dirs = ephys_recording_dirs
         super().__init__(hdf5, sync, ephys_recording_dirs=ephys_recording_dirs,
                          **kwargs)
     @property
