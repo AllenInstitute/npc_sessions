@@ -547,7 +547,7 @@ def xcorr(
 def get_stim_latencies_from_nidaq_recording(
     stim_file_or_dataset: StimPathOrDataset,
     sync: utils.SyncPathOrDataset,
-    recording_dirs: Iterable[upath.UPath],
+    recording_dirs: Iterable[utils.PathLike],
     waveform_type: Literal["sound", "audio", "opto"],
     nidaq_device_name: str | None = None,
     correlation_method: Callable[
