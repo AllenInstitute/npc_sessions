@@ -39,10 +39,14 @@ class RFMapping(TaskControl):
         **kwargs,
     ) -> None:
         if sync is None:
-            raise ValueError(f"sync data is required for {self.__class__.__name__} trials table")
+            raise ValueError(
+                f"sync data is required for {self.__class__.__name__} trials table"
+            )
         self._ephys_recording_dirs = ephys_recording_dirs
-        super().__init__(hdf5, sync, ephys_recording_dirs=ephys_recording_dirs,
-                         **kwargs)
+        super().__init__(
+            hdf5, sync, ephys_recording_dirs=ephys_recording_dirs, **kwargs
+        )
+
     @property
     def _aud_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
         self._cached_aud_stim_recordings: tuple[utils.StimRecording | None, ...] | None
@@ -58,12 +62,16 @@ class RFMapping(TaskControl):
                 self._sync,
                 waveform_type="sound",
             )
-        elif (recording_dirs := getattr(self, "_ephys_recording_dirs", None)) is not None:
-            self._cached_aud_stim_recordings = utils.get_stim_latencies_from_nidaq_recording(
-                self._hdf5,
-                sync=self._sync,
-                recording_dirs=recording_dirs,
-                waveform_type="sound",
+        elif (
+            recording_dirs := getattr(self, "_ephys_recording_dirs", None)
+        ) is not None:
+            self._cached_aud_stim_recordings = (
+                utils.get_stim_latencies_from_nidaq_recording(
+                    self._hdf5,
+                    sync=self._sync,
+                    recording_dirs=recording_dirs,
+                    waveform_type="sound",
+                )
             )
         else:
             self._cached_aud_stim_recordings = None

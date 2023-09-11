@@ -8,7 +8,7 @@ display times to get stim onset times
 from __future__ import annotations
 
 import functools
-from typing import Iterable
+from collections.abc import Iterable
 
 import DynamicRoutingTask.TaskUtils
 import numpy as np
@@ -25,6 +25,7 @@ class OptoTagging(TaskControl):
     >>> trials = OptoTagging(stim, sync)
     >>> assert trials
     """
+
     def __init__(
         self,
         hdf5: utils.StimPathOrDataset,
@@ -33,17 +34,20 @@ class OptoTagging(TaskControl):
         **kwargs,
     ) -> None:
         if sync is None:
-            raise ValueError(f"sync data is required for {self.__class__.__name__} trials table")
+            raise ValueError(
+                f"sync data is required for {self.__class__.__name__} trials table"
+            )
         self._ephys_recording_dirs = ephys_recording_dirs
-        super().__init__(hdf5, sync, ephys_recording_dirs=ephys_recording_dirs,
-                         **kwargs)
-        
+        super().__init__(
+            hdf5, sync, ephys_recording_dirs=ephys_recording_dirs, **kwargs
+        )
+
     @functools.cached_property
     def _stim_recordings(self) -> tuple[utils.StimRecording | None, ...]:
         return utils.get_stim_latencies_from_sync(
             self._hdf5, self._sync, waveform_type="opto"
         )
-        # TODO check this works for all older sessions 
+        # TODO check this works for all older sessions
 
     @functools.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:

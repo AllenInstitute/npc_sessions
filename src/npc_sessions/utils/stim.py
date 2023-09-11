@@ -15,7 +15,6 @@ import npc_session
 import numba
 import numpy as np
 import numpy.typing as npt
-import upath
 from typing_extensions import TypeAlias
 
 import npc_sessions.utils as utils
@@ -487,7 +486,7 @@ def xcorr(
     recordings: list[StimRecording | None] = [None] * num_presentations
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
     xcorr_values = []
-    for idx, presentation in enumerate(presentations):
+    for _idx, presentation in enumerate(presentations):
         # print(f"{idx+1}/{num_presentations}\r", end='', flush=True)
         if presentation is None:
             continue
@@ -520,7 +519,9 @@ def xcorr(
             1 / nidaq_timing.sampling_rate,
         )
         interp_waveform_samples = np.interp(
-            interp_waveform_times, presentation.waveform.timestamps, presentation.waveform.samples
+            interp_waveform_times,
+            presentation.waveform.timestamps,
+            presentation.waveform.samples,
         )
 
         lag, xcorr = _xcorr(nidaq_samples, interp_waveform_samples, nidaq_times)
@@ -540,7 +541,9 @@ def xcorr(
         plt.plot(interp_waveform_times + recordings[-1].latency, norm_waveform_samples / max(abs(norm_waveform_samples)))
         plt.title(f"{recordings[-1].latency = }")
         """
-    logger.info(f'Cross-correlation values: {max(xcorr_values)=}, {min(xcorr_values)=}, {np.mean(xcorr_values)=}')
+    logger.info(
+        f"Cross-correlation values: {max(xcorr_values)=}, {min(xcorr_values)=}, {np.mean(xcorr_values)=}"
+    )
     return tuple(recordings)
 
 
