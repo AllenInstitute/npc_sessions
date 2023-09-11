@@ -60,7 +60,6 @@ class TaskControl(property_dict.PropertyDict):
         sync: utils.SyncPathOrDataset | None = None,
         **kwargs,
     ) -> None:
-        super().__init__(**kwargs)
         for k, v in kwargs.items():
             setattr(self, f"_{k.strip('_')}", v)
         self._hdf5 = utils.get_h5_stim_data(hdf5)
