@@ -58,8 +58,7 @@ class RFMapping(TaskControl):
                 self._sync,
                 waveform_type="sound",
             )
-        elif getattr(self, "_ephys_recording_dirs", None) is not None:
-            recording_dirs = getattr(self, "_ephys_recording_dirs")
+        elif (recording_dirs := getattr(self, "_ephys_recording_dirs", None)) is not None:
             self._cached_aud_stim_recordings = utils.get_stim_latencies_from_nidaq_recording(
                 self._hdf5,
                 sync=self._sync,
