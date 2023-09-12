@@ -746,22 +746,20 @@ class DynamicRoutingSession:
     
     @functools.cached_property
     def units(self) -> pynwb.misc.Units:
-        units = pynwb.misc.Units(name='units', description='spike-sorted units from Kilosort 2.5', waveform_rate=30_000., waveform_unit='volts', electrode_table=self.electrodes)
+        units = pynwb.misc.Units(name='units', description='spike-sorted units from Kilosort 2.5', waveform_rate=30_000., waveform_unit='microvolts', electrode_table=self.electrodes)
         for column in self._units.columns:
             if column in ('spike_times',):
                 continue
             units.add_column(name=column, description="")
-        
-        for unit in self._units.fill_null(np.nan).iter_rows(named=True):
+        df = self._units.fill_null(np.nan)
+        for unit in df.iter_rows(named=True):
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
             units.add_unit(
                 **unit, # contains spike_times
-                electrodes=tuple(e.index.item() for e in self.electrodes if e.channel.item() == unit['peak_channel'] and e.group_name.item() == unit['device_name']),
+                electrodes=[self.electrodes[:].query(f"channel == {unit['peak_channel']}").query(f"group_name == {unit['device_name']!r}").index.item()],
                 electrode_group=self.electrode_groups[unit['device_name']],
             )
-        units.id.extend(self._units['units_id'].to_list())
-        # units.id is a list of `pywnb.ElementIdentifiers`, len == num_units
         return units
 
     _intervals_descriptions = {
