@@ -1,5 +1,5 @@
 """
->>> s = Session('670248_2023-08-03')
+>>> s = DynamicRoutingSession('670248_2023-08-03')
 >>> s.session_start_time
 '2023-08-03 12:04:15'
 >>> 'DynamicRouting1' in s.stim_tags
@@ -8,23 +8,22 @@ True
 S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
 >>> s.stim_paths[0]
 S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
->>> s.devices.df['device_id'][0] == s.electrode_groups.df['device'][0]
-True
 >>> s.ephys_timing_data[0].name, s.ephys_timing_data[0].sampling_rate, s.ephys_timing_data[0].start_time
 ('Neuropix-PXI-100.ProbeA-AP', 30000.070518634246, 20.080209634424037)
 """
+
 from __future__ import annotations
 
 import contextlib
-import datetime
 import functools
 import io
 import itertools
 import json
 import pathlib
 import re
+import uuid
 import warnings
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any, Callable, Literal
 
 import h5py
@@ -33,29 +32,28 @@ import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
 import numpy as np
 import numpy.typing as npt
+import polars as pl
 import pynwb
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
 import npc_sessions.nwb as nwb
-import npc_sessions.trials as trials
+import npc_sessions.trials as TaskControl
 import npc_sessions.utils as utils
 
 
-class Session:
-    trials_interval_name: str = "DynamicRouting1"
+class DynamicRoutingSession:
+    """Class for fetching & processing raw data for given a session id, and
+    converting to NWB modules or an NWBFile instance."""
+    _trials_interval_name: str = "DynamicRouting1"
 
     experimenter: str | None = None
-    experiment_description: str | None = None
-    identifier: str | None = None
+    experiment_description: str = "Visual-auditory task-switching behavior session"
+    institution: str | None = "Neural Circuits & Behavior | MindScope program | Allen Institute"
     notes: str | None = None
     source_script: str | None = None
 
     local_path: upath.UPath | None = None
-
-    acquisition: Mapping[Literal["licks", "running"], nwb.NWBContainer]
-    processing: Mapping[Literal["ephys", "behavior"], nwb.NWBContainer]
-    analysis: Mapping[str, nwb.NWBContainerWithDF] = {}
 
     def __init__(self, session: str, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session))
@@ -63,11 +61,141 @@ class Session:
             self.local_path = upath.UPath(session)
         for key, value in kwargs.items():
             setattr(self, key, value)
+    
+    @property
+    def nwb(self) -> pynwb.NWBFile:
+        # if self._nwb_hdf5_path:
+        #     self.nwb = pynwb.NWBHDF5IO(self._nwb_hdf5_path, "r").read()
+        return pynwb.NWBFile(
+            session_id=self.id,
+            session_description=self.experiment_description,
+            identifier=self.identifier,
+            session_start_time=self.session_start_time.dt,
+            experimenter=self.experimenter,
+            notes=self.notes,
+            source_script=self.source_script,
+            subject=self.subject,
+            keywords=self.keywords,
+            epochs=self.epochs,
+            epoch_tags=self.epoch_tags,
+            trials=self.trials,
+            intervals=self.intervals,
+            acquisition=self._acquisition,
+            processing=self._processing,
+            analysis=self._analysis,
+            devices=self._probes if self.is_ephys else None,
+            electrode_groups=self._electrode_groups if self.is_ephys else None,
+            electrodes=self.electrodes if self.is_ephys else None,
+            units=self.units if self.is_ephys else None,
+        )
 
     def __getattribute__(self, __name: str) -> Any:
         if __name in ("date", "idx"):
             return self.id.__getattribute__(__name)
         return super().__getattribute__(__name)
+
+    @functools.cached_property
+    def _acquisition(
+        self,
+    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        return (self._licks.as_nwb(),)
+
+    @functools.cached_property
+    def _processing(
+        self,
+    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        return (self._running.as_nwb(),)
+
+    @functools.cached_property
+    def _analysis(
+        self,
+    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        return ()
+
+    @property
+    def acquisition(
+        self,
+    ) -> pynwb.core.LabelledDict[
+        str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
+    ]:
+        acquisition = pynwb.core.LabelledDict(label="acquisition", key_attr="name")
+        for module in self._acquisition:
+            acquisition[module.name] = module
+        return acquisition
+
+    @property
+    def processing(
+        self,
+    ) -> pynwb.core.LabelledDict[
+        str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
+    ]:
+        processing = pynwb.core.LabelledDict(label="processing", key_attr="name")
+        for module in self._processing:
+            processing[module.name] = module
+        return processing
+
+    @property
+    def analysis(
+        self,
+    ) -> pynwb.core.LabelledDict[
+        str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
+    ]:
+        analysis = pynwb.core.LabelledDict(label="analysis", key_attr="name")
+        for module in self._analysis:
+            analysis[module.name] = module
+        return analysis
+
+    @functools.cached_property
+    def trials(self) -> pynwb.epoch.TimeIntervals:
+        trials = pynwb.epoch.TimeIntervals(
+            name="trials",
+            description=self._intervals_descriptions[self._trials.__class__],
+        )
+        for column in self._trials.to_add_trial_column():
+            trials.add_column(**column)
+        for trial in self._trials.to_add_trial():
+            trials.add_interval(**trial)
+        return trials
+
+    @functools.cached_property
+    def intervals(self) -> pynwb.epoch.TimeIntervals:
+        intervals = []
+        for _k, v in self._intervals.items():
+            if v is self._trials:
+                continue
+            trials = pynwb.epoch.TimeIntervals(
+                name=v.__class__.__name__,
+                description=self._intervals_descriptions[v.__class__],
+            )
+            for column in self._trials.to_add_trial_column():
+                trials.add_column(**column)
+            for trial in self._trials.to_add_trial():
+                trials.add_interval(**trial)
+            intervals.append(trials)
+        return intervals
+
+    @property
+    def identifier(self) -> str:
+        if getattr(self, "_identifier", None) is None:
+            self._identifier = str(uuid.uuid4())
+        return self._identifier
+
+    @property
+    def keywords(self) -> list[str]:
+        if getattr(self, "_keywords", None) is None:
+            self._keywords: list[str] = []
+            self.keywords.append("behavior")
+            if self.is_sync:
+                self.keywords.append("sync")
+            if self.is_ephys:
+                self.keywords.append("ephys")
+        return self._keywords
+
+    @keywords.setter
+    def keywords(self, value: Iterable[str]) -> None:
+        keywords = getattr(self, "_keywords", [])
+        keywords += list(value)
+        self._keywords = list(set(keywords))
 
     @functools.cached_property
     def info(self) -> tracked_sessions.SessionInfo | None:
@@ -115,7 +243,7 @@ class Session:
             stimulus_notes=self.task_version,
             experimenter=self.experimenter,
             experiment_description=self.experiment_description,
-            epoch_tags=list(self.epoch_tags),
+            # epoch_tags=list(self.epoch_tags),
             source_script=self.source_script,
             identifier=self.identifier,
             notes=self.notes,
@@ -137,6 +265,10 @@ class Session:
             for file in npc_lims.get_raw_data_root(self.id).iterdir()
             if file.suffix == ".json"
         )
+
+    @property
+    def _nwb_hdf5_path(self) -> upath.UPath | None:
+        return npc_lims.get_nwb_file_from_s3(self.id)
 
     @functools.cached_property
     def _subject_aind_metadata(self) -> dict[str, Any]:
@@ -160,33 +292,33 @@ class Session:
             warnings.warn(
                 "Could not find subject.json metadata in raw upload: information will be limited"
             )
-            return nwb.Subject(
-                [
-                    npc_lims.Subject(
-                        subject_id=self.id.subject,
-                    )
-                ]
+            return pynwb.file.Subject(
+                subject_id=self.id.subject,
             )
         assert metadata["subject_id"] == self.id.subject
         dob = npc_session.DatetimeRecord(metadata["date_of_birth"])
-        return nwb.Subject(
-            [
-                npc_lims.Subject(
-                    subject_id=metadata["subject_id"],
-                    sex=metadata["sex"][0].upper(),
-                    date_of_birth=metadata["date_of_birth"],
-                    genotype=metadata["genotype"],
-                    description=None,
-                    strain=metadata["background_strain"] or metadata["breeding_group"],
-                    notes=metadata["notes"],
-                    age=f"P{(self.session_start_time.dt - dob.dt).days}D",
-                )
-            ]
+        return pynwb.file.Subject(
+            subject_id=metadata["subject_id"],
+            species="Mus musculus",
+            sex=metadata["sex"][0].upper(),
+            date_of_birth=dob.dt,
+            genotype=metadata["genotype"],
+            description=None,
+            strain=metadata["background_strain"] or metadata["breeding_group"],
+            age=f"P{(self.session_start_time.dt - dob.dt).days}D",
         )
 
     @property
-    def epoch_tags(self) -> tuple[str, ...]:
-        return tuple(self.epochs.df["tags"].to_list())
+    def epoch_tags(self) -> list[str]:
+        if getattr(self, "_epoch_tags", None) is None:
+            self._epoch_tags: list[str] = list(set(self.epochs.tags))
+        return self._epoch_tags
+
+    @epoch_tags.setter
+    def epoch_tags(self, value: Iterable[str]) -> None:
+        epoch_tags = getattr(self, "_epoch_tags", [])
+        epoch_tags += list(value)
+        self._epoch_tags = list(set(epoch_tags))
 
     @property
     def stim_tags(self) -> tuple[str, ...]:
@@ -392,7 +524,7 @@ class Session:
         return utils.get_stim_frame_times(
             *self.stim_data, sync=self.sync_data, frame_time_type="display_time"
         )
-        
+
     def get_epoch_record(
         self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
     ) -> npc_lims.Epoch:
@@ -422,8 +554,20 @@ class Session:
         )
 
     @functools.cached_property
-    def epochs(self) -> nwb.NWBContainerWithDF:
-        return nwb.Epochs(self.get_epoch_record(stim) for stim in self.stim_data)
+    def epochs(self) -> pynwb.file.TimeIntervals:
+        epochs = pynwb.file.TimeIntervals(
+            name="epochs",
+            description="time intervals corresponding to different phases of the session",
+        )
+        epochs.add_column(
+            "notes",
+            description="notes about the experiment or the data collected during the epoch",
+        )
+        for stim in self.stim_data:
+            epochs.add_interval(
+                **self.get_epoch_record(stim).nwb,
+            )
+        return epochs
 
     @property
     def ephys_record_node_dirs(self) -> tuple[upath.UPath, ...]:
@@ -480,6 +624,7 @@ class Session:
         self,
     ) -> dict[str, dict[Literal["start", "rate"], int]]:
         return utils.get_sync_messages_data(self.ephys_sync_messages_path)
+
     @functools.cached_property
     def ephys_experiment_dirs(self) -> tuple[upath.UPath, ...]:
         return tuple(
@@ -498,7 +643,7 @@ class Session:
             record_node / "settings.xml" for record_node in self.ephys_record_node_dirs
         )
 
-    @property
+    @functools.cached_property
     def ephys_settings_xml_path(self) -> upath.UPath:
         """Single settings.xml path, if applicable"""
         if not self.ephys_settings_xml_paths:
@@ -527,17 +672,25 @@ class Session:
         )
 
     @functools.cached_property
-    def devices(self) -> nwb.NWBContainerWithDF:
-        return nwb.Devices(
-            npc_lims.Device(
-                device_id=serial_number,
+    def _probes(self) -> tuple[pynwb.device.Device, ...]:
+        return tuple(
+            pynwb.device.Device(
+                name=str(serial_number),
                 description=probe_type,
+                manufacturer="imec",
             )
             for serial_number, probe_type in zip(
                 self.ephys_settings_xml_data.probe_serial_numbers,
                 self.ephys_settings_xml_data.probe_types,
             )
         )
+
+    @functools.cached_property
+    def devices(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
+        devices = pynwb.core.LabelledDict(label="devices", key_attr="name")
+        for module in itertools.chain(self._probes): # add other devices as we need them
+            devices[module.name] = module
+        return devices
 
     @property
     def electrode_group_description(self) -> str:
@@ -563,7 +716,16 @@ class Session:
         return "2002" if "2002" in implant else implant
 
     @functools.cached_property
-    def electrode_groups(self) -> nwb.NWBContainerWithDF:
+    def electrode_groups(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
+        electrode_groups = pynwb.core.LabelledDict(
+            label="electrode_groups", key_attr="name"
+        )
+        for module in self._electrode_groups:
+            electrode_groups[module.name] = module
+        return electrode_groups
+
+    @functools.cached_property
+    def _electrode_groups(self) -> tuple[pynwb.ecephys.ElectrodeGroup, ...]:
         locations = (
             {
                 v["letter"]: f"{self.implant} {v['hole']}"
@@ -572,14 +734,13 @@ class Session:
             }
             if self.probe_insertions
             else {}
-        )
-        return nwb.ElectrodeGroups(
-            npc_lims.ElectrodeGroup(
-                session_id=self.id,
-                device=serial_number,
-                name=f"probe{probe_letter}",  # type: ignore[arg-type]
+        )  # TODO upload probe insertion records for all sessions
+        return tuple(
+            pynwb.ecephys.ElectrodeGroup(
+                name=f"probe{probe_letter}",
+                device=self.devices[str(serial_number)],
                 description=probe_type,
-                location=locations.get(probe_letter, None),
+                location=locations.get(probe_letter, probe_letter),
             )
             for serial_number, probe_type, probe_letter in zip(
                 self.ephys_settings_xml_data.probe_serial_numbers,
@@ -589,31 +750,77 @@ class Session:
         )
 
     @functools.cached_property
-    def electrodes(self) -> tuple[nwb.NWBContainerWithDF, ...]:
-        return tuple(
-            nwb.Electrodes(
-                npc_lims.Electrode(
-                    session_id=self.id,
-                    group=f"probe{probe}",  # type: ignore[arg-type]
-                    channel_index=i,
-                    id=i,
-                    location="Not annotated"
-                    # TODO: add ccf coordinates
+    def electrodes(self) -> pynwb.core.DynamicTable:
+        electrodes = pynwb.file.ElectrodeTable()
+        for column in (
+            "rel_x",
+            "rel_y",
+            "channel",  # "id", # "x", "y", "z",
+        ):
+            electrodes.add_column(name=column, description="")
+        for probe_letter, channel_pos_xy in zip(
+            self.ephys_settings_xml_data.probe_letters,
+            self.ephys_settings_xml_data.channel_pos_xy,
+        ):
+            group = self.electrode_groups[f"probe{probe_letter}"]
+            for channel_label, (x, y) in channel_pos_xy.items():
+                channel_idx = int(channel_label.strip("CH"))
+                electrodes.add_row(
+                    # x=,
+                    # y=,
+                    # z=,
+                    # TODO: get ccf coordinates
+                    location="unknown",
+                    group=group,
+                    group_name=group.name,
+                    rel_x=x,
+                    rel_y=y,
+                    channel=channel_idx,
                 )
-                for i in range(1, 385)  # TODO: get number of channels
-            )
-            for probe in self.ephys_settings_xml_data.probe_letters
+        return electrodes
+
+    @functools.cached_property
+    def _units(self) -> pl.DataFrame:
+        return utils.get_units_electrodes_spike_times(self.id)
+
+    @functools.cached_property
+    def units(self) -> pynwb.misc.Units:
+        units = pynwb.misc.Units(
+            name="units",
+            description="spike-sorted units from Kilosort 2.5",
+            waveform_rate=30_000.0,
+            waveform_unit="microvolts",
+            electrode_table=self.electrodes,
         )
+        for column in self._units.columns:
+            if column in ("spike_times",):
+                continue
+            units.add_column(name=column, description="")
+        df = self._units.fill_null(np.nan)
+        for unit in df.iter_rows(named=True):
+            ## for ref:
+            # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
+            units.add_unit(
+                **unit,  # contains spike_times
+                electrodes=[
+                    self.electrodes[:]
+                    .query(f"channel == {unit['peak_channel']}")
+                    .query(f"group_name == {unit['device_name']!r}")
+                    .index.item()
+                ],
+                electrode_group=self.electrode_groups[unit["device_name"]],
+            )
+        return units
 
     _intervals_descriptions = {
-        trials.VisRFMapping: "visual receptive-field mapping trials",
-        trials.AudRFMapping: "auditory receptive-field mapping trials",
-        trials.DynamicRouting1: "visual-auditory task-switching behavior trials",
-        trials.OptoTagging: "opto-tagging trials",
+        TaskControl.VisRFMapping: "visual receptive-field mapping trials",
+        TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
+        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials",
+        TaskControl.OptoTagging: "opto-tagging trials",
     }
 
     @functools.cached_property
-    def _intervals(self) -> utils.LazyDict[str, trials.TaskControl]:
+    def _intervals(self) -> utils.LazyDict[str, TaskControl.TaskControl]:
         if self.is_sync:
             sync = self.sync_data
             stim_paths = tuple(
@@ -628,29 +835,31 @@ class Session:
             stim_paths = self.stim_paths
 
         def get_intervals(
-            cls: type[trials.TaskControl], stim_filename: str, *args
-        ) -> trials.TaskControl:
+            cls: type[TaskControl.TaskControl], stim_filename: str, *args
+        ) -> TaskControl.TaskControl:
             return cls(self.stim_data[stim_filename], sync, *args)
 
-        filename_to_args: dict[str, tuple[Callable, type[trials.TaskControl], str]] = {}
+        filename_to_args: dict[
+            str, tuple[Callable, type[TaskControl.TaskControl], str]
+        ] = {}
         for stim_path in stim_paths:
             assert isinstance(stim_path, upath.UPath)
             stim_filename = stim_path.stem
             if "RFMapping" in stim_filename:
                 filename_to_args["Aud" + stim_filename] = (
                     get_intervals,
-                    trials.AudRFMapping,
+                    TaskControl.AudRFMapping,
                     stim_filename,
                 )
                 filename_to_args["Vis" + stim_filename] = (
                     get_intervals,
-                    trials.VisRFMapping,
+                    TaskControl.VisRFMapping,
                     stim_filename,
                 )
             else:
                 try:
-                    cls: type[trials.TaskControl] = getattr(
-                        trials, stim_filename.split("_")[0]
+                    cls: type[TaskControl.TaskControl] = getattr(
+                        TaskControl, stim_filename.split("_")[0]
                     )
                 except AttributeError:
                     continue  # some stims (e.g. Spontaneous) have no trials class
@@ -660,14 +869,14 @@ class Session:
         return utils.LazyDict((k, v) for k, v in filename_to_args.items())
 
     @property
-    def _trials(self) -> trials.TaskControl:
+    def _trials(self) -> TaskControl.TaskControl:
         """Main behavior task trials"""
         stim_name = next(
-            (_ for _ in self.stim_paths if self.trials_interval_name in _.stem), None
+            (_ for _ in self.stim_paths if self._trials_interval_name in _.stem), None
         )
         if stim_name is None:
             raise ValueError(
-                f"no intervals named {self.trials_interval_name} found for {self.id}"
+                f"no intervals named {self._trials_interval_name} found for {self.id}"
             )
         return self._intervals[stim_name.stem]
 
@@ -694,6 +903,7 @@ class Session:
 # x.sync_data.plot_diode_measured_sync_square_flips()
 
 if __name__ == "__main__":
+
     import doctest
 
     import dotenv
