@@ -101,7 +101,7 @@ class DynamicRouting1(TaskControl):
         elif (
             recording_dirs := getattr(self, "_ephys_recording_dirs", None)
         ) is not None:
-            assert recording_dirs
+            assert recording_dirs is not None
             self._cached_aud_stim_recordings = (
                 utils.get_stim_latencies_from_nidaq_recording(
                     self._hdf5,
