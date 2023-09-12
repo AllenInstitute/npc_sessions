@@ -478,8 +478,7 @@ class Session:
     def ephys_sync_messages_data(
         self,
     ) -> dict[str, dict[Literal["start", "rate"], int]]:
-        return utils.get_sync_messages_data(self.get_sync_messages_path())
-
+        return utils.get_sync_messages_data(self.ephys_sync_messages_path)
     @functools.cached_property
     def ephys_experiment_dirs(self) -> tuple[upath.UPath, ...]:
         return tuple(
