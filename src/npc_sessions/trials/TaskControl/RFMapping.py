@@ -65,6 +65,7 @@ class RFMapping(TaskControl):
         elif (
             recording_dirs := getattr(self, "_ephys_recording_dirs", None)
         ) is not None:
+            assert recording_dirs
             self._cached_aud_stim_recordings = (
                 utils.get_stim_latencies_from_nidaq_recording(
                     self._hdf5,
