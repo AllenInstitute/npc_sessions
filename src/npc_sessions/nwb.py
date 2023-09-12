@@ -32,7 +32,8 @@ def get_ecephys(nwb_file: pynwb.NWBFile) -> pynwb.ProcessingModule:
 class SupportsToNWB(Protocol):
     def to_nwb(self, nwb: pynwb.NWBFile) -> None:
         ...
-        
+
+
 class SupportsAsNWB(Protocol):
     def as_nwb(self) -> pynwb.core.NWBContainer:
         ...
@@ -119,17 +120,16 @@ class LickSpout(SupportsToNWB):
         self.timestamps = utils.get_sync_data(sync_path_or_dataset).get_rising_edges(
             "lick_sensor", units="seconds"
         )
+
     def as_nwb(self) -> ndx_events.Events:
         return ndx_events.Events(
             timestamps=self.timestamps,
             name=self.name,
             description=self.description,
         )
-        
+
     def to_nwb(self, nwb_file: pynwb.NWBFile) -> None:
-        nwb_file.add_acquisition(
-            lick_nwb_data=self.as_nwb()
-        )
+        nwb_file.add_acquisition(lick_nwb_data=self.as_nwb())
 
 
 class RunningSpeed(SupportsToNWB):
@@ -160,7 +160,7 @@ class RunningSpeed(SupportsToNWB):
             unit=self.unit,
             conversion=self.conversion,
         )
-        
+
     def to_nwb(self, nwb_file: pynwb.NWBFile) -> None:
         get_behavior(nwb_file).add(self.as_nwb())
 

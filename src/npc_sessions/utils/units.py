@@ -76,16 +76,18 @@ def get_units_electrodes_spike_times(session: str, *args, **kwargs) -> pl.DataFr
     units = pl.DataFrame(units_df).join(spike_times_df, on="unit_name")
     return (
         units.with_columns(
-            pl.col('device_name').str.replace('P', 'p').alias('device_name'), 
+            pl.col("device_name").str.replace("P", "p").alias("device_name"),
             pl.concat_str(
-                pl.col('device_name').str.replace('Probe', f"{session}_"),
-                pl.col('original_cluster_id').cast(pl.Int64),
+                pl.col("device_name").str.replace("Probe", f"{session}_"),
+                pl.col("original_cluster_id").cast(pl.Int64),
                 separator="_",
-            ).alias('unit_id'),
-        ).select(
-            pl.exclude('unit_name', 'id'),
-        ).filter(
-            'default_qc',
+            ).alias("unit_id"),
+        )
+        .select(
+            pl.exclude("unit_name", "id"),
+        )
+        .filter(
+            "default_qc",
         )
     )
 
