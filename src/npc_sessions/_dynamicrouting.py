@@ -17,6 +17,7 @@ import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
 import numpy as np
+import numpy.typing as npt
 import polars as pl
 import pynwb
 import upath
@@ -28,13 +29,12 @@ import npc_sessions.utils as utils
 
 
 class DynamicRoutingSession:
-    nwb: pynwb.NWBFile
 
     _trials_interval_name: str = "DynamicRouting1"
 
     experimenter: str | None = None
     experiment_description: str = "Visual-auditory task-switching behavior session"
-    institution: str | None = "Neural Circuits & Behavior - MindScope - Allen Institute"
+    institution: str | None = "Neural Circuits & Behavior | MindScope program | Allen Institute"
     notes: str | None = None
     source_script: str | None = None
 
@@ -50,10 +50,12 @@ class DynamicRoutingSession:
             self.local_path = upath.UPath(session)
         for key, value in kwargs.items():
             setattr(self, key, value)
-
+    
+    @property
+    def nwb(self) -> pynwb.NWBFile:
         # if self._nwb_hdf5_path:
         #     self.nwb = pynwb.NWBHDF5IO(self._nwb_hdf5_path, "r").read()
-        self.nwb = pynwb.NWBFile(
+        return pynwb.NWBFile(
             session_id=self.id,
             session_description=self.experiment_description,
             identifier=self.identifier,
@@ -507,9 +509,9 @@ class DynamicRoutingSession:
         )
 
     @functools.cached_property
-    def frame_times(self):
+    def frame_times(self) -> dict[utils.StimPathOrDataset, Exception | npt.NDArray[np.float64]]:
         return utils.get_stim_frame_times(
-            *self.stim_data, self.sync, frame_time_type="display_time"
+            *self.stim_data, sync=self.sync_data, frame_time_type="display_time"
         )
 
     def get_epoch_record(
@@ -889,8 +891,7 @@ class DynamicRoutingSession:
 # x.sync_data.plot_diode_measured_sync_square_flips()
 
 if __name__ == "__main__":
-    x = DynamicRoutingSession("670248_2023-08-03")
-    x.date
+    x.acquisition['lick spout']
     x.nwb
     x.trials
     # y = DynamicRoutingSession('DRpilot_644866_20230209')
