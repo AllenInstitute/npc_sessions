@@ -31,6 +31,8 @@ import h5py
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
+import numpy as np
+import numpy.typing as npt
 import pynwb
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
@@ -385,19 +387,31 @@ class Session:
             for path in self.video_info_paths
         )
 
-    def get_epoch_record(self, stim_file_name: str) -> npc_lims.Epoch:
-        h5 = self.stim_data[stim_file_name]
-        tags = [stim_file_name.split("_")[0]]
+    @functools.cached_property
+    def frame_times(self) -> dict[utils.StimPathOrDataset, Exception | npt.NDArray[np.float64]]:
+        return utils.get_stim_frame_times(
+            *self.stim_data, sync=self.sync_data, frame_time_type="display_time"
+        )
+        
+    def get_epoch_record(
+        self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
+    ) -> npc_lims.Epoch:
+        h5 = self.stim_data[utils.from_pathlike(stim_file).stem]
+
+        tags = []
+        tags.append(utils.from_pathlike(stim_file).stem.split("_")[0])
         if any(label in h5 for label in ("optoRegions", "optoParams")):
             tags.append("opto")
         if any(h5["rewardFrames"][:]):
             tags.append("rewards")
-        hdf5_start = npc_session.extract_isoformat_datetime(h5["startTime"].asstr()[()])
-        assert hdf5_start is not None
-        start = datetime.datetime.fromisoformat(hdf5_start)
-        stop = start + datetime.timedelta(seconds=sum(h5["frameIntervals"][:]))
-        start_time = start.time().isoformat(timespec="seconds")
-        stop_time = stop.time().isoformat(timespec="seconds")
+
+        if sync is None:
+            start_time = 0.0
+            stop_time = utils.get_stim_duration(h5)
+        else:
+            start_time = self.frame_times[stim_file][0]
+            stop_time = self.frame_times[stim_file][-1]
+
         assert start_time != stop_time
         return npc_lims.Epoch(
             session_id=self.id,
