@@ -608,7 +608,7 @@ class DynamicRoutingSession:
             record_node / "settings.xml" for record_node in self.ephys_record_node_dirs
         )
 
-    @property
+    @functools.cached_property
     def ephys_settings_xml_path(self) -> upath.UPath:
         """Single settings.xml path, if applicable"""
         if not self.ephys_settings_xml_paths:
@@ -650,7 +650,7 @@ class DynamicRoutingSession:
             )
         )
 
-    @property
+    @functools.cached_property
     def devices(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
         devices = pynwb.core.LabelledDict(label='devices', key_attr='name')
         for module in self._devices:
@@ -680,7 +680,7 @@ class DynamicRoutingSession:
         implant: str = self.probe_insertions["implant"]
         return "2002" if "2002" in implant else implant
     
-    @property
+    @functools.cached_property
     def electrode_groups(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
         electrode_groups = pynwb.core.LabelledDict(label='electrode_groups', key_attr='name')
         for module in self._electrode_groups:
