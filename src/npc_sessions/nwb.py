@@ -32,6 +32,10 @@ def get_ecephys(nwb_file: pynwb.NWBFile) -> pynwb.ProcessingModule:
 class SupportsToNWB(Protocol):
     def to_nwb(self, nwb: pynwb.NWBFile) -> None:
         ...
+        
+class SupportsAsNWB(Protocol):
+    def as_nwb(self) -> pynwb.core.NWBContainer:
+        ...
 
 
 class NWBContainer(SupportsToNWB):
@@ -105,9 +109,9 @@ class Units(NWBContainerWithDF):
 
 
 class LickSpout(SupportsToNWB):
-    name = ("lick spout",)
+    name = "lick spout"
     description = (
-        "times at which the subject interacted with a water spout "
+        "times at which the subject interacted with a water spout - "
         "putatively licks, but may include other events such as grooming"
     )
 
@@ -115,14 +119,16 @@ class LickSpout(SupportsToNWB):
         self.timestamps = utils.get_sync_data(sync_path_or_dataset).get_rising_edges(
             "lick_sensor", units="seconds"
         )
-
+    def as_nwb(self) -> ndx_events.Events:
+        return ndx_events.Events(
+            timestamps=self.timestamps,
+            name=self.name,
+            description=self.description,
+        )
+        
     def to_nwb(self, nwb_file: pynwb.NWBFile) -> None:
         nwb_file.add_acquisition(
-            lick_nwb_data=ndx_events.Events(
-                timestamps=self.timestamps,
-                name=self.name,
-                description=self.description,
-            )
+            lick_nwb_data=self.as_nwb()
         )
 
 
@@ -145,8 +151,8 @@ class RunningSpeed(SupportsToNWB):
             *stim, sync=sync, filt=utils.lowpass_filter
         )
 
-    def to_nwb(self, nwb_file: pynwb.NWBFile) -> None:
-        filtered = pynwb.TimeSeries(
+    def as_nwb(self) -> pynwb.TimeSeries:
+        return pynwb.TimeSeries(
             name=self.name,
             description=self.description,
             data=self.data,
@@ -154,7 +160,9 @@ class RunningSpeed(SupportsToNWB):
             unit=self.unit,
             conversion=self.conversion,
         )
-        get_behavior(nwb_file).add(filtered)
+        
+    def to_nwb(self, nwb_file: pynwb.NWBFile) -> None:
+        get_behavior(nwb_file).add(self.as_nwb())
 
 
 class Intervals(NWBContainerWithDF):
