@@ -699,7 +699,7 @@ class DynamicRoutingSession:
             else {}
         ) #TODO upload probe insertion records for all sessions
         return tuple(pynwb.ecephys.ElectrodeGroup(
-                name=f"probe{probe_letter}",  # type: ignore[arg-type]
+                name=f"probe{probe_letter}",
                 device=self.devices[str(serial_number)],
                 description=probe_type,
                 location=locations.get(probe_letter, probe_letter),
