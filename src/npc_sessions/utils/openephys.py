@@ -114,7 +114,13 @@ def get_ephys_timing_on_pxi(
                 continue
             events = recording_dir / "events" / device
             ttl = next(events.glob("TTL*"))
-            first_sample_on_ephys_clock = device_to_sync_messages_data[device]["start"]
+            
+            first_sample_from_continuous_sample_numbers = np.load(io.BytesIO((continuous / "sample_numbers.npy").read_bytes()))[0].item()
+            first_sample_from_sync_messages = device_to_sync_messages_data[device]["start"]
+            if first_sample_from_continuous_sample_numbers != first_sample_from_sync_messages:
+                logger.debug(f"{first_sample_from_sync_messages =} != {first_sample_from_continuous_sample_numbers =}. This may be due to Record Nodes being out-of-sync (green indicator in GUI). Using value from sample_numbers.npy")
+            first_sample_on_ephys_clock = first_sample_from_continuous_sample_numbers
+            
             sampling_rate = device_to_sync_messages_data[device]["rate"]
             ttl_sample_numbers = (
                 np.load(io.BytesIO((ttl / "sample_numbers.npy").read_bytes()))
