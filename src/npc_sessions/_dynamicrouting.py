@@ -534,8 +534,8 @@ class DynamicRoutingSession:
         assert start_time != stop_time
         return npc_lims.Epoch(
             session_id=self.id,
-            start_time=start_time,  # type: ignore[arg-type]
-            stop_time=stop_time,  # type: ignore[arg-type]
+            start_time=start_time,
+            stop_time=stop_time,
             tags=tags,
         )  # TODO update npc_lims _time types -> floats
 
