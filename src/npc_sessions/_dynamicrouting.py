@@ -661,7 +661,7 @@ class DynamicRoutingSession:
         )
 
     @functools.cached_property
-    def _devices(self) -> tuple[pynwb.device.Device, ...]:
+    def _probes(self) -> tuple[pynwb.device.Device, ...]:
         return tuple(
             pynwb.device.Device(
                 name=str(serial_number),
@@ -677,7 +677,7 @@ class DynamicRoutingSession:
     @functools.cached_property
     def devices(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
         devices = pynwb.core.LabelledDict(label="devices", key_attr="name")
-        for module in self._devices:
+        for module in itertools.chain(self._probes): # add other devices as we need them
             devices[module.name] = module
         return devices
 
