@@ -11,7 +11,6 @@ S3_ELECTRODE_PATH = upath.UPath(
     "s3://aind-scratch-data/arjun.sridhar/tissuecyte_cloud_processed"
 )
 
-
 @functools.cache
 def get_electrode_files_from_s3(
     session: str | npc_session.SessionRecord,
@@ -21,19 +20,7 @@ def get_electrode_files_from_s3(
     >>> assert len(electrode_files) > 0
     """
     session = npc_session.SessionRecord(session)
-    all_subject_sessions = npc_lims.get_subject_data_assets(session.subject)
-    raw_subject_assets = sorted(
-        asset["name"]
-        for asset in all_subject_sessions
-        if npc_lims.is_raw_data_asset(asset)
-    )
-    # TODO: fix getting right day
-    day = tuple(
-        raw_subject_assets.index(asset) + 1
-        for asset in raw_subject_assets
-        if f"{session.subject}_{session.date}" in asset
-    )[0]
-
+    day = npc_lims.get_day(session)
     subject_electrode_network_path = S3_ELECTRODE_PATH / str(session.subject.id)
 
     if not subject_electrode_network_path.exists():
