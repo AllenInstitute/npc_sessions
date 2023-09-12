@@ -467,6 +467,22 @@ def generate_opto_waveforms(
 
     return tuple(waveforms)
 
+def find_envelope(s,t,dmin=1,dmax=1):
+    # locals min      
+    lmin = (np.diff(np.sign(np.diff(s))) > 0).nonzero()[0] + 1 
+    # locals max
+    lmax = (np.diff(np.sign(np.diff(s))) < 0).nonzero()[0] + 1 
+
+    # global min of dmin-chunks of locals min 
+    lmin = lmin[[i+np.argmin(s[lmin[i:i+dmin]]) for i in range(0,len(lmin),dmin)]]
+    # global max of dmax-chunks of locals max 
+    lmax = lmax[[i+np.argmax(s[lmax[i:i+dmax]]) for i in range(0,len(lmax),dmax)]]
+    
+    #upsample envelope to original sampling rate
+    s_min = np.interp(t,t[lmin],s[lmin])
+    s_max = np.interp(t,t[lmax],s[lmax])
+
+    return s_min,s_max
 
 @numba.njit(parallel=True)
 def _xcorr(v, w, t) -> tuple[float, float]:
@@ -479,6 +495,7 @@ def xcorr(
     nidaq_timing: utils.EphysTimingInfoOnSync,
     nidaq_channel: int,
     presentations: Iterable[StimPresentation | None],
+    use_envelope: bool = False,
     padding_sec: float = 0.15,
     **kwargs,
 ) -> tuple[StimRecording | None, ...]:
@@ -499,6 +516,7 @@ def xcorr(
         offset_sample_on_nidaq = round(
             (trigger_time_on_nidaq + presentation.duration) * nidaq_timing.sampling_rate
         )
+        
         nidaq_times = (
             np.arange(
                 (offset_sample_on_nidaq + padding_samples)
@@ -513,6 +531,7 @@ def xcorr(
             + padding_samples,
             nidaq_channel,
         ]
+
         interp_waveform_times = np.arange(
             0,
             presentation.duration,
@@ -524,7 +543,34 @@ def xcorr(
             presentation.waveform.samples,
         )
 
-        lag, xcorr = _xcorr(nidaq_samples, interp_waveform_samples, nidaq_times)
+        if use_envelope==False:
+
+            lag, xcorr = _xcorr(nidaq_samples, interp_waveform_samples, nidaq_times)
+
+        elif use_envelope==True:
+
+            _,nidaq_samples_max=find_envelope(nidaq_samples,nidaq_times)
+            _,interp_waveform_samples_max=find_envelope(interp_waveform_samples,interp_waveform_times)
+
+            lag, xcorr = _xcorr(nidaq_samples_max, interp_waveform_samples_max, nidaq_times)
+            
+        #TODO: upsample option
+        # interp_nidaq_times = np.arange(
+        #     nidaq_times[0],
+        #     nidaq_times[-1],
+        #     1 / presentation.waveform.sampling_rate,
+        # )
+        # interp_nidaq_samples = np.interp(
+        #     interp_nidaq_times,
+        #     nidaq_times,
+        #     nidaq_samples,
+        # )
+        
+        # _,interp_nidaq_samples_max=find_envelope(interp_nidaq_samples,interp_nidaq_times)
+        # _,waveform_samples_max=find_envelope(presentation.waveform.samples,presentation.waveform.timestamps)
+
+        # lag, xcorr = _xcorr(interp_nidaq_samples_max, waveform_samples_max, interp_nidaq_times)
+
         recordings[idx] = FlexStimRecording(
             presentation=presentation,
             latency=lag,
@@ -558,10 +604,12 @@ def get_stim_latencies_from_nidaq_recording(
             utils.EphysTimingInfoOnSync,
             int,
             Iterable[StimPresentation | None],
+            bool,
         ],
         tuple[StimRecording | None, ...],
     ] = xcorr,
     correlation_method_kwargs: dict[str, Any] | None = None,
+    use_envelope: bool = False,
 ) -> tuple[StimRecording | None, ...]:
     """
     >>> stim = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5'
@@ -628,6 +676,7 @@ def get_stim_latencies_from_nidaq_recording(
         nidaq_timing,
         nidaq_channel,
         presentations,
+        use_envelope,
         **(correlation_method_kwargs or {}),
     )
 
