@@ -409,8 +409,9 @@ class Session:
             start_time = 0.0
             stop_time = utils.get_stim_duration(h5)
         else:
-            start_time = self.frame_times[stim_file][0]
-            stop_time = self.frame_times[stim_file][-1]
+            frame_times = utils.assert_stim_times(self.frame_times[stim_file])
+            start_time = frame_times[0]
+            stop_time = frame_times[-1]
 
         assert start_time != stop_time
         return npc_lims.Epoch(
