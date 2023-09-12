@@ -517,10 +517,10 @@ class DynamicRoutingSession:
         assert start_time != stop_time
         return npc_lims.Epoch(
             session_id=self.id,
-            start_time=start_time,
-            stop_time=stop_time,
+            start_time=start_time, # type: ignore[arg-type]
+            stop_time=stop_time, # type: ignore[arg-type]
             tags=tags,
-        )
+        ) # TODO update npc_lims _time types -> floats
 
     @functools.cached_property
     def epochs(self) -> pynwb.file.TimeIntervals:
