@@ -285,7 +285,7 @@ class DynamicRoutingSession:
         return json.loads(file.read_text())
 
     @functools.cached_property
-    def subject(self) -> nwb.SupportsToNWB:
+    def subject(self) -> pynwb.file.Subject:
         try:
             metadata = self._subject_aind_metadata
         except FileNotFoundError:
@@ -881,11 +881,11 @@ class DynamicRoutingSession:
         return self._intervals[stim_name.stem]
 
     @functools.cached_property
-    def _licks(self):
+    def _licks(self) -> nwb.SupportsAsNWB:
         return nwb.LickSpout(self.sync_data)
 
     @functools.cached_property
-    def _running(self):
+    def _running(self) -> nwb.SupportsAsNWB:
         return nwb.RunningSpeed(
             *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
         )
