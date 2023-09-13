@@ -62,6 +62,7 @@ class SettingsXmlInfo:
             if field.name not in ("path", "start_time")
         )
 
+
 def get_settings_xml_data(path: utils.PathLike) -> ET.ElementTree:
     """Info from a settings.xml file from an Open Ephys recording."""
     return ET.parse(io.BytesIO(utils.from_pathlike(path).read_bytes()))

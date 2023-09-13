@@ -293,20 +293,20 @@ class DynamicRoutingSession:
         # avoid iterating over values and checking for type, as this will
         # create all intervals in lazydict if they don't exist
         trials = self._all_trials[stim_name.stem]
-        assert isinstance(trials, TaskControl.DynamicRouting1) # for mypy
+        assert isinstance(trials, TaskControl.DynamicRouting1)  # for mypy
         return trials
 
     @functools.cached_property
     def intervals(self) -> pynwb.core.LabelledDict:
         """AKA trials tables other than the main behavior task.
-        
+
         The property as it appears on an NWBFile.
         """
         intervals = pynwb.core.LabelledDict(
             label="intervals",
             key_attr="name",
         )
-        for module in self._intervals: 
+        for module in self._intervals:
             intervals[module.name] = module
         return intervals
 
@@ -582,7 +582,7 @@ class DynamicRoutingSession:
         with contextlib.suppress(FileNotFoundError, ValueError):
             npc_lims.get_units_codeoean_kilosort_path_from_s3(self.id)
         return False
-    
+
     @functools.cached_property
     def is_annotated(self) -> bool:
         """CCF annotation data accessible"""
@@ -860,12 +860,14 @@ class DynamicRoutingSession:
     @functools.cached_property
     def frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
         times = utils.get_stim_frame_times(
-            *self.stim_data.values(), sync=self.sync_data, frame_time_type="display_time"
+            *self.stim_data.values(),
+            sync=self.sync_data,
+            frame_time_type="display_time",
         )
         for k in times:
             utils.assert_stim_times(times[k])
         assert not any(isinstance(v, Exception) for v in times.values())
-        return dict(zip(self.stim_data.keys(), times.values())) # type: ignore [arg-type]
+        return dict(zip(self.stim_data.keys(), times.values()))  # type: ignore [arg-type]
 
     def get_epoch_record(
         self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
@@ -878,8 +880,8 @@ class DynamicRoutingSession:
             tags.append("opto")
         if any(h5["rewardFrames"][:]):
             tags.append("rewards")
-        
-        if sync: 
+
+        if sync:
             sync = utils.get_sync_data(sync)
         elif self.is_sync:
             sync = self.sync_data
