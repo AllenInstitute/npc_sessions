@@ -122,7 +122,11 @@ class DynamicRoutingSession:
         start_time = (
             start_time.decode() if isinstance(start_time, bytes) else start_time
         )
-        return npc_session.DatetimeRecord(f"{self.date} {start_time}").dt
+        return npc_session.DatetimeRecord(f"{self.id.date} {start_time}").dt
+    
+    @property
+    def _session_start_time(self) -> npc_session.DatetimeRecord:
+        return npc_session.DatetimeRecord(self.session_start_time.isoformat())
     
     @property
     def identifier(self) -> str:
@@ -577,7 +581,7 @@ class DynamicRoutingSession:
         return npc_lims.Session(
             session_id=self.id,
             subject_id=self.id.subject,
-            session_start_time=npc_session.DateRecord(self.session_start_time),
+            session_start_time=self._session_start_time,
             stimulus_notes=self.task_version,
             experimenter=self.experimenter,
             experiment_description=self.experiment_description,
