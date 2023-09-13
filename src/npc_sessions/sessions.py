@@ -95,6 +95,7 @@ class DynamicRoutingSession:
             keywords=self.keywords,
             epochs=self.epochs,
             epoch_tags=self.epoch_tags,
+            stimulus_template=None, # TODO pass tuple of stimulus templates
             trials=self.trials,
             intervals=self.intervals,
             acquisition=self._acquisition,
