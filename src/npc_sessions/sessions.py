@@ -105,7 +105,7 @@ class DynamicRoutingSession:
             devices=self._devices,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
-            units=self.units if self.is_ephys else None,
+            units=self.units if self.is_sorted else None,
         )
 
     def __getattribute__(self, __name: str) -> Any:
@@ -144,6 +144,8 @@ class DynamicRoutingSession:
                 self.keywords.append("sync")
             if self.is_ephys:
                 self.keywords.append("ephys")
+            if not self.is_sorted:
+                self.keywords.append("no units")
             if self.is_annotated:
                 self.keywords.append("CCF")
             if self.is_opto:
@@ -431,6 +433,8 @@ class DynamicRoutingSession:
         """The group of channels on each inserted probe.
 
         The property as it appears on an NWBFile"""
+        if not self.is_ephys:
+            raise AttributeError(f"{self.id} is not an ephys session")
         electrode_groups = pynwb.core.LabelledDict(
             label="electrode_groups", key_attr="name"
         )
@@ -441,6 +445,8 @@ class DynamicRoutingSession:
     @functools.cached_property
     def _electrode_groups(self) -> tuple[pynwb.ecephys.ElectrodeGroup, ...]:
         """The version passed to NWBFile.__init__"""
+        if not self.is_ephys:
+            raise AttributeError(f"{self.id} is not an ephys session")
         locations = (
             {
                 v["letter"]: f"{self.implant} {v['hole']}"
@@ -467,6 +473,8 @@ class DynamicRoutingSession:
     @functools.cached_property
     def electrodes(self) -> pynwb.core.DynamicTable:
         """Individual channels on an inserted probe, including location, CCF coords."""
+        if not self.is_ephys:
+            raise AttributeError(f"{self.id} is not an ephys session")
         electrodes = pynwb.file.ElectrodeTable()
         for column in (
             "rel_x",
@@ -497,6 +505,8 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def _units(self) -> pl.DataFrame:
+        if not self.is_sorted:
+            raise AttributeError(f"{self.id} hasn't been spike-sorted")
         return utils.get_units_electrodes_spike_times(self.id)
 
     @functools.cached_property
@@ -558,6 +568,14 @@ class DynamicRoutingSession:
                 return True
         return False
 
+    @functools.cached_property
+    def is_sorted(self) -> bool:
+        if not self.is_ephys:
+            return False
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            npc_lims.get_units_codeoean_kilosort_path_from_s3(self.id)
+        return False
+    
     @functools.cached_property
     def is_annotated(self) -> bool:
         """CCF annotation data accessible"""
