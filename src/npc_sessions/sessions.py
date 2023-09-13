@@ -80,6 +80,9 @@ class DynamicRoutingSession:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.id!r})"
+
     @property
     def nwb(self) -> pynwb.NWBFile:
         # if self._nwb_hdf5_path:
