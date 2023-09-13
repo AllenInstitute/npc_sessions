@@ -98,54 +98,80 @@ def get_units_electrodes_spike_times(session: str, *args, **kwargs) -> pl.DataFr
         )
     )
 
+
 @functools.cache
 def get_mean_waveforms(session: str) -> npt.NDArray[np.float64]:
-    mean_waveforms_path = npc_lims.get_mean_waveform_codeocean_kilosort_path_from_s3(session)
+    mean_waveforms_path = npc_lims.get_mean_waveform_codeocean_kilosort_path_from_s3(
+        session
+    )
     with io.BytesIO(mean_waveforms_path.read_bytes()) as f:
         mean_waveforms = np.load(f, allow_pickle=True)
-    
+
     return mean_waveforms
+
 
 @functools.cache
 def get_sd_waveforms(session: str) -> npt.NDArray[np.float64]:
-    sd_waveforms_path = npc_lims.get_sd_waveform_codeocean_kilosort_path_from_s3(session)
+    sd_waveforms_path = npc_lims.get_sd_waveform_codeocean_kilosort_path_from_s3(
+        session
+    )
     with io.BytesIO(sd_waveforms_path.read_bytes()) as f:
         sd_waveforms = np.load(f, allow_pickle=True)
-    
+
     return sd_waveforms
 
-def align_device_kilosort_spike_times(session: str, device_name: str, 
-                                      device_timing_on_sync: npc_sessions.EphysTimingInfoOnSync) -> npt.NDArray[np.float64]:
-    sorting_cached_file = npc_lims.get_spike_sorting_device_path_from_s3(session, device_name)
+
+def align_device_kilosort_spike_times(
+    session: str,
+    device_name: str,
+    device_timing_on_sync: npc_sessions.EphysTimingInfoOnSync,
+) -> npt.NDArray[np.float64]:
+    sorting_cached_file = npc_lims.get_spike_sorting_device_path_from_s3(
+        session, device_name
+    )
     with io.BytesIO(sorting_cached_file.read_bytes()) as f:
         sorting_cached = np.load(f, allow_pickle=True)
-        spike_times_unaligned = sorting_cached['spike_indexes_seg0']
-    
-    #directly getting spike times from sorted output, don't need sample start it seems
-    #spike_times_unaligned = spike_times_unaligned - device_timing_on_sync.device.start_sample
-    return (spike_times_unaligned / device_timing_on_sync.sampling_rate) + device_timing_on_sync.start_time
+        spike_times_unaligned = sorting_cached["spike_indexes_seg0"]
 
-def get_aligned_device_kilosort_spike_times(session: str) -> dict[str, npt.NDArray[np.float64]]:
+    # directly getting spike times from sorted output, don't need sample start it seems
+    # spike_times_unaligned = spike_times_unaligned - device_timing_on_sync.device.start_sample
+    return (
+        spike_times_unaligned / device_timing_on_sync.sampling_rate
+    ) + device_timing_on_sync.start_time
+
+
+def get_aligned_device_kilosort_spike_times(
+    session: str,
+) -> dict[str, npt.NDArray[np.float64]]:
     """
     Returns the algined spike times for each device, prior to making the units table
     """
     device_spike_times = {}
-    recording_dirs_experiment = npc_lims.get_recording_dirs_experiment_path_from_s3(session)
+    recording_dirs_experiment = npc_lims.get_recording_dirs_experiment_path_from_s3(
+        session
+    )
     sync_path = npc_lims.get_h5_sync_from_s3(session)
     settings_xml_path = npc_lims.get_settings_xml_path_from_s3(session)
 
     device_names = npc_sessions.get_settings_xml_info(settings_xml_path).probe_letters
-    device_names_probe = tuple(f'Probe{name}' for name in device_names)
+    device_names_probe = tuple(f"Probe{name}" for name in device_names)
 
     devices = npc_sessions.get_ephys_timing_on_pxi(recording_dirs_experiment)
-    devices_timing_on_sync = npc_sessions.get_ephys_timing_on_sync(sync_path, devices=devices)
+    devices_timing_on_sync = npc_sessions.get_ephys_timing_on_sync(
+        sync_path, devices=devices
+    )
 
     for device_name in device_names_probe:
-        device_timing_on_sync = next(timing for timing in devices_timing_on_sync if device_name in timing.name) 
-        # TODO: Save to s3?   
-        device_spike_times[device_name] = align_device_kilosort_spike_times(session, device_name, device_timing_on_sync)
-    
+        device_timing_on_sync = next(
+            timing for timing in devices_timing_on_sync if device_name in timing.name
+        )
+        # TODO: Save to s3?
+        device_spike_times[device_name] = align_device_kilosort_spike_times(
+            session, device_name, device_timing_on_sync
+        )
+
     return device_spike_times
+
 
 if __name__ == "__main__":
     import doctest
