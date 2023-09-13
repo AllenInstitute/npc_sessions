@@ -21,18 +21,48 @@ conda activate npc_sessions
 pip install npc_sessions
 ```
 
-Get some minimal info on all the tracked sessions available to work with:
 ```python
->>> from npc_sessions import tracked as tracked_sessions;
+>>> from npc_sessions import sessions;
 
-# each record in the sequence has info about one session:
->>> tracked_sessions[0]._fields
-('session', 'subject', 'date', 'idx', 'project', 'is_ephys', 'is_sync', 'allen_path')
->>> tracked_sessions[0].is_ephys
+# each object is used to get metadata and paths for a session:
+>>> sessions[0] 
+DynamicRoutingSession('626791_2022-08-15')
+>>> sessions[0].is_ephys
 True
->>> all(s.date.year >= 2022 for s in tracked_sessions)
+>>> all(s.date.year >= 2022 for s in sessions)
 True
+>>> sessions[0].stim_paths[0].stem
+'DynamicRouting1_626791_20220815_112336'
 
+# data is processed on-demand to generate individual pynwb modules:
+>>> sessions[0].subject # doctest: +SKIP
+subject pynwb.file.Subject at 0x...
+Fields:
+  age: P145D
+  age__reference: birth
+  date_of_birth: 2022-03-22 20:22:03-07:00
+  genotype: wt/wt
+  sex: M
+  species: Mus musculus
+  strain: C57BL6J(NP)
+  subject_id: 626791
+
+# a full NWBFile instance can also be generated with all currently-available data:
+>>> sessions[0].nwb # doctest: +SKIP
+root pynwb.file.NWBFile at 0x...
+Fields:
+  acquisition: {
+    lick spout <class 'ndx_events.events.Events'>
+  }
+  devices: {
+    18005102491 <class 'pynwb.device.Device'>,
+    18005114452 <class 'pynwb.device.Device'>,
+    18005123131 <class 'pynwb.device.Device'>,
+    18194810652 <class 'pynwb.device.Device'>,
+    19192719021 <class 'pynwb.device.Device'>,
+    19192719061 <class 'pynwb.device.Device'>
+  }
+  ...
 ```
 
 ## to develop with conda
