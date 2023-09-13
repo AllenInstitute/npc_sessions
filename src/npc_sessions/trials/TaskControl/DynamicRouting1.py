@@ -41,7 +41,7 @@ class DynamicRouting1(TaskControl):
     ...    nwb_file.add_trial(**trial)
 
     >>> trials = DynamicRouting1('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
-    >>> assert trials._df
+    >>> assert not trials._df.is_empty()
     """
 
     def __init__(
