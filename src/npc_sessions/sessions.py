@@ -865,7 +865,7 @@ class DynamicRoutingSession:
         for k in times:
             utils.assert_stim_times(times[k])
         assert not any(isinstance(v, Exception) for v in times.values())
-        return dict(zip(self.stim_data.keys(), times.values()))
+        return dict(zip(self.stim_data.keys(), times.values())) # type: ignore [arg-type]
 
     def get_epoch_record(
         self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
