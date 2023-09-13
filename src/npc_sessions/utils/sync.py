@@ -723,6 +723,32 @@ class SyncDataset:
         return datetime.datetime.fromisoformat(self.meta_data["start_time"])
 
     @functools.cached_property
+    def stim_running_edges(self) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        stim_running_rising_edges = self.get_rising_edges(
+            "stim_running", units="seconds"
+        )
+        stim_running_falling_edges = self.get_falling_edges(
+            "stim_running", units="seconds"
+        )
+
+        if any(stim_running_rising_edges) and any(stim_running_falling_edges):
+            if stim_running_rising_edges[0] > stim_running_falling_edges[0]:
+                stim_running_falling_edges[1:]
+        return stim_running_rising_edges, stim_running_falling_edges
+    
+    def filter_on_stim_running(self, data: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
+        """Filter data to only include times when stim_running is high. 
+        
+        Data must be in seconds relative to first sample."""
+        if self.stim_running_edges[0].size == 0:
+            return data
+        mask = [False] * len(data)
+        for on, off in zip(*self.stim_running_edges):
+            mask |= (data > on) & (data < off)
+        
+        return data[mask]
+    
+    @functools.cached_property
     def vsync_times_in_blocks(self) -> tuple[npt.NDArray[np.floating], ...]:
         """Blocks of vsync falling edge times, in seconds relative to first
         sample: one block per stimulus.
