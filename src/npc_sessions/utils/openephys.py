@@ -88,21 +88,32 @@ class EphysTimingInfoOnSync(NamedTuple):
     start_time: float
     """First sample time (sec) relative to the start of the sync clock"""
 
+
 def read_array_range_from_npy(path: utils.PathLike, _range: int | slice) -> npt.NDArray:
     """Read specific range without downloading entire array. For 1-D array only, currently."""
     if not isinstance(_range, slice):
-        _range = slice(_range, _range+1)
+        _range = slice(_range, _range + 1)
     path = utils.from_pathlike(path)
-    ver_major = int.from_bytes(path.fs.read_bytes(path, start=6, end=7), 'little')
+    ver_major = int.from_bytes(path.fs.read_bytes(path, start=6, end=7), "little")
     header_len_stop = 10 if ver_major == 1 else 12
-    header_len = int.from_bytes(path.fs.read_bytes(path, start=8, end=header_len_stop), 'little')
-    array_start = header_len_stop + header_len 
+    header_len = int.from_bytes(
+        path.fs.read_bytes(path, start=8, end=header_len_stop), "little"
+    )
+    array_start = header_len_stop + header_len
     header_bytes = path.fs.read_bytes(path, start=header_len_stop, end=array_start)
-    header = eval(header_bytes.decode('utf-8').strip('\n').strip())
-    assert len(header['shape']) == 1, "Currently supporting 1-D array only"
-    dtype = header['descr']
+    header = eval(header_bytes.decode("utf-8").strip("\n").strip())
+    assert len(header["shape"]) == 1, "Currently supporting 1-D array only"
+    dtype = header["descr"]
     num_bytes_per_value = np.dtype(dtype).itemsize
-    return np.frombuffer(path.fs.read_bytes(path, start=array_start + _range.start*num_bytes_per_value, end=array_start + _range.stop*num_bytes_per_value), dtype=dtype)
+    return np.frombuffer(
+        path.fs.read_bytes(
+            path,
+            start=array_start + _range.start * num_bytes_per_value,
+            end=array_start + _range.stop * num_bytes_per_value,
+        ),
+        dtype=dtype,
+    )
+
 
 def get_ephys_timing_on_pxi(
     recording_dirs: Iterable[utils.PathLike],
@@ -129,13 +140,22 @@ def get_ephys_timing_on_pxi(
                 continue
             events = recording_dir / "events" / device
             ttl = next(events.glob("TTL*"))
-            
-            first_sample_from_continuous_sample_numbers = read_array_range_from_npy(continuous / "sample_numbers.npy", 0).item()
-            first_sample_from_sync_messages = device_to_sync_messages_data[device]["start"]
-            if first_sample_from_continuous_sample_numbers != first_sample_from_sync_messages:
-                logger.debug(f"{first_sample_from_sync_messages =} != {first_sample_from_continuous_sample_numbers =}. This may be due to Record Nodes being out-of-sync (green indicator in GUI). Using value from sample_numbers.npy")
+
+            first_sample_from_continuous_sample_numbers = read_array_range_from_npy(
+                continuous / "sample_numbers.npy", 0
+            ).item()
+            first_sample_from_sync_messages = device_to_sync_messages_data[device][
+                "start"
+            ]
+            if (
+                first_sample_from_continuous_sample_numbers
+                != first_sample_from_sync_messages
+            ):
+                logger.debug(
+                    f"{first_sample_from_sync_messages =} != {first_sample_from_continuous_sample_numbers =}. This may be due to Record Nodes being out-of-sync (green indicator in GUI). Using value from sample_numbers.npy"
+                )
             first_sample_on_ephys_clock = first_sample_from_continuous_sample_numbers
-            
+
             sampling_rate = device_to_sync_messages_data[device]["rate"]
             ttl_sample_numbers = (
                 np.load(io.BytesIO((ttl / "sample_numbers.npy").read_bytes()))
@@ -232,12 +252,14 @@ def get_pxi_nidaq_data(
                 f"Could not find device metadata for {device.name}: looked for `structure.oebin` files in {recording_dirs}"
             )
         num_channels: int = device_metadata["num_channels"]
-        
-        if not (protocol := device.continuous.protocol) or protocol == 'file':
+
+        if not (protocol := device.continuous.protocol) or protocol == "file":
             # local file we can memory-map
             dat = np.load(device.continuous / "continuous.dat", mmap_mode="r")
         else:
-            logger.warning(f'Reading entirety of uncompressed OpenEphys NI-DAQ data from {protocol}. If you only need part of this data, consider using `read_array_range_from_npy` with the path instead.')
+            logger.warning(
+                f"Reading entirety of uncompressed OpenEphys NI-DAQ data from {protocol}. If you only need part of this data, consider using `read_array_range_from_npy` with the path instead."
+            )
             dat = np.frombuffer(
                 (device.continuous / "continuous.dat").read_bytes(), dtype=np.int16
             )

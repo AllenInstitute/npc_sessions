@@ -42,9 +42,12 @@ def get_units_electrodes(
     return units
 
 
-def bin_spike_times(spike_times: npt.NDArray[np.float64], bin_time:int) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    spike_times = np.concatenate(spike_times, axis=0) # flatten array
+def bin_spike_times(
+    spike_times: npt.NDArray[np.float64], bin_time: int
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    spike_times = np.concatenate(spike_times, axis=0)  # flatten array
     return np.histogram(spike_times, bins=np.arange(0, np.max(spike_times), bin_time))
+
 
 @functools.cache
 def get_unit_spike_times_dict(

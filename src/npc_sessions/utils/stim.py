@@ -467,22 +467,28 @@ def generate_opto_waveforms(
 
     return tuple(waveforms)
 
-def find_envelope(s,t,dmin=1,dmax=1):
-    # locals min      
-    lmin = (np.diff(np.sign(np.diff(s))) > 0).nonzero()[0] + 1 
+
+def find_envelope(s, t, dmin=1, dmax=1):
+    # locals min
+    lmin = (np.diff(np.sign(np.diff(s))) > 0).nonzero()[0] + 1
     # locals max
-    lmax = (np.diff(np.sign(np.diff(s))) < 0).nonzero()[0] + 1 
+    lmax = (np.diff(np.sign(np.diff(s))) < 0).nonzero()[0] + 1
 
-    # global min of dmin-chunks of locals min 
-    lmin = lmin[[i+np.argmin(s[lmin[i:i+dmin]]) for i in range(0,len(lmin),dmin)]]
-    # global max of dmax-chunks of locals max 
-    lmax = lmax[[i+np.argmax(s[lmax[i:i+dmax]]) for i in range(0,len(lmax),dmax)]]
-    
-    #upsample envelope to original sampling rate
-    s_min = np.interp(t,t[lmin],s[lmin])
-    s_max = np.interp(t,t[lmax],s[lmax])
+    # global min of dmin-chunks of locals min
+    lmin = lmin[
+        [i + np.argmin(s[lmin[i : i + dmin]]) for i in range(0, len(lmin), dmin)]
+    ]
+    # global max of dmax-chunks of locals max
+    lmax = lmax[
+        [i + np.argmax(s[lmax[i : i + dmax]]) for i in range(0, len(lmax), dmax)]
+    ]
 
-    return s_min,s_max
+    # upsample envelope to original sampling rate
+    s_min = np.interp(t, t[lmin], s[lmin])
+    s_max = np.interp(t, t[lmax], s[lmax])
+
+    return s_min, s_max
+
 
 @numba.njit(parallel=True)
 def _xcorr(v, w, t) -> tuple[float, float]:
@@ -516,7 +522,7 @@ def xcorr(
         offset_sample_on_nidaq = round(
             (trigger_time_on_nidaq + presentation.duration) * nidaq_timing.sampling_rate
         )
-        
+
         nidaq_times = (
             np.arange(
                 (offset_sample_on_nidaq + padding_samples)
@@ -543,18 +549,20 @@ def xcorr(
             presentation.waveform.samples,
         )
 
-        if use_envelope==False:
-
+        if use_envelope is False:
             lag, xcorr = _xcorr(nidaq_samples, interp_waveform_samples, nidaq_times)
 
-        elif use_envelope==True:
+        elif use_envelope is True:
+            _, nidaq_samples_max = find_envelope(nidaq_samples, nidaq_times)
+            _, interp_waveform_samples_max = find_envelope(
+                interp_waveform_samples, interp_waveform_times
+            )
 
-            _,nidaq_samples_max=find_envelope(nidaq_samples,nidaq_times)
-            _,interp_waveform_samples_max=find_envelope(interp_waveform_samples,interp_waveform_times)
+            lag, xcorr = _xcorr(
+                nidaq_samples_max, interp_waveform_samples_max, nidaq_times
+            )
 
-            lag, xcorr = _xcorr(nidaq_samples_max, interp_waveform_samples_max, nidaq_times)
-            
-        #TODO: upsample option
+        # TODO: upsample option
         # interp_nidaq_times = np.arange(
         #     nidaq_times[0],
         #     nidaq_times[-1],
@@ -565,7 +573,7 @@ def xcorr(
         #     nidaq_times,
         #     nidaq_samples,
         # )
-        
+
         # _,interp_nidaq_samples_max=find_envelope(interp_nidaq_samples,interp_nidaq_times)
         # _,waveform_samples_max=find_envelope(presentation.waveform.samples,presentation.waveform.timestamps)
 

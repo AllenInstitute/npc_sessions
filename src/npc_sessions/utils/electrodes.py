@@ -11,6 +11,7 @@ S3_ELECTRODE_PATH = upath.UPath(
     "s3://aind-scratch-data/arjun.sridhar/tissuecyte_cloud_processed"
 )
 
+
 @functools.cache
 def get_electrode_files_from_s3(
     session: str | npc_session.SessionRecord,

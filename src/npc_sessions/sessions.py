@@ -1,6 +1,4 @@
-
 from __future__ import annotations
-from ast import mod
 
 import contextlib
 import datetime
@@ -9,7 +7,6 @@ import io
 import itertools
 import json
 import logging
-import pathlib
 import re
 import uuid
 import warnings
@@ -33,12 +30,13 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
+
 class DynamicRoutingSession:
     """Class for fetching & processing raw data for given a session id, and
     converting to NWB modules or an NWBFile instance
-    
+
     >>> s = DynamicRoutingSession('670248_2023-08-03')
-    
+
     # paths/raw data processing:
     >>> 'DynamicRouting1' in s.stim_tags
     True
@@ -48,7 +46,7 @@ class DynamicRoutingSession:
     S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
     >>> s.ephys_timing_data[0].name, s.ephys_timing_data[0].sampling_rate, s.ephys_timing_data[0].start_time
     ('Neuropix-PXI-100.ProbeA-AP', 30000.070518634246, 20.080209634424037)
-    
+
     # access nwb modules individually before compiling a whole nwb file:
     >>> s.session_start_time
     datetime.datetime(2023, 8, 3, 12, 4, 15, 854423)
@@ -59,14 +57,15 @@ class DynamicRoutingSession:
     >>> 'DynamicRouting1' in s.epoch_tags
     True
     """
-    
+
     # pass any of these read/write properties to init to set
     _trials_interval_name: str = "DynamicRouting1"
 
-
     experimenter: str | None = None
     experiment_description: str = "Visual-auditory task-switching behavior session"
-    institution: str | None = "Neural Circuits & Behavior | MindScope program | Allen Institute"
+    institution: str | None = (
+        "Neural Circuits & Behavior | MindScope program | Allen Institute"
+    )
     notes: str | None = None
     source_script: str | None = None
 
@@ -74,11 +73,13 @@ class DynamicRoutingSession:
 
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
-        if (path := utils.from_pathlike(session_or_path)).exists() and path.protocol in ('', 'file'):
+        if (
+            path := utils.from_pathlike(session_or_path)
+        ).exists() and path.protocol in ("", "file"):
             self.local_path = path
         for key, value in kwargs.items():
             setattr(self, key, value)
-    
+
     @property
     def nwb(self) -> pynwb.NWBFile:
         # if self._nwb_hdf5_path:
@@ -95,7 +96,7 @@ class DynamicRoutingSession:
             keywords=self.keywords,
             epochs=self.epochs,
             epoch_tags=self.epoch_tags,
-            stimulus_template=None, # TODO pass tuple of stimulus templates
+            stimulus_template=None,  # TODO pass tuple of stimulus templates
             trials=self.trials,
             intervals=self.intervals,
             acquisition=self._acquisition,
@@ -113,7 +114,7 @@ class DynamicRoutingSession:
         return super().__getattribute__(__name)
 
     # metadata ------------------------------------------------------------------ #
-            
+
     @property
     def session_start_time(self) -> datetime.datetime:
         if self.is_sync:
@@ -123,11 +124,11 @@ class DynamicRoutingSession:
             start_time.decode() if isinstance(start_time, bytes) else start_time
         )
         return npc_session.DatetimeRecord(f"{self.id.date} {start_time}").dt
-    
+
     @property
     def _session_start_time(self) -> npc_session.DatetimeRecord:
         return npc_session.DatetimeRecord(self.session_start_time.isoformat())
-    
+
     @property
     def identifier(self) -> str:
         if getattr(self, "_identifier", None) is None:
@@ -190,7 +191,7 @@ class DynamicRoutingSession:
         epoch_tags = getattr(self, "_epoch_tags", [])
         epoch_tags += list(value)
         self._epoch_tags = list(set(epoch_tags))
-    
+
     # LabelledDicts ------------------------------------------------------------- #
 
     @property
@@ -200,7 +201,7 @@ class DynamicRoutingSession:
         str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
     ]:
         """Raw data, as acquired - filtered data goes in `processing`.
-        
+
         The property as it appears on an NWBFile"""
         acquisition = pynwb.core.LabelledDict(label="acquisition", key_attr="name")
         for module in self._acquisition:
@@ -215,7 +216,7 @@ class DynamicRoutingSession:
     ]:
         """Data after processing and filtering - raw data goes in
         `acquisition`.
-        
+
         The property as it appears on an NWBFile"""
         processing = pynwb.core.LabelledDict(label="processing", key_attr="name")
         for module in self._processing:
@@ -229,13 +230,13 @@ class DynamicRoutingSession:
         str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
     ]:
         """Derived data that would take time to re-compute.
-        
+
         The property as it appears on an NWBFile"""
         analysis = pynwb.core.LabelledDict(label="analysis", key_attr="name")
         for module in self._analysis:
             analysis[module.name] = module
         return analysis
-    
+
     @functools.cached_property
     def _acquisition(
         self,
@@ -264,7 +265,7 @@ class DynamicRoutingSession:
         return ()
 
     # intervals ----------------------------------------------------------------- #
-    
+
     @functools.cached_property
     def trials(self) -> pynwb.epoch.TimeIntervals:
         trials = pynwb.epoch.TimeIntervals(
@@ -290,16 +291,16 @@ class DynamicRoutingSession:
         # avoid iterating over values and checking for type, as this will
         # create all intervals in lazydict if they don't exist
         trials = self._intervals[stim_name.stem]
-        assert isinstance(trials, TaskControl.DynamicRouting1) # for mypy
+        assert isinstance(trials, TaskControl.DynamicRouting1)  # for mypy
         return trials
-    
+
     @functools.cached_property
     def intervals(self) -> pynwb.epoch.TimeIntervals:
         """AKA trials tables other than the main behavior task.
-        
+
         Accessed here as:
         next(i for i in self.intervals if i.name == "OptoTagging")
-        
+
         Accessed from NWBFile as:
         `self.nwb.get_time_intervals("OptoTagging")`
         """
@@ -389,9 +390,9 @@ class DynamicRoutingSession:
                 **self.get_epoch_record(stim).nwb,
             )
         return epochs
-    
+
     # probes, devices, units ---------------------------------------------------- #
-    
+
     @functools.cached_property
     def _probes(self) -> tuple[pynwb.device.Device, ...]:
         if not self.is_ephys:
@@ -407,28 +408,28 @@ class DynamicRoutingSession:
                 self.ephys_settings_xml_data.probe_types,
             )
         )
-    
+
     @property
     def _devices(self) -> tuple[pynwb.device.Device, ...]:
         """The version passed to NWBFile.__init__"""
-        return tuple(itertools.chain(self._probes)) # add other devices as we need them
-    
+        return tuple(itertools.chain(self._probes))  # add other devices as we need them
+
     @functools.cached_property
     def devices(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
-        """Currently just probe model + serial number. 
-        
+        """Currently just probe model + serial number.
+
         Could include other devices: laser, monitor, etc.
-        
+
         The property as it appears on an NWBFile"""
         devices = pynwb.core.LabelledDict(label="devices", key_attr="name")
-        for module in self._devices: 
+        for module in self._devices:
             devices[module.name] = module
         return devices
 
     @functools.cached_property
     def electrode_groups(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
         """The group of channels on each inserted probe.
-                
+
         The property as it appears on an NWBFile"""
         electrode_groups = pynwb.core.LabelledDict(
             label="electrode_groups", key_attr="name"
@@ -556,7 +557,7 @@ class DynamicRoutingSession:
             ):
                 return True
         return False
-    
+
     @functools.cached_property
     def is_annotated(self) -> bool:
         """CCF annotation data accessible"""
@@ -566,14 +567,20 @@ class DynamicRoutingSession:
             if utils.get_electrode_files_from_s3(self.id):
                 return True
         return False
-    
+
     @functools.cached_property
     def is_opto(self) -> bool:
         """Opto during behavior task && not wt/wt (if genotype info available)"""
-        genotype: str | None = self.subject.genotype # won't exist if subject.json not found
-        if self._trials._has_opto and (genotype is None or "wt/wt" not in genotype.lower()):
+        genotype: str | None = (
+            self.subject.genotype
+        )  # won't exist if subject.json not found
+        if self._trials._has_opto and (
+            genotype is None or "wt/wt" not in genotype.lower()
+        ):
             if genotype is None:
-                logger.warning(f"Could not find genotype for {self.id}: returning is_opto = True regardless")
+                logger.warning(
+                    f"Could not find genotype for {self.id}: returning is_opto = True regardless"
+                )
             return True
         return False
 
@@ -826,7 +833,9 @@ class DynamicRoutingSession:
         )
 
     @functools.cached_property
-    def frame_times(self) -> dict[utils.StimPathOrDataset, Exception | npt.NDArray[np.float64]]:
+    def frame_times(
+        self,
+    ) -> dict[utils.StimPathOrDataset, Exception | npt.NDArray[np.float64]]:
         return utils.get_stim_frame_times(
             *self.stim_data, sync=self.sync_data, frame_time_type="display_time"
         )
@@ -993,9 +1002,9 @@ class DynamicRoutingSession:
         return nwb_internal.RunningSpeed(
             *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
         )
-        
-if __name__ == "__main__":
 
+
+if __name__ == "__main__":
     import doctest
 
     import dotenv
