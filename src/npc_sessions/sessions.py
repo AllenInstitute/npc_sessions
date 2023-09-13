@@ -98,7 +98,7 @@ class DynamicRoutingSession:
             epoch_tags=self.epoch_tags,
             stimulus_template=None,  # TODO pass tuple of stimulus templates
             trials=self.trials,
-            intervals=self.intervals,
+            intervals=self._intervals,
             acquisition=self._acquisition,
             processing=self._processing,
             analysis=self._analysis,
@@ -858,12 +858,14 @@ class DynamicRoutingSession:
         )
 
     @functools.cached_property
-    def frame_times(
-        self,
-    ) -> dict[utils.StimPathOrDataset, Exception | npt.NDArray[np.float64]]:
-        return utils.get_stim_frame_times(
-            *self.stim_data, sync=self.sync_data, frame_time_type="display_time"
+    def frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
+        times = utils.get_stim_frame_times(
+            *self.stim_data.values(), sync=self.sync_data, frame_time_type="display_time"
         )
+        for k in times:
+            utils.assert_stim_times(times[k])
+        assert not any(isinstance(v, Exception) for v in times.values())
+        return dict(zip(self.stim_data.keys(), times.values()))
 
     def get_epoch_record(
         self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
@@ -871,7 +873,7 @@ class DynamicRoutingSession:
         stim_file = utils.from_pathlike(stim_file)
         h5 = self.stim_data[stim_file.stem]
         tags = []
-        tags.append(utils.from_pathlike(stim_file).stem.split("_")[0])
+        tags.append(stim_file.stem.split("_")[0])
         if any(label in h5 for label in ("optoRegions", "optoParams")):
             tags.append("opto")
         if any(h5["rewardFrames"][:]):
@@ -886,7 +888,7 @@ class DynamicRoutingSession:
             start_time = 0.0
             stop_time = utils.get_stim_duration(h5)
         else:
-            frame_times = utils.assert_stim_times(self.frame_times[stim_file.stem])
+            frame_times = self.frame_times[stim_file.stem]
             start_time = frame_times[0]
             stop_time = frame_times[-1]
 
