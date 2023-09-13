@@ -1222,7 +1222,7 @@ class SyncDataset:
             self.plot_bit(4, x0, x1, axes=axes[ind], auto_show=False)
             labels.append("diode-measured sync square")
             self.plot_bit(5, x0, x1, axes=axes[ind], auto_show=False)
-            labels.append("stim running")
+            labels.append("stim running or ends of block")
             axes[ind].set_xlim([x0, x1])
             axes[ind].legend(
                 labels,
