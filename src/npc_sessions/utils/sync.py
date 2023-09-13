@@ -723,7 +723,9 @@ class SyncDataset:
         return datetime.datetime.fromisoformat(self.meta_data["start_time"])
 
     @functools.cached_property
-    def stim_running_edges(self) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+    def stim_running_edges(
+        self,
+    ) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
         stim_running_rising_edges = self.get_rising_edges(
             "stim_running", units="seconds"
         )
@@ -735,19 +737,21 @@ class SyncDataset:
             if stim_running_rising_edges[0] > stim_running_falling_edges[0]:
                 stim_running_falling_edges[1:]
         return stim_running_rising_edges, stim_running_falling_edges
-    
-    def filter_on_stim_running(self, data: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
-        """Filter data to only include times when stim_running is high. 
-        
+
+    def filter_on_stim_running(
+        self, data: npt.NDArray[np.floating]
+    ) -> npt.NDArray[np.floating]:
+        """Filter data to only include times when stim_running is high.
+
         Data must be in seconds relative to first sample."""
         if self.stim_running_edges[0].size == 0:
             return data
         mask = [False] * len(data)
         for on, off in zip(*self.stim_running_edges):
             mask |= (data > on) & (data < off)
-        
+
         return data[mask]
-    
+
     @functools.cached_property
     def vsync_times_in_blocks(self) -> tuple[npt.NDArray[np.floating], ...]:
         """Blocks of vsync falling edge times, in seconds relative to first
@@ -824,12 +828,15 @@ class SyncDataset:
 
         if any(
             len(diode_edge_blocks) < len(vsync_times_in_blocks)
-            for diode_edge_blocks in (diode_rising_edges_in_blocks, diode_falling_edges_in_blocks)
+            for diode_edge_blocks in (
+                diode_rising_edges_in_blocks,
+                diode_falling_edges_in_blocks,
+            )
         ):
             # too few blocks of diode flips - affected some early DRPilot
             # sessions with near-constant diode flips between stimulus
             # blocks, and no stim-running signal to filter them
-            
+
             # - vsyncs necessarily precede diode flips
             # - split existing diode flip blocks at the first vsync time for
             #   each vsync block
@@ -846,13 +853,18 @@ class SyncDataset:
                         new_falling_edges.extend([block[:split], block[split:]])
                     else:
                         new_falling_edges.append(block)
-            diode_rising_edges_in_blocks, diode_falling_edges_in_blocks = tuple(new_rising_edges), tuple(new_falling_edges)
-            
+            diode_rising_edges_in_blocks, diode_falling_edges_in_blocks = tuple(
+                new_rising_edges
+            ), tuple(new_falling_edges)
+
         if any(
             len(diode_edge_blocks) > len(vsync_times_in_blocks)
-            for diode_edge_blocks in (diode_rising_edges_in_blocks, diode_falling_edges_in_blocks)
+            for diode_edge_blocks in (
+                diode_rising_edges_in_blocks,
+                diode_falling_edges_in_blocks,
+            )
         ):
-            # more blocks of diode flips than blocks of vsyncs 
+            # more blocks of diode flips than blocks of vsyncs
             def is_mismatch(edges, block) -> bool:
                 return edges[-1] < block[0]
 
@@ -942,36 +954,34 @@ class SyncDataset:
                     more similar"""
                     common_len = min([len(vsyncs), len(diode_flips)])
                     return np.correlate(
-                        np.diff(vsyncs[:common_len]), 
-                        np.diff(
-                                    adjust_diode_flip_intervals(diode_flips)[
-                                        :common_len
-                                    ]
-                                ),
+                        np.diff(vsyncs[:common_len]),
+                        np.diff(adjust_diode_flip_intervals(diode_flips)[:common_len]),
                     ).max()
-                    
+
                 def median_diff(diode_flips, vsyncs) -> float:
                     common_len = min([len(vsyncs), len(diode_flips)])
                     return np.median(diode_flips[:common_len] - vsyncs[:common_len])
-                
+
                 while (
-                    (
-                        (median_diff(diode_flips, vsyncs) > MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC)
-                        and 
-                        (MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC < median_diff(diode_flips, vsyncs[1:]) < median_diff(diode_flips, vsyncs))
-                    )    
+                    median_diff(diode_flips, vsyncs)
+                    > MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC
+                ) and (
+                    MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC
+                    < median_diff(diode_flips, vsyncs[1:])
+                    < median_diff(diode_flips, vsyncs)
                 ):
                     logger.debug("Missing first diode flip")
                     diode_flips = add_missing_diode_flip_at_stim_onset(
                         diode_flips, vsyncs
                     )
-                    
+
                 while (
-                    (
-                        (median_diff(diode_flips, vsyncs) < MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)
-                        and 
-                        (median_diff(diode_flips, vsyncs) < median_diff(diode_flips[1:], vsyncs) < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC)
-                    )    
+                    median_diff(diode_flips, vsyncs)
+                    < MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC
+                ) and (
+                    median_diff(diode_flips, vsyncs)
+                    < median_diff(diode_flips[1:], vsyncs)
+                    < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC
                 ):
                     logger.debug("Removing extra first diode flip")
                     diode_flips = diode_flips[1:]
@@ -979,16 +989,17 @@ class SyncDataset:
                 if len(diode_flips) < len(vsyncs):
                     total_sync_sec = self.meta_data["total_samples"] / self.sample_freq
                     if (
-                        (is_last_vsync_close_to_end_of_sync := abs(
-                        total_sync_sec - vsyncs[-1]
-                        ) < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC) 
-                        or
-                        (
-                            any(self.stim_running_edges[1]) 
-                            and 
-                            (is_last_vsync_close_to_last_stim_running_rising := abs(
+                        is_last_vsync_close_to_end_of_sync := abs(
+                            total_sync_sec - vsyncs[-1]
+                        )
+                        < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC
+                    ) or (
+                        any(self.stim_running_edges[1])
+                        and (
+                            is_last_vsync_close_to_last_stim_running_rising := abs(
                                 self.stim_running_edges[1][block_idx] - vsyncs[-1]
-                            ) < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC)
+                            )
+                            < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC
                         )
                     ):
                         logger.debug(
