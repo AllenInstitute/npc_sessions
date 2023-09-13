@@ -774,31 +774,13 @@ class SyncDataset:
         logger.info(
             f"Found {len(vsync_times_in_blocks)} blocks of vsync events with lengths {block_lengths}"
         )
-
-        stim_running_rising_edges = self.get_rising_edges(
-            "stim_running", units="seconds"
-        )
-        stim_running_falling_edges = self.get_falling_edges(
-            "stim_running", units="seconds"
-        )
-
+        stim_running_rising_edges, stim_running_falling_edges = self.stim_running_edges
         if any(stim_running_rising_edges) and any(stim_running_falling_edges):
-            if stim_running_rising_edges[0] > stim_running_falling_edges[0]:
-                stim_running_falling_edges[1:]
             assert len(stim_running_rising_edges) == len(vsync_times_in_blocks)
-            for idx, (stim_running_rising, stim_running_falling) in enumerate(
-                zip(
-                    stim_running_rising_edges,
-                    stim_running_falling_edges,
-                )
-            ):
-                vsync_times_in_blocks[idx] = vsync_times_in_blocks[idx][
-                    stim_running_rising < vsync_times_in_blocks[idx]
-                ]
-                vsync_times_in_blocks[idx] = vsync_times_in_blocks[idx][
-                    vsync_times_in_blocks[idx] < stim_running_falling
-                ]
+            for idx, block in enumerate(vsync_times_in_blocks):
+                vsync_times_in_blocks[idx] = self.filter_on_stim_running(block)
 
+        assert all(block.size > 0 for block in vsync_times_in_blocks)
         return tuple(vsync_times_in_blocks)
 
     @functools.cached_property
@@ -834,10 +816,10 @@ class SyncDataset:
         assert abs(len(diode_rising_edges) - len(diode_falling_edges)) < 2
 
         diode_rising_edges_in_blocks = reshape_into_blocks(
-            diode_rising_edges, min_gap=1.0
+            self.filter_on_stim_running(diode_rising_edges), min_gap=1.0
         )
         diode_falling_edges_in_blocks = reshape_into_blocks(
-            diode_falling_edges, min_gap=1.0
+            self.filter_on_stim_running(diode_falling_edges), min_gap=1.0
         )
 
         if not all(
