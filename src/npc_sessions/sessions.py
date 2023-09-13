@@ -27,7 +27,7 @@ import pynwb
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
-import npc_sessions.nwb as nwb
+import npc_sessions.nwb as nwb_internal
 import npc_sessions.trials as TaskControl
 import npc_sessions.utils as utils
 
@@ -981,12 +981,12 @@ class DynamicRoutingSession:
         return "2002" if "2002" in implant else implant
 
     @functools.cached_property
-    def _licks(self) -> nwb.SupportsAsNWB:
-        return nwb.LickSpout(self.sync_data)
+    def _licks(self) -> nwb_internal.SupportsAsNWB:
+        return nwb_internal.LickSpout(self.sync_data)
 
     @functools.cached_property
-    def _running(self) -> nwb.SupportsAsNWB:
-        return nwb.RunningSpeed(
+    def _running(self) -> nwb_internal.SupportsAsNWB:
+        return nwb_internal.RunningSpeed(
             *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
         )
         
