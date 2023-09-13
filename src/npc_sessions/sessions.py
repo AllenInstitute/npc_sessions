@@ -57,7 +57,9 @@ class DynamicRoutingSession:
     >>> 'DynamicRouting1' in s.epoch_tags
     True
     """
-
+    suppress_errors = False
+    """If True, just compile as much as possible from available stim files."""
+    
     # pass any of these read/write properties to init to set
     _trials_interval_name: str = "DynamicRouting1"
 
