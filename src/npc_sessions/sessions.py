@@ -1,24 +1,13 @@
-"""
->>> s = DynamicRoutingSession('670248_2023-08-03')
->>> s.session_start_time
-'2023-08-03 12:04:15'
->>> 'DynamicRouting1' in s.stim_tags
-True
->>> s.sync_path
-S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
->>> s.stim_paths[0]
-S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
->>> s.ephys_timing_data[0].name, s.ephys_timing_data[0].sampling_rate, s.ephys_timing_data[0].start_time
-('Neuropix-PXI-100.ProbeA-AP', 30000.070518634246, 20.080209634424037)
-"""
 
 from __future__ import annotations
 
 import contextlib
+import datetime
 import functools
 import io
 import itertools
 import json
+import logging
 import pathlib
 import re
 import uuid
@@ -41,11 +30,38 @@ import npc_sessions.nwb as nwb
 import npc_sessions.trials as TaskControl
 import npc_sessions.utils as utils
 
+logger = logging.getLogger(__name__)
 
 class DynamicRoutingSession:
     """Class for fetching & processing raw data for given a session id, and
-    converting to NWB modules or an NWBFile instance."""
+    converting to NWB modules or an NWBFile instance
+    
+    >>> s = DynamicRoutingSession('670248_2023-08-03')
+    
+    # paths/raw data processing:
+    >>> 'DynamicRouting1' in s.stim_tags
+    True
+    >>> s.sync_path
+    S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
+    >>> s.stim_paths[0]
+    S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
+    >>> s.ephys_timing_data[0].name, s.ephys_timing_data[0].sampling_rate, s.ephys_timing_data[0].start_time
+    ('Neuropix-PXI-100.ProbeA-AP', 30000.070518634246, 20.080209634424037)
+    
+    # access nwb modules individually before compiling a whole nwb file:
+    >>> s.session_start_time
+    datetime.datetime(2023, 8, 3, 12, 4, 15, 854423)
+    >>> s.subject.age
+    'P166D'
+    >>> s.subject.genotype
+    'VGAT-ChR2-YFP/wt'
+    >>> 'DynamicRouting1' in s.epoch_tags
+    True
+    """
+    
+    # pass any of these read/write properties to init to set
     _trials_interval_name: str = "DynamicRouting1"
+
 
     experimenter: str | None = None
     experiment_description: str = "Visual-auditory task-switching behavior session"
@@ -55,10 +71,10 @@ class DynamicRoutingSession:
 
     local_path: upath.UPath | None = None
 
-    def __init__(self, session: str, **kwargs) -> None:
-        self.id = npc_session.SessionRecord(str(session))
-        if pathlib.Path(session).exists():
-            self.local_path = upath.UPath(session)
+    def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
+        self.id = npc_session.SessionRecord(str(session_or_path))
+        if (path := utils.from_pathlike(session_or_path)).exists() and path.protocol in ('', 'file'):
+            self.local_path = path
         for key, value in kwargs.items():
             setattr(self, key, value)
     
@@ -70,7 +86,7 @@ class DynamicRoutingSession:
             session_id=self.id,
             session_description=self.experiment_description,
             identifier=self.identifier,
-            session_start_time=self.session_start_time.dt,
+            session_start_time=self.session_start_time,
             experimenter=self.experimenter,
             notes=self.notes,
             source_script=self.source_script,
@@ -83,7 +99,7 @@ class DynamicRoutingSession:
             acquisition=self._acquisition,
             processing=self._processing,
             analysis=self._analysis,
-            devices=self._probes if self.is_ephys else None,
+            devices=self.devices,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
             units=self.units if self.is_ephys else None,
@@ -94,23 +110,82 @@ class DynamicRoutingSession:
             return self.id.__getattribute__(__name)
         return super().__getattribute__(__name)
 
-    @functools.cached_property
-    def _acquisition(
-        self,
-    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        return (self._licks.as_nwb(),)
+    # metadata ------------------------------------------------------------------ #
+            
+    @property
+    def session_start_time(self) -> datetime.datetime:
+        if self.is_sync:
+            return self.sync_data.start_time
+        start_time = self.epochs[:]["start_time"].min()
+        start_time = (
+            start_time.decode() if isinstance(start_time, bytes) else start_time
+        )
+        return npc_session.DatetimeRecord(f"{self.date} {start_time}").dt
+    
+    @property
+    def identifier(self) -> str:
+        if getattr(self, "_identifier", None) is None:
+            self._identifier = str(uuid.uuid4())
+        return self._identifier
+
+    @property
+    def keywords(self) -> list[str]:
+        if getattr(self, "_keywords", None) is None:
+            self._keywords: list[str] = []
+            self.keywords.append("behavior")
+            if self.is_sync:
+                self.keywords.append("sync")
+            if self.is_ephys:
+                self.keywords.append("ephys")
+            if self.is_annotated:
+                self.keywords.append("CCF")
+            if self.is_opto:
+                self.keywords.append("opto")
+        return self._keywords
+
+    @keywords.setter
+    def keywords(self, value: Iterable[str]) -> None:
+        keywords = getattr(self, "_keywords", [])
+        keywords += list(value)
+        self._keywords = list(set(keywords))
 
     @functools.cached_property
-    def _processing(
-        self,
-    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        return (self._running.as_nwb(),)
+    def subject(self) -> pynwb.file.Subject:
+        try:
+            metadata = self._subject_aind_metadata
+        except FileNotFoundError:
+            warnings.warn(
+                "Could not find subject.json metadata in raw upload: information will be limited"
+            )
+            return pynwb.file.Subject(
+                subject_id=self.id.subject,
+            )
+        assert metadata["subject_id"] == self.id.subject
+        dob = npc_session.DatetimeRecord(metadata["date_of_birth"])
+        return pynwb.file.Subject(
+            subject_id=metadata["subject_id"],
+            species="Mus musculus",
+            sex=metadata["sex"][0].upper(),
+            date_of_birth=dob.dt,
+            genotype=metadata["genotype"],
+            description=None,
+            strain=metadata["background_strain"] or metadata["breeding_group"],
+            age=f"P{(self.session_start_time - dob.dt).days}D",
+        )
 
-    @functools.cached_property
-    def _analysis(
-        self,
-    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        return ()
+    @property
+    def epoch_tags(self) -> list[str]:
+        if getattr(self, "_epoch_tags", None) is None:
+            self._epoch_tags: list[str] = list(set(self.epochs.tags))
+        return self._epoch_tags
+
+    @epoch_tags.setter
+    def epoch_tags(self, value: Iterable[str]) -> None:
+        epoch_tags = getattr(self, "_epoch_tags", [])
+        epoch_tags += list(value)
+        self._epoch_tags = list(set(epoch_tags))
+    
+    # LabelledDicts ------------------------------------------------------------- #
 
     @property
     def acquisition(
@@ -144,7 +219,30 @@ class DynamicRoutingSession:
         for module in self._analysis:
             analysis[module.name] = module
         return analysis
+    
+    @functools.cached_property
+    def _acquisition(
+        self,
+    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        modules = []
+        if self.is_sync:
+            modules.append(self._licks.as_nwb())
+        return tuple(modules)
 
+    @functools.cached_property
+    def _processing(
+        self,
+    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        return (self._running.as_nwb(),)
+
+    @functools.cached_property
+    def _analysis(
+        self,
+    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        return ()
+
+    # intervals ----------------------------------------------------------------- #
+    
     @functools.cached_property
     def trials(self) -> pynwb.epoch.TimeIntervals:
         trials = pynwb.epoch.TimeIntervals(
@@ -157,6 +255,22 @@ class DynamicRoutingSession:
             trials.add_interval(**trial)
         return trials
 
+    @property
+    def _trials(self) -> TaskControl.DynamicRouting1:
+        """Main behavior task trials"""
+        stim_name = next(
+            (_ for _ in self.stim_paths if self._trials_interval_name in _.stem), None
+        )
+        if stim_name is None:
+            raise ValueError(
+                f"no intervals named {self._trials_interval_name} found for {self.id}"
+            )
+        # avoid iterating over values and checking for type, as this will
+        # create all intervals in lazydict if they don't exist
+        trials = self._intervals[stim_name.stem]
+        assert isinstance(trials, TaskControl.DynamicRouting1) # for mypy
+        return trials
+    
     @functools.cached_property
     def intervals(self) -> pynwb.epoch.TimeIntervals:
         intervals = []
@@ -174,28 +288,201 @@ class DynamicRoutingSession:
             intervals.append(trials)
         return intervals
 
-    @property
-    def identifier(self) -> str:
-        if getattr(self, "_identifier", None) is None:
-            self._identifier = str(uuid.uuid4())
-        return self._identifier
+    _intervals_descriptions = {
+        TaskControl.VisRFMapping: "visual receptive-field mapping trials",
+        TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
+        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials",
+        TaskControl.OptoTagging: "opto-tagging trials",
+    }
 
-    @property
-    def keywords(self) -> list[str]:
-        if getattr(self, "_keywords", None) is None:
-            self._keywords: list[str] = []
-            self.keywords.append("behavior")
-            if self.is_sync:
-                self.keywords.append("sync")
-            if self.is_ephys:
-                self.keywords.append("ephys")
-        return self._keywords
+    @functools.cached_property
+    def _intervals(self) -> utils.LazyDict[str, TaskControl.TaskControl]:
+        if self.is_sync:
+            sync = self.sync_data
+            stim_paths = tuple(
+                path
+                for path, times in utils.get_stim_frame_times(
+                    *self.stim_paths, sync=self.sync_data
+                ).items()
+                if not isinstance(times, Exception)
+            )
+        else:
+            sync = None
+            stim_paths = self.stim_paths
 
-    @keywords.setter
-    def keywords(self, value: Iterable[str]) -> None:
-        keywords = getattr(self, "_keywords", [])
-        keywords += list(value)
-        self._keywords = list(set(keywords))
+        def get_intervals(
+            cls: type[TaskControl.TaskControl], stim_filename: str, *args
+        ) -> TaskControl.TaskControl:
+            return cls(self.stim_data[stim_filename], sync, *args)
+
+        filename_to_args: dict[
+            str, tuple[Callable, type[TaskControl.TaskControl], str]
+        ] = {}
+        for stim_path in stim_paths:
+            assert isinstance(stim_path, upath.UPath)
+            stim_filename = stim_path.stem
+            if "RFMapping" in stim_filename:
+                filename_to_args["Aud" + stim_filename] = (
+                    get_intervals,
+                    TaskControl.AudRFMapping,
+                    stim_filename,
+                )
+                filename_to_args["Vis" + stim_filename] = (
+                    get_intervals,
+                    TaskControl.VisRFMapping,
+                    stim_filename,
+                )
+            else:
+                try:
+                    cls: type[TaskControl.TaskControl] = getattr(
+                        TaskControl, stim_filename.split("_")[0]
+                    )
+                except AttributeError:
+                    continue  # some stims (e.g. Spontaneous) have no trials class
+                # TODO append stim latencies where required
+                filename_to_args[stim_filename] = (get_intervals, cls, stim_filename)
+
+        return utils.LazyDict((k, v) for k, v in filename_to_args.items())
+
+    @functools.cached_property
+    def epochs(self) -> pynwb.file.TimeIntervals:
+        epochs = pynwb.file.TimeIntervals(
+            name="epochs",
+            description="time intervals corresponding to different phases of the session",
+        )
+        epochs.add_column(
+            "notes",
+            description="notes about the experiment or the data collected during the epoch",
+        )
+        for stim in self.stim_data:
+            epochs.add_interval(
+                **self.get_epoch_record(stim).nwb,
+            )
+        return epochs
+    
+    # probes, devices, units ---------------------------------------------------- #
+    
+    @functools.cached_property
+    def electrode_groups(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
+        electrode_groups = pynwb.core.LabelledDict(
+            label="electrode_groups", key_attr="name"
+        )
+        for module in self._electrode_groups:
+            electrode_groups[module.name] = module
+        return electrode_groups
+
+    @functools.cached_property
+    def _probes(self) -> tuple[pynwb.device.Device, ...]:
+        if not self.is_ephys:
+            raise AttributeError(f"{self.id} is not an ephys session")
+        return tuple(
+            pynwb.device.Device(
+                name=str(serial_number),
+                description=probe_type,
+                manufacturer="imec",
+            )
+            for serial_number, probe_type in zip(
+                self.ephys_settings_xml_data.probe_serial_numbers,
+                self.ephys_settings_xml_data.probe_types,
+            )
+        )
+
+    @functools.cached_property
+    def devices(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
+        devices = pynwb.core.LabelledDict(label="devices", key_attr="name")
+        for module in itertools.chain(self._probes): # add other devices as we need them
+            devices[module.name] = module
+        return devices
+
+    @functools.cached_property
+    def _electrode_groups(self) -> tuple[pynwb.ecephys.ElectrodeGroup, ...]:
+        locations = (
+            {
+                v["letter"]: f"{self.implant} {v['hole']}"
+                for k, v in self.probe_insertions.items()
+                if k.startswith("probe") and "hole" in v and "letter" in v
+            }
+            if self.probe_insertions
+            else {}
+        )  # TODO upload probe insertion records for all sessions
+        return tuple(
+            pynwb.ecephys.ElectrodeGroup(
+                name=f"probe{probe_letter}",
+                device=self.devices[str(serial_number)],
+                description=probe_type,
+                location=locations.get(probe_letter, probe_letter),
+            )
+            for serial_number, probe_type, probe_letter in zip(
+                self.ephys_settings_xml_data.probe_serial_numbers,
+                self.ephys_settings_xml_data.probe_types,
+                self.ephys_settings_xml_data.probe_letters,
+            )
+        )
+
+    @functools.cached_property
+    def electrodes(self) -> pynwb.core.DynamicTable:
+        electrodes = pynwb.file.ElectrodeTable()
+        for column in (
+            "rel_x",
+            "rel_y",
+            "channel",  # "id", # "x", "y", "z",
+        ):
+            electrodes.add_column(name=column, description="")
+        for probe_letter, channel_pos_xy in zip(
+            self.ephys_settings_xml_data.probe_letters,
+            self.ephys_settings_xml_data.channel_pos_xy,
+        ):
+            group = self.electrode_groups[f"probe{probe_letter}"]
+            for channel_label, (x, y) in channel_pos_xy.items():
+                channel_idx = int(channel_label.strip("CH"))
+                electrodes.add_row(
+                    # x=,
+                    # y=,
+                    # z=,
+                    # TODO: get ccf coordinates
+                    location="unknown",
+                    group=group,
+                    group_name=group.name,
+                    rel_x=x,
+                    rel_y=y,
+                    channel=channel_idx,
+                )
+        return electrodes
+
+    @functools.cached_property
+    def _units(self) -> pl.DataFrame:
+        return utils.get_units_electrodes_spike_times(self.id)
+
+    @functools.cached_property
+    def units(self) -> pynwb.misc.Units:
+        units = pynwb.misc.Units(
+            name="units",
+            description="spike-sorted units from Kilosort 2.5",
+            waveform_rate=30_000.0,
+            waveform_unit="microvolts",
+            electrode_table=self.electrodes,
+        )
+        for column in self._units.columns:
+            if column in ("spike_times",):
+                continue
+            units.add_column(name=column, description="")
+        df = self._units.fill_null(np.nan)
+        for unit in df.iter_rows(named=True):
+            ## for ref:
+            # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
+            units.add_unit(
+                **unit,  # contains spike_times
+                electrodes=[
+                    self.electrodes[:]
+                    .query(f"channel == {unit['peak_channel']}")
+                    .query(f"group_name == {unit['device_name']!r}")
+                    .index.item()
+                ],
+                electrode_group=self.electrode_groups[unit["device_name"]],
+            )
+        return units
+
+    # session ------------------------------------------------------------------- #
 
     @functools.cached_property
     def info(self) -> tracked_sessions.SessionInfo | None:
@@ -204,7 +491,7 @@ class DynamicRoutingSession:
             None,
         )
 
-    @property
+    @functools.cached_property
     def is_sync(self) -> bool:
         if self.info:
             return self.info.is_sync
@@ -213,7 +500,7 @@ class DynamicRoutingSession:
                 return True
         return False
 
-    @property
+    @functools.cached_property
     def is_ephys(self) -> bool:
         if self.info:
             return self.info.is_ephys
@@ -224,16 +511,26 @@ class DynamicRoutingSession:
             ):
                 return True
         return False
-
-    @property
-    def session_start_time(self) -> npc_session.DatetimeRecord:
-        if self.is_sync:
-            return npc_session.DatetimeRecord(self.sync_path.stem)
-        start_time = self.epochs.df["start_time"].min()
-        start_time = (
-            start_time.decode() if isinstance(start_time, bytes) else start_time
-        )
-        return npc_session.DatetimeRecord(f"{self.date} {start_time}")
+    
+    @functools.cached_property
+    def is_annotated(self) -> bool:
+        """CCF annotation data accessible"""
+        if not self.is_ephys:
+            return False
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            if utils.get_electrode_files_from_s3(self.id):
+                return True
+        return False
+    
+    @functools.cached_property
+    def is_opto(self) -> bool:
+        """Opto during behavior task && not wt/wt (if genotype info available)"""
+        genotype: str | None = self.subject.genotype # won't exist if subject.json not found
+        if self._trials._has_opto and (genotype is None or "wt/wt" not in genotype.lower()):
+            if genotype is None:
+                logger.warning(f"Could not find genotype for {self.id}: returning is_opto = True regardless")
+            return True
+        return False
 
     def get_record(self) -> npc_lims.Session:
         return npc_lims.Session(
@@ -283,42 +580,6 @@ class DynamicRoutingSession:
                 f"Could not find subject.json for {self.id} in {self._raw_upload_metadata_json_paths}"
             ) from exc
         return json.loads(file.read_text())
-
-    @functools.cached_property
-    def subject(self) -> pynwb.file.Subject:
-        try:
-            metadata = self._subject_aind_metadata
-        except FileNotFoundError:
-            warnings.warn(
-                "Could not find subject.json metadata in raw upload: information will be limited"
-            )
-            return pynwb.file.Subject(
-                subject_id=self.id.subject,
-            )
-        assert metadata["subject_id"] == self.id.subject
-        dob = npc_session.DatetimeRecord(metadata["date_of_birth"])
-        return pynwb.file.Subject(
-            subject_id=metadata["subject_id"],
-            species="Mus musculus",
-            sex=metadata["sex"][0].upper(),
-            date_of_birth=dob.dt,
-            genotype=metadata["genotype"],
-            description=None,
-            strain=metadata["background_strain"] or metadata["breeding_group"],
-            age=f"P{(self.session_start_time.dt - dob.dt).days}D",
-        )
-
-    @property
-    def epoch_tags(self) -> list[str]:
-        if getattr(self, "_epoch_tags", None) is None:
-            self._epoch_tags: list[str] = list(set(self.epochs.tags))
-        return self._epoch_tags
-
-    @epoch_tags.setter
-    def epoch_tags(self, value: Iterable[str]) -> None:
-        epoch_tags = getattr(self, "_epoch_tags", [])
-        epoch_tags += list(value)
-        self._epoch_tags = list(set(epoch_tags))
 
     @property
     def stim_tags(self) -> tuple[str, ...]:
@@ -553,22 +814,6 @@ class DynamicRoutingSession:
             tags=tags,
         )
 
-    @functools.cached_property
-    def epochs(self) -> pynwb.file.TimeIntervals:
-        epochs = pynwb.file.TimeIntervals(
-            name="epochs",
-            description="time intervals corresponding to different phases of the session",
-        )
-        epochs.add_column(
-            "notes",
-            description="notes about the experiment or the data collected during the epoch",
-        )
-        for stim in self.stim_data:
-            epochs.add_interval(
-                **self.get_epoch_record(stim).nwb,
-            )
-        return epochs
-
     @property
     def ephys_record_node_dirs(self) -> tuple[upath.UPath, ...]:
         return tuple(
@@ -671,27 +916,6 @@ class DynamicRoutingSession:
             data_asset_id=self.raw_data_asset_id,
         )
 
-    @functools.cached_property
-    def _probes(self) -> tuple[pynwb.device.Device, ...]:
-        return tuple(
-            pynwb.device.Device(
-                name=str(serial_number),
-                description=probe_type,
-                manufacturer="imec",
-            )
-            for serial_number, probe_type in zip(
-                self.ephys_settings_xml_data.probe_serial_numbers,
-                self.ephys_settings_xml_data.probe_types,
-            )
-        )
-
-    @functools.cached_property
-    def devices(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
-        devices = pynwb.core.LabelledDict(label="devices", key_attr="name")
-        for module in itertools.chain(self._probes): # add other devices as we need them
-            devices[module.name] = module
-        return devices
-
     @property
     def electrode_group_description(self) -> str:
         # TODO get correct channels range from settings xml
@@ -716,171 +940,6 @@ class DynamicRoutingSession:
         return "2002" if "2002" in implant else implant
 
     @functools.cached_property
-    def electrode_groups(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
-        electrode_groups = pynwb.core.LabelledDict(
-            label="electrode_groups", key_attr="name"
-        )
-        for module in self._electrode_groups:
-            electrode_groups[module.name] = module
-        return electrode_groups
-
-    @functools.cached_property
-    def _electrode_groups(self) -> tuple[pynwb.ecephys.ElectrodeGroup, ...]:
-        locations = (
-            {
-                v["letter"]: f"{self.implant} {v['hole']}"
-                for k, v in self.probe_insertions.items()
-                if k.startswith("probe") and "hole" in v and "letter" in v
-            }
-            if self.probe_insertions
-            else {}
-        )  # TODO upload probe insertion records for all sessions
-        return tuple(
-            pynwb.ecephys.ElectrodeGroup(
-                name=f"probe{probe_letter}",
-                device=self.devices[str(serial_number)],
-                description=probe_type,
-                location=locations.get(probe_letter, probe_letter),
-            )
-            for serial_number, probe_type, probe_letter in zip(
-                self.ephys_settings_xml_data.probe_serial_numbers,
-                self.ephys_settings_xml_data.probe_types,
-                self.ephys_settings_xml_data.probe_letters,
-            )
-        )
-
-    @functools.cached_property
-    def electrodes(self) -> pynwb.core.DynamicTable:
-        electrodes = pynwb.file.ElectrodeTable()
-        for column in (
-            "rel_x",
-            "rel_y",
-            "channel",  # "id", # "x", "y", "z",
-        ):
-            electrodes.add_column(name=column, description="")
-        for probe_letter, channel_pos_xy in zip(
-            self.ephys_settings_xml_data.probe_letters,
-            self.ephys_settings_xml_data.channel_pos_xy,
-        ):
-            group = self.electrode_groups[f"probe{probe_letter}"]
-            for channel_label, (x, y) in channel_pos_xy.items():
-                channel_idx = int(channel_label.strip("CH"))
-                electrodes.add_row(
-                    # x=,
-                    # y=,
-                    # z=,
-                    # TODO: get ccf coordinates
-                    location="unknown",
-                    group=group,
-                    group_name=group.name,
-                    rel_x=x,
-                    rel_y=y,
-                    channel=channel_idx,
-                )
-        return electrodes
-
-    @functools.cached_property
-    def _units(self) -> pl.DataFrame:
-        return utils.get_units_electrodes_spike_times(self.id)
-
-    @functools.cached_property
-    def units(self) -> pynwb.misc.Units:
-        units = pynwb.misc.Units(
-            name="units",
-            description="spike-sorted units from Kilosort 2.5",
-            waveform_rate=30_000.0,
-            waveform_unit="microvolts",
-            electrode_table=self.electrodes,
-        )
-        for column in self._units.columns:
-            if column in ("spike_times",):
-                continue
-            units.add_column(name=column, description="")
-        df = self._units.fill_null(np.nan)
-        for unit in df.iter_rows(named=True):
-            ## for ref:
-            # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
-            units.add_unit(
-                **unit,  # contains spike_times
-                electrodes=[
-                    self.electrodes[:]
-                    .query(f"channel == {unit['peak_channel']}")
-                    .query(f"group_name == {unit['device_name']!r}")
-                    .index.item()
-                ],
-                electrode_group=self.electrode_groups[unit["device_name"]],
-            )
-        return units
-
-    _intervals_descriptions = {
-        TaskControl.VisRFMapping: "visual receptive-field mapping trials",
-        TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
-        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials",
-        TaskControl.OptoTagging: "opto-tagging trials",
-    }
-
-    @functools.cached_property
-    def _intervals(self) -> utils.LazyDict[str, TaskControl.TaskControl]:
-        if self.is_sync:
-            sync = self.sync_data
-            stim_paths = tuple(
-                path
-                for path, times in utils.get_stim_frame_times(
-                    *self.stim_paths, sync=self.sync_data
-                ).items()
-                if not isinstance(times, Exception)
-            )
-        else:
-            sync = None
-            stim_paths = self.stim_paths
-
-        def get_intervals(
-            cls: type[TaskControl.TaskControl], stim_filename: str, *args
-        ) -> TaskControl.TaskControl:
-            return cls(self.stim_data[stim_filename], sync, *args)
-
-        filename_to_args: dict[
-            str, tuple[Callable, type[TaskControl.TaskControl], str]
-        ] = {}
-        for stim_path in stim_paths:
-            assert isinstance(stim_path, upath.UPath)
-            stim_filename = stim_path.stem
-            if "RFMapping" in stim_filename:
-                filename_to_args["Aud" + stim_filename] = (
-                    get_intervals,
-                    TaskControl.AudRFMapping,
-                    stim_filename,
-                )
-                filename_to_args["Vis" + stim_filename] = (
-                    get_intervals,
-                    TaskControl.VisRFMapping,
-                    stim_filename,
-                )
-            else:
-                try:
-                    cls: type[TaskControl.TaskControl] = getattr(
-                        TaskControl, stim_filename.split("_")[0]
-                    )
-                except AttributeError:
-                    continue  # some stims (e.g. Spontaneous) have no trials class
-                # TODO append stim latencies where required
-                filename_to_args[stim_filename] = (get_intervals, cls, stim_filename)
-
-        return utils.LazyDict((k, v) for k, v in filename_to_args.items())
-
-    @property
-    def _trials(self) -> TaskControl.TaskControl:
-        """Main behavior task trials"""
-        stim_name = next(
-            (_ for _ in self.stim_paths if self._trials_interval_name in _.stem), None
-        )
-        if stim_name is None:
-            raise ValueError(
-                f"no intervals named {self._trials_interval_name} found for {self.id}"
-            )
-        return self._intervals[stim_name.stem]
-
-    @functools.cached_property
     def _licks(self) -> nwb.SupportsAsNWB:
         return nwb.LickSpout(self.sync_data)
 
@@ -889,19 +948,7 @@ class DynamicRoutingSession:
         return nwb.RunningSpeed(
             *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
         )
-
-    # state: MutableMapping[str | int, Any]
-    # subject: MutableMapping[str, Any]
-    # session: MutableMapping[str, Any]
-    # stimuli: pl.DataFrame
-    # units: pl.DataFrame
-
-
-# x = Session(r'\\allen\programs\mindscope\workgroups\np-exp\1290510496_681446_20230816')
-# x.sync_data.plot_stim_offsets()
-# # x = Session('670248_2023-08-03')
-# x.sync_data.plot_diode_measured_sync_square_flips()
-
+        
 if __name__ == "__main__":
 
     import doctest
