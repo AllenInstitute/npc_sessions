@@ -324,18 +324,18 @@ class DynamicRoutingSession:
     def _intervals(self) -> pynwb.epoch.TimeIntervals:
         """The version passed to NWBFile.__init__"""
         intervals = []
-        for _k, v in self._all_trials.items():
-            if v is self._trials:
+        for k, v in self._all_trials.items():
+            if self._trials_interval_name in k:
                 continue
-            trials = pynwb.epoch.TimeIntervals(
+            nwb_intervals = pynwb.epoch.TimeIntervals(
                 name=v.__class__.__name__,
                 description=self._intervals_descriptions[v.__class__],
             )
-            for column in self._trials.to_add_trial_column():
-                trials.add_column(**column)
-            for trial in self._trials.to_add_trial():
-                trials.add_interval(**trial)
-            intervals.append(trials)
+            for column in v.to_add_trial_column():
+                nwb_intervals.add_column(**column)
+            for trial in v.to_add_trial():
+                nwb_intervals.add_interval(**trial)
+            intervals.append(nwb_intervals)
         return intervals
 
     _intervals_descriptions = {
