@@ -844,13 +844,17 @@ class DynamicRoutingSession:
         self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
     ) -> npc_lims.Epoch:
         h5 = self.stim_data[utils.from_pathlike(stim_file).stem]
-
         tags = []
         tags.append(utils.from_pathlike(stim_file).stem.split("_")[0])
         if any(label in h5 for label in ("optoRegions", "optoParams")):
             tags.append("opto")
         if any(h5["rewardFrames"][:]):
             tags.append("rewards")
+        
+        if sync: 
+            sync = utils.get_sync_data(sync)
+        elif self.is_sync:
+            sync = self.sync_data
 
         if sync is None:
             start_time = 0.0
