@@ -394,7 +394,7 @@ class DynamicRoutingSession:
             "notes",
             description="notes about the experiment or the data collected during the epoch",
         )
-        for stim in self.stim_data:
+        for stim in self.stim_paths:
             epochs.add_interval(
                 **self.get_epoch_record(stim).nwb,
             )
@@ -868,7 +868,8 @@ class DynamicRoutingSession:
     def get_epoch_record(
         self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
     ) -> npc_lims.Epoch:
-        h5 = self.stim_data[utils.from_pathlike(stim_file).stem]
+        stim_file = utils.from_pathlike(stim_file)
+        h5 = self.stim_data[stim_file.stem]
         tags = []
         tags.append(utils.from_pathlike(stim_file).stem.split("_")[0])
         if any(label in h5 for label in ("optoRegions", "optoParams")):
@@ -885,7 +886,7 @@ class DynamicRoutingSession:
             start_time = 0.0
             stop_time = utils.get_stim_duration(h5)
         else:
-            frame_times = utils.assert_stim_times(self.frame_times[stim_file])
+            frame_times = utils.assert_stim_times(self.frame_times[stim_file.stem])
             start_time = frame_times[0]
             stop_time = frame_times[-1]
 
