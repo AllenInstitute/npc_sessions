@@ -18,6 +18,7 @@ import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
 import numpy as np
+import ndx_events
 import numpy.typing as npt
 import polars as pl
 import pynwb
@@ -147,6 +148,8 @@ class DynamicRoutingSession:
             self.keywords.append("behavior")
             if self.is_sync:
                 self.keywords.append("sync")
+            if self.is_video:
+                self.keywords.append("video")
             if self.is_ephys:
                 self.keywords.append("ephys")
             if not self.is_sorted:
@@ -252,6 +255,8 @@ class DynamicRoutingSession:
         modules = []
         if self.is_sync:
             modules.append(self._licks.as_nwb())
+        if self.is_video:
+            modules.extend(self._video_frame_times)
         return tuple(modules)
 
     @functools.cached_property
@@ -565,6 +570,15 @@ class DynamicRoutingSession:
             return self.info.is_sync
         with contextlib.suppress(FileNotFoundError, ValueError):
             if self.get_sync_paths():
+                return True
+        return False
+    
+    @functools.cached_property
+    def is_video(self) -> bool:
+        if not self.is_sync:
+            return False
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            if self.video_paths:
                 return True
         return False
 
@@ -1042,7 +1056,19 @@ class DynamicRoutingSession:
             *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
         )
 
-
+    @functools.cached_property
+    def _video_frame_times(self) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        # currently doesn't require opening videos 
+        path_to_timestamps = utils.get_video_frame_times(self.sync_data, *self.video_paths)
+        return tuple(
+            ndx_events.Events(
+                timestamps=timestamps,
+                name=utils.extract_camera_name(path.stem),
+                description=f'video frame timestamps for {path.stem}',
+            )
+            for path, timestamps in path_to_timestamps.items()
+        )
+        
 if __name__ == "__main__":
     import doctest
 
