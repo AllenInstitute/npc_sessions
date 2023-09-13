@@ -937,24 +937,62 @@ class SyncDataset:
                         ).item()
                     )
 
-                while score(diode_flips, vsyncs) < score(diode_flips, vsyncs[1:]):
+                def corr_score(diode_flips, vsyncs) -> float:
+                    """Similarity between diode and vsync intervals - higher is
+                    more similar"""
+                    common_len = min([len(vsyncs), len(diode_flips)])
+                    return np.correlate(
+                        np.diff(vsyncs[:common_len]), 
+                        np.diff(
+                                    adjust_diode_flip_intervals(diode_flips)[
+                                        :common_len
+                                    ]
+                                ),
+                    ).max()
+                    
+                def median_diff(diode_flips, vsyncs) -> float:
+                    common_len = min([len(vsyncs), len(diode_flips)])
+                    return np.median(diode_flips[:common_len] - vsyncs[:common_len])
+                
+                while (
+                    (
+                        (median_diff(diode_flips, vsyncs) > MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC)
+                        and 
+                        (MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC < median_diff(diode_flips, vsyncs[1:]) < median_diff(diode_flips, vsyncs))
+                    )    
+                ):
                     logger.debug("Missing first diode flip")
                     diode_flips = add_missing_diode_flip_at_stim_onset(
                         diode_flips, vsyncs
                     )
-
-                while score(diode_flips, vsyncs) < score(diode_flips[1:], vsyncs):
+                    
+                while (
+                    (
+                        (median_diff(diode_flips, vsyncs) < MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)
+                        and 
+                        (median_diff(diode_flips, vsyncs) < median_diff(diode_flips[1:], vsyncs) < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC)
+                    )    
+                ):
                     logger.debug("Removing extra first diode flip")
                     diode_flips = diode_flips[1:]
 
                 if len(diode_flips) < len(vsyncs):
                     total_sync_sec = self.meta_data["total_samples"] / self.sample_freq
-                    is_last_vsync_close_to_end_of_sync = abs(
+                    if (
+                        (is_last_vsync_close_to_end_of_sync := abs(
                         total_sync_sec - vsyncs[-1]
-                    ) < max(np.diff(vsyncs))
-                    if is_last_vsync_close_to_end_of_sync:
+                        ) < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC) 
+                        or
+                        (
+                            any(self.stim_running_edges[1]) 
+                            and 
+                            (is_last_vsync_close_to_last_stim_running_rising := abs(
+                                self.stim_running_edges[1][block_idx] - vsyncs[-1]
+                            ) < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC)
+                        )
+                    ):
                         logger.debug(
-                            "Missing last diode flips - sync recording truncated"
+                            "Missing last diode flips - truncated by end of sync of stim running"
                         )
                         diode_flips = add_missing_diode_flips_for_truncated_sync(
                             diode_flips, vsyncs
