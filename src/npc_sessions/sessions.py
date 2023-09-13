@@ -577,7 +577,7 @@ class DynamicRoutingSession:
         return npc_lims.Session(
             session_id=self.id,
             subject_id=self.id.subject,
-            session_start_time=self.session_start_time,
+            session_start_time=npc_session.DateRecord(self.session_start_time),
             stimulus_notes=self.task_version,
             experimenter=self.experimenter,
             experiment_description=self.experiment_description,
