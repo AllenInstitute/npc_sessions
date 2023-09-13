@@ -1152,11 +1152,15 @@ class SyncDataset:
 
     @property
     def stim_onsets(self) -> npt.NDArray[np.floating]:
-        return self.get_rising_edges("stim_running", units="seconds")
+        if any(stim_running := self.get_rising_edges("stim_running", units="seconds")):
+            return stim_running
+        return np.array([block[0] for block in self.vsync_times_in_blocks])
 
     @property
     def stim_offsets(self) -> npt.NDArray[np.floating]:
-        return self.get_falling_edges("stim_running", units="seconds")
+        if any(stim_running := self.get_falling_edges("stim_running", units="seconds")):
+            return stim_running
+        return np.array([block[-1] for block in self.frame_display_time_blocks])
 
     def plot_stim_onsets(self) -> tuple[fig.Figure, list[plt.Axes]]:
         import matplotlib.pyplot as plt
