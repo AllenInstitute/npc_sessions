@@ -822,24 +822,50 @@ class SyncDataset:
             self.filter_on_stim_running(diode_falling_edges), min_gap=1.0
         )
 
-        if not all(
-            len(edges) == len(vsync_times_in_blocks)
-            for edges in (diode_rising_edges_in_blocks, diode_falling_edges_in_blocks)
+        if any(
+            len(diode_edge_blocks) < len(vsync_times_in_blocks)
+            for diode_edge_blocks in (diode_rising_edges_in_blocks, diode_falling_edges_in_blocks)
         ):
-
+            # too few blocks of diode flips - affected some early DRPilot
+            # sessions with near-constant diode flips between stimulus
+            # blocks, and no stim-running signal to filter them
+            
+            # - vsyncs necessarily precede diode flips
+            # - split existing diode flip blocks at the first vsync time for
+            #   each vsync block
+            for idx, vsync_block in enumerate(vsync_times_in_blocks):
+                new_rising_edges = []
+                new_falling_edges = []
+                for block in diode_rising_edges_in_blocks:
+                    if (split := np.searchsorted(block, vsync_block[0])) and split > 0:
+                        new_rising_edges.extend([block[:split], block[split:]])
+                    else:
+                        new_rising_edges.append(block)
+                for block in diode_falling_edges_in_blocks:
+                    if (split := np.searchsorted(block, vsync_block[0])) and split > 0:
+                        new_falling_edges.extend([block[:split], block[split:]])
+                    else:
+                        new_falling_edges.append(block)
+            diode_rising_edges_in_blocks, diode_falling_edges_in_blocks = tuple(new_rising_edges), tuple(new_falling_edges)
+            
+        if any(
+            len(diode_edge_blocks) > len(vsync_times_in_blocks)
+            for diode_edge_blocks in (diode_rising_edges_in_blocks, diode_falling_edges_in_blocks)
+        ):
+            # more blocks of diode flips than blocks of vsyncs 
             def is_mismatch(edges, block) -> bool:
                 return edges[-1] < block[0]
 
-            for idx, block in enumerate(vsync_times_in_blocks):
+            for idx, vsync_block in enumerate(vsync_times_in_blocks):
                 # work through blocks in order,
                 # discard blocks with diode flips that don't match any vsyncs
-                while is_mismatch(diode_rising_edges_in_blocks[idx], block):
+                while is_mismatch(diode_rising_edges_in_blocks[idx], vsync_block):
                     diode_rising_edges_in_blocks = tuple(
                         block
                         for i, block in enumerate(diode_rising_edges_in_blocks)
                         if i != idx
                     )
-                while is_mismatch(diode_falling_edges_in_blocks[idx], block):
+                while is_mismatch(diode_falling_edges_in_blocks[idx], vsync_block):
                     diode_falling_edges_in_blocks = tuple(
                         block
                         for i, block in enumerate(diode_falling_edges_in_blocks)
