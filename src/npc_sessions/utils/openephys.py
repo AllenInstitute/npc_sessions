@@ -580,18 +580,8 @@ def assert_xml_files_match(*path: utils.PathLike) -> None:
             f"Not all paths are files, or they do not exist: {paths}"
         )
     if not utils.checksums_match(*paths):
-        # if the files are the same size and were created within +/- 1 second
-        # of each other, we'll assume they're the same
-
-        created_times = tuple(utils.ctime(p) for p in paths)
-        created_times_equal = all(
-            created_times[0] - 1 <= t <= created_times[0] + 1 for t in created_times[1:]
-        )
-
-        sizes = tuple(utils.file_size(p) for p in paths)
-        sizes_equal = all(s == sizes[0] for s in sizes[1:])
-
-        if not (sizes_equal and created_times_equal):
+        data = [utils.get_settings_xml_info(p) for p in paths]
+        if not all(d == data[0] for d in data):
             raise AssertionError(f"XML files do not match: {paths}")
 
 

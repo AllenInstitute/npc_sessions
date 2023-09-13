@@ -51,6 +51,16 @@ class SettingsXmlInfo:
     open_ephys_version: str
     channel_pos_xy: tuple[dict[str, tuple[int, int]], ...]
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, SettingsXmlInfo):
+            return NotImplemented
+        # files from multiple nodes can be created at slightly different times, so their `date`
+        # fields may differ. Everything else should be identical.
+        return all(
+            getattr(self, field.name) == getattr(other, field.name)
+            for field in dataclasses.fields(self)
+            if field.name not in ("path", "start_time")
+        )
 
 def get_settings_xml_data(path: utils.PathLike) -> ET.ElementTree:
     """Info from a settings.xml file from an Open Ephys recording."""
