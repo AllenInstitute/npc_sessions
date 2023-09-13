@@ -1,5 +1,6 @@
 
 from __future__ import annotations
+from ast import mod
 
 import contextlib
 import datetime
@@ -99,7 +100,7 @@ class DynamicRoutingSession:
             acquisition=self._acquisition,
             processing=self._processing,
             analysis=self._analysis,
-            devices=self.devices,
+            devices=self._devices,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
             units=self.units if self.is_ephys else None,
@@ -193,6 +194,9 @@ class DynamicRoutingSession:
     ) -> pynwb.core.LabelledDict[
         str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
     ]:
+        """Raw data, as acquired - filtered data goes in `processing`.
+        
+        The property as it appears on an NWBFile"""
         acquisition = pynwb.core.LabelledDict(label="acquisition", key_attr="name")
         for module in self._acquisition:
             acquisition[module.name] = module
@@ -204,6 +208,10 @@ class DynamicRoutingSession:
     ) -> pynwb.core.LabelledDict[
         str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
     ]:
+        """Data after processing and filtering - raw data goes in
+        `acquisition`.
+        
+        The property as it appears on an NWBFile"""
         processing = pynwb.core.LabelledDict(label="processing", key_attr="name")
         for module in self._processing:
             processing[module.name] = module
@@ -215,6 +223,9 @@ class DynamicRoutingSession:
     ) -> pynwb.core.LabelledDict[
         str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
     ]:
+        """Derived data that would take time to re-compute.
+        
+        The property as it appears on an NWBFile"""
         analysis = pynwb.core.LabelledDict(label="analysis", key_attr="name")
         for module in self._analysis:
             analysis[module.name] = module
@@ -224,6 +235,7 @@ class DynamicRoutingSession:
     def _acquisition(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        """The version passed to NWBFile.__init__"""
         modules = []
         if self.is_sync:
             modules.append(self._licks.as_nwb())
@@ -233,12 +245,17 @@ class DynamicRoutingSession:
     def _processing(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        return (self._running.as_nwb(),)
+        """The version passed to NWBFile.__init__"""
+        # TODO add LFP
+        modules = []
+        modules.append(self._running.as_nwb())
+        return tuple(modules)
 
     @functools.cached_property
     def _analysis(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        """The version passed to NWBFile.__init__"""
         return ()
 
     # intervals ----------------------------------------------------------------- #
@@ -273,6 +290,14 @@ class DynamicRoutingSession:
     
     @functools.cached_property
     def intervals(self) -> pynwb.epoch.TimeIntervals:
+        """AKA trials tables other than the main behavior task.
+        
+        Accessed here as:
+        next(i for i in self.intervals if i.name == "OptoTagging")
+        
+        Accessed from NWBFile as:
+        `self.nwb.get_time_intervals("OptoTagging")`
+        """
         intervals = []
         for _k, v in self._intervals.items():
             if v is self._trials:
@@ -363,15 +388,6 @@ class DynamicRoutingSession:
     # probes, devices, units ---------------------------------------------------- #
     
     @functools.cached_property
-    def electrode_groups(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
-        electrode_groups = pynwb.core.LabelledDict(
-            label="electrode_groups", key_attr="name"
-        )
-        for module in self._electrode_groups:
-            electrode_groups[module.name] = module
-        return electrode_groups
-
-    @functools.cached_property
     def _probes(self) -> tuple[pynwb.device.Device, ...]:
         if not self.is_ephys:
             raise AttributeError(f"{self.id} is not an ephys session")
@@ -386,16 +402,39 @@ class DynamicRoutingSession:
                 self.ephys_settings_xml_data.probe_types,
             )
         )
-
+    
+    @property
+    def _devices(self) -> tuple[pynwb.device.Device, ...]:
+        """The version passed to NWBFile.__init__"""
+        return tuple(itertools.chain(self._probes)) # add other devices as we need them
+    
     @functools.cached_property
     def devices(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
+        """Currently just probe model + serial number. 
+        
+        Could include other devices: laser, monitor, etc.
+        
+        The property as it appears on an NWBFile"""
         devices = pynwb.core.LabelledDict(label="devices", key_attr="name")
-        for module in itertools.chain(self._probes): # add other devices as we need them
+        for module in self._devices: 
             devices[module.name] = module
         return devices
 
     @functools.cached_property
+    def electrode_groups(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
+        """The group of channels on each inserted probe.
+                
+        The property as it appears on an NWBFile"""
+        electrode_groups = pynwb.core.LabelledDict(
+            label="electrode_groups", key_attr="name"
+        )
+        for module in self._electrode_groups:
+            electrode_groups[module.name] = module
+        return electrode_groups
+
+    @functools.cached_property
     def _electrode_groups(self) -> tuple[pynwb.ecephys.ElectrodeGroup, ...]:
+        """The version passed to NWBFile.__init__"""
         locations = (
             {
                 v["letter"]: f"{self.implant} {v['hole']}"
@@ -421,6 +460,7 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def electrodes(self) -> pynwb.core.DynamicTable:
+        """Individual channels on an inserted probe, including location, CCF coords."""
         electrodes = pynwb.file.ElectrodeTable()
         for column in (
             "rel_x",
