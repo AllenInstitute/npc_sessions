@@ -292,22 +292,29 @@ class DynamicRoutingSession:
             )
         # avoid iterating over values and checking for type, as this will
         # create all intervals in lazydict if they don't exist
-        trials = self._intervals[stim_name.stem]
-        assert isinstance(trials, TaskControl.DynamicRouting1)  # for mypy
+        trials = self._all_trials[stim_name.stem]
+        assert isinstance(trials, TaskControl.DynamicRouting1) # for mypy
         return trials
 
     @functools.cached_property
-    def intervals(self) -> pynwb.epoch.TimeIntervals:
+    def intervals(self) -> pynwb.core.LabelledDict:
         """AKA trials tables other than the main behavior task.
-
-        Accessed here as:
-        next(i for i in self.intervals if i.name == "OptoTagging")
-
-        Accessed from NWBFile as:
-        `self.nwb.get_time_intervals("OptoTagging")`
+        
+        The property as it appears on an NWBFile.
         """
+        intervals = pynwb.core.LabelledDict(
+            label="intervals",
+            key_attr="name",
+        )
+        for module in self._intervals: 
+            intervals[module.name] = module
+        return intervals
+
+    @functools.cached_property
+    def _intervals(self) -> pynwb.epoch.TimeIntervals:
+        """The version passed to NWBFile.__init__"""
         intervals = []
-        for _k, v in self._intervals.items():
+        for _k, v in self._all_trials.items():
             if v is self._trials:
                 continue
             trials = pynwb.epoch.TimeIntervals(
@@ -329,7 +336,7 @@ class DynamicRoutingSession:
     }
 
     @functools.cached_property
-    def _intervals(self) -> utils.LazyDict[str, TaskControl.TaskControl]:
+    def _all_trials(self) -> utils.LazyDict[str, TaskControl.TaskControl]:
         if self.is_sync:
             sync = self.sync_data
             stim_paths = tuple(
