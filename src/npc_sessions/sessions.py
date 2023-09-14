@@ -290,7 +290,7 @@ class DynamicRoutingSession:
             trials.add_interval(**trial)
         return trials
 
-    @property
+    @functools.cached_property
     def _trials(self) -> TaskControl.DynamicRouting1:
         """Main behavior task trials"""
         stim_name = next(
@@ -298,10 +298,15 @@ class DynamicRoutingSession:
         )
         if stim_name is None:
             raise ValueError(
-                f"no intervals named {self._trials_interval_name} found for {self.id}"
+                f"no stim named {self._trials_interval_name}* found for {self.id}"
             )
         # avoid iterating over values and checking for type, as this will
         # create all intervals in lazydict if they don't exist
+        if stim_name.stem not in self._all_trials.keys():
+            raise IndexError(
+                f"no intervals named {self._trials_interval_name}* found for {self.id}"
+            )
+            
         trials = self._all_trials[stim_name.stem]
         assert isinstance(trials, TaskControl.DynamicRouting1)  # for mypy
         return trials
