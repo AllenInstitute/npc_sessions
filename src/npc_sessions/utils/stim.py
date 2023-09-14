@@ -798,7 +798,7 @@ def get_stim_frame_times(
     >>> assert_stim_times(frame_times[bad_stim])
     Traceback (most recent call last):
     ...
-    OSError: Unable to open file (bad object header version number)
+    FileNotFoundError: aind-ephys-data/ecephys_670248_2023-08-02_11-30-53/behavior/DynamicRouting1_670248_20230802_120703.hdf5
     """
 
     # load sync file once
