@@ -497,16 +497,9 @@ class DynamicRouting1(TaskControl):
 
     @functools.cached_property
     def _opto_location_bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
-        calibration_data = dict(self._hdf5["bregmaGalvoCalibrationData"])
-        for k in ("bregmaXOffset", "bregmaYOffset"):
-            calibration_data[k] = calibration_data[k][()]
-        return tuple(
-            DynamicRoutingTask.TaskUtils.galvoToBregma(
-                calibration_data,
-                *voltages,
-            )
-            for voltages in zip(self._galvo_voltage_x, self._galvo_voltage_y)
-        )
+        bregma = self._hdf5.get('optoBregma', None) or self._hdf5.get('bregmaXY', None) 
+        galvo = self._hdf5['galvoVoltage'][()]
+        return np.array([bregma[np.all(galvo==v, axis=1)][0] for v in self._hdf5['trialGalvoVoltage']])
 
     @functools.cached_property
     def opto_location_bregma_x(self) -> npt.NDArray[np.float64]:
@@ -521,17 +514,29 @@ class DynamicRouting1(TaskControl):
         return np.array([bregma[1] for bregma in self._opto_location_bregma_xy])
 
     @functools.cached_property
-    def opto_location_name(self) -> npt.NDArray[np.str_]:
+    def _opto_location_name(self) -> npt.NDArray[np.str_]:
         """target location for optogenetic inactivation during the trial"""
         if not any(self.is_opto):
             return np.full(self._len, np.nan)
-        labels = self._hdf5["trialOptoLabel"].asstr()[()]
-        return np.where(
-            labels != "no opto",
-            labels,
-            np.nan,
-        )
-
+        if trialOptoLabel := self._hdf5.get("trialOptoLabel", None):
+            labels = trialOptoLabel.asstr()[()]
+            return np.where(
+                labels != "no opto",
+                labels,
+                np.nan,
+            )
+        if (optoLocs := self._hdf5.get('optoLocs')):
+            label = optoLocs['label'].asstr()[()]
+            xy = np.array([(x, y) for x,y in zip(optoLocs['X'], optoLocs['Y'])])
+            return np.array([label[np.all(xy==v, axis=1)][0] for v in self._opto_location_bregma_xy], dtype=str)
+        raise ValueError("No known opto location data found (try `optoParams`)")
+    
+    @functools.cached_property
+    def opto_location_name(self) -> npt.NDArray[np.str_]:
+        if all(str(v).upper() in 'ABCDEF' for v in self._opto_location_name):
+            return np.array([f'probe{str(v).upper()}' for v in self._opto_location_name], dtype=str)
+        return self._opto_location_name
+    
     @functools.cached_property
     def _opto_location_index(self) -> npt.NDArray[np.int32]:
         """0-indexed target location for optogenetic inactivation during the trial"""
