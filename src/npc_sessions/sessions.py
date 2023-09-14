@@ -281,6 +281,7 @@ class DynamicRoutingSession:
             modules.append(self._licks.as_nwb())
         if self.is_video:
             modules.extend(self._video_frame_times)
+        modules.append(self._rewards)
         return tuple(modules)
 
     @functools.cached_property
@@ -1148,6 +1149,33 @@ class DynamicRoutingSession:
             )
             for path, timestamps in path_to_timestamps.items()
         )
+    
+    @functools.cached_property
+    def _rewards(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
+        reward_times = []
+        def get_reward_frames(data: h5py.File) -> list[int]:
+            r = []
+            for key in ('rewardFrames', 'manualRewardFrames'):
+                if (v := data.get(key, None)):
+                    r.extend(v[:])
+            return r
+        if self.is_sync:
+            for stim_file, frame_times in self.stim_frame_times.items():
+                if any(name in stim_file.lower() for name in ('mapping', 'tagging')):
+                    continue
+                reward_times.extend(
+                    frame_times[
+                        get_reward_frames(self.stim_data[stim_file])
+                        ]
+                    )
+        else:
+            reward_times.extend(self.stim_data[self.task_path.stem])
+        return ndx_events.Events(
+            timestamps=np.sort(np.unique(reward_times)),
+            name='rewards',
+            description='individual water rewards delivered to the subject',
+        )
+    
         
 if __name__ == "__main__":
     import doctest
