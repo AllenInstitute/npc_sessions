@@ -846,22 +846,24 @@ class SyncDataset:
             # - vsyncs necessarily precede diode flips
             # - split existing diode flip blocks at the first vsync time for
             #   each vsync block
-            for idx, vsync_block in enumerate(vsync_times_in_blocks):
-                new_rising_edges = []
-                new_falling_edges = []
-                for block in diode_rising_edges_in_blocks:
-                    if (split := np.searchsorted(block, vsync_block[0])) and split > 0:
-                        new_rising_edges.extend([block[:split], block[split:]])
+            # - we'll clean up any excess diode flips at the end of the block later
+            # to see the problem compare these two lists:
+            # [(v[0], v[-1]) for v in vsync_times_in_blocks]
+            # [(v[0], v[-1]) for v in diode_falling_edges_in_blocks]
+            for v_start in (v[0] for v in vsync_times_in_blocks):
+                assert len(diode_rising_edges_in_blocks) == len(diode_falling_edges_in_blocks)
+                new_rising_edges: list[npt.NDArray] = []
+                new_falling_edges: list[npt.NDArray] = [] 
+                for d_idx, (d_start, d_stop) in enumerate((d[0], d[-1]) for d in diode_falling_edges_in_blocks):
+                    if d_start < v_start < d_stop and (split := np.searchsorted(diode_falling_edges_in_blocks[d_idx], v_start)) not in (0, len(diode_falling_edges_in_blocks[d_idx])):
+                        for new, old in zip((new_rising_edges, new_falling_edges), (diode_rising_edges_in_blocks[d_idx], diode_falling_edges_in_blocks[d_idx])):
+                            new.extend((old[:split], old[split:]))
                     else:
-                        new_rising_edges.append(block)
-                for block in diode_falling_edges_in_blocks:
-                    if (split := np.searchsorted(block, vsync_block[0])) and split > 0:
-                        new_falling_edges.extend([block[:split], block[split:]])
-                    else:
-                        new_falling_edges.append(block)
-            diode_rising_edges_in_blocks, diode_falling_edges_in_blocks = tuple(
-                new_rising_edges
-            ), tuple(new_falling_edges)
+                        for new, old in zip((new_rising_edges, new_falling_edges), (diode_rising_edges_in_blocks[d_idx], diode_falling_edges_in_blocks[d_idx])):
+                            new.append(old)
+                diode_rising_edges_in_blocks, diode_falling_edges_in_blocks = (
+                    tuple(new_rising_edges), tuple(new_falling_edges)
+                )
 
         if any(
             len(diode_edge_blocks) > len(vsync_times_in_blocks)
