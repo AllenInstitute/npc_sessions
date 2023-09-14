@@ -137,8 +137,8 @@ class DynamicRoutingSession:
 
     @property
     def source_script(self) -> str | None:
-        if self.is_task:
-            return self.task_data.get('githubTaskScript', None)
+        if self.is_task and not np.isnan(script := self.task_data.get('githubTaskScript', None)[()]):
+            return script
         return None
     
     @property
