@@ -425,9 +425,6 @@ class DynamicRoutingSession:
                 # TODO feed-in ephys recording dirs for alignment
                 # for DynamicRouting1 and AudRFMapping 
                 filename_to_args[stim_filename] = (get_intervals, cls, stim_filename)
-        # TODO combine across instances of the same class:
-        #! requires stimulus param hashes or links to stimulus table, to
-        # identify unique stims across stim files
         return utils.LazyDict((k, v) for k, v in filename_to_args.items())
 
     @functools.cached_property
