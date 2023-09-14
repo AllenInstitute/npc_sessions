@@ -64,6 +64,13 @@ class DynamicRoutingSession:
     # pass any of these read/write properties to init to set
     _trials_interval_name: str = "DynamicRouting1"
 
+    _intervals_descriptions = {
+        TaskControl.VisRFMapping: "visual receptive-field mapping trials",
+        TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
+        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials", # must be "trials" if assigned as main trials table in nwb
+        TaskControl.OptoTagging: "opto-tagging trials",
+    }
+    
     experimenter: str | None = None
     experiment_description: str = "visual-auditory task-switching behavior session"
     institution: str | None = (
@@ -388,12 +395,6 @@ class DynamicRoutingSession:
         # identify unique stims across stim files
         return tuple(intervals)
 
-    _intervals_descriptions = {
-        TaskControl.VisRFMapping: "visual receptive-field mapping trials",
-        TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
-        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials",
-        TaskControl.OptoTagging: "opto-tagging trials",
-    }
 
     @functools.cached_property
     def _all_trials(self) -> utils.LazyDict[str, TaskControl.TaskControl]:
