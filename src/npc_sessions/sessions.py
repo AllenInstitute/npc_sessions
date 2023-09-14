@@ -599,7 +599,7 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def is_task(self) -> bool:
-        with contextlib.suppress(FileNotFoundError, ValueError):
+        with contextlib.suppress(FileNotFoundError, ValueError, StopIteration):
             _ = self.task_data
             return True
         return False
