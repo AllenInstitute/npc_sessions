@@ -499,7 +499,7 @@ class DynamicRouting1(TaskControl):
     def _opto_location_bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         bregma = self._hdf5.get('optoBregma', None) or self._hdf5.get('bregmaXY', None) 
         galvo = self._hdf5['galvoVoltage'][()]
-        return np.array([bregma[np.all(galvo==v, axis=1)][0] for v in self._hdf5['trialGalvoVoltage']])
+        return tuple(tuple(bregma[np.all(galvo==v, axis=1)][0]) for v in self._hdf5['trialGalvoVoltage']) # type: ignore[return-value]
 
     @functools.cached_property
     def opto_location_bregma_x(self) -> npt.NDArray[np.float64]:
