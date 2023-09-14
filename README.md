@@ -25,8 +25,8 @@ pip install npc_sessions
 >>> from npc_sessions import sessions;
 
 # each object is used to get metadata and paths for a session:
->>> sessions[0] 
-DynamicRoutingSession('626791_2022-08-15')  # doctest: +SKIP
+>>> sessions[0]                             # doctest: +SKIP
+DynamicRoutingSession('626791_2022-08-15')  
 >>> sessions[0].is_ephys
 True
 >>> all(s.date.year >= 2022 for s in sessions)
