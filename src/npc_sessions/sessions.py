@@ -65,12 +65,11 @@ class DynamicRoutingSession:
     _trials_interval_name: str = "DynamicRouting1"
 
     experimenter: str | None = None
-    experiment_description: str = "Visual-auditory task-switching behavior session"
+    experiment_description: str = "visual-auditory task-switching behavior session"
     institution: str | None = (
         "Neural Circuits & Behavior | MindScope program | Allen Institute"
     )
     notes: str | None = None
-    source_script: str | None = None
 
     local_path: upath.UPath | None = None
 
@@ -96,6 +95,7 @@ class DynamicRoutingSession:
             identifier=self.identifier,
             session_start_time=self.session_start_time.astimezone(),
             experimenter=self.experimenter,
+            lab=self.lab,
             notes=self.notes,
             source_script=self.source_script,
             subject=self.subject,
@@ -103,7 +103,7 @@ class DynamicRoutingSession:
             epochs=self.epochs,
             epoch_tags=self.epoch_tags,
             stimulus_template=None,  # TODO pass tuple of stimulus templates
-            trials=self.trials, # we have one sessions without trials (670248_2023-08-02)
+            trials=self.trials if self.is_task else None, # we have one sessions without trials (670248_2023-08-02)
             intervals=self._intervals,
             acquisition=self._acquisition,
             processing=self._processing,
@@ -136,6 +136,18 @@ class DynamicRoutingSession:
         return npc_session.DatetimeRecord(self.session_start_time.isoformat())
 
     @property
+    def source_script(self) -> str | None:
+        if self.is_task:
+            return self.task_data.get('githubTaskScript', None)
+        return None
+    
+    @property
+    def lab(self) -> str | None:
+        with contextlib.suppress(AttributeError):
+            return self.rig
+        return None
+    
+    @property
     def identifier(self) -> str:
         if getattr(self, "_identifier", None) is None:
             self._identifier = str(uuid.uuid4())
@@ -148,6 +160,8 @@ class DynamicRoutingSession:
             self.keywords.append("behavior")
             if self.is_sync:
                 self.keywords.append("sync")
+            if not self.is_task:
+                self.keywords.append("no trials")
             if self.is_video:
                 self.keywords.append("video")
             if self.is_ephys:
@@ -158,8 +172,6 @@ class DynamicRoutingSession:
                 self.keywords.append("CCF")
             if self.is_opto:
                 self.keywords.append("opto")
-            if self.trials is None:
-                self.keywords.append("no trials")
         return self._keywords
 
     @keywords.setter
@@ -586,6 +598,13 @@ class DynamicRoutingSession:
         )
 
     @functools.cached_property
+    def is_task(self) -> bool:
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            _ = self.task_data
+            return True
+        return False
+    
+    @functools.cached_property
     def is_sync(self) -> bool:
         if self.info:
             return self.info.is_sync
@@ -809,7 +828,13 @@ class DynamicRoutingSession:
             )
             for path in self.stim_paths
         )
-
+    @functools.cached_property
+    def rig(self) -> str:
+        for hdf5 in itertools.chain((self.task_data,) if self.is_task else (), (v for v in self.stim_data.values())):
+            if rig := hdf5.get('rigName', None):
+                return rig.asstr()[()]
+        raise AttributeError(f"Could not find rigName for {self.id} in stim files")
+        
     @property
     def sam(self) -> DynRoutData:
         if not hasattr(self, "_sam"):
