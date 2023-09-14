@@ -11,5 +11,5 @@ _ = dotenv.load_dotenv(
 )  # take environment variables from .env
 
 Session = DynamicRoutingSession  # temp alias for backwards compatibility
-sessions = [DynamicRoutingSession(info.session) for info in tracked if info.is_uploaded]
+sessions = [DynamicRoutingSession(info.session) for info in sorted(tracked, key=lambda x: x.date) if info.is_uploaded]
 """Uploaded sessions, tracked in npc_lims via `tracked_sessions.yaml`"""
