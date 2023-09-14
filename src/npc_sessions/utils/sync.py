@@ -987,10 +987,9 @@ class SyncDataset:
                     diode_flips = diode_flips[1:]
 
                 if len(diode_flips) < len(vsyncs):
-                    total_sync_sec = self.meta_data["total_samples"] / self.sample_freq
                     if (
                         is_last_vsync_close_to_end_of_sync := abs(
-                            total_sync_sec - vsyncs[-1]
+                            self.total_seconds - vsyncs[-1]
                         )
                         < MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC
                     ) or (
