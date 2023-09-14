@@ -349,13 +349,8 @@ class DynamicRoutingSession:
     def _all_trials(self) -> utils.LazyDict[str, TaskControl.TaskControl]:
         if self.is_sync:
             sync = self.sync_data
-            stim_paths = tuple(
-                path
-                for path, times in utils.get_stim_frame_times(
-                    *self.stim_paths, sync=self.sync_data
-                ).items()
-                if not isinstance(times, Exception)
-            )
+            # get the only stims for which we have times:
+            stim_paths = tuple(path for path in self.stim_paths if path.stem in self.stim_frame_times.keys())
         else:
             sync = None
             stim_paths = self.stim_paths
@@ -405,6 +400,8 @@ class DynamicRoutingSession:
             description="notes about the experiment or the data collected during the epoch",
         )
         for stim in self.stim_paths:
+            if stim.stem not in self.stim_frame_times.keys():
+                continue
             epochs.add_interval(
                 **self.get_epoch_record(stim).nwb,
             )
@@ -877,17 +874,34 @@ class DynamicRoutingSession:
         )
 
     @functools.cached_property
-    def frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
-        times = utils.get_stim_frame_times(
-            *self.stim_data.values(),
+    def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
+        """Frame times dict for all stims, containing time arrays or Exceptions."""
+        frame_times = utils.get_stim_frame_times(
+            *self.stim_data.values(), # use cached data
             sync=self.sync_data,
             frame_time_type="display_time",
         )
-        for k in times:
-            utils.assert_stim_times(times[k])
-        assert not any(isinstance(v, Exception) for v in times.values())
-        return dict(zip(self.stim_data.keys(), times.values()))  # type: ignore [arg-type]
-
+        def reverse_lookup(d, value) -> str:
+            return next(str(k) for k, v in d.items() if v is value)
+        return {reverse_lookup(self.stim_data, k): frame_times[k] for k in frame_times}
+        
+    @property
+    def stim_frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
+        """Frame times dict for stims with time arrays, or optionally raising
+        exceptions."""
+        if self.suppress_errors:
+            return {
+                path: times
+                for path, times in self._stim_frame_times.items()
+                if not isinstance(times, Exception)
+            }
+        asserted_stim_frame_times: dict[str, npt.NDArray[np.float64]] = {}
+        for k, v in self._stim_frame_times.items():
+            utils.assert_stim_times(self._stim_frame_times[k])
+            asserted_stim_frame_times[k] = v
+        assert not any(isinstance(v, Exception) for v in asserted_stim_frame_times.values())
+        return asserted_stim_frame_times
+    
     def get_epoch_record(
         self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
     ) -> npc_lims.Epoch:
@@ -909,7 +923,7 @@ class DynamicRoutingSession:
             start_time = 0.0
             stop_time = utils.get_stim_duration(h5)
         else:
-            frame_times = self.frame_times[stim_file.stem]
+            frame_times = self.stim_frame_times[stim_file.stem]
             start_time = frame_times[0]
             stop_time = frame_times[-1]
 
