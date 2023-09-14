@@ -138,8 +138,10 @@ class DynamicRoutingSession:
     @property
     def source_script(self) -> str | None:
         if self.is_task and (script := self.task_data.get('githubTaskScript', None)):
-            if not np.isnan(script[()]):
-                return script
+            if isinstance(script[()], bytes):
+                return script.asstr()[()]
+            if isinstance(script[()], np.floating) and not np.isnan(script[()]):
+                return str(script[()])
         return None
     
     @property
