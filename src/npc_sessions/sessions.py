@@ -407,7 +407,8 @@ class DynamicRoutingSession:
                     )
                 except AttributeError:
                     continue  # some stims (e.g. Spontaneous) have no trials class
-                # TODO append stim latencies where required
+                # TODO feed-in ephys recording dirs for alignment
+                # for DynamicRouting1 and AudRFMapping 
                 filename_to_args[stim_filename] = (get_intervals, cls, stim_filename)
 
         return utils.LazyDict((k, v) for k, v in filename_to_args.items())
