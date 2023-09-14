@@ -963,7 +963,7 @@ class DynamicRoutingSession:
             }
         asserted_stim_frame_times: dict[str, npt.NDArray[np.float64]] = {}
         for k, v in self._stim_frame_times.items():
-            utils.assert_stim_times(self._stim_frame_times[k])
+            v = utils.assert_stim_times(v)
             asserted_stim_frame_times[k] = v
         assert not any(isinstance(v, Exception) for v in asserted_stim_frame_times.values())
         return asserted_stim_frame_times
