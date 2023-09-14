@@ -1062,7 +1062,7 @@ class DynamicRoutingSession:
                 f"{self.id} is not an ephys session (required for settings.xml)"
             )
         return tuple(
-            record_node / "settings.xml" for record_node in self.ephys_record_node_dirs
+            next(record_node.glob("settings*.xml")) for record_node in self.ephys_record_node_dirs
         )
 
     @functools.cached_property
