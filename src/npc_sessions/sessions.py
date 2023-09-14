@@ -358,23 +358,35 @@ class DynamicRoutingSession:
             intervals[module.name] = module
         return intervals
 
+
     @functools.cached_property
-    def _intervals(self) -> pynwb.epoch.TimeIntervals:
+    def _intervals(self) -> tuple[pynwb.epoch.TimeIntervals, ...]:
         """The version passed to NWBFile.__init__"""
-        intervals = []
+        intervals: list[pynwb.epoch.TimeIntervals] = []
         for k, v in self._all_trials.items():
-            if self._trials_interval_name in k:
-                continue
-            nwb_intervals = pynwb.epoch.TimeIntervals(
-                name=v.__class__.__name__,
-                description=self._intervals_descriptions[v.__class__],
-            )
-            for column in v.to_add_trial_column():
-                nwb_intervals.add_column(**column)
+            # if self._trials_interval_name in k:
+            #     continue
+            
+            if not any(existing := [i for i in intervals if i.name == v.__class__.__name__]):
+                nwb_intervals = pynwb.epoch.TimeIntervals(
+                    name=v.__class__.__name__,
+                    description=self._intervals_descriptions[v.__class__],
+                )
+                trial_idx_offset = 0
+                for column in v.to_add_trial_column():
+                    nwb_intervals.add_column(**column)
+            else:
+                nwb_intervals = existing[0]
+                trial_idx_offset = nwb_intervals[:]['trial_index'].max() + 1
+                assert (a := set(nwb_intervals.colnames)) == (b := set(v.keys())), f"columns don't match for {k} and existing {nwb_intervals.name} intervals: {a.symmetric_difference(b) = }"
             for trial in v.to_add_trial():
                 nwb_intervals.add_interval(**trial)
-            intervals.append(nwb_intervals)
-        return intervals
+            if trial_idx_offset == 0:
+                intervals.append(nwb_intervals)
+        # TODO deal with stimuli across epochs
+        #! requires stimulus param hashes or links to stimulus table, to
+        # identify unique stims across stim files
+        return tuple(intervals)
 
     _intervals_descriptions = {
         TaskControl.VisRFMapping: "visual receptive-field mapping trials",
