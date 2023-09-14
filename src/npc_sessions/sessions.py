@@ -1131,7 +1131,7 @@ class DynamicRoutingSession:
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=utils.extract_camera_name(path.stem),
+                name=f'{utils.extract_camera_name(path.stem)}_camera',
                 description=f'video frame timestamps for {path.stem}',
             )
             for path, timestamps in path_to_timestamps.items()
