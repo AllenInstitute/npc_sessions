@@ -103,7 +103,7 @@ class DynamicRoutingSession:
             epochs=self.epochs,
             epoch_tags=self.epoch_tags,
             stimulus_template=None,  # TODO pass tuple of stimulus templates
-            trials=self.trials,
+            trials=self.trials, # we have one sessions without trials (670248_2023-08-02)
             intervals=self._intervals,
             acquisition=self._acquisition,
             processing=self._processing,
@@ -158,6 +158,8 @@ class DynamicRoutingSession:
                 self.keywords.append("CCF")
             if self.is_opto:
                 self.keywords.append("opto")
+            if self.trials is None:
+                self.keywords.append("no trials")
         return self._keywords
 
     @keywords.setter
@@ -278,8 +280,23 @@ class DynamicRoutingSession:
 
     # intervals ----------------------------------------------------------------- #
 
-    @functools.cached_property
-    def trials(self) -> pynwb.epoch.TimeIntervals:
+    @property
+    def trials(self) -> pynwb.epoch.TimeIntervals | None:
+        if (cached := getattr(self, "_cached_nwb_trials", None)) is not None and cached != -1:
+            return cached
+        try:
+            _ = self._trials
+        except ValueError as exc:
+            if self.suppress_errors:
+                if (cached := getattr(self, "_cached_nwb_trials", None)) == -1:
+                    return None # avoid repeating the same message
+                logger.warning(f"Couldn't create trials table for {self.id}: {exc!r}")
+                self._cached_nwb_trials = -1
+                return None
+            if self.id == '670248_20230802':
+                raise ValueError(f"DynamicRouting1*.hdf5 was recorded badly for 670248_20230802 and won't open.\nIf you wish to compile an nwb anyway, set `session.suppress_errors = True` for this session and re-run")
+            raise exc
+
         trials = pynwb.epoch.TimeIntervals(
             name="trials",
             description=self._intervals_descriptions[self._trials.__class__],
@@ -288,6 +305,7 @@ class DynamicRoutingSession:
             trials.add_column(**column)
         for trial in self._trials.to_add_trial():
             trials.add_interval(**trial)
+        self._cached_nwb_trials = trials
         return trials
 
     @functools.cached_property
@@ -620,6 +638,8 @@ class DynamicRoutingSession:
         genotype: str | None = (
             self.subject.genotype
         )  # won't exist if subject.json not found
+        if self.trials is None:
+            return False
         if self._trials._has_opto and (
             genotype is None or "wt/wt" not in genotype.lower()
         ):
