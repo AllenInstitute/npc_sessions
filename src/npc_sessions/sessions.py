@@ -706,7 +706,8 @@ class DynamicRoutingSession:
         if self.info:
             return self.info.is_sorted
         with contextlib.suppress(FileNotFoundError, ValueError):
-            npc_lims.is_sorted_data_asset(self.id)
+            _ = npc_lims.is_sorted_data_asset(self.id)
+            return True
         return False
     
     @functools.cached_property
@@ -715,7 +716,8 @@ class DynamicRoutingSession:
         if not self.is_sorted:
             return False
         with contextlib.suppress(FileNotFoundError, ValueError):
-            npc_lims.get_units_codeoean_kilosort_path_from_s3(self.id)
+            _ = npc_lims.get_units_codeoean_kilosort_path_from_s3(self.id)
+            return True
         return False
 
     @functools.cached_property
