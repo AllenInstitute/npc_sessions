@@ -20,6 +20,7 @@ import npc_session
 import numpy as np
 import ndx_events
 import numpy.typing as npt
+import PIL.Image
 import polars as pl
 import pynwb
 import upath
@@ -299,7 +300,10 @@ class DynamicRoutingSession:
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
-        return ()
+        # TODO add RF maps
+        modules = []
+        modules.append(self.drift_maps)
+        return tuple(modules)
 
     # intervals ----------------------------------------------------------------- #
 
@@ -603,6 +607,30 @@ class DynamicRoutingSession:
                 electrode_group=self.electrode_groups[unit["device_name"]],
             )
         return units
+
+    # images -------------------------------------------------------------------- #
+    
+    @functools.cached_property
+    def drift_maps(self) -> pynwb.image.Images:
+        return pynwb.image.Images(
+            name="drift_maps",
+            images=tuple(self.img_to_nwb(p) for p in self.drift_map_paths),
+            description="activity plots (time x probe depth x firing rate) over the entire ecephys recording, for assessing probe drift",
+            )
+        
+    @staticmethod
+    def img_to_nwb(path: utils.PathLike) -> pynwb.image.Image:
+        path = utils.from_pathlike(path)
+        img = PIL.Image.open(io.BytesIO(path.read_bytes()))
+        mode_to_nwb_cls = {
+            "L": pynwb.image.GrayscaleImage,
+            "RGB": pynwb.image.RGBImage,
+            "RGBA": pynwb.image.RGBAImage,
+        }
+        return mode_to_nwb_cls[img.mode](
+            name=path.stem,
+            data=np.array(img.convert(img.mode)),
+        )
 
     # session ------------------------------------------------------------------- #
 
@@ -1035,6 +1063,12 @@ class DynamicRoutingSession:
                     self.sync_data, self.ephys_recording_dirs
                 )
             )
+        )
+
+    @functools.cached_property
+    def drift_map_paths(self) -> tuple[upath.UPath, ...]:
+        return tuple(
+            next(d for d in self.sorted_data_paths if d.name == 'drift_maps').iterdir()
         )
 
     @functools.cached_property
