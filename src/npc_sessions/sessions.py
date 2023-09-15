@@ -34,8 +34,8 @@ logger = logging.getLogger(__name__)
 
 
 class DynamicRoutingSession:
-    """Class for fetching & processing raw data for given a session id, and
-    converting to NWB modules or an NWBFile instance
+    """Class for fetching & processing raw data for a session, making 
+    NWB modules and an NWBFile instance available as attributes.
 
     >>> s = DynamicRoutingSession('670248_2023-08-03')
 
@@ -59,25 +59,30 @@ class DynamicRoutingSession:
     >>> 'DynamicRouting1' in s.epoch_tags
     True
     """
+    
     suppress_errors = False
-    """If True, just compile as much as possible from available stim files."""
+    """If True, just compile as much as possible from available stim files,
+    ignoring non-critical errors."""
     
-    # pass any of these read/write properties to init to set
-    _trials_interval_name: str = "DynamicRouting1"
-
-    _intervals_descriptions = {
-        TaskControl.VisRFMapping: "visual receptive-field mapping trials",
-        TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
-        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials", # must be "trials" if assigned as main trials table in nwb
-        TaskControl.OptoTagging: "opto-tagging trials",
-    }
-    
+    # pass any of these properties to init to set
+    # NWB metadata -------------------------------------------------------------- #
     experimenter: str | None = None
     experiment_description: str = "visual-auditory task-switching behavior session"
     institution: str | None = (
         "Neural Circuits & Behavior | MindScope program | Allen Institute"
     )
     notes: str | None = None
+    
+    # --------------------------------------------------------------------------- #
+    
+    task_stim_name: str = "DynamicRouting1"
+
+    intervals_descriptions = {
+        TaskControl.VisRFMapping: "visual receptive-field mapping trials",
+        TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
+        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials", # must be "trials" if assigned as main trials table in nwb
+        TaskControl.OptoTagging: "opto-tagging trials",
+    }
 
     root_path: upath.UPath | None = None
     """Assigned on init if session_or_path is a pathlike object.
@@ -335,7 +340,7 @@ class DynamicRoutingSession:
 
         trials = pynwb.epoch.TimeIntervals(
             name="trials",
-            description=self._intervals_descriptions[self._trials.__class__],
+            description=self.intervals_descriptions[self._trials.__class__],
         )
         for column in self._trials.to_add_trial_column():
             trials.add_column(**column)
@@ -348,17 +353,17 @@ class DynamicRoutingSession:
     def _trials(self) -> TaskControl.DynamicRouting1:
         """Main behavior task trials"""
         stim_name = next(
-            (_ for _ in self.stim_paths if self._trials_interval_name in _.stem), None
+            (_ for _ in self.stim_paths if self.task_stim_name in _.stem), None
         )
         if stim_name is None:
             raise ValueError(
-                f"no stim named {self._trials_interval_name}* found for {self.id}"
+                f"no stim named {self.task_stim_name}* found for {self.id}"
             )
         # avoid iterating over values and checking for type, as this will
         # create all intervals in lazydict if they don't exist
         if stim_name.stem not in self._all_trials.keys():
             raise IndexError(
-                f"no intervals named {self._trials_interval_name}* found for {self.id}"
+                f"no intervals named {self.task_stim_name}* found for {self.id}"
             )
             
         trials = self._all_trials[stim_name.stem]
@@ -391,7 +396,7 @@ class DynamicRoutingSession:
             if not any(existing := [i for i in intervals if i.name == v.__class__.__name__]):
                 nwb_intervals = pynwb.epoch.TimeIntervals(
                     name=v.__class__.__name__,
-                    description=self._intervals_descriptions[v.__class__],
+                    description=self.intervals_descriptions[v.__class__],
                 )
                 trial_idx_offset = 0
                 for column in v.to_add_trial_column():
@@ -877,8 +882,8 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def raw_data_asset_id(self) -> str:
-        if not self.is_ephys:  # currently only ephys sessions have raw data assets
-            raise ValueError(f"{self.id} is not a session with ephys raw data")
+        if not self.is_ephys: 
+            raise ValueError(f"{self.id} currently only ephys sessions have raw data assets")
         return npc_lims.get_session_raw_data_asset(self.id)["id"]
 
     @functools.cached_property
