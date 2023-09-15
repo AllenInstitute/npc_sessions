@@ -905,7 +905,7 @@ class DynamicRoutingSession:
             raise ValueError(f"{self.id} is not a session with ephys")
         return npc_lims.get_sorted_data_paths_from_s3(self.id)
 
-    @property
+    @functools.cached_property
     def sync_path(self) -> upath.UPath:
         if not self.is_sync:
             raise ValueError(f"{self.id} is not a session with sync data")
@@ -914,7 +914,6 @@ class DynamicRoutingSession:
             raise ValueError(f"Expected 1 sync file, found {paths = }")
         return paths[0]
 
-    @functools.cache
     def get_sync_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
             p
