@@ -970,6 +970,7 @@ class SyncDataset:
                     common_len = min([len(vsyncs), len(diode_flips)])
                     return np.median(diode_flips[:common_len] - vsyncs[:common_len])
 
+                counter = 0
                 while (
                     median_diff(diode_flips, vsyncs)
                     > MAX_VSYNC_DIODE_FLIP_SEPARATION_SEC
@@ -978,11 +979,16 @@ class SyncDataset:
                     < median_diff(diode_flips, vsyncs[1:])
                     < median_diff(diode_flips, vsyncs)
                 ):
+                    if counter > 2: #!  this may need to be dereased to allow only 1 
+                        raise ValueError(
+                            f'Added two missed diode flips at start already, the max we can explain by pre-stim background & first diode square being similar luminance. This is a different problem: sync {self.start_time=}.'
+                        )
                     logger.debug("Missing first diode flip")
                     diode_flips = add_missing_diode_flip_at_stim_onset(
                         diode_flips, vsyncs
                     )
-
+                    counter += 1
+                    
                 while (
                     median_diff(diode_flips, vsyncs)
                     < MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC
