@@ -22,20 +22,17 @@ pip install npc_sessions
 ```
 
 ```python
->>> from npc_sessions import get_sessions;
+>>> from npc_sessions import DynamicRoutingSession, get_sessions;
 
-# each object is used to get metadata and paths for a session:
->>> session = next(get_sessions())                  # doctest: +SKIP
-DynamicRoutingSession('626791_2022-08-15')  
->>> session.is_ephys
+# each object is used to get metadata and paths for a session:         
+>>> DynamicRoutingSession('668755_2023-08-31')  
+>>> session.is_ephys                                
 True
->>> session.stim_paths[0].stem                      # doctest: +SKIP
+>>> session.stim_paths[0].stem                      
 'DynamicRouting1_626791_20220815_112336'
->>> all(s.date.year >= 2022 for s in get_sessions())
-True
 
 # data is processed on-demand to generate individual pynwb modules:
->>> session.subject                                 # doctest: +SKIP
+>>> session.subject                                 
 subject pynwb.file.Subject at 0x...
 Fields:
   age: P145D
@@ -62,7 +59,14 @@ Fields:
     19192719021 <class 'pynwb.device.Device'>,
     19192719061 <class 'pynwb.device.Device'>
   }
-  ...
+
+# loop over all currently-tracked ephys sessions using the session-generator:
+>>> all(s.date.year >= 2022 for s in get_sessions())
+True
+>>> trials_dfs = {}
+>>> for session in get_sessions():                  # doctest: +SKIP
+...     trials_dfs[session.id] = session.trials[:]
+
 ```
 
 ## to develop with conda
