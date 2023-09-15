@@ -22,20 +22,20 @@ pip install npc_sessions
 ```
 
 ```python
->>> from npc_sessions import sessions;
+>>> from npc_sessions import get_sessions;
 
 # each object is used to get metadata and paths for a session:
->>> sessions[0]                             # doctest: +SKIP
+>>> session = next(get_sessions())                  # doctest: +SKIP
 DynamicRoutingSession('626791_2022-08-15')  
->>> sessions[0].is_ephys
+>>> session.is_ephys
 True
->>> all(s.date.year >= 2022 for s in sessions)
-True
->>> sessions[0].stim_paths[0].stem          # doctest: +SKIP
+>>> session.stim_paths[0].stem                      # doctest: +SKIP
 'DynamicRouting1_626791_20220815_112336'
+>>> all(s.date.year >= 2022 for s in get_sessions())
+True
 
 # data is processed on-demand to generate individual pynwb modules:
->>> sessions[0].subject                     # doctest: +SKIP
+>>> session.subject                                 # doctest: +SKIP
 subject pynwb.file.Subject at 0x...
 Fields:
   age: P145D
@@ -48,7 +48,7 @@ Fields:
   subject_id: 626791
 
 # a full NWBFile instance can also be generated with all currently-available data:
->>> sessions[0].nwb                         # doctest: +SKIP
+>>> session.nwb                                     # doctest: +SKIP
 root pynwb.file.NWBFile at 0x...
 Fields:
   acquisition: {
