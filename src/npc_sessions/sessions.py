@@ -156,6 +156,9 @@ class DynamicRoutingSession:
             return self.id == other_id
         return self.id == str(other)
     
+    def __hash__(self) -> int:
+        return hash(self.id)
+    
     @property
     def nwb(self) -> pynwb.NWBFile:
         # if self._nwb_hdf5_path:
