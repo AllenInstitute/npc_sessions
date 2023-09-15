@@ -118,7 +118,7 @@ class DynamicRoutingSession:
             devices=self._devices,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
-            units=self.units if self.is_sorted else None,
+            units=self.units if self._is_units else None, # should use is_sorted when processing is done on-demand
         )
 
     def __getattribute__(self, __name: str) -> Any:
@@ -176,7 +176,7 @@ class DynamicRoutingSession:
                 self.keywords.append("video")
             if self.is_ephys:
                 self.keywords.append("ephys")
-            if not self.is_sorted:
+            if not self._is_units: # TODO switch back to `is_sorted` when processing is done on-demand
                 self.keywords.append("no units")
             if self.is_annotated:
                 self.keywords.append("CCF")
@@ -653,6 +653,17 @@ class DynamicRoutingSession:
     @functools.cached_property
     def is_sorted(self) -> bool:
         if not self.is_ephys:
+            return False
+        if self.info:
+            return self.info.is_sorted
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            npc_lims.is_sorted_data_asset(self.id)
+        return False
+    
+    @functools.cached_property
+    def _is_units(self) -> bool:
+        """Temp attr to check if arjun's processed units files are available"""
+        if not self.is_sorted:
             return False
         with contextlib.suppress(FileNotFoundError, ValueError):
             npc_lims.get_units_codeoean_kilosort_path_from_s3(self.id)
