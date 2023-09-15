@@ -946,7 +946,7 @@ class DynamicRoutingSession:
         if not hasattr(self, "_sam"):
             obj = DynRoutData()
             obj.loadBehavData(
-                self.task_path.as_posix(), io.BytesIO(self.task_path.read_bytes())
+                self.task_path.as_posix(), self.task_data,
             )
             self._sam = obj
         return self._sam
