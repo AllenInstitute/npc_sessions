@@ -74,7 +74,8 @@ class OptoTagging(TaskControl):
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         bregma = self._hdf5.get('optoBregma', None) or self._hdf5.get('bregmaXY', None) 
         galvo = self._hdf5['galvoVoltage'][()]
-        return tuple(tuple(bregma[np.all(galvo==v, axis=1)][0]) for v in self._hdf5['trialGalvoVoltage']) # type: ignore[return-value]
+        trial_voltages  = self._hdf5['trialGalvoVoltage']
+        return tuple(tuple(bregma[np.all(galvo==v, axis=1)][0]) for v in trial_voltages) # type: ignore
 
     @functools.cached_property
     def bregma_x(self) -> npt.NDArray[np.float64]:
