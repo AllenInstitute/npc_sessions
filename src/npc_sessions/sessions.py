@@ -649,6 +649,8 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def is_task(self) -> bool:
+        if v := getattr(self, '_is_task', None):
+            return v
         with contextlib.suppress(FileNotFoundError, ValueError, StopIteration):
             _ = self.task_data
             return True
@@ -656,6 +658,8 @@ class DynamicRoutingSession:
     
     @functools.cached_property
     def is_sync(self) -> bool:
+        if v := getattr(self, '_is_sync', None):
+            return v
         if self.info:
             return self.info.is_sync
         with contextlib.suppress(FileNotFoundError, ValueError):
@@ -665,6 +669,8 @@ class DynamicRoutingSession:
     
     @functools.cached_property
     def is_video(self) -> bool:
+        if v := getattr(self, '_is_video', None):
+            return v
         if not self.is_sync:
             return False
         with contextlib.suppress(FileNotFoundError, ValueError):
@@ -674,18 +680,19 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def is_ephys(self) -> bool:
+        if v := getattr(self, '_is_ephys', None):
+            return v
         if self.info:
             return self.info.is_ephys
         with contextlib.suppress(FileNotFoundError, ValueError):
-            if (
-                self.get_raw_data_paths_from_local()
-                or npc_lims.get_raw_data_paths_from_s3(self.id)
-            ):
+            if self.ephys_record_node_dirs:
                 return True
         return False
 
     @functools.cached_property
     def is_sorted(self) -> bool:
+        if v := getattr(self, '_is_sorted', None):
+            return v
         if not self.is_ephys:
             return False
         if self.info:
