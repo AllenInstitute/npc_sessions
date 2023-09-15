@@ -820,6 +820,18 @@ class DynamicRoutingSession:
         root_level_paths = tuple(p for p in self.root_path.iterdir() if p.is_file())
         return root_level_paths + tuple(set(ephys_paths))
 
+    def get_task_hdf5_from_s3_repo(self) -> upath.UPath:
+        try:
+            return next(
+                (npc_lims.DR_DATA_REPO / str(self.id.subject)).glob(
+                f'{self.task_stim_name}*{self.id.date.replace("-", "")}*.hdf5'
+                )
+            )
+        except StopIteration:
+            raise FileNotFoundError(
+                f"Could not find file in {npc_lims.DR_DATA_REPO} for {self.id}"
+            ) from None
+            
     @functools.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
         if self.root_path:
