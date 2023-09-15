@@ -11,14 +11,14 @@ import re
 import uuid
 import warnings
 from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Generator, Literal, Any
+from typing import Any, Callable, Generator, Literal
 
 import h5py
+import ndx_events
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
 import numpy as np
-import ndx_events
 import numpy.typing as npt
 import PIL.Image
 import polars as pl
@@ -68,9 +68,9 @@ def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
     >>> for session in sessions:                              # doctest: +SKIP
     ...     nwbs.append(session.nwb)
     """
-    for info in sorted(npc_lims.tracked, key=lambda x: x.date, reverse=True):
-        if info.is_uploaded and str(info.session) not in config.session_issues:
-            yield DynamicRoutingSession(info.session, **config.session_kwargs.get(info.session, {}))
+    for session in sorted(npc_lims.tracked, key=lambda x: x.date, reverse=True):
+        if session.is_uploaded and session.id not in config.session_issues:
+            yield DynamicRoutingSession(session.id, **config.session_kwargs.get(session.id, {}))
 
 class DynamicRoutingSession:
     """Class for fetching & processing raw data for a session, making 
