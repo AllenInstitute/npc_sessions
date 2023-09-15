@@ -46,10 +46,10 @@ def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
       keeping references to sessions that are no longer needed
       
     ## getting an indexable sequence of sessions
+    Just convert the output to a list or tuple, but see the note below if you intend to
+    loop over this sequence to process large amounts of data:
     >>> sessions = list(get_sessions())
-    However, see the note below if you intend to loop over this list to process
-    large amounts of data.
-    
+
     ## looping over sessions
     Data is cached in each session object after fetching from the cloud, so
     looping over all sessions can use a lot of memory if all sessions are
