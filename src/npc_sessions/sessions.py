@@ -11,7 +11,7 @@ import re
 import uuid
 import warnings
 from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Generator, Literal, Any
 
 import h5py
 import npc_lims
@@ -26,12 +26,51 @@ import pynwb
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
+import npc_sessions.config as config
 import npc_sessions.nwb as nwb_internal
 import npc_sessions.trials as TaskControl
 import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
+def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
+    """Uploaded sessions, tracked in npc_lims via `tracked_sessions.yaml`, newest
+    to oldest. 
+
+    - sessions with known issues are excluded
+    - session-specific config from `npc_sessions.config.session_kwargs`
+      is always re-applied: modify it if you want to pass in parameters to each
+      session init
+    - returns a generator not because objects take long to create (data is
+      loaded lazily) but because attributes are cached, so we want to avoid
+      keeping references to sessions that are no longer needed
+      
+    ## getting an indexable sequence of sessions
+    >>> sessions = list(get_sessions())
+    However, see the note below if you intend to loop over this list to process
+    large amounts of data.
+    
+    ## looping over sessions
+    Data is cached in each session object after fetching from the cloud, so
+    looping over all sessions can use a lot of memory if all sessions are
+    retained.
+
+    ### do this
+    loop over the generator so each session object is discarded after use:
+    >>> nwbs = []
+    >>> for session in get_sessions():           # doctest: +SKIP
+    ...     nwbs.append(session.nwb)
+    
+    ### avoid this
+    `sessions` will end up storing all data for all sessions in memory:
+    >>> sessions = list(get_sessions())
+    >>> nwbs = []
+    >>> for session in sessions:                              # doctest: +SKIP
+    ...     nwbs.append(session.nwb)
+    """
+    for info in sorted(npc_lims.tracked, key=lambda x: x.date, reverse=True):
+        if info.is_uploaded and str(info.session) not in config.session_issues:
+            yield DynamicRoutingSession(info.session, **config.session_kwargs.get(info.session, {}))
 
 class DynamicRoutingSession:
     """Class for fetching & processing raw data for a session, making 
@@ -107,6 +146,10 @@ class DynamicRoutingSession:
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.id!r})"
 
+    def __getattribute__(self, __name: str) -> Any:
+        if __name in ("date", "idx"):
+            return self.id.__getattribute__(__name)
+        return super().__getattribute__(__name)
 
     def __eq__(self, other: Any) -> bool:
         if other_id := getattr(other, 'id', None):
@@ -141,11 +184,6 @@ class DynamicRoutingSession:
             electrodes=self.electrodes if self.is_ephys else None,
             units=self.units if self._is_units else None, # should use is_sorted when processing is done on-demand
         )
-
-    def __getattribute__(self, __name: str) -> Any:
-        if __name in ("date", "idx"):
-            return self.id.__getattribute__(__name)
-        return super().__getattribute__(__name)
 
     # metadata ------------------------------------------------------------------ #
 
@@ -1282,6 +1320,7 @@ class DynamicRoutingSession:
     
         
 if __name__ == "__main__":
+    list(get_sessions())
     import doctest
 
     import dotenv
