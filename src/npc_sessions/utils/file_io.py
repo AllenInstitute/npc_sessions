@@ -20,7 +20,19 @@ PathLike = Union[str, bytes, os.PathLike, pathlib.Path, upath.UPath]
 
 
 def from_pathlike(pathlike) -> upath.UPath:
-    return upath.UPath(os.fsdecode(pathlike))
+    """
+    >>> from_pathlike('s3://aind-data-bucket/experiment2_Record Node 102#probeA.png')
+    S3Path('s3://aind-data-bucket/experiment2_Record Node 102#probeA.png')
+    """
+    if isinstance(pathlike, upath.UPath):
+        return pathlike 
+    path: str = os.fsdecode(pathlike)
+    # UPath will do rsplit('#')[0] on path
+    if "#" in (p := pathlib.Path(path)).name:
+        return upath.UPath(p.parent).with_name(p.name)
+    if '#' in p.parent.as_posix():
+        raise ValueError(f"Path {p} contains '#' in a parent dir, which we don't have a fix for yet")
+    return upath.UPath(path)
 
 
 def checksum(path: PathLike, show_progress_bar=True) -> str:
