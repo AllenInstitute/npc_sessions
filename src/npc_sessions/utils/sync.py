@@ -921,8 +921,8 @@ class SyncDataset:
                 0.1 * 1 / 60
             )  # at 60 fps we should never have diode-flip intervals this small: consider them anomalous
 
-            def short_interval_indices(frametimes):
-                intervals = np.diff(frametimes)
+            def short_interval_indices(diode_flips):
+                intervals = np.diff(diode_flips)
                 return np.where(intervals < short_interval_threshold)[0]
 
             while any(short_interval_indices(diode_flips)):
