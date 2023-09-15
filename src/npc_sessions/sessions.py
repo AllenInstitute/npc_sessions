@@ -755,6 +755,19 @@ class DynamicRoutingSession:
             for file in npc_lims.get_raw_data_root(self.id).iterdir()
             if file.suffix == ".json"
         )
+        
+    @functools.cached_property
+    def sorting_vis(self) -> dict[str, dict | str]:
+        """To open links:
+        import webbrowser
+        webbrowser.open(_)
+        """
+        if not self.is_ephys:
+            raise AttributeError(f"{self.id} is not an ephys session")
+        if not self.is_sorted:
+            raise AttributeError(f"{self.id} has not been sorted")
+        path = next(p for p in self.sorted_data_paths if p.name == 'visualization_output.json')
+        return json.loads(path.read_text())
 
     @property
     def _nwb_hdf5_path(self) -> upath.UPath | None:
