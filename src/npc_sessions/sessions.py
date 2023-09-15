@@ -79,14 +79,20 @@ class DynamicRoutingSession:
     )
     notes: str | None = None
 
-    local_path: upath.UPath | None = None
-
+    root_path: upath.UPath | None = None
+    """Assigned on init if session_or_path is a pathlike object.
+    May also be assigned later when looking for raw data if Code Ocean upload is missing.
+    """
+    
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
-        if (
+        if any(char in (
             path := utils.from_pathlike(session_or_path)
-        ).exists() and path.protocol in ("", "file"):
-            self.local_path = path
+        ).as_posix() for char in '\\/.') and path.exists():
+            if path.is_dir():
+                self.root_path = path
+            if path.is_file():
+                self.root_path = path.parent
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -796,24 +802,29 @@ class DynamicRoutingSession:
                 [p.name for p in self.stim_paths], key=npc_session.DatetimeRecord
             )
         )
-
-    def get_raw_data_paths_from_local(self) -> tuple[upath.UPath, ...]:
-        if not self.local_path:
+        
+    def get_raw_data_paths_from_root(self) -> tuple[upath.UPath, ...]:
+        if not self.root_path:
             raise ValueError(f"{self.id} does not have a local path assigned yet")
         ephys_paths = itertools.chain(
-            self.local_path.glob("Record Node *"),
-            self.local_path.glob("*/Record Node *"),
+            self.root_path.glob("Record Node *"),
+            self.root_path.glob("*/Record Node *"),
         )
-        root_level_paths = tuple(p for p in self.local_path.iterdir() if p.is_file())
+        root_level_paths = tuple(p for p in self.root_path.iterdir() if p.is_file())
         return root_level_paths + tuple(set(ephys_paths))
 
     @functools.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
-        if self.local_path:
-            return self.get_raw_data_paths_from_local()
-        if not self.is_ephys:
-            raise ValueError(f"{self.id} is not a session with a raw ephys upload")
-        return npc_lims.get_raw_data_paths_from_s3(self.id)
+        if self.root_path:
+            return self.get_raw_data_paths_from_root()
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            return npc_lims.get_raw_data_paths_from_s3(self.id)
+        with contextlib.suppress(StopIteration):
+            stim = self.get_task_hdf5_from_s3_repo()
+            logger.warning(f"Using {stim.name} in {npc_lims.DR_DATA_REPO}")
+            self.root_path = stim.parent
+            return self.get_raw_data_paths_from_root()
+        raise ValueError(f"{self.id} is either an untracked ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}")
 
     @functools.cached_property
     def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
