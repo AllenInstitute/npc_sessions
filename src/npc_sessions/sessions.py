@@ -695,7 +695,7 @@ class DynamicRoutingSession:
     @functools.cached_property
     def info(self) -> tracked_sessions.SessionInfo | None:
         return next(
-            (info for info in npc_lims.tracked if info.session == self.id),
+            (info for info in npc_lims.tracked if info.id == self.id),
             None,
         )
 
