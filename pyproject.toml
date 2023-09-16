@@ -24,7 +24,6 @@ dependencies = [
     "scipy>=1.9.3",
     "DynamicRoutingTask>=0.1.7",
     "numba>=0.57.1",
-    "jupyter>=1.0.0",
     "ipywidgets>=8.1.0",
     "ipympl>=0.9.3",
     "opencv-python-headless>=4.8.0.76",
@@ -33,6 +32,7 @@ dependencies = [
     "SimpleITK>=2.2.1",
     "pyarrow>=13.0.0",
     "spikeinterface>=0.98.2",
+    "ipykernel>=6.25.2",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
