@@ -1380,7 +1380,6 @@ class DynamicRoutingSession:
 
 
 if __name__ == "__main__":
-    list(get_sessions())
     import doctest
 
     import dotenv
