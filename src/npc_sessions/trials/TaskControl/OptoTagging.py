@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import functools
 from collections.abc import Iterable
-from typing import Sequence
 
 import DynamicRoutingTask.TaskUtils
 import numpy as np
@@ -72,10 +71,10 @@ class OptoTagging(TaskControl):
 
     @functools.cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
-        bregma = self._hdf5.get('optoBregma', None) or self._hdf5.get('bregmaXY', None) 
-        galvo = self._hdf5['galvoVoltage'][()]
-        trial_voltages  = self._hdf5['trialGalvoVoltage']
-        return tuple(tuple(bregma[np.all(galvo==v, axis=1)][0]) for v in trial_voltages) # type: ignore
+        bregma = self._hdf5.get("optoBregma", None) or self._hdf5.get("bregmaXY", None)
+        galvo = self._hdf5["galvoVoltage"][()]
+        trial_voltages = self._hdf5["trialGalvoVoltage"]
+        return tuple(tuple(bregma[np.all(galvo == v, axis=1)][0]) for v in trial_voltages)  # type: ignore
 
     @functools.cached_property
     def bregma_x(self) -> npt.NDArray[np.float64]:
@@ -89,18 +88,24 @@ class OptoTagging(TaskControl):
     def _location(self) -> npt.NDArray[np.str_]:
         if trialOptoLabel := self._hdf5.get("trialOptoLabel", None):
             return np.array(trialOptoLabel.asstr()[self.trial_index], dtype=str)
-        if (optoTaggingLocs := self._hdf5.get('optoTaggingLocs')):
-            label = optoTaggingLocs['label'].asstr()[()]
-            xy = np.array([(x, y) for x,y in zip(optoTaggingLocs['X'], optoTaggingLocs['Y'])])
-            return np.array([label[np.all(xy==v, axis=1)][0] for v in self._bregma_xy], dtype=str)
+        if optoTaggingLocs := self._hdf5.get("optoTaggingLocs"):
+            label = optoTaggingLocs["label"].asstr()[()]
+            xy = np.array(
+                [(x, y) for x, y in zip(optoTaggingLocs["X"], optoTaggingLocs["Y"])]
+            )
+            return np.array(
+                [label[np.all(xy == v, axis=1)][0] for v in self._bregma_xy], dtype=str
+            )
         raise ValueError("No known optotagging location data found")
 
     @functools.cached_property
     def location(self) -> npt.NDArray[np.str_]:
-        if all(str(v).upper() in 'ABCDEF' for v in self._location):
-            return np.array([f'probe{str(v).upper()}' for v in self._location], dtype=str)
+        if all(str(v).upper() in "ABCDEF" for v in self._location):
+            return np.array(
+                [f"probe{str(v).upper()}" for v in self._location], dtype=str
+            )
         return self._location
-    
+
     @functools.cached_property
     def power(self) -> npt.NDArray[np.float64]:
         calibration_data = self._hdf5["optoPowerCalibrationData"]

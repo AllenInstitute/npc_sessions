@@ -851,18 +851,39 @@ class SyncDataset:
             # [(v[0], v[-1]) for v in vsync_times_in_blocks]
             # [(v[0], v[-1]) for v in diode_falling_edges_in_blocks]
             for v_start in (v[0] for v in vsync_times_in_blocks):
-                assert len(diode_rising_edges_in_blocks) == len(diode_falling_edges_in_blocks)
+                assert len(diode_rising_edges_in_blocks) == len(
+                    diode_falling_edges_in_blocks
+                )
                 new_rising_edges: list[npt.NDArray] = []
-                new_falling_edges: list[npt.NDArray] = [] 
-                for d_idx, (d_start, d_stop) in enumerate((d[0], d[-1]) for d in diode_falling_edges_in_blocks):
-                    if d_start < v_start < d_stop and (split := np.searchsorted(diode_falling_edges_in_blocks[d_idx], v_start)) not in (0, len(diode_falling_edges_in_blocks[d_idx])):
-                        for new, old in zip((new_rising_edges, new_falling_edges), (diode_rising_edges_in_blocks[d_idx], diode_falling_edges_in_blocks[d_idx])):
+                new_falling_edges: list[npt.NDArray] = []
+                for d_idx, (d_start, d_stop) in enumerate(
+                    (d[0], d[-1]) for d in diode_falling_edges_in_blocks
+                ):
+                    if d_start < v_start < d_stop and (
+                        split := np.searchsorted(
+                            diode_falling_edges_in_blocks[d_idx], v_start
+                        )
+                    ) not in (0, len(diode_falling_edges_in_blocks[d_idx])):
+                        for new, old in zip(
+                            (new_rising_edges, new_falling_edges),
+                            (
+                                diode_rising_edges_in_blocks[d_idx],
+                                diode_falling_edges_in_blocks[d_idx],
+                            ),
+                        ):
                             new.extend((old[:split], old[split:]))
                     else:
-                        for new, old in zip((new_rising_edges, new_falling_edges), (diode_rising_edges_in_blocks[d_idx], diode_falling_edges_in_blocks[d_idx])):
+                        for new, old in zip(
+                            (new_rising_edges, new_falling_edges),
+                            (
+                                diode_rising_edges_in_blocks[d_idx],
+                                diode_falling_edges_in_blocks[d_idx],
+                            ),
+                        ):
                             new.append(old)
                 diode_rising_edges_in_blocks, diode_falling_edges_in_blocks = (
-                    tuple(new_rising_edges), tuple(new_falling_edges)
+                    tuple(new_rising_edges),
+                    tuple(new_falling_edges),
                 )
 
         if any(
@@ -979,16 +1000,16 @@ class SyncDataset:
                     < median_diff(diode_flips, vsyncs[1:])
                     < median_diff(diode_flips, vsyncs)
                 ):
-                    if counter > 2: #!  this may need to be dereased to allow only 1 
+                    if counter > 2:  #!  this may need to be dereased to allow only 1
                         raise ValueError(
-                            f'Added two missed diode flips at start already, the max we can explain by pre-stim background & first diode square being similar luminance. This is a different problem: sync {self.start_time=}.'
+                            f"Added two missed diode flips at start already, the max we can explain by pre-stim background & first diode square being similar luminance. This is a different problem: sync {self.start_time=}."
                         )
                     logger.debug("Missing first diode flip")
                     diode_flips = add_missing_diode_flip_at_stim_onset(
                         diode_flips, vsyncs
                     )
                     counter += 1
-                    
+
                 while (
                     median_diff(diode_flips, vsyncs)
                     < MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC

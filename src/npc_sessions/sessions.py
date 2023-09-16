@@ -10,8 +10,8 @@ import logging
 import re
 import uuid
 import warnings
-from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Generator, Literal
+from collections.abc import Generator, Iterable, Mapping
+from typing import Any, Callable, Literal
 
 import h5py
 import ndx_events
@@ -33,9 +33,10 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
+
 def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
     """Uploaded sessions, tracked in npc_lims via `tracked_sessions.yaml`, newest
-    to oldest. 
+    to oldest.
 
     - sessions with known issues are excluded
     - session-specific config from `npc_sessions.config.session_kwargs`
@@ -44,7 +45,7 @@ def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
     - returns a generator not because objects take long to create (data is
       loaded lazily) but because attributes are cached, so we want to avoid
       keeping references to sessions that are no longer needed
-      
+
     ## getting an indexable sequence of sessions
     Just convert the output to a list or tuple, but see the note below if you intend to
     loop over this sequence to process large amounts of data:
@@ -60,7 +61,7 @@ def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
     >>> nwbs = []
     >>> for session in get_sessions():           # doctest: +SKIP
     ...     nwbs.append(session.nwb)
-    
+
     ### avoid this
     `sessions` will end up storing all data for all sessions in memory:
     >>> sessions = list(get_sessions())
@@ -70,10 +71,13 @@ def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
     """
     for session in sorted(npc_lims.tracked, key=lambda x: x.date, reverse=True):
         if session.is_uploaded and session.id not in config.session_issues:
-            yield DynamicRoutingSession(session.id, **config.session_kwargs.get(session.id, {}))
+            yield DynamicRoutingSession(
+                session.id, **config.session_kwargs.get(session.id, {})
+            )
+
 
 class DynamicRoutingSession:
-    """Class for fetching & processing raw data for a session, making 
+    """Class for fetching & processing raw data for a session, making
     NWB modules and an NWBFile instance available as attributes.
 
     >>> s = DynamicRoutingSession('670248_2023-08-03')
@@ -98,11 +102,11 @@ class DynamicRoutingSession:
     >>> 'DynamicRouting1' in s.epoch_tags
     True
     """
-    
+
     suppress_errors = False
     """If True, just compile as much as possible from available stim files,
     ignoring non-critical errors."""
-    
+
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
     experimenter: str | None = None
@@ -111,15 +115,15 @@ class DynamicRoutingSession:
         "Neural Circuits & Behavior | MindScope program | Allen Institute"
     )
     notes: str | None = None
-    
+
     # --------------------------------------------------------------------------- #
-    
+
     task_stim_name: str = "DynamicRouting1"
 
     intervals_descriptions = {
         TaskControl.VisRFMapping: "visual receptive-field mapping trials",
         TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
-        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials", # must be "trials" if assigned as main trials table in nwb
+        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials",  # must be "trials" if assigned as main trials table in nwb
         TaskControl.OptoTagging: "opto-tagging trials",
     }
 
@@ -127,12 +131,16 @@ class DynamicRoutingSession:
     """Assigned on init if session_or_path is a pathlike object.
     May also be assigned later when looking for raw data if Code Ocean upload is missing.
     """
-    
+
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
-        if any(char in (
-            path := utils.from_pathlike(session_or_path)
-        ).as_posix() for char in '\\/.') and path.exists():
+        if (
+            any(
+                char in (path := utils.from_pathlike(session_or_path)).as_posix()
+                for char in "\\/."
+            )
+            and path.exists()
+        ):
             if path.is_dir():
                 self.root_path = path
             if path.is_file():
@@ -152,13 +160,13 @@ class DynamicRoutingSession:
         return super().__getattribute__(__name)
 
     def __eq__(self, other: Any) -> bool:
-        if other_id := getattr(other, 'id', None):
+        if other_id := getattr(other, "id", None):
             return self.id == other_id
         return self.id == str(other)
-    
+
     def __hash__(self) -> int:
         return hash(self.id)
-    
+
     @property
     def nwb(self) -> pynwb.NWBFile:
         # if self._nwb_hdf5_path:
@@ -177,7 +185,9 @@ class DynamicRoutingSession:
             epochs=self.epochs,
             epoch_tags=self.epoch_tags,
             stimulus_template=None,  # TODO pass tuple of stimulus templates
-            trials=self.trials if self.is_task else None, # we have one sessions without trials (670248_2023-08-02)
+            trials=self.trials
+            if self.is_task
+            else None,  # we have one sessions without trials (670248_2023-08-02)
             intervals=self._intervals,
             acquisition=self._acquisition,
             processing=self._processing,
@@ -185,7 +195,9 @@ class DynamicRoutingSession:
             devices=self._devices,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
-            units=self.units if self._is_units else None, # should use is_sorted when processing is done on-demand
+            units=self.units
+            if self._is_units
+            else None,  # should use is_sorted when processing is done on-demand
         )
 
     # metadata ------------------------------------------------------------------ #
@@ -206,19 +218,19 @@ class DynamicRoutingSession:
 
     @property
     def source_script(self) -> str | None:
-        if self.is_task and (script := self.task_data.get('githubTaskScript', None)):
+        if self.is_task and (script := self.task_data.get("githubTaskScript", None)):
             if isinstance(script[()], bytes):
                 return script.asstr()[()]
             if isinstance(script[()], np.floating) and not np.isnan(script[()]):
                 return str(script[()])
         return None
-    
+
     @property
     def lab(self) -> str | None:
         with contextlib.suppress(AttributeError):
             return self.rig
         return None
-    
+
     @property
     def identifier(self) -> str:
         if getattr(self, "_identifier", None) is None:
@@ -238,7 +250,9 @@ class DynamicRoutingSession:
                 self.keywords.append("video")
             if self.is_ephys:
                 self.keywords.append("ephys")
-            if not self._is_units: # TODO switch back to `is_sorted` when processing is done on-demand
+            if (
+                not self._is_units
+            ):  # TODO switch back to `is_sorted` when processing is done on-demand
                 self.keywords.append("no units")
             if self.is_annotated:
                 self.keywords.append("CCF")
@@ -370,19 +384,23 @@ class DynamicRoutingSession:
 
     @property
     def trials(self) -> pynwb.epoch.TimeIntervals | None:
-        if (cached := getattr(self, "_cached_nwb_trials", None)) is not None and cached != -1:
+        if (
+            cached := getattr(self, "_cached_nwb_trials", None)
+        ) is not None and cached != -1:
             return cached
         try:
             _ = self._trials
         except ValueError as exc:
             if self.suppress_errors:
                 if (cached := getattr(self, "_cached_nwb_trials", None)) == -1:
-                    return None # avoid repeating the same message
+                    return None  # avoid repeating the same message
                 logger.warning(f"Couldn't create trials table for {self.id}: {exc!r}")
                 self._cached_nwb_trials = -1
                 return None
-            if self.id == '670248_20230802':
-                raise ValueError(f"DynamicRouting1*.hdf5 was recorded badly for 670248_20230802 and won't open.\nIf you wish to compile an nwb anyway, set `session.suppress_errors = True` for this session and re-run")
+            if self.id == "670248_20230802":
+                raise ValueError(
+                    "DynamicRouting1*.hdf5 was recorded badly for 670248_20230802 and won't open.\nIf you wish to compile an nwb anyway, set `session.suppress_errors = True` for this session and re-run"
+                )
             raise exc
 
         trials = pynwb.epoch.TimeIntervals(
@@ -412,7 +430,7 @@ class DynamicRoutingSession:
             raise IndexError(
                 f"no intervals named {self.task_stim_name}* found for {self.id}"
             )
-            
+
         trials = self._all_trials[stim_name.stem]
         assert isinstance(trials, TaskControl.DynamicRouting1)  # for mypy
         return trials
@@ -431,7 +449,6 @@ class DynamicRoutingSession:
             intervals[module.name] = module
         return intervals
 
-
     @functools.cached_property
     def _intervals(self) -> tuple[pynwb.epoch.TimeIntervals, ...]:
         """The version passed to NWBFile.__init__"""
@@ -439,8 +456,10 @@ class DynamicRoutingSession:
         for k, v in self._all_trials.items():
             # if self._trials_interval_name in k:
             #     continue
-            
-            if not any(existing := [i for i in intervals if i.name == v.__class__.__name__]):
+
+            if not any(
+                existing := [i for i in intervals if i.name == v.__class__.__name__]
+            ):
                 nwb_intervals = pynwb.epoch.TimeIntervals(
                     name=v.__class__.__name__,
                     description=self.intervals_descriptions[v.__class__],
@@ -450,8 +469,10 @@ class DynamicRoutingSession:
                     nwb_intervals.add_column(**column)
             else:
                 nwb_intervals = existing[0]
-                trial_idx_offset = nwb_intervals[:]['trial_index'].max() + 1
-                assert (a := set(nwb_intervals.colnames)) == (b := set(v.keys())), f"columns don't match for {k} and existing {nwb_intervals.name} intervals: {a.symmetric_difference(b) = }"
+                trial_idx_offset = nwb_intervals[:]["trial_index"].max() + 1
+                assert (a := set(nwb_intervals.colnames)) == (
+                    b := set(v.keys())
+                ), f"columns don't match for {k} and existing {nwb_intervals.name} intervals: {a.symmetric_difference(b) = }"
             for trial in v.to_add_trial():
                 nwb_intervals.add_interval(**trial)
             if trial_idx_offset == 0:
@@ -461,13 +482,16 @@ class DynamicRoutingSession:
         # identify unique stims across stim files
         return tuple(intervals)
 
-
     @functools.cached_property
     def _all_trials(self) -> utils.LazyDict[str, TaskControl.TaskControl]:
         if self.is_sync:
             sync = self.sync_data
             # get the only stims for which we have times:
-            stim_paths = tuple(path for path in self.stim_paths if path.stem in self.stim_frame_times.keys())
+            stim_paths = tuple(
+                path
+                for path in self.stim_paths
+                if path.stem in self.stim_frame_times.keys()
+            )
         else:
             sync = None
             stim_paths = self.stim_paths
@@ -502,7 +526,7 @@ class DynamicRoutingSession:
                 except AttributeError:
                     continue  # some stims (e.g. Spontaneous) have no trials class
                 # TODO feed-in ephys recording dirs for alignment
-                # for DynamicRouting1 and AudRFMapping 
+                # for DynamicRouting1 and AudRFMapping
                 filename_to_args[stim_filename] = (get_intervals, cls, stim_filename)
         return utils.LazyDict((k, v) for k, v in filename_to_args.items())
 
@@ -670,15 +694,15 @@ class DynamicRoutingSession:
         return units
 
     # images -------------------------------------------------------------------- #
-    
+
     @functools.cached_property
     def drift_maps(self) -> pynwb.image.Images:
         return pynwb.image.Images(
             name="drift_maps",
             images=tuple(self.img_to_nwb(p) for p in self.drift_map_paths),
             description="activity plots (time x probe depth x firing rate) over the entire ecephys recording, for assessing probe drift",
-            )
-        
+        )
+
     @staticmethod
     def img_to_nwb(path: utils.PathLike) -> pynwb.image.Image:
         path = utils.from_pathlike(path)
@@ -704,18 +728,18 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def is_task(self) -> bool:
-        if v := getattr(self, '_is_task', None):
+        if v := getattr(self, "_is_task", None):
             return v
         with contextlib.suppress(FileNotFoundError, ValueError, StopIteration):
             _ = self.task_data
             return True
         return False
-    
+
     @functools.cached_property
     def is_sync(self) -> bool:
-        if v := getattr(self, '_is_sync', None):
+        if v := getattr(self, "_is_sync", None):
             return v
-        if v := getattr(self, '_sync_path', None):
+        if v := getattr(self, "_sync_path", None):
             return True
         if self.info:
             return self.info.is_sync
@@ -723,10 +747,10 @@ class DynamicRoutingSession:
             if self.get_sync_paths():
                 return True
         return False
-    
+
     @functools.cached_property
     def is_video(self) -> bool:
-        if v := getattr(self, '_is_video', None):
+        if v := getattr(self, "_is_video", None):
             return v
         if not self.is_sync:
             return False
@@ -737,7 +761,7 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def is_ephys(self) -> bool:
-        if v := getattr(self, '_is_ephys', None):
+        if v := getattr(self, "_is_ephys", None):
             return v
         if self.info:
             return self.info.is_ephys
@@ -748,7 +772,7 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def is_sorted(self) -> bool:
-        if v := getattr(self, '_is_sorted', None):
+        if v := getattr(self, "_is_sorted", None):
             return v
         if not self.is_ephys:
             return False
@@ -758,7 +782,7 @@ class DynamicRoutingSession:
             _ = npc_lims.is_sorted_data_asset(self.id)
             return True
         return False
-    
+
     @functools.cached_property
     def _is_units(self) -> bool:
         """Temp attr to check if arjun's processed units files are available"""
@@ -827,7 +851,7 @@ class DynamicRoutingSession:
             for file in npc_lims.get_raw_data_root(self.id).iterdir()
             if file.suffix == ".json"
         )
-        
+
     @functools.cached_property
     def sorting_vis(self) -> dict[str, dict | str]:
         """To open links:
@@ -838,7 +862,9 @@ class DynamicRoutingSession:
             raise AttributeError(f"{self.id} is not an ephys session")
         if not self.is_sorted:
             raise AttributeError(f"{self.id} has not been sorted")
-        path = next(p for p in self.sorted_data_paths if p.name == 'visualization_output.json')
+        path = next(
+            p for p in self.sorted_data_paths if p.name == "visualization_output.json"
+        )
         return json.loads(path.read_text())
 
     @property
@@ -868,7 +894,7 @@ class DynamicRoutingSession:
                 [p.name for p in self.stim_paths], key=npc_session.DatetimeRecord
             )
         )
-        
+
     def get_raw_data_paths_from_root(self) -> tuple[upath.UPath, ...]:
         if not self.root_path:
             raise ValueError(f"{self.id} does not have a local path assigned yet")
@@ -883,14 +909,14 @@ class DynamicRoutingSession:
         try:
             return next(
                 (npc_lims.DR_DATA_REPO / str(self.id.subject)).glob(
-                f'{self.task_stim_name}*{self.id.date.replace("-", "")}*.hdf5'
+                    f'{self.task_stim_name}*{self.id.date.replace("-", "")}*.hdf5'
                 )
             )
         except StopIteration:
             raise FileNotFoundError(
                 f"Could not find file in {npc_lims.DR_DATA_REPO} for {self.id}"
             ) from None
-            
+
     @functools.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
         if self.root_path:
@@ -902,7 +928,9 @@ class DynamicRoutingSession:
             logger.warning(f"Using {stim.name} in {npc_lims.DR_DATA_REPO}")
             self.root_path = stim.parent
             return self.get_raw_data_paths_from_root()
-        raise ValueError(f"{self.id} is either an untracked ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}")
+        raise ValueError(
+            f"{self.id} is either an untracked ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}"
+        )
 
     @functools.cached_property
     def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
@@ -935,8 +963,10 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def raw_data_asset_id(self) -> str:
-        if not self.is_ephys: 
-            raise ValueError(f"{self.id} currently only ephys sessions have raw data assets")
+        if not self.is_ephys:
+            raise ValueError(
+                f"{self.id} currently only ephys sessions have raw data assets"
+            )
         return npc_lims.get_session_raw_data_asset(self.id)["id"]
 
     @functools.cached_property
@@ -987,19 +1017,24 @@ class DynamicRoutingSession:
             )
             for path in self.stim_paths
         )
+
     @functools.cached_property
     def rig(self) -> str:
-        for hdf5 in itertools.chain((self.task_data,) if self.is_task else (), (v for v in self.stim_data.values())):
-            if rig := hdf5.get('rigName', None):
+        for hdf5 in itertools.chain(
+            (self.task_data,) if self.is_task else (),
+            (v for v in self.stim_data.values()),
+        ):
+            if rig := hdf5.get("rigName", None):
                 return rig.asstr()[()]
         raise AttributeError(f"Could not find rigName for {self.id} in stim files")
-        
+
     @property
     def sam(self) -> DynRoutData:
         if not hasattr(self, "_sam"):
             obj = DynRoutData()
             obj.loadBehavData(
-                self.task_path.as_posix(), self.task_data,
+                self.task_path.as_posix(),
+                self.task_data,
             )
             self._sam = obj
         return self._sam
@@ -1087,14 +1122,16 @@ class DynamicRoutingSession:
     def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
         """Frame times dict for all stims, containing time arrays or Exceptions."""
         frame_times = utils.get_stim_frame_times(
-            *self.stim_data.values(), # use cached data
+            *self.stim_data.values(),  # use cached data
             sync=self.sync_data,
             frame_time_type="display_time",
         )
+
         def reverse_lookup(d, value) -> str:
             return next(str(k) for k, v in d.items() if v is value)
+
         return {reverse_lookup(self.stim_data, k): frame_times[k] for k in frame_times}
-        
+
     @property
     def stim_frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
         """Frame times dict for stims with time arrays, or optionally raising
@@ -1109,9 +1146,11 @@ class DynamicRoutingSession:
         for k, v in self._stim_frame_times.items():
             v = utils.assert_stim_times(v)
             asserted_stim_frame_times[k] = v
-        assert not any(isinstance(v, Exception) for v in asserted_stim_frame_times.values())
+        assert not any(
+            isinstance(v, Exception) for v in asserted_stim_frame_times.values()
+        )
         return asserted_stim_frame_times
-    
+
     def get_epoch_record(
         self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
     ) -> npc_lims.Epoch:
@@ -1172,7 +1211,7 @@ class DynamicRoutingSession:
     @functools.cached_property
     def drift_map_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
-            next(d for d in self.sorted_data_paths if d.name == 'drift_maps').iterdir()
+            next(d for d in self.sorted_data_paths if d.name == "drift_maps").iterdir()
         )
 
     @functools.cached_property
@@ -1222,7 +1261,8 @@ class DynamicRoutingSession:
                 f"{self.id} is not an ephys session (required for settings.xml)"
             )
         return tuple(
-            next(record_node.glob("settings*.xml")) for record_node in self.ephys_record_node_dirs
+            next(record_node.glob("settings*.xml"))
+            for record_node in self.ephys_record_node_dirs
         )
 
     @functools.cached_property
@@ -1287,45 +1327,48 @@ class DynamicRoutingSession:
         )
 
     @functools.cached_property
-    def _video_frame_times(self) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        # currently doesn't require opening videos 
-        path_to_timestamps = utils.get_video_frame_times(self.sync_data, *self.video_paths)
+    def _video_frame_times(
+        self,
+    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        # currently doesn't require opening videos
+        path_to_timestamps = utils.get_video_frame_times(
+            self.sync_data, *self.video_paths
+        )
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=f'{utils.extract_camera_name(path.stem)}_camera',
-                description=f'video frame timestamps for {path.stem}',
+                name=f"{utils.extract_camera_name(path.stem)}_camera",
+                description=f"video frame timestamps for {path.stem}",
             )
             for path, timestamps in path_to_timestamps.items()
         )
-    
+
     @functools.cached_property
     def _rewards(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
         def get_reward_frames(data: h5py.File) -> list[int]:
             r = []
-            for key in ('rewardFrames', 'manualRewardFrames'):
-                if (v := data.get(key, None)):
+            for key in ("rewardFrames", "manualRewardFrames"):
+                if v := data.get(key, None):
                     r.extend(v[:])
             return r
+
         reward_times: list[npt.NDArray[np.floating]] = []
         if self.is_sync:
             for stim_file, frame_times in self.stim_frame_times.items():
-                if any(name in stim_file.lower() for name in ('mapping', 'tagging')):
+                if any(name in stim_file.lower() for name in ("mapping", "tagging")):
                     continue
                 reward_times.extend(
-                    frame_times[
-                        get_reward_frames(self.stim_data[stim_file])
-                        ]
-                    )
+                    frame_times[get_reward_frames(self.stim_data[stim_file])]
+                )
         else:
             reward_times.extend(self.stim_data[self.task_path.stem])
         return ndx_events.Events(
             timestamps=np.sort(np.unique(reward_times)),
-            name='rewards',
-            description='individual water rewards delivered to the subject',
+            name="rewards",
+            description="individual water rewards delivered to the subject",
         )
-    
-        
+
+
 if __name__ == "__main__":
     list(get_sessions())
     import doctest

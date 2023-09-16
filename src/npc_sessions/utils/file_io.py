@@ -25,13 +25,15 @@ def from_pathlike(pathlike) -> upath.UPath:
     S3Path('s3://aind-data-bucket/experiment2_Record Node 102#probeA.png')
     """
     if isinstance(pathlike, upath.UPath):
-        return pathlike 
+        return pathlike
     path: str = os.fsdecode(pathlike)
     # UPath will do rsplit('#')[0] on path
     if "#" in (p := pathlib.Path(path)).name:
         return upath.UPath(path).with_name(p.name)
-    if '#' in p.parent.as_posix():
-        raise ValueError(f"Path {p} contains '#' in a parent dir, which we don't have a fix for yet")
+    if "#" in p.parent.as_posix():
+        raise ValueError(
+            f"Path {p} contains '#' in a parent dir, which we don't have a fix for yet"
+        )
     return upath.UPath(path)
 
 

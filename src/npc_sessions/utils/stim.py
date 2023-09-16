@@ -848,19 +848,34 @@ def get_stim_frame_times(
 
         # try to match to vsyncs by start time
         stim_start_time_on_sync = (stim_start_time - sync_data.start_time).seconds
-        matching_block_idx_by_start_time = np.argmin(abs(first_frame_per_block - stim_start_time_on_sync))
+        matching_block_idx_by_start_time = np.argmin(
+            abs(first_frame_per_block - stim_start_time_on_sync)
+        )
         matching_block_idx_by_len = np.argmin(abs(n_frames_per_block - n_stim_frames))
         start_and_len_match_disagree: bool = (
             (matching_block_idx_by_start_time != matching_block_idx_by_len)
-            and 
-            (len([same_len_stims for same_len_stims in n_frames_per_block if same_len_stims == n_frames_per_block[matching_block_idx_by_len]]) == 1)
+            and (
+                len(
+                    [
+                        same_len_stims
+                        for same_len_stims in n_frames_per_block
+                        if same_len_stims
+                        == n_frames_per_block[matching_block_idx_by_len]
+                    ]
+                )
+                == 1
+            )
             # if multiple blocks have the same number of frames, then we can't
             # use the number of frames to disambiguate
         )
-        num_frames_match: bool = n_stim_frames == n_frames_per_block[matching_block_idx_by_start_time]
+        num_frames_match: bool = (
+            n_stim_frames == n_frames_per_block[matching_block_idx_by_start_time]
+        )
         # use first frame time for actual matching
         if not num_frames_match and not start_and_len_match_disagree:
-            frame_diff = n_stim_frames - n_frames_per_block[matching_block_idx_by_start_time]
+            frame_diff = (
+                n_stim_frames - n_frames_per_block[matching_block_idx_by_start_time]
+            )
             exception = IndexError(
                 f"Closest match with {stim_path} has a mismatch of {frame_diff} frames."
             )
@@ -871,20 +886,32 @@ def get_stim_frame_times(
             # number of frames (checked earlier), then we take it as the
             # correct match - however it indicates a problem with time info on
             # sync or in the stim files that we should log
-            msg = f'failed to match frame times using {stim_start_time = } with {sync_data.start_time = }, expected {stim_start_time_on_sync = }. Sync or stim file may have the wrong start-time info.'
+            msg = f"failed to match frame times using {stim_start_time = } with {sync_data.start_time = }, expected {stim_start_time_on_sync = }. Sync or stim file may have the wrong start-time info."
             if n_stim_frames == n_frames_per_block[matching_block_idx_by_len]:
-                logger.warning(f'{stim_path = } matched to sync block using {n_stim_frames = }, but {msg}')
-                stim_frame_times[stim_path] = frame_times_in_blocks[matching_block_idx_by_len]
+                logger.warning(
+                    f"{stim_path = } matched to sync block using {n_stim_frames = }, but {msg}"
+                )
+                stim_frame_times[stim_path] = frame_times_in_blocks[
+                    matching_block_idx_by_len
+                ]
                 continue
             # otherwise, we have a mismatch that we can't resolve
-            time_diff_len = stim_start_time_on_sync - first_frame_per_block[matching_block_idx_by_len]
-            time_diff_start = stim_start_time_on_sync - first_frame_per_block[matching_block_idx_by_start_time]
+            time_diff_len = (
+                stim_start_time_on_sync
+                - first_frame_per_block[matching_block_idx_by_len]
+            )
+            time_diff_start = (
+                stim_start_time_on_sync
+                - first_frame_per_block[matching_block_idx_by_start_time]
+            )
             exception = IndexError(
                 f"{matching_block_idx_by_start_time=} != {matching_block_idx_by_len=} for {stim_path}: {msg} Closest match by start time has a mismatch of {time_diff_start:.1f} seconds. Closest match by number of frames has a mismatch of {time_diff_len:.1f} seconds."
-            )                
+            )
             stim_frame_times[stim_path] = exception
             continue
-        stim_frame_times[stim_path] = frame_times_in_blocks[matching_block_idx_by_start_time]
+        stim_frame_times[stim_path] = frame_times_in_blocks[
+            matching_block_idx_by_start_time
+        ]
     sorted_keys = sorted(stim_frame_times.keys(), key=lambda x: 0 if isinstance(stim_frame_times[x], Exception) else stim_frame_times[x][0])  # type: ignore[index]
     return {k: stim_frame_times[k] for k in sorted_keys}
 
