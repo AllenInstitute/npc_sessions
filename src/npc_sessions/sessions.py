@@ -70,7 +70,7 @@ def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
     ...     nwbs.append(session.nwb)
     """
     for session in sorted(npc_lims.tracked, key=lambda x: x.date, reverse=True):
-        if session.is_uploaded and session.id not in config.session_issues:
+        if session.is_uploaded and str(session.id) not in config.session_issues:
             yield DynamicRoutingSession(
                 session.id, **config.session_kwargs.get(session.id, {})
             )
