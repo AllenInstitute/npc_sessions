@@ -11,7 +11,9 @@ import pandas as pd
 import polars as pl
 
 import npc_sessions
-
+import upath
+import uuid
+import spikeinterface as si
 
 @functools.cache
 def get_units_electrodes(
@@ -172,6 +174,81 @@ def get_aligned_device_kilosort_spike_times(
 
     return device_spike_times
 
+def get_closest_channel(unit_location:npt.NDArray[np.float64], channel_positions:npt.NDArray[np.int64])  -> int:
+    distances = np.sum((channel_positions - unit_location)**2, axis=1)
+    return int(np.argmin(distances))
+
+def get_peak_channels(units_locations: npt.NDArray[np.float64], electrode_positions: tuple[dict[str, tuple[int, int]], ...]) -> list[int]:
+    peak_channels: list[int] = []
+    channel_positions = np.array(list(electrode_positions[0].values()))
+
+    for location in units_locations:
+        unit_location = np.array([location[0], location[1]])
+        peak_channels.append(get_closest_channel(unit_location, channel_positions))
+    
+    return peak_channels
+
+def make_units_metrics_device_table(quality_metrics_path: upath.UPath, template_metrics_path: upath.UPath, 
+                            units_locations_path: upath.UPath, sorting_precurated_path: upath.UPath, device_name: str,
+                            electrode_positions:tuple[dict[str, tuple[int, int]], ...]) -> pd.DataFrame:
+    df_quality_metrics = pd.read_csv(quality_metrics_path, storage_options={"key": os.getenv("AWS_ACCESS_KEY_ID"),
+                                                                            "secret": os.getenv("AWS_SECRET_ACCESS_KEY")})
+    df_quality_metrics.rename(columns={'Unnamed: 0': 'ks_unit_id'}, inplace=True)
+
+    df_template_metrics = pd.read_csv(template_metrics_path, storage_options={"key": os.getenv("AWS_ACCESS_KEY_ID"),
+                                                                            "secret": os.getenv("AWS_SECRET_ACCESS_KEY")})
+    df_template_metrics.rename(columns={'Unnamed: 0': 'ks_unit_id'}, inplace=True)
+
+    df_quality_template_metrics = df_quality_metrics.merge(df_template_metrics, on='ks_unit_id')
+    
+    with io.BytesIO(units_locations_path.read_bytes()) as f:
+        units_locations = np.load(f, allow_pickle=True)
+    
+    peak_channels = get_peak_channels(units_locations, electrode_positions)
+    df_quality_template_metrics['peak_channel'] = peak_channels
+    df_quality_metrics['device_name'] = [device_name for i in range(len(df_quality_metrics))]
+
+    return df_quality_metrics
+    
+def make_units_table(session: str) -> pd.DataFrame:
+    recording_dirs_experiment = npc_lims.get_recording_dirs_experiment_path_from_s3(
+        session
+    )
+    sync_path = npc_lims.get_h5_sync_from_s3(session)
+    settings_xml_path = npc_lims.get_settings_xml_path_from_s3(session)
+    settings_xml_info = npc_sessions.get_settings_xml_info(settings_xml_path)
+    device_names = settings_xml_info.probe_letters
+    electrode_positions = settings_xml_info.channel_pos_xy
+
+    device_names_probe = tuple(f"Probe{name}" for name in device_names)
+
+    devices = npc_sessions.get_ephys_timing_on_pxi(recording_dirs_experiment)
+    devices_timing_on_sync = npc_sessions.get_ephys_timing_on_sync(
+        sync_path, devices=devices
+    )
+
+    quality_metrics_paths = sorted(npc_lims.get_quality_metrics_paths_from_s3(session))
+    template_metrics_paths = sorted(npc_lims.get_template_metrics_paths_from_s3(session))
+    unit_locations_paths = sorted(npc_lims.get_unit_locations_paths_from_s3(session))
+    sorting_precurated_paths = sorted(npc_lims.get_sorted_precurated_paths_from_s3(session))
+
+    for i in range(len(quality_metrics_paths)):
+        quality_metrics_path = quality_metrics_paths[i]
+        template_metrics_path = template_metrics_paths[i]
+        units_locations_path = unit_locations_paths[i]
+        sorting_precurated_path = sorting_precurated_paths[i]
+        device_name = next(device_name_probe for device_name_probe in device_names_probe if device_name_probe in str(quality_metrics_path))
+
+        df_device_metrics = make_units_metrics_device_table(quality_metrics_path, template_metrics_path, units_locations_path, 
+                                        sorting_precurated_path, device_name, electrode_positions)
+        df_device_metrics['unit_id'] = [f'{session}_{ks_id}' for ks_id in df_device_metrics['ks_unit_id']]
+
+        #TODO: add amplitudes, default qc, spike times for units, and clean up code, code below fails
+        """
+        sorting_precurated = si.load_extractor(sorting_precurated_path.read_text())
+        we = si.load_waveforms(quality_metrics_path.parent.parent, sorting=sorting_precurated, with_recording=False)
+        amplitudes = list(si.get_template_extremum_amplitude(we).values())
+        """
 
 if __name__ == "__main__":
     import doctest

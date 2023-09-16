@@ -32,6 +32,7 @@ dependencies = [
     "ndx-events>=0.2.0",
     "SimpleITK>=2.2.1",
     "pyarrow>=13.0.0",
+    "spikeinterface>=0.98.2",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
