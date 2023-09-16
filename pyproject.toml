@@ -182,7 +182,6 @@ doctest_optionflags = [
     "ELLIPSIS",
 ]
 testpaths = [
-    ".",
     "src",
     "tests",
 ]
