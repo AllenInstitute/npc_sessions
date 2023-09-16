@@ -908,9 +908,9 @@ class DynamicRoutingSession:
     def get_task_hdf5_from_s3_repo(self) -> upath.UPath:
         try:
             return next(
-                (npc_lims.DR_DATA_REPO / str(self.id.subject)).glob(
-                    f'{self.task_stim_name}*{self.id.date.replace("-", "")}*.hdf5'
-                )
+                path for path in 
+                npc_lims.get_hdf5_stim_files_from_s3(self.id)
+                if self.task_stim_name in path.stem
             )
         except StopIteration:
             raise FileNotFoundError(
