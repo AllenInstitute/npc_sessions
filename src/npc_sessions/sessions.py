@@ -1301,13 +1301,13 @@ class DynamicRoutingSession:
     
     @functools.cached_property
     def _rewards(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
-        reward_times = []
         def get_reward_frames(data: h5py.File) -> list[int]:
             r = []
             for key in ('rewardFrames', 'manualRewardFrames'):
                 if (v := data.get(key, None)):
                     r.extend(v[:])
             return r
+        reward_times: list[npt.NDArray[np.floating]] = []
         if self.is_sync:
             for stim_file, frame_times in self.stim_frame_times.items():
                 if any(name in stim_file.lower() for name in ('mapping', 'tagging')):
