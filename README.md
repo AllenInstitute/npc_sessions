@@ -61,7 +61,7 @@ Fields:
   }
 
 # loop over all currently-tracked ephys sessions using the session-generator:
->>> all(s.date.year >= 2022 for s in get_sessions())
+>>> all(s.session_start_time.year >= 2022 for s in get_sessions())
 True
 >>> trials_dfs = {}
 >>> for session in get_sessions():                  # doctest: +SKIP
