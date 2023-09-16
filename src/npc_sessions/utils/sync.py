@@ -736,8 +736,9 @@ class SyncDataset:
         if any(stim_running_rising_edges) and any(stim_running_falling_edges):
             if stim_running_rising_edges[0] > stim_running_falling_edges[0]:
                 stim_running_falling_edges[1:]
-        if stim_running_falling_edges[-1] < stim_running_rising_edges[-1]:
-            stim_running_falling_edges += self.total_seconds
+            if stim_running_falling_edges[-1] < stim_running_rising_edges[-1]:
+                stim_running_falling_edges = np.concatenate([stim_running_falling_edges, [self.total_seconds]])
+        assert len(stim_running_rising_edges) == len(stim_running_falling_edges)
         return stim_running_rising_edges, stim_running_falling_edges
 
     def filter_on_stim_running(
