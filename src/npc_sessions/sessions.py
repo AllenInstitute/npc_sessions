@@ -34,7 +34,7 @@ import npc_sessions.utils as utils
 logger = logging.getLogger(__name__)
 
 
-def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
+def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None, None]:
     """Uploaded sessions, tracked in npc_lims via `tracked_sessions.yaml`, newest
     to oldest.
 
@@ -71,8 +71,9 @@ def get_sessions() -> Generator[DynamicRoutingSession, None, None]:
     """
     for session in sorted(npc_lims.tracked, key=lambda x: x.date, reverse=True):
         if session.is_uploaded and str(session.id) not in config.session_issues:
+            session_kwargs = config.session_kwargs.get(str(session.id), {})
             yield DynamicRoutingSession(
-                session.id, **config.session_kwargs.get(session.id, {})
+                session.id, **session_kwargs | all_session_kwargs,
             )
 
 
