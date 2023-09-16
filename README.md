@@ -59,7 +59,7 @@ Fields:
     19192719021 <class 'pynwb.device.Device'>,
     19192719061 <class 'pynwb.device.Device'>
   }
-
+   ...     
 # loop over all currently-tracked ephys sessions using the session-generator:
 >>> all(s.session_start_time.year >= 2022 for s in get_sessions())
 True
