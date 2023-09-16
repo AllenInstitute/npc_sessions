@@ -908,8 +908,8 @@ class DynamicRoutingSession:
     def get_task_hdf5_from_s3_repo(self) -> upath.UPath:
         try:
             return next(
-                file.path for file in 
-                npc_lims.get_hdf5_stim_files_from_s3(self.id)
+                file.path
+                for file in npc_lims.get_hdf5_stim_files_from_s3(self.id)
                 if self.task_stim_name in file.path.stem
             )
         except StopIteration:

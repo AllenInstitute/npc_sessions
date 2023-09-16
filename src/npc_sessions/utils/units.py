@@ -250,9 +250,7 @@ def make_units_table(session: str) -> pd.DataFrame:
     device_names_probe = tuple(f"Probe{name}" for name in device_names)
 
     devices = npc_sessions.get_ephys_timing_on_pxi(recording_dirs_experiment)
-    npc_sessions.get_ephys_timing_on_sync(
-        sync_path, devices=devices
-    )
+    npc_sessions.get_ephys_timing_on_sync(sync_path, devices=devices)
 
     quality_metrics_paths = sorted(npc_lims.get_quality_metrics_paths_from_s3(session))
     template_metrics_paths = sorted(
