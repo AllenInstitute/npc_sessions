@@ -97,9 +97,13 @@ class DynamicRoutingSession:
     True
     >>> s.stim_paths[0]
     S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
+    >>> s.sync_path
+    S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
     >>> s.ephys_timing_data[0].name, s.ephys_timing_data[0].sampling_rate, s.ephys_timing_data[0].start_time
     ('Neuropix-PXI-100.ProbeA-AP', 30000.070518634246, 20.080209634424037)
-
+    >>> s.sam.dprimeSameModal                                                                   
+    [3.5501294698425694]
+    
     # access nwb modules individually before compiling a whole nwb file:
     >>> s.session_start_time
     datetime.datetime(2023, 8, 3, 12, 4, 15, 854423)
