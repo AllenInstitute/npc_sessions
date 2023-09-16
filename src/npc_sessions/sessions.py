@@ -715,6 +715,8 @@ class DynamicRoutingSession:
     def is_sync(self) -> bool:
         if v := getattr(self, '_is_sync', None):
             return v
+        if v := getattr(self, '_sync_path', None):
+            return True
         if self.info:
             return self.info.is_sync
         with contextlib.suppress(FileNotFoundError, ValueError):
@@ -910,12 +912,15 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def sync_path(self) -> upath.UPath:
+        if path := getattr(self, "_sync_path", None):
+            return path
         if not self.is_sync:
             raise ValueError(f"{self.id} is not a session with sync data")
         paths = self.get_sync_paths()
         if not len(paths) == 1:
             raise ValueError(f"Expected 1 sync file, found {paths = }")
-        return paths[0]
+        self._sync_path = paths[0]
+        return self._sync_path
 
     def get_sync_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
