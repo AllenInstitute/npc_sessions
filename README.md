@@ -25,7 +25,7 @@ pip install npc_sessions
 >>> from npc_sessions import DynamicRoutingSession, get_sessions;
 
 # each object is used to get metadata and paths for a session:         
->>> DynamicRoutingSession('668755_2023-08-31')  
+>>> sesssion = DynamicRoutingSession('668755_2023-08-31')  
 >>> session.is_ephys                                
 True
 >>> session.stim_paths[0].stem                      
