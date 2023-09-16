@@ -42,6 +42,7 @@ def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None,
     - session-specific config from `npc_sessions.config.session_kwargs`
       is always re-applied: modify it if you want to pass in parameters to each
       session init
+    - `all_session_kwargs` will be applied on top of any session-specific kwargs
     - returns a generator not because objects take long to create (data is
       loaded lazily) but because attributes are cached, so we want to avoid
       keeping references to sessions that are no longer needed
@@ -59,15 +60,23 @@ def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None,
     ### do this
     loop over the generator so each session object is discarded after use:
     >>> nwbs = []
-    >>> for session in get_sessions():           # doctest: +SKIP
+    >>> for session in get_sessions():                          # doctest: +SKIP
     ...     nwbs.append(session.nwb)
 
     ### avoid this
     `sessions` will end up storing all data for all sessions in memory:
     >>> sessions = list(get_sessions())
     >>> nwbs = []
-    >>> for session in sessions:                              # doctest: +SKIP
+    >>> for session in sessions:                                # doctest: +SKIP
     ...     nwbs.append(session.nwb)
+    
+    ## using `all_session_kwargs`
+    if, for example, you wanted to get trials tables for all sessions without using sync
+    information for timing (the default when `session.is_sync == True`), you can set the
+    property on all sessions (just for this loop) by passing it in as a kwarg:
+    >>> trials_dfs = []
+    >>> for session in get_sessions(is_sync=False):             # doctest: +SKIP
+    ...     trials_dfs.append(session.trials)
     """
     for session in sorted(npc_lims.tracked, key=lambda x: x.date, reverse=True):
         if session.is_uploaded and str(session.id) not in config.session_issues:
