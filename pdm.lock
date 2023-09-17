@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:55a83c62501a40f29563c608f2db350bd5640958d8cfdb1c012506bf2b78afcf"
+content_hash = "sha256:7964d35318f1a399fda28b6bf29b745bd767659f463a49289fe27068e31a7950"
 
 [[package]]
 name = "adbc-driver-manager"
