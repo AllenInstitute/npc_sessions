@@ -53,11 +53,6 @@ text = "MIT"
 Repository = "https://github.com/AllenInstitute/npc_sessions"
 Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 
-[project.optional-dependencies]
-onsite = [
-    "np-session>=0.6.34",
-]
-
 [tool.pdm]
 plugins = [
     "pdm-bump",
