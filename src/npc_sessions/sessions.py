@@ -219,11 +219,7 @@ class DynamicRoutingSession:
     def session_start_time(self) -> datetime.datetime:
         if self.is_sync:
             return self.sync_data.start_time
-        start_time = self.epochs[:]["start_time"].min()
-        start_time = (
-            start_time.decode() if isinstance(start_time, bytes) else start_time
-        )
-        return npc_session.DatetimeRecord(f"{self.id.date} {start_time}").dt
+        return utils.get_stim_start_time(self.task_data)
 
     @property
     def _session_start_time(self) -> npc_session.DatetimeRecord:
