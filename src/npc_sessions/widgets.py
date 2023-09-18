@@ -29,8 +29,10 @@ def session_widget() -> DynamicRoutingSession:
         if DynamicRoutingSession(change["new"]) != session:
             # we can't re-return the session, so we have to update it in place:
             session.__init__(change["new"])  # type: ignore[misc]
-            print(f"Updated `session`: {session!r}\n(no need to re-run the cell)")
-
+            print(f"Updated `session`: {session!r}\n(to make another session, re-run this cell)")
+        session_select.disabled = True
+        session_specify.disabled = True
+        
     session_select.observe(update, names=["value"])
     session_specify.observe(update, names=["value"])
 
