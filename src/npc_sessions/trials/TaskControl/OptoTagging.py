@@ -43,10 +43,12 @@ class OptoTagging(TaskControl):
         )
 
     @functools.cached_property
-    def _stim_recordings(self) -> tuple[utils.StimRecording | None, ...]:
-        return utils.get_stim_latencies_from_sync(
+    def _stim_recordings(self) -> tuple[utils.StimRecording, ...]:
+        recordings = utils.get_stim_latencies_from_sync(
             self._hdf5, self._sync, waveform_type="opto"
         )
+        assert None not in recordings, f"{recordings.count(None) = } encountered: expected a recording of stim onset for every trial"
+        return tuple(_ for _ in recordings if _ is not None) # for mypy
         # TODO check this works for all older sessions
 
     @functools.cached_property
