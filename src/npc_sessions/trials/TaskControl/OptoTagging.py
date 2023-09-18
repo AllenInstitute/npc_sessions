@@ -47,8 +47,10 @@ class OptoTagging(TaskControl):
         recordings = utils.get_stim_latencies_from_sync(
             self._hdf5, self._sync, waveform_type="opto"
         )
-        assert None not in recordings, f"{recordings.count(None) = } encountered: expected a recording of stim onset for every trial"
-        return tuple(_ for _ in recordings if _ is not None) # for mypy
+        assert (
+            None not in recordings
+        ), f"{recordings.count(None) = } encountered: expected a recording of stim onset for every trial"
+        return tuple(_ for _ in recordings if _ is not None)  # for mypy
         # TODO check this works for all older sessions
 
     @functools.cached_property
@@ -58,34 +60,33 @@ class OptoTagging(TaskControl):
 
     @functools.cached_property
     def _inter_trial_interval(self) -> float:
-        return self._hdf5['optoInterval'][()] / self._hdf5['frameRate'][()]
-    
+        return self._hdf5["optoInterval"][()] / self._hdf5["frameRate"][()]
+
     @functools.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
-        return self.stim_start_time - min(.2, .5 * self._inter_trial_interval)
+        return self.stim_start_time - min(0.2, 0.5 * self._inter_trial_interval)
 
     @functools.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
-        return self.stim_stop_time + min(.2, .5 * self._inter_trial_interval)
-    
+        return self.stim_stop_time + min(0.2, 0.5 * self._inter_trial_interval)
+
     @functools.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
-        return np.array(
-            [rec.onset_time_on_sync for rec in self._stim_recordings]
-        )[self.trial_index]
-        
+        return np.array([rec.onset_time_on_sync for rec in self._stim_recordings])[
+            self.trial_index
+        ]
+
     @functools.cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
-        return np.array(
-            [
-                rec.offset_time_on_sync
-                for rec in self._stim_recordings
-            ]
-        )[self.trial_index]
+        return np.array([rec.offset_time_on_sync for rec in self._stim_recordings])[
+            self.trial_index
+        ]
 
     @functools.cached_property
     def stim_name(self) -> npt.NDArray[np.str_]:
-        return np.array([recording.name for recording in self._stim_recordings])[self.trial_index]
+        return np.array([recording.name for recording in self._stim_recordings])[
+            self.trial_index
+        ]
 
     @functools.cached_property
     def duration(self) -> npt.NDArray[np.float64]:
