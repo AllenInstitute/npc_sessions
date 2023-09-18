@@ -94,11 +94,11 @@ class OptoTagging(TaskControl):
 
     @functools.cached_property
     def bregma_x(self) -> npt.NDArray[np.float64]:
-        return np.array([bregma[0] for bregma in self._bregma_xy])
+        return np.array([bregma[0] for bregma in self._bregma_xy])[self.trial_index]
 
     @functools.cached_property
     def bregma_y(self) -> npt.NDArray[np.float64]:
-        return np.array([bregma[1] for bregma in self._bregma_xy])
+        return np.array([bregma[1] for bregma in self._bregma_xy])[self.trial_index]
 
     @functools.cached_property
     def _location(self) -> npt.NDArray[np.str_]:
@@ -111,7 +111,7 @@ class OptoTagging(TaskControl):
             )
             return np.array(
                 [label[np.all(xy == v, axis=1)][0] for v in self._bregma_xy], dtype=str
-            )
+            )[self.trial_index]
         raise ValueError("No known optotagging location data found")
 
     @functools.cached_property
