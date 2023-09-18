@@ -133,6 +133,7 @@ class LazyDict(collections.abc.Mapping[K, V]):
     >>> d['b']
     1
     """
+
     def __init__(self, *args, **kwargs) -> None:
         self._raw_dict = dict(*args, **kwargs)
 

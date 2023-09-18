@@ -506,37 +506,50 @@ class DynamicRoutingSession:
             )
         else:
             stim_paths = self.stim_paths
-            
+
         def get_intervals(
-            cls: type[TaskControl.TaskControl], 
-            stim_filename: str, 
-            **kwargs
+            cls: type[TaskControl.TaskControl], stim_filename: str, **kwargs
         ) -> TaskControl.TaskControl:
             return cls(self.stim_data[stim_filename], **kwargs)
-        
-        lazy_dict_items: dict[str, tuple] = {} # tuple of (func, args, kwargs)
+
+        lazy_dict_items: dict[str, tuple] = {}  # tuple of (func, args, kwargs)
+
         def set_lazy_eval(
             key: str,
-            cls: type[TaskControl.TaskControl], 
-            stim_filename: str, 
+            cls: type[TaskControl.TaskControl],
+            stim_filename: str,
             taskcontrol_kwargs: dict[str, Any],
-        ) -> None: 
-            lazy_dict_items[key] = (get_intervals, (cls, stim_filename), taskcontrol_kwargs)
-            
+        ) -> None:
+            lazy_dict_items[key] = (
+                get_intervals,
+                (cls, stim_filename),
+                taskcontrol_kwargs,
+            )
+
         for stim_path in stim_paths:
             assert isinstance(stim_path, upath.UPath)
             stim_filename = stim_path.stem
             kwargs: dict[str, Any] = {}
             if self.is_sync:
-                kwargs |= dict(sync=self.sync_data)
+                kwargs |= {"sync": self.sync_data}
             if self.is_ephys:
-                kwargs |= dict(ephys_recording_dirs=self.ephys_recording_dirs)
+                kwargs |= {"ephys_recording_dirs": self.ephys_recording_dirs}
 
             # set items in LazyDict for postponed evaluation
             if "RFMapping" in stim_filename:
                 # create two separate trials tables
-                set_lazy_eval(f'Aud{stim_filename}', TaskControl.AudRFMapping, stim_filename, kwargs)
-                set_lazy_eval(f'Vis{stim_filename}', TaskControl.VisRFMapping, stim_filename, kwargs)
+                set_lazy_eval(
+                    f"Aud{stim_filename}",
+                    TaskControl.AudRFMapping,
+                    stim_filename,
+                    kwargs,
+                )
+                set_lazy_eval(
+                    f"Vis{stim_filename}",
+                    TaskControl.VisRFMapping,
+                    stim_filename,
+                    kwargs,
+                )
             else:
                 try:
                     cls: type[TaskControl.TaskControl] = getattr(
@@ -544,7 +557,7 @@ class DynamicRoutingSession:
                     )
                 except AttributeError:
                     # some stims (e.g. Spontaneous) have no trials class
-                    continue  
+                    continue
                 set_lazy_eval(stim_filename, cls, stim_filename, kwargs)
         return utils.LazyDict((k, v) for k, v in lazy_dict_items.items())
 
