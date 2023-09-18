@@ -215,6 +215,23 @@ class DynamicRoutingSession:
 
     # metadata ------------------------------------------------------------------ #
 
+    @functools.cached_property
+    def metadata(self) -> pynwb.NWBFile:
+        """NWB file with session metadata-alone"""
+        return pynwb.NWBFile(
+            session_id=self.id,
+            session_description=self.experiment_description,
+            identifier=self.identifier,
+            session_start_time=self.session_start_time.astimezone(),
+            experimenter=self.experimenter,
+            lab=self.lab,
+            notes=self.notes,
+            source_script=self.source_script,
+            subject=self.subject,
+            epoch_tags=self.stim_names,
+            # keywords=self.keywords, # fetches all trials tables
+        )
+
     @property
     def session_start_time(self) -> datetime.datetime:
         if self.is_sync:
