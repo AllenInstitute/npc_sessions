@@ -386,19 +386,6 @@ class DynamicRouting1(TaskControl):
         return self._sam.trialStim
 
     @functools.cached_property
-    def stim_index(self) -> npt.NDArray[np.int32]:
-        """0-indexed number corresponding to a unique stimulus definition, randomized over trials
-
-        - nan for catch trials"""
-        # - refers to `nwb.stimulus.templates` table
-        # TODO link to stimulus table
-        return np.where(
-            self.is_catch,
-            np.nan,
-            np.unique(self.stim_name).searchsorted(self.stim_name),
-        )
-
-    @functools.cached_property
     def block_index(self) -> npt.NDArray[np.int32]:
         """0-indexed block number, increments with each block"""
         assert min(self._sam.trialBlock) == 1
