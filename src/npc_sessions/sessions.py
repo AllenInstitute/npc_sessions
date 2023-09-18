@@ -279,12 +279,12 @@ class DynamicRoutingSession:
     def subject(self) -> pynwb.file.Subject:
         try:
             metadata = self._subject_aind_metadata
-        except FileNotFoundError:
-            warnings.warn(
-                "Could not find subject.json metadata in raw upload: information will be limited"
+        except (FileNotFoundError, ValueError):
+            logger.warning(
+                "Can currently only fetch subject metadata from `subject.json` raw upload: information will be limited"
             )
             return pynwb.file.Subject(
-                subject_id=self.id.subject,
+                subject_id=str(self.id.subject),
             )
         assert metadata["subject_id"] == self.id.subject
         dob = npc_session.DatetimeRecord(metadata["date_of_birth"])
