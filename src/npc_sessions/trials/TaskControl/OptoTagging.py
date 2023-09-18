@@ -71,14 +71,14 @@ class OptoTagging(TaskControl):
     @functools.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         return np.array(
-            [rec.onset_time_on_sync if rec else np.nan for rec in self._stim_recordings]
+            [rec.onset_time_on_sync for rec in self._stim_recordings]
         )[self.trial_index]
         
     @functools.cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
         return np.array(
             [
-                rec.offset_time_on_sync if rec else np.nan
+                rec.offset_time_on_sync
                 for rec in self._stim_recordings
             ]
         )[self.trial_index]
