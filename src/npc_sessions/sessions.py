@@ -1,5 +1,4 @@
 from __future__ import annotations
-from ast import Attribute
 
 import contextlib
 import datetime
@@ -415,10 +414,8 @@ class DynamicRoutingSession:
                 raise ValueError(
                     "DynamicRouting1*.hdf5 was recorded badly for 670248_20230802 and won't open.\nIf you wish to compile an nwb anyway, set `session.is_task = False` for this session and re-run"
                 )
-            raise AttributeError(f"no trials table available for this session")
-        if (
-            cached := getattr(self, "_cached_nwb_trials", None)
-        ) is not None:
+            raise AttributeError("no trials table available for this session")
+        if (cached := getattr(self, "_cached_nwb_trials", None)) is not None:
             return cached
         trials = pynwb.epoch.TimeIntervals(
             name="trials",
@@ -471,11 +468,10 @@ class DynamicRoutingSession:
         """The version passed to NWBFile.__init__"""
         intervals: list[pynwb.epoch.TimeIntervals] = []
         for k, v in self._all_trials.items():
-            
             if self.task_stim_name in k and self.is_task:
                 intervals.append(self.trials)
                 continue
-            
+
             if not any(
                 existing := [i for i in intervals if i.name == v.__class__.__name__]
             ):
