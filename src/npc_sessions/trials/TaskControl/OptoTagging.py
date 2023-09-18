@@ -55,19 +55,31 @@ class OptoTagging(TaskControl):
         return np.arange(len(self._hdf5["trialOptoOnsetFrame"]))
 
     @functools.cached_property
+    def _inter_trial_interval(self) -> float:
+        return self._hdf5['optoInterval'][()] / self._hdf5['frameRate'][()]
+    
+    @functools.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
-        return np.array(
-            [rec.onset_time_on_sync if rec else np.nan for rec in self._stim_recordings]
-        )
+        return self.stim_start_time - min(.2, .5 * self._inter_trial_interval)
 
     @functools.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
+        return self.stim_stop_time + min(.2, .5 * self._inter_trial_interval)
+    
+    @functools.cached_property
+    def stim_start_time(self) -> npt.NDArray[np.float64]:
+        return np.array(
+            [rec.onset_time_on_sync if rec else np.nan for rec in self._stim_recordings]
+        )[self.trial_index]
+        
+    @functools.cached_property
+    def stim_stop_time(self) -> npt.NDArray[np.float64]:
         return np.array(
             [
                 rec.offset_time_on_sync if rec else np.nan
                 for rec in self._stim_recordings
             ]
-        )
+        )[self.trial_index]
 
     @functools.cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
