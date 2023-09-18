@@ -441,7 +441,7 @@ class DynamicRoutingSession:
         # avoid iterating over values and checking for type, as this will
         # create all intervals in lazydict if they don't exist
         if stim_name.stem not in self._all_trials.keys():
-            raise IndexError(
+            raise KeyError(
                 f"no intervals named {self.task_stim_name}* found for {self.id}"
             )
 
