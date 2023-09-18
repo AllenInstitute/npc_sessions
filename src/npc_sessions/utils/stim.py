@@ -322,7 +322,7 @@ class FlexStimRecording(StimRecording):
             return self._name
         if self.waveform is not None:
             return self.waveform.name
-        assert self.waveform is not None
+        assert self.presentation is not None
         return self.presentation.waveform.name
     
     @property
