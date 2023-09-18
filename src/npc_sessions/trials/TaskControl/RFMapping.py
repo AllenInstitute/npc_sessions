@@ -190,7 +190,7 @@ class RFMapping(TaskControl):
         )
 
     @functools.cached_property
-    def index(self) -> npt.NDArray[np.int32]:
+    def trial_index(self) -> npt.NDArray[np.int32]:
         return np.arange(self._len_all_trials)[self._idx]
 
     @functools.cached_property
