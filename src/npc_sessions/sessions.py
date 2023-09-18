@@ -1023,13 +1023,16 @@ class DynamicRoutingSession:
             return utils.is_stim_file(
                 p, subject_spec=self.id.subject, date_spec=self.id.date
             )
-
         if self.is_ephys:
-            stim_paths = tuple(p for p in self.raw_data_paths if is_valid_stim_file(p))
-            if stim_paths:
+            if stim_paths := tuple(p for p in self.raw_data_paths if is_valid_stim_file(p)):
                 return stim_paths
-        return tuple(p for p in self.stim_path_root.iterdir() if is_valid_stim_file(p))
-
+        if self.root_path:
+            if stim_paths := tuple(p for p in self.root_path.iterdir() if is_valid_stim_file(p)):
+                return stim_paths
+        if stim_paths := tuple(p for p in self.stim_path_root.iterdir() if is_valid_stim_file(p)):
+            return stim_paths
+        raise FileNotFoundError(f'Could not find stim files for {self.id} in {self.stim_path_root}')
+    
     @functools.cached_property
     def stim_file_records(self) -> tuple[npc_lims.File, ...]:
         return tuple(
