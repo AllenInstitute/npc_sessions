@@ -11,7 +11,7 @@ import re
 import uuid
 import warnings
 from collections.abc import Generator, Iterable, Mapping
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 import h5py
 import ndx_events
@@ -1070,7 +1070,7 @@ class DynamicRoutingSession:
             return h5py.File(io.BytesIO(path.read_bytes()), "r")
 
         return utils.LazyDict(
-            (path.stem, (h5_dataset, path)) for path in self.stim_paths
+            (path.stem, (h5_dataset, (path,), {})) for path in self.stim_paths
         )
 
     @property

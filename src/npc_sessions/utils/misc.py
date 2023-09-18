@@ -117,30 +117,29 @@ V = TypeVar("V")
 class LazyDict(collections.abc.Mapping[K, V]):
     """Dict for postponed evaluation of functions and caching of results.
 
-    Assign values as a tuple of (callable, *args). The callable will be
+    Assign values as a tuple of (callable, args, kwargs). The callable will be
     evaluated when the key is first accessed. The result will be cached and
     returned directly on subsequent access.
 
     Effectively immutable after initialization.
 
     Initialize with a dict:
-    >>> d = LazyDict({'a': (lambda x: x + 1, 1)})
+    >>> d = LazyDict({'a': (lambda x: x + 1, (1,), {})})
     >>> d['a']
     2
 
     or with keyword arguments:
-    >>> d = LazyDict(b=(min, 1, 2))
+    >>> d = LazyDict(b=(min, (1, 2), {}))
     >>> d['b']
     1
     """
-
     def __init__(self, *args, **kwargs) -> None:
         self._raw_dict = dict(*args, **kwargs)
 
     def __getitem__(self, key) -> V:
         with contextlib.suppress(TypeError):
-            func, *args = self._raw_dict.__getitem__(key)
-            self._raw_dict.__setitem__(key, func(*args))
+            func, args, *kwargs = self._raw_dict.__getitem__(key)
+            self._raw_dict.__setitem__(key, func(*args, **kwargs[0]))
         return self._raw_dict.__getitem__(key)
 
     def __iter__(self) -> Iterator[K]:
