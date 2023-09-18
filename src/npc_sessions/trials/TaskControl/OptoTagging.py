@@ -82,6 +82,10 @@ class OptoTagging(TaskControl):
         )[self.trial_index]
 
     @functools.cached_property
+    def duration(self) -> npt.NDArray[np.float64]:
+        return self._hdf5["trialOptoDur"][self.trial_index]
+
+    @functools.cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         bregma = self._hdf5.get("optoBregma", None) or self._hdf5.get("bregmaXY", None)
         galvo = self._hdf5["galvoVoltage"][()]
