@@ -82,6 +82,10 @@ class OptoTagging(TaskControl):
         )[self.trial_index]
 
     @functools.cached_property
+    def stim_name(self) -> npt.NDArray[np.str_]:
+        return np.array([recording.name for recording in self._stim_recordings])[self.trial_index]
+
+    @functools.cached_property
     def duration(self) -> npt.NDArray[np.float64]:
         return self._hdf5["trialOptoDur"][self.trial_index]
 

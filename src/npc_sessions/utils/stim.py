@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+import enum
 import functools
 import io
 import logging
@@ -52,8 +53,33 @@ def get_pkl_stim_data(stim_path: StimPathOrDataset, **kwargs) -> dict:
     kwargs.setdefault("encoding", "latin1")
     return pickle.loads(utils.from_pathlike(stim_path).read_bytes())
 
-
+class WaveformModality(enum.Enum):
+    SOUND = enum.auto()
+    OPTO = enum.auto()
+    
+    def __str__(self) -> str:
+        return self.name.lower()
+    
+    @classmethod
+    def from_factory(cls, s: Any) -> WaveformModality:
+        if isinstance(s, WaveformModality):
+            return s
+        s = str(s)
+        if any(label in s.lower() for label in  ("sound", "audio", "tone", "noise", "acoustic")):
+            return cls.SOUND
+        if any(label in s.lower() for label in ('opto', 'optic')):
+            return cls.OPTO
+        raise ValueError(f"Could not determine modality from {s!r}")
+    
 class Waveform(Protocol):
+    @property
+    def name(self) -> str:
+        raise NotImplementedError
+    
+    @property
+    def modality(self) -> WaveformModality:
+        raise NotImplementedError
+    
     @property
     def samples(self) -> npt.NDArray[np.float64]:
         raise NotImplementedError
@@ -85,16 +111,26 @@ class Waveform(Protocol):
 
 class SimpleWaveform(Waveform):
     """
-    >>> waveform = SimpleWaveform(sampling_rate=1, samples=np.array([1, 2, 3]))
+    >>> waveform = SimpleWaveform(name='test', modality='opto',sampling_rate=1, samples=np.array([1, 2, 3]))
     >>> waveform.duration
     3.0
     >>> waveform.timestamps
     array([0., 1., 2.])
     """
 
-    def __init__(self, sampling_rate: float, samples: npt.NDArray[np.float64]) -> None:
+    def __init__(self, name:str, modality: str | WaveformModality, sampling_rate: float, samples: npt.NDArray[np.float64]) -> None:
         self._samples = samples
         self._sampling_rate = sampling_rate
+        self._name = name.replace(' ', '_')
+        self._modality = WaveformModality.from_factory(modality)
+        
+    @property
+    def name(self) -> str:
+        return self._name
+    
+    @property
+    def modality(self) -> WaveformModality:
+        return self._modality
 
     @property
     def samples(self) -> npt.NDArray[np.float64]:
@@ -113,7 +149,7 @@ class LazyWaveform(Waveform):
     waveforms available immediately and stored only once for each unique
     parameter set.
 
-    >>> waveform = LazyWaveform(sampling_rate=1, fn=lambda dtype: np.array([1, 2, 3], dtype=dtype), dtype=np.float64)
+    >>> waveform = LazyWaveform(name='test', modality='opto', sampling_rate=1, fn=lambda dtype: np.array([1, 2, 3], dtype=dtype), dtype=np.float64)
     >>> waveform.samples
     array([1., 2., 3.])
     >>> waveform.duration
@@ -124,14 +160,16 @@ class LazyWaveform(Waveform):
 
     def __init__(
         self,
+        name: str,
+        modality: str | WaveformModality,
         sampling_rate: float,
-        fn: Callable[[Any], npt.NDArray[np.float64]],
-        *args,
-        **kwargs,
+        fn: Callable[..., npt.NDArray[np.float64]],
+        **kwargs: dict[str, Any],
     ) -> None:
+        self._name=name.replace(' ', '_')
+        self._modality = WaveformModality.from_factory(modality)
         self._sampling_rate = sampling_rate
         self._fn = fn
-        self._args = args
         self._kwargs = kwargs
         for k, v in kwargs.items():
             if isinstance(v, np.ndarray):
@@ -139,23 +177,31 @@ class LazyWaveform(Waveform):
                 self._kwargs[k] = tuple(v)
 
     @property
+    def name(self) -> str:
+        return self._name
+    
+    @property
+    def modality(self) -> WaveformModality:
+        return self._modality
+    
+    @property
     def sampling_rate(self) -> float:
         return self._sampling_rate
 
     @property
     def samples(self) -> npt.NDArray[np.float64]:
-        return self._fn(*self._args, **self._kwargs)
+        return self._fn(**self._kwargs)
 
 
 @dataclasses.dataclass(frozen=True, eq=True)
 class StimPresentation:
     """
-    Info about a waveform-stimulus when it was triggered: its waveform (ideal, not actual), the time it was
+    Info about a waveform-stimulus when it was triggered: its sample values (ideal, not actual), the time it was
     sent, the expected duration, etc.
 
     >>> presentation = StimPresentation(
     ...     trial_idx=0,
-    ...     waveform=SimpleWaveform(sampling_rate=1, samples=np.array([1, 2, 3])),
+    ...     waveform=SimpleWaveform(name="test", modality="sound", sampling_rate=1, samples=np.array([1, 2, 3])),
     ...     trigger_time_on_sync=0,
     ...     )
     >>> presentation.duration
@@ -174,6 +220,15 @@ class StimPresentation:
 class StimRecording(Protocol):
     """Timing information about a waveform-stimulus as recorded."""
 
+    @property
+    def name(self) -> str:
+        """Descriptive name - will be used as key in `nwb.stimuli` dict"""
+        raise NotImplementedError
+        
+    @property
+    def modality(self) -> WaveformModality:
+        raise NotImplementedError
+        
     @property
     def onset_time_on_sync(self) -> float:
         raise NotImplementedError
@@ -194,6 +249,8 @@ class FlexStimRecording(StimRecording):
     >>> presentation = StimPresentation(
     ...     trial_idx=0,
     ...     waveform=SimpleWaveform(
+    ...         name="test",
+    ...         modality="sound",
     ...         sampling_rate=1,
     ...         samples=np.array([1, 2, 3]),
     ...     ),
@@ -206,6 +263,8 @@ class FlexStimRecording(StimRecording):
     3.1
 
     >>> recorded_waveform = SimpleWaveform(
+    ...     name="test",
+    ...     modality="sound",
     ...     sampling_rate=1,
     ...     samples=np.array([1, 2, 3]),
     ... )
@@ -216,6 +275,8 @@ class FlexStimRecording(StimRecording):
 
     def __init__(
         self,
+        name: str | None = None,
+        modality: str | WaveformModality | None = None,
         presentation: StimPresentation | None = None,
         waveform: Waveform | None = None,
         trigger_time_on_sync: float | None = None,
@@ -223,7 +284,15 @@ class FlexStimRecording(StimRecording):
         onset_time_on_sync: float | None = None,
         offset_time_on_sync: float | None = None,
     ) -> None:
-        if presentation is None and waveform is None:
+        if not (name or presentation or waveform):
+            raise ValueError(
+                "At least one of `name`, `presentation`, `waveform` must be provided"
+            )
+        if not (presentation or waveform):
+            raise ValueError(
+                "At least one of `presentation`, `waveform` must be provided"
+            )
+        if not (presentation or waveform):
             raise ValueError(
                 "At least one of `presentation` or `waveform` must be provided"
             )
@@ -231,7 +300,7 @@ class FlexStimRecording(StimRecording):
             raise ValueError(
                 "At least one of `latency` or `onset_time_on_sync` must be provided"
             )
-        if presentation is None and waveform is None and offset_time_on_sync is None:
+        if not (presentation or waveform) and offset_time_on_sync is None:
             raise ValueError(
                 "At least one of `presentation`, `waveform`, `offset_time_on_sync` must be provided"
             )
@@ -239,12 +308,32 @@ class FlexStimRecording(StimRecording):
         self.presentation = presentation
         self.waveform = waveform
         self.trigger_time_on_sync = trigger_time_on_sync
+        self._name = None if name is None else name.replace(' ', '_')
+        self._modality = None if modality is None else WaveformModality.from_factory(modality)
 
         # attrs that can potentially be derived from other attrs:
         self._latency = latency
         self._onset_time_on_sync = onset_time_on_sync
         self._offset_time_on_sync = offset_time_on_sync
-
+        
+    @property
+    def name(self) -> str:
+        if self._name is not None:
+            return self._name
+        if self.waveform is not None:
+            return self.waveform.name
+        assert self.waveform is not None
+        return self.presentation.waveform.name
+    
+    @property
+    def modality(self) -> WaveformModality:
+        if self._modality is not None:
+            return self._modality
+        if self.waveform is not None:
+            return self.waveform.modality
+        assert self.presentation is not None
+        return self.presentation.waveform.modality
+    
     @property
     def latency(self) -> float | None:
         if self._latency is not None:
@@ -320,7 +409,19 @@ def get_audio_waveforms_from_stim_file(
     waveforms: list[Waveform | None] = [None] * get_num_trials(stim_data)
     for idx in range(len(waveforms)):
         if any(trialSoundArray[idx]):
+            if sound_type := stim_data.get("trialSoundType"):
+                name = sound_type[idx].decode()
+            elif (noise := stim_data.get("trialAMNoiseFreq")) and ~np.isnan(noise[idx]):
+                    name = "AM_noise"
+            elif (tone := stim_data.get("trialToneFreq")) and ~np.isnan(tone[idx]):
+                name = "tone"
+            else:
+                raise ValueError(
+                    f"Could not determine sound type for trial {idx} in {stim_file_or_dataset}"
+                )
             waveforms[idx] = SimpleWaveform(
+                name=name,
+                modality=WaveformModality.SOUND,
                 sampling_rate=stim_data["soundSampleRate"][()],
                 samples=trialSoundArray[idx],
             )
@@ -384,6 +485,8 @@ def generate_sound_waveforms(
             freq = trialSoundFreq[idx]
 
         waveforms[idx] = LazyWaveform(
+            name=trialSoundType[idx].decode(),
+            modality=WaveformModality.SOUND,
             sampling_rate=soundSampleRate,
             fn=get_cached_sound_waveform,
             soundType=trialSoundType[idx].decode(),
@@ -452,8 +555,16 @@ def generate_opto_waveforms(
     for trialnum in range(0, nTrials):
         if np.isnan(trialOptoDur[trialnum]) is True:
             continue
-
+        if trialOptoDur[trialnum] == 0:
+            continue
+        
+        if trialOptoSinFreq[trialnum] != 0:
+            name='sine'
+        else:
+            name='square'
         waveforms[trialnum] = LazyWaveform(
+            name=name,
+            modality=WaveformModality.OPTO,
             sampling_rate=optoSampleRate,
             fn=get_cached_opto_pulse_waveform,
             sampleRate=optoSampleRate,
