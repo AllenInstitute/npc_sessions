@@ -92,6 +92,14 @@ class OptoTagging(TaskControl):
         return self._hdf5["trialOptoDur"][self.trial_index]
 
     @functools.cached_property
+    def location(self) -> npt.NDArray[np.str_]:
+        if all(str(v).upper() in "ABCDEF" for v in self._location):
+            return np.array(
+                [f"probe{str(v).upper()}" for v in self._location], dtype=str
+            )
+        return self._location
+
+    @functools.cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         bregma = self._hdf5.get("optoBregma", None) or self._hdf5.get("bregmaXY", None)
         galvo = self._hdf5["galvoVoltage"][()]
@@ -119,14 +127,6 @@ class OptoTagging(TaskControl):
                 [label[np.all(xy == v, axis=1)][0] for v in self._bregma_xy], dtype=str
             )[self.trial_index]
         raise ValueError("No known optotagging location data found")
-
-    @functools.cached_property
-    def location(self) -> npt.NDArray[np.str_]:
-        if all(str(v).upper() in "ABCDEF" for v in self._location):
-            return np.array(
-                [f"probe{str(v).upper()}" for v in self._location], dtype=str
-            )
-        return self._location
 
     @functools.cached_property
     def power(self) -> npt.NDArray[np.float64]:
