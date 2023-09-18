@@ -6,7 +6,7 @@ from npc_lims import tracked
 from npc_sessions.sessions import *
 from npc_sessions.trials import *
 from npc_sessions.utils import *
-from npc_sessions.widgets import session_widget, PSTHWidget
+from npc_sessions.widgets import PSTHWidget, session_widget
 
 _ = dotenv.load_dotenv(
     dotenv.find_dotenv(usecwd=True)
