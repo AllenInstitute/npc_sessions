@@ -1118,12 +1118,9 @@ class DynamicRoutingSession:
         return utils.get_video_info_file_paths(*self.raw_data_paths)
 
     @functools.cached_property
-    def video_info_data(self) -> Mapping[str, Any]:
-        def recording_report(path: upath.UPath) -> dict[str, str | int | float]:
-            return json.loads(path.read_bytes())["RecordingReport"]
-
+    def video_info_data(self) -> utils.LazyDict[str, utils.MVRInfoData]:
         return utils.LazyDict(
-            (utils.extract_camera_name(path.stem), (recording_report, path))
+            (utils.extract_camera_name(path.stem), (utils.get_video_info_data, path), {})
             for path in self.video_info_paths
         )
 

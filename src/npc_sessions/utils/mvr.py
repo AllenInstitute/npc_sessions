@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Container, Iterable
+from collections.abc import Container, Iterable, Mapping
 from typing import Literal, TypeVar
 
 import numpy as np
@@ -45,14 +45,14 @@ def get_video_frame_times(
     camera_to_video_path = {
         utils.extract_camera_name(path.stem): path for path in videos
     }
-    camera_to_json_path = {utils.extract_camera_name(path.stem): path for path in jsons}
+    camera_to_json_data = {utils.extract_camera_name(path.stem): get_video_info_data(path) for path in jsons}
     camera_exposing_times = get_cam_exposing_times_on_sync(sync_path_or_dataset)
     frame_times = {}
     for camera in camera_exposing_times:
         if camera in camera_to_video_path:
             frame_times[camera_to_video_path[camera]] = remove_lost_frame_times(
                 camera_exposing_times[camera],
-                get_lost_frames_from_camera_info(camera_to_json_path[camera]),
+                get_lost_frames_from_camera_info(camera_to_json_data[camera]),
             )
             # Insert a nan frame time at the beginning to account for metadata frame
             frame_times[camera_to_video_path[camera]] = np.insert(
@@ -109,26 +109,21 @@ def get_cam_transfer_times_on_sync(
 
 
 def get_lost_frames_from_camera_info(
-    info_path_or_dict: dict | utils.PathLike,
+    info_path_or_data: MVRInfoData | utils.PathLike,
 ) -> npt.NDArray[np.int32]:
     """
     >>> get_lost_frames_from_camera_info({'LostFrames': ['1-2,4-5,7']})
     array([0, 1, 3, 4, 6])
     """
-    if not isinstance(info_path_or_dict, dict):
-        info = json.loads(utils.from_pathlike(info_path_or_dict).read_bytes())
-    else:
-        info = info_path_or_dict
-
-    if "RecordingReport" in info:
-        info = info["RecordingReport"]
+    info = get_video_info_data(info_path_or_data)
 
     if info.get("FramesLostCount") == 0:
         return np.array([])
 
-    lost_frame_spans: list[str] = info["LostFrames"][0].split(",")
+    assert isinstance(_lost_frames := info["LostFrames"], list)
+    lost_frame_spans: list[str] = _lost_frames[0].split(",")
 
-    lost_frames = []
+    lost_frames: list[int] = []
     for span in lost_frame_spans:
         start_end = span.split("-")
         if len(start_end) == 1:
@@ -173,6 +168,16 @@ def get_video_info_file_paths(*paths: utils.PathLike) -> tuple[upath.UPath, ...]
         for p in get_video_file_paths(*paths)
     )
 
+MVRInfoData = Mapping[str, str | int |float | list[str]]
+"""Contents of `RecordingReport` from a camera's info.json for an MVR
+recording."""
+
+def get_video_info_data(path_or_info_data: utils.PathLike | Mapping) -> MVRInfoData:
+    if isinstance(path_or_info_data, Mapping):
+        if "RecordingReport" in path_or_info_data:
+            return path_or_info_data["RecordingReport"]
+        return path_or_info_data    
+    return json.loads(utils.from_pathlike(path_or_info_data).read_bytes())["RecordingReport"]
 
 if __name__ == "__main__":
     import doctest
