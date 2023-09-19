@@ -18,17 +18,15 @@ def get_video_frame_times(
     sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
     *video_paths: utils.PathLike,
 ) -> dict[upath.UPath, npt.NDArray[np.float64]]:
-    """Returns number of frames on sync line for each video file (after
-    subtracting lost frames).
+    """Returns frametimes as measured on sync clock for each video file.
 
     If a single directory is passed, video files in that directory will be
     found. If multiple paths are passed, the video files will be filtered out.
 
     - keys are video file paths
     - values are arrays of frame times in seconds
-
-    - if the number of frames in a video file doesn't match the number of frames
-    returned here, just truncate the excess frames in the video file:
+    - the first frametime will be a nan value (corresponding to a metadata frame)
+    - frames at the end may also be nan values:
 
         MVR previously ceased all TTL pulses before the recording was
         stopped, resulting in frames in the video that weren't registered
@@ -47,17 +45,25 @@ def get_video_frame_times(
     }
     camera_to_json_data = {utils.extract_camera_name(path.stem): get_video_info_data(path) for path in jsons}
     camera_exposing_times = get_cam_exposing_times_on_sync(sync_path_or_dataset)
-    frame_times = {}
+    frame_times: dict[upath.UPath, npt.NDArray[np.floating]] = {}
     for camera in camera_exposing_times:
         if camera in camera_to_video_path:
-            frame_times[camera_to_video_path[camera]] = remove_lost_frame_times(
+            camera_frame_times = remove_lost_frame_times(
                 camera_exposing_times[camera],
                 get_lost_frames_from_camera_info(camera_to_json_data[camera]),
             )
             # Insert a nan frame time at the beginning to account for metadata frame
-            frame_times[camera_to_video_path[camera]] = np.insert(
-                frame_times[camera_to_video_path[camera]], 0, np.nan
+            camera_frame_times = np.insert(
+                camera_frame_times, 0, np.nan
             )
+            # append nan frametimes for frames in the video file but are
+            # unnaccounted for on sync:
+            if (frames_missing_from_sync := len(frame_times) - get_total_frames_from_camera_info(camera_to_json_data[camera])) > 0:
+                camera_frame_times = np.append(
+                    camera_frame_times,
+                    np.full(frames_missing_from_sync, np.nan),
+                )
+            frame_times[camera_to_video_path[camera]] = camera_frame_times
     return frame_times
 
 
@@ -133,6 +139,14 @@ def get_lost_frames_from_camera_info(
 
     return np.subtract(lost_frames, 1)  # lost frames in info are 1-indexed
 
+def get_total_frames_from_camera_info(
+    info_path_or_data: dict | utils.PathLike,
+) -> int:
+    """`FramesRecorded` in info.json plus 1 (for metadata frame)."""
+    info = get_video_info_data(info_path_or_data)
+    assert isinstance((reported := info.get("FramesRecorded")), int)
+    return reported + 1
+    
 
 NumericT = TypeVar("NumericT", bound=np.generic, covariant=True)
 
