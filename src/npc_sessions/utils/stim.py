@@ -531,6 +531,10 @@ def generate_opto_waveforms(
     trialOptoDur = stim_data["trialOptoDur"][:nTrials].squeeze()
     trialOptoVoltage = stim_data["trialOptoVoltage"][:nTrials].squeeze()
 
+    # TODO update `trialOptoDelay` to accommodate multiple devices (task only)
+    # Sam says: there is a trialOptoDelay value for each device (because the
+    # analog output has to start synchronously for each laser but you might
+    # want one laser to actually turn on later than the other one)
     if "trialOptoDelay" in stim_data:
         trialOptoDelay = stim_data["trialOptoDelay"][:nTrials]
     elif "optoDelay" in stim_data:
