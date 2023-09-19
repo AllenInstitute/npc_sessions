@@ -280,9 +280,9 @@ class DynamicRouting1(TaskControl):
         if not self._has_opto:
             return np.nan * np.ones(self._len)
         return np.where(
-            ~np.isnan(self._sam.trialOptoOnsetFrame),
+            ~np.isnan(self._hdf5["trialOptoOnsetFrame"][:self._len]),
             self.get_vis_display_time(
-                self._sam.stimStartFrame + self._sam.trialOptoOnsetFrame
+                self._sam.stimStartFrame + self._hdf5["trialOptoOnsetFrame"][:self._len]
             ),
             np.nan * np.ones(self._len),
         )
@@ -292,7 +292,7 @@ class DynamicRouting1(TaskControl):
         """offset of optogenetic inactivation"""
         if not self._has_opto:
             return np.nan * np.ones(self._len)
-        return self.opto_start_time + self._sam.trialOptoDur
+        return self.opto_start_time + self._hdf5["trialOptoDur"][:self._len]
 
     @functools.cached_property
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
@@ -548,7 +548,7 @@ class DynamicRouting1(TaskControl):
         if not self._has_opto:
             return voltages
         for idx in range(self._len):
-            v = self._sam.trialOptoVoltage[idx]
+            v = self._hdf5["trialOptoVoltage"][self._opto_params_index][idx]
             if v.shape:
                 voltages[idx] = utils.safe_index(v, self._opto_params_index[idx])
                 continue
@@ -559,7 +559,7 @@ class DynamicRouting1(TaskControl):
     def opto_power(self) -> npt.NDArray[np.float64]:
         if not self._has_opto:
             return np.full(self._len, np.nan)
-        voltages = self._sam.trialOptoVoltage[self._opto_params_index]
+        voltages = self._hdf5["trialOptoVoltage"][self._opto_params_index][:self._len]
         return np.where(
             np.isnan(voltages),
             np.nan,
