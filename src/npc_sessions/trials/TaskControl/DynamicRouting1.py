@@ -13,6 +13,7 @@ from __future__ import annotations
 import functools
 import logging
 from collections.abc import Iterable
+from typing import Sized
 
 import DynamicRoutingTask.TaskUtils
 import npc_lims
@@ -139,6 +140,7 @@ class DynamicRouting1(TaskControl):
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
             return self.get_script_frame_time(self._hdf5["trialStimStartFrame"][trial])
         return utils.safe_index(self._aud_stim_onset_times, trial)
+    
 
     def get_trial_aud_offset(
         self, trial: int | npt.NDArray[np.int32]
@@ -154,6 +156,34 @@ class DynamicRouting1(TaskControl):
             return self.get_trial_aud_onset(trial) + self._hdf5["trialSoundDur"][trial]
         return utils.safe_index(self._aud_stim_offset_times, trial)
 
+    def get_trial_opto_onset(
+        self, trial: int | npt.NDArray[np.int32]
+    ) -> npt.NDArray[np.float64]:
+        if self._opto_stim_recordings is not None:
+            return np.array(
+                [
+                    np.nan if rec is None else rec.onset_time_on_sync
+                    for rec in self._opto_stim_recordings
+                ]
+            )[trial]
+        start_frames = self._hdf5["trialOptoOnsetFrame"][trial].squeeze()
+        if all(v == 0 for v in start_frames if ~np.isnan(v)):
+            # some sessions for 670248 recrded incorrectly
+            start_frames += self._hdf5.get("trialStimStartFrame")[trial].squeeze()
+        return self.get_script_frame_time(self._hdf5["trialStimStartFrame"][trial] + start_frames)
+    
+    def get_trial_opto_offset(
+        self, trial: int | npt.NDArray[np.int32]
+    ) -> npt.NDArray[np.float64]:
+        if self._opto_stim_recordings is not None:
+            return np.array(
+                [
+                    np.nan if rec is None else rec.offset_time_on_sync
+                    for rec in self._opto_stim_recordings
+                ]
+            )[trial]
+        return self.get_trial_opto_onset(trial) + self._hdf5["trialOptoDur"][trial].squeeze()
+    
     # ---------------------------------------------------------------------- #
     # helper-properties that won't become columns:
 
@@ -253,7 +283,7 @@ class DynamicRouting1(TaskControl):
     @functools.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         """onset of visual or auditory stimulus"""
-        starts = np.nan * np.ones(self._len)
+        starts = np.full(self._len, np.nan)
         for idx in range(self._len):
             if self.is_vis_stim[idx] or self.is_catch[idx]:
                 starts[idx] = self.get_vis_display_time(self._sam.stimStartFrame[idx])
@@ -264,7 +294,7 @@ class DynamicRouting1(TaskControl):
     @functools.cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of visual or auditory stimulus"""
-        ends = np.nan * np.ones(self._len)
+        ends = np.full(self._len, np.nan)
         for idx in range(self._len):
             if self.is_vis_stim[idx] or self.is_catch[idx]:
                 ends[idx] = self.get_vis_display_time(
@@ -279,21 +309,15 @@ class DynamicRouting1(TaskControl):
     def opto_start_time(self) -> npt.NDArray[np.float64]:
         """Onset of optogenetic inactivation"""
         if not self._has_opto:
-            return np.nan * np.ones(self._len)
-        return np.where(
-            ~np.isnan(self._hdf5["trialOptoOnsetFrame"][:self._len]),
-            self.get_vis_display_time(
-                self._sam.stimStartFrame + self._hdf5["trialOptoOnsetFrame"][:self._len]
-            ),
-            np.nan * np.ones(self._len),
-        )
+            return np.full(self._len, np.nan)
+        return self.get_trial_opto_onset(self.trial_index)
 
     @functools.cached_property
     def opto_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of optogenetic inactivation"""
         if not self._has_opto:
-            return np.nan * np.ones(self._len)
-        return self.opto_start_time + self._hdf5["trialOptoDur"][:self._len]
+            return np.full(self._len, np.nan)
+        return self.get_trial_opto_offset(self.trial_index)
 
     @functools.cached_property
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
@@ -468,7 +492,7 @@ class DynamicRouting1(TaskControl):
         return np.where(
             self.is_reward_scheduled is True,
             self.trial_index_in_block,
-            np.nan * np.ones(self._len),
+            np.full(self._len, np.nan),
         )
 
     def get_trial_opto_devices(self, trial_idx: int) -> tuple[str, ...]:
@@ -635,7 +659,7 @@ class DynamicRouting1(TaskControl):
         
         if "optoPowerCalibrationData" not in self._hdf5:
             powers = []
-            for devices in self._trial_opto_devices:
+            for voltage, devices in zip(voltages, self._trial_opto_devices):
                 if not devices:
                     powers.append(np.nan)
                     continue
@@ -646,7 +670,12 @@ class DynamicRouting1(TaskControl):
                 if not devices[0]:
                     powers.append(np.nan)
                     continue
-                powers.append(DynamicRoutingTask.TaskUtils.voltsToPower(self.getOptoPowerCalibrationData(devices[0])))
+                powers.append(
+                    DynamicRoutingTask.TaskUtils.voltsToPower(
+                        self.getOptoPowerCalibrationData(devices[0]),
+                        voltage,
+                    ).item()
+                )
             return np.array(powers)        
         
         return np.where(

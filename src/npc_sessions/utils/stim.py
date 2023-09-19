@@ -528,8 +528,8 @@ def generate_opto_waveforms(
 
     nTrials = get_num_trials(stim_data)
 
-    trialOptoDur = stim_data["trialOptoDur"][:nTrials]
-    trialOptoVoltage = stim_data["trialOptoVoltage"][:nTrials]
+    trialOptoDur = stim_data["trialOptoDur"][:nTrials].squeeze()
+    trialOptoVoltage = stim_data["trialOptoVoltage"][:nTrials].squeeze()
 
     if "trialOptoDelay" in stim_data:
         trialOptoDelay = stim_data["trialOptoDelay"][:nTrials]
@@ -566,16 +566,15 @@ def generate_opto_waveforms(
 
     waveforms: list[Waveform | None] = [None] * nTrials
     for trialnum in range(0, nTrials):
-        if np.isnan(trialOptoDur[trialnum]) is True:
+        if any(np.isnan(v[trialnum]) or v[trialnum] == 0 for v in (trialOptoDur, trialOptoVoltage)):
             continue
-        if trialOptoDur[trialnum] == 0:
-            continue
-
+    
         if trialOptoSinFreq[trialnum] != 0:
             name = "sine"
         else:
             name = "square"
-        waveforms[trialnum] = LazyWaveform(
+            
+        waveform = LazyWaveform(
             name=name,
             modality=WaveformModality.OPTO,
             sampling_rate=optoSampleRate,
@@ -588,7 +587,9 @@ def generate_opto_waveforms(
             onRamp=trialOptoOnRamp[trialnum],
             offRamp=trialOptoOffRamp[trialnum],
         )
-
+        assert waveform is not None and waveform.samples.any()
+        waveforms[trialnum] = waveform
+        
     return tuple(waveforms)
 
 
@@ -1111,7 +1112,10 @@ def get_stim_trigger_frames(
         (stim_data.get("trialStimStartFrame") or stim_data.get("stimStartFrame"))
         if stim_type != "opto"
         else stim_data.get("trialOptoOnsetFrame")
-    )[: get_num_trials(stim_data)]
+    )[:get_num_trials(stim_data)].squeeze()
+    if stim_type == "opto" and all(v == 0 for v in start_frames if ~np.isnan(v)):
+        # some sessions for 670248 recrded incorrectly
+        start_frames += stim_data.get("trialStimStartFrame")[:get_num_trials(stim_data)].squeeze()
     return tuple(
         int(v) if ~np.isnan(v) else None
         for v in utils.safe_index(start_frames, np.arange(len(start_frames)))
