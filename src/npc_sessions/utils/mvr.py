@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Container, Iterable, Mapping
-from typing import Literal, TypeVar
+from typing import Literal, TypeVar, Union
+from typing_extensions import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -182,7 +183,7 @@ def get_video_info_file_paths(*paths: utils.PathLike) -> tuple[upath.UPath, ...]
         for p in get_video_file_paths(*paths)
     )
 
-MVRInfoData = Mapping[str, str | int |float | list[str]]
+MVRInfoData: TypeAlias = Mapping[str, Union[str, int, float, list[str]]]
 """Contents of `RecordingReport` from a camera's info.json for an MVR
 recording."""
 
