@@ -175,7 +175,7 @@ class LazyWaveform(Waveform):
         modality: str | WaveformModality,
         sampling_rate: float,
         fn: Callable[..., npt.NDArray[np.float64]],
-        **kwargs: dict[str, Any],
+        **kwargs,
     ) -> None:
         self._name = name.replace(" ", "_")
         self._modality = WaveformModality.from_factory(modality)
