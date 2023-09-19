@@ -68,6 +68,12 @@ class PSTHWidget(nwbwidgets.misc.PSTHWidget):
             self.trial_event_controller.value = ["start_time"]
         if "stim_name" in self.gas.group_dd.options:
             self.gas.group_dd.value = "stim_name"
+    
+    def update(self, *args, **kwargs):
+        kwargs.setdefault("figsize", (6, 7))
+        fig = super(self.__class__, self).update(*args, **kwargs)
+        fig.axes[1].set_xticks(sorted([*fig.axes[1].get_xlim(), 0]))
+        return fig
 
     __doc__ = nwbwidgets.misc.PSTHWidget.__doc__
     __init__.__doc__ = nwbwidgets.misc.PSTHWidget.__init__.__doc__
