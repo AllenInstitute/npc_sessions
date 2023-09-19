@@ -15,6 +15,7 @@ import logging
 from collections.abc import Iterable
 
 import DynamicRoutingTask.TaskUtils
+import npc_lims
 import numpy as np
 import numpy.typing as npt
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
@@ -480,20 +481,82 @@ class DynamicRouting1(TaskControl):
         return tuple(eval(devices))
 
     @functools.cached_property
-    def _opto_params_index(self) -> npt.NDArray[np.float64]:
+    def _trial_opto_devices(self) -> tuple[tuple[str, ...], ...]:
+        return tuple(self.get_trial_opto_devices(idx) for idx in range(self._len))
+    
+    @functools.cached_property
+    def _opto_params_index(self) -> npt.NDArray[np.float64] | None:
         if not self._has_opto:
             return np.full(self._len, np.nan)
-        return self._hdf5["trialOptoParamsIndex"][()]
+        if (found := self._hdf5.get("trialOptoParamsIndex")):
+            return found[()]
+        return None
+
+    @property
+    def _rig(self) -> str:
+        return self._hdf5["rigName"].asstr()[()]
+    
+    @staticmethod
+    def txtToDict(txt: str) -> dict[str, list[float]]:
+        """From Sam's code, modified to use text directly rather than a file"""
+        cols = zip(*[line.strip('\n').split('\t') for line in txt.split('\n')]) 
+        return {d[0]: [float(s) for s in d[1:]] for d in cols}
+    
+    def getBregmaGalvoCalibrationData(self) -> dict[str, float | list[float]]:
+        """From Sam's code, modified to use synced copies on s3"""
+        root = npc_lims.DR_DATA_REPO.parent / 'OptoGui' / self._rig
+        bregmaGalvoFile = root / f"{self._rig}_bregma_galvo.txt"
+        bregmaOffsetFile = root / f"{self._rig}_bregma_offset.txt"
+        voltages = self.txtToDict(bregmaGalvoFile.read_text())
+        offsets =  {k: v[0] for k, v in self.txtToDict(bregmaOffsetFile.read_text()).items()}
+        return voltages | offsets
+    
+    def getOptoPowerCalibrationData(self, opto_device_name: str):
+        """Fro m Sam's code, modified to use synced copies on s3"""
+        root = npc_lims.DR_DATA_REPO.parent / 'OptoGui' / self._rig
+        powerCalibrationFile = root / f"{self._rig}_{opto_device_name}_power.txt"
+        d = self.txtToDict(powerCalibrationFile.read_text())
+        p = np.polyfit(d['input (V)'],d['power (mW)'],2)
+        d['poly coefficients'] = p
+        d['offsetV'] = min(np.roots(p))
+        return d
 
     @functools.cached_property
+    def _galvo_voltage_xy(self):
+        if not self._has_opto:
+            return np.full(self._len, np.nan)
+        if not all(len(v) == 2 for v in self._sam.trialGalvoVoltage):
+            # a set of experiments with 670248 had a bug where galvo
+            # voltage was a single value. 
+            # Fortunately, there was also only one possible galvo voltage
+            # available
+            if len(g := self._hdf5["galvoVoltage"][()]) == 1 and len(xy := g[0]) == 2:
+                return tuple((xy[0], xy[1]) for _ in range(self._len))
+            raise IndexError("trialGalvoVoltage has elements with len != 2")
+        return tuple(tuple(v) for v in self._sam.trialGalvoVoltage)
+    
+    @functools.cached_property
     def _opto_location_bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
-        bregma = self._hdf5.get("optoBregma", None) or self._hdf5.get("bregmaXY", None)
-        galvo = self._hdf5["galvoVoltage"][()]
-        return tuple(tuple(bregma[np.all(galvo == v, axis=1)][0]) for v in self._hdf5["trialGalvoVoltage"])  # type: ignore
+        bregma = self._hdf5.get("optoBregma") or self._hdf5.get("bregmaXY")
+        if bregma is not None:
+            galvo = self._hdf5["galvoVoltage"][()]
+            return tuple(tuple(bregma[np.all(galvo == v, axis=1)][0]) for v in self._galvo_voltage_xy)  # type: ignore
+        if (calibration_data := self._hdf5.get("bregmaGalvoCalibrationData")) is None:
+            calibration_data = self.getBregmaGalvoCalibrationData()
+        else: 
+            for k in ("bregmaXOffset", "bregmaYOffset"):
+                calibration_data[k] = calibration_data[k][()]
+        return tuple(
+            DynamicRoutingTask.TaskUtils.galvoToBregma(
+                calibration_data,
+                *voltages,
+            )
+            for voltages in self._galvo_voltage_xy
+        )[:self._len]
 
     @functools.cached_property
     def opto_location_bregma_x(self) -> npt.NDArray[np.float64]:
-        if not any(self.is_opto):
+        if not self._has_opto:
             return np.full(self._len, np.nan)
         return np.array([bregma[0] for bregma in self._opto_location_bregma_xy])
 
@@ -525,6 +588,9 @@ class DynamicRouting1(TaskControl):
                 ],
                 dtype=str,
             )[:self._len]
+        logger.warning("No known opto location data found")
+        u = tuple(set(self._galvo_voltage_xy))
+        return np.asarray([f"unlabeled_{u.index(xy)}" for xy in self._galvo_voltage_xy], dtype=str)
 
     @functools.cached_property
     def opto_location_name(self) -> npt.NDArray[np.str_]:
@@ -548,6 +614,9 @@ class DynamicRouting1(TaskControl):
         if not self._has_opto:
             return voltages
         for idx in range(self._len):
+            if self._opto_params_index is None:
+                voltages[idx] = self._hdf5["trialOptoVoltage"][idx] 
+                continue
             v = self._hdf5["trialOptoVoltage"][self._opto_params_index][idx]
             if v.shape:
                 voltages[idx] = utils.safe_index(v, self._opto_params_index[idx])
@@ -559,7 +628,27 @@ class DynamicRouting1(TaskControl):
     def opto_power(self) -> npt.NDArray[np.float64]:
         if not self._has_opto:
             return np.full(self._len, np.nan)
-        voltages = self._hdf5["trialOptoVoltage"][self._opto_params_index][:self._len]
+        if self._opto_params_index is None:
+            voltages = self._hdf5["trialOptoVoltage"][:self._len]
+        else:
+            voltages = self._hdf5["trialOptoVoltage"][self._opto_params_index][:self._len]
+        
+        if "optoPowerCalibrationData" not in self._hdf5:
+            powers = []
+            for devices in self._trial_opto_devices:
+                if not devices:
+                    powers.append(np.nan)
+                    continue
+                if isinstance(devices, str):
+                    devices = (devices,)
+                if len(devices) > 1:
+                    raise ValueError(f"Not ready to handle multiple opto devices: {devices}")
+                if not devices[0]:
+                    powers.append(np.nan)
+                    continue
+                powers.append(DynamicRoutingTask.TaskUtils.voltsToPower(self.getOptoPowerCalibrationData(devices[0])))
+            return np.array(powers)        
+        
         return np.where(
             np.isnan(voltages),
             np.nan,
@@ -568,18 +657,6 @@ class DynamicRouting1(TaskControl):
                 voltages,
             ),
         )
-
-    @functools.cached_property
-    def _galvo_voltage_x(self) -> npt.NDArray[np.float64]:
-        if not any(self.is_opto):
-            return np.full(self._len, np.nan)
-        return np.array([voltage[0] for voltage in self._sam.trialGalvoVoltage])
-
-    @functools.cached_property
-    def _galvo_voltage_y(self) -> npt.NDArray[np.float64]:
-        if not any(self.is_opto):
-            return np.full(self._len, np.nan)
-        return np.array([voltage[1] for voltage in self._sam.trialGalvoVoltage])
 
     @functools.cached_property
     def repeat_index(self) -> npt.NDArray[np.float64]:
