@@ -158,8 +158,11 @@ class DynamicRouting1(TaskControl):
 
     @functools.cached_property
     def _has_opto(self) -> bool:
-        return hasattr(self._sam, "optoVoltage") and any(self._sam.optoVoltage)
-
+        voltages = self._hdf5.get("trialOptoVoltage")
+        if voltages is not None and np.any(~np.isnan(voltages)):
+            return True
+        return False
+        
     @functools.cached_property
     def _sam(self) -> DynRoutData:
         obj = DynRoutData()
@@ -478,7 +481,7 @@ class DynamicRouting1(TaskControl):
 
     @functools.cached_property
     def _opto_params_index(self) -> npt.NDArray[np.float64]:
-        if not any(self.is_opto):
+        if not self._has_opto:
             return np.full(self._len, np.nan)
         return self._hdf5["trialOptoParamsIndex"][()]
 
@@ -496,14 +499,14 @@ class DynamicRouting1(TaskControl):
 
     @functools.cached_property
     def opto_location_bregma_y(self) -> npt.NDArray[np.float64]:
-        if not any(self.is_opto):
+        if not self._has_opto:
             return np.full(self._len, np.nan)
         return np.array([bregma[1] for bregma in self._opto_location_bregma_xy])
 
     @functools.cached_property
     def _opto_location_name(self) -> npt.NDArray[np.str_]:
         """target location for optogenetic inactivation during the trial"""
-        if not any(self.is_opto):
+        if not self._has_opto:
             return np.full(self._len, np.nan)
         if trialOptoLabel := self._hdf5.get("trialOptoLabel", None):
             labels = trialOptoLabel.asstr()[()]
@@ -511,7 +514,7 @@ class DynamicRouting1(TaskControl):
                 labels != "no opto",
                 labels,
                 np.nan,
-            )
+            )[:self._len]
         if optoLocs := self._hdf5.get("optoLocs"):
             label = optoLocs["label"].asstr()[()]
             xy = np.array([(x, y) for x, y in zip(optoLocs["X"], optoLocs["Y"])])
@@ -521,8 +524,7 @@ class DynamicRouting1(TaskControl):
                     for v in self._opto_location_bregma_xy
                 ],
                 dtype=str,
-            )
-        raise ValueError("No known opto location data found (try `optoParams`)")
+            )[:self._len]
 
     @functools.cached_property
     def opto_location_name(self) -> npt.NDArray[np.str_]:
@@ -536,14 +538,14 @@ class DynamicRouting1(TaskControl):
     def _opto_location_index(self) -> npt.NDArray[np.int32]:
         """0-indexed target location for optogenetic inactivation during the trial"""
         # TODO
-        if not any(self.is_opto):
+        if not self._has_opto:
             return np.full(self._len, np.nan)
         return np.full(self._len, np.nan)
 
     @functools.cached_property
     def _opto_voltage(self) -> npt.NDArray[np.float64]:
         voltages = np.full(self._len, np.nan)
-        if not any(self.is_opto):
+        if not self._has_opto:
             return voltages
         for idx in range(self._len):
             v = self._sam.trialOptoVoltage[idx]
@@ -555,7 +557,7 @@ class DynamicRouting1(TaskControl):
 
     @functools.cached_property
     def opto_power(self) -> npt.NDArray[np.float64]:
-        if not any(self.is_opto):
+        if not self._has_opto:
             return np.full(self._len, np.nan)
         voltages = self._sam.trialOptoVoltage[self._opto_params_index]
         return np.where(
