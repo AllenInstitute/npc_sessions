@@ -169,7 +169,7 @@ class DynamicRouting1(TaskControl):
         start_frames = self._hdf5["trialOptoOnsetFrame"][trial].squeeze()
         if all(v == 0 for v in start_frames if ~np.isnan(v)):
             # some sessions for 670248 recrded incorrectly
-            start_frames += self._hdf5.get("trialStimStartFrame")[trial].squeeze()
+            start_frames += self._hdf5.get("trialStimStartFrame")[trial]
         return self.get_script_frame_time(self._hdf5["trialStimStartFrame"][trial] + start_frames)
     
     def get_trial_opto_offset(
