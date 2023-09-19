@@ -70,10 +70,7 @@ class TaskControl(property_dict.PropertyDict):
             self._frame_times = np.concatenate(
                 ([0], np.cumsum(self._hdf5["frameIntervals"][:]))
             )
-            """Best-estimate time of 'frame' in event loop, in seconds, from start
-            of experiment. Uses vsync time if available."""
             self._display_times = self._frame_times
-            """Best-estimate time of screen update. Without sync, this equals frame times."""
         else:
             # - all times in nwb are relative to start of first sample on sync
             # - there can be multiple hdf5 files, all recorded on sync
@@ -92,9 +89,12 @@ class TaskControl(property_dict.PropertyDict):
     def get_script_frame_time(
         self, frame: SupportsFloat | Iterable[SupportsFloat]
     ) -> npt.NDArray[np.float64]:
+        """Best-estimate time of 'frame' in psychopy event loop, in seconds, from start
+        of experiment. Uses vsync time if available."""
         return utils.safe_index(self._frame_times, frame)
 
     def get_vis_display_time(
         self, frame: SupportsFloat | Iterable[SupportsFloat]
     ) -> npt.NDArray[np.float64]:
+        """Best-estimate time of monitor update. Without sync, this equals frame times."""
         return utils.safe_index(self._display_times, frame)
