@@ -224,8 +224,11 @@ class DynamicRouting1(TaskControl):
 
     @functools.cached_property
     def _has_opto(self) -> bool:
-        voltages = self._hdf5.get("trialOptoVoltage")
-        if voltages is not None and np.any(~np.isnan(voltages)):
+        if (
+            ((sam := getattr(self._sam, "trialOptoOnsetFrame", None)) is not None and np.any(~np.isnan(sam)))
+            or 
+            ((h5 := self._hdf5.get("trialOptoOnsetFrame")) is not None and np.any(~np.isnan(h5)))
+            ):
             return True
         return False
         
