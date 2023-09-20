@@ -574,7 +574,7 @@ class DynamicRoutingSession:
             description="notes about the experiment or the data collected during the epoch",
         )
         for stim in self.stim_paths:
-            if stim.stem not in self.stim_frame_times.keys():
+            if self.is_sync and stim.stem not in self.stim_frame_times.keys():
                 continue
             epochs.add_interval(
                 **self.get_epoch_record(stim).nwb,
