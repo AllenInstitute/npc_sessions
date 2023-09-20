@@ -217,7 +217,7 @@ class DynamicRouting1(TaskControl):
                 ]
             )[trial]
         self.assert_single_opto_device()
-        return self.get_trial_opto_onset(trial) + self._sam.trialoptoDur[trial].squeeze()
+        return self.get_trial_opto_onset(trial) + self._sam.trialOptoDur[trial].squeeze()
 
     # ---------------------------------------------------------------------- #
     # helper-properties that won't become columns:
