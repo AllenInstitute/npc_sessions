@@ -832,6 +832,8 @@ def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
         raise result from None
     return result
 
+class MissingSyncLineError(IndexError):
+    pass
 
 def get_stim_latencies_from_sync(
     stim_file_or_dataset: StimPathOrDataset,
@@ -850,6 +852,10 @@ def get_stim_latencies_from_sync(
     if not line_index_or_label:
         line_index_or_label = get_sync_line_for_stim_onset(
             waveform_type=waveform_type, date=sync.start_time.date()
+        )
+    if not sync.get_rising_edges(line_index_or_label).any():
+        raise MissingSyncLineError(
+            f"No edges found for {line_index_or_label = } in {sync = }"
         )
     vsyncs = assert_stim_times(
         get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim]

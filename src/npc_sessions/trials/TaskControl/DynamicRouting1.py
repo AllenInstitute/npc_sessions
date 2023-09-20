@@ -69,11 +69,25 @@ class DynamicRouting1(TaskControl):
         if cached is not None:
             return cached
         if self._sync:
-            self._cached_opto_stim_recordings = utils.get_stim_latencies_from_sync(
-                self._hdf5,
-                self._sync,
-                waveform_type="opto",
-            )
+            try:
+                self._cached_opto_stim_recordings = utils.get_stim_latencies_from_sync(
+                    self._hdf5,
+                    self._sync,
+                    waveform_type="opto",
+                )
+            except utils.MissingSyncLineError:
+                if self._ephys_recording_dirs:
+                    self._cached_opto_stim_recordings = (
+                        utils.get_stim_latencies_from_nidaq_recording(
+                            self._hdf5,
+                            sync=self._sync,
+                            recording_dirs=self._ephys_recording_dirs,
+                            waveform_type="opto",
+                        )
+                    )
+                else:
+                    logger.warning(f'No opto stim sync line found and no ephys data provided: stim {utils.get_stim_start_time(self._hdf5)}')
+                    self._cached_opto_stim_recordings = None
         else:
             self._cached_opto_stim_recordings = None
         return self._cached_opto_stim_recordings
