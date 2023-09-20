@@ -169,7 +169,8 @@ class DynamicRouting1(TaskControl):
                 ]
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
-            return self.get_script_frame_time(self._hdf5["trialStimStartFrame"][trial])
+            logger.debug('Using script frame times for opto stim onsets')
+            return self.get_script_frame_time(self._sam.stimStartFrame[trial])
         return utils.safe_index(self._aud_stim_onset_times, trial)
     
 
@@ -197,12 +198,12 @@ class DynamicRouting1(TaskControl):
                     np.nan if rec is None else rec.onset_time_on_sync
                     for rec in self._opto_stim_recordings
                 ]
-            )[trial]
-        start_frames = self._hdf5["trialOptoOnsetFrame"][trial].squeeze()
-        if all(v == 0 for v in start_frames if ~np.isnan(v)):
-            # some sessions for 670248 recrded incorrectly
-            start_frames += self._hdf5.get("trialStimStartFrame")[trial]
-        return self.get_script_frame_time(self._hdf5["trialStimStartFrame"][trial] + start_frames)
+            )[trial]    
+        logger.debug('Using script frame times for opto stim onsets')
+        if (onset_frames := self._sam.trialOptoOnsetFrame).ndim == 2:
+            onset_frames = onset_frames.squeeze()
+        # note: this is different to OptoTagging, where onset frame is abs frame idx
+        return self.get_script_frame_time(self._sam.stimStartFrame + onset_frames[trial])
     
     def get_trial_opto_offset(
         self, trial: int | npt.NDArray[np.int32]
@@ -215,8 +216,9 @@ class DynamicRouting1(TaskControl):
                     for rec in self._opto_stim_recordings
                 ]
             )[trial]
-        return self.get_trial_opto_onset(trial) + self._hdf5["trialOptoDur"][trial].squeeze()
-    
+        self.assert_single_opto_device()
+        return self.get_trial_opto_onset(trial) + self._sam.trialoptoDur[trial].squeeze()
+
     # ---------------------------------------------------------------------- #
     # helper-properties that won't become columns:
 
