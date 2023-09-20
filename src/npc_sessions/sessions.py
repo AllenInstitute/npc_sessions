@@ -1071,9 +1071,19 @@ class DynamicRoutingSession:
     @functools.cached_property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
         def is_valid_stim_file(p) -> bool:
-            return utils.is_stim_file(
+            if not utils.is_stim_file(
                 p, subject_spec=self.id.subject, date_spec=self.id.date
-            )
+            ):
+                return False
+            if not self.is_sync:
+                if self.task_stim_name not in p.stem:
+                    return False # only analyse the task stim file if we have no sync data
+                return True
+            if (dt := npc_session.DatetimeRecord(p.stem).dt) < self.sync_data.start_time:
+                return False
+            if dt > self.sync_data.stop_time:
+                return False
+            return True
 
         if self.is_ephys:
             if stim_paths := tuple(
