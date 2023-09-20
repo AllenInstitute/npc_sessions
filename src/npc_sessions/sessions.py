@@ -459,29 +459,61 @@ class DynamicRoutingSession:
             block_performance: dict[str, float | str] = {}
 
             block_performance['context'] = context
-
+            block_performance['cross_modal_dprime'] = self.sam.dprimeOtherModalGo[block]
+            block_performance['same_modal_dprime'] = self.sam.dprimeSameModal[block]
+            block_performance['nonrewarded_modal_dprime'] = self.sam.dprimeNonrewardedModal[block]
+            
             if context=='vis1':
-                block_performance['cross_modal_dprime'] = self.sam.dprimeOtherModalGo[block]
                 block_performance['signed_cross_modal_dprime'] = self.sam.dprimeOtherModalGo[block]
                 block_performance['vis_intra_dprime'] = self.sam.dprimeSameModal[block]
                 block_performance['aud_intra_dprime'] = self.sam.dprimeNonrewardedModal[block]
 
             elif context=='sound1':
-                block_performance['cross_modal_dprime'] = self.sam.dprimeOtherModalGo[block]
                 block_performance['signed_cross_modal_dprime'] = -self.sam.dprimeOtherModalGo[block]
                 block_performance['aud_intra_dprime'] = self.sam.dprimeSameModal[block]
                 block_performance['vis_intra_dprime'] = self.sam.dprimeNonrewardedModal[block]
+
             task_performance_by_block[block] = block_performance
             
         nwb_intervals = pynwb.epoch.TimeIntervals(
             name='performance',
             description=f'behavioral performance for each block in {self.task_stim_name} trials',
         )
-        for k in task_performance_by_block[0].keys():
-            nwb_intervals.add_column(
-                name=k,
-                description='', #TODO
-            )
+        # for k in task_performance_by_block[0].keys():
+        #     nwb_intervals.add_column(
+        #         name=k,
+        #         description='', #TODO
+        #     )
+        
+        nwb_intervals.add_column(
+            name='context',
+            description='context of the block (a.k.a. rewarded stimulus), either vis1 or sound1',
+        )
+        nwb_intervals.add_column(
+            name='cross_modal_dprime',
+            description='dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus',
+        )
+        nwb_intervals.add_column(
+            name='signed_cross_modal_dprime',
+            description='same as cross_modal_dprime, but with sign flipped for auditory blocks',
+        )
+        nwb_intervals.add_column(
+            name='same_modal_dprime',
+            description='dprime within rewarded modality; hits=response rate to rewarded target stimulus, false alarms=response rate to same modality non-target stimulus',
+        )
+        nwb_intervals.add_column(
+            name='nonrewarded_modal_dprime',
+            description='dprime within non-rewarded modality; hits=response rate to non-rewarded target stimulus, false alarms=response rate to same modality non-target stimulus',
+        )
+        nwb_intervals.add_column(
+            name='vis_intra_dprime',
+            description='dprime within visual modality; hits=response rate to visual target stimulus, false alarms=response rate to visual non-target stimulus',
+        )
+        nwb_intervals.add_column(
+            name='aud_intra_dprime',
+            description='dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus',
+        )
+
         for block_index in task_performance_by_block:
             nwb_intervals.add_interval(
                 start_time=trials[trials['block_index']==block_index]['start_time'].min(),
