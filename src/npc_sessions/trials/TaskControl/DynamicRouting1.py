@@ -382,12 +382,13 @@ class DynamicRouting1(TaskControl):
         - nan if no lick occurred"""
         if not self._sync:
             return self.get_vis_display_time(self._sam.trialResponseFrame)
-        next_lick = np.searchsorted(
-            self._sync.get_rising_edges("lick_sensor", units="seconds"),
+        sync_times = self._sync.get_rising_edges("lick_sensor", units="seconds")
+        next_licks = np.searchsorted(
+            sync_times,
             self.response_window_start_time,
         )
         times = np.full(self._len, np.nan)
-        for idx, lick in enumerate(next_lick):
+        for idx, lick in enumerate(sync_times[next_licks]):
             if not self.is_response[idx]:
                 continue
             assert self.response_window_start_time[idx] <= lick <= self.response_window_stop_time[idx]
