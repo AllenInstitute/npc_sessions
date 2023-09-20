@@ -361,7 +361,7 @@ class DynamicRouting1(TaskControl):
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
         """start of interval in which the subject should lick if a GO trial,
         otherwise should not lick"""
-        return self.get_vis_display_time(
+        return self.get_script_frame_time(
             self._sam.stimStartFrame + self._hdf5["responseWindow"][()][0]
         )
 
@@ -373,7 +373,7 @@ class DynamicRouting1(TaskControl):
     def response_window_stop_time(self) -> npt.NDArray[np.float64]:
         """end of interval in which the subject should lick if a GO trial,
         otherwise should not lick"""
-        return self.get_vis_display_time(self._response_window_stop_frame)
+        return self.get_script_frame_time(self._response_window_stop_frame)
 
     @functools.cached_property
     def response_time(self) -> npt.NDArray[np.float64]:
