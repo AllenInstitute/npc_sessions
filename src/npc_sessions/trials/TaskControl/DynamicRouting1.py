@@ -45,7 +45,8 @@ class DynamicRouting1(TaskControl):
     >>> trials = DynamicRouting1('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
     >>> assert not trials._df.is_empty()
     """
-
+    _num_opto_devices = None
+    
     def __init__(
         self,
         hdf5: utils.StimPathOrDataset,
@@ -62,6 +63,12 @@ class DynamicRouting1(TaskControl):
             hdf5, sync, ephys_recording_dirs=ephys_recording_dirs, **kwargs
         )
 
+    def assert_single_opto_device(self) -> None:
+        """A temporary measure to check before running code that assumes a single
+        opto device"""
+        if self._num_opto_devices is not None and self._num_opto_devices > 1:
+            raise AssertionError(f"Multiple opto devices used in session - the following section of code assumes only one was used.")
+        
     @property
     def _opto_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
         self._cached_opto_stim_recordings: tuple[utils.StimRecording | None, ...] | None
@@ -173,6 +180,7 @@ class DynamicRouting1(TaskControl):
     def get_trial_opto_onset(
         self, trial: int | npt.NDArray[np.int32]
     ) -> npt.NDArray[np.float64]:
+        self.assert_single_opto_device()
         if self._opto_stim_recordings is not None:
             return np.array(
                 [
@@ -189,6 +197,7 @@ class DynamicRouting1(TaskControl):
     def get_trial_opto_offset(
         self, trial: int | npt.NDArray[np.int32]
     ) -> npt.NDArray[np.float64]:
+        self.assert_single_opto_device()
         if self._opto_stim_recordings is not None:
             return np.array(
                 [
