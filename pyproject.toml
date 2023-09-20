@@ -66,6 +66,7 @@ dev = [
     "mypy>=1.4.1",
     "pytest-cov>=4.1.0",
     "black>=23.7.0",
+    "pytest-xdist>=3.3.1",
 ]
 
 [tool.pdm.scripts]
@@ -170,7 +171,10 @@ addopts = [
     "--doctest-modules",
     "--ignore-glob=*scripts*,*examples*",
     "--cov",
+    "--cov-report=xml",
     "--doctest-glob=*README.md",
+    "-x",
+    "-n=auto",
 ]
 doctest_optionflags = [
     "NORMALIZE_WHITESPACE",
