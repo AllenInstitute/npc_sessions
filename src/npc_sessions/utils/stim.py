@@ -517,6 +517,7 @@ def generate_sound_waveforms(
 
 def generate_opto_waveforms(
     stim_file_or_dataset: StimPathOrDataset,
+    device_index: int | None = None
 ) -> tuple[Waveform | None, ...]:
     """
     >>> path = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/OptoTagging_662892_20230821_125915.hdf5'
@@ -567,7 +568,12 @@ def generate_opto_waveforms(
         optoSampleRate = stim_data["optoSampleRate"][()]
     else:
         optoSampleRate = 2000
-
+    
+    def device(array: npt.NDArray) -> npt.NDArray:
+        if array.ndim > 1:
+            return array[:, device_index or 0]
+        return array
+    
     waveforms: list[Waveform | None] = [None] * nTrials
     for trialnum in range(0, nTrials):
         if any(np.isnan(v[trialnum]) or v[trialnum] == 0 for v in (trialOptoDur, trialOptoVoltage)):
@@ -584,12 +590,12 @@ def generate_opto_waveforms(
             sampling_rate=optoSampleRate,
             fn=get_cached_opto_pulse_waveform,
             sampleRate=optoSampleRate,
-            amp=trialOptoVoltage[trialnum],
-            dur=trialOptoDur[trialnum],
-            delay=trialOptoDelay[trialnum],
-            freq=trialOptoSinFreq[trialnum],
-            onRamp=trialOptoOnRamp[trialnum],
-            offRamp=trialOptoOffRamp[trialnum],
+            amp=device(trialOptoVoltage)[trialnum],
+            dur=device(trialOptoDur)[trialnum],
+            delay=device(trialOptoDelay)[trialnum],
+            freq=device(trialOptoSinFreq)[trialnum],
+            onRamp=device(trialOptoOnRamp)[trialnum],
+            offRamp=device(trialOptoOffRamp)[trialnum],
         )
         assert waveform is not None and waveform.samples.any()
         waveforms[trialnum] = waveform
