@@ -380,6 +380,8 @@ class DynamicRouting1(TaskControl):
         """time of first lick within the response window
 
         - nan if no lick occurred"""
+        if not self._sync:
+            return self.get_vis_display_time(self._sam.trialResponseFrame)
         next_lick = np.searchsorted(
             self._sync.get_rising_edges("lick_sensor", units="seconds"),
             self.response_window_start_time,
