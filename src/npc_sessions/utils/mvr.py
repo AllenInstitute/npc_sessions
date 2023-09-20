@@ -10,6 +10,8 @@ import numpy as np
 import numpy.typing as npt
 import upath
 
+import cv2
+
 import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
@@ -68,39 +70,40 @@ def get_video_frame_times(
     return frame_times
 
 
+def get_cam_line_times_on_sync(
+    sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
+    sync_line_suffix: str,
+    edge_type: Literal['rising', 'falling'] = 'rising'
+) -> dict[Literal["behavior", "eye", "face"], npt.NDArray[np.float64]]:
+    sync_data = utils.get_sync_data(sync_path_or_dataset)
+
+    edge_getter = sync_data.get_rising_edges if edge_type=='rising' else sync_data.get_falling_edges
+
+    line_times = {}
+    for line in (line for line in sync_data.line_labels if sync_line_suffix in line):
+        camera_name = utils.extract_camera_name(line)
+        line_times[camera_name] = edge_getter(line, units="seconds")
+    return line_times
+
+
 def get_cam_exposing_times_on_sync(
     sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
 ) -> dict[Literal["behavior", "eye", "face"], npt.NDArray[np.float64]]:
-    if isinstance(sync_path_or_dataset, utils.SyncDataset):
-        sync_data = sync_path_or_dataset
-    else:
-        sync_data = utils.SyncDataset(utils.from_pathlike(sync_path_or_dataset))
 
-    frame_times = {}
-    for line in (line for line in sync_data.line_labels if "_cam_exposing" in line):
-        camera_name = utils.extract_camera_name(line)
-        frame_times[camera_name] = sync_data.get_rising_edges(line, units="seconds")
-    return frame_times
+    return get_cam_line_times_on_sync(sync_path_or_dataset, '_cam_exposing')
 
 
 def get_cam_exposing_falling_edge_times_on_sync(
     sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
 ) -> dict[Literal["behavior", "eye", "face"], npt.NDArray[np.float64]]:
-    if isinstance(sync_path_or_dataset, utils.SyncDataset):
-        sync_data = sync_path_or_dataset
-    else:
-        sync_data = utils.SyncDataset(utils.from_pathlike(sync_path_or_dataset))
-
-    frame_times = {}
-    for line in (line for line in sync_data.line_labels if "_cam_exposing" in line):
-        camera_name = utils.extract_camera_name(line)
-        frame_times[camera_name] = sync_data.get_falling_edges(line, units="seconds")
-    return frame_times
+    
+    return get_cam_line_times_on_sync(sync_path_or_dataset, '_cam_exposing', 'falling')
 
 
 def get_cam_transfer_times_on_sync(
     sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
 ) -> dict[Literal["behavior", "eye", "face"], npt.NDArray[np.float64]]:
+<<<<<<< HEAD
     if isinstance(sync_path_or_dataset, utils.SyncDataset):
         sync_data = sync_path_or_dataset
     else:
@@ -113,6 +116,10 @@ def get_cam_transfer_times_on_sync(
         camera_name = utils.extract_camera_name(line)
         frame_times[camera_name] = sync_data.get_rising_edges(line, units="seconds")
     return frame_times
+=======
+   
+    return get_cam_line_times_on_sync(sync_path_or_dataset, '_cam_frame_readout')
+>>>>>>> d00663b (add mvr qc)
 
 
 def get_lost_frames_from_camera_info(
@@ -193,6 +200,75 @@ def get_video_info_data(path_or_info_data: utils.PathLike | Mapping) -> MVRInfoD
             return path_or_info_data["RecordingReport"]
         return path_or_info_data    
     return json.loads(utils.from_pathlike(path_or_info_data).read_bytes())["RecordingReport"]
+
+def get_video_data(
+    video_or_video_path: cv2.VideoCapture | utils.PathLike
+    ) -> cv2.VideoCapture | None:
+
+    if isinstance(video_or_video_path, cv2.VideoCapture):
+        return video_or_video_path
+
+    video_path = utils.from_pathlike(video_or_video_path)
+    #check if this is a local or cloud path
+    is_local = video_path.as_uri()[:4] == 'file'
+    if is_local:
+        video_data = cv2.VideoCapture(video_path.as_posix())
+    else:
+        video_data = None
+        logger.warning('get_video_data not yet implemented for cloud resources')
+    
+    return video_data
+
+
+def get_total_frames_in_video(
+    video_path: utils.PathLike,
+) -> int:
+
+    v = get_video_data(video_path)
+    num_frames = v.get(cv2.CAP_PROP_FRAME_COUNT)
+    
+    return int(num_frames)
+
+
+def get_augmented_camera_info(
+    sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
+    *video_paths: utils.PathLike,
+) -> dict[upath.UPath, dict]:
+
+    videos = get_video_file_paths(*video_paths)
+    jsons = get_video_info_file_paths(*video_paths)
+    camera_to_video_path = {
+        utils.extract_camera_name(path.stem): path for path in videos
+    }
+    camera_to_json_path = {utils.extract_camera_name(path.stem): path for path in jsons}
+
+    cam_exposing_times = get_cam_exposing_times_on_sync(sync_path_or_dataset)
+    cam_transfer_times = get_cam_transfer_times_on_sync(sync_path_or_dataset)
+    cam_exposing_falling_edge_times = get_cam_exposing_falling_edge_times_on_sync(sync_path_or_dataset)
+    
+    augmented_camera_info = {}
+    for camera, video_path in camera_to_video_path.items():
+        
+        camera_info = json.loads(camera_to_json_path[camera].read_bytes())['RecordingReport']
+
+        frames_lost = camera_info['FramesLostCount']
+        num_exposures = cam_exposing_times[camera].size
+        num_transfers = cam_transfer_times[camera].size
+
+        num_frames_in_video = get_total_frames_in_video(video_path)
+        num_expected_from_sync = num_transfers - frames_lost + 1
+        signature_exposures = cam_exposing_falling_edge_times[camera][:10] - cam_exposing_times[camera][:10]
+        
+        camera_info['num_frames_exposed'] = num_exposures
+        camera_info['num_frames_transfered'] = num_transfers
+        camera_info['num_frames_in_video'] = num_frames_in_video
+        camera_info['num_expected_from_sync'] =num_expected_from_sync
+        camera_info['expected_minus_actual'] = num_expected_from_sync - num_frames_in_video
+        camera_info['signature_exposure_duration'] = np.round(np.median(signature_exposures), 3)
+        augmented_camera_info[camera] = camera_info
+
+    return augmented_camera_info
+
 
 if __name__ == "__main__":
     import doctest
