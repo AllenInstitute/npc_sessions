@@ -743,6 +743,19 @@ class DynamicRouting1(TaskControl):
         )
 
     @functools.cached_property
+    def opto_stim_name(self) -> npt.NDArray[np.str_] | npt.NDArray[np.floating]:
+        """stimulus presented during optogenetic inactivation, corresponding to
+        keys in `stimulus` dict"""
+        if not self._has_opto:
+            return np.full(self._len, np.nan)
+        return np.array(
+            [
+                f'opto{self._unique_opto_waveforms.index(w)}_{loc}' if w is not None else ''
+                for w, loc in zip(self._opto_stim_waveforms, self.opto_location_name)
+            ], dtype=str,
+        )
+
+    @functools.cached_property
     def repeat_index(self) -> npt.NDArray[np.float64]:
         """number of times the trial has already been presented in immediately
         preceding trials.
