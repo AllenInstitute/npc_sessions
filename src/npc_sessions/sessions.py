@@ -473,8 +473,6 @@ class DynamicRoutingSession:
                 block_performance['vis_intra_dprime'] = self.sam.dprimeNonrewardedModal[block]
             task_performance_by_block[block] = block_performance
             
-        return self._process_performance(task_performance_by_block)
-
         nwb_intervals = pynwb.epoch.TimeIntervals(
             name='performance',
             description=f'behavioral performance for each block in {self.task_stim_name} trials',
