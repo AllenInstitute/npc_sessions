@@ -722,6 +722,10 @@ class SyncDataset:
     def start_time(self) -> datetime.datetime:
         return datetime.datetime.fromisoformat(self.meta_data["start_time"])
 
+    @property
+    def stop_time(self) -> datetime.datetime:
+        return self.start_time + datetime.timedelta(seconds=self.total_seconds)
+
     @functools.cached_property
     def stim_running_edges(
         self,
