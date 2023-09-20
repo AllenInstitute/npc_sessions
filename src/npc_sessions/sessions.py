@@ -450,26 +450,8 @@ class DynamicRoutingSession:
         assert isinstance(trials, TaskControl.DynamicRouting1)  # for mypy
         return trials
     
-    def _process_performance(self, task_performance_by_block) -> pynwb.epoch.TimeIntervals:
-        nwb_intervals = pynwb.epoch.TimeIntervals(
-            name='performance',
-            description=f'behavioral performance for each block in {self.task_stim_name} trials',
-        )
-        for k in task_performance_by_block[0].keys():
-            nwb_intervals.add_column(
-                name=k,
-                description='', #TODO
-            )
-        for block_index in task_performance_by_block:
-            nwb_intervals.add_interval(
-                start_time=self.trials[:][self.trials[:]['block_index']==block_index]['start_time'].min(),
-                stop_time=self.trials[:][self.trials[:]['block_index']==block_index]['stop_time'].max(),
-                **{k:v for k,v in task_performance_by_block[block_index].items()}
-            )
-        
-        return nwb_intervals
     @property
-    def _task_performance_by_block_sam(self) -> dict[int, dict[str, str | float]]:
+    def _task_performance_by_block(self) -> dict[int, dict[str, str | float]]:
         trials = self.trials[:]
         task_performance_by_block = {}
         
@@ -493,81 +475,23 @@ class DynamicRoutingSession:
             
         return self._process_performance(task_performance_by_block)
 
-    # @functools.cached_property
-    @property
-    def _task_performance_by_block_egm(self) -> dict[int, dict[str, str | float]]:
-            
-        trials = self.trials[:]
-
-        #loop through blocks
-
-        task_performance_by_block = {}
-
-        for block in trials['block_index'].unique():
-            
-            block_performance: dict[str, float | str] = {}
-
-            block_trials=trials[trials['block_index']==block]
-
-            vis_target_resp=(block_trials.query(
-                'is_vis_target==True and \
-                is_repeat==False'
-            )['is_response']==True).mean()
-
-            vis_nontarget_resp=(block_trials.query(
-                'is_vis_nontarget==True and \
-                is_repeat==False'
-            )['is_response']==True).mean()
-
-            aud_target_resp=(block_trials.query(
-                'is_aud_target==True and \
-                is_repeat==False'
-            )['is_response']==True).mean()
-
-            aud_nontarget_resp=(block_trials.query(
-                'is_aud_nontarget==True and \
-                is_repeat==False'
-            )['is_response']==True).mean()
-            
-            if vis_target_resp==1:
-                vis_target_resp=0.99
-            elif vis_target_resp==0:
-                vis_target_resp=0.01      
-            if vis_nontarget_resp==1:
-                vis_nontarget_resp=0.99
-            elif vis_nontarget_resp==0:
-                vis_nontarget_resp=0.01
-            if aud_target_resp==1:
-                aud_target_resp=0.99
-            elif aud_target_resp==0:
-                aud_target_resp=0.01
-            if aud_nontarget_resp==1:
-                aud_nontarget_resp=0.99
-            elif aud_nontarget_resp==0:
-                aud_nontarget_resp=0.01
-
-            if block_trials['is_vis_context'].iloc[0]==True:
-                cross_dprime=(scipy.stats.norm.ppf(vis_target_resp) - scipy.stats.norm.ppf(aud_target_resp))
-                signed_cross_dprime=(scipy.stats.norm.ppf(vis_target_resp) - scipy.stats.norm.ppf(aud_target_resp))
-                block_performance['context'] = 'vis'
-
-            elif block_trials['is_aud_context'].iloc[0]==True:
-                cross_dprime=(scipy.stats.norm.ppf(aud_target_resp) - scipy.stats.norm.ppf(vis_target_resp))
-                signed_cross_dprime=-(scipy.stats.norm.ppf(aud_target_resp) - scipy.stats.norm.ppf(vis_target_resp))
-                block_performance['context'] = 'aud'
-            
-            vis_dprime=(scipy.stats.norm.ppf(vis_target_resp) - scipy.stats.norm.ppf(vis_nontarget_resp))
-            aud_dprime=(scipy.stats.norm.ppf(aud_target_resp) - scipy.stats.norm.ppf(aud_nontarget_resp))
-
-            block_performance['cross_modal_dprime'] = cross_dprime
-            block_performance['signed_cross_modal_dprime'] = signed_cross_dprime
-
-            block_performance['vis_intra_dprime'] = vis_dprime
-            block_performance['aud_intra_dprime'] = aud_dprime
+        nwb_intervals = pynwb.epoch.TimeIntervals(
+            name='performance',
+            description=f'behavioral performance for each block in {self.task_stim_name} trials',
+        )
+        for k in task_performance_by_block[0].keys():
+            nwb_intervals.add_column(
+                name=k,
+                description='', #TODO
+            )
+        for block_index in task_performance_by_block:
+            nwb_intervals.add_interval(
+                start_time=trials[trials['block_index']==block_index]['start_time'].min(),
+                stop_time=trials[trials['block_index']==block_index]['stop_time'].max(),
+                **{k:v for k,v in task_performance_by_block[block_index].items()}
+            )
         
-            task_performance_by_block[block] = block_performance
-            
-        return self._process_performance(task_performance_by_block)
+        return nwb_intervals
     
     @functools.cached_property
     def intervals(self) -> pynwb.core.LabelledDict:
@@ -590,6 +514,7 @@ class DynamicRoutingSession:
         for k, v in self._all_trials.items():
             if self.task_stim_name in k and self.is_task:
                 intervals.append(self.trials)
+                intervals.append(self._task_performance_by_block)
                 continue
 
             if not any(
