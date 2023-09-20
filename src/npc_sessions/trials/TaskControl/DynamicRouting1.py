@@ -545,9 +545,9 @@ class DynamicRouting1(TaskControl):
         )
 
     def get_trial_opto_devices(self, trial_idx: int) -> tuple[str, ...]:
-        devices = self._hdf5["trialOptoDevice"].asstr()[trial_idx]
-        if not devices:
+        if (devices := self._hdf5.get("trialOptoDevice")) is None or devices.size == 0:
             return ()
+        devices = devices.asstr()[trial_idx]
         if devices[0] + devices[-1] != "[]":
             # basic check before we eval code from the web
             raise ValueError(f"Invalid opto devices string: {devices}")
@@ -562,7 +562,7 @@ class DynamicRouting1(TaskControl):
         if not self._has_opto:
             return np.full(self._len, np.nan)
         if (found := self._hdf5.get("trialOptoParamsIndex")):
-            return found[()]
+            return found[()][self.trial_index]
         return None
 
     @property
