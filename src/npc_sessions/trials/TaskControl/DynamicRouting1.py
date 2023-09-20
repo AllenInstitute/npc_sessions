@@ -105,7 +105,17 @@ class DynamicRouting1(TaskControl):
     ) -> None:
         """Can be set on init by passing as kwarg"""
         self._cached_opto_stim_recordings = tuple(value)
-
+        
+    @functools.cached_property
+    def _opto_stim_waveforms(self) -> tuple[utils.Waveform | None, ...]:
+        if not self._has_opto:
+            return tuple(None for _ in range(self._len))
+        return utils.get_opto_waveforms_from_stim_file(self._hdf5)
+    
+    @functools.cached_property
+    def _unique_opto_waveforms(self) -> tuple[utils.Waveform, ...]:
+        return tuple(set(w for w in self._opto_stim_waveforms if w is not None))
+    
     @property
     def _aud_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
         self._cached_aud_stim_recordings: tuple[utils.StimRecording | None, ...] | None
