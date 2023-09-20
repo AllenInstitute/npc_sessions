@@ -380,7 +380,18 @@ class DynamicRouting1(TaskControl):
         """time of first lick within the response window
 
         - nan if no lick occurred"""
-        return self.get_vis_display_time(self._sam.trialResponseFrame)
+        next_lick = np.searchsorted(
+            self._sync.get_rising_edges("lick_sensor", units="seconds"),
+            self.response_window_start_time,
+            np.nan,
+        )
+        times = np.full(self._len, np.nan)
+        for idx, lick in enumerate(next_lick):
+            if not self.is_response[idx]:
+                continue
+            assert self.response_window_start_time[idx] <= lick <= self.response_window_stop_time[idx]
+            times[idx] = lick
+        return times
 
     @functools.cached_property
     def _timeout_start_frame(self) -> npt.NDArray[np.float64]:
