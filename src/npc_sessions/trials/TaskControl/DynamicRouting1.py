@@ -385,7 +385,6 @@ class DynamicRouting1(TaskControl):
         next_lick = np.searchsorted(
             self._sync.get_rising_edges("lick_sensor", units="seconds"),
             self.response_window_start_time,
-            np.nan,
         )
         times = np.full(self._len, np.nan)
         for idx, lick in enumerate(next_lick):
