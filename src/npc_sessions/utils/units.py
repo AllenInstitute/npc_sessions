@@ -45,8 +45,9 @@ def merge_units_electrodes(session: str, units: pd.DataFrame) -> pd.DataFrame:
         units.drop(columns=["channel"], inplace=True)
     except FileNotFoundError as e:
         print(str(e) + ". Returning units without electrodes")
-    
+
     return units
+
 
 def bin_spike_times(
     spike_times: npt.NDArray[np.float64], bin_time: int
@@ -361,16 +362,14 @@ def make_units_table(session: str) -> pd.DataFrame:
 
     if units is not None:
         units.index = range(len(units))
-        units["unit_id"] = [
-            f"{session}_{i}" for i in range(len(units))
-        ]
+        units["unit_id"] = [f"{session}_{i}" for i in range(len(units))]
         units = merge_units_electrodes(session, units)
 
     return units
 
 
 if __name__ == "__main__":
-    make_units_table('649943_20230215')
+    make_units_table("649943_20230215")
     import doctest
 
     import dotenv
