@@ -198,30 +198,24 @@ def get_video_info_data(path_or_info_data: utils.PathLike | Mapping) -> MVRInfoD
 
 def get_video_data(
     video_or_video_path: cv2.VideoCapture | utils.PathLike,
-) -> cv2.VideoCapture | None:
+) -> cv2.VideoCapture:
     if isinstance(video_or_video_path, cv2.VideoCapture):
         return video_or_video_path
 
     video_path = utils.from_pathlike(video_or_video_path)
     # check if this is a local or cloud path
     is_local = video_path.as_uri()[:4] == "file"
-    if is_local:
-        video_data = cv2.VideoCapture(video_path.as_posix())
-    else:
-        video_data = None
-        logger.warning("get_video_data not yet implemented for cloud resources")
-
-    return video_data
+    if not is_local:
+        raise NotImplementedError(
+            "Getting video data not yet implemented for cloud resources"
+        )
+    return cv2.VideoCapture(video_path.as_posix())
 
 
 def get_total_frames_in_video(
     video_path: utils.PathLike,
 ) -> int:
     v = get_video_data(video_path)
-    if v is None:
-        raise NotImplementedError(
-            "get_total_frames_in_video not yet implemented for cloud resources"
-        )
     num_frames = v.get(cv2.CAP_PROP_FRAME_COUNT)
 
     return int(num_frames)
