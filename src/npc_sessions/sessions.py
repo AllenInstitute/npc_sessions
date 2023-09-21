@@ -462,7 +462,7 @@ class DynamicRoutingSession:
         return trials
     
     @property
-    def _task_performance_by_block(self) -> dict[int, dict[str, str | float]]:
+    def _task_performance_by_block(self) -> pynwb.epoch.TimeIntervals:
         trials = self.trials[:]
         task_performance_by_block = {}
         
@@ -1228,7 +1228,7 @@ class DynamicRoutingSession:
                 name=utils.extract_camera_name(path.stem),
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
-                    self.video_info_data[utils.extract_camera_name(path.stem)][
+                    self.video_info_data[utils.extract_camera_name(path.stem)][ # type: ignore[arg-type]
                         "TimeStart"
                     ]
                 ),
@@ -1246,8 +1246,8 @@ class DynamicRoutingSession:
                 session_id=self.id,
                 name=utils.extract_camera_name(path.stem),
                 suffix=path.suffix,
-                timestamp=npc_session.TimeRecord.parse_id(
-                    self.video_info_data[path.stem]["TimeStart"]
+                timestamp=npc_session.TimeRecord.parse_id(  
+                    self.video_info_data[path.stem]["TimeStart"] # type: ignore[arg-type]
                 ),
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),

@@ -1141,7 +1141,7 @@ def get_stim_trigger_frames(
             logger.warning('Using "trialOptoOnsetFrame" instead of "trialStimStartFrame" - this is likely an old optoTagging experiment, and `stim_type` was specified as `stim` instead of `opto`.')
             
     start_frames = start_frames[:get_num_trials(stim_data)].squeeze()
-    monotonic_increase: bool = np.all((without_nans := start_frames[~np.isnan(start_frames)])[1:] > without_nans[:-1])
+    monotonic_increase = np.all((without_nans := start_frames[~np.isnan(start_frames)])[1:] > without_nans[:-1])
     if not monotonic_increase: 
         # behavior files with opto report the onset frame of opto relative to stim onset for
         # each trial. OptoTagging files specify absolute frame index

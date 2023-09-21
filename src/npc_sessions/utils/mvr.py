@@ -133,7 +133,7 @@ def get_lost_frames_from_camera_info(
     return np.subtract(lost_frames, 1)  # lost frames in info are 1-indexed
 
 def get_total_frames_from_camera_info(
-    info_path_or_data: dict | utils.PathLike,
+    info_path_or_data: MVRInfoData | utils.PathLike,
 ) -> int:
     """`FramesRecorded` in info.json plus 1 (for metadata frame)."""
     info = get_video_info_data(info_path_or_data)
@@ -210,6 +210,8 @@ def get_total_frames_in_video(
 ) -> int:
 
     v = get_video_data(video_path)
+    if v is None:
+        raise NotImplementedError('get_total_frames_in_video not yet implemented for cloud resources')
     num_frames = v.get(cv2.CAP_PROP_FRAME_COUNT)
     
     return int(num_frames)
@@ -218,7 +220,7 @@ def get_total_frames_in_video(
 def get_augmented_camera_info(
     sync_path_or_dataset: utils.PathLike | utils.SyncDataset,
     *video_paths: utils.PathLike,
-) -> dict[upath.UPath, dict]:
+) -> dict[Literal['eye', 'face', 'behavior'], dict[str, int | float]]:
 
     videos = get_video_file_paths(*video_paths)
     jsons = get_video_info_file_paths(*video_paths)

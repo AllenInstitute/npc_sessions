@@ -601,7 +601,7 @@ class DynamicRouting1(TaskControl):
         powerCalibrationFile = root / f"{self._rig}_{opto_device_name}_power.txt"
         d = self.txtToDict(powerCalibrationFile.read_text())
         p = np.polyfit(d['input (V)'],d['power (mW)'],2)
-        d['poly coefficients'] = p
+        d['poly coefficients'] = p  # type: ignore[assignment]
         d['offsetV'] = min(np.roots(p))
         return d
 
