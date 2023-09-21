@@ -110,7 +110,7 @@ class Units(NWBContainerWithDF):
 
 
 class LickSpout(SupportsToNWB):
-    name = "lick spout"
+    name = "lick_spout"
     description = (
         "times at which the subject interacted with a water spout - "
         "putatively licks, but may include other events such as grooming"

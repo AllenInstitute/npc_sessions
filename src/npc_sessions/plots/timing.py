@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     import npc_sessions
 
 
-def plot_bad_lick_times(session: "npc_sessions.DynamicRoutingSession") -> None:
+def plot_bad_lick_times(session: 'npc_sessions.DynamicRoutingSession') -> plt.Figure:
     """A loop making eventplots vsyncs for trials with:
     - licks in script but no lick within response window
     - licks not in script, but lick within response window
@@ -88,17 +88,12 @@ def plot_bad_lick_times(session: "npc_sessions.DynamicRoutingSession") -> None:
         plt.gca().set_yticks([])
         plt.gca().set_xlabel("time (s)")
         plt.gcf().set_size_inches(12, 4)
-        plt.gca().title.set_text(
-            f"sync & script timing - trial {idx} - {session._trials.stim_name[idx]}"
-        )
-        # plt.show()
-
-
-def plot_lick_times_on_sync_and_script(
-    session: "npc_sessions.DynamicRoutingSession",
-) -> None:
-    """-stem plot of lick times on sync relative to lick times in TaskControl
-    - histogram showing distribution of same intervals
+        plt.gca().title.set_text(f"sync & script timing - trial {idx} - {session._trials.stim_name[idx]}")
+        return plt.gcf()
+        
+def plot_lick_times_on_sync_and_script(session: 'npc_sessions.DynamicRoutingSession') -> plt.Figure:
+    """ -stem plot of lick times on sync relative to lick times in TaskControl
+        - histogram showing distribution of same intervals
     """
     sync_time = session._trials.response_time
     script_time = session._trials.get_script_frame_time(
@@ -118,15 +113,13 @@ def plot_lick_times_on_sync_and_script(
     plt.setp(baseline, visible=False)
     plt.gca().set_xlabel("lick time on sync relative to lick time in TaskControl (s)")
     plt.gca().set_ylabel("experiment time (s)")
-    plt.gca().set_title(
-        f"{np.nanmean(intervals) = :.3f}s, {np.nanstd(intervals) = :.3f}"
-    )
-    plt.show()
-
+    plt.gca().set_title(f'{np.nanmean(intervals) = :.3f}s, {np.nanstd(intervals) = :.3f}')
+    f1 = plt.gcf()
+    
     plt.hist(intervals, bins=50)
     plt.gca().set_xlabel("lick time on sync relative to lick time in TaskControl (s)")
     plt.gca().set_ylabel("count")
-    plt.gca().set_title(
-        f"{np.nanmean(intervals) = :.3f}s, {np.nanstd(intervals) = :.3f}"
-    )
-    plt.show()
+    plt.gca().set_title(f'{np.nanmean(intervals) = :.3f}s, {np.nanstd(intervals) = :.3f}')
+    f2 = plt.gcf()
+    return f1, f2
+
