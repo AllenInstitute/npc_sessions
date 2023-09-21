@@ -362,7 +362,7 @@ class DynamicRouting1(TaskControl):
         """start of interval in which the subject should lick if a GO trial,
         otherwise should not lick"""
         return self.get_script_frame_time(
-            self._sam.stimStartFrame + self._hdf5["responseWindow"][()][0]
+            self._sam.stimStartFrame + self._hdf5["responseWindow"][()][0] - 1
         )
 
     @functools.cached_property
