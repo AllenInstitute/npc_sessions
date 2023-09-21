@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 import npc_sessions.plots.plot_utils as plot_utils
 import npc_sessions.utils as utils
     
-def plot_bad_lick_times(session: 'npc_sessions.DynamicRoutingSession') -> plt.Figure:
+def plot_bad_lick_times(session: 'npc_sessions.DynamicRoutingSession') -> tuple[plt.Figure, ...]:
     """A loop making eventplots vsyncs for trials with:
     - licks in script but no lick within response window
     - licks not in script, but lick within response window
@@ -33,6 +33,7 @@ def plot_bad_lick_times(session: 'npc_sessions.DynamicRoutingSession') -> plt.Fi
         )
     ).index
 
+    figs = []
     for idx in (
         *trials_with_lick_outside_response_window,
         *trials_with_lick_inside_response_window_but_not_recorded,
@@ -41,30 +42,32 @@ def plot_bad_lick_times(session: 'npc_sessions.DynamicRoutingSession') -> plt.Fi
         stop = session._trials.response_window_stop_time[idx]
         vsyncs = session._trials._sync.get_falling_edges("vsync_stim", units="seconds")
         licks = session._trials._sync.get_rising_edges("lick_sensor", units="seconds")
+        
+        fig, ax = plt.subplots()
         padding = 0.3
         marker_config = {"linestyles": "-", "linelengths": 0.2}
         line_config = {"linestyles": "-", "linelengths": 1}
-        plt.eventplot(
+        ax.eventplot(
             vsyncs[(vsyncs >= start - padding) & (vsyncs <= stop + padding)],
             **line_config,
             label="vsyncs",
             alpha=0.5,
             color="orange",
         )
-        plt.eventplot(
+        ax.eventplot(
             vsyncs[(vsyncs >= start) & (vsyncs <= stop)],
             **line_config,
             label="vsyncs within response window",
             color="orange",
         )
-        plt.eventplot(
+        ax.eventplot(
             licks[(licks >= start - padding) & (licks <= stop + padding)],
             **marker_config,
             label="licks",
             color="k",
             lineoffsets=1,
         )
-        plt.eventplot(
+        ax.eventplot(
             [
                 session._trials.get_script_frame_time(
                     session._trials._sam.trialResponseFrame[idx]
@@ -75,7 +78,7 @@ def plot_bad_lick_times(session: 'npc_sessions.DynamicRoutingSession') -> plt.Fi
             color="lime",
             lineoffsets=1.6,
         )
-        plt.eventplot(
+        ax.eventplot(
             [
                 session._trials.get_script_frame_time(
                     session._trials._sam.stimStartFrame[idx]
@@ -87,14 +90,15 @@ def plot_bad_lick_times(session: 'npc_sessions.DynamicRoutingSession') -> plt.Fi
             lineoffsets=1.6,
         )
 
-        plt.legend(fontsize=8, loc="upper center", fancybox=True, ncol=4)
-        plt.gca().set_yticks([])
-        plt.gca().set_xlabel("time (s)")
-        plt.gcf().set_size_inches(12, 4)
-        plt.gca().title.set_text(f"sync & script timing - trial {idx} - {session._trials.stim_name[idx]}")
-        return plt.gcf()
+        ax.legend(fontsize=8, loc="upper center", fancybox=True, ncol=4)
+        ax.set_yticks([])
+        ax.set_xlabel("time (s)")
+        ax.title.set_text(f"sync & script timing - trial {idx} - {session._trials.stim_name[idx]}")
+        fig.set_size_inches(12, 4)
+        figs.append(fig)        
+    return tuple(figs)
         
-def plot_lick_times_on_sync_and_script(session: 'npc_sessions.DynamicRoutingSession') -> plt.Figure:
+def plot_lick_times_on_sync_and_script(session: 'npc_sessions.DynamicRoutingSession') -> tuple[plt.Figure, plt.Figure]:
     """ -stem plot of lick times on sync relative to lick times in TaskControl
         - histogram showing distribution of same intervals
     """
@@ -104,7 +108,7 @@ def plot_lick_times_on_sync_and_script(session: 'npc_sessions.DynamicRoutingSess
     )
 
     intervals = sync_time - script_time
-
+    fig1, ax = plt.subplots()
     markerline, stemline, baseline = plt.stem(
         sync_time,
         intervals,
@@ -114,20 +118,19 @@ def plot_lick_times_on_sync_and_script(session: 'npc_sessions.DynamicRoutingSess
     plt.setp(stemline, linewidth=0.5, alpha=0.3)
     plt.setp(markerline, markersize=0.5, alpha=0.8)
     plt.setp(baseline, visible=False)
-    plt.gca().set_xlabel("lick time on sync relative to lick time in TaskControl (s)")
-    plt.gca().set_ylabel("experiment time (s)")
-    plt.gca().set_title(f'{np.nanmean(intervals) = :.3f}s, {np.nanstd(intervals) = :.3f}')
-    f1 = plt.gcf()
+    ax.set_xlabel("lick time on sync relative to lick time in TaskControl (s)")
+    ax.set_ylabel("experiment time (s)")
+    ax.set_title(f'{np.nanmean(intervals) = :.3f}s, {np.nanstd(intervals) = :.3f}')
     
-    plt.hist(intervals, bins=50)
-    plt.gca().set_xlabel("lick time on sync relative to lick time in TaskControl (s)")
-    plt.gca().set_ylabel("count")
-    plt.gca().set_title(f'{np.nanmean(intervals) = :.3f}s, {np.nanstd(intervals) = :.3f}')
-    f2 = plt.gcf()
-    return f1, f2
+    fig2, ax = plt.subplots()
+    ax.hist(intervals, bins=50)
+    ax.set_xlabel("lick time on sync relative to lick time in TaskControl (s)")
+    ax.set_ylabel("count")
+    ax.set_title(f'{np.nanmean(intervals) = :.3f}s, {np.nanstd(intervals) = :.3f}')
+    return fig1, fig2
 
 
-def plot_diode_flip_intervals(session: 'npc_sessions.DynamicRoutingSession'):
+def plot_diode_flip_intervals(session: 'npc_sessions.DynamicRoutingSession') -> plt.Figure:
     fig, axes = session.sync_data.plot_diode_measured_sync_square_flips()
     names = tuple(k for k, v in session.stim_frame_times.items() if not isinstance(v, Exception))
     for idx, ax in enumerate(axes):
@@ -179,3 +182,13 @@ def plot_histogram_of_vsync_intervals(session):
         ax.set_xlabel('time (s)')
         ax.set_ylabel('frame interval count')
     plt.tight_layout()
+    
+def plot_reward_times(session):
+    fig, ax = plt.subplots()
+    ax.hist(session.trials[:].reward_time - session.trials[:].response_time)
+    ax.xaxis.label.set_text('contingent_reward_time - response_time (s)')
+    ax.yaxis.label.set_text('count')
+    ax.set_xlim(min(0, ax.get_xlim()[0]), ax.get_xlim()[1])
+    ax.vlines(0, 0, ax.get_ylim()[1], color='k', linestyle='dotted')
+
+    return fig
