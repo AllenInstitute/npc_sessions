@@ -28,20 +28,25 @@ def get_units_electrodes(
             },
         )
     if electrode_method == "tissuecyte":
-        try:
-            electrodes = npc_sessions.create_tissuecyte_electrodes_table(session)
-            units = units.merge(
-                electrodes,
-                left_on=["device_name", "peak_channel"],
-                right_on=["device_name", "channel"],
-            )
-            units.drop(columns=["channel"], inplace=True)
-        except FileNotFoundError as e:
-            print(str(e) + ". Returning units without electrodes")
+        units = merge_units_electrodes(session, units)
 
     units.drop(columns=["electrodes"], inplace=True)
     return units
 
+
+def merge_units_electrodes(session: str, units: pd.DataFrame) -> pd.DataFrame:
+    try:
+        electrodes = npc_sessions.create_tissuecyte_electrodes_table(session)
+        units = units.merge(
+            electrodes,
+            left_on=["device_name", "peak_channel"],
+            right_on=["device_name", "channel"],
+        )
+        units.drop(columns=["channel"], inplace=True)
+    except FileNotFoundError as e:
+        print(str(e) + ". Returning units without electrodes")
+    
+    return units
 
 def bin_spike_times(
     spike_times: npt.NDArray[np.float64], bin_time: int
@@ -330,9 +335,6 @@ def make_units_table(session: str) -> pd.DataFrame:
             device_name,
             electrode_positions,
         )
-        df_device_metrics["unit_id"] = [
-            f"{session}_{ks_id}" for ks_id in df_device_metrics["ks_unit_id"]
-        ]
 
         amplitudes, mean_waveforms = get_amplitudes_mean_waveforms(
             templates_average_path, df_device_metrics["ks_unit_id"].values
@@ -357,10 +359,18 @@ def make_units_table(session: str) -> pd.DataFrame:
             units = pd.concat([units, df_device_metrics])
         # TODO: figure out way to add default qc
 
+    if units is not None:
+        units.index = range(len(units))
+        units["unit_id"] = [
+            f"{session}_{i}" for i in range(len(units))
+        ]
+        units = merge_units_electrodes(session, units)
+
     return units
 
 
 if __name__ == "__main__":
+    make_units_table('649943_20230215')
     import doctest
 
     import dotenv
