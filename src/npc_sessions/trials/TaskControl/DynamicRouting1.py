@@ -417,6 +417,21 @@ class DynamicRouting1(TaskControl):
         return times
 
     @functools.cached_property
+    def reward_time(self) -> npt.NDArray[np.floating]:
+        reward_times = self.get_script_frame_time(self._sam.rewardFrames)
+        return np.where(
+            self.is_contingent_reward,
+            reward_times[
+                np.searchsorted(
+                    reward_times,
+                    self.start_time,
+                    side='left',
+                ),
+            ],
+            np.nan,
+        ) 
+    
+    @functools.cached_property
     def _timeout_start_frame(self) -> npt.NDArray[np.float64]:
         starts = np.nan * np.ones_like(self.start_time)
         for idx in range(0, self._len - 1):
