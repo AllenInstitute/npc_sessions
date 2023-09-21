@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import random
 import matplotlib.pyplot as plt
 import numpy as np
+import rich
 
 if TYPE_CHECKING:
     import npc_sessions
@@ -65,3 +66,4 @@ def plot_unit_spikes_channels(session: 'npc_sessions.DynamicRoutingSession', low
         ax.set_title(f'{probe} spike hist for channel range {lower_channel} to {upper_channel}')
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Spike Count per 1 second bin')
+        

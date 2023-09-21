@@ -1,3 +1,5 @@
+from typing import Literal, TYPE_CHECKING
+
 import os
 import itertools
 import npc_sessions.utils.stim as stim
@@ -114,7 +116,7 @@ def plot_audio_latencies(session: 'npc_sessions.DynamicRoutingSession', latency_
         ax[1].hist(latency_info['sync'],bins=xbins,alpha=0.5)
         ax[1].legend(['signal','envelope','sync'])
 
-    if 'templeton' in session.task_version:
+    if session.task_version and 'templeton' in session.task_version:
         figtitle='Audio latency by alignment method: '+session.id+' (templeton)'
     else:
         figtitle='Audio latency by alignment method: '+session.id+' (DR)'
@@ -185,7 +187,7 @@ def plot_tone_vs_AMnoise(session: 'npc_sessions.DynamicRoutingSession', latency_
         else:
             ax[0,xx].set_title(idx_labels[xx])
 
-    if 'templeton' in session.task_version:
+    if session.task_version and 'templeton' in session.task_version:
         figtitle='Comp tone vs. AM noise latency: '+session.id+' RFMapping (templeton)'
     else:
         figtitle='Comp tone vs. AM noise latency: '+session.id+' RFMapping (DR)'
