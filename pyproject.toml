@@ -79,8 +79,8 @@ tag = "pdm bump tag"
 
 [tool.pdm.scripts.prebuild]
 composite = [
-    "test",
     "mypy",
+    "test",
     "black",
     "ruff",
 ]
