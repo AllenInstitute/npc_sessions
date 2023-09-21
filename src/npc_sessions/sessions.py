@@ -10,7 +10,7 @@ import logging
 import re
 import uuid
 from collections.abc import Generator, Iterable
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
 import h5py
 import ndx_events
@@ -188,7 +188,8 @@ class DynamicRoutingSession:
         Looks in `npc_sessions.plots` for functions starting with `plot_`
         """
         for attr in (attr for attr in plots.__dict__ if attr.startswith("plot_")):
-            setattr(self, attr, functools.partial(fn := getattr(plots, attr), self))
+            if isinstance((fn := getattr(plots, attr)), Callable):
+                setattr(self, attr, functools.partial(fn := getattr(plots, attr), self))
 
     @property
     def nwb(self) -> pynwb.NWBFile:
