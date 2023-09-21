@@ -380,18 +380,27 @@ class DynamicRouting1(TaskControl):
         """time of first lick within the response window
 
         - nan if no lick occurred"""
+        script_response_times = self.get_script_frame_time(self._sam.trialResponseFrame)
         if not self._sync:
-            return self.get_vis_display_time(self._sam.trialResponseFrame)
+            return script_response_times
         sync_times = self._sync.get_rising_edges("lick_sensor", units="seconds")
-        next_licks = np.searchsorted(
+        previous_licks = np.searchsorted(
             sync_times,
-            self.response_window_start_time,
-        )
+            script_response_times,
+            side='left',
+        ) - 1
         times = np.full(self._len, np.nan)
-        for idx, lick in enumerate(sync_times[next_licks]):
+        for idx in self.trial_index:
             if not self.is_response[idx]:
                 continue
-            assert self.response_window_start_time[idx] <= lick <= self.response_window_stop_time[idx]
+            start = self.response_window_start_time[idx]
+            stop = self.response_window_stop_time[idx]
+            lick = sync_times[previous_licks[idx]]
+            if not (start <= lick <= stop):
+                logger.warning(
+                f"Lick time found for trial {idx} is outside of response window: [{start=}s : {stop=}s], lick on sync={lick=}s. "
+                f"Response frame reported from Sam's object corresponds to vsync time: {script_response_times[idx]}s."
+                ) 
             times[idx] = lick
         return times
 
