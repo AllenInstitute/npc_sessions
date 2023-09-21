@@ -90,13 +90,12 @@ def get_units_electrodes_spike_times(session: str, *args, **kwargs) -> pl.DataFr
                 pl.col("ks_unit_id").cast(pl.Int64),
                 separator="_",
             ).alias("unit_id"),
-        )
-        .select(
+        ).select(
             pl.exclude("unit_name", "id"),
         )
-        #.filter(
+        # .filter(
         #    "default_qc",
-        #)
+        # )
     )
 
 
@@ -235,45 +234,53 @@ def make_units_metrics_device_table(
 
     return df_quality_template_metrics
 
-def get_amplitudes_mean_waveforms(templates_average_path: upath.UPath, 
-                                  ks_unit_ids: npt.NDArray[np.int64]) -> tuple[list[float], list[npt.NDArray[np.float64]]] :
+
+def get_amplitudes_mean_waveforms(
+    templates_average_path: upath.UPath, ks_unit_ids: npt.NDArray[np.int64]
+) -> tuple[list[float], list[npt.NDArray[np.float64]]]:
     unit_amplitudes: list[float] = []
     templates_mean: list[npt.NDArray[np.float64]] = []
 
     with io.BytesIO(templates_average_path.read_bytes()) as f:
         templates = np.load(f, allow_pickle=True)
-    
+
     """
     @property
     def nbefore(self) -> int:
         nbefore = int(self._params["ms_before"] * self.sampling_frequency / 1000.0)
         return nbefore
     """
-    before = 90 # from spike interface, ms_before = 3, TODO: look at this further
-    for index, ks_unit_id in enumerate(ks_unit_ids):
+    before = 90  # from spike interface, ms_before = 3, TODO: look at this further
+    for index, _ks_unit_id in enumerate(ks_unit_ids):
         template = templates[index, :, :]
         values = -template[before, :]
         unit_amplitudes.append(np.max(values))
         templates_mean.append(template)
-    
+
     return unit_amplitudes, templates_mean
 
-def get_units_spike_times(session: str, device_name: str, spike_times_aligned: npt.NDArray[np.float64],
-                         ks_unit_ids: npt.NDArray[np.int64]) -> list[npt.NDArray[np.float64]]:
+
+def get_units_spike_times(
+    session: str,
+    device_name: str,
+    spike_times_aligned: npt.NDArray[np.float64],
+    ks_unit_ids: npt.NDArray[np.int64],
+) -> list[npt.NDArray[np.float64]]:
     units_spike_times: list[npt.NDArray[np.float64]] = []
     sorting_cached_file = npc_lims.get_spike_sorting_device_path_from_s3(
         session, device_name
     )
     with io.BytesIO(sorting_cached_file.read_bytes()) as f:
         sorting_cached = np.load(f, allow_pickle=True)
-        spike_labels = sorting_cached['spike_labels_seg0']
-    
+        spike_labels = sorting_cached["spike_labels_seg0"]
+
     for ks_unit_id in ks_unit_ids:
         label_indices = np.argwhere(spike_labels == ks_unit_id)
         unit_spike_time = spike_times_aligned[label_indices].flatten()
         units_spike_times.append(unit_spike_time)
-    
+
     return units_spike_times
+
 
 def make_units_table(session: str) -> pd.DataFrame:
     recording_dirs_experiment = npc_lims.get_recording_dirs_experiment_path_from_s3(
@@ -296,14 +303,16 @@ def make_units_table(session: str) -> pd.DataFrame:
     template_metrics_paths = sorted(
         npc_lims.get_template_metrics_paths_from_s3(session)
     )
-    
+
     unit_locations_paths = sorted(npc_lims.get_unit_locations_paths_from_s3(session))
 
     for i in range(len(quality_metrics_paths)):
         quality_metrics_path = quality_metrics_paths[i]
         template_metrics_path = template_metrics_paths[i]
         units_locations_path = unit_locations_paths[i]
-        templates_average_path = next(quality_metrics_path.parent.parent.glob('templates_average.npy'))
+        templates_average_path = next(
+            quality_metrics_path.parent.parent.glob("templates_average.npy")
+        )
 
         device_name = next(
             device_name_probe
@@ -325,21 +334,31 @@ def make_units_table(session: str) -> pd.DataFrame:
             f"{session}_{ks_id}" for ks_id in df_device_metrics["ks_unit_id"]
         ]
 
-        amplitudes, mean_waveforms = get_amplitudes_mean_waveforms(templates_average_path, df_device_metrics['ks_unit_id'].values)
-        spike_times_aligned = align_device_kilosort_spike_times(session, device_name, device_timing_on_sync)
-        unit_spike_times = get_units_spike_times(session, device_name, spike_times_aligned, df_device_metrics['ks_unit_id'].values)
+        amplitudes, mean_waveforms = get_amplitudes_mean_waveforms(
+            templates_average_path, df_device_metrics["ks_unit_id"].values
+        )
+        spike_times_aligned = align_device_kilosort_spike_times(
+            session, device_name, device_timing_on_sync
+        )
+        unit_spike_times = get_units_spike_times(
+            session,
+            device_name,
+            spike_times_aligned,
+            df_device_metrics["ks_unit_id"].values,
+        )
 
-        df_device_metrics['amplitude'] = amplitudes
-        df_device_metrics['waveform_mean'] = mean_waveforms
-        df_device_metrics['spike_times'] = unit_spike_times
-        
+        df_device_metrics["amplitude"] = amplitudes
+        df_device_metrics["waveform_mean"] = mean_waveforms
+        df_device_metrics["spike_times"] = unit_spike_times
+
         if units is None:
             units = df_device_metrics
         else:
             units = pd.concat([units, df_device_metrics])
         # TODO: figure out way to add default qc
-    
+
     return units
+
 
 if __name__ == "__main__":
     import doctest

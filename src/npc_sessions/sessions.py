@@ -9,7 +9,7 @@ import json
 import logging
 import re
 import uuid
-from collections.abc import Generator, Iterable, Mapping
+from collections.abc import Generator, Iterable
 from typing import Any, Literal
 
 import h5py
@@ -22,7 +22,6 @@ import numpy.typing as npt
 import PIL.Image
 import polars as pl
 import pynwb
-import scipy.stats
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
@@ -165,7 +164,7 @@ class DynamicRoutingSession:
             except AttributeError:
                 setattr(self, f"_{key}", value)
         self._add_plots_as_methods()
-        
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.id!r})"
 
@@ -181,16 +180,16 @@ class DynamicRoutingSession:
 
     def __hash__(self) -> int:
         return hash(self.id)
-    
+
     def _add_plots_as_methods(self) -> None:
         """Add plots as methods to session object, so they can be called
         directly, e.g. `session.plot_drift_maps()`.
-        
+
         Looks in `npc_sessions.plots` for functions starting with `plot_`
         """
         for attr in (attr for attr in plots.__dict__ if attr.startswith("plot_")):
             setattr(self, attr, functools.partial(fn := getattr(plots, attr), self))
-    
+
     @property
     def nwb(self) -> pynwb.NWBFile:
         # if self._nwb_hdf5_path:
@@ -460,80 +459,94 @@ class DynamicRoutingSession:
         trials = self._all_trials[stim_name.stem]
         assert isinstance(trials, TaskControl.DynamicRouting1)  # for mypy
         return trials
-    
+
     @property
     def _task_performance_by_block(self) -> pynwb.epoch.TimeIntervals:
         trials = self.trials[:]
         task_performance_by_block = {}
-        
-        for block,context in enumerate(self.sam.blockStimRewarded):
+
+        for block, context in enumerate(self.sam.blockStimRewarded):
             block_performance: dict[str, float | str] = {}
 
-            block_performance['context'] = context
-            block_performance['cross_modal_dprime'] = self.sam.dprimeOtherModalGo[block]
-            block_performance['same_modal_dprime'] = self.sam.dprimeSameModal[block]
-            block_performance['nonrewarded_modal_dprime'] = self.sam.dprimeNonrewardedModal[block]
-            
-            if context=='vis1':
-                block_performance['signed_cross_modal_dprime'] = self.sam.dprimeOtherModalGo[block]
-                block_performance['vis_intra_dprime'] = self.sam.dprimeSameModal[block]
-                block_performance['aud_intra_dprime'] = self.sam.dprimeNonrewardedModal[block]
+            block_performance["context"] = context
+            block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block]
+            block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block]
+            block_performance[
+                "nonrewarded_modal_dprime"
+            ] = self.sam.dprimeNonrewardedModal[block]
 
-            elif context=='sound1':
-                block_performance['signed_cross_modal_dprime'] = -self.sam.dprimeOtherModalGo[block]
-                block_performance['aud_intra_dprime'] = self.sam.dprimeSameModal[block]
-                block_performance['vis_intra_dprime'] = self.sam.dprimeNonrewardedModal[block]
+            if context == "vis1":
+                block_performance[
+                    "signed_cross_modal_dprime"
+                ] = self.sam.dprimeOtherModalGo[block]
+                block_performance["vis_intra_dprime"] = self.sam.dprimeSameModal[block]
+                block_performance["aud_intra_dprime"] = self.sam.dprimeNonrewardedModal[
+                    block
+                ]
+
+            elif context == "sound1":
+                block_performance[
+                    "signed_cross_modal_dprime"
+                ] = -self.sam.dprimeOtherModalGo[block]
+                block_performance["aud_intra_dprime"] = self.sam.dprimeSameModal[block]
+                block_performance["vis_intra_dprime"] = self.sam.dprimeNonrewardedModal[
+                    block
+                ]
 
             task_performance_by_block[block] = block_performance
-            
+
         nwb_intervals = pynwb.epoch.TimeIntervals(
-            name='performance',
-            description=f'behavioral performance for each block in {self.task_stim_name} trials',
+            name="performance",
+            description=f"behavioral performance for each block in {self.task_stim_name} trials",
         )
         # for k in task_performance_by_block[0].keys():
         #     nwb_intervals.add_column(
         #         name=k,
         #         description='', #TODO
         #     )
-        
+
         nwb_intervals.add_column(
-            name='context',
-            description='context of the block (a.k.a. rewarded stimulus), either vis1 or sound1',
+            name="context",
+            description="context of the block (a.k.a. rewarded stimulus), either vis1 or sound1",
         )
         nwb_intervals.add_column(
-            name='cross_modal_dprime',
-            description='dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus',
+            name="cross_modal_dprime",
+            description="dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
         )
         nwb_intervals.add_column(
-            name='signed_cross_modal_dprime',
-            description='same as cross_modal_dprime, but with sign flipped for auditory blocks',
+            name="signed_cross_modal_dprime",
+            description="same as cross_modal_dprime, but with sign flipped for auditory blocks",
         )
         nwb_intervals.add_column(
-            name='same_modal_dprime',
-            description='dprime within rewarded modality; hits=response rate to rewarded target stimulus, false alarms=response rate to same modality non-target stimulus',
+            name="same_modal_dprime",
+            description="dprime within rewarded modality; hits=response rate to rewarded target stimulus, false alarms=response rate to same modality non-target stimulus",
         )
         nwb_intervals.add_column(
-            name='nonrewarded_modal_dprime',
-            description='dprime within non-rewarded modality; hits=response rate to non-rewarded target stimulus, false alarms=response rate to same modality non-target stimulus',
+            name="nonrewarded_modal_dprime",
+            description="dprime within non-rewarded modality; hits=response rate to non-rewarded target stimulus, false alarms=response rate to same modality non-target stimulus",
         )
         nwb_intervals.add_column(
-            name='vis_intra_dprime',
-            description='dprime within visual modality; hits=response rate to visual target stimulus, false alarms=response rate to visual non-target stimulus',
+            name="vis_intra_dprime",
+            description="dprime within visual modality; hits=response rate to visual target stimulus, false alarms=response rate to visual non-target stimulus",
         )
         nwb_intervals.add_column(
-            name='aud_intra_dprime',
-            description='dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus',
+            name="aud_intra_dprime",
+            description="dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus",
         )
 
         for block_index in task_performance_by_block:
             nwb_intervals.add_interval(
-                start_time=trials[trials['block_index']==block_index]['start_time'].min(),
-                stop_time=trials[trials['block_index']==block_index]['stop_time'].max(),
-                **{k:v for k,v in task_performance_by_block[block_index].items()}
+                start_time=trials[trials["block_index"] == block_index][
+                    "start_time"
+                ].min(),
+                stop_time=trials[trials["block_index"] == block_index][
+                    "stop_time"
+                ].max(),
+                **dict(task_performance_by_block[block_index].items()),
             )
-        
+
         return nwb_intervals
-    
+
     @functools.cached_property
     def intervals(self) -> pynwb.core.LabelledDict:
         """AKA trials tables other than the main behavior task.
@@ -1118,9 +1131,13 @@ class DynamicRoutingSession:
                 return False
             if not self.is_sync:
                 if self.task_stim_name not in p.stem:
-                    return False # only analyse the task stim file if we have no sync data
+                    return (
+                        False  # only analyse the task stim file if we have no sync data
+                    )
                 return True
-            if (dt := npc_session.DatetimeRecord(p.stem).dt) < self.sync_data.start_time:
+            if (
+                dt := npc_session.DatetimeRecord(p.stem).dt
+            ) < self.sync_data.start_time:
                 return False
             if dt > self.sync_data.stop_time:
                 return False
@@ -1216,7 +1233,11 @@ class DynamicRoutingSession:
     @functools.cached_property
     def video_info_data(self) -> utils.LazyDict[str, utils.MVRInfoData]:
         return utils.LazyDict(
-            (utils.extract_camera_name(path.stem), (utils.get_video_info_data, path), {})
+            (
+                utils.extract_camera_name(path.stem),
+                (utils.get_video_info_data, path),
+                {},
+            )
             for path in self.video_info_paths
         )
 
@@ -1228,7 +1249,7 @@ class DynamicRoutingSession:
                 name=utils.extract_camera_name(path.stem),
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
-                    self.video_info_data[utils.extract_camera_name(path.stem)][ # type: ignore[arg-type]
+                    self.video_info_data[utils.extract_camera_name(path.stem)][  # type: ignore[arg-type]
                         "TimeStart"
                     ]
                 ),
@@ -1246,8 +1267,8 @@ class DynamicRoutingSession:
                 session_id=self.id,
                 name=utils.extract_camera_name(path.stem),
                 suffix=path.suffix,
-                timestamp=npc_session.TimeRecord.parse_id(  
-                    self.video_info_data[path.stem]["TimeStart"] # type: ignore[arg-type]
+                timestamp=npc_session.TimeRecord.parse_id(
+                    self.video_info_data[path.stem]["TimeStart"]  # type: ignore[arg-type]
                 ),
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),

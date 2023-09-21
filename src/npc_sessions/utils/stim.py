@@ -516,8 +516,7 @@ def generate_sound_waveforms(
 
 
 def generate_opto_waveforms(
-    stim_file_or_dataset: StimPathOrDataset,
-    device_index: int | None = None
+    stim_file_or_dataset: StimPathOrDataset, device_index: int | None = None
 ) -> tuple[Waveform | None, ...]:
     """
     >>> path = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/OptoTagging_662892_20230821_125915.hdf5'
@@ -568,22 +567,25 @@ def generate_opto_waveforms(
         optoSampleRate = stim_data["optoSampleRate"][()]
     else:
         optoSampleRate = 2000
-    
+
     def device(array: npt.NDArray) -> npt.NDArray:
         if array.ndim > 1:
             return array[:, device_index or 0]
         return array
-    
+
     waveforms: list[Waveform | None] = [None] * nTrials
     for trialnum in range(0, nTrials):
-        if any(np.isnan(v[trialnum]) or v[trialnum] == 0 for v in (trialOptoDur, trialOptoVoltage)):
+        if any(
+            np.isnan(v[trialnum]) or v[trialnum] == 0
+            for v in (trialOptoDur, trialOptoVoltage)
+        ):
             continue
-    
+
         if trialOptoSinFreq[trialnum] != 0:
             name = "sine"
         else:
             name = "square"
-            
+
         waveform = LazyWaveform(
             name=name,
             modality=WaveformModality.OPTO,
@@ -599,7 +601,7 @@ def generate_opto_waveforms(
         )
         assert waveform is not None and waveform.samples.any()
         waveforms[trialnum] = waveform
-        
+
     return tuple(waveforms)
 
 
@@ -832,8 +834,10 @@ def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
         raise result from None
     return result
 
+
 class MissingSyncLineError(IndexError):
     pass
+
 
 def get_stim_latencies_from_sync(
     stim_file_or_dataset: StimPathOrDataset,
@@ -1113,9 +1117,9 @@ def get_stim_trigger_frames(
     stim_type: str | Literal["opto"] = "stim",
 ) -> tuple[int | None, ...]:
     """Frame index of stim command being sent. len() == num trials.
-    
+
     - for DynamicRouting1 files, use `stim_type='opto'` to get the trigger frames for opto
-    
+
     >>> path = 's3://aind-ephys-data/ecephys_668755_2023-08-31_12-33-31/behavior/DynamicRouting1_668755_20230831_131418.hdf5'
     >>> frames = get_stim_trigger_frames(path)
     >>> len(frames)
@@ -1131,22 +1135,28 @@ def get_stim_trigger_frames(
         if stim_type != "opto"
         else (opto := stim_data.get("trialOptoOnsetFrame"))
     )
-    
+
     if start_frames is None and opto is not None:
         # optoTagging experiments use "trialOptoOnsetFrame" instead of
         # "trialStimStartFrame" - should be safe to switch.. the stim_type
         # parameter just wasn't set to 'opto' when the function was called
         start_frames = opto
         if stim_data.get("optoTaggingLocs") is None:
-            logger.warning('Using "trialOptoOnsetFrame" instead of "trialStimStartFrame" - this is likely an old optoTagging experiment, and `stim_type` was specified as `stim` instead of `opto`.')
-            
-    start_frames = start_frames[:get_num_trials(stim_data)].squeeze()
-    monotonic_increase = np.all((without_nans := start_frames[~np.isnan(start_frames)])[1:] > without_nans[:-1])
-    if not monotonic_increase: 
+            logger.warning(
+                'Using "trialOptoOnsetFrame" instead of "trialStimStartFrame" - this is likely an old optoTagging experiment, and `stim_type` was specified as `stim` instead of `opto`.'
+            )
+
+    start_frames = start_frames[: get_num_trials(stim_data)].squeeze()
+    monotonic_increase = np.all(
+        (without_nans := start_frames[~np.isnan(start_frames)])[1:] > without_nans[:-1]
+    )
+    if not monotonic_increase:
         # behavior files with opto report the onset frame of opto relative to stim onset for
         # each trial. OptoTagging files specify absolute frame index
-        start_frames += stim_data.get("trialStimStartFrame")[:get_num_trials(stim_data)].squeeze()
-    
+        start_frames += stim_data.get("trialStimStartFrame")[
+            : get_num_trials(stim_data)
+        ].squeeze()
+
     return tuple(
         int(v) if ~np.isnan(v) else None
         for v in utils.safe_index(start_frames, np.arange(len(start_frames)))
