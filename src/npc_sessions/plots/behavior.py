@@ -59,16 +59,16 @@ def plot_first_lick_latency_hist(session: 'npc_sessions.DynamicRoutingSession') 
 
 def plot_lick_raster(session: 'npc_sessions.DynamicRoutingSession') -> plt.Figure:
 
-    lick_times=session.acquisition['lick_spout'].timestamps
+    timeseries =session.acquisition['lick_spout']
     trials: pd.DataFrame = session.trials[:]
 
     fig,ax=plt.subplots(1,1)
     ax.axvline(0,color='k',linestyle='--',linewidth=0.5)
     for tt,trial in trials.iterrows():
 
-        trial_licks = lick_times[
-            (lick_times>trial['stim_start_time']-1) & 
-            (lick_times<trial['stim_start_time']+2)
+        trial_licks = timeseries.timestamps[
+            (timeseries.timestamps>trial['stim_start_time']-1) & 
+            (timeseries.timestamps<trial['stim_start_time']+2)
             ]-trial['stim_start_time']
         
         ax.vlines(trial_licks,tt,tt+1)
@@ -76,13 +76,19 @@ def plot_lick_raster(session: 'npc_sessions.DynamicRoutingSession') -> plt.Figur
     ax.set_xlim([-1,2])
     ax.set_xlabel('time rel to stim onset (s)')
     ax.set_ylabel('trial number')
-    ax.set_title('lick raster: '+session.id)
+    ax.set_title(timeseries.description,fontsize=8)
+    fig.suptitle(session.id, fontsize=10)
 
     return fig
 
 def plot_running(session: 'npc_sessions.DynamicRoutingSession') -> plt.Figure:
     timeseries = session.processing['running']
+    fig,ax=plt.subplots(1,1)
     plt.plot(timeseries.timestamps, timeseries.data)
-    plt.gca().set_ylim(-.2, 1)
-    plt.gcf().set_size_inches(12, 3)
-    return plt.gcf()
+    ax.set_ylim(-.2, 1)
+    ax.set_xlabel('time (s)')
+    ax.set_ylabel(timeseries.unit)
+    ax.set_title(timeseries.description, fontsize=8)
+    fig.suptitle(session.id, fontsize=10)
+    fig.set_size_inches(12, 3)
+    return fig
