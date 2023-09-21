@@ -28,6 +28,7 @@ from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
 import npc_sessions.config as config
 import npc_sessions.nwb as nwb_internal
+import npc_sessions.plots as plots
 import npc_sessions.trials as TaskControl
 import npc_sessions.utils as utils
 
@@ -163,7 +164,8 @@ class DynamicRoutingSession:
                 setattr(self, key, value)
             except AttributeError:
                 setattr(self, f"_{key}", value)
-
+        self._add_plots_as_methods()
+        
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.id!r})"
 
@@ -179,7 +181,16 @@ class DynamicRoutingSession:
 
     def __hash__(self) -> int:
         return hash(self.id)
-
+    
+    def _add_plots_as_methods(self) -> None:
+        """Add plots as methods to session object, so they can be called
+        directly, e.g. `session.plot_drift_maps()`.
+        
+        Looks in `npc_sessions.plots` for functions starting with `plot_`
+        """
+        for attr in (attr for attr in plots.__dict__ if attr.startswith("plot_")):
+            setattr(self, attr, functools.partial(fn := getattr(plots, attr), self))
+    
     @property
     def nwb(self) -> pynwb.NWBFile:
         # if self._nwb_hdf5_path:
