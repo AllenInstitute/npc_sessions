@@ -369,7 +369,6 @@ def make_units_table(session: str) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    make_units_table("649943_20230215")
     import doctest
 
     import dotenv
