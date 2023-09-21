@@ -188,8 +188,8 @@ class DynamicRoutingSession:
         Looks in `npc_sessions.plots` for functions starting with `plot_`
         """
         for attr in (attr for attr in plots.__dict__ if attr.startswith("plot_")):
-            if isinstance((fn := getattr(plots, attr)), Callable):
-                setattr(self, attr, functools.partial(fn := getattr(plots, attr), self))
+            if getattr((fn := getattr(plots, attr)), '__call__', None) is not None:
+                setattr(self, attr, functools.partial(fn, self))
 
     @property
     def nwb(self) -> pynwb.NWBFile:
