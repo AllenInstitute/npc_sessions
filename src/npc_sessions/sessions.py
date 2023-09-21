@@ -24,6 +24,7 @@ import polars as pl
 import pynwb
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
+import ndx_events
 
 import npc_sessions.config as config
 import npc_sessions.nwb as nwb_internal
@@ -1477,8 +1478,21 @@ class DynamicRoutingSession:
         return "2002" if "2002" in implant else implant
 
     @functools.cached_property
-    def _licks(self) -> nwb_internal.SupportsAsNWB:
-        return nwb_internal.LickSpout(self.sync_data)
+    def _licks(self) -> ndx_events.Events:
+        if self.is_sync:
+            timestamps = self.sync_data.get_rising_edges(
+                "lick_sensor", units="seconds"
+            )
+        else:
+            timestamps = self.sam.lickTimes
+        return ndx_events.Events(
+            timestamps=timestamps,
+            name = "lick_spout",
+            description = (
+                "times at which the subject interacted with a water spout - "
+                "putatively licks, but may include other events such as grooming"
+            ),
+        )
 
     @functools.cached_property
     def _running(self) -> nwb_internal.SupportsAsNWB:
