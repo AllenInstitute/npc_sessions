@@ -483,9 +483,7 @@ def generate_sound_waveforms(
     if "trialSoundSeed" in stim_data:
         trialSoundSeed = stim_data["trialSoundSeed"][:nTrials]
     else:
-        print(
-            "trialSoundSeed not found; likely older (2022) recording; setting to None"
-        )
+        logger.debug('trialSoundSeed not found; likely older (2022) recording; setting to None')
         trialSoundSeed = [None] * nTrials
     trialSoundType = stim_data["trialSoundType"][:nTrials]
     trialSoundVolume = stim_data["trialSoundVolume"][:nTrials]
