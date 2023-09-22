@@ -390,11 +390,10 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
         modules = []
-        if self.is_sync:
-            modules.append(self._licks.as_nwb())
+        modules.append(self._licks)
+        modules.append(self._rewards)
         if self.is_video:
             modules.extend(self._video_frame_times)
-        modules.append(self._rewards)
         return tuple(modules)
 
     @functools.cached_property
