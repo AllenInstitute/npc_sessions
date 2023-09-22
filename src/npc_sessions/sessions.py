@@ -196,8 +196,8 @@ class DynamicRoutingSession:
         # if self._nwb_hdf5_path:
         #     self.nwb = pynwb.NWBHDF5IO(self._nwb_hdf5_path, "r").read()
         return pynwb.NWBFile(
-            session_id=self.id,
-            session_description=self.experiment_description,
+            session_id=self.session_id,
+            session_description=self.session_description,
             identifier=self.identifier,
             session_start_time=self.session_start_time.astimezone(),
             experimenter=self.experimenter,
@@ -230,8 +230,8 @@ class DynamicRoutingSession:
     def metadata(self) -> pynwb.NWBFile:
         """NWB file with session metadata-alone"""
         return pynwb.NWBFile(
-            session_id=self.id,
-            session_description=self.experiment_description,
+            session_id=self.session_id,
+            session_description=self.session_description,
             identifier=self.identifier,
             session_start_time=self.session_start_time.astimezone(),
             experimenter=self.experimenter,
@@ -243,6 +243,10 @@ class DynamicRoutingSession:
             # keywords=self.keywords, # fetches all trials tables
         )
 
+    @property
+    def session_id(self) -> str:
+        return str(self.id)
+    
     @property
     def session_start_time(self) -> datetime.datetime:
         if self.is_sync:
