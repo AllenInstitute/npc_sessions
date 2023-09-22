@@ -123,7 +123,7 @@ class DynamicRoutingSession:
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
     experimenter: str | None = None
-    experiment_description: str = "visual-auditory task-switching behavior session"
+    experiment_description: str = "visual-auditory task-switching behavior experiment"
     institution: str | None = (
         "Neural Circuits & Behavior | MindScope program | Allen Institute"
     )
@@ -198,6 +198,7 @@ class DynamicRoutingSession:
         return pynwb.NWBFile(
             session_id=self.session_id,
             session_description=self.session_description,
+            experiment_description=self.experiment_description,
             identifier=self.identifier,
             session_start_time=self.session_start_time.astimezone(),
             experimenter=self.experimenter,
@@ -232,6 +233,7 @@ class DynamicRoutingSession:
         return pynwb.NWBFile(
             session_id=self.session_id,
             session_description=self.session_description,
+            experiment_description=self.experiment_description,
             identifier=self.identifier,
             session_start_time=self.session_start_time.astimezone(),
             experimenter=self.experimenter,
@@ -253,6 +255,29 @@ class DynamicRoutingSession:
             return self.sync_data.start_time
         return utils.get_stim_start_time(self.task_data)
 
+    @property
+    def session_description(self) -> str:
+        """Uses `is_` bools to construct a text description.
+        - won't be correct if testing with datastreams manually disabled
+        """ 
+        opto = ", with optogenetic inactivation during task" if self.is_opto else ""
+        video = f", with video recording of behavior" if self.is_video else ""
+        sync = f", without precise timing information" if not self.is_sync else ""
+        if not self.is_ephys:
+            description = "training session with behavioral task data"
+            description += opto
+            description += video
+            description += sync
+            return description
+        else:
+            description = f"ecephys session"
+            description += f" without sorted units" if not self.is_sorted else ""
+            description += f", {'with' if self.is_task else 'without'} behavioral task data"
+            description += opto
+            description += video
+            description += sync
+        return ', with '.join(description.split(', with ')[:-1]) + ' and ' + description.split(', with ')[-1]
+    
     @property
     def _session_start_time(self) -> npc_session.DatetimeRecord:
         return npc_session.DatetimeRecord(self.session_start_time.isoformat())
