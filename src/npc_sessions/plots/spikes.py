@@ -6,9 +6,11 @@ import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
     import pandas as pd
-    import pynwb.NWBFile
+    import pynwb
 
     import npc_sessions
+    
+import npc_sessions.utils as utils
 
 
 def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSession):
@@ -42,7 +44,7 @@ def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSess
             ax[probe_index].set_xlabel(x_labels[metric])
             probe_index += 1
 
-        fig.set_size_inches([16, 6])
+        fig.set_size_inches([10, 6])
     plt.tight_layout()
 
 
@@ -57,7 +59,7 @@ def plot_all_unit_spike_histograms(session: npc_sessions.DynamicRoutingSession):
             "spike_times"
         ].to_numpy()
 
-        hist, bins = npc_sessions.bin_spike_times(unit_spike_times, bin_time=1)
+        hist, bins = utils.bin_spike_times(unit_spike_times, bin_time=1)
         ax.plot(hist)
         ax.set_title(f"{probe} Spike Histogram")
         ax.set_xlabel("Time (s)")
@@ -66,8 +68,8 @@ def plot_all_unit_spike_histograms(session: npc_sessions.DynamicRoutingSession):
 
 def plot_unit_spikes_channels(
     session: npc_sessions.DynamicRoutingSession,
-    lower_channel: int,
-    upper_channel: int,
+    lower_channel: int = 0,
+    upper_channel: int = 384,
 ):
     units: pd.DataFrame = session.units[:]
 
