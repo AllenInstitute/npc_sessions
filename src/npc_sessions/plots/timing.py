@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     import npc_sessions
 
 
-
 def plot_bad_lick_times(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> tuple[plt.Figure, ...]:

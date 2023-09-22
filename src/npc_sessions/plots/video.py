@@ -17,7 +17,6 @@ from matplotlib import pyplot as plt
 import npc_sessions.utils as utils
 
 if TYPE_CHECKING:
-
     import npc_sessions
 
 import npc_sessions.plots.plot_utils as plot_utils

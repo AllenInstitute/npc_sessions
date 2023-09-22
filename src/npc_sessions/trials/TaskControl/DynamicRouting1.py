@@ -420,11 +420,14 @@ class DynamicRouting1(TaskControl):
     def reward_time(self) -> npt.NDArray[np.floating]:
         """delivery time of water reward, for contingent and non-contingent rewards"""
         all_reward_times = self.get_script_frame_time(self._sam.rewardFrames)
-        all_reward_trials = np.searchsorted(
-            self.start_time,
-            all_reward_times,
-            side='right',
-        ) - 1
+        all_reward_trials = (
+            np.searchsorted(
+                self.start_time,
+                all_reward_times,
+                side="right",
+            )
+            - 1
+        )
         reward_time = np.full(self._len, np.nan)
         if np.all(np.where(self.is_rewarded)[0] == all_reward_trials):
             # expected single reward per trial

@@ -7,7 +7,6 @@ from matplotlib import pyplot as plt
 import npc_sessions.utils.stim as stim
 
 if TYPE_CHECKING:
-
     import npc_sessions
 
 
