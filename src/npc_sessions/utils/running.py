@@ -115,7 +115,7 @@ def get_running_speed_from_hdf5(
         and isinstance(d["rotaryEncoder"][()], bytes)
         and d["rotaryEncoder"].asstr()[()] == "digital"
     ):
-        if 'frameRate' in d:
+        if "frameRate" in d:
             assert d["frameRate"][()] == FRAMERATE
         wheel_revolutions = (
             d["rotaryEncoderCount"][:] / d["rotaryEncoderCountsPerRev"][()]

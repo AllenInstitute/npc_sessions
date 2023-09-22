@@ -26,7 +26,6 @@ import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
 import npc_sessions.config as config
-import npc_sessions.nwb as nwb_internal
 import npc_sessions.plots as plots
 import npc_sessions.trials as TaskControl
 import npc_sessions.utils as utils
@@ -248,7 +247,7 @@ class DynamicRoutingSession:
     @property
     def session_id(self) -> str:
         return str(self.id)
-    
+
     @property
     def session_start_time(self) -> datetime.datetime:
         if self.is_sync:
@@ -259,10 +258,10 @@ class DynamicRoutingSession:
     def session_description(self) -> str:
         """Uses `is_` bools to construct a text description.
         - won't be correct if testing with datastreams manually disabled
-        """ 
+        """
         opto = ", with optogenetic inactivation during task" if self.is_opto else ""
-        video = f", with video recording of behavior" if self.is_video else ""
-        sync = f", without precise timing information" if not self.is_sync else ""
+        video = ", with video recording of behavior" if self.is_video else ""
+        sync = ", without precise timing information" if not self.is_sync else ""
         if not self.is_ephys:
             description = "training session with behavioral task data"
             description += opto
@@ -270,14 +269,20 @@ class DynamicRoutingSession:
             description += sync
             return description
         else:
-            description = f"ecephys session"
-            description += f" without sorted units" if not self.is_sorted else ""
-            description += f", {'with' if self.is_task else 'without'} behavioral task data"
+            description = "ecephys session"
+            description += " without sorted units" if not self.is_sorted else ""
+            description += (
+                f", {'with' if self.is_task else 'without'} behavioral task data"
+            )
             description += opto
             description += video
             description += sync
-        return ', with '.join(description.split(', with ')[:-1]) + ' and ' + description.split(', with ')[-1]
-    
+        return (
+            ", with ".join(description.split(", with ")[:-1])
+            + " and "
+            + description.split(", with ")[-1]
+        )
+
     @property
     def _session_start_time(self) -> npc_session.DatetimeRecord:
         return npc_session.DatetimeRecord(self.session_start_time.isoformat())
@@ -1530,7 +1535,9 @@ class DynamicRoutingSession:
         conversion = 100 if utils.RUNNING_SPEED_UNITS == "cm/s" else 1.0
         # comments = f'Assumes mouse runs at `radius = {utils.RUNNING_DISK_RADIUS} {utils.RUNNING_SPEED_UNITS.split("/")[0]}` on disk.'
         data, timestamps = utils.get_running_speed_from_stim_files(
-             *self.stim_data.values(), sync=self.sync_data if self.is_sync else None, filt=utils.lowpass_filter,
+            *self.stim_data.values(),
+            sync=self.sync_data if self.is_sync else None,
+            filt=utils.lowpass_filter,
         )
         return pynwb.TimeSeries(
             name=name,
