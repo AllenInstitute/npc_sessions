@@ -38,67 +38,72 @@ def plot_bad_lick_times(
         *trials_with_lick_outside_response_window,
         *trials_with_lick_inside_response_window_but_not_recorded,
     ):
-        start = session._trials.response_window_start_time[idx]
-        stop = session._trials.response_window_stop_time[idx]
-        vsyncs = session._trials._sync.get_falling_edges("vsync_stim", units="seconds")
-        licks = session._trials._sync.get_rising_edges("lick_sensor", units="seconds")
-
-        fig, ax = plt.subplots()
-        padding = 0.3
-        marker_config = {"linestyles": "-", "linelengths": 0.2}
-        line_config = {"linestyles": "-", "linelengths": 1}
-        ax.eventplot(
-            vsyncs[(vsyncs >= start - padding) & (vsyncs <= stop + padding)],
-            **line_config,
-            label="vsyncs",
-            alpha=0.5,
-            color="orange",
-        )
-        ax.eventplot(
-            vsyncs[(vsyncs >= start) & (vsyncs <= stop)],
-            **line_config,
-            label="vsyncs within response window",
-            color="orange",
-        )
-        ax.eventplot(
-            licks[(licks >= start - padding) & (licks <= stop + padding)],
-            **marker_config,
-            label="licks",
-            color="k",
-            lineoffsets=1,
-        )
-        ax.eventplot(
-            [
-                session._trials.get_script_frame_time(
-                    session._trials._sam.trialResponseFrame[idx]
-                )
-            ],
-            **marker_config,
-            label="lick frame in TaskControl",
-            color="lime",
-            lineoffsets=1.6,
-        )
-        ax.eventplot(
-            [
-                session._trials.get_script_frame_time(
-                    session._trials._sam.stimStartFrame[idx]
-                )
-            ],
-            **marker_config,
-            label="stim start frame in TaskControl",
-            color="r",
-            lineoffsets=1.6,
-        )
-
-        ax.legend(fontsize=8, loc="upper center", fancybox=True, ncol=4)
-        ax.set_yticks([])
-        ax.set_xlabel("time (s)")
-        ax.title.set_text(
-            f"sync & script timing - trial {idx} - {session._trials.stim_name[idx]}"
-        )
-        fig.set_size_inches(12, 4)
-        figs.append(fig)
+        figs += plot_trial_lick_timing(session, idx)
     return tuple(figs)
+
+def plot_trial_lick_timing(session: "npc_sessions.DynamicRoutingSession", trial_idx: int) -> plt.Figure:
+    if not session.is_sync or session._trials._sync is None:
+        raise ValueError("session must have sync data")
+    start = session._trials.response_window_start_time[trial_idx]
+    stop = session._trials.response_window_stop_time[trial_idx]
+    vsyncs = session._trials._sync.get_falling_edges("vsync_stim", units="seconds")
+    licks = session._trials._sync.get_rising_edges("lick_sensor", units="seconds")
+
+    fig, ax = plt.subplots()
+    padding = 0.3
+    marker_config = {"linestyles": "-", "linelengths": 0.2}
+    line_config = {"linestyles": "-", "linelengths": 1}
+    ax.eventplot(
+        vsyncs[(vsyncs >= start - padding) & (vsyncs <= stop + padding)],
+        **line_config,
+        label="vsyncs",
+        alpha=0.5,
+        color="orange",
+    )
+    ax.eventplot(
+        vsyncs[(vsyncs >= start) & (vsyncs <= stop)],
+        **line_config,
+        label="vsyncs within response window",
+        color="orange",
+    )
+    ax.eventplot(
+        licks[(licks >= start - padding) & (licks <= stop + padding)],
+        **marker_config,
+        label="licks",
+        color="k",
+        lineoffsets=1,
+    )
+    ax.eventplot(
+        [
+            session._trials.get_script_frame_time(
+                session._trials._sam.trialResponseFrame[trial_idx]
+            )
+        ],
+        **marker_config,
+        label="lick frame in TaskControl",
+        color="lime",
+        lineoffsets=1.6,
+    )
+    ax.eventplot(
+        [
+            session._trials.get_script_frame_time(
+                session._trials._sam.stimStartFrame[trial_idx]
+            )
+        ],
+        **marker_config,
+        label="stim start frame in TaskControl",
+        color="r",
+        lineoffsets=1.6,
+    )
+
+    ax.legend(fontsize=8, loc="upper center", fancybox=True, ncol=4)
+    ax.set_yticks([])
+    ax.set_xlabel("time (s)")
+    ax.title.set_text(
+        f"sync & script timing - trial {trial_idx} - {session._trials.stim_name[trial_idx]}"
+    )
+    fig.set_size_inches(12, 4)
+    return fig
 
 
 def plot_lick_times_on_sync_and_script(
