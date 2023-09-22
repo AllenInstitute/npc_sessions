@@ -418,19 +418,29 @@ class DynamicRouting1(TaskControl):
 
     @functools.cached_property
     def reward_time(self) -> npt.NDArray[np.floating]:
-        """delivery time of contingent reward"""
+        """delivery time of water reward, for contingent and non-contingent rewards"""
         all_reward_times = self.get_script_frame_time(self._sam.rewardFrames)
-        all_reward_trials = (
-            np.searchsorted(
-                self.start_time,
-                all_reward_times,
-                side="right",
-            )
-            - 1
-        )
-        assert np.all(np.where(self.is_rewarded)[0] == all_reward_trials)
+        all_reward_trials = np.searchsorted(
+            self.start_time,
+            all_reward_times,
+            side='right',
+        ) - 1
         reward_time = np.full(self._len, np.nan)
-        reward_time[all_reward_trials] = all_reward_times
+        if np.all(np.where(self.is_rewarded)[0] == all_reward_trials):
+            # expected single reward per trial
+            reward_time[all_reward_trials] = all_reward_times
+        else:
+            # mismatch between reward times and trials that are marked as having rewards
+            for trial_idx in np.where(self.is_rewarded)[0]:
+                reward_times = all_reward_times[
+                    (all_reward_times > self.start_time[trial_idx])
+                    & (all_reward_times < self.stop_time[trial_idx])
+                ]
+                if len(reward_times) != 1:
+                    logger.warning(
+                        f"Multiple reward times found for trial {trial_idx}. Assigning the first: {reward_times} s"
+                    )
+                reward_time[trial_idx] = reward_times[0]
         return reward_time
 
     @functools.cached_property
@@ -470,7 +480,7 @@ class DynamicRouting1(TaskControl):
     @functools.cached_property
     def post_response_window_start_time(self) -> npt.NDArray[np.float64]:
         """start of null interval in which the subject awaits a new trial;
-        may receive a noncontingent reward if scheduled"""
+        may receive a non-contingent reward if scheduled"""
         return self.get_vis_display_time(self._post_response_window_start_frame)
 
     @functools.cached_property
