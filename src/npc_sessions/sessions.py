@@ -10,7 +10,7 @@ import logging
 import re
 import uuid
 from collections.abc import Generator, Iterable
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 import h5py
 import ndx_events
@@ -24,7 +24,6 @@ import polars as pl
 import pynwb
 import upath
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
-import ndx_events
 
 import npc_sessions.config as config
 import npc_sessions.nwb as nwb_internal
@@ -189,7 +188,7 @@ class DynamicRoutingSession:
         Looks in `npc_sessions.plots` for functions starting with `plot_`
         """
         for attr in (attr for attr in plots.__dict__ if attr.startswith("plot_")):
-            if getattr((fn := getattr(plots, attr)), '__call__', None) is not None:
+            if getattr((fn := getattr(plots, attr)), "__call__", None) is not None:
                 setattr(self, attr, functools.partial(fn, self))
 
     @property
@@ -1480,15 +1479,13 @@ class DynamicRoutingSession:
     @functools.cached_property
     def _licks(self) -> ndx_events.Events:
         if self.is_sync:
-            timestamps = self.sync_data.get_rising_edges(
-                "lick_sensor", units="seconds"
-            )
+            timestamps = self.sync_data.get_rising_edges("lick_sensor", units="seconds")
         else:
             timestamps = self.sam.lickTimes
         return ndx_events.Events(
             timestamps=timestamps,
-            name = "lick_spout",
-            description = (
+            name="lick_spout",
+            description=(
                 "times at which the subject interacted with a water spout - "
                 "putatively licks, but may include other events such as grooming"
             ),

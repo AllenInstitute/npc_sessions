@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:94ea5f77aa274b6a8535a9c42db6ce1cada91b701b3ec7ef868851865002becf"
+content_hash = "sha256:7e6ee72996a65837893564fdf25c98fac8ccf75b4bd76d5970c497f4fbf6705f"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -1022,7 +1022,7 @@ files = [
 
 [[package]]
 name = "dynamicroutingtask"
-version = "0.1.13"
+version = "0.1.14"
 requires_python = ">=3.9"
 summary = ""
 dependencies = [
@@ -1033,8 +1033,8 @@ dependencies = [
     "scipy",
 ]
 files = [
-    {file = "DynamicRoutingTask-0.1.13-py3-none-any.whl", hash = "sha256:d2a536254e0cae2244a49da5408851d40121ac86893c994ff40112feeebf7362"},
-    {file = "DynamicRoutingTask-0.1.13.tar.gz", hash = "sha256:ed4effaab7ac51436f1f117d9a5fb87bd744160312a6ead3db58b09cce143b6a"},
+    {file = "DynamicRoutingTask-0.1.14-py3-none-any.whl", hash = "sha256:1e470f4452305ea8200e2ce02e8fb9f9bfc9e80c404a4fcb15a2c2a3b2f56ae2"},
+    {file = "DynamicRoutingTask-0.1.14.tar.gz", hash = "sha256:59f93beb6b83e4c8893dddcb0a3e195fcda626ed1ea9b8c9645250f9adb8b7e6"},
 ]
 
 [[package]]
@@ -1681,7 +1681,7 @@ files = [
 
 [[package]]
 name = "jsonschema"
-version = "4.19.0"
+version = "4.19.1"
 requires_python = ">=3.8"
 summary = "An implementation of JSON Schema validation for Python"
 dependencies = [
@@ -1691,8 +1691,8 @@ dependencies = [
     "rpds-py>=0.7.1",
 ]
 files = [
-    {file = "jsonschema-4.19.0-py3-none-any.whl", hash = "sha256:043dc26a3845ff09d20e4420d6012a9c91c9aa8999fa184e7efcfeccb41e32cb"},
-    {file = "jsonschema-4.19.0.tar.gz", hash = "sha256:6e1e7569ac13be8139b2dd2c21a55d350066ee3f80df06c608b398cdc6f30e8f"},
+    {file = "jsonschema-4.19.1-py3-none-any.whl", hash = "sha256:cd5f1f9ed9444e554b38ba003af06c0a8c2868131e56bfbef0550fb450c0330e"},
+    {file = "jsonschema-4.19.1.tar.gz", hash = "sha256:ec84cc37cfa703ef7cd4928db24f9cb31428a5d0fa77747b8b51a847458e0bbf"},
 ]
 
 [[package]]

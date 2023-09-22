@@ -420,16 +420,19 @@ class DynamicRouting1(TaskControl):
     def reward_time(self) -> npt.NDArray[np.floating]:
         """delivery time of contingent reward"""
         all_reward_times = self.get_script_frame_time(self._sam.rewardFrames)
-        all_reward_trials = np.searchsorted(
-            self.start_time,
-            all_reward_times,
-            side='right',
-        ) - 1
+        all_reward_trials = (
+            np.searchsorted(
+                self.start_time,
+                all_reward_times,
+                side="right",
+            )
+            - 1
+        )
         assert np.all(np.where(self.is_rewarded)[0] == all_reward_trials)
         reward_time = np.full(self._len, np.nan)
         reward_time[all_reward_trials] = all_reward_times
         return reward_time
-    
+
     @functools.cached_property
     def _timeout_start_frame(self) -> npt.NDArray[np.float64]:
         starts = np.nan * np.ones_like(self.start_time)
