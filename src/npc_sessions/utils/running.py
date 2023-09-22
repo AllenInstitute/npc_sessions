@@ -62,8 +62,8 @@ def get_running_speed_from_stim_files(
 
     if sync is None:
         _append(
-            get_running_speed_from_hdf5(stim_path_or_dataset),
-            get_frame_times_from_stim_file(stim_path_or_dataset),
+            get_running_speed_from_hdf5(*stim_path_or_dataset),
+            get_frame_times_from_stim_file(*stim_path_or_dataset),
         )
     else:
         # we need timestamps for each frame (wheel encoder is read before every
@@ -115,7 +115,8 @@ def get_running_speed_from_hdf5(
         and isinstance(d["rotaryEncoder"][()], bytes)
         and d["rotaryEncoder"].asstr()[()] == "digital"
     ):
-        assert d["frameRate"][()] == FRAMERATE
+        if 'frameRate' in d:
+            assert d["frameRate"][()] == FRAMERATE
         wheel_revolutions = (
             d["rotaryEncoderCount"][:] / d["rotaryEncoderCountsPerRev"][()]
         )

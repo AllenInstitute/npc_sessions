@@ -404,7 +404,7 @@ class DynamicRoutingSession:
         """The version passed to NWBFile.__init__"""
         # TODO add LFP
         modules = []
-        modules.append(self._running.as_nwb())
+        modules.append(self._running)
         return tuple(modules)
 
     @functools.cached_property
@@ -1492,9 +1492,25 @@ class DynamicRoutingSession:
         )
 
     @functools.cached_property
-    def _running(self) -> nwb_internal.SupportsAsNWB:
-        return nwb_internal.RunningSpeed(
-            *self.stim_data.values(), sync=self.sync_data if self.is_sync else None
+    def _running(self) -> pynwb.TimeSeries:
+        name = "running"
+        description = (
+            "linear forward running speed on a rotating disk, low-pass filtered "
+            f"at {utils.RUNNING_LOWPASS_FILTER_HZ} Hz with a 3rd order Butterworth filter"
+        )
+        unit = "m/s"
+        conversion = 100 if utils.RUNNING_SPEED_UNITS == "cm/s" else 1.0
+        # comments = f'Assumes mouse runs at `radius = {utils.RUNNING_DISK_RADIUS} {utils.RUNNING_SPEED_UNITS.split("/")[0]}` on disk.'
+        data, timestamps = utils.get_running_speed_from_stim_files(
+             *self.stim_data.values(), sync=self.sync_data if self.is_sync else None, filt=utils.lowpass_filter,
+        )
+        return pynwb.TimeSeries(
+            name=name,
+            description=description,
+            data=data,
+            timestamps=timestamps,
+            unit=unit,
+            conversion=conversion,
         )
 
     @functools.cached_property
