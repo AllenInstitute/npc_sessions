@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
     import pandas as pd
-
+    import pynwb.NWBFile
     import npc_sessions
 
 
@@ -84,3 +86,17 @@ def plot_unit_spikes_channels(
         )
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Spike Count per 1 second bin")
+    
+def plot_drift_maps(
+    session: "npc_sessions.DynamicRoutingSession" | pynwb.NWBFile,
+) -> tuple[plt.Figure, ...]:
+    figs = []
+    for k,v in session.analysis['drift_maps']:
+        fig, ax = plt.subplots()
+        ax.imshow(v)
+        ax.set_title(f"{session.session_id}")
+        ax.axis('off')
+        fig.set_size_inches([8, 8])
+        fig.tight_layout()
+        figs.append(fig)
+    return tuple(figs)
