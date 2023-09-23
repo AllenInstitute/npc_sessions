@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     import pynwb
 
     import npc_sessions
-    
+
 import npc_sessions.utils as utils
 
 
