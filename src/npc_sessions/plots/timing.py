@@ -42,7 +42,7 @@ def plot_bad_lick_times(
         figs += plot_trial_lick_timing(session, idx)
     return tuple(figs)
 
-def plot_assorted_lick_times(session: "npc_sessions.DynamicRoutingSession") -> tuple[plt.Figure, plt.Figure, plt.Figure]:
+def plot_assorted_lick_times(session: "npc_sessions.DynamicRoutingSession") -> tuple[plt.Figure, ...]:
     sync_time = session._trials.response_time
     script_time = session._trials.get_script_frame_time(
         session._trials._sam.trialResponseFrame
@@ -265,7 +265,7 @@ def plot_long_vsyncs_distribution_across_trial(session: "npc_sessions.DynamicRou
 
     interval_threshold = 0.017 # s
 
-    all_long_intervals = []
+    all_long_intervals: list[float] = []
     fig, axes = plt.subplots(1, 2, sharey=True, sharex=True, figsize=(12, 4))
     for cidx, condition in enumerate(('is_vis_stim', 'is_aud_stim')):
         plt.sca(axes[cidx])
