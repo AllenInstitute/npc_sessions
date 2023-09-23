@@ -89,7 +89,7 @@ def plot_trial_lick_timing(session: "npc_sessions.DynamicRoutingSession", trial_
         [
             (
                 lick_frames := session._trials.get_script_frame_time(
-                    session._trials._sam.lickFrames[trial_idx]
+                    session._trials._sam.lickFrames
                 )
             )[(lick_frames >= start) & (lick_frames <= stop)]
         ],
