@@ -244,3 +244,35 @@ def plot_reward_times(session):
     ax.vlines(0, 0, ax.get_ylim()[1], color="k", linestyle="dotted")
 
     return fig
+
+def plot_long_vsyncs_distribution_across_trial(session: "npc_sessions.DynamicRoutingSession") -> plt.Figure:
+
+    all_vsyncs = np.hstack(session.sync_data.vsync_times_in_blocks)
+
+    interval_threshold = 0.017 # s
+
+    all_long_intervals = []
+    fig, axes = plt.subplots(1, 2, sharey=True, sharex=True, figsize=(12, 4))
+    for cidx, condition in enumerate(('is_vis_stim', 'is_aud_stim')):
+        plt.sca(axes[cidx])
+        for idx, trial in session.trials[:].query(condition).iterrows():
+            vsyncs = all_vsyncs[(all_vsyncs >= trial.start_time) & (all_vsyncs <= trial.stop_time)] - trial.start_time
+            intervals = np.diff(vsyncs)
+            long_vsyncs = vsyncs[:-1][intervals > interval_threshold]
+            long_intervals = intervals[intervals > interval_threshold]
+            plt.scatter(long_vsyncs, np.ones_like(long_vsyncs) * idx, c=long_intervals, marker='.', facecolor='none', cmap='magma_r', s=4, alpha=1)
+            all_long_intervals.extend(long_intervals)    
+        
+        plt.gca().set_title(condition.split('_')[1])
+        top_ax = plt.gca().secondary_xaxis('top')
+        top_ax.set_xticks([trial['stim_start_time'] - trial.start_time])
+        top_ax.set_xticklabels([f'stim_start_time {" (incl device latency)" if session.is_ephys else ""}'])
+        c = plt.colorbar()
+        c.set_ticks([interval_threshold, *(unique_intervals := np.unique(np.round(all_long_intervals, 2)))])
+        plt.clim([interval_threshold, max(unique_intervals)])
+        plt.xlabel("time from trial start (s)")
+        if cidx == 0:
+            plt.ylabel("trial index")
+            
+    plt.suptitle(f'{session.id} - vsync intervals > {interval_threshold:.3f} s', fontsize=8);
+    return fig
