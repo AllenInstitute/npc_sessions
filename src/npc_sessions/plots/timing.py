@@ -80,10 +80,25 @@ def plot_trial_lick_timing(session: "npc_sessions.DynamicRoutingSession", trial_
             )
         ],
         **marker_config,
-        label="lick frame in TaskControl",
+        label="responseFrame in TaskControl",
         color="lime",
         lineoffsets=1.6,
     )
+    
+    ax.eventplot(
+        [
+            (
+                lick_frames := session._trials.get_script_frame_time(
+                    session._trials._sam.lickFrames[trial_idx]
+                )
+            )[(lick_frames >= start) & (lick_frames <= stop)]
+        ],
+        **(marker_config | {'linestyles': ':'}),
+        label="lickFrames in TaskControl",
+        color="g",
+        lineoffsets=1.6,    
+    )
+    
     ax.eventplot(
         [
             session._trials.get_script_frame_time(
@@ -156,7 +171,7 @@ def plot_diode_flip_intervals(
 
 def plot_vsyncs_and_diode_flips_at_ends_of_each_stim(
     session: "npc_sessions.DynamicRoutingSession",
-):
+) -> plt.Figure:
     rich.print("[bold] Fraction long frames [/bold]")
     for stim_name, stim_times in session.stim_frame_times.items():
         if isinstance(stim_times, Exception):
@@ -197,7 +212,8 @@ def plot_vsyncs_and_diode_flips_at_ends_of_each_stim(
             ax.set_title(names[idx].split("_")[0])
     fig.set_size_inches(10, 5 * len(axes))
     fig.subplots_adjust(hspace=0.3)
-
+    
+    return fig
 
 def plot_histogram_of_vsync_intervals(session):
     stim_frame_times = {
