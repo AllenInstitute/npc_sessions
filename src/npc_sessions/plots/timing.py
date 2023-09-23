@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+import random
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,6 +40,19 @@ def plot_bad_lick_times(
         *trials_with_lick_inside_response_window_but_not_recorded,
     ):
         figs += plot_trial_lick_timing(session, idx)
+    return tuple(figs)
+
+def plot_assorted_lick_times(session: "npc_sessions.DynamicRoutingSession") -> tuple[plt.Figure, plt.Figure, plt.Figure]:
+    sync_time = session._trials.response_time
+    script_time = session._trials.get_script_frame_time(
+        session._trials._sam.trialResponseFrame
+    )
+    intervals = np.abs(sync_time - script_time)
+    figs = []
+    for idx, trial_idx in enumerate([np.nanargmax(intervals), np.nanargmin(intervals), random.choice(session.trials[:].query('is_response').index)]):
+        fig = session.plot_trial_lick_timing(trial_idx)
+        fig.axes[0].set_title(session.id + fig.axes[0].get_title() + " - "+ ["longest", "shortest", "random"][idx] + " lick-lickFrame interval")
+        figs.append(fig)
     return tuple(figs)
 
 def plot_trial_lick_timing(session: "npc_sessions.DynamicRoutingSession", trial_idx: int) -> plt.Figure:
