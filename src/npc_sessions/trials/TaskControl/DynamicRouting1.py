@@ -382,22 +382,22 @@ class DynamicRouting1(TaskControl):
     def response_window_stop_time(self) -> npt.NDArray[np.float64]:
         """end of interval in which the subject should lick if a GO trial,
         otherwise should not lick"""
-        return self.get_script_frame_time(self._response_window_stop_frame)
+        return self.get_flip_time(self._response_window_stop_frame)
 
     @functools.cached_property
     def response_time(self) -> npt.NDArray[np.float64]:
         """time of first lick within the response window
 
         - nan if no lick occurred"""
-        script_response_times = self.get_script_frame_time(self._sam.trialResponseFrame)
         if not self._sync:
-            return script_response_times
+            return self.get_nidaq_read_time(self._sam.trialResponseFrame)
+        response_frame_flip = self.get_flip_time(self._sam.trialResponseFrame)
         sync_times = self._sync.get_rising_edges("lick_sensor", units="seconds")
-        previous_licks = (
+        preceding_lick_sync_time_idx = (
             np.searchsorted(
                 sync_times,
-                script_response_times,
-                side="left",
+                response_frame_flip,
+                side="right",
             )
             - 1
         )
@@ -407,11 +407,11 @@ class DynamicRouting1(TaskControl):
                 continue
             start = self.response_window_start_time[idx]
             stop = self.response_window_stop_time[idx]
-            lick = sync_times[previous_licks[idx]]
+            lick = sync_times[preceding_lick_sync_time_idx[idx]]
             if not (start <= lick <= stop):
                 logger.warning(
                     f"Lick time found for trial {idx} is outside of response window: [{start=}s : {stop=}s], lick on sync={lick=}s. "
-                    f"Response frame reported from Sam's object corresponds to vsync time: {script_response_times[idx]}s."
+                    f"Response frame reported from Sam's object corresponds to: {response_frame_flip[idx - 1]}s."
                 )
             times[idx] = lick
         return times
