@@ -113,8 +113,9 @@ def plot_camera_frame_grabs_simple(
 
 def plot_video_frames_with_licks(
     session: npc_sessions.DynamicRoutingSession,
+    trial_idx: int | None = None,
 ):
-    NUM_LICKS = 3
+    NUM_LICKS = 3 if trial_idx is None else 1
     NUM_CAMERAS = 2  # 1 x face, 1 x body
 
     FRAMES_EITHER_SIDE_OF_LICK = 2
@@ -126,6 +127,8 @@ def plot_video_frames_with_licks(
 
     response_times: npt.NDArray = (
         session.trials[:].query("is_response").response_time.to_numpy()
+    ) if trial_idx is None else (
+        session.trials[trial_idx].response_time.to_numpy()
     )
     lick_times = sorted(
         random.sample(tuple(response_times[~np.isnan(response_times)]), NUM_LICKS)
