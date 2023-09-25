@@ -408,7 +408,15 @@ class DynamicRouting1(TaskControl):
             start = self.response_window_start_time[idx]
             stop = self.response_window_stop_time[idx]
             lick = sync_times[preceding_lick_sync_time_idx[idx]]
-            if not (start <= lick <= stop):
+            if (lick_time := lick - self.stim_start_time[idx]) < (min_resp_time := self._hdf5["responseWindow"][()][0] / self._sam.frameRate):
+                logger.error(
+                    f"Lick time found for trial {idx} violates minimum response time: {lick_time=}s, {min_resp_time=}s. "
+                )
+            elif lick_time > (max_resp_time := self._hdf5["responseWindow"][()][1] / self._sam.frameRate):
+                logger.error(
+                    f"Lick time found for trial {idx} violates maximum response time: {lick_time=}s, {max_resp_time=}s. "
+                )
+            elif not (start <= lick <= stop):
                 logger.warning(
                     f"Lick time found for trial {idx} is outside of response window: [{start=}s : {stop=}s], lick on sync={lick=}s. "
                     f"Response frame reported from Sam's object corresponds to: {response_frame_flip[idx - 1]}s."
