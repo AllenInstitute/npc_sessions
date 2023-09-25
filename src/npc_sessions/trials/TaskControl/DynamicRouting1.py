@@ -174,7 +174,7 @@ class DynamicRouting1(TaskControl):
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
             logger.debug("Using script frame times for opto stim onsets")
-            return self.get_script_frame_time(self._sam.stimStartFrame[trial])
+            return self.get_flip_time(self._sam.stimStartFrame[trial])
         return utils.safe_index(self._aud_stim_onset_times, trial)
 
     def get_trial_aud_offset(
@@ -206,7 +206,7 @@ class DynamicRouting1(TaskControl):
         if (onset_frames := self._sam.trialOptoOnsetFrame).ndim == 2:
             onset_frames = onset_frames.squeeze()
         # note: this is different to OptoTagging, where onset frame is abs frame idx
-        return self.get_script_frame_time(
+        return self.get_flip_time(
             self._sam.stimStartFrame + onset_frames[trial]
         )
 
@@ -301,14 +301,14 @@ class DynamicRouting1(TaskControl):
         - extensions due to quiescent violations are discarded: only the final
           `preStimFramesFixed` before a stim are included
         """
-        return self.get_vis_display_time(
+        return self.get_nidaq_read_time(
             self._sam.stimStartFrame - self._hdf5["preStimFramesFixed"][()]
         )
 
     @functools.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         """latest time in each trial, after all events have occurred"""
-        return self.get_vis_display_time(self._sam.trialEndFrame)
+        return self.get_flip_time(self._sam.trialEndFrame)
 
     @functools.cached_property
     def quiescent_start_time(self) -> npt.NDArray[np.float64]:
@@ -317,7 +317,7 @@ class DynamicRouting1(TaskControl):
 
         - only the last quiescent interval (which was not violated) is included
         """
-        return self.get_vis_display_time(
+        return self.get_nidaq_read_time(
             self._sam.stimStartFrame - self._hdf5["quiescentFrames"][()]
         )
 
@@ -370,7 +370,7 @@ class DynamicRouting1(TaskControl):
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
         """start of interval in which the subject should lick if a GO trial,
         otherwise should not lick"""
-        return self.get_script_frame_time(
+        return self.get_nidaq_read_time(
             self._sam.stimStartFrame + self._hdf5["responseWindow"][()][0]
         )
 
@@ -419,7 +419,7 @@ class DynamicRouting1(TaskControl):
     @functools.cached_property
     def reward_time(self) -> npt.NDArray[np.floating]:
         """delivery time of water reward, for contingent and non-contingent rewards"""
-        all_reward_times = self.get_script_frame_time(self._sam.rewardFrames)
+        all_reward_times = self.get_flip_time(self._sam.rewardFrames)
         all_reward_trials = (
             np.searchsorted(
                 self.start_time,
@@ -451,7 +451,7 @@ class DynamicRouting1(TaskControl):
         starts = np.nan * np.ones_like(self.start_time)
         for idx in range(0, self._len - 1):
             if self.is_repeat[idx + 1]:
-                starts[idx] = self.get_vis_display_time(
+                starts[idx] = (
                     self._sam.stimStartFrame[idx]
                     + self._hdf5["responseWindow"][()][1]
                     + 1
@@ -461,7 +461,7 @@ class DynamicRouting1(TaskControl):
     @functools.cached_property
     def timeout_start_time(self) -> npt.NDArray[np.float64]:
         """start of extended inter-trial interval added due to a false alarm"""
-        return self.get_vis_display_time(self._timeout_start_frame)
+        return self.get_nidaq_read_time(self._timeout_start_frame)
 
     @functools.cached_property
     def _timeout_stop_frame(self) -> npt.NDArray[np.float64]:

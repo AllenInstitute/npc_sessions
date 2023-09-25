@@ -39,7 +39,7 @@ def plot_bad_lick_times(
         *trials_with_lick_outside_response_window,
         *trials_with_lick_inside_response_window_but_not_recorded,
     ):
-        figs += plot_trial_lick_timing(session, idx)
+        figs.append(plot_trial_lick_timing(session, idx))
     return tuple(figs)
 
 
@@ -47,7 +47,7 @@ def plot_assorted_lick_times(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> tuple[plt.Figure, ...]:
     sync_time = session._trials.response_time
-    script_time = session._trials.get_script_frame_time(
+    script_time = session._trials.get_flip_time(
         session._trials._sam.trialResponseFrame
     )
     intervals = np.abs(sync_time - script_time)
@@ -107,7 +107,7 @@ def plot_trial_lick_timing(
     )
     ax.eventplot(
         [
-            session._trials.get_script_frame_time(
+            session._trials.get_nidaq_read_time(
                 session._trials._sam.trialResponseFrame[trial_idx]
             )
         ],
@@ -120,7 +120,7 @@ def plot_trial_lick_timing(
     ax.eventplot(
         [
             (
-                lick_frames := session._trials.get_script_frame_time(
+                lick_frames := session._trials.get_nidaq_read_time(
                     session._trials._sam.lickFrames
                 )
             )[(lick_frames >= start) & (lick_frames <= stop)]
@@ -133,7 +133,7 @@ def plot_trial_lick_timing(
 
     ax.eventplot(
         [
-            session._trials.get_script_frame_time(
+            session._trials.get_flip_time(
                 session._trials._sam.stimStartFrame[trial_idx]
             )
         ],
@@ -160,7 +160,7 @@ def plot_lick_times_on_sync_and_script(
     - histogram showing distribution of same intervals
     """
     sync_time = session._trials.response_time
-    script_time = session._trials.get_script_frame_time(
+    script_time = session._trials.get_flip_time(
         session._trials._sam.trialResponseFrame
     )
 

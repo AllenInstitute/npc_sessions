@@ -94,7 +94,7 @@ class RFMapping(TaskControl):
                 ]
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
-            return self.get_script_frame_time(self._hdf5["stimStartFrame"][trial])
+            return self.get_flip_time(self._hdf5["stimStartFrame"][trial])
         return utils.safe_index(self._aud_stim_onset_times, trial)
 
     def get_trial_aud_offset(
@@ -157,7 +157,7 @@ class RFMapping(TaskControl):
     @functools.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         """Falling edge of first vsync in each trial"""
-        return self.get_script_frame_time(self._hdf5["stimStartFrame"][self._idx])
+        return self.get_flip_time(self._hdf5["stimStartFrame"][self._idx])
 
     @functools.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
