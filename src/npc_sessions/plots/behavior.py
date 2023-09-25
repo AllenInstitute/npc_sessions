@@ -118,12 +118,21 @@ def plot_lick_raster(session: "npc_sessions.DynamicRoutingSession") -> plt.Figur
 
 def plot_running(session: "npc_sessions.DynamicRoutingSession") -> plt.Figure:
     timeseries = session.processing["running"]
-    fig, ax = plt.subplots(1, 1)
-    plt.plot(timeseries.timestamps, timeseries.data)
-    ax.set_ylim(-0.2, 1)
-    ax.set_xlabel("time (s)")
-    ax.set_ylabel(timeseries.unit)
-    ax.set_title(timeseries.description, fontsize=8)
+    epochs: pd.DataFrame = session.epochs[:]
+    fig, _ = plt.subplots(1, len(epochs), sharey=True, width_ratios=[t_1 - t_0 for t_0, t_1 in epochs[["start_time", "stop_time"]].values])
+    for idx, epoch in epochs.iterrows():
+        ax = fig.axes[idx]
+        window_idx = (timeseries.timestamps >= epoch['start_time']) & (timeseries.timestamps <= epoch['stop_time'])
+        if len(window_idx) > 0:
+            ax.plot(timeseries.timestamps[window_idx], timeseries.data[window_idx])        
+            ax.set_title('\n'.join(epoch.tags), fontsize=8)
+            ax.set_xlabel("time (s)")
+        else:
+            ax.xaxis.set_visible(False)
+        if idx == 0:
+            ax.set_ylim(-0.2, 1)
+            ax.set_ylabel(timeseries.unit)
+        
     fig.suptitle(session.id, fontsize=10)
     fig.set_size_inches(12, 3)
     return fig
