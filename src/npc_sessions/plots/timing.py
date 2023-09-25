@@ -7,7 +7,7 @@ import rich
 
 if TYPE_CHECKING:
     import npc_sessions
-
+import npc_sessions.utils as utils
 
 def plot_bad_lick_times(
     session: "npc_sessions.DynamicRoutingSession",
@@ -47,7 +47,8 @@ def plot_assorted_lick_times(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> tuple[plt.Figure, ...]:
     sync_time = session._trials.response_time
-    script_time = session._trials._flip_times(
+    script_time = utils.safe_index(
+        session._trials._flip_times,
         session._trials._sam.trialResponseFrame
     )
     intervals = np.abs(sync_time - script_time)
@@ -61,8 +62,7 @@ def plot_assorted_lick_times(
     ):
         fig = session.plot_trial_lick_timing(trial_idx)
         fig.axes[0].set_title(
-            session.id
-            + fig.axes[0].get_title()
+            fig.axes[0].get_title()
             + " - "
             + ["longest", "shortest", "random"][idx]
             + " lick-lickFrame interval"
@@ -79,8 +79,9 @@ def plot_trial_lick_timing(
     start = session._trials.response_window_start_time[trial_idx]
     stop = session._trials.response_window_stop_time[trial_idx]
     vsyncs = session._trials._sync.get_falling_edges("vsync_stim", units="seconds")
-    licks = session._trials._sync.get_rising_edges("lick_sensor", units="seconds")
-
+    lick_sensor_rising = session._trials._sync.get_rising_edges("lick_sensor", units="seconds")
+    lick_sensor_falling = session._trials._sync.get_falling_edges("lick_sensor", units="seconds")
+    
     fig, ax = plt.subplots()
     padding = 0.3
     marker_config = {"linestyles": "-", "linelengths": 0.2}
@@ -99,17 +100,25 @@ def plot_trial_lick_timing(
         color="orange",
     )
     ax.eventplot(
-        licks[(licks >= start - padding) & (licks <= stop + padding)],
+        lick_sensor_rising[(lick_sensor_rising >= start - padding) & (lick_sensor_rising <= stop + padding)],
         **marker_config,
-        label="licks",
+        label="lick sensor rising",
         color="k",
         lineoffsets=1,
     )
     ax.eventplot(
+        lick_sensor_falling[(lick_sensor_falling >= start - padding) & (lick_sensor_falling <= stop + padding)],
+        **marker_config,
+        label="lick sensor falling",
+        color="grey",
+        lineoffsets=1,
+    )
+    ax.eventplot(
         [
-            session._trials._input_data_times[
+            utils.safe_index(
+                session._trials._input_data_times,
                 session._trials._sam.trialResponseFrame[trial_idx]
-            ]
+            )
         ],
         **marker_config,
         label="responseFrame in TaskControl",
@@ -120,9 +129,10 @@ def plot_trial_lick_timing(
     ax.eventplot(
         [
             (
-                lick_frames := session._trials._input_data_times[
+                lick_frames := utils.safe_index(
+                    session._trials._input_data_times,
                     session._trials._sam.lickFrames
-                ]
+                )
             )[(lick_frames >= start) & (lick_frames <= stop)]
         ],
         **(marker_config | {"linestyles": ":"}),
@@ -133,9 +143,10 @@ def plot_trial_lick_timing(
 
     ax.eventplot(
         [
-            session._trials._flip_times[
+            utils.safe_index(
+                session._trials._flip_times,
                 session._trials._sam.stimStartFrame[trial_idx]
-            ]
+            )
         ],
         **marker_config,
         label="stim start frame in TaskControl",
@@ -147,7 +158,7 @@ def plot_trial_lick_timing(
     ax.set_yticks([])
     ax.set_xlabel("time (s)")
     ax.title.set_text(
-        f"sync & script timing - trial {trial_idx} - {session._trials.stim_name[trial_idx]}"
+        f"{session.id} - sync & script timing - trial {trial_idx} - {session._trials.stim_name[trial_idx]}"
     )
     fig.set_size_inches(12, 4)
     return fig
@@ -160,9 +171,10 @@ def plot_lick_times_on_sync_and_script(
     - histogram showing distribution of same intervals
     """
     sync_time = session._trials.response_time
-    script_time = session._trials._flip_times[
+    script_time = utils.safe_index(
+        session._trials._flip_times,
         session._trials._sam.trialResponseFrame
-    ]
+    )
 
     intervals = sync_time - script_time
     fig1, ax = plt.subplots()

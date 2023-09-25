@@ -94,7 +94,7 @@ class RFMapping(TaskControl):
                 ]
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
-            return self._flip_times[self._hdf5["stimStartFrame"][trial]]
+            return utils.safe_index(self._flip_times, self._hdf5["stimStartFrame"][trial])
         return utils.safe_index(self._aud_stim_onset_times, trial)
 
     def get_trial_aud_offset(
@@ -156,15 +156,15 @@ class RFMapping(TaskControl):
 
     @functools.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
-        """Falling edge of first vsync in each trial"""
-        return self._flip_times[self._hdf5["stimStartFrame"][self._idx]]
+        """falling edge of first vsync in each trial"""
+        return utils.safe_index(self._flip_times, self._hdf5["stimStartFrame"][self._idx])
 
     @functools.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
-        """Onset of RF mapping stimulus"""
+        """onset of RF mapping stimulus"""
         return np.where(
             self._is_vis_stim,
-            self._vis_display_times[self._hdf5["stimStartFrame"][self._idx]],
+            utils.safe_index(self._vis_display_times, self._hdf5["stimStartFrame"][self._idx]),
             self.get_trial_aud_onset(self._idx),
         )
 
@@ -174,20 +174,27 @@ class RFMapping(TaskControl):
         frames_per_stim = self._hdf5["stimFrames"][()]
         return np.where(
             self._is_vis_stim,
-            self._vis_display_times[
+            utils.safe_index(self._vis_display_times,
                 self._hdf5["stimStartFrame"][self._idx] + frames_per_stim
-            ],
+            ),
             self.get_trial_aud_offset(self._idx),
         )
 
     @functools.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
-        """Falling edge of last vsync, after inter-stim frames"""
-        return self._vis_display_times[
-            self._hdf5["stimStartFrame"][self._idx]
-            + self._hdf5["stimFrames"][()]
-            + self._hdf5["interStimFrames"][()]
-        ]
+        """falling edge of vsync after stimulus end + inter-stim frames"""
+        return np.max(
+            [
+                utils.safe_index(
+                    self._flip_times,
+                    self._hdf5["stimStartFrame"][self._idx]
+                    + self._hdf5["stimFrames"][()]
+                    + self._hdf5["interStimFrames"][()]
+                ),
+                self.stim_stop_time + self._hdf5["interStimFrames"][()],
+            ],
+            axis=1,
+        )
 
     @functools.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
