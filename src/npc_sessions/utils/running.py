@@ -1,6 +1,3 @@
-"""
-Use `np_session.Session` to initialize & add metadata to a `pynwb.NWBFile`.
-"""
 from __future__ import annotations
 
 import logging
@@ -66,23 +63,16 @@ def get_running_speed_from_stim_files(
             get_frame_times_from_stim_file(*stim_path_or_dataset),
         )
     else:
-        # we need timestamps for each frame (wheel encoder is read before every
-        # vsync falling edge)
+        # we need timestamps for each frame's nidaq-read time (wheel encoder is read before frame's
+        # flip time)
         # there may be multiple h5 files with encoder
         # data per sync file: vsyncs are in blocks with a separating gap
-        hdf5_to_vsync_times = utils.get_stim_frame_times(
-            *(utils.get_stim_data(hdf5) for hdf5 in stim_path_or_dataset),
-            sync=sync,
-            frame_time_type="vsync",
-        )
-
-        for hdf5, vsync_times in hdf5_to_vsync_times.items():
-            if vsync_times is None:
-                continue
+        for hdf5 in stim_path_or_dataset:
+            read_times = utils.get_input_data_times(hdf5, sync)
             h5_data = get_running_speed_from_hdf5(hdf5)
             if h5_data is None:
                 continue
-            _append(h5_data, vsync_times)
+            _append(h5_data, read_times)
 
     assert len(running_speed) == len(timestamps)
     return running_speed, timestamps

@@ -37,6 +37,7 @@ by just adding trials to an existing nwb table, via `nwb_file.add_trial(**trial)
 """
 from __future__ import annotations
 
+import functools
 from collections.abc import Iterable
 from typing import Optional, SupportsFloat
 
@@ -67,61 +68,30 @@ class TaskControl(property_dict.PropertyDict):
             # - all times in nwb are relative to start of first frame in hdf5
             # - there can only be one hdf5 file
             self._sync = None
-            # frame starts with getNidaqData
-            self._nidaq_read_times = np.concatenate(
-                ([0], np.cumsum(self._hdf5["frameIntervals"][:]))
-            )
-            # frame ends just after flip is called
-            self._flip_times = np.concatenate(
-                ([np.nan], self._nidaq_read_times[:-1])
-            )
-            self._monitor_update_times = self._flip_times
         else:
             # - all times in nwb are relative to start of first sample on sync
             # - there can be multiple hdf5 files, all recorded on sync
             self._sync = utils.get_sync_data(sync)
-            
-            # vsync time of preceding frame
-            # (nidaq is read immediately after that flip)
-            self._nidaq_read_times = np.concatenate(
-                [
-                    [np.nan], 
-                    utils.assert_stim_times(
-                        utils.get_stim_frame_times(
-                            self._hdf5, sync=self._sync, frame_time_type="vsync"
-                            )[self._hdf5]
-                        )[:-1],
-                ]
-            )
-            # vsync time immediately following flip
-            self._flip_times = utils.assert_stim_times(
-                utils.get_stim_frame_times(
-                    self._hdf5, sync=self._sync, frame_time_type="vsync"
-                )[self._hdf5],
-            )
-            # photodiode estimate of monitor update after vsync
-            self._monitor_update_times = utils.assert_stim_times(
-                utils.get_stim_frame_times(
-                    self._hdf5, sync=self._sync, frame_time_type="display_time"
-                )[self._hdf5],
-            )
-
-    def get_nidaq_read_time(
-        self, frame_idx: SupportsFloat | Iterable[SupportsFloat]
+    
+    @functools.cached_property
+    def _input_data_times(
+        self
     ) -> npt.NDArray[np.float64]:
-        """Best-estimate time of `getNidaqData()` in psychopy event loop, in seconds, from start
+        """Best-estimate time of `getInputData()` in psychopy event loop, in seconds, from start
         of experiment. Uses preceding frame's vsync time if available."""
-        return utils.safe_index(self._nidaq_read_times, frame_idx)
+        return utils.get_input_data_times(self._hdf5, self._sync)
 
-    def get_flip_time(
-        self, frame_idx: SupportsFloat | Iterable[SupportsFloat]
+    @functools.cached_property
+    def _flip_times(
+        self
     ) -> npt.NDArray[np.float64]:
         """Best-estimate time of `flip()` in psychopy event loop, in seconds, from start
         of experiment. Uses frame's vsync time if available."""
-        return utils.safe_index(self._flip_times, frame_idx)
-
-    def get_vis_display_time(
-        self, frame_idx: SupportsFloat | Iterable[SupportsFloat]
+        return utils.get_flip_times(self._hdf5, self._sync)
+    
+    @functools.cached_property
+    def _vis_display_times(
+        self
     ) -> npt.NDArray[np.float64]:
         """Best-estimate time of monitor update. Without sync, this equals frame times."""
-        return utils.safe_index(self._monitor_update_times, frame_idx)
+        return utils.get_vis_display_times(self._hdf5, self._sync)

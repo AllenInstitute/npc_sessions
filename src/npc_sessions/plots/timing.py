@@ -47,7 +47,7 @@ def plot_assorted_lick_times(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> tuple[plt.Figure, ...]:
     sync_time = session._trials.response_time
-    script_time = session._trials.get_flip_time(
+    script_time = session._trials._flip_times(
         session._trials._sam.trialResponseFrame
     )
     intervals = np.abs(sync_time - script_time)
@@ -107,9 +107,9 @@ def plot_trial_lick_timing(
     )
     ax.eventplot(
         [
-            session._trials.get_nidaq_read_time(
+            session._trials._input_data_times[
                 session._trials._sam.trialResponseFrame[trial_idx]
-            )
+            ]
         ],
         **marker_config,
         label="responseFrame in TaskControl",
@@ -120,9 +120,9 @@ def plot_trial_lick_timing(
     ax.eventplot(
         [
             (
-                lick_frames := session._trials.get_nidaq_read_time(
+                lick_frames := session._trials._input_data_times[
                     session._trials._sam.lickFrames
-                )
+                ]
             )[(lick_frames >= start) & (lick_frames <= stop)]
         ],
         **(marker_config | {"linestyles": ":"}),
@@ -133,9 +133,9 @@ def plot_trial_lick_timing(
 
     ax.eventplot(
         [
-            session._trials.get_flip_time(
+            session._trials._flip_times[
                 session._trials._sam.stimStartFrame[trial_idx]
-            )
+            ]
         ],
         **marker_config,
         label="stim start frame in TaskControl",
@@ -160,9 +160,9 @@ def plot_lick_times_on_sync_and_script(
     - histogram showing distribution of same intervals
     """
     sync_time = session._trials.response_time
-    script_time = session._trials.get_flip_time(
+    script_time = session._trials._flip_times[
         session._trials._sam.trialResponseFrame
-    )
+    ]
 
     intervals = sync_time - script_time
     fig1, ax = plt.subplots()
