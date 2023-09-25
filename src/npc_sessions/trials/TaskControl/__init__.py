@@ -84,14 +84,14 @@ class TaskControl(property_dict.PropertyDict):
             # vsync time of preceding frame
             # (nidaq is read immediately after that flip)
             self._nidaq_read_times = np.concatenate(
-                (
+                [
                     [np.nan], 
                     utils.assert_stim_times(
                         utils.get_stim_frame_times(
                             self._hdf5, sync=self._sync, frame_time_type="vsync"
-                        )[self._hdf5],
-                    )[:-1],
-                )
+                            )[self._hdf5]
+                        )[:-1],
+                ]
             )
             # vsync time immediately following flip
             self._flip_times = utils.assert_stim_times(
