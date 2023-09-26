@@ -1575,15 +1575,15 @@ class DynamicRoutingSession:
             return r
 
         reward_times: list[npt.NDArray[np.floating]] = []
-        if self.is_sync:
-            for stim_file, frame_times in self.stim_frame_times.items():
-                if any(name in stim_file.lower() for name in ("mapping", "tagging")):
-                    continue
-                reward_times.extend(
-                    frame_times[get_reward_frames(self.stim_data[stim_file])]
+        for stim_file, stim_data in self.stim_data.items():
+            if any(name in stim_file.lower() for name in ("mapping", "tagging")):
+                continue
+            reward_times.extend(
+                utils.safe_index(
+                    utils.get_flip_times(stim_data, sync=self.sync_data if self.is_sync else None),
+                    get_reward_frames(stim_data)
                 )
-        else:
-            reward_times.extend(self.stim_data[self.task_path.stem])
+            )
         return ndx_events.Events(
             timestamps=np.sort(np.unique(reward_times)),
             name="rewards",
