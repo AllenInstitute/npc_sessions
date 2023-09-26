@@ -52,8 +52,6 @@ import npc_sessions.utils as utils
 class TaskControl(property_dict.PropertyDict):
     _sync: utils.SyncDataset | None
     _hdf5: h5py.File
-    _flip_times: npt.NDArray[np.float64]
-    _monitor_update_times: npt.NDArray[np.float64]
 
     def __init__(
         self,
