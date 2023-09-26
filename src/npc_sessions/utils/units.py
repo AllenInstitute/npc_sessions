@@ -10,6 +10,7 @@ import numpy.typing as npt
 import pandas as pd
 import polars as pl
 import upath
+from typing import Generator
 
 import npc_sessions
 
@@ -128,13 +129,10 @@ def get_sd_waveforms(session: str) -> npt.NDArray[np.float64]:
 
 
 def align_device_kilosort_spike_times(
-    session: str,
-    device_name: str,
+    sorting_cached_file: upath.UPath,
     device_timing_on_sync: npc_sessions.EphysTimingInfoOnSync,
 ) -> npt.NDArray[np.float64]:
-    sorting_cached_file = npc_lims.get_spike_sorting_device_path_from_s3(
-        session, device_name
-    )
+    
     with io.BytesIO(sorting_cached_file.read_bytes()) as f:
         sorting_cached = np.load(f, allow_pickle=True)
         spike_times_unaligned = sorting_cached["spike_indexes_seg0"]
@@ -144,39 +142,6 @@ def align_device_kilosort_spike_times(
     return (
         spike_times_unaligned / device_timing_on_sync.sampling_rate
     ) + device_timing_on_sync.start_time
-
-
-def get_aligned_device_kilosort_spike_times(
-    session: str,
-) -> dict[str, npt.NDArray[np.float64]]:
-    """
-    Returns the algined spike times for each device, prior to making the units table
-    """
-    device_spike_times = {}
-    recording_dirs_experiment = npc_lims.get_recording_dirs_experiment_path_from_s3(
-        session
-    )
-    sync_path = npc_lims.get_h5_sync_from_s3(session)
-    settings_xml_path = npc_lims.get_settings_xml_path_from_s3(session)
-
-    device_names = npc_sessions.get_settings_xml_info(settings_xml_path).probe_letters
-    device_names_probe = tuple(f"Probe{name}" for name in device_names)
-
-    devices = npc_sessions.get_ephys_timing_on_pxi(recording_dirs_experiment)
-    devices_timing_on_sync = npc_sessions.get_ephys_timing_on_sync(
-        sync_path, devices=devices
-    )
-
-    for device_name in device_names_probe:
-        device_timing_on_sync = next(
-            timing for timing in devices_timing_on_sync if device_name in timing.name
-        )
-        # TODO: Save to s3?
-        device_spike_times[device_name] = align_device_kilosort_spike_times(
-            session, device_name, device_timing_on_sync
-        )
-
-    return device_spike_times
 
 
 def get_closest_channel(
@@ -267,15 +232,12 @@ def get_amplitudes_mean_waveforms(
 
 
 def get_units_spike_times(
-    session: str,
-    device_name: str,
+    sorting_cached_file: upath.UPath,
     spike_times_aligned: npt.NDArray[np.float64],
     ks_unit_ids: npt.NDArray[np.int64],
 ) -> list[npt.NDArray[np.float64]]:
     units_spike_times: list[npt.NDArray[np.float64]] = []
-    sorting_cached_file = npc_lims.get_spike_sorting_device_path_from_s3(
-        session, device_name
-    )
+   
     with io.BytesIO(sorting_cached_file.read_bytes()) as f:
         sorting_cached = np.load(f, allow_pickle=True)
         spike_labels = sorting_cached["spike_labels_seg0"]
@@ -288,34 +250,22 @@ def get_units_spike_times(
     return units_spike_times
 
 
-def make_units_table(session: str) -> pd.DataFrame:
-    recording_dirs_experiment = npc_lims.get_recording_dirs_experiment_path_from_s3(
-        session
-    )
+def make_units_table(session: str, settings_xml_path: upath.UPath, quality_metrics_paths: tuple[upath.UPath, ...],
+                     template_metrics_paths: tuple[upath.UPath, ...], unit_locations_paths: tuple[upath.UPath, ...],
+                     spike_sorted_cached_paths: tuple[upath.UPath, ...],
+                     devices_timing: Generator[npc_sessions.EphysTimingInfoOnSync, None, None]) -> pd.DataFrame:
+    # TODO: add test to tests folder
     units = None
-
-    sync_path = npc_lims.get_h5_sync_from_s3(session)
-    settings_xml_path = npc_lims.get_settings_xml_path_from_s3(session)
     settings_xml_info = npc_sessions.get_settings_xml_info(settings_xml_path)
     device_names = settings_xml_info.probe_letters
     electrode_positions = settings_xml_info.channel_pos_xy
-
     device_names_probe = tuple(f"Probe{name}" for name in device_names)
-
-    devices = npc_sessions.get_ephys_timing_on_pxi(recording_dirs_experiment)
-    devices_timing = npc_sessions.get_ephys_timing_on_sync(sync_path, devices=devices)
-
-    quality_metrics_paths = sorted(npc_lims.get_quality_metrics_paths_from_s3(session))
-    template_metrics_paths = sorted(
-        npc_lims.get_template_metrics_paths_from_s3(session)
-    )
-
-    unit_locations_paths = sorted(npc_lims.get_unit_locations_paths_from_s3(session))
 
     for i in range(len(quality_metrics_paths)):
         quality_metrics_path = quality_metrics_paths[i]
         template_metrics_path = template_metrics_paths[i]
         units_locations_path = unit_locations_paths[i]
+        spike_sorted_cached_path = spike_sorted_cached_paths[i]
         templates_average_path = next(
             quality_metrics_path.parent.parent.glob("templates_average.npy")
         )
@@ -323,7 +273,8 @@ def make_units_table(session: str) -> pd.DataFrame:
         device_name = next(
             device_name_probe
             for device_name_probe in device_names_probe
-            if device_name_probe in str(quality_metrics_path)
+            if device_name_probe in str(quality_metrics_path) and device_name_probe in str(template_metrics_path) \
+                and device_name_probe in str(unit_locations_paths) and device_name_probe in str(spike_sorted_cached_path)
         )
         device_timing_on_sync = next(
             timing for timing in devices_timing if device_name in timing.name
@@ -341,11 +292,10 @@ def make_units_table(session: str) -> pd.DataFrame:
             templates_average_path, df_device_metrics["ks_unit_id"].values
         )
         spike_times_aligned = align_device_kilosort_spike_times(
-            session, device_name, device_timing_on_sync
+            spike_sorted_cached_path, device_timing_on_sync
         )
         unit_spike_times = get_units_spike_times(
-            session,
-            device_name,
+            spike_sorted_cached_path,
             spike_times_aligned,
             df_device_metrics["ks_unit_id"].values,
         )
