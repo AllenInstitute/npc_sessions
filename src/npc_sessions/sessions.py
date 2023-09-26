@@ -426,7 +426,7 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
         modules = []
-        modules.append(self._licks)
+        modules.append(self._lick_sensor_rising)
         modules.append(self._rewards)
         modules.append(self._raw_lfp)
         if self.is_video:
@@ -440,7 +440,7 @@ class DynamicRoutingSession:
         """The version passed to NWBFile.__init__"""
         # TODO add LFP
         modules = []
-        modules.append(self._running)
+        modules.append(self._running_speed)
         return tuple(modules)
 
     @functools.cached_property
@@ -1572,23 +1572,37 @@ class DynamicRoutingSession:
         return "2002" if "2002" in implant else implant
 
     @functools.cached_property
-    def _licks(self) -> ndx_events.Events:
+    def _lick_sensor_rising(self) -> ndx_events.Events:
         if self.is_sync:
             timestamps = self.sync_data.get_rising_edges("lick_sensor", units="seconds")
         else:
             timestamps = self.sam.lickTimes
         return ndx_events.Events(
             timestamps=timestamps,
-            name="lick_spout",
+            name="lick_sensor_rising",
             description=(
                 "times at which the subject interacted with a water spout - "
-                "putatively licks, but may include other events such as grooming"
+                "putatively the starts of licks, but may include other events such as grooming"
+            ),
+        )
+    @functools.cached_property
+    def _lick_sensor_falling(self) -> ndx_events.Events:
+        if self.is_sync:
+            timestamps = self.sync_data.get_falling_edges("lick_sensor", units="seconds")
+        else:
+            timestamps = self.sam.lickTimes
+        return ndx_events.Events(
+            timestamps=timestamps,
+            name="lick_sensor_falling",
+            description=(
+                "times at which the subject ceased interacting with a water spout - "
+                "putatively the ends of licks, but may include other events such as grooming"
             ),
         )
 
     @functools.cached_property
-    def _running(self) -> pynwb.TimeSeries:
-        name = "running"
+    def _running_speed(self) -> pynwb.TimeSeries:
+        name = "running_speed"
         description = (
             "linear forward running speed on a rotating disk, low-pass filtered "
             f"at {utils.RUNNING_LOWPASS_FILTER_HZ} Hz with a 3rd order Butterworth filter"

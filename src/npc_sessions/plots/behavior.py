@@ -91,7 +91,7 @@ def plot_first_lick_latency_hist(
 
 
 def plot_lick_raster(session: "npc_sessions.DynamicRoutingSession") -> plt.Figure:
-    timeseries = session.acquisition["lick_spout"]
+    timeseries = session.acquisition["lick_sensor_rising"]
     trials: pd.DataFrame = session.trials[:]
 
     fig, ax = plt.subplots(1, 1)
@@ -117,7 +117,7 @@ def plot_lick_raster(session: "npc_sessions.DynamicRoutingSession") -> plt.Figur
 
 
 def plot_running(session: "npc_sessions.DynamicRoutingSession") -> plt.Figure:
-    timeseries = session.processing["running"]
+    timeseries = session.processing["running_speed"]
     epochs: pd.DataFrame = session.epochs[:]
     fig, _ = plt.subplots(
         1,

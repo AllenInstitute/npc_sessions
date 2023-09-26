@@ -110,7 +110,7 @@ class Units(NWBContainerWithDF):
 
 
 class LickSpout(SupportsToNWB):
-    name = "lick_spout"
+    name = "lick_sensor_rising"
     description = (
         "times at which the subject interacted with a water spout - "
         "putatively licks, but may include other events such as grooming"
@@ -133,7 +133,7 @@ class LickSpout(SupportsToNWB):
 
 
 class RunningSpeed(SupportsToNWB):
-    name = "running"
+    name = "running_speed"
     description = (
         "linear forward running speed on a rotating disk, low-pass filtered "
         f"at {utils.RUNNING_LOWPASS_FILTER_HZ} Hz with a 3rd order Butterworth filter"
