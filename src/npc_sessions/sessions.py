@@ -13,6 +13,7 @@ from collections.abc import Generator, Iterable
 from typing import Any, Literal
 
 import h5py
+import hdmf
 import ndx_events
 import npc_lims
 import npc_lims.status.tracked_sessions as tracked_sessions
@@ -23,6 +24,7 @@ import PIL.Image
 import polars as pl
 import pynwb
 import upath
+import zarr
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
 import npc_sessions.config as config
@@ -426,6 +428,7 @@ class DynamicRoutingSession:
         modules = []
         modules.append(self._licks)
         modules.append(self._rewards)
+        modules.append(self._raw_lfp)
         if self.is_video:
             modules.extend(self._video_frame_times)
         return tuple(modules)
@@ -859,6 +862,65 @@ class DynamicRoutingSession:
             )
         return units
 
+    @functools.cached_property
+    def raw_lfp_paths(self) -> tuple[upath.UPath, ...]:
+        return tuple(
+            p for p in self.raw_data_paths 
+            if (
+                ("LFP" in p.name or "LFP" in p.parent.name)
+                and p.suffix in ('.zarr', '.dat')
+            )
+        )
+        
+    @functools.cached_property
+    def _raw_lfp(self) -> pynwb.ecephys.LFP:
+        
+        lfp = pynwb.ecephys.LFP()
+        
+        for probe in self.electrode_groups.values():
+            data_path = next(
+                (p for p in self.raw_lfp_paths if probe.name.lower() in p.name.lower()),
+                None,
+            )
+            if data_path is None:
+                continue
+            
+            electrode_table_region = hdmf.common.DynamicTableRegion(               
+                name='electrodes', # pynwb requires this not be renamed
+                description=f"channels with LFP data on {probe.name}",
+                data=tuple(range(0, 384)),
+                table=self.electrodes,
+            )
+            
+            if data_path.suffix == ".dat":
+                data = np.memmap(data_path, dtype=np.int16, mode='r')
+                data = data.reshape(-1, 384)
+            elif data_path.suffix == ".zarr":
+                data = zarr.open(data_path, mode='r')["traces_seg0"]
+                # as long as we don't index into this array (ie to take a subset), it
+                # will be loaded into the electrical series for lazy access
+            else:
+                raise ValueError(f"unexpected file type for lfp data: {data_path}")
+            
+            timing = next(
+                d for d in self.ephys_timing_data
+                if d.name.endswith('LFP') and probe.name.lower() in d.name.lower()
+            )
+            lfp.create_electrical_series(
+                name=probe.name, 
+                data=data,
+                electrodes=electrode_table_region,
+                starting_time=timing.start_time,
+                rate=timing.sampling_rate,
+                channel_conversion=None,
+                filtering='none',
+                conversion=0.195, # bit/Volt from open-ephys.. necessary? 
+                comments='',
+                resolution=1/(2**16 * 0.195), # correct?
+                description=f'local field potential voltage timeseries from electrodes on {probe.name}',
+            )
+        return lfp
+    
     # images -------------------------------------------------------------------- #
 
     @functools.cached_property
