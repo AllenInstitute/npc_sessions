@@ -426,7 +426,8 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
         modules = []
-        modules.append(self._lick_sensor_rising)
+        if self.is_sync:
+            modules.extend(self._all_licks[1:])
         modules.append(self._rewards)
         modules.append(self._raw_lfp)
         if self.is_video:
@@ -440,6 +441,7 @@ class DynamicRoutingSession:
         """The version passed to NWBFile.__init__"""
         # TODO add LFP
         modules = []
+        modules.append(self._all_licks[0])
         modules.append(self._running_speed)
         return tuple(modules)
 
@@ -1571,35 +1573,74 @@ class DynamicRoutingSession:
         implant: str = self.probe_insertions["implant"]
         return "2002" if "2002" in implant else implant
 
-    @functools.cached_property
-    def _lick_sensor_rising(self) -> ndx_events.Events:
-        if self.is_sync:
-            timestamps = self.sync_data.get_rising_edges("lick_sensor", units="seconds")
-        else:
-            timestamps = self.sam.lickTimes
-        return ndx_events.Events(
-            timestamps=timestamps,
-            name="lick_sensor_rising",
-            description=(
-                "times at which the subject interacted with a water spout - "
-                "putatively the starts of licks, but may include other events such as grooming"
-            ),
-        )
-    @functools.cached_property
-    def _lick_sensor_falling(self) -> ndx_events.Events:
-        if self.is_sync:
-            timestamps = self.sync_data.get_falling_edges("lick_sensor", units="seconds")
-        else:
-            timestamps = self.sam.lickTimes
-        return ndx_events.Events(
-            timestamps=timestamps,
-            name="lick_sensor_falling",
-            description=(
-                "times at which the subject ceased interacting with a water spout - "
-                "putatively the ends of licks, but may include other events such as grooming"
-            ),
-        )
 
+    @functools.cached_property
+    def _all_licks(self) -> tuple[ndx_events.Events, ...]:
+        """First item is always `processing['licks']` - the following items are only if sync
+        is available, and are raw rising/falling edges of the lick sensor,
+        for `acquisition`.
+        
+        If sync isn't available, we only have start frames of licks, so we can't
+        filter by duration very accurately. 
+        """
+        max_contact = 0.5 # must factor-in lick_sensor staying high after end of contact
+        # https://www.nature.com/articles/s41586-021-03561-9/figures/1
+        
+        rising = self.sync_data.get_rising_edges("lick_sensor", units="seconds")
+        falling = self.sync_data.get_falling_edges("lick_sensor", units="seconds")
+        if falling[0] < rising[0]:
+            falling = falling[1:]
+        if rising[-1] > falling[-1]:
+            rising = rising[:-1]
+        assert len(rising) == len(falling)
+
+        rising_falling = np.array([rising, falling]).T
+        lick_duration = np.diff(rising_falling, axis=1).squeeze()
+        
+        filtered_idx = lick_duration <= max_contact
+        
+        # # remove licks that aren't part of a sequence of licks at at least ~3 Hz
+        # max_interval = 0.5
+        # for i, (r, f) in enumerate(rising_falling):
+        #     prev_end = rising_falling[i-1, 1] if i > 0 else None
+        #     next_start = rising_falling[i+1, 0] if i < len(rising_falling) - 1 else None
+        #     if (
+        #         (prev_end is None or r - prev_end > max_interval)
+        #         and
+        #         (next_start is None or next_start - f > max_interval)
+        #     ):
+        #         filtered_idx[i] = False
+                
+        filtered = rising[filtered_idx]
+        
+        return (
+            ndx_events.Events(
+                timestamps=filtered if self.is_sync else self.sam.lickTimes,
+                name="licks",
+                description="times at which the subject made contact with a water spout" + (
+                    f" - filtered to exclude events with duration >{max_contact} s"
+                    if self.is_sync
+                    else "putatively the starts of licks, but may include other events such as grooming"
+                )
+            ),
+            ndx_events.Events(
+                timestamps=rising,
+                name="lick_sensor_rising",
+                description=(
+                    "times at which the subject made contact with a water spout - "
+                    "putatively the starts of licks, but may include other events such as grooming"
+                ),
+            ),
+            ndx_events.Events(
+                timestamps=falling,
+                name="lick_sensor_falling",
+                description=(
+                    "times at which the subject ceased making contact with a water spout - "
+                    "putatively the ends of licks, but may include other events such as grooming"
+                ),
+            ),
+        )
+            
     @functools.cached_property
     def _running_speed(self) -> pynwb.TimeSeries:
         name = "running_speed"
