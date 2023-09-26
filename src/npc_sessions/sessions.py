@@ -893,8 +893,7 @@ class DynamicRoutingSession:
             )
             
             if data_path.suffix == ".dat":
-                data = np.memmap(data_path, dtype=np.int16, mode='r')
-                data = data.reshape(-1, 384)
+                data = np.memmap(data_path, dtype=np.int16, mode='r').reshape(-1, 384)
             elif data_path.suffix == ".zarr":
                 data = zarr.open(data_path, mode='r')["traces_seg0"]
                 # as long as we don't index into this array (ie to take a subset), it
