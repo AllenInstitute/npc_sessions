@@ -114,8 +114,9 @@ def plot_camera_frame_grabs_simple(
 def plot_video_frames_with_licks(
     session: npc_sessions.DynamicRoutingSession,
     trial_idx: int | None = None,
+    lick_time: float | None = None,
 ):
-    NUM_LICKS = 3 if trial_idx is None else 1
+    NUM_LICKS = 3 if (trial_idx is None and lick_time is None) else 1
     NUM_CAMERAS = 2  # 1 x face, 1 x body
 
     FRAMES_EITHER_SIDE_OF_LICK = 2
@@ -125,14 +126,17 @@ def plot_video_frames_with_licks(
     ROWS_PER_VIDEO = 2  # 1 x camera frames, 1 x eventplots
     ROWS_PER_LICK = ROWS_PER_VIDEO * NUM_CAMERAS
 
-    response_times: npt.NDArray = (
-        (session.trials[:].query("is_response").response_time.to_numpy())
-        if trial_idx is None
-        else (session.trials[trial_idx].response_time.to_numpy())
-    )
-    lick_times = sorted(
-        random.sample(tuple(response_times[~np.isnan(response_times)]), NUM_LICKS)
-    )
+    if lick_time is None:
+        response_times: npt.NDArray = (
+            (session.trials[:].query("is_response").response_time.to_numpy())
+            if trial_idx is None
+            else (session.trials[trial_idx].response_time.to_numpy())
+        )
+        lick_times = sorted(
+            random.sample(tuple(response_times[~np.isnan(response_times)]), NUM_LICKS)
+        )
+    else:
+        lick_times = [lick_time]
 
     fig = plt.figure(figsize=[12, 5 * NUM_LICKS], facecolor="0.5")
     # fig, axes = plt.subplots(NUM_LICKS * ROWS_PER_LICK, FRAMES_PER_ROW,)
