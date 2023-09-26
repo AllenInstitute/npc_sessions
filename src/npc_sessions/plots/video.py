@@ -126,9 +126,9 @@ def plot_video_frames_with_licks(
     ROWS_PER_LICK = ROWS_PER_VIDEO * NUM_CAMERAS
 
     response_times: npt.NDArray = (
-        session.trials[:].query("is_response").response_time.to_numpy()
-    ) if trial_idx is None else (
-        session.trials[trial_idx].response_time.to_numpy()
+        (session.trials[:].query("is_response").response_time.to_numpy())
+        if trial_idx is None
+        else (session.trials[trial_idx].response_time.to_numpy())
     )
     lick_times = sorted(
         random.sample(tuple(response_times[~np.isnan(response_times)]), NUM_LICKS)

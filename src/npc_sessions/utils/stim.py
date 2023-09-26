@@ -384,47 +384,45 @@ class FlexStimRecording(StimRecording):
             return self.waveform.duration
         return self.offset_time_on_sync - self.onset_time_on_sync
 
+
 def get_input_data_times(
-    stim: utils.StimPathOrDataset, sync: utils.SyncPathOrDataset | None = None,
+    stim: utils.StimPathOrDataset,
+    sync: utils.SyncPathOrDataset | None = None,
 ) -> npt.NDArray[np.float64]:
     """Best-estimate time of `getInputData()` in psychopy event loop, in seconds, from start
     of experiment. Uses preceding frame's vsync time if sync provided"""
     stim = get_stim_data(stim)
     assert isinstance(stim, h5py.File), "Only hdf5 stim files supported for now"
     if not sync:
-        return np.concatenate(
-                ([0], np.cumsum(stim["frameIntervals"][:]))
-            )
+        return np.concatenate(([0], np.cumsum(stim["frameIntervals"][:])))
     return np.concatenate(
-            [
-                [np.nan], 
-                assert_stim_times(
-                    get_stim_frame_times(
-                        stim, sync=sync, frame_time_type="vsync"
-                        )[stim]
-                    )[:-1],
-            ]
-        )
+        [
+            [np.nan],
+            assert_stim_times(
+                get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim]
+            )[:-1],
+        ]
+    )
+
 
 def get_flip_times(
-    stim: utils.StimPathOrDataset, sync: utils.SyncPathOrDataset | None = None,
+    stim: utils.StimPathOrDataset,
+    sync: utils.SyncPathOrDataset | None = None,
 ) -> npt.NDArray[np.float64]:
     """Best-estimate time of `flip()` at end of psychopy event loop, in seconds, from start
     of experiment. Uses frame's vsync time sync provided."""
     stim = get_stim_data(stim)
     assert isinstance(stim, h5py.File), "Only hdf5 stim files supported for now"
     if not sync:
-        return np.concatenate(
-                (np.cumsum(stim["frameIntervals"][:]), [np.nan])
-            )
+        return np.concatenate((np.cumsum(stim["frameIntervals"][:]), [np.nan]))
     return assert_stim_times(
-            get_stim_frame_times(
-                stim, sync=sync, frame_time_type="vsync"
-            )[stim]
-        )
+        get_stim_frame_times(stim, sync=sync, frame_time_type="vsync")[stim]
+    )
+
 
 def get_vis_display_times(
-    stim: utils.StimPathOrDataset, sync: utils.SyncPathOrDataset | None = None,
+    stim: utils.StimPathOrDataset,
+    sync: utils.SyncPathOrDataset | None = None,
 ) -> npt.NDArray[np.float64]:
     """Best-estimate time of monitor update. Uses photodiode if sync provided. Without sync, this equals frame times."""
     stim = get_stim_data(stim)
@@ -432,10 +430,9 @@ def get_vis_display_times(
     if not sync:
         return get_flip_times(stim)
     return assert_stim_times(
-            get_stim_frame_times(
-                stim, sync=sync, frame_time_type="display_time"
-            )[stim]
-        )
+        get_stim_frame_times(stim, sync=sync, frame_time_type="display_time")[stim]
+    )
+
 
 def get_waveforms_from_stim_file(
     stim_file_or_dataset: StimPathOrDataset,

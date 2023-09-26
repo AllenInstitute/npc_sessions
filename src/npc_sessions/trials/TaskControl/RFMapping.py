@@ -94,7 +94,9 @@ class RFMapping(TaskControl):
                 ]
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
-            return utils.safe_index(self._flip_times, self._hdf5["stimStartFrame"][trial])
+            return utils.safe_index(
+                self._flip_times, self._hdf5["stimStartFrame"][trial]
+            )
         return utils.safe_index(self._aud_stim_onset_times, trial)
 
     def get_trial_aud_offset(
@@ -157,14 +159,18 @@ class RFMapping(TaskControl):
     @functools.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         """falling edge of first vsync in each trial"""
-        return utils.safe_index(self._flip_times, self._hdf5["stimStartFrame"][self._idx])
+        return utils.safe_index(
+            self._flip_times, self._hdf5["stimStartFrame"][self._idx]
+        )
 
     @functools.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         """onset of RF mapping stimulus"""
         return np.where(
             self._is_vis_stim,
-            utils.safe_index(self._vis_display_times, self._hdf5["stimStartFrame"][self._idx]),
+            utils.safe_index(
+                self._vis_display_times, self._hdf5["stimStartFrame"][self._idx]
+            ),
             self.get_trial_aud_onset(self._idx),
         )
 
@@ -174,8 +180,9 @@ class RFMapping(TaskControl):
         frames_per_stim = self._hdf5["stimFrames"][()]
         return np.where(
             self._is_vis_stim,
-            utils.safe_index(self._vis_display_times,
-                self._hdf5["stimStartFrame"][self._idx] + frames_per_stim
+            utils.safe_index(
+                self._vis_display_times,
+                self._hdf5["stimStartFrame"][self._idx] + frames_per_stim,
             ),
             self.get_trial_aud_offset(self._idx),
         )
@@ -189,7 +196,7 @@ class RFMapping(TaskControl):
                     self._flip_times,
                     self._hdf5["stimStartFrame"][self._idx]
                     + self._hdf5["stimFrames"][()]
-                    + self._hdf5["interStimFrames"][()]
+                    + self._hdf5["interStimFrames"][()],
                 ),
                 self.stim_stop_time + self._hdf5["interStimFrames"][()],
             ],

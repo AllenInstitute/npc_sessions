@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import io
 import os
+from collections.abc import Generator
 
 import npc_lims
 import numpy as np
@@ -10,7 +11,6 @@ import numpy.typing as npt
 import pandas as pd
 import polars as pl
 import upath
-from typing import Generator
 
 import npc_sessions
 
@@ -132,7 +132,6 @@ def align_device_kilosort_spike_times(
     sorting_cached_file: upath.UPath,
     device_timing_on_sync: npc_sessions.EphysTimingInfoOnSync,
 ) -> npt.NDArray[np.float64]:
-    
     with io.BytesIO(sorting_cached_file.read_bytes()) as f:
         sorting_cached = np.load(f, allow_pickle=True)
         spike_times_unaligned = sorting_cached["spike_indexes_seg0"]
@@ -237,7 +236,7 @@ def get_units_spike_times(
     ks_unit_ids: npt.NDArray[np.int64],
 ) -> list[npt.NDArray[np.float64]]:
     units_spike_times: list[npt.NDArray[np.float64]] = []
-   
+
     with io.BytesIO(sorting_cached_file.read_bytes()) as f:
         sorting_cached = np.load(f, allow_pickle=True)
         spike_labels = sorting_cached["spike_labels_seg0"]
@@ -250,10 +249,15 @@ def get_units_spike_times(
     return units_spike_times
 
 
-def make_units_table(session: str, settings_xml_path: upath.UPath, quality_metrics_paths: tuple[upath.UPath, ...],
-                     template_metrics_paths: tuple[upath.UPath, ...], unit_locations_paths: tuple[upath.UPath, ...],
-                     spike_sorted_cached_paths: tuple[upath.UPath, ...],
-                     devices_timing: Generator[npc_sessions.EphysTimingInfoOnSync, None, None]) -> pd.DataFrame:
+def make_units_table(
+    session: str,
+    settings_xml_path: upath.UPath,
+    quality_metrics_paths: tuple[upath.UPath, ...],
+    template_metrics_paths: tuple[upath.UPath, ...],
+    unit_locations_paths: tuple[upath.UPath, ...],
+    spike_sorted_cached_paths: tuple[upath.UPath, ...],
+    devices_timing: Generator[npc_sessions.EphysTimingInfoOnSync, None, None],
+) -> pd.DataFrame:
     # TODO: add test to tests folder
     units = None
     settings_xml_info = npc_sessions.get_settings_xml_info(settings_xml_path)
@@ -273,8 +277,10 @@ def make_units_table(session: str, settings_xml_path: upath.UPath, quality_metri
         device_name = next(
             device_name_probe
             for device_name_probe in device_names_probe
-            if device_name_probe in str(quality_metrics_path) and device_name_probe in str(template_metrics_path) \
-                and device_name_probe in str(unit_locations_paths) and device_name_probe in str(spike_sorted_cached_path)
+            if device_name_probe in str(quality_metrics_path)
+            and device_name_probe in str(template_metrics_path)
+            and device_name_probe in str(unit_locations_paths)
+            and device_name_probe in str(spike_sorted_cached_path)
         )
         device_timing_on_sync = next(
             timing for timing in devices_timing if device_name in timing.name

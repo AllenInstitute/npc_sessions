@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     import npc_sessions
 import npc_sessions.utils as utils
 
+
 def plot_bad_lick_times(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> tuple[plt.Figure, ...]:
@@ -48,8 +49,7 @@ def plot_assorted_lick_times(
 ) -> tuple[plt.Figure, ...]:
     sync_time = session._trials.response_time
     script_time = utils.safe_index(
-        session._trials._flip_times,
-        session._trials._sam.trialResponseFrame
+        session._trials._flip_times, session._trials._sam.trialResponseFrame
     )
     intervals = np.abs(sync_time - script_time)
     figs = []
@@ -79,9 +79,13 @@ def plot_trial_lick_timing(
     start = session._trials.response_window_start_time[trial_idx]
     stop = session._trials.response_window_stop_time[trial_idx]
     vsyncs = session._trials._sync.get_falling_edges("vsync_stim", units="seconds")
-    lick_sensor_rising = session._trials._sync.get_rising_edges("lick_sensor", units="seconds")
-    lick_sensor_falling = session._trials._sync.get_falling_edges("lick_sensor", units="seconds")
-    
+    lick_sensor_rising = session._trials._sync.get_rising_edges(
+        "lick_sensor", units="seconds"
+    )
+    lick_sensor_falling = session._trials._sync.get_falling_edges(
+        "lick_sensor", units="seconds"
+    )
+
     fig, ax = plt.subplots()
     padding = 0.3
     marker_config = {"linestyles": "-", "linelengths": 0.2}
@@ -100,14 +104,20 @@ def plot_trial_lick_timing(
         color="orange",
     )
     ax.eventplot(
-        lick_sensor_rising[(lick_sensor_rising >= start - padding) & (lick_sensor_rising <= stop + padding)],
+        lick_sensor_rising[
+            (lick_sensor_rising >= start - padding)
+            & (lick_sensor_rising <= stop + padding)
+        ],
         **marker_config,
         label="lick sensor rising",
         color="k",
         lineoffsets=1,
     )
     ax.eventplot(
-        lick_sensor_falling[(lick_sensor_falling >= start - padding) & (lick_sensor_falling <= stop + padding)],
+        lick_sensor_falling[
+            (lick_sensor_falling >= start - padding)
+            & (lick_sensor_falling <= stop + padding)
+        ],
         **marker_config,
         label="lick sensor falling",
         color="grey",
@@ -117,7 +127,7 @@ def plot_trial_lick_timing(
         [
             utils.safe_index(
                 session._trials._input_data_times,
-                session._trials._sam.trialResponseFrame[trial_idx]
+                session._trials._sam.trialResponseFrame[trial_idx],
             )
         ],
         **marker_config,
@@ -130,8 +140,7 @@ def plot_trial_lick_timing(
         [
             (
                 lick_frames := utils.safe_index(
-                    session._trials._input_data_times,
-                    session._trials._sam.lickFrames
+                    session._trials._input_data_times, session._trials._sam.lickFrames
                 )
             )[(lick_frames >= start) & (lick_frames <= stop)]
         ],
@@ -145,7 +154,7 @@ def plot_trial_lick_timing(
         [
             utils.safe_index(
                 session._trials._flip_times,
-                session._trials._sam.stimStartFrame[trial_idx]
+                session._trials._sam.stimStartFrame[trial_idx],
             )
         ],
         **marker_config,
@@ -172,8 +181,7 @@ def plot_lick_times_on_sync_and_script(
     """
     sync_time = session._trials.response_time
     script_time = utils.safe_index(
-        session._trials._flip_times,
-        session._trials._sam.trialResponseFrame
+        session._trials._flip_times, session._trials._sam.trialResponseFrame
     )
 
     intervals = sync_time - script_time

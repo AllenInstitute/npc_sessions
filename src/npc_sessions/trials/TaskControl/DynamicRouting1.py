@@ -206,8 +206,8 @@ class DynamicRouting1(TaskControl):
         if (onset_frames := self._sam.trialOptoOnsetFrame).ndim == 2:
             onset_frames = onset_frames.squeeze()
         # note: this is different to OptoTagging, where onset frame is abs frame idx
-        return utils.safe_index(self._flip_times,
-            self._sam.stimStartFrame + onset_frames[trial]
+        return utils.safe_index(
+            self._flip_times, self._sam.stimStartFrame + onset_frames[trial]
         )
 
     def get_trial_opto_offset(
@@ -301,8 +301,9 @@ class DynamicRouting1(TaskControl):
         - extensions due to quiescent violations are discarded: only the final
           `preStimFramesFixed` before a stim are included
         """
-        return utils.safe_index(self._input_data_times,
-            self._sam.stimStartFrame - self._hdf5["preStimFramesFixed"][()]
+        return utils.safe_index(
+            self._input_data_times,
+            self._sam.stimStartFrame - self._hdf5["preStimFramesFixed"][()],
         )
 
     @functools.cached_property
@@ -317,8 +318,9 @@ class DynamicRouting1(TaskControl):
 
         - only the last quiescent interval (which was not violated) is included
         """
-        return utils.safe_index(self._input_data_times,
-            self._sam.stimStartFrame - self._hdf5["quiescentFrames"][()]
+        return utils.safe_index(
+            self._input_data_times,
+            self._sam.stimStartFrame - self._hdf5["quiescentFrames"][()],
         )
 
     @functools.cached_property
@@ -333,7 +335,9 @@ class DynamicRouting1(TaskControl):
         starts = np.full(self._len, np.nan)
         for idx in range(self._len):
             if self.is_vis_stim[idx] or self.is_catch[idx]:
-                starts[idx] = utils.safe_index(self._vis_display_times, self._sam.stimStartFrame[idx])
+                starts[idx] = utils.safe_index(
+                    self._vis_display_times, self._sam.stimStartFrame[idx]
+                )
             if self.is_aud_stim[idx]:
                 starts[idx] = self.get_trial_aud_onset(idx)
         return starts
@@ -347,7 +351,7 @@ class DynamicRouting1(TaskControl):
                 ends[idx] = utils.safe_index(
                     self._vis_display_times,
                     self._sam.stimStartFrame[idx]
-                    + self._hdf5["trialVisStimFrames"][idx]
+                    + self._hdf5["trialVisStimFrames"][idx],
                 )
             if self.is_aud_stim[idx]:
                 ends[idx] = self.get_trial_aud_offset(idx)
@@ -371,14 +375,15 @@ class DynamicRouting1(TaskControl):
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
         """start of interval in which the subject should lick if a GO trial,
         otherwise should not lick"""
-        return utils.safe_index(self._input_data_times,
-            self._sam.stimStartFrame + self._hdf5["responseWindow"][()][0]
+        return utils.safe_index(
+            self._input_data_times,
+            self._sam.stimStartFrame + self._hdf5["responseWindow"][()][0],
         )
 
     @functools.cached_property
     def _response_window_stop_frame(self) -> npt.NDArray[np.float64]:
         return self._sam.stimStartFrame + self._hdf5["responseWindow"][()][1]
- 
+
     @functools.cached_property
     def response_window_stop_time(self) -> npt.NDArray[np.float64]:
         """end of interval in which the subject should lick if a GO trial,
@@ -391,8 +396,12 @@ class DynamicRouting1(TaskControl):
 
         - nan if no lick occurred"""
         if not self._sync:
-            return utils.safe_index(self._input_data_times, self._sam.trialResponseFrame)
-        response_frame_flip = utils.safe_index(self._flip_times, self._sam.trialResponseFrame)
+            return utils.safe_index(
+                self._input_data_times, self._sam.trialResponseFrame
+            )
+        response_frame_flip = utils.safe_index(
+            self._flip_times, self._sam.trialResponseFrame
+        )
         sync_times = self._sync.get_rising_edges("lick_sensor", units="seconds")
         preceding_lick_sync_time_idx = (
             np.searchsorted(
@@ -409,11 +418,17 @@ class DynamicRouting1(TaskControl):
             start = self.response_window_start_time[idx]
             stop = self.response_window_stop_time[idx]
             lick = sync_times[preceding_lick_sync_time_idx[idx]]
-            if (lick_time := lick - self.stim_start_time[idx]) < (min_resp_time := self._hdf5["responseWindow"][()][0] / self._sam.frameRate):
+            if (lick_time := lick - self.stim_start_time[idx]) < (
+                min_resp_time := self._hdf5["responseWindow"][()][0]
+                / self._sam.frameRate
+            ):
                 logger.error(
                     f"Lick time found for trial {idx} violates minimum response time: {lick_time=}s, {min_resp_time=}s. "
                 )
-            elif lick_time > (max_resp_time := self._hdf5["responseWindow"][()][1] / self._sam.frameRate):
+            elif lick_time > (
+                max_resp_time := self._hdf5["responseWindow"][()][1]
+                / self._sam.frameRate
+            ):
                 logger.error(
                     f"Lick time found for trial {idx} violates maximum response time: {lick_time=}s, {max_resp_time=}s. "
                 )
@@ -493,7 +508,9 @@ class DynamicRouting1(TaskControl):
     def post_response_window_start_time(self) -> npt.NDArray[np.float64]:
         """start of null interval in which the subject awaits a new trial;
         may receive a non-contingent reward if scheduled"""
-        return utils.safe_index(self._vis_display_times, self._post_response_window_start_frame)
+        return utils.safe_index(
+            self._vis_display_times, self._post_response_window_start_frame
+        )
 
     @functools.cached_property
     def _post_response_window_stop_frame(self) -> npt.NDArray[np.float64]:
@@ -505,7 +522,9 @@ class DynamicRouting1(TaskControl):
     @functools.cached_property
     def post_response_window_stop_time(self) -> npt.NDArray[np.float64]:
         """end of null interval"""
-        return utils.safe_index(self._vis_display_times, self._post_response_window_stop_frame)
+        return utils.safe_index(
+            self._vis_display_times, self._post_response_window_stop_frame
+        )
 
     '''
     @functools.cached_property

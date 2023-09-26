@@ -70,26 +70,20 @@ class TaskControl(property_dict.PropertyDict):
             # - all times in nwb are relative to start of first sample on sync
             # - there can be multiple hdf5 files, all recorded on sync
             self._sync = utils.get_sync_data(sync)
-    
+
     @functools.cached_property
-    def _input_data_times(
-        self
-    ) -> npt.NDArray[np.float64]:
+    def _input_data_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of `getInputData()` in psychopy event loop, in seconds, from start
         of experiment. Uses preceding frame's vsync time if available."""
         return utils.get_input_data_times(self._hdf5, self._sync)
 
     @functools.cached_property
-    def _flip_times(
-        self
-    ) -> npt.NDArray[np.float64]:
+    def _flip_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of `flip()` in psychopy event loop, in seconds, from start
         of experiment. Uses frame's vsync time if available."""
         return utils.get_flip_times(self._hdf5, self._sync)
-    
+
     @functools.cached_property
-    def _vis_display_times(
-        self
-    ) -> npt.NDArray[np.float64]:
+    def _vis_display_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of monitor update. Without sync, this equals frame times."""
         return utils.get_vis_display_times(self._hdf5, self._sync)
