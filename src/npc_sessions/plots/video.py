@@ -25,7 +25,7 @@ import npc_sessions.utils as utils
 
 def plot_video_info(
     session: npc_sessions.DynamicRoutingSession,
-):
+) -> None:
     "Not a plot: prints info to stdout"
 
     augmented_camera_info = utils.get_augmented_camera_info(
@@ -66,7 +66,7 @@ def plot_camera_frame_grabs_simple(
     session: npc_sessions.DynamicRoutingSession,
     paths: Iterable[upath.UPath] | None = None,
     num_frames_to_grab: int = 5,
-) -> None:
+) -> plt.Figure:
     """Just plots evenly spaced frames, no concept of epochs.
 
     video frames across cameras aren't synced .
