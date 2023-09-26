@@ -193,7 +193,7 @@ class RFMapping(TaskControl):
                 ),
                 self.stim_stop_time + self._hdf5["interStimFrames"][()],
             ],
-            axis=1,
+            axis=0,
         )
 
     @functools.cached_property
