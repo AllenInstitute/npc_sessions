@@ -868,45 +868,48 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def _raw_lfp(self) -> pynwb.ecephys.LFP:
-        
         lfp = pynwb.ecephys.LFP()
-        
+
         for probe in self.electrode_groups.values():
-            
             timing_info = next(
-                d for d in self.ephys_timing_data
-                if d.name.endswith('LFP') and probe.name.lower() in d.name.lower()
+                d
+                for d in self.ephys_timing_data
+                if d.name.endswith("LFP") and probe.name.lower() in d.name.lower()
             )
-            
-            electrode_table_region = hdmf.common.DynamicTableRegion(               
-                name='electrodes', # pynwb requires this not be renamed
+
+            electrode_table_region = hdmf.common.DynamicTableRegion(
+                name="electrodes",  # pynwb requires this not be renamed
                 description=f"channels with LFP data on {probe.name}",
                 data=tuple(range(0, 384)),
                 table=self.electrodes,
             )
-            
+
             # as long as we don't index into the data array (ie to take a subset), it
             # will be instantly inserted into the electrical series container for lazy access
             if timing_info.device.compressed:
-                data = zarr.open(timing_info.device.compressed, mode='r')["traces_seg0"]
-            else: 
-                data = np.memmap(timing_info.device.continuous / 'continuous.dat', dtype=np.int16, mode='r').reshape(-1, 384)
-            
+                data = zarr.open(timing_info.device.compressed, mode="r")["traces_seg0"]
+            else:
+                data = np.memmap(
+                    timing_info.device.continuous / "continuous.dat",
+                    dtype=np.int16,
+                    mode="r",
+                ).reshape(-1, 384)
+
             lfp.create_electrical_series(
-                name=probe.name, 
+                name=probe.name,
                 data=data,
                 electrodes=electrode_table_region,
                 starting_time=timing_info.start_time,
                 rate=timing_info.sampling_rate,
                 channel_conversion=None,
-                filtering='none',
-                conversion=0.195e6, # bit/microVolt from open-ephys
-                comments='',
+                filtering="none",
+                conversion=0.195e6,  # bit/microVolt from open-ephys
+                comments="",
                 resolution=0.195e-6,
-                description=f'local field potential voltage timeseries from electrodes on {probe.name}',
+                description=f"local field potential voltage timeseries from electrodes on {probe.name}",
             )
         return lfp
-    
+
     # images -------------------------------------------------------------------- #
 
     @functools.cached_property
@@ -1557,19 +1560,20 @@ class DynamicRoutingSession:
         implant: str = self.probe_insertions["implant"]
         return "2002" if "2002" in implant else implant
 
-
     @functools.cached_property
     def _all_licks(self) -> tuple[ndx_events.Events, ...]:
         """First item is always `processing['licks']` - the following items are only if sync
         is available, and are raw rising/falling edges of the lick sensor,
         for `acquisition`.
-        
+
         If sync isn't available, we only have start frames of licks, so we can't
-        filter by duration very accurately. 
+        filter by duration very accurately.
         """
-        max_contact = 0.5 # must factor-in lick_sensor staying high after end of contact
+        max_contact = (
+            0.5  # must factor-in lick_sensor staying high after end of contact
+        )
         # https://www.nature.com/articles/s41586-021-03561-9/figures/1
-        
+
         rising = self.sync_data.get_rising_edges("lick_sensor", units="seconds")
         falling = self.sync_data.get_falling_edges("lick_sensor", units="seconds")
         if falling[0] < rising[0]:
@@ -1580,9 +1584,9 @@ class DynamicRoutingSession:
 
         rising_falling = np.array([rising, falling]).T
         lick_duration = np.diff(rising_falling, axis=1).squeeze()
-        
+
         filtered_idx = lick_duration <= max_contact
-        
+
         # # remove licks that aren't part of a sequence of licks at at least ~3 Hz
         # max_interval = 0.5
         # for i, (r, f) in enumerate(rising_falling):
@@ -1594,18 +1598,19 @@ class DynamicRoutingSession:
         #         (next_start is None or next_start - f > max_interval)
         #     ):
         #         filtered_idx[i] = False
-                
+
         filtered = rising[filtered_idx]
-        
+
         return (
             ndx_events.Events(
                 timestamps=filtered if self.is_sync else self.sam.lickTimes,
                 name="licks",
-                description="times at which the subject made contact with a water spout" + (
+                description="times at which the subject made contact with a water spout"
+                + (
                     f" - filtered to exclude events with duration >{max_contact} s"
                     if self.is_sync
                     else "putatively the starts of licks, but may include other events such as grooming"
-                )
+                ),
             ),
             ndx_events.Events(
                 timestamps=rising,
@@ -1624,7 +1629,7 @@ class DynamicRoutingSession:
                 ),
             ),
         )
-            
+
     @functools.cached_property
     def _running_speed(self) -> pynwb.TimeSeries:
         name = "running_speed"

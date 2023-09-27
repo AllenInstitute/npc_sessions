@@ -157,7 +157,7 @@ def plot_video_frames_with_licks(
         for lick_idx, lick_time in enumerate(lick_times):
             v = utils.get_video_data(video_path)  # TODO open with upath from cloud
 
-            closest_frame_index = np.nanargmin(np.abs(frame_times - lick_time)) # type: ignore[operator]
+            closest_frame_index = np.nanargmin(np.abs(frame_times - lick_time))  # type: ignore[operator]
             frame_indices = np.arange(
                 closest_frame_index - FRAMES_EITHER_SIDE_OF_LICK,
                 closest_frame_index + FRAMES_EITHER_SIDE_OF_LICK + 1,
@@ -185,7 +185,7 @@ def plot_video_frames_with_licks(
                 ax.axis("off")
                 if frame_index == closest_frame_index:
                     trial = (
-                        np.searchsorted(        # type: ignore[call-overload]
+                        np.searchsorted(  # type: ignore[call-overload]
                             session.trials[:].start_time, lick_time, "right"
                         )
                         - 1
