@@ -903,7 +903,7 @@ class DynamicRoutingSession:
                 rate=timing_info.sampling_rate,
                 channel_conversion=None,
                 filtering="none",
-                conversion=0.195e6,  # bit/microVolt from open-ephys
+                conversion=0.195e-6,  # bit/microVolt from open-ephys
                 comments="",
                 resolution=0.195e-6,
                 description=f"local field potential voltage timeseries from electrodes on {probe.name}",
