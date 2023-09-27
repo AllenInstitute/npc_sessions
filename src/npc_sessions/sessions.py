@@ -865,27 +865,16 @@ class DynamicRoutingSession:
         return units
 
     @functools.cached_property
-    def raw_lfp_paths(self) -> tuple[upath.UPath, ...]:
-        return tuple(
-            p for p in self.raw_data_paths 
-            if (
-                ("LFP" in p.name or "LFP" in p.parent.name)
-                and p.suffix in ('.zarr', '.dat')
-            )
-        )
-        
-    @functools.cached_property
     def _raw_lfp(self) -> pynwb.ecephys.LFP:
         
         lfp = pynwb.ecephys.LFP()
         
         for probe in self.electrode_groups.values():
-            data_path = next(
-                (p for p in self.raw_lfp_paths if probe.name.lower() in p.name.lower()),
-                None,
+            
+            timing_info = next(
+                d for d in self.ephys_timing_data
+                if d.name.endswith('LFP') and probe.name.lower() in d.name.lower()
             )
-            if data_path is None:
-                continue
             
             electrode_table_region = hdmf.common.DynamicTableRegion(               
                 name='electrodes', # pynwb requires this not be renamed
@@ -894,31 +883,24 @@ class DynamicRoutingSession:
                 table=self.electrodes,
             )
             
-            if data_path.suffix == ".dat":
-                data = np.memmap(data_path, dtype=np.int16, mode='r').reshape(-1, 384)
-            elif data_path.suffix == ".zarr":
-                data = zarr.open(data_path, mode='r')["traces_seg0"]
-                # as long as we don't index into this array (ie to take a subset), it
-                # will be loaded into the electrical series for lazy access
-            else:
-                raise ValueError(f"unexpected file type for lfp data: {data_path}")
+            # as long as we don't index into the data array (ie to take a subset), it
+            # will be instantly inserted into the electrical series container for lazy access
+            if timing_info.device.compressed:
+                data = zarr.open(timing_info.device.compressed, mode='r')["traces_seg0"]
+            else: 
+                data = np.memmap(timing_info.device.continuous / 'continuous.dat', dtype=np.int16, mode='r').reshape(-1, 384)
             
-            timing = next(
-                d for d in self.ephys_timing_data
-                if d.name.endswith('LFP') and probe.name.lower() in d.name.lower()
-            )
             lfp.create_electrical_series(
                 name=probe.name, 
                 data=data,
                 electrodes=electrode_table_region,
-                starting_time=timing.start_time,
-                rate=timing.sampling_rate,
+                starting_time=timing_info.start_time,
+                rate=timing_info.sampling_rate,
                 channel_conversion=None,
                 filtering='none',
-                units='microvolts',
-                conversion=0.195, # bit/microVolt from open-ephys.. 
+                conversion=0.195e6, # bit/microVolt from open-ephys
                 comments='',
-                resolution=1/(2**16 * 0.195), # correct?
+                resolution=0.195e-6,
                 description=f'local field potential voltage timeseries from electrodes on {probe.name}',
             )
         return lfp
