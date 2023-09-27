@@ -60,7 +60,11 @@ jobs:
     - name: Publish
       run: |
         pdm publish
-        
+      
+    - name: Add requirements.txt
+      run: |
+        pdm export --without-hashes -o requirements.txt
+
     - name: Commit changes
       uses: EndBug/add-and-commit@v9
       with:
