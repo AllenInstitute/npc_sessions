@@ -276,7 +276,9 @@ def make_units_table(
             quality_metrics_path.parent.parent.glob("templates_average.npy")
         )
 
-        default_qc_path = next(sorting_precurated_path.glob('properties/default_qc.npy'))
+        default_qc_path = next(
+            sorting_precurated_path.glob("properties/default_qc.npy")
+        )
 
         device_name = next(
             device_name_probe
@@ -313,8 +315,8 @@ def make_units_table(
 
         with io.BytesIO(default_qc_path.read_bytes()) as f:
             default_qc = np.load(f, allow_pickle=True).tolist()
-        
-        df_device_metrics['default_qc'] = default_qc
+
+        df_device_metrics["default_qc"] = default_qc
         df_device_metrics["amplitude"] = amplitudes
         df_device_metrics["waveform_mean"] = mean_waveforms
         df_device_metrics["spike_times"] = unit_spike_times
