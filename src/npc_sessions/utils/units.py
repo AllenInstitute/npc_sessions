@@ -251,16 +251,16 @@ def get_units_spike_times(
 
 def make_units_table(
     session: str,
-    settings_xml_path: upath.UPath,
+    settings_xml_info: npc_sessions.SettingsXmlInfo,
     quality_metrics_paths: tuple[upath.UPath, ...],
     template_metrics_paths: tuple[upath.UPath, ...],
+    sorting_precurated_paths: tuple[upath.UPath, ...],
     unit_locations_paths: tuple[upath.UPath, ...],
     spike_sorted_cached_paths: tuple[upath.UPath, ...],
     devices_timing: Generator[npc_sessions.EphysTimingInfoOnSync, None, None],
 ) -> pd.DataFrame:
-    # TODO: add test to tests folder
+    # TODO: add tests
     units = None
-    settings_xml_info = npc_sessions.get_settings_xml_info(settings_xml_path)
     device_names = settings_xml_info.probe_letters
     electrode_positions = settings_xml_info.channel_pos_xy
     device_names_probe = tuple(f"Probe{name}" for name in device_names)
@@ -270,9 +270,13 @@ def make_units_table(
         template_metrics_path = template_metrics_paths[i]
         units_locations_path = unit_locations_paths[i]
         spike_sorted_cached_path = spike_sorted_cached_paths[i]
+        sorting_precurated_path = sorting_precurated_paths[i]
+
         templates_average_path = next(
             quality_metrics_path.parent.parent.glob("templates_average.npy")
         )
+
+        default_qc_path = next(sorting_precurated_path.glob('properties/default_qc.npy'))
 
         device_name = next(
             device_name_probe
@@ -281,6 +285,7 @@ def make_units_table(
             and device_name_probe in str(template_metrics_path)
             and device_name_probe in str(unit_locations_paths)
             and device_name_probe in str(spike_sorted_cached_path)
+            and device_name_probe in str(sorting_precurated_path)
         )
         device_timing_on_sync = next(
             timing for timing in devices_timing if device_name in timing.name
@@ -306,6 +311,10 @@ def make_units_table(
             df_device_metrics["ks_unit_id"].values,
         )
 
+        with io.BytesIO(default_qc_path.read_bytes()) as f:
+            default_qc = np.load(f, allow_pickle=True).tolist()
+        
+        df_device_metrics['default_qc'] = default_qc
         df_device_metrics["amplitude"] = amplitudes
         df_device_metrics["waveform_mean"] = mean_waveforms
         df_device_metrics["spike_times"] = unit_spike_times
@@ -314,7 +323,6 @@ def make_units_table(
             units = df_device_metrics
         else:
             units = pd.concat([units, df_device_metrics])
-        # TODO: figure out way to add default qc
 
     if units is not None:
         units.index = range(len(units))
