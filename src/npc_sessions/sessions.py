@@ -425,11 +425,12 @@ class DynamicRoutingSession:
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
-        modules = []
+        modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_sync:
             modules.extend(self._all_licks[1:])
         modules.append(self._rewards)
-        modules.append(self._raw_lfp)
+        if self.is_ephys:
+            modules.append(self._raw_lfp)
         if self.is_video:
             modules.extend(self._video_frame_times)
         return tuple(modules)
@@ -439,8 +440,8 @@ class DynamicRoutingSession:
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
-        # TODO add LFP
-        modules = []
+        # TODO add filtered, sub-sampled LFP
+        modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         modules.append(self._all_licks[0])
         modules.append(self._running_speed)
         return tuple(modules)
@@ -451,8 +452,9 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
         # TODO add RF maps
-        modules = []
-        modules.append(self.drift_maps)
+        modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
+        if self.is_ephys:
+            modules.append(self.drift_maps)
         return tuple(modules)
 
     # intervals ----------------------------------------------------------------- #
