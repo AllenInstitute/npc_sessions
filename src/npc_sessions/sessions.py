@@ -1039,7 +1039,7 @@ class DynamicRoutingSession:
         if not self.is_ephys:
             return False
         with contextlib.suppress(FileNotFoundError, ValueError):
-            if utils.get_electrode_files_from_s3(self.id):
+            if utils.get_tissuecyte_annotation_files_from_s3(self.id):
                 return True
         return False
 
