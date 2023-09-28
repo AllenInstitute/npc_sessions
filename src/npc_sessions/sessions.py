@@ -1544,7 +1544,7 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def ephys_settings_xml_data(self) -> utils.SettingsXmlInfo:
-        return utils.get_settings_xml_info(self.ephys_settings_xml_path)
+        return utils.get_settings_xml_data(self.ephys_settings_xml_path)
 
     @functools.cached_property
     def ephys_settings_xml_file_record(self) -> npc_lims.File:

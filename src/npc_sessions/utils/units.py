@@ -12,14 +12,14 @@ import pandas as pd
 import polars as pl
 import upath
 
-import npc_sessions
+import npc_sessions.utils as utils
 
 
 @functools.cache
 def get_units_electrodes(
-    session: str, units_method="codeocean_kilosort", electrode_method="tissuecyte"
+    session: str, sorting_method="codeocean_ks25", annotation_method="tissuecyte"
 ) -> pd.DataFrame:
-    if units_method == "codeocean_kilosort":
+    if sorting_method == "codeocean_ks25":
         units_path = npc_lims.get_units_codeoean_kilosort_path_from_s3(session)
         units = pd.read_csv(
             units_path,
@@ -28,7 +28,7 @@ def get_units_electrodes(
                 "secret": os.getenv("AWS_SECRET_ACCESS_KEY"),
             },
         )
-    if electrode_method == "tissuecyte":
+    if annotation_method == "tissuecyte":
         units = merge_units_electrodes(session, units)
 
     units.drop(columns=["electrodes"], inplace=True)
@@ -37,7 +37,7 @@ def get_units_electrodes(
 
 def merge_units_electrodes(session: str, units: pd.DataFrame) -> pd.DataFrame:
     try:
-        electrodes = npc_sessions.get_tissuecyte_electrodes_table(session)
+        electrodes = utils.get_tissuecyte_electrodes_table(session)
         units = units.merge(
             electrodes,
             left_on=["group_name", "peak_channel"],
@@ -59,11 +59,11 @@ def bin_spike_times(
 
 @functools.cache
 def get_unit_spike_times_dict(
-    session: str, unit_ids: tuple[str, ...], method="codeocean_kilosort"
+    session: str, unit_ids: tuple[str, ...], sorting_method="codeocean_ks25"
 ) -> dict[str, npt.NDArray[np.float64]]:
-    # change function call depending on method
+    # change function call depending on sorting_method
     spike_times_dict = {}
-    if method == "codeocean_kilosort":
+    if sorting_method == "codeocean_ks25":
         spike_times_path = npc_lims.get_spike_times_codeocean_kilosort_path_from_s3(
             session
         )
@@ -130,7 +130,7 @@ def get_sd_waveforms(session: str) -> npt.NDArray[np.float64]:
 
 def align_device_kilosort_spike_times(
     sorting_cached_file: upath.UPath,
-    device_timing_on_sync: npc_sessions.EphysTimingInfoOnSync,
+    device_timing_on_sync: utils.EphysTimingInfoOnSync,
 ) -> npt.NDArray[np.float64]:
     with io.BytesIO(sorting_cached_file.read_bytes()) as f:
         sorting_cached = np.load(f, allow_pickle=True)
@@ -251,16 +251,17 @@ def get_units_spike_times(
 
 def make_units_table(
     session: str,
-    settings_xml_info: npc_sessions.SettingsXmlInfo,
+    settings_xml_data_or_path: utils.PathLike | utils.SettingsXmlInfo,
     quality_metrics_paths: tuple[upath.UPath, ...],
     template_metrics_paths: tuple[upath.UPath, ...],
     sorting_precurated_paths: tuple[upath.UPath, ...],
     unit_locations_paths: tuple[upath.UPath, ...],
     spike_sorted_cached_paths: tuple[upath.UPath, ...],
-    devices_timing: Generator[npc_sessions.EphysTimingInfoOnSync, None, None],
+    devices_timing: Generator[utils.EphysTimingInfoOnSync, None, None],
 ) -> pd.DataFrame:
     # TODO: add tests
     units = None
+    settings_xml_info = utils.get_settings_xml_data(settings_xml_data_or_path)
     device_names = settings_xml_info.probe_letters
     electrode_positions = settings_xml_info.channel_pos_xy
     device_names_probe = tuple(f"Probe{name}" for name in device_names)

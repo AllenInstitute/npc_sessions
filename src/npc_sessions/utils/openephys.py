@@ -580,7 +580,7 @@ def assert_xml_files_match(*path: utils.PathLike) -> None:
             f"Not all paths are files, or they do not exist: {paths}"
         )
     if not utils.checksums_match(*paths):
-        data = [utils.get_settings_xml_info(p) for p in paths]
+        data = [utils.get_settings_xml_data(p) for p in paths]
         if not all(d == data[0] for d in data):
             raise AssertionError(f"XML files do not match: {paths}")
 

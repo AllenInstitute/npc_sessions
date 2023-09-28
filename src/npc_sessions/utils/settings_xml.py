@@ -63,13 +63,15 @@ class SettingsXmlInfo:
         )
 
 
-def get_settings_xml_data(path: utils.PathLike) -> ET.ElementTree:
+def get_settings_xml_etree(path: utils.PathLike) -> ET.ElementTree:
     """Info from a settings.xml file from an Open Ephys recording."""
     return ET.parse(io.BytesIO(utils.from_pathlike(path).read_bytes()))
 
 
-def get_settings_xml_info(path: utils.PathLike) -> SettingsXmlInfo:
-    et = get_settings_xml_data(path)
+def get_settings_xml_data(path: utils.PathLike) -> SettingsXmlInfo:
+    if isinstance(path, SettingsXmlInfo):
+        return path
+    et = get_settings_xml_etree(path)
     return SettingsXmlInfo(
         path=utils.from_pathlike(path),
         probe_serial_numbers=_probe_serial_numbers(et),
