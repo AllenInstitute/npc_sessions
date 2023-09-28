@@ -37,10 +37,10 @@ def get_units_electrodes(
 
 def merge_units_electrodes(session: str, units: pd.DataFrame) -> pd.DataFrame:
     try:
-        electrodes = npc_sessions.create_tissuecyte_electrodes_table(session)
+        electrodes = npc_sessions.get_tissuecyte_electrodes_table(session)
         units = units.merge(
             electrodes,
-            left_on=["device_name", "peak_channel"],
+            left_on=["group_name", "peak_channel"],
             right_on=["device_name", "channel"],
         )
         units.drop(columns=["channel"], inplace=True)

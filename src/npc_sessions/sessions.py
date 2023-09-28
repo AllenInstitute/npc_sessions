@@ -799,16 +799,40 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def electrodes(self) -> pynwb.core.DynamicTable:
-        """Individual channels on an inserted probe, including location, CCF coords."""
+        """Individual channels on an inserted probe, including location, CCF
+        coords.
+        
+        Currently assumes Neuropixels 1.0 probes.        
+        """
         if not self.is_ephys:
             raise AttributeError(f"{self.id} is not an ephys session")
+        
         electrodes = pynwb.file.ElectrodeTable()
-        for column in (
+        
+        column_names: tuple[str, ...] = (
             "rel_x",
             "rel_y",
-            "channel",  # "id", # "x", "y", "z",
-        ):
-            electrodes.add_column(name=column, description="")
+            "channel",
+            "reference",
+            "imp",
+        )
+        if self.is_annotated:
+            column_names = ("x", "y", "z", "structure") + column_names
+            ccf_df = utils.get_tissuecyte_electrodes_table(self.id)
+        column_description = {
+            "rel_x": "position on the short-axis of the probe surface, in microns",
+            "rel_y": "position on the long-axis of the probe surface, relative to the tip, in microns",
+            "channel": "channel index on the probe, as used in OpenEphys (0 at probe tip)",
+            "x": "x coordinate in the Allen CCF, +x is posterior",
+            "y": "y coordinate in the Allen CCF, +y is inferior",
+            "z": "z coordinate in the Allen CCF, +z is right",
+            "structure": "acronym for the Allen CCF structure that the electrode recorded from - less-specific than `location`",
+            "reference": "the reference electrode or referencing scheme used",
+            "imp": 'impedance, in ohms',
+        }
+        for column in column_names:
+            electrodes.add_column(name=column, description=column_description[column])
+            
         for probe_letter, channel_pos_xy in zip(
             self.ephys_settings_xml_data.probe_letters,
             self.ephys_settings_xml_data.channel_pos_xy,
@@ -816,17 +840,20 @@ class DynamicRoutingSession:
             group = self.electrode_groups[f"probe{probe_letter}"]
             for channel_label, (x, y) in channel_pos_xy.items():
                 channel_idx = int(channel_label.strip("CH"))
-                electrodes.add_row(
-                    # x=,
-                    # y=,
-                    # z=,
-                    # TODO: get ccf coordinates
-                    location="unknown",
+                kwargs: dict[str, str | float] = dict(
                     group=group,
                     group_name=group.name,
                     rel_x=x,
                     rel_y=y,
                     channel=channel_idx,
+                    imp=150e3,  # https://www.neuropixels.org/_files/ugd/832f20_4a14406ba1204e60ae8534b09e201b49.pdf
+                    reference='tip',
+                    location="unannotated",
+                )
+                if self.is_annotated:
+                    kwargs |= ccf_df.query(f'group_name == {group.name!r}').query(f'channel == {channel_idx}').iloc[0].to_dict()
+                electrodes.add_row(
+                    **kwargs,
                 )
         return electrodes
 
