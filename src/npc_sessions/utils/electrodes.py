@@ -21,7 +21,7 @@ def get_electrode_files_from_s3(
     >>> assert len(electrode_files) > 0
     """
     session = npc_session.SessionRecord(session)
-    day = npc_lims.get_day(session)
+    day = npc_lims.get_session_info(session).day
     subject_electrode_network_path = S3_ELECTRODE_PATH / str(session.subject.id)
 
     if not subject_electrode_network_path.exists():

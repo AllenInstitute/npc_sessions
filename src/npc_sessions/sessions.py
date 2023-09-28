@@ -16,7 +16,6 @@ import h5py
 import hdmf
 import ndx_events
 import npc_lims
-import npc_lims.status.tracked_sessions as tracked_sessions
 import npc_session
 import numpy as np
 import numpy.typing as npt
@@ -36,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None, None]:
-    """Uploaded sessions, tracked in npc_lims via `tracked_sessions.yaml`, newest
+    """Uploaded sessions, tracked in npc_lims via `get_tracked_sessions()`, newest
     to oldest.
 
     - sessions with known issues are excluded
@@ -79,7 +78,7 @@ def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None,
     >>> for session in get_sessions(is_sync=False):             # doctest: +SKIP
     ...     trials_dfs.append(session.trials)
     """
-    for session in sorted(npc_lims.tracked, key=lambda x: x.date, reverse=True):
+    for session in sorted(npc_lims.get_tracked_sessions(), key=lambda x: x.date, reverse=True):
         if session.is_uploaded and str(session.id) not in config.session_issues:
             session_kwargs = config.session_kwargs.get(str(session.id), {})
             yield DynamicRoutingSession(
@@ -937,11 +936,8 @@ class DynamicRoutingSession:
     # session ------------------------------------------------------------------- #
 
     @functools.cached_property
-    def info(self) -> tracked_sessions.SessionInfo | None:
-        return next(
-            (info for info in npc_lims.tracked if info.id == self.id),
-            None,
-        )
+    def info(self) -> npc_lims.SessionInfo | None:
+        return npc_lims.get_session_info(self.id)
 
     @functools.cached_property
     def is_task(self) -> bool:

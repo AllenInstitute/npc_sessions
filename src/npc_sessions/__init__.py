@@ -1,7 +1,7 @@
 from collections.abc import Generator
 
 import dotenv
-from npc_lims import tracked
+import npc_lims
 
 from npc_sessions.plots import *
 from npc_sessions.sessions import *
