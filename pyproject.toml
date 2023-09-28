@@ -75,8 +75,6 @@ ruff = "ruff check src --fix-only"
 black = "black src"
 test = "pytest --cov --cov-report=xml"
 mypy = "mypy src --install-types --non-interactive"
-bumpver = "pdm bump micro"
-tag = "pdm bump tag"
 
 [tool.pdm.scripts.prebuild]
 composite = [
@@ -92,10 +90,21 @@ composite = [
     "pdm publish --repository testpypi",
 ]
 
+[tool.pdm.scripts.bump]
+composite = [
+    "pdm self add pdm-bump",
+    "pdm bump micro",
+]
+
+[tool.pdm.scripts.tag]
+composite = [
+    "pdm self add pdm-bump",
+    "pdm bump tag",
+]
+
 [tool.pdm.scripts.pub]
 composite = [
     "prebuild",
-    "pdm install --plugins",
     "bumpver",
     "pdm publish",
 ]
