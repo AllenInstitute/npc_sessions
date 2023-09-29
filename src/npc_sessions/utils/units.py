@@ -128,13 +128,11 @@ def get_sd_waveforms(session: str) -> npt.NDArray[np.float64]:
     return sd_waveforms
 
 
-def align_device_kilosort_spike_times(
-    sorting_cached_file: upath.UPath,
+def align_device_spike_times_ks25(
+    sorting_cached: dict[str, npt.NDArray],
     device_timing_on_sync: utils.EphysTimingInfoOnSync,
 ) -> npt.NDArray[np.float64]:
-    with io.BytesIO(sorting_cached_file.read_bytes()) as f:
-        sorting_cached = np.load(f, allow_pickle=True)
-        spike_times_unaligned = sorting_cached["spike_indexes_seg0"]
+    spike_times_unaligned = sorting_cached["spike_indexes_seg0"]
 
     # directly getting spike times from sorted output, don't need sample start it seems
     # spike_times_unaligned = spike_times_unaligned - device_timing_on_sync.device.start_sample
@@ -164,37 +162,16 @@ def get_peak_channels(
     return peak_channels
 
 
-def make_units_metrics_device_table(
-    quality_metrics_path: upath.UPath,
-    template_metrics_path: upath.UPath,
-    units_locations_path: upath.UPath,
+def make_units_metrics_device_table_ks25(
+    quality_metrics_device_df: pd.DataFrame,
+    template_metrics_device_df: pd.DataFrame,
+    units_locations: npt.NDArray[np.floating],
     device_name: str,
     electrode_positions: tuple[dict[str, tuple[int, int]], ...],
 ) -> pd.DataFrame:
-    df_quality_metrics = pd.read_csv(
-        quality_metrics_path,
-        storage_options={
-            "key": os.getenv("AWS_ACCESS_KEY_ID"),
-            "secret": os.getenv("AWS_SECRET_ACCESS_KEY"),
-        },
+    df_quality_template_metrics = quality_metrics_device_df.merge(
+        template_metrics_device_df, left_index=True, right_index=True
     )
-    df_quality_metrics.rename(columns={"Unnamed: 0": "ks_unit_id"}, inplace=True)
-
-    df_template_metrics = pd.read_csv(
-        template_metrics_path,
-        storage_options={
-            "key": os.getenv("AWS_ACCESS_KEY_ID"),
-            "secret": os.getenv("AWS_SECRET_ACCESS_KEY"),
-        },
-    )
-    df_template_metrics.rename(columns={"Unnamed: 0": "ks_unit_id"}, inplace=True)
-
-    df_quality_template_metrics = df_quality_metrics.merge(
-        df_template_metrics, on="ks_unit_id"
-    )
-
-    with io.BytesIO(units_locations_path.read_bytes()) as f:
-        units_locations = np.load(f, allow_pickle=True)
 
     peak_channels = get_peak_channels(units_locations, electrode_positions)
     df_quality_template_metrics["peak_channel"] = peak_channels
@@ -205,14 +182,11 @@ def make_units_metrics_device_table(
     return df_quality_template_metrics
 
 
-def get_amplitudes_mean_waveforms(
-    templates_average_path: upath.UPath, ks_unit_ids: npt.NDArray[np.int64]
+def get_amplitudes_mean_waveforms_ks25(
+    templates: npt.NDArray[np.floating], ks_unit_ids: npt.NDArray[np.int64]
 ) -> tuple[list[float], list[npt.NDArray[np.float64]]]:
     unit_amplitudes: list[float] = []
     templates_mean: list[npt.NDArray[np.float64]] = []
-
-    with io.BytesIO(templates_average_path.read_bytes()) as f:
-        templates = np.load(f, allow_pickle=True)
 
     """
     @property
@@ -230,16 +204,14 @@ def get_amplitudes_mean_waveforms(
     return unit_amplitudes, templates_mean
 
 
-def get_units_spike_times(
-    sorting_cached_file: upath.UPath,
+def get_units_spike_times_ks25(
+    sorting_cached: dict[str, npt.NDArray],
     spike_times_aligned: npt.NDArray[np.float64],
     ks_unit_ids: npt.NDArray[np.int64],
 ) -> list[npt.NDArray[np.float64]]:
     units_spike_times: list[npt.NDArray[np.float64]] = []
 
-    with io.BytesIO(sorting_cached_file.read_bytes()) as f:
-        sorting_cached = np.load(f, allow_pickle=True)
-        spike_labels = sorting_cached["spike_labels_seg0"]
+    spike_labels = sorting_cached['spike_labels_seg0']
 
     for ks_unit_id in ks_unit_ids:
         label_indices = np.argwhere(spike_labels == ks_unit_id)
@@ -249,78 +221,56 @@ def get_units_spike_times(
     return units_spike_times
 
 
-def make_units_table(
+def make_units_table_from_spike_interface_ks25(
     session: str,
     settings_xml_data_or_path: utils.PathLike | utils.SettingsXmlInfo,
-    quality_metrics_paths: tuple[upath.UPath, ...],
-    template_metrics_paths: tuple[upath.UPath, ...],
-    sorting_precurated_paths: tuple[upath.UPath, ...],
-    unit_locations_paths: tuple[upath.UPath, ...],
-    spike_sorted_cached_paths: tuple[upath.UPath, ...],
     devices_timing: Generator[utils.EphysTimingInfoOnSync, None, None],
 ) -> pd.DataFrame:
-    # TODO: add tests
+    """
+    >>> devices_timing = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'))
+    >>> settings_xml_data = utils.get_settings_xml_data(npc_lims.get_settings_xml_path_from_s3('662892_20230821'))
+    >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', settings_xml_data, devices_timing)
+    CCF annotations for 662892_2023-08-21 have not been uploaded to s3. Returning units without electrodes
+    >>> len(units[units['device_name'] == 'probeA'])
+    237
+    """
     units = None
     settings_xml_info = utils.get_settings_xml_data(settings_xml_data_or_path)
     device_names = settings_xml_info.probe_letters
     electrode_positions = settings_xml_info.channel_pos_xy
-    device_names_probe = tuple(f"Probe{name}" for name in device_names)
+    device_names_probe = tuple(f"probe{name}" for name in device_names)
+    spike_interface_data = utils.SpikeInterfaceKS25Data(session)
 
-    for i in range(len(quality_metrics_paths)):
-        quality_metrics_path = quality_metrics_paths[i]
-        template_metrics_path = template_metrics_paths[i]
-        units_locations_path = unit_locations_paths[i]
-        spike_sorted_cached_path = spike_sorted_cached_paths[i]
-        sorting_precurated_path = sorting_precurated_paths[i]
-
-        templates_average_path = next(
-            quality_metrics_path.parent.parent.glob("templates_average.npy")
-        )
-
-        default_qc_path = next(
-            sorting_precurated_path.glob("properties/default_qc.npy")
-        )
-
-        device_name = next(
-            device_name_probe
-            for device_name_probe in device_names_probe
-            if device_name_probe in str(quality_metrics_path)
-            and device_name_probe in str(template_metrics_path)
-            and device_name_probe in str(unit_locations_paths)
-            and device_name_probe in str(spike_sorted_cached_path)
-            and device_name_probe in str(sorting_precurated_path)
-        )
+    for device_name in device_names_probe:
         device_timing_on_sync = next(
-            timing for timing in devices_timing if device_name in timing.name
+            timing for timing in devices_timing if device_name[0].upper()+device_name[1:] in timing.name
         )
 
-        df_device_metrics = make_units_metrics_device_table(
-            quality_metrics_path,
-            template_metrics_path,
-            units_locations_path,
+        df_device_metrics = make_units_metrics_device_table_ks25(
+            spike_interface_data.quality_metrics_df(device_name),
+            spike_interface_data.template_metrics_df(device_name),
+            spike_interface_data.unit_locations(device_name),
             device_name,
             electrode_positions,
         )
 
-        amplitudes, mean_waveforms = get_amplitudes_mean_waveforms(
-            templates_average_path, df_device_metrics["ks_unit_id"].values
+        amplitudes, mean_waveforms = get_amplitudes_mean_waveforms_ks25(
+            spike_interface_data.templates_average(device_name), df_device_metrics.index.values
         )
-        spike_times_aligned = align_device_kilosort_spike_times(
-            spike_sorted_cached_path, device_timing_on_sync
+        spike_times_aligned = align_device_spike_times_ks25(
+            spike_interface_data.sorting_cached(device_name), device_timing_on_sync
         )
-        unit_spike_times = get_units_spike_times(
-            spike_sorted_cached_path,
+        unit_spike_times = get_units_spike_times_ks25(
+            spike_interface_data.sorting_cached(device_name),
             spike_times_aligned,
-            df_device_metrics["ks_unit_id"].values,
+            df_device_metrics.index.values,
         )
 
-        with io.BytesIO(default_qc_path.read_bytes()) as f:
-            default_qc = np.load(f, allow_pickle=True).tolist()
-
-        df_device_metrics["default_qc"] = default_qc
+        df_device_metrics["default_qc"] = spike_interface_data.default_qc(device_name)
         df_device_metrics["amplitude"] = amplitudes
         df_device_metrics["waveform_mean"] = mean_waveforms
         df_device_metrics["spike_times"] = unit_spike_times
+        df_device_metrics['ks_unit_id'] = df_device_metrics.index.to_list()
 
         if units is None:
             units = df_device_metrics
