@@ -129,16 +129,24 @@ class SpikeInterfaceKS25Data:
         return self.read_csv(self.format_path(self.postprocessed(probe), "template_metrics", "metrics.csv"))
     
     @functools.cache
-    def templates_average_array(self, probe: str) -> npt.NDArray[np.floating]:
+    def templates_average(self, probe: str) -> npt.NDArray[np.floating]:
         return np.load(io.BytesIO(self.format_path(self.postprocessed(probe), "templates_average.npy").read_bytes()))
     
     @functools.cache
-    def templates_average_std(self, probe: str) -> npt.NDArray[np.floating]:
+    def templates_std(self, probe: str) -> npt.NDArray[np.floating]:
         return np.load(io.BytesIO(self.format_path(self.postprocessed(probe), "templates_std.npy").read_bytes()))
     
     @functools.cache
-    def spikesorted_cached_array(self, probe: str) -> dict[str, npt.NDArray]:
+    def sorting_cached(self, probe: str) -> dict[str, npt.NDArray]:
         return np.load(io.BytesIO(self.format_path(self.spikesorted(probe), "sorting_cached.npz").read_bytes()), allow_pickle=True)
+    
+    @functools.cache
+    def default_qc(self, probe: str) -> npt.NDArray[np.floating]:
+        return np.load(io.BytesIO(self.format_path(self.sorting_precurated(probe), "properties", "default_qc.npy").read_bytes()))
+    
+    @functools.cache
+    def unit_locations(self, probe: str) -> npt.NDArray[np.floating]:
+        return np.load(io.BytesIO(self.format_path(self.postprocessed(probe), "unit_locations", "unit_locations.npy").read_bytes()))
 
 
 if __name__ == "__main__":
