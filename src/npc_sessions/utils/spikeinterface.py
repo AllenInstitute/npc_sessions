@@ -150,7 +150,14 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def unit_locations(self, probe: str) -> npt.NDArray[np.floating]:
         return np.load(io.BytesIO(self.format_path(self.postprocessed(probe), "unit_locations", "unit_locations.npy").read_bytes()))
-
+    
+    @functools.cache
+    def sorting_json(self, probe: str) -> dict:
+        return self.read_json(self.format_path(self.postprocessed(probe), "sorting.json"))
+    
+    @functools.cache
+    def electrode_locations_xy(self, probe: str) -> npt.NDArray[np.floating]:
+        return np.array(self.postprocessed(probe)["annotations"]["__sorting_info__"]["properties"]["location"])
 
 if __name__ == "__main__":
     import doctest
