@@ -22,7 +22,7 @@ import upath
 
 import npc_sessions.utils as utils
 
-def get_spikeinterface_data(session_or_root_path: str | npc_session.SessionRecord | utils.PathLike) -> SpikeInterfaceKS25Data:
+def get_spikeinterface_data(session_or_root_path: str | npc_session.SessionRecord | utils.PathLike | SpikeInterfaceKS25Data) -> SpikeInterfaceKS25Data:
     """Return a SpikeInterfaceKS25Data object for a session.
     
     >>> paths = get_spikeinterface_data('668759_20230711')

@@ -68,7 +68,7 @@ def get_settings_xml_etree(path: utils.PathLike) -> ET.ElementTree:
     return ET.parse(io.BytesIO(utils.from_pathlike(path).read_bytes()))
 
 
-def get_settings_xml_data(path: utils.PathLike) -> SettingsXmlInfo:
+def get_settings_xml_data(path: utils.PathLike | SettingsXmlInfo) -> SettingsXmlInfo:
     if isinstance(path, SettingsXmlInfo):
         return path
     et = get_settings_xml_etree(path)
