@@ -133,7 +133,7 @@ def get_ephys_timing_on_pxi(
             recording_dir / "sync_messages.txt"
         )  # includes name of each input device used (probe, nidaq)
         for device in device_to_sync_messages_data:
-            if only_devices_including and only_devices_including not in device:
+            if only_devices_including and only_devices_including.lower() not in device.lower():
                 continue
             continuous = recording_dir / "continuous" / device
             if not continuous.exists():
