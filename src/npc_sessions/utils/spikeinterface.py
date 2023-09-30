@@ -157,7 +157,7 @@ class SpikeInterfaceKS25Data:
     
     @functools.cache
     def electrode_locations_xy(self, probe: str) -> npt.NDArray[np.floating]:
-        return np.array(self.postprocessed(probe)["annotations"]["__sorting_info__"]["properties"]["location"])
+        return np.array(self.sorting_json(probe)["annotations"]["__sorting_info__"]["properties"]["location"])
 
 if __name__ == "__main__":
     import doctest
