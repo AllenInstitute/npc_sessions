@@ -1159,7 +1159,7 @@ class SyncDataset:
         start_time: float = 0.0,
         end_time: float | None = None,
         auto_show: bool = True,
-    ) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes | Iterable[matplotlib.axes.Axes]]:
+    ) -> matplotlib.figure.Figure:
         """
         Plots a list of bits.
         """
@@ -1178,7 +1178,7 @@ class SyncDataset:
         if auto_show:
             plt.show()
 
-        return f, axes
+        return f
 
     def plot_bit(
         self,
@@ -1188,7 +1188,7 @@ class SyncDataset:
         auto_show: bool = True,
         axes=None,
         name="",
-    ) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes | Iterable[matplotlib.axes.Axes]]:
+    ) -> matplotlib.figure.Figure:
         """
         Plots a specific bit at a specific time period.
         """
@@ -1314,7 +1314,7 @@ class SyncDataset:
             labels.append("diode-measured sync square")
             self.plot_bit(5, x0, x1, axes=axes[ind], auto_show=False)
             labels.append("stim running or ends of block")
-            axes[ind].set_xlim((*x0, x1))
+            axes[ind].set_xlim((x0, x1))
             axes[ind].legend(
                 labels,
                 fontsize=8,
@@ -1459,7 +1459,7 @@ class SyncDataset:
             ax.set_yticks(ticks_with_period)
             if idx == 0:
                 ax.set_yticklabels([f"{_:.3f}" for _ in ticks_with_period])
-        fig.set_tight_layout(True)
+        fig.set_layout_engine('tight')
 
         return fig, fig.axes
 
