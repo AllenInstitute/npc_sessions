@@ -10,7 +10,7 @@ authors = [
 ]
 dependencies = [
     "npc-session>=0.1.22",
-    "npc-lims>=0.1.69",
+    "npc-lims>=0.1.70",
     "polars[all]>=0.18.14",
     "h5py>=3.9.0",
     "pandas[aws,excel,fss,hdf5,performance,plot]>=1.1.5",
