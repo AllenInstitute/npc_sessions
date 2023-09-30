@@ -624,8 +624,6 @@ class DynamicRoutingSession:
             if self.task_stim_name in k and self.is_task:
                 intervals.append(self.trials)
                 intervals.append(self.performance)
-                continue
-
             if not any(
                 existing := [i for i in intervals if i.name == v.__class__.__name__]
             ):
