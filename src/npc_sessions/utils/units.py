@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import io
 import os
+import concurrent.futures
 from typing import Iterable
 
 import npc_lims
@@ -149,7 +150,7 @@ def get_amplitudes_mean_waveforms_ks25(
         nbefore = int(self._params["ms_before"] * self.sampling_frequency / 1000.0)
         return nbefore
     """
-    before = 90  # from spike interface, ms_before = 3, TODO: look at this further
+    before = 90  # from spike interface, ms_before = 3, # TODO: #38 @arjunsridhar12345 look at this further
     for index, _ks_unit_id in enumerate(ks_unit_ids):
         template = templates[index, :, :]
         values = -template[before, :]
@@ -220,7 +221,7 @@ def make_units_table_from_spike_interface_ks25(
         unit_spike_times = get_units_spike_times_ks25(
             spike_interface_data.sorting_cached(electrode_group),
             spike_times_aligned,
-            df_device_metrics.index.values,
+            df_device_metrics.index.values, # TODO #37 @arjunsridhar12345 is this safe?
         )
 
         df_device_metrics["default_qc"] = spike_interface_data.default_qc(electrode_group)
