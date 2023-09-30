@@ -208,7 +208,7 @@ no_implicit_optional = true
 show_error_codes = true
 ignore_missing_imports = true
 implicit_reexport = false
-exclude = ["src/npc_sessions/plotting"] 
+exclude = ["src/npc_sessions/plots"] 
 
 [build-system]
 requires = [
