@@ -42,7 +42,7 @@ def merge_units_electrodes(session: str, units: pd.DataFrame) -> pd.DataFrame:
         units = units.merge(
             electrodes,
             left_on=["group_name", "peak_channel"],
-            right_on=["device_name", "channel"],
+            right_on=["electrode_group", "channel"],
         )
         units.drop(columns=["channel"], inplace=True)
     except FileNotFoundError as e:
@@ -141,7 +141,7 @@ def make_units_metrics_device_table_ks25(
     quality_metrics_device_df: pd.DataFrame,
     template_metrics_device_df: pd.DataFrame,
     units_locations: npt.NDArray[np.floating],
-    device_name: str,
+    electrode_group: str,
     electrode_positions: tuple[dict[str, tuple[int, int]], ...],
 ) -> pd.DataFrame:
     df_quality_template_metrics = quality_metrics_device_df.merge(
@@ -150,8 +150,8 @@ def make_units_metrics_device_table_ks25(
 
     peak_channels = get_peak_channels(units_locations, electrode_positions)
     df_quality_template_metrics["peak_channel"] = peak_channels
-    df_quality_template_metrics["device_name"] = [
-        device_name for i in range(len(df_quality_template_metrics))
+    df_quality_template_metrics["electrode_group"] = [
+        electrode_group for i in range(len(df_quality_template_metrics))
     ]
 
     return df_quality_template_metrics
@@ -206,7 +206,7 @@ def make_units_table_from_spike_interface_ks25(
     >>> settings_xml_data = utils.get_settings_xml_data(npc_lims.get_settings_xml_path_from_s3('662892_20230821'))
     >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', settings_xml_data, devices_timing)
     CCF annotations for 662892_2023-08-21 have not been uploaded to s3. Returning units without electrodes
-    >>> len(units[units['device_name'] == 'probeA'])
+    >>> len(units[units['electrode_group'] == 'probeA'])
     237
     """
     units = pd.DataFrame()
@@ -219,29 +219,29 @@ def make_units_table_from_spike_interface_ks25(
         if not device_timing_on_sync.device.name.endswith('-AP'):
             continue
         
-        device_name = npc_session.ProbeRecord(device_timing_on_sync.device)
+        electrode_group = npc_session.ProbeRecord(device_timing_on_sync.device)
 
         df_device_metrics = make_units_metrics_device_table_ks25(
-            spike_interface_data.quality_metrics_df(device_name),
-            spike_interface_data.template_metrics_df(device_name),
-            spike_interface_data.unit_locations(device_name),
-            device_name,
+            spike_interface_data.quality_metrics_df(electrode_group),
+            spike_interface_data.template_metrics_df(electrode_group),
+            spike_interface_data.unit_locations(electrode_group),
+            electrode_group,
             electrode_positions,
         )
 
         amplitudes, mean_waveforms = get_amplitudes_mean_waveforms_ks25(
-            spike_interface_data.templates_average(device_name), df_device_metrics.index.values
+            spike_interface_data.templates_average(electrode_group), df_device_metrics.index.values
         )
         spike_times_aligned = get_aligned_spike_times(
-            spike_interface_data.sorting_cached(device_name)["spike_indexes_seg0"], device_timing_on_sync
+            spike_interface_data.sorting_cached(electrode_group)["spike_indexes_seg0"], device_timing_on_sync
         )
         unit_spike_times = get_units_spike_times_ks25(
-            spike_interface_data.sorting_cached(device_name),
+            spike_interface_data.sorting_cached(electrode_group),
             spike_times_aligned,
             df_device_metrics.index.values,
         )
 
-        df_device_metrics["default_qc"] = spike_interface_data.default_qc(device_name)
+        df_device_metrics["default_qc"] = spike_interface_data.default_qc(electrode_group)
         df_device_metrics["amplitude"] = amplitudes
         df_device_metrics["waveform_mean"] = mean_waveforms
         df_device_metrics["spike_times"] = unit_spike_times
@@ -254,7 +254,7 @@ def make_units_table_from_spike_interface_ks25(
 def format_unit_ids(units: pd.DataFrame, session: str | npc_session.SessionRecord) -> pd.DataFrame:
     """Add session and probe letter"""
     units["unit_id"] = [
-        f"{session}_{row.device_name.replace('probe', '')}-{row.unit_id}" 
+        f"{session}_{row.electrode_group.replace('probe', '')}-{row.unit_id}" 
         if session not in row.unit_id
         else row.unit_id
         for _, row in units.iterrows()
