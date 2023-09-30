@@ -22,7 +22,8 @@ import numpy.typing as npt
 from typing_extensions import Self, TypeAlias
 
 if TYPE_CHECKING:
-    import matplotlib.figure as fig
+    import matplotlib.axes
+    import matplotlib.figure
     import matplotlib.pyplot as plt
 
 import npc_sessions.utils as utils
@@ -1091,7 +1092,7 @@ class SyncDataset:
                         labels.append("stim vsyncs")
                         ax.plot(dvs, 0.5 * np.ones_like(dvs), "|", ms=20)
                         labels.append("diode_flips")
-                        ax.set_xlim([start_time, end_time])
+                        ax.set_xlim((start_time, end_time))
                         fig.axes[0].legend(
                             labels,
                             fontsize=8,
@@ -1158,7 +1159,7 @@ class SyncDataset:
         start_time: float = 0.0,
         end_time: float | None = None,
         auto_show: bool = True,
-    ) -> tuple[fig.Figure, plt.Axes | Iterable[plt.Axes]]:
+    ) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes | Iterable[matplotlib.axes.Axes]]:
         """
         Plots a list of bits.
         """
@@ -1187,7 +1188,7 @@ class SyncDataset:
         auto_show: bool = True,
         axes=None,
         name="",
-    ) -> tuple[fig.Figure, plt.Axes | Iterable[plt.Axes]]:
+    ) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes | Iterable[matplotlib.axes.Axes]]:
         """
         Plots a specific bit at a specific time period.
         """
@@ -1252,7 +1253,7 @@ class SyncDataset:
         start_time: float = 0.0,
         end_time: float | None = None,
         auto_show: bool = True,
-    ) -> tuple[fig.Figure, plt.Axes | Iterable[plt.Axes]]:
+    ) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes | Iterable[matplotlib.axes.Axes]]:
         """
         Plots specific lines at a specific time period.
         """
@@ -1286,7 +1287,7 @@ class SyncDataset:
             return stim_running
         return np.array([block[-1] for block in self.frame_display_time_blocks])
 
-    def plot_stim_onsets(self) -> tuple[fig.Figure, list[plt.Axes]]:
+    def plot_stim_onsets(self) -> tuple[matplotlib.figure.Figure, list[matplotlib.axes.Axes]]:
         import matplotlib.pyplot as plt
 
         # plot beginning of stims
@@ -1313,7 +1314,7 @@ class SyncDataset:
             labels.append("diode-measured sync square")
             self.plot_bit(5, x0, x1, axes=axes[ind], auto_show=False)
             labels.append("stim running or ends of block")
-            axes[ind].set_xlim([x0, x1])
+            axes[ind].set_xlim((*x0, x1))
             axes[ind].legend(
                 labels,
                 fontsize=8,
@@ -1329,7 +1330,7 @@ class SyncDataset:
                     legend.remove()
         return fig, axes
 
-    def plot_stim_offsets(self) -> tuple[fig.Figure, list[plt.Axes]]:
+    def plot_stim_offsets(self) -> tuple[matplotlib.figure.Figure, list[matplotlib.axes.Axes]]:
         import matplotlib.pyplot as plt
 
         # plot end of stims
@@ -1357,7 +1358,7 @@ class SyncDataset:
             labels.append("diode-measured sync square")
             self.plot_bit(5, x0, x1, axes=axes[ind], auto_show=False)
             labels.append("stim running or ends of block")
-            axes[ind].set_xlim([x0, x1])
+            axes[ind].set_xlim((x0, x1))
             axes[ind].legend(
                 labels,
                 fontsize=8,
@@ -1375,7 +1376,7 @@ class SyncDataset:
 
     def plot_diode_measured_sync_square_flips(
         self,
-    ) -> tuple[fig.Figure, list[plt.Axes]]:
+    ) -> tuple[matplotlib.figure.Figure, list[matplotlib.axes.Axes]]:
         """Plot the diode-measured sync-square changes that should occur every 1 s while stim is running."""
         import matplotlib.pyplot as plt
 
