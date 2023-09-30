@@ -35,11 +35,10 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         # update-python: false
-        cache: false
+        cache: true
         
     - name: Install dependencies
       run: |
-        # rm pdm.lock
         eval $(pdm venv activate)
         pdm install -G dev
         pdm update
@@ -53,11 +52,11 @@ jobs:
         CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
         CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
       run: |
-        pdm prebuild
+        pdm run prebuild
         
     - name: Bump project version
       run: |
-        pdm bumpver
+        pdm run bumpver
                 
     - name: Publish
       run: |
@@ -75,7 +74,7 @@ jobs:
         
     - name: Tag commit
       run: |
-        pdm tag
+        pdm run tag
         git push --tags
 
     - name: Upload coverage reports to Codecov
