@@ -731,7 +731,7 @@ class DynamicRoutingSession:
                 continue
             records.append(self.get_epoch_record(stim).nwb)
 
-        for record in sorted(records, key=lambda _: _["start_time"]):
+        for record in sorted(records, key=lambda _: float(_["start_time"])):
             epochs.add_interval(
                 **record,
             )
