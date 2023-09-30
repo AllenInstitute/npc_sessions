@@ -6,6 +6,7 @@ import os
 from typing import Iterable
 
 import npc_lims
+import npc_session
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -196,7 +197,7 @@ def get_units_spike_times_ks25(
 
 
 def make_units_table_from_spike_interface_ks25(
-    session: str,
+    session_or_spikeinterface_data_or_path: str | npc_session.SessionRecord | utils.PathLike | utils.SpikeInterfaceKS25Data,
     settings_xml_data_or_path: utils.PathLike | utils.SettingsXmlInfo,
     devices_timing: Iterable[utils.EphysTimingInfoOnSync],
 ) -> pd.DataFrame:
@@ -213,7 +214,7 @@ def make_units_table_from_spike_interface_ks25(
     device_names = settings_xml_info.probe_letters
     electrode_positions = settings_xml_info.channel_pos_xy
     device_names_probe = tuple(f"probe{name}" for name in device_names)
-    spike_interface_data = utils.SpikeInterfaceKS25Data(session)
+    spike_interface_data = utils.get_spikeinterface_data(session_or_spikeinterface_data_or_path)
 
     for device_name in device_names_probe:
         device_timing_on_sync = next(
@@ -251,13 +252,17 @@ def make_units_table_from_spike_interface_ks25(
         else:
             units = pd.concat([units, df_device_metrics])
 
-    if units is not None:
-        units.index = range(len(units))
-        units["unit_id"] = [f"{session}_{i}" for i in range(len(units))]
-        units = merge_units_electrodes(session, units)
-
     return units
 
+def format_unit_ids(units: pd.DataFrame, session: str | npc_session.SessionRecord) -> pd.DataFrame:
+    """Add session and probe letter"""
+    units["unit_id"] = [
+        f"{session}_{row.device_name.replace('probe', '')}-{row.unit_id}" 
+        if session not in row.unit_id
+        else row.unit_id
+        for _, row in units.iterrows()
+        ]
+    return units
 
 if __name__ == "__main__":
     import doctest
