@@ -209,7 +209,7 @@ def make_units_table_from_spike_interface_ks25(
     >>> len(units[units['device_name'] == 'probeA'])
     237
     """
-    units = None
+    units = pd.DataFrame()
     settings_xml_info = utils.get_settings_xml_data(settings_xml_data_or_path)
     device_names = settings_xml_info.probe_letters
     electrode_positions = settings_xml_info.channel_pos_xy
@@ -247,10 +247,7 @@ def make_units_table_from_spike_interface_ks25(
         df_device_metrics["spike_times"] = unit_spike_times
         df_device_metrics['ks_unit_id'] = df_device_metrics.index.to_list()
 
-        if units is None:
-            units = df_device_metrics
-        else:
-            units = pd.concat([units, df_device_metrics])
+        units = pd.concat([units, df_device_metrics])
 
     return units
 
