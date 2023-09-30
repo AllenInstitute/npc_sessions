@@ -884,7 +884,14 @@ class DynamicRoutingSession:
     def _units(self) -> pl.DataFrame:
         if not self.is_sorted:
             raise AttributeError(f"{self.id} hasn't been spike-sorted")
-        return utils.get_units_electrodes_spike_times(self.id)
+        return utils.format_unit_ids(
+            units=utils.make_units_table_from_spike_interface_ks25(
+                    self.id, #TODO keep spikeinterface obj in self
+                    self.ephys_settings_xml_data,
+                    self.ephys_timing_data,
+                ), 
+            session=self.id,
+            )
 
     @functools.cached_property
     def units(self) -> pynwb.misc.Units:
