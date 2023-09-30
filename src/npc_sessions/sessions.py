@@ -21,6 +21,7 @@ import numpy as np
 import numpy.typing as npt
 import PIL.Image
 import polars as pl
+import pandas as pd
 import pynwb
 import upath
 import zarr
@@ -881,7 +882,7 @@ class DynamicRoutingSession:
         return electrodes
 
     @functools.cached_property
-    def _units(self) -> pl.DataFrame:
+    def _units(self) -> pd.DataFrame:
         if not self.is_sorted:
             raise AttributeError(f"{self.id} hasn't been spike-sorted")
         return utils.format_unit_ids(
@@ -903,22 +904,22 @@ class DynamicRoutingSession:
             electrode_table=self.electrodes,
         )
         for column in self._units.columns:
-            if column in ("spike_times",):
+            if column in ("spike_times", "waveform_mean", "waveform_sd", "electrode_group"):
                 continue
             units.add_column(name=column, description="")
-        df = self._units.fill_null(np.nan)
-        for unit in df.iter_rows(named=True):
+        for _, row in self._units.iterrows():
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
+            # TODO add obs_intervals - use invalid_times, presence?
             units.add_unit(
-                **unit,  # contains spike_times
+                **row,  # contains spike_times
                 electrodes=[
                     self.electrodes[:]
-                    .query(f"channel == {unit['peak_channel']}")
-                    .query(f"group_name == {unit['device_name']!r}")
+                    .query(f"channel == {row['peak_channel']}")
+                    .query(f"group_name == {row['electrode_group_name']!r}")
                     .index.item()
                 ],
-                electrode_group=self.electrode_groups[unit["device_name"]],
+                electrode_group=self.electrode_groups[row["electrode_group_name"]],
             )
         return units
 
