@@ -41,6 +41,7 @@ jobs:
     - name: Install dependencies
       run: |
         rm pdm.lock
+        pdm update
         pdm install -G dev
         
     - name: Test, format, lint
