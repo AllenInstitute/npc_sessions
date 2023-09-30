@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 def plot_performance_by_block(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> plt.Figure:
-    task_performance_by_block_df: pd.DataFrame = session._task_performance_by_block[:]
+    task_performance_by_block_df: pd.DataFrame = session.analysis['performance'][:]
 
     n_passing_blocks = np.sum(task_performance_by_block_df["cross_modal_dprime"] >= 1.5)
     failed_block_ind = task_performance_by_block_df["cross_modal_dprime"] < 1.5
