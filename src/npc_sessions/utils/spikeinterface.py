@@ -35,7 +35,7 @@ def get_spikeinterface_data(session_or_root_path: SpikeInterfaceData) -> SpikeIn
     if isinstance(session_or_root_path, SpikeInterfaceKS25Data):
         return session_or_root_path
     try:
-        session = npc_session.SessionRecord(session_or_root_path)
+        session = npc_session.SessionRecord(str(session_or_root_path))
         root = None
     except ValueError:
         session = None
