@@ -42,11 +42,8 @@ def from_pathlike(pathlike) -> upath.UPath:
             if "#" in parent.name:
                 new = upath.UPath(path).with_name(parent.name)
                 for part in p.relative_to(parent).parts:
-                    new = next(new.glob(part))
+                    new = next(new.glob(part)) # we can't create or join the problem-#, so we have to 'discover' it
                 return new 
-        raise ValueError(
-            f"Path {p} contains '#' in a parent dir, which we don't have a fix for yet"
-        )
     return upath.UPath(path)
 
 
