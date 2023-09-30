@@ -2,11 +2,11 @@ import random
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
+import matplotlib.figure
 import numpy as np
 import rich
 
 if TYPE_CHECKING:
-    import matplotlib.figure
     import npc_sessions
     
 import npc_sessions.utils as utils
