@@ -106,28 +106,6 @@ def get_units_electrodes_spike_times(session: str, *args, **kwargs) -> pl.DataFr
     )
 
 
-@functools.cache
-def get_mean_waveforms(session: str) -> npt.NDArray[np.float64]:
-    mean_waveforms_path = npc_lims.get_mean_waveform_codeocean_kilosort_path_from_s3(
-        session
-    )
-    with io.BytesIO(mean_waveforms_path.read_bytes()) as f:
-        mean_waveforms = np.load(f, allow_pickle=True)
-
-    return mean_waveforms
-
-
-@functools.cache
-def get_sd_waveforms(session: str) -> npt.NDArray[np.float64]:
-    sd_waveforms_path = npc_lims.get_sd_waveform_codeocean_kilosort_path_from_s3(
-        session
-    )
-    with io.BytesIO(sd_waveforms_path.read_bytes()) as f:
-        sd_waveforms = np.load(f, allow_pickle=True)
-
-    return sd_waveforms
-
-
 def get_aligned_spike_times(
     spike_times: npt.NDArray[np.floating],
     device_timing_on_sync: utils.EphysTimingInfoOnSync,
