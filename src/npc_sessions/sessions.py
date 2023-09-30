@@ -627,7 +627,7 @@ class DynamicRoutingSession:
         for k, v in self._all_trials.items():
             if self.task_stim_name in k and self.is_task:
                 intervals.append(self.trials)
-                intervals.append(self._task_performance_by_block)
+                intervals.append(self.performance)
                 continue
 
             if not any(
