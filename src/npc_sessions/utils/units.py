@@ -43,7 +43,7 @@ def merge_units_electrodes(session: str, units: pd.DataFrame) -> pd.DataFrame:
         units = units.merge(
             electrodes,
             left_on=["group_name", "peak_channel"],
-            right_on=["electrode_group", "channel"],
+            right_on=["electrode_group_name", "channel"],
         )
         units.drop(columns=["channel"], inplace=True)
     except FileNotFoundError as e:
@@ -186,7 +186,7 @@ def make_units_table_from_spike_interface_ks25(
     >>> devices_timing = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'))
     >>> settings_xml_data = utils.get_settings_xml_data(npc_lims.get_settings_xml_path_from_s3('662892_20230821'))
     >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', settings_xml_data, devices_timing)
-    >>> len(units[units['electrode_group'] == 'probeA'])
+    >>> len(units[units['electrode_group_name'] == 'probeA'])
     237
     """
     # TODO @arjunsridhar12345 rm settings xml, use spike_interface_data.electrode_locations_xy
@@ -197,31 +197,31 @@ def make_units_table_from_spike_interface_ks25(
     
     def device_helper(device_timing_on_sync: utils.EphysTimingInfoOnSync) -> pd.DataFrame:
         
-        electrode_group = npc_session.ProbeRecord(device_timing_on_sync.device)
+        electrode_group_name = npc_session.ProbeRecord(device_timing_on_sync.device)
 
-        df_device_metrics = spike_interface_data.quality_metrics_df(electrode_group).merge(
-            spike_interface_data.template_metrics_df(electrode_group), left_index=True, right_index=True
+        df_device_metrics = spike_interface_data.quality_metrics_df(electrode_group_name).merge(
+            spike_interface_data.template_metrics_df(electrode_group_name), left_index=True, right_index=True
         )
         df_device_metrics["peak_channel"] = get_peak_channels(
-            spike_interface_data.unit_locations(electrode_group),
+            spike_interface_data.unit_locations(electrode_group_name),
             electrode_positions,
         )
-        df_device_metrics["electrode_group"] = [str(electrode_group)] * len(df_device_metrics)
+        df_device_metrics["electrode_group_name"] = [str(electrode_group_name)] * len(df_device_metrics)
         
         amplitudes, mean_waveforms = get_amplitudes_mean_waveforms_ks25(
-            spike_interface_data.templates_average(electrode_group), df_device_metrics.index.values
+            spike_interface_data.templates_average(electrode_group_name), df_device_metrics.index.values
         ) 
         # TODO #40 get waveform sd
         spike_times_aligned = get_aligned_spike_times(
-            spike_interface_data.sorting_cached(electrode_group)["spike_indexes_seg0"], device_timing_on_sync
+            spike_interface_data.sorting_cached(electrode_group_name)["spike_indexes_seg0"], device_timing_on_sync
         )
         unit_spike_times = get_units_spike_times_ks25(
-            spike_interface_data.sorting_cached(electrode_group),
+            spike_interface_data.sorting_cached(electrode_group_name),
             spike_times_aligned,
             df_device_metrics.index.values, # TODO #37 @arjunsridhar12345 is this safe?
         )
 
-        df_device_metrics["default_qc"] = spike_interface_data.default_qc(electrode_group)
+        df_device_metrics["default_qc"] = spike_interface_data.default_qc(electrode_group_name)
         df_device_metrics["amplitude"] = amplitudes
         df_device_metrics["waveform_mean"] = mean_waveforms
         df_device_metrics["spike_times"] = unit_spike_times
@@ -239,7 +239,7 @@ def make_units_table_from_spike_interface_ks25(
 def format_unit_ids(units: pd.DataFrame, session: str | npc_session.SessionRecord) -> pd.DataFrame:
     """Add session and probe letter"""
     units["unit_id"] = [
-        f"{session}_{row.electrode_group.replace('probe', '')}-{row.unit_id}" 
+        f"{session}_{row.electrode_group_name.replace('probe', '')}-{row.unit_id}" 
         if session not in str(row.unit_id) # in case we aready ran this fn
         else row.unit_id
         for _, row in units.iterrows()
