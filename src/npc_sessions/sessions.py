@@ -449,6 +449,7 @@ class DynamicRoutingSession:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_ephys:
             modules.append(self.drift_maps)
+        modules.append(self.performance)
         return tuple(modules)
 
     # intervals ----------------------------------------------------------------- #
@@ -519,7 +520,7 @@ class DynamicRoutingSession:
         return trials
 
     @property
-    def _task_performance_by_block(self) -> pynwb.epoch.TimeIntervals:
+    def performance(self) -> pynwb.epoch.TimeIntervals:
         trials = self.trials[:]
         task_performance_by_block = {}
 
