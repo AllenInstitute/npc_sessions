@@ -6,7 +6,9 @@ import numpy as np
 import rich
 
 if TYPE_CHECKING:
+    import matplotlib.figure
     import npc_sessions
+    
 import npc_sessions.utils as utils
 
 
@@ -73,7 +75,7 @@ def plot_assorted_lick_times(
 
 def plot_trial_lick_timing(
     session: "npc_sessions.DynamicRoutingSession", trial_idx: int
-) -> plt.Figure:
+) -> matplotlib.figure.Figure:
     if not session.is_sync or session._trials._sync is None:
         raise ValueError("session must have sync data")
     start = session._trials.response_window_start_time[trial_idx]
@@ -209,7 +211,7 @@ def plot_lick_times_on_sync_and_script(
 
 def plot_diode_flip_intervals(
     session: "npc_sessions.DynamicRoutingSession",
-) -> plt.Figure:
+) -> matplotlib.figure.Figure:
     fig, axes = session.sync_data.plot_diode_measured_sync_square_flips()
     names = tuple(
         k for k, v in session.stim_frame_times.items() if not isinstance(v, Exception)
@@ -223,7 +225,7 @@ def plot_diode_flip_intervals(
 
 def plot_vsyncs_and_diode_flips_at_ends_of_each_stim(
     session: "npc_sessions.DynamicRoutingSession",
-) -> plt.Figure:
+) -> matplotlib.figure.Figure:
     rich.print("[bold] Fraction long frames [/bold]")
     for stim_name, stim_times in session.stim_frame_times.items():
         if isinstance(stim_times, Exception):
@@ -301,7 +303,7 @@ def plot_reward_times(session):
 
 def plot_long_vsyncs_distribution_across_trial(
     session: "npc_sessions.DynamicRoutingSession",
-) -> plt.Figure:
+) -> matplotlib.figure.Figure:
     all_vsyncs = np.hstack(session.sync_data.vsync_times_in_blocks)
 
     interval_threshold = 0.017  # s

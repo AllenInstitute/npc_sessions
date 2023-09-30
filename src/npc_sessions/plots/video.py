@@ -12,11 +12,12 @@ import numpy as np
 import numpy.typing as npt
 import rich
 import upath
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
 import npc_sessions.utils as utils
 
 if TYPE_CHECKING:
+    import matplotlib.figure
     import npc_sessions
 
 import npc_sessions.plots.plot_utils as plot_utils
@@ -66,7 +67,7 @@ def plot_camera_frame_grabs_simple(
     session: npc_sessions.DynamicRoutingSession,
     paths: Iterable[upath.UPath] | None = None,
     num_frames_to_grab: int = 5,
-) -> plt.Figure:
+) -> matplotlib.figure.Figure:
     """Just plots evenly spaced frames, no concept of epochs.
 
     video frames across cameras aren't synced .
