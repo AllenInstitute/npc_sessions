@@ -128,16 +128,12 @@ def get_sd_waveforms(session: str) -> npt.NDArray[np.float64]:
     return sd_waveforms
 
 
-def align_device_spike_times_ks25(
-    sorting_cached: dict[str, npt.NDArray],
+def get_aligned_spike_times(
+    spike_times: npt.NDArray[np.floating],
     device_timing_on_sync: utils.EphysTimingInfoOnSync,
 ) -> npt.NDArray[np.float64]:
-    spike_times_unaligned = sorting_cached["spike_indexes_seg0"]
-
-    # directly getting spike times from sorted output, don't need sample start it seems
-    # spike_times_unaligned = spike_times_unaligned - device_timing_on_sync.device.start_sample
     return (
-        spike_times_unaligned / device_timing_on_sync.sampling_rate
+        spike_times / device_timing_on_sync.sampling_rate
     ) + device_timing_on_sync.start_time
 
 
@@ -257,8 +253,8 @@ def make_units_table_from_spike_interface_ks25(
         amplitudes, mean_waveforms = get_amplitudes_mean_waveforms_ks25(
             spike_interface_data.templates_average(device_name), df_device_metrics.index.values
         )
-        spike_times_aligned = align_device_spike_times_ks25(
-            spike_interface_data.sorting_cached(device_name), device_timing_on_sync
+        spike_times_aligned = get_aligned_spike_times(
+            spike_interface_data.sorting_cached(device_name)["spike_indexes_seg0"], device_timing_on_sync
         )
         unit_spike_times = get_units_spike_times_ks25(
             spike_interface_data.sorting_cached(device_name),
