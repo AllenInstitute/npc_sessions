@@ -3,7 +3,7 @@ from __future__ import annotations
 import functools
 import io
 import os
-from collections.abc import Generator
+from typing import Iterable
 
 import npc_lims
 import numpy as np
@@ -198,7 +198,7 @@ def get_units_spike_times_ks25(
 def make_units_table_from_spike_interface_ks25(
     session: str,
     settings_xml_data_or_path: utils.PathLike | utils.SettingsXmlInfo,
-    devices_timing: Generator[utils.EphysTimingInfoOnSync, None, None],
+    devices_timing: Iterable[utils.EphysTimingInfoOnSync],
 ) -> pd.DataFrame:
     """
     >>> devices_timing = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'))
