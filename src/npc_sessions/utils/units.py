@@ -211,15 +211,15 @@ def make_units_table_from_spike_interface_ks25(
     """
     units = pd.DataFrame()
     settings_xml_info = utils.get_settings_xml_data(settings_xml_data_or_path)
-    device_names = settings_xml_info.probe_letters
     electrode_positions = settings_xml_info.channel_pos_xy
-    device_names_probe = tuple(f"probe{name}" for name in device_names)
     spike_interface_data = utils.get_spikeinterface_data(session_or_spikeinterface_data_or_path)
 
-    for device_name in device_names_probe:
-        device_timing_on_sync = next(
-            timing for timing in devices_timing if device_name[0].upper()+device_name[1:] in timing.name
-        )
+    for device_timing_on_sync in devices_timing:
+
+        if not device_timing_on_sync.device.name.endswith('-AP'):
+            continue
+        
+        device_name = npc_session.ProbeRecord(device_timing_on_sync.device)
 
         df_device_metrics = make_units_metrics_device_table_ks25(
             spike_interface_data.quality_metrics_df(device_name),
