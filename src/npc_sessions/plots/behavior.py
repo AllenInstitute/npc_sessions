@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
+import matplotlib.figure
 import numpy as np
 
 if TYPE_CHECKING:
-    import matplotlib.figure
     import pandas as pd
     import npc_sessions
 
