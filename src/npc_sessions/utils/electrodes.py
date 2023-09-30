@@ -54,7 +54,7 @@ def get_tissuecyte_electrodes_table(
     """Get annotation data for each electrode (channel) on each probe inserted in
     a session. Column names are ready for insertion into nwb ElectrodeTable.
     
-    >>> df = create_tissuecyte_electrodes_table('626791_2022-08-16')
+    >>> df = get_tissuecyte_electrodes_table('626791_2022-08-16')
     >>> df.columns
     Index(['group_name', 'channel', 'location', 'structure', 'x', 'y', 'z'], dtype='object')
     """
