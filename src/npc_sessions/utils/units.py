@@ -137,26 +137,6 @@ def get_peak_channels(
     return peak_channels
 
 
-def make_units_metrics_device_table_ks25(
-    quality_metrics_device_df: pd.DataFrame,
-    template_metrics_device_df: pd.DataFrame,
-    units_locations: npt.NDArray[np.floating],
-    electrode_group: str,
-    electrode_positions: tuple[dict[str, tuple[int, int]], ...],
-) -> pd.DataFrame:
-    df_quality_template_metrics = quality_metrics_device_df.merge(
-        template_metrics_device_df, left_index=True, right_index=True
-    )
-
-    peak_channels = get_peak_channels(units_locations, electrode_positions)
-    df_quality_template_metrics["peak_channel"] = peak_channels
-    df_quality_template_metrics["electrode_group"] = [
-        electrode_group for i in range(len(df_quality_template_metrics))
-    ]
-
-    return df_quality_template_metrics
-
-
 def get_amplitudes_mean_waveforms_ks25(
     templates: npt.NDArray[np.floating], ks_unit_ids: npt.NDArray[np.int64]
 ) -> tuple[list[float], list[npt.NDArray[np.float64]]]:
@@ -210,6 +190,7 @@ def make_units_table_from_spike_interface_ks25(
     237
     """
     units = pd.DataFrame()
+    # TODO @arjunsridhar12345 rm settings xml, use spike_interface_data.electrode_locations_xy
     settings_xml_info = utils.get_settings_xml_data(settings_xml_data_or_path)
     electrode_positions = settings_xml_info.channel_pos_xy
     spike_interface_data = utils.get_spikeinterface_data(session_or_spikeinterface_data_or_path)
@@ -221,14 +202,15 @@ def make_units_table_from_spike_interface_ks25(
         
         electrode_group = npc_session.ProbeRecord(device_timing_on_sync.device)
 
-        df_device_metrics = make_units_metrics_device_table_ks25(
-            spike_interface_data.quality_metrics_df(electrode_group),
-            spike_interface_data.template_metrics_df(electrode_group),
+        df_device_metrics = spike_interface_data.quality_metrics_df(electrode_group).merge(
+            spike_interface_data.template_metrics_df(electrode_group), left_index=True, right_index=True
+        )
+        df_device_metrics["peak_channel"] = get_peak_channels(
             spike_interface_data.unit_locations(electrode_group),
-            electrode_group,
             electrode_positions,
         )
-
+        df_device_metrics["electrode_group"] = [str(electrode_group)] * len(df_device_metrics)
+        
         amplitudes, mean_waveforms = get_amplitudes_mean_waveforms_ks25(
             spike_interface_data.templates_average(electrode_group), df_device_metrics.index.values
         )
@@ -245,7 +227,7 @@ def make_units_table_from_spike_interface_ks25(
         df_device_metrics["amplitude"] = amplitudes
         df_device_metrics["waveform_mean"] = mean_waveforms
         df_device_metrics["spike_times"] = unit_spike_times
-        df_device_metrics['ks_unit_id'] = df_device_metrics.index.to_list()
+        df_device_metrics['ks_unit_id'] = df_device_metrics.index.to_list() 
 
         units = pd.concat([units, df_device_metrics])
 
