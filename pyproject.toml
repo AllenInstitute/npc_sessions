@@ -90,7 +90,7 @@ composite = [
     "pdm publish --repository testpypi",
 ]
 
-[tool.pdm.scripts.bump]
+[tool.pdm.scripts.bumpver]
 composite = [
     "pdm self add pdm-bump",
     "pdm bump micro",
