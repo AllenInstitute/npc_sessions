@@ -1,18 +1,19 @@
 from typing import TYPE_CHECKING
 
-import matplotlib.pyplot as plt
 import matplotlib.figure
+import matplotlib.pyplot as plt
 import numpy as np
 
 if TYPE_CHECKING:
     import pandas as pd
+
     import npc_sessions
 
 
 def plot_performance_by_block(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> matplotlib.figure.Figure:
-    task_performance_by_block_df: pd.DataFrame = session.analysis['performance'][:]
+    task_performance_by_block_df: pd.DataFrame = session.analysis["performance"][:]
 
     n_passing_blocks = np.sum(task_performance_by_block_df["cross_modal_dprime"] >= 1.5)
     failed_block_ind = task_performance_by_block_df["cross_modal_dprime"] < 1.5
@@ -90,7 +91,9 @@ def plot_first_lick_latency_hist(
     return fig
 
 
-def plot_lick_raster(session: "npc_sessions.DynamicRoutingSession") -> matplotlib.figure.Figure:
+def plot_lick_raster(
+    session: "npc_sessions.DynamicRoutingSession",
+) -> matplotlib.figure.Figure:
     timeseries = session.processing["licks"]
     trials: pd.DataFrame = session.trials[:]
 
@@ -116,7 +119,9 @@ def plot_lick_raster(session: "npc_sessions.DynamicRoutingSession") -> matplotli
     return fig
 
 
-def plot_running(session: "npc_sessions.DynamicRoutingSession") -> matplotlib.figure.Figure:
+def plot_running(
+    session: "npc_sessions.DynamicRoutingSession",
+) -> matplotlib.figure.Figure:
     timeseries = session.processing["running_speed"]
     epochs: pd.DataFrame = session.epochs[:]
     fig, _ = plt.subplots(

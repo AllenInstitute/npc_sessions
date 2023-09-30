@@ -19,9 +19,8 @@ import npc_lims
 import npc_session
 import numpy as np
 import numpy.typing as npt
-import PIL.Image
-import polars as pl
 import pandas as pd
+import PIL.Image
 import pynwb
 import upath
 import zarr
@@ -79,7 +78,9 @@ def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None,
     >>> for session in get_sessions(is_sync=False):             # doctest: +SKIP
     ...     trials_dfs.append(session.trials)
     """
-    for session in sorted(npc_lims.get_tracked_sessions(), key=lambda x: x.date, reverse=True):
+    for session in sorted(
+        npc_lims.get_tracked_sessions(), key=lambda x: x.date, reverse=True
+    ):
         if session.is_uploaded and str(session.id) not in config.session_issues:
             session_kwargs = config.session_kwargs.get(str(session.id), {})
             yield DynamicRoutingSession(
@@ -459,9 +460,9 @@ class DynamicRoutingSession:
     def invalid_times(self) -> pynwb.epoch.TimeIntervals:
         """Time intervals when recording was interrupted, stim malfunctioned or
         otherwise invalid.
-        
+
         A separate attribute can mark invalid times for individual ecephys units:
-        see `NWBFile.Units.get_unit_obs_intervals()`  
+        see `NWBFile.Units.get_unit_obs_intervals()`
         """
         intervals = pynwb.epoch.TimeIntervals(
             name="invalid_times",
@@ -471,9 +472,15 @@ class DynamicRoutingSession:
             name="reason",
             description="reason for invalidation",
         )
-        if self.info and (invalid_intervals := getattr(self, "_invalid_intervals", None)) is not None:
+        if (
+            self.info
+            and (invalid_intervals := getattr(self, "_invalid_intervals", None))
+            is not None
+        ):
             for interval in invalid_intervals:
-                if (stop_time := interval.get('stop_time', None)) is None or stop_time == -1:
+                if (
+                    stop_time := interval.get("stop_time", None)
+                ) is None or stop_time == -1:
                     interval["stop_time"] = self.epochs[:].stop_time.max()
                 intervals.add_interval(**interval)
         return intervals
@@ -486,7 +493,9 @@ class DynamicRoutingSession:
                     "DynamicRouting1*.hdf5 was recorded badly for 670248_20230802 and won't open. "
                     "If you wish to compile an nwb anyway, set `session.is_task = False` for this session and re-run"
                 )
-            raise AttributeError(f"No trials table available for {self.id}: {self.is_task=}")
+            raise AttributeError(
+                f"No trials table available for {self.id}: {self.is_task=}"
+            )
         if (cached := getattr(self, "_cached_nwb_trials", None)) is not None:
             return cached
         trials = pynwb.epoch.TimeIntervals(
@@ -819,14 +828,14 @@ class DynamicRoutingSession:
     def electrodes(self) -> pynwb.core.DynamicTable:
         """Individual channels on an inserted probe, including location, CCF
         coords.
-        
-        Currently assumes Neuropixels 1.0 probes.        
+
+        Currently assumes Neuropixels 1.0 probes.
         """
         if not self.is_ephys:
             raise AttributeError(f"{self.id} is not an ephys session")
-        
+
         electrodes = pynwb.file.ElectrodeTable()
-        
+
         column_names: tuple[str, ...] = (
             "rel_x",
             "rel_y",
@@ -846,11 +855,11 @@ class DynamicRoutingSession:
             "z": "z coordinate in the Allen CCF, +z is right",
             "structure": "acronym for the Allen CCF structure that the electrode recorded from - less-specific than `location`",
             "reference": "the reference electrode or referencing scheme used",
-            "imp": 'impedance, in ohms',
+            "imp": "impedance, in ohms",
         }
         for column in column_names:
             electrodes.add_column(name=column, description=column_description[column])
-            
+
         for probe_letter, channel_pos_xy in zip(
             self.ephys_settings_xml_data.probe_letters,
             self.ephys_settings_xml_data.channel_pos_xy,
@@ -858,18 +867,23 @@ class DynamicRoutingSession:
             group = self.electrode_groups[f"probe{probe_letter}"]
             for channel_label, (x, y) in channel_pos_xy.items():
                 channel_idx = int(channel_label.strip("CH"))
-                kwargs: dict[str, str | float] = dict(
-                    group=group,
-                    group_name=group.name,
-                    rel_x=x,
-                    rel_y=y,
-                    channel=channel_idx,
-                    imp=150e3,  # https://www.neuropixels.org/_files/ugd/832f20_4a14406ba1204e60ae8534b09e201b49.pdf
-                    reference='tip',
-                    location="unannotated",
-                )
+                kwargs: dict[str, str | float] = {
+                    "group": group,
+                    "group_name": group.name,
+                    "rel_x": x,
+                    "rel_y": y,
+                    "channel": channel_idx,
+                    "imp": 150e3,  # https://www.neuropixels.org/_files/ugd/832f20_4a14406ba1204e60ae8534b09e201b49.pdf
+                    "reference": "tip",
+                    "location": "unannotated",
+                }
                 if self.is_annotated:
-                    kwargs |= ccf_df.query(f'group_name == {group.name!r}').query(f'channel == {channel_idx}').iloc[0].to_dict()
+                    kwargs |= (
+                        ccf_df.query(f"group_name == {group.name!r}")
+                        .query(f"channel == {channel_idx}")
+                        .iloc[0]
+                        .to_dict()
+                    )
                 electrodes.add_row(
                     **kwargs,
                 )
@@ -881,12 +895,12 @@ class DynamicRoutingSession:
             raise AttributeError(f"{self.id} hasn't been spike-sorted")
         return utils.format_unit_ids(
             units=utils.make_units_table_from_spike_interface_ks25(
-                    self.id, #TODO keep spikeinterface obj in self
-                    self.ephys_settings_xml_data,
-                    self.ephys_timing_data,
-                ), 
+                self.id,  # TODO keep spikeinterface obj in self
+                self.ephys_settings_xml_data,
+                self.ephys_timing_data,
+            ),
             session=self.id,
-            )
+        )
 
     @functools.cached_property
     def units(self) -> pynwb.misc.Units:
@@ -898,7 +912,12 @@ class DynamicRoutingSession:
             electrode_table=self.electrodes,
         )
         for column in self._units.columns:
-            if column in ("spike_times", "waveform_mean", "waveform_sd", "electrode_group"):
+            if column in (
+                "spike_times",
+                "waveform_mean",
+                "waveform_sd",
+                "electrode_group",
+            ):
                 continue
             units.add_column(name=column, description="")
         for _, row in self._units.iterrows():
@@ -992,7 +1011,7 @@ class DynamicRoutingSession:
         with contextlib.suppress(ValueError):
             return npc_lims.get_session_info(self.id)
         return None
-    
+
     @functools.cached_property
     def is_task(self) -> bool:
         if v := getattr(self, "_is_task", None):
@@ -1471,10 +1490,13 @@ class DynamicRoutingSession:
             stop_time = frame_times[-1]
 
         assert start_time != stop_time
-        
+
         notes: list[str] = []
         for _, invalid_interval in self.invalid_times[:].iterrows():
-            if any(start_time <= invalid_interval[time] <= stop_time for time in ("start_time", "stop_time")):
+            if any(
+                start_time <= invalid_interval[time] <= stop_time
+                for time in ("start_time", "stop_time")
+            ):
                 notes.append(invalid_interval["reason"])
                 if "invalid_times" not in tags:
                     tags.append("invalid_times")
@@ -1659,18 +1681,18 @@ class DynamicRoutingSession:
             #         filtered_idx[i] = False
 
             filtered = rising[filtered_idx]
-            
+
         licks = ndx_events.Events(
-                timestamps=self.sam.lickTimes if not self.is_sync else filtered,
-                name="licks",
-                description="times at which the subject made contact with a water spout"
-                + (
-                    f" - filtered to exclude events with duration >{max_contact} s"
-                    if self.is_sync
-                    else "putatively the starts of licks, but may include other events such as grooming"
-                ),
-            )
-        
+            timestamps=self.sam.lickTimes if not self.is_sync else filtered,
+            name="licks",
+            description="times at which the subject made contact with a water spout"
+            + (
+                f" - filtered to exclude events with duration >{max_contact} s"
+                if self.is_sync
+                else "putatively the starts of licks, but may include other events such as grooming"
+            ),
+        )
+
         if not self.is_sync:
             return tuple(licks)
         return licks, (

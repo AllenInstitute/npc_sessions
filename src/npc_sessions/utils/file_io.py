@@ -23,7 +23,7 @@ def from_pathlike(pathlike) -> upath.UPath:
     """
     >>> from_pathlike('s3://aind-data-bucket/experiment2_Record Node 102#probeA.png')
     S3Path('s3://aind-data-bucket/experiment2_Record Node 102#probeA.png')
-    
+
     >>> from_pathlike('s3://codeocean-s3datasetsbucket-1u41qdg42ur9/4797cab2-9ea2-4747-8d15-5ba064837c1c/postprocessed/experiment1_Record Node 102#Neuropix-PXI-100.ProbeA-AP_recording1/template_metrics/params.json')
     S3Path('s3://codeocean-s3datasetsbucket-1u41qdg42ur9/4797cab2-9ea2-4747-8d15-5ba064837c1c/postprocessed/experiment1_Record Node 102#Neuropix-PXI-100.ProbeA-AP_recording1/template_metrics/params.json')
     """
@@ -34,7 +34,7 @@ def from_pathlike(pathlike) -> upath.UPath:
     if "#" in (p := pathlib.Path(path)).name:
         return upath.UPath(path).with_name(p.name)
     if "#" in p.parent.as_posix():
-        if p.parent.as_posix().count('#') > 1:
+        if p.parent.as_posix().count("#") > 1:
             raise ValueError(
                 f"Path {p} contains multiple '#' in a parent dirs, which we don't have a fix for yet"
             )
@@ -42,8 +42,10 @@ def from_pathlike(pathlike) -> upath.UPath:
             if "#" in parent.name:
                 new = upath.UPath(path).with_name(parent.name)
                 for part in p.relative_to(parent).parts:
-                    new = next(new.glob(part)) # we can't create or join the problem-#, so we have to 'discover' it
-                return new 
+                    new = next(
+                        new.glob(part)
+                    )  # we can't create or join the problem-#, so we have to 'discover' it
+                return new
     return upath.UPath(path)
 
 

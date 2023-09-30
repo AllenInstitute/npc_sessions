@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import concurrent.futures
 import functools
 import io
 import os
-import concurrent.futures
-from typing import Iterable
+from collections.abc import Iterable
 
 import npc_lims
 import npc_session
@@ -12,7 +12,6 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import polars as pl
-import upath
 
 import npc_sessions.utils as utils
 
@@ -167,7 +166,7 @@ def get_units_spike_times_ks25(
 ) -> list[npt.NDArray[np.float64]]:
     units_spike_times: list[npt.NDArray[np.float64]] = []
 
-    spike_labels = sorting_cached['spike_labels_seg0']
+    spike_labels = sorting_cached["spike_labels_seg0"]
 
     for ks_unit_id in ks_unit_ids:
         label_indices = np.argwhere(spike_labels == ks_unit_id)
@@ -178,7 +177,10 @@ def get_units_spike_times_ks25(
 
 
 def make_units_table_from_spike_interface_ks25(
-    session_or_spikeinterface_data_or_path: str | npc_session.SessionRecord | utils.PathLike | utils.SpikeInterfaceKS25Data,
+    session_or_spikeinterface_data_or_path: str
+    | npc_session.SessionRecord
+    | utils.PathLike
+    | utils.SpikeInterfaceKS25Data,
     settings_xml_data_or_path: utils.PathLike | utils.SettingsXmlInfo,
     devices_timing: Iterable[utils.EphysTimingInfoOnSync],
 ) -> pd.DataFrame:
@@ -192,59 +194,87 @@ def make_units_table_from_spike_interface_ks25(
     # TODO @arjunsridhar12345 rm settings xml, use spike_interface_data.electrode_locations_xy
     settings_xml_info = utils.get_settings_xml_data(settings_xml_data_or_path)
     electrode_positions = settings_xml_info.channel_pos_xy
-    spike_interface_data = utils.get_spikeinterface_data(session_or_spikeinterface_data_or_path)
-    devices_timing = tuple(timing for timing in devices_timing if timing.device.name.endswith('-AP'))
-    
-    def device_helper(device_timing_on_sync: utils.EphysTimingInfoOnSync) -> pd.DataFrame:
-        
-        electrode_group_name = npc_session.ProbeRecord(device_timing_on_sync.device.name)
+    spike_interface_data = utils.get_spikeinterface_data(
+        session_or_spikeinterface_data_or_path
+    )
+    devices_timing = tuple(
+        timing for timing in devices_timing if timing.device.name.endswith("-AP")
+    )
 
-        df_device_metrics = spike_interface_data.quality_metrics_df(electrode_group_name).merge(
-            spike_interface_data.template_metrics_df(electrode_group_name), left_index=True, right_index=True
+    def device_helper(
+        device_timing_on_sync: utils.EphysTimingInfoOnSync,
+    ) -> pd.DataFrame:
+        electrode_group_name = npc_session.ProbeRecord(
+            device_timing_on_sync.device.name
+        )
+
+        df_device_metrics = spike_interface_data.quality_metrics_df(
+            electrode_group_name
+        ).merge(
+            spike_interface_data.template_metrics_df(electrode_group_name),
+            left_index=True,
+            right_index=True,
         )
         df_device_metrics["peak_channel"] = get_peak_channels(
             spike_interface_data.unit_locations(electrode_group_name),
             electrode_positions,
         )
-        df_device_metrics["electrode_group_name"] = [str(electrode_group_name)] * len(df_device_metrics)
-        
+        df_device_metrics["electrode_group_name"] = [str(electrode_group_name)] * len(
+            df_device_metrics
+        )
+
         amplitudes, mean_waveforms = get_amplitudes_mean_waveforms_ks25(
-            spike_interface_data.templates_average(electrode_group_name), df_device_metrics.index.values
-        ) 
+            spike_interface_data.templates_average(electrode_group_name),
+            df_device_metrics.index.values,
+        )
         # TODO #40 get waveform sd
         spike_times_aligned = get_aligned_spike_times(
-            spike_interface_data.sorting_cached(electrode_group_name)["spike_indexes_seg0"], device_timing_on_sync
+            spike_interface_data.sorting_cached(electrode_group_name)[
+                "spike_indexes_seg0"
+            ],
+            device_timing_on_sync,
         )
         unit_spike_times = get_units_spike_times_ks25(
             spike_interface_data.sorting_cached(electrode_group_name),
             spike_times_aligned,
-            df_device_metrics.index.values, # TODO #37 @arjunsridhar12345 is this safe?
+            df_device_metrics.index.values,  # TODO #37 @arjunsridhar12345 is this safe?
         )
 
-        df_device_metrics["default_qc"] = spike_interface_data.default_qc(electrode_group_name)
+        df_device_metrics["default_qc"] = spike_interface_data.default_qc(
+            electrode_group_name
+        )
         df_device_metrics["amplitude"] = amplitudes
         df_device_metrics["waveform_mean"] = mean_waveforms
         df_device_metrics["spike_times"] = unit_spike_times
-        df_device_metrics['unit_id'] = df_device_metrics.index.to_list() 
+        df_device_metrics["unit_id"] = df_device_metrics.index.to_list()
 
         return df_device_metrics
-    
+
     device_to_future: dict[str, concurrent.futures.Future] = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
         for device_timing_on_sync in devices_timing:
-            device_to_future[device_timing_on_sync.device.name] = executor.submit(device_helper, device_timing_on_sync)
-            
-    return pd.concat(device_to_future[device].result() for device in sorted(tuple(device_to_future.keys())))
+            device_to_future[device_timing_on_sync.device.name] = executor.submit(
+                device_helper, device_timing_on_sync
+            )
 
-def format_unit_ids(units: pd.DataFrame, session: str | npc_session.SessionRecord) -> pd.DataFrame:
+    return pd.concat(
+        device_to_future[device].result()
+        for device in sorted(device_to_future.keys())
+    )
+
+
+def format_unit_ids(
+    units: pd.DataFrame, session: str | npc_session.SessionRecord
+) -> pd.DataFrame:
     """Add session and probe letter"""
     units["unit_id"] = [
-        f"{session}_{row.electrode_group_name.replace('probe', '')}-{row.unit_id}" 
-        if session not in str(row.unit_id) # in case we aready ran this fn
+        f"{session}_{row.electrode_group_name.replace('probe', '')}-{row.unit_id}"
+        if session not in str(row.unit_id)  # in case we aready ran this fn
         else row.unit_id
         for _, row in units.iterrows()
-        ]
+    ]
     return units
+
 
 if __name__ == "__main__":
     import doctest

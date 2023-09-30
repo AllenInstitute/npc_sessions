@@ -744,7 +744,7 @@ class DynamicRouting1(TaskControl):
             )[: self._len]
         if optoLocs := self._hdf5.get("optoLocs"):
             label = optoLocs["label"].asstr()[()]
-            xy = np.array([(x, y) for x, y in zip(optoLocs["X"], optoLocs["Y"])])
+            xy = np.array(list(zip(optoLocs["X"], optoLocs["Y"])))
             return np.array(
                 [
                     label[np.all(xy == v, axis=1)][0]

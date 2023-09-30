@@ -24,7 +24,6 @@ from typing_extensions import Self, TypeAlias
 if TYPE_CHECKING:
     import matplotlib.axes
     import matplotlib.figure
-    import matplotlib.pyplot as plt
 
 import npc_sessions.utils as utils
 
@@ -1459,7 +1458,7 @@ class SyncDataset:
             ax.set_yticks(ticks_with_period)
             if idx == 0:
                 ax.set_yticklabels([f"{_:.3f}" for _ in ticks_with_period])
-        fig.set_layout_engine('tight')
+        fig.set_layout_engine("tight")
 
         return fig
 

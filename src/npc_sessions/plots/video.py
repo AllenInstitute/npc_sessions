@@ -6,14 +6,13 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 import cv2
+import matplotlib.figure
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
-import matplotlib.figure
 import numpy as np
 import numpy.typing as npt
 import rich
 import upath
-import matplotlib.pyplot as plt
 
 import npc_sessions.utils as utils
 

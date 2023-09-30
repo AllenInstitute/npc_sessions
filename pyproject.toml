@@ -1,6 +1,6 @@
 [project]
 name = "npc_sessions"
-version = "0.0.68"
+version = "0.0.69"
 description = "Tools and interfaces for working with behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 authors = [
     { name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org" },
@@ -208,7 +208,9 @@ no_implicit_optional = true
 show_error_codes = true
 ignore_missing_imports = true
 implicit_reexport = false
-exclude = ["src/npc_sessions/plots"] 
+exclude = [
+    "src/npc_sessions/plots",
+]
 
 [build-system]
 requires = [
