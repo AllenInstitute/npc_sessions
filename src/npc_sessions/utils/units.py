@@ -210,7 +210,8 @@ def make_units_table_from_spike_interface_ks25(
         
         amplitudes, mean_waveforms = get_amplitudes_mean_waveforms_ks25(
             spike_interface_data.templates_average(electrode_group), df_device_metrics.index.values
-        )
+        ) 
+        # TODO #40 get waveform sd
         spike_times_aligned = get_aligned_spike_times(
             spike_interface_data.sorting_cached(electrode_group)["spike_indexes_seg0"], device_timing_on_sync
         )
