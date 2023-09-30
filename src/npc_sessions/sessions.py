@@ -483,9 +483,10 @@ class DynamicRoutingSession:
         if not self.is_task:
             if self.id == "670248_20230802":
                 raise ValueError(
-                    "DynamicRouting1*.hdf5 was recorded badly for 670248_20230802 and won't open.\nIf you wish to compile an nwb anyway, set `session.is_task = False` for this session and re-run"
+                    "DynamicRouting1*.hdf5 was recorded badly for 670248_20230802 and won't open. "
+                    "If you wish to compile an nwb anyway, set `session.is_task = False` for this session and re-run"
                 )
-            raise AttributeError("no trials table available for this session")
+            raise AttributeError(f"No trials table available for {self.id}: {self.is_task=}")
         if (cached := getattr(self, "_cached_nwb_trials", None)) is not None:
             return cached
         trials = pynwb.epoch.TimeIntervals(
