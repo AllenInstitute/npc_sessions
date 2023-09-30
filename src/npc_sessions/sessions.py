@@ -168,11 +168,6 @@ class DynamicRoutingSession:
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.id!r})"
 
-    def __getattribute__(self, __name: str) -> Any:
-        if __name in ("date", "idx"):
-            return self.id.__getattribute__(__name)
-        return super().__getattribute__(__name)
-
     def __eq__(self, other: Any) -> bool:
         if other_id := getattr(other, "id", None):
             return self.id == other_id
