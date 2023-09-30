@@ -1,7 +1,4 @@
-from collections.abc import Generator
-
 import dotenv
-import npc_lims
 
 from npc_sessions.plots import *
 from npc_sessions.sessions import *
