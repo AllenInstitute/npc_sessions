@@ -1253,7 +1253,7 @@ class SyncDataset:
         start_time: float = 0.0,
         end_time: float | None = None,
         auto_show: bool = True,
-    ) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes | Iterable[matplotlib.axes.Axes]]:
+    ) -> matplotlib.figure.Figure:
         """
         Plots specific lines at a specific time period.
         """
@@ -1262,7 +1262,7 @@ class SyncDataset:
         bits = []
         for line in lines:
             bits.append(self._line_to_bit(line))
-        f, axes = self.plot_bits(
+        fig = self.plot_bits(
             bits,
             start_time,
             end_time,
@@ -1273,7 +1273,7 @@ class SyncDataset:
         if auto_show:
             plt.show()
 
-        return f, axes
+        return fig
 
     @property
     def stim_onsets(self) -> npt.NDArray[np.floating]:
@@ -1287,7 +1287,7 @@ class SyncDataset:
             return stim_running
         return np.array([block[-1] for block in self.frame_display_time_blocks])
 
-    def plot_stim_onsets(self) -> tuple[matplotlib.figure.Figure, list[matplotlib.axes.Axes]]:
+    def plot_stim_onsets(self) -> matplotlib.figure.Figure:
         import matplotlib.pyplot as plt
 
         # plot beginning of stims
@@ -1328,9 +1328,9 @@ class SyncDataset:
                 legend = axes[ind].get_legend()
                 if ind > 0 and legend is not None:
                     legend.remove()
-        return fig, axes
+        return fig
 
-    def plot_stim_offsets(self) -> tuple[matplotlib.figure.Figure, list[matplotlib.axes.Axes]]:
+    def plot_stim_offsets(self) -> matplotlib.figure.Figure:
         import matplotlib.pyplot as plt
 
         # plot end of stims
@@ -1372,11 +1372,11 @@ class SyncDataset:
                 legend = axes[ind].get_legend()
                 if ind > 0 and legend is not None:
                     legend.remove()
-        return fig, axes
+        return fig
 
     def plot_diode_measured_sync_square_flips(
         self,
-    ) -> tuple[matplotlib.figure.Figure, list[matplotlib.axes.Axes]]:
+    ) -> matplotlib.figure.Figure:
         """Plot the diode-measured sync-square changes that should occur every 1 s while stim is running."""
         import matplotlib.pyplot as plt
 
@@ -1461,7 +1461,7 @@ class SyncDataset:
                 ax.set_yticklabels([f"{_:.3f}" for _ in ticks_with_period])
         fig.set_layout_engine('tight')
 
-        return fig, fig.axes
+        return fig
 
     def close(self) -> None:
         """
