@@ -62,7 +62,7 @@ def plot_assorted_lick_times(
             random.choice(session.trials[:].query("is_response").index),
         ]
     ):
-        fig = session.plot_trial_lick_timing(trial_idx)
+        fig = session.plot_trial_lick_timing(trial_idx) # type: ignore[attr-defined]
         fig.axes[0].set_title(
             fig.axes[0].get_title()
             + " - "
