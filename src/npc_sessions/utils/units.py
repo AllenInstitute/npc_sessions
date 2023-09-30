@@ -225,7 +225,7 @@ def make_units_table_from_spike_interface_ks25(
         df_device_metrics["amplitude"] = amplitudes
         df_device_metrics["waveform_mean"] = mean_waveforms
         df_device_metrics["spike_times"] = unit_spike_times
-        df_device_metrics['ks_unit_id'] = df_device_metrics.index.to_list() 
+        df_device_metrics['unit_id'] = df_device_metrics.index.to_list() 
 
         return df_device_metrics
     
@@ -240,7 +240,7 @@ def format_unit_ids(units: pd.DataFrame, session: str | npc_session.SessionRecor
     """Add session and probe letter"""
     units["unit_id"] = [
         f"{session}_{row.electrode_group.replace('probe', '')}-{row.unit_id}" 
-        if session not in row.unit_id
+        if session not in str(row.unit_id) # in case we aready ran this fn
         else row.unit_id
         for _, row in units.iterrows()
         ]
