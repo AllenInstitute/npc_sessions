@@ -197,7 +197,7 @@ def make_units_table_from_spike_interface_ks25(
     
     def device_helper(device_timing_on_sync: utils.EphysTimingInfoOnSync) -> pd.DataFrame:
         
-        electrode_group_name = npc_session.ProbeRecord(device_timing_on_sync.device)
+        electrode_group_name = npc_session.ProbeRecord(device_timing_on_sync.device.name)
 
         df_device_metrics = spike_interface_data.quality_metrics_df(electrode_group_name).merge(
             spike_interface_data.template_metrics_df(electrode_group_name), left_index=True, right_index=True
