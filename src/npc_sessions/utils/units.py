@@ -186,20 +186,16 @@ def make_units_table_from_spike_interface_ks25(
     >>> devices_timing = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'))
     >>> settings_xml_data = utils.get_settings_xml_data(npc_lims.get_settings_xml_path_from_s3('662892_20230821'))
     >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', settings_xml_data, devices_timing)
-    CCF annotations for 662892_2023-08-21 have not been uploaded to s3. Returning units without electrodes
     >>> len(units[units['electrode_group'] == 'probeA'])
     237
     """
-    units = pd.DataFrame()
     # TODO @arjunsridhar12345 rm settings xml, use spike_interface_data.electrode_locations_xy
     settings_xml_info = utils.get_settings_xml_data(settings_xml_data_or_path)
     electrode_positions = settings_xml_info.channel_pos_xy
     spike_interface_data = utils.get_spikeinterface_data(session_or_spikeinterface_data_or_path)
-
-    for device_timing_on_sync in devices_timing:
-
-        if not device_timing_on_sync.device.name.endswith('-AP'):
-            continue
+    devices_timing = tuple(timing for timing in devices_timing if timing.device.name.endswith('-AP'))
+    
+    def device_helper(device_timing_on_sync: utils.EphysTimingInfoOnSync) -> pd.DataFrame:
         
         electrode_group = npc_session.ProbeRecord(device_timing_on_sync.device)
 
@@ -230,9 +226,14 @@ def make_units_table_from_spike_interface_ks25(
         df_device_metrics["spike_times"] = unit_spike_times
         df_device_metrics['ks_unit_id'] = df_device_metrics.index.to_list() 
 
-        units = pd.concat([units, df_device_metrics])
-
-    return units
+        return df_device_metrics
+    
+    device_to_future: dict[str, concurrent.futures.Future] = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        for device_timing_on_sync in devices_timing:
+            device_to_future[device_timing_on_sync.device.name] = executor.submit(device_helper, device_timing_on_sync)
+            
+    return pd.concat(device_to_future[device].result() for device in sorted(tuple(device_to_future.keys())))
 
 def format_unit_ids(units: pd.DataFrame, session: str | npc_session.SessionRecord) -> pd.DataFrame:
     """Add session and probe letter"""
