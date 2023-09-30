@@ -1467,11 +1467,17 @@ class DynamicRoutingSession:
             stop_time = frame_times[-1]
 
         assert start_time != stop_time
+        
+        notes: list[str] = []
+        for _, invalid_interval in self.invalid_times[:].iterrows():
+            if any(start_time <= invalid_interval[time] <= stop_time for time in ("start_time", "stop_time")):
+                notes.append(invalid_interval["reason"])
         return npc_lims.Epoch(
             session_id=self.id,
             start_time=start_time,
             stop_time=stop_time,
             tags=tags,
+            notes=None if not notes else f"includes invalid times: {'; ' .join(notes)}",
         )
 
     @property
