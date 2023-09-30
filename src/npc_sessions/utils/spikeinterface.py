@@ -11,7 +11,7 @@ import io
 import json
 import operator
 from collections.abc import Iterator
-from typing import TypeAlias, Union
+from typing import Union
 
 import npc_lims
 import npc_session
@@ -19,6 +19,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import polars as pl
+from typing_extensions import TypeAlias
 import upath
 
 import npc_sessions.utils as utils
