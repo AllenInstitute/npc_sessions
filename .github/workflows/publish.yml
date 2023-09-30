@@ -36,11 +36,11 @@ jobs:
         version: 'head' 
         python-version: ${{ matrix.python-version }}
         # update-python: false
-        cache: true
+        cache: false
         
     - name: Install dependencies
       run: |
-        rm pdm.lock
+        # rm pdm.lock
         pdm install -G dev
         
     - name: Test, format, lint
