@@ -471,6 +471,8 @@ class DynamicRoutingSession:
         )
         if self.info and (invalid_intervals := getattr(self, "_invalid_intervals", None)) is not None:
             for interval in invalid_intervals:
+                if (stop_time := interval.get('stop_time', None)) is None or stop_time == -1:
+                    interval["stop_time"] = self.epochs[:].stop_time.max()
                 intervals.add_interval(**interval)
         return intervals
 
