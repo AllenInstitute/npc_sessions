@@ -557,13 +557,8 @@ class DynamicRoutingSession:
 
         nwb_intervals = pynwb.epoch.TimeIntervals(
             name="performance",
-            description=f"behavioral performance for each block in {self.task_stim_name} trials",
+            description=f"behavioral performance for each context block in task (refers to `trials` or `intervals[{self.task_stim_name!r}])",
         )
-        # for k in task_performance_by_block[0].keys():
-        #     nwb_intervals.add_column(
-        #         name=k,
-        #         description='', #TODO
-        #     )
 
         nwb_intervals.add_column(
             name="context",
