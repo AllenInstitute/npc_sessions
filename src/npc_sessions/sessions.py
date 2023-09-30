@@ -453,6 +453,27 @@ class DynamicRoutingSession:
 
     # intervals ----------------------------------------------------------------- #
 
+    @functools.cached_property
+    def invalid_times(self) -> pynwb.epoch.TimeIntervals:
+        """Time intervals when recording was interrupted, stim malfunctioned or
+        otherwise invalid.
+        
+        A separate attribute can mark invalid times for individual ecephys units:
+        see `NWBFile.Units.get_unit_obs_intervals()`  
+        """
+        intervals = pynwb.epoch.TimeIntervals(
+            name="invalid_times",
+            description="time intervals to be removed from analysis",
+        )
+        intervals.add_column(
+            name="reason",
+            description="reason for invalidation",
+        )
+        if self.info and (invalid_intervals := getattr(self, "_invalid_intervals", None)) is not None:
+            for interval in invalid_intervals:
+                intervals.add_interval(**interval)
+        return intervals
+
     @property
     def trials(self) -> pynwb.epoch.TimeIntervals:
         if not self.is_task:
