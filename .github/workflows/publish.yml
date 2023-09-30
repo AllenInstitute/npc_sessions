@@ -34,14 +34,12 @@ jobs:
     - uses: pdm-project/setup-pdm@v3
       with:
         python-version: ${{ matrix.python-version }}
-        # update-python: false
+        update-python: false
         cache: true
         
     - name: Install dependencies
       run: |
-        eval $(pdm venv activate)
         pdm install -G dev
-        pdm update
         
     - name: Test, format, lint
       env:
