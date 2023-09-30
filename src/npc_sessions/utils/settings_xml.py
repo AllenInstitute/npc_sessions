@@ -15,7 +15,7 @@
 ('A', 'B', 'C', 'D', 'E', 'F')
 >>> _probe_types(et)
 ('Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0', 'Neuropixels 1.0')
->>> isinstance(get_settings_xml_info(path), SettingsXmlInfo)
+>>> isinstance(get_settings_xml_data(path), SettingsXmlInfo)
 True
 >>> _probe_serial_number_to_channel_pos_xy(et)[18194810652]['CH0']
 (27, 0)
