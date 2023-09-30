@@ -989,8 +989,10 @@ class DynamicRoutingSession:
 
     @functools.cached_property
     def info(self) -> npc_lims.SessionInfo | None:
-        return npc_lims.get_session_info(self.id)
-
+        with contextlib.suppress(ValueError):
+            return npc_lims.get_session_info(self.id)
+        return None
+    
     @functools.cached_property
     def is_task(self) -> bool:
         if v := getattr(self, "_is_task", None):
