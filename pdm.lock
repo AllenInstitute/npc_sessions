@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:02e56c266e2b60b9b17a9e4d1df87894d7971e0345c4f6fe37f7a678dc5937c9"
+content_hash = "sha256:f85e78c9ccaec7677017f10957cf8f195758d0e8cbed033046d78cbdcf4503d0"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -1052,7 +1052,7 @@ files = [
 
 [[package]]
 name = "dynamicroutingtask"
-version = "0.1.16"
+version = "0.1.17"
 requires_python = ">=3.9"
 summary = ""
 dependencies = [
@@ -1063,8 +1063,8 @@ dependencies = [
     "scipy",
 ]
 files = [
-    {file = "DynamicRoutingTask-0.1.16-py3-none-any.whl", hash = "sha256:f8616b2ae1d5fbfbb10811be3049a159c9651cd37eed3089ada5f007e042ca0b"},
-    {file = "DynamicRoutingTask-0.1.16.tar.gz", hash = "sha256:30e1e9631d80208005b51eb3cb7dde41557a34128f8fd6607346b62083e0b1f4"},
+    {file = "DynamicRoutingTask-0.1.17-py3-none-any.whl", hash = "sha256:4064b7a437581891cf4da63f73f1e0f06d4e3a2a7138908c5f70a7a68d0712c2"},
+    {file = "DynamicRoutingTask-0.1.17.tar.gz", hash = "sha256:a21a49bdff5dd710004924d44f6f0efca87115568d9c78aec8a0faec623a0e1b"},
 ]
 
 [[package]]
@@ -2349,13 +2349,14 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.69"
+version = "0.1.70"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
     "aind-codeocean-api>=0.2.4",
     "npc-session>=0.1.0",
     "pydbhub-bjh>=0.0.8",
+    "pyopenssl>=23.2.0",
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0.1",
     "redis>=4.1.4",
@@ -2366,8 +2367,8 @@ dependencies = [
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.69-py3-none-any.whl", hash = "sha256:8f9421509f845f8c0fb5d1d0aa2eebe55e49696c96e281549a105a63e927d647"},
-    {file = "npc_lims-0.1.69.tar.gz", hash = "sha256:ac6007d337ee14848c9715a5bfafa92e0fe7471b477ebc42b8d0eb90d66401fd"},
+    {file = "npc_lims-0.1.70-py3-none-any.whl", hash = "sha256:921a3774eb896967f2df8bbb14c39f50470c251cbed36bfcc9303586a7890b7f"},
+    {file = "npc_lims-0.1.70.tar.gz", hash = "sha256:65c82dd26aea74a0334fb24152bc968d7a85394622d66b1714bd4c18ea3fe3d0"},
 ]
 
 [[package]]
@@ -3160,6 +3161,19 @@ dependencies = [
 files = [
     {file = "pynwb-2.5.0-py3-none-any.whl", hash = "sha256:d0ef0a6e42e9176fd0e71d186911701362e53f78514230236589848468a46f83"},
     {file = "pynwb-2.5.0.tar.gz", hash = "sha256:4010bb946e8b9ec50733e7569207702af663bcd8edafcae96e2c66e53ae573d6"},
+]
+
+[[package]]
+name = "pyopenssl"
+version = "23.2.0"
+requires_python = ">=3.6"
+summary = "Python wrapper module around the OpenSSL library"
+dependencies = [
+    "cryptography!=40.0.0,!=40.0.1,<42,>=38.0.0",
+]
+files = [
+    {file = "pyOpenSSL-23.2.0-py3-none-any.whl", hash = "sha256:24f0dc5227396b3e831f4c7f602b950a5e9833d292c8e4a2e06b709292806ae2"},
+    {file = "pyOpenSSL-23.2.0.tar.gz", hash = "sha256:276f931f55a452e7dea69c7173e984eb2a4407ce413c918aa34b55f82f9b8bac"},
 ]
 
 [[package]]
