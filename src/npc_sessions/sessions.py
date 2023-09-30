@@ -1592,41 +1592,41 @@ class DynamicRoutingSession:
         If sync isn't available, we only have start frames of licks, so we can't
         filter by duration very accurately.
         """
-        max_contact = (
-            0.5  # must factor-in lick_sensor staying high after end of contact
-        )
-        # https://www.nature.com/articles/s41586-021-03561-9/figures/1
+        if self.is_sync:
+            max_contact = (
+                0.5  # must factor-in lick_sensor staying high after end of contact
+            )
+            # https://www.nature.com/articles/s41586-021-03561-9/figures/1
 
-        rising = self.sync_data.get_rising_edges("lick_sensor", units="seconds")
-        falling = self.sync_data.get_falling_edges("lick_sensor", units="seconds")
-        if falling[0] < rising[0]:
-            falling = falling[1:]
-        if rising[-1] > falling[-1]:
-            rising = rising[:-1]
-        assert len(rising) == len(falling)
+            rising = self.sync_data.get_rising_edges("lick_sensor", units="seconds")
+            falling = self.sync_data.get_falling_edges("lick_sensor", units="seconds")
+            if falling[0] < rising[0]:
+                falling = falling[1:]
+            if rising[-1] > falling[-1]:
+                rising = rising[:-1]
+            assert len(rising) == len(falling)
 
-        rising_falling = np.array([rising, falling]).T
-        lick_duration = np.diff(rising_falling, axis=1).squeeze()
+            rising_falling = np.array([rising, falling]).T
+            lick_duration = np.diff(rising_falling, axis=1).squeeze()
 
-        filtered_idx = lick_duration <= max_contact
+            filtered_idx = lick_duration <= max_contact
 
-        # # remove licks that aren't part of a sequence of licks at at least ~3 Hz
-        # max_interval = 0.5
-        # for i, (r, f) in enumerate(rising_falling):
-        #     prev_end = rising_falling[i-1, 1] if i > 0 else None
-        #     next_start = rising_falling[i+1, 0] if i < len(rising_falling) - 1 else None
-        #     if (
-        #         (prev_end is None or r - prev_end > max_interval)
-        #         and
-        #         (next_start is None or next_start - f > max_interval)
-        #     ):
-        #         filtered_idx[i] = False
+            # # remove licks that aren't part of a sequence of licks at at least ~3 Hz
+            # max_interval = 0.5
+            # for i, (r, f) in enumerate(rising_falling):
+            #     prev_end = rising_falling[i-1, 1] if i > 0 else None
+            #     next_start = rising_falling[i+1, 0] if i < len(rising_falling) - 1 else None
+            #     if (
+            #         (prev_end is None or r - prev_end > max_interval)
+            #         and
+            #         (next_start is None or next_start - f > max_interval)
+            #     ):
+            #         filtered_idx[i] = False
 
-        filtered = rising[filtered_idx]
-
-        return (
-            ndx_events.Events(
-                timestamps=filtered if self.is_sync else self.sam.lickTimes,
+            filtered = rising[filtered_idx]
+            
+        licks = ndx_events.Events(
+                timestamps=self.sam.lickTimes if not self.is_sync else filtered,
                 name="licks",
                 description="times at which the subject made contact with a water spout"
                 + (
@@ -1634,7 +1634,11 @@ class DynamicRoutingSession:
                     if self.is_sync
                     else "putatively the starts of licks, but may include other events such as grooming"
                 ),
-            ),
+            )
+        
+        if not self.is_sync:
+            return tuple(licks)
+        return licks, (
             ndx_events.Events(
                 timestamps=rising,
                 name="lick_sensor_rising",
