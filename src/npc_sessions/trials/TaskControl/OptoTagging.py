@@ -121,9 +121,7 @@ class OptoTagging(TaskControl):
             return np.array(trialOptoLabel.asstr()[self.trial_index], dtype=str)
         if optoTaggingLocs := self._hdf5.get("optoTaggingLocs"):
             label = optoTaggingLocs["label"].asstr()[()]
-            xy = np.array(
-                list(zip(optoTaggingLocs["X"], optoTaggingLocs["Y"]))
-            )
+            xy = np.array(list(zip(optoTaggingLocs["X"], optoTaggingLocs["Y"])))
             return np.array(
                 [label[np.all(xy == v, axis=1)][0] for v in self._bregma_xy], dtype=str
             )[self.trial_index]

@@ -157,13 +157,17 @@ def get_amplitudes_mean_waveforms_ks25(
 
     return unit_amplitudes, templates_mean
 
-def get_ampltiudes_std_waveforms_ks25(templates_std: npt.NDArray[np.floating], ks_unit_ids: list[int]) -> list[npt.NDArray[np.floating]]:
+
+def get_ampltiudes_std_waveforms_ks25(
+    templates_std: npt.NDArray[np.floating], ks_unit_ids: list[int]
+) -> list[npt.NDArray[np.floating]]:
     unit_templates_std: list[npt.NDArray[np.floating]] = []
-    for index, ks_unit_id in enumerate(ks_unit_ids):
+    for index, _ks_unit_id in enumerate(ks_unit_ids):
         template = templates_std[index, :, :]
         unit_templates_std.append(template)
-    
+
     return unit_templates_std
+
 
 def get_units_spike_times_ks25(
     sorting_cached: dict[str, npt.NDArray],
@@ -186,10 +190,10 @@ def _device_helper(
     device_timing_on_sync: utils.EphysTimingInfoOnSync,
     spike_interface_data: utils.SpikeInterfaceKS25Data,
 ) -> pd.DataFrame:
-    electrode_group_name = npc_session.ProbeRecord(
-        device_timing_on_sync.device.name
+    electrode_group_name = npc_session.ProbeRecord(device_timing_on_sync.device.name)
+    electrode_positions = spike_interface_data.electrode_locations_xy(
+        electrode_group_name
     )
-    electrode_positions = spike_interface_data.electrode_locations_xy(electrode_group_name)
 
     df_device_metrics = spike_interface_data.quality_metrics_df(
         electrode_group_name
@@ -212,9 +216,7 @@ def _device_helper(
     )
 
     spike_times_aligned = get_aligned_spike_times(
-        spike_interface_data.sorting_cached(electrode_group_name)[
-            "spike_indexes_seg0"
-        ],
+        spike_interface_data.sorting_cached(electrode_group_name)["spike_indexes_seg0"],
         device_timing_on_sync,
     )
     unit_spike_times = get_units_spike_times_ks25(
@@ -228,8 +230,10 @@ def _device_helper(
     )
     df_device_metrics["amplitude"] = amplitudes
     df_device_metrics["waveform_mean"] = mean_waveforms
-    df_device_metrics['waveform_std'] = get_ampltiudes_std_waveforms_ks25(spike_interface_data.templates_std(electrode_group_name),
-                                                                            df_device_metrics.index.to_list())
+    df_device_metrics["waveform_std"] = get_ampltiudes_std_waveforms_ks25(
+        spike_interface_data.templates_std(electrode_group_name),
+        df_device_metrics.index.to_list(),
+    )
     df_device_metrics["spike_times"] = unit_spike_times
     df_device_metrics["unit_id"] = df_device_metrics.index.to_list()
 
@@ -265,9 +269,9 @@ def make_units_table_from_spike_interface_ks25(
             )
 
     return pd.concat(
-        device_to_future[device].result()
-        for device in sorted(device_to_future.keys())
+        device_to_future[device].result() for device in sorted(device_to_future.keys())
     )
+
 
 def format_unit_ids(
     units: pd.DataFrame, session: str | npc_session.SessionRecord
