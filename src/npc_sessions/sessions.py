@@ -896,7 +896,6 @@ class DynamicRoutingSession:
         return utils.format_unit_ids(
             units=utils.make_units_table_from_spike_interface_ks25(
                 self.id,  # TODO keep spikeinterface obj in self
-                self.ephys_settings_xml_data,
                 self.ephys_timing_data,
             ),
             session=self.id,
