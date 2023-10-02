@@ -117,7 +117,7 @@ def get_aligned_spike_times(
 
 
 def get_closest_channel(
-    unit_location: npt.NDArray[np.float64], channel_positions: npt.NDArray[np.int64]
+    unit_location: npt.NDArray[np.float64], channel_positions: npt.NDArray[np.floating]
 ) -> int:
     distances = np.sum((channel_positions - unit_location) ** 2, axis=1)
     return int(np.argmin(distances))
@@ -125,23 +125,22 @@ def get_closest_channel(
 
 def get_peak_channels(
     units_locations: npt.NDArray[np.float64],
-    electrode_positions: tuple[dict[str, tuple[int, int]], ...],
+    electrode_positions: npt.NDArray[np.floating],
 ) -> list[int]:
     peak_channels: list[int] = []
-    channel_positions = np.array(list(electrode_positions[0].values()))
 
     for location in units_locations:
         unit_location = np.array([location[0], location[1]])
-        peak_channels.append(get_closest_channel(unit_location, channel_positions))
+        peak_channels.append(get_closest_channel(unit_location, electrode_positions))
 
     return peak_channels
 
 
 def get_amplitudes_mean_waveforms_ks25(
     templates: npt.NDArray[np.floating], ks_unit_ids: npt.NDArray[np.int64]
-) -> tuple[list[float], list[npt.NDArray[np.float64]]]:
+) -> tuple[list[float], list[npt.NDArray[np.floating]]]:
     unit_amplitudes: list[float] = []
-    templates_mean: list[npt.NDArray[np.float64]] = []
+    templates_mean: list[npt.NDArray[np.floating]] = []
 
     """
     @property
@@ -158,6 +157,13 @@ def get_amplitudes_mean_waveforms_ks25(
 
     return unit_amplitudes, templates_mean
 
+def get_ampltiudes_std_waveforms_ks25(templates_std: npt.NDArray[np.floating], ks_unit_ids: list[int]) -> list[npt.NDArray[np.floating]]:
+    unit_templates_std: list[npt.NDArray[np.floating]] = []
+    for index, ks_unit_id in enumerate(ks_unit_ids):
+        template = templates_std[index, :, :]
+        unit_templates_std.append(template)
+    
+    return unit_templates_std
 
 def get_units_spike_times_ks25(
     sorting_cached: dict[str, npt.NDArray],
@@ -181,22 +187,18 @@ def make_units_table_from_spike_interface_ks25(
     | npc_session.SessionRecord
     | utils.PathLike
     | utils.SpikeInterfaceKS25Data,
-    settings_xml_data_or_path: utils.PathLike | utils.SettingsXmlInfo,
     devices_timing: Iterable[utils.EphysTimingInfoOnSync],
 ) -> pd.DataFrame:
     """
     >>> devices_timing = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'))
-    >>> settings_xml_data = utils.get_settings_xml_data(npc_lims.get_settings_xml_path_from_s3('662892_20230821'))
-    >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', settings_xml_data, devices_timing)
+    >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', devices_timing)
     >>> len(units[units['electrode_group_name'] == 'probeA'])
     237
     """
-    # TODO @arjunsridhar12345 rm settings xml, use spike_interface_data.electrode_locations_xy
-    settings_xml_info = utils.get_settings_xml_data(settings_xml_data_or_path)
-    electrode_positions = settings_xml_info.channel_pos_xy
     spike_interface_data = utils.get_spikeinterface_data(
         session_or_spikeinterface_data_or_path
     )
+
     devices_timing = tuple(
         timing for timing in devices_timing if timing.device.name.endswith("-AP")
     )
@@ -207,6 +209,7 @@ def make_units_table_from_spike_interface_ks25(
         electrode_group_name = npc_session.ProbeRecord(
             device_timing_on_sync.device.name
         )
+        electrode_positions = spike_interface_data.electrode_locations_xy(electrode_group_name)
 
         df_device_metrics = spike_interface_data.quality_metrics_df(
             electrode_group_name
@@ -227,7 +230,7 @@ def make_units_table_from_spike_interface_ks25(
             spike_interface_data.templates_average(electrode_group_name),
             df_device_metrics.index.values,
         )
-        # TODO #40 get waveform sd
+
         spike_times_aligned = get_aligned_spike_times(
             spike_interface_data.sorting_cached(electrode_group_name)[
                 "spike_indexes_seg0"
@@ -245,6 +248,8 @@ def make_units_table_from_spike_interface_ks25(
         )
         df_device_metrics["amplitude"] = amplitudes
         df_device_metrics["waveform_mean"] = mean_waveforms
+        df_device_metrics['waveform_std'] = get_ampltiudes_std_waveforms_ks25(spike_interface_data.templates_std(electrode_group_name),
+                                                                              df_device_metrics.index.to_list())
         df_device_metrics["spike_times"] = unit_spike_times
         df_device_metrics["unit_id"] = df_device_metrics.index.to_list()
 
@@ -261,7 +266,6 @@ def make_units_table_from_spike_interface_ks25(
         device_to_future[device].result()
         for device in sorted(device_to_future.keys())
     )
-
 
 def format_unit_ids(
     units: pd.DataFrame, session: str | npc_session.SessionRecord
