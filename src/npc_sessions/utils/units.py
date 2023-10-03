@@ -18,6 +18,7 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
+
 @functools.cache
 def get_units_electrodes(
     session: str, sorting_method="codeocean_ks25", annotation_method="tissuecyte"
@@ -260,7 +261,9 @@ def make_units_table_from_spike_interface_ks25(
     )
 
 
-def add_tissuecyte_annotations(units: pd.DataFrame, session: str | npc_session.SessionRecord) -> pd.DataFrame:
+def add_tissuecyte_annotations(
+    units: pd.DataFrame, session: str | npc_session.SessionRecord
+) -> pd.DataFrame:
     """Join units table with tissuecyte electrode locations table and drop redundant columns."""
     try:
         electrodes = utils.get_tissuecyte_electrodes_table(session)
@@ -278,7 +281,9 @@ def add_tissuecyte_annotations(units: pd.DataFrame, session: str | npc_session.S
 
 
 def add_global_unit_ids(
-    units: pd.DataFrame, session: str | npc_session.SessionRecord, unit_id_column: str = "unit_id"
+    units: pd.DataFrame,
+    session: str | npc_session.SessionRecord,
+    unit_id_column: str = "unit_id",
 ) -> pd.DataFrame:
     """Add session and probe letter"""
     units["unit_id"] = [
