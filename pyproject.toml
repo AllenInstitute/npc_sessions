@@ -10,7 +10,7 @@ authors = [
 ]
 dependencies = [
     "npc-session>=0.1.22",
-    "npc-lims>=0.1.71",
+    "npc-lims>=0.1.72",
     "polars[all]>=0.18.14",
     "h5py>=3.9.0",
     "pandas[aws,excel,fss,hdf5,performance,plot]>=1.1.5",
@@ -36,6 +36,8 @@ dependencies = [
     "ipykernel>=6.25.2",
     "nwbwidgets>=0.11.3",
     "hdmf-zarr>=0.2.0",
+    "loky>=3.4.1",
+    "hdmf>=3.5.4",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
