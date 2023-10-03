@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:e5a79d376a40200c0e9fbf9525a16596e6a971d284d811af27b91bc3e39ed2cf"
+content_hash = "sha256:83fe910346e8476749b024451fa72201f66c3b3faeb6ad090d8ad8fd054ec3fa"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -1399,38 +1399,39 @@ files = [
 
 [[package]]
 name = "hdmf"
-version = "3.9.0"
-requires_python = ">=3.8"
-summary = "A hierarchical data modeling framework for modern science data standards"
+version = "3.5.4"
+requires_python = ">=3.7"
+summary = "A package for standardizing hierarchical object data"
 dependencies = [
     "h5py>=2.10",
     "jsonschema>=2.6.0",
-    "numpy>=1.18",
+    "numpy>=1.16",
     "pandas>=1.0.5",
     "ruamel-yaml>=0.16",
-    "scipy>=1.4",
+    "scipy>=1.1",
+    "setuptools",
 ]
 files = [
-    {file = "hdmf-3.9.0-py3-none-any.whl", hash = "sha256:62f16ee97659d51edab35de2727ae189652eb10a4852f533440764da8ac13a29"},
-    {file = "hdmf-3.9.0.tar.gz", hash = "sha256:eee444223a810c5cddb7c2ebdfaaad7b56ff16e30ff0358000d2c1f096b22051"},
+    {file = "hdmf-3.5.4-py3-none-any.whl", hash = "sha256:749956542d543fc30487156c27e774577a24bc21d4d67da7b98e10abd19e07f6"},
+    {file = "hdmf-3.5.4.tar.gz", hash = "sha256:56f1a801988929dcaa6a9a99018f848b6bb5f787db966bdd08f520ae1fd7f003"},
 ]
 
 [[package]]
 name = "hdmf-zarr"
-version = "0.2.0"
+version = "0.3.0"
 requires_python = ">=3.7"
 summary = "A package defining a Zarr I/O backend for HDMF"
 dependencies = [
-    "hdmf>=3.4.0",
+    "hdmf==3.5.4",
     "numcodecs>=0.9.1",
     "numpy<1.24,>=1.22; python_version > \"3.7\"",
-    "pynwb>=2.0.0",
+    "pynwb>=2.3.2",
     "setuptools",
     "zarr>=2.11.0",
 ]
 files = [
-    {file = "hdmf_zarr-0.2.0-py3-none-any.whl", hash = "sha256:725f1ed3672eab8b603c40938d4504a1bc6529bf00eca3c75e0cd5003ce284c8"},
-    {file = "hdmf_zarr-0.2.0.tar.gz", hash = "sha256:740c58f01db1d644cdbedf9597bf84812386ee88cf52656fd9215defe78a48d5"},
+    {file = "hdmf_zarr-0.3.0-py3-none-any.whl", hash = "sha256:684e3c7a1b474b9396872e537cc8d2287c3d3e8829b416f49c95ad864c6cdc69"},
+    {file = "hdmf_zarr-0.3.0.tar.gz", hash = "sha256:da12419cd5a0616ca73d742c5fdeb5c8f02e2b17dc8a0390494021c25b3de929"},
 ]
 
 [[package]]
@@ -3175,20 +3176,20 @@ files = [
 
 [[package]]
 name = "pynwb"
-version = "2.5.0"
-requires_python = ">=3.8"
+version = "2.3.3"
+requires_python = ">=3.7"
 summary = "Package for working with Neurodata stored in the NWB format"
 dependencies = [
     "h5py>=2.10",
-    "hdmf>=3.9.0",
+    "hdmf>=3.5.4",
     "numpy>=1.16",
     "pandas>=1.1.5",
     "python-dateutil>=2.7.3",
     "setuptools",
 ]
 files = [
-    {file = "pynwb-2.5.0-py3-none-any.whl", hash = "sha256:d0ef0a6e42e9176fd0e71d186911701362e53f78514230236589848468a46f83"},
-    {file = "pynwb-2.5.0.tar.gz", hash = "sha256:4010bb946e8b9ec50733e7569207702af663bcd8edafcae96e2c66e53ae573d6"},
+    {file = "pynwb-2.3.3-py3-none-any.whl", hash = "sha256:28b7448b627483e64cf5efaa066735c9b6944045507b7e117e05bee59e9bd9f2"},
+    {file = "pynwb-2.3.3.tar.gz", hash = "sha256:a072815277912fdacdd67f10edfd763e05fe6016a5353b67dcc837d525daee14"},
 ]
 
 [[package]]

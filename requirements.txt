@@ -55,8 +55,8 @@ fscacher==0.4.0
 fsspec==2023.9.2
 gast==0.4.0
 h5py==3.9.0
-hdmf==3.9.0
-hdmf-zarr==0.2.0
+hdmf==3.5.4
+hdmf-zarr==0.3.0
 humanize==4.8.0
 idna==3.4
 imageio==2.31.4
@@ -147,7 +147,7 @@ pycryptodomex==3.19.0
 pydantic==1.10.13
 pydbhub-bjh==0.0.9
 pygments==2.16.1
-pynwb==2.5.0
+pynwb==2.3.3
 pyopenssl==23.2.0
 pyout==0.7.3
 pyparsing==3.1.1
