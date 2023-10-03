@@ -16,7 +16,7 @@ dependencies = [
     "pandas[aws,excel,fss,hdf5,performance,plot]>=1.1.5",
     "universal-pathlib>=0.1.1",
     "s3fs>=2023.6.0",
-    "pynwb>=2.5.0",
+    "pynwb",
     "crc32c>=2.3.post0",
     "rich>=13.5.2",
     "zarr>=2.16.1",
