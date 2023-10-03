@@ -1694,7 +1694,8 @@ class DynamicRoutingSession:
 
         if not self.is_sync:
             return tuple(licks)
-        return licks, (
+        return (
+            licks,
             ndx_events.Events(
                 timestamps=rising,
                 name="lick_sensor_rising",
