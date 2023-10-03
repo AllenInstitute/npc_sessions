@@ -893,10 +893,13 @@ class DynamicRoutingSession:
     def _units(self) -> pd.DataFrame:
         if not self.is_sorted:
             raise AttributeError(f"{self.id} hasn't been spike-sorted")
-        return utils.format_unit_ids(
-            units=utils.make_units_table_from_spike_interface_ks25(
-                self.id,  # TODO keep spikeinterface obj in self
-                self.ephys_timing_data,
+        return utils.add_global_unit_ids(
+                utils.add_tissuecyte_annotations(
+                    units=utils.make_units_table_from_spike_interface_ks25(
+                        self.id,  # TODO keep spikeinterface obj in self
+                        self.ephys_timing_data,
+                    ),
+                    session=self.id,
             ),
             session=self.id,
         )

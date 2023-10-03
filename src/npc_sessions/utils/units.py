@@ -3,6 +3,7 @@ from __future__ import annotations
 import concurrent.futures
 import functools
 import io
+import logging
 import os
 from collections.abc import Iterable
 
@@ -15,6 +16,7 @@ import polars as pl
 
 import npc_sessions.utils as utils
 
+logger = logging.getLogger(__name__)
 
 @functools.cache
 def get_units_electrodes(
@@ -30,24 +32,9 @@ def get_units_electrodes(
             },
         )
     if annotation_method == "tissuecyte":
-        units = merge_units_electrodes(session, units)
+        units = add_tissuecyte_annotations(units, session)
 
     units.drop(columns=["electrodes"], inplace=True)
-    return units
-
-
-def merge_units_electrodes(session: str, units: pd.DataFrame) -> pd.DataFrame:
-    try:
-        electrodes = utils.get_tissuecyte_electrodes_table(session)
-        units = units.merge(
-            electrodes,
-            left_on=["group_name", "peak_channel"],
-            right_on=["electrode_group_name", "channel"],
-        )
-        units.drop(columns=["channel"], inplace=True)
-    except FileNotFoundError as e:
-        print(str(e) + ". Returning units without electrodes")
-
     return units
 
 
@@ -273,16 +260,35 @@ def make_units_table_from_spike_interface_ks25(
     )
 
 
-def format_unit_ids(
-    units: pd.DataFrame, session: str | npc_session.SessionRecord
+def add_tissuecyte_annotations(units: pd.DataFrame, session: str | npc_session.SessionRecord) -> pd.DataFrame:
+    """Join units table with tissuecyte electrode locations table and drop redundant columns."""
+    try:
+        electrodes = utils.get_tissuecyte_electrodes_table(session)
+    except FileNotFoundError as e:
+        logger.warning(f"{e}: returning units without locations.")
+        return units
+    units = units.merge(
+        electrodes,
+        left_on=["electrode_group_name", "peak_channel"],
+        right_on=["group_name", "channel"],
+    )
+    units.drop(columns=["channel"], inplace=True)
+
+    return units
+
+
+def add_global_unit_ids(
+    units: pd.DataFrame, session: str | npc_session.SessionRecord, unit_id_column: str = "unit_id"
 ) -> pd.DataFrame:
     """Add session and probe letter"""
     units["unit_id"] = [
-        f"{session}_{row.electrode_group_name.replace('probe', '')}-{row.unit_id}"
-        if session not in str(row.unit_id)  # in case we aready ran this fn
-        else row.unit_id
+        f"{session}_{row.electrode_group_name.replace('probe', '')}-{row[unit_id_column]}"
+        if session not in str(row[unit_id_column])  # in case we aready ran this fn
+        else row[unit_id_column]
         for _, row in units.iterrows()
     ]
+    if unit_id_column != "unit_id":
+        units.drop(columns=[unit_id_column], inplace=True)
     return units
 
 
