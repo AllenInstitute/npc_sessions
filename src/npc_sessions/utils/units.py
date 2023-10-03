@@ -158,7 +158,7 @@ def get_amplitudes_mean_waveforms_ks25(
     return unit_amplitudes, templates_mean
 
 
-def get_ampltiudes_std_waveforms_ks25(
+def get_waveform_sd_ks25(
     templates_std: npt.NDArray[np.floating], ks_unit_ids: list[int]
 ) -> list[npt.NDArray[np.floating]]:
     unit_templates_std: list[npt.NDArray[np.floating]] = []
@@ -230,7 +230,7 @@ def _device_helper(
     )
     df_device_metrics["amplitude"] = amplitudes
     df_device_metrics["waveform_mean"] = mean_waveforms
-    df_device_metrics["waveform_std"] = get_ampltiudes_std_waveforms_ks25(
+    df_device_metrics["waveform_sd"] = get_waveform_sd_ks25(
         spike_interface_data.templates_std(electrode_group_name),
         df_device_metrics.index.to_list(),
     )
