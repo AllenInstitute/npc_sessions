@@ -1752,10 +1752,15 @@ class DynamicRoutingSession:
         path_to_timestamps = utils.get_video_frame_times(
             self.sync_data, *self.video_paths
         )
+        nwb_names = {
+            'eye': 'eye',
+            'face': 'front',
+            'behavior': 'side',
+        }
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=f"{utils.extract_camera_name(path.stem)}_camera",
+                name=f"{nwb_names[utils.extract_camera_name(path.stem)]}_camera",
                 description=f"start of video frame exposures for {path.stem}",
             )
             for path, timestamps in path_to_timestamps.items()
