@@ -10,6 +10,9 @@ import pathlib
 import shutil
 from typing import Union
 
+import hdmf.backends.io
+import hdmf_zarr
+import pynwb
 import crc32c
 import rich.progress
 import upath
@@ -236,6 +239,19 @@ def free_gb(path: PathLike) -> float:
     path = from_pathlike(path)
     return round(shutil.disk_usage(path).free / 1024**3, 1)
 
+def write_nwb_to_s3(nwb: pynwb.NWBFile, path: PathLike, nwb_io_class: Type[hdmf.backends.io.HDMFIO] = hdmf_zarr.NWBZarrIO) -> None:
+    path = from_pathlike(path)
+    if issubclass(nwb_io_class, hdmf_zarr.NWBZarrIO):
+        if path.suffix != '.zarr':
+            path = path.with_suffix(".nwb.zarr")
+    elif issubclass(nwb_io_class, pynwb.NWBHDF5IO):
+        if not path.protocol or path.protocol == 'file':
+            raise ValueError(f"Must use a local path for {nwb_io_class!r}")
+        if path.suffix != '.nwb':
+            path = path.with_suffix(".nwb")
+    with nwb_io_class(path=path.as_posix(), mode="w") as nwb_io:
+        nwb_io.write(nwb)
+        
 
 if __name__ == "__main__":
     import doctest
