@@ -214,7 +214,7 @@ class DynamicRoutingSession:
             else None,  # we have one sessions without trials (670248_2023-08-02)
             intervals=self._intervals,
             acquisition=self._acquisition,
-            processing=self._processing,
+            processing=tuple(self.processing.values()),
             analysis=self._analysis,
             devices=self._devices,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
@@ -401,15 +401,21 @@ class DynamicRoutingSession:
     def processing(
         self,
     ) -> pynwb.core.LabelledDict[
-        str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
+        str, pynwb.base.ProcessingModule
     ]:
         """Data after processing and filtering - raw data goes in
         `acquisition`.
 
-        The property as it appears on an NWBFile"""
+        The property as it appears on an NWBFile."""
+        # TODO replace with `nwb.add_processing_module`
         processing = pynwb.core.LabelledDict(label="processing", key_attr="name")
-        for module in self._processing:
-            processing[module.name] = module
+        for module_name in ('behavior', 'ecephys'):
+            module = getattr(self, f'_{module_name}')
+            processing[module_name] = pynwb.base.ProcessingModule(
+                name=module_name,
+                description=f'processed {module_name} data',
+                data_interfaces=module,
+            )
         return processing
 
     @property
@@ -442,14 +448,20 @@ class DynamicRoutingSession:
         return tuple(modules)
 
     @functools.cached_property
-    def _processing(
+    def _behavior(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        """The version passed to NWBFile.__init__"""
-        # TODO add filtered, sub-sampled LFP
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         modules.append(self._all_licks[0])
         modules.append(self._running_speed)
+        return tuple(modules)
+    
+    @functools.cached_property
+    def _ecephys(
+        self,
+    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        # TODO add filtered, sub-sampled LFP
+        modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         return tuple(modules)
 
     @functools.cached_property
