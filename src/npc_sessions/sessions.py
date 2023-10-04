@@ -10,9 +10,10 @@ import itertools
 import json
 import logging
 import re
+import typing
 import uuid
 from collections.abc import Generator, Iterable
-from typing import Any, Literal
+from typing import Any, Iterator, Literal
 
 import h5py
 import hdmf
@@ -34,11 +35,22 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
-
-def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None, None]:
+@typing.overload
+def get_sessions() -> Iterator[DynamicRoutingSession]:
+    ...
+    
+@typing.overload
+def get_sessions(session: str | npc_session.SessionRecord) -> DynamicRoutingSession:
+    ...
+    
+def get_sessions(
+    session: str | npc_session.SessionRecord | None = None, 
+    **all_session_kwargs,
+):
     """Uploaded sessions, tracked in npc_lims via `get_tracked_sessions()`, newest
     to oldest.
-
+    
+    - if `session` is provided, a single session object is returned 
     - sessions with known issues are excluded
     - `all_session_kwargs` will be applied on top of any session-specific kwargs
         - session-specific config from `npc_lims.get_session_kwargs`
@@ -80,12 +92,14 @@ def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None,
     >>> for session in get_sessions(is_sync=False):             # doctest: +SKIP
     ...     trials_dfs.append(session.trials)
     """
-    for session in sorted(
-        npc_lims.get_tracked_sessions(), key=lambda x: x.date, reverse=True
+    if session:
+        return DynamicRoutingSession(session, **all_session_kwargs)
+    for session_info in sorted(
+        npc_lims.get_session_info(), key=lambda x: x.date, reverse=True
     ):
-        if session.is_uploaded and not npc_lims.get_session_issues(session.id):
+        if session_info.is_uploaded and not npc_lims.get_session_issues(session_info.id):
             yield DynamicRoutingSession(
-                session.id,
+                session_info.id,
                 **all_session_kwargs,
             )
 
