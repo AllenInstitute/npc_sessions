@@ -240,9 +240,9 @@ def free_gb(path: PathLike) -> float:
     return round(shutil.disk_usage(path).free / 1024**3, 1)
 
 
-def write_nwb_to_s3(
-    nwb: pynwb.NWBFile,
+def write_nwb(
     path: PathLike,
+    nwb: pynwb.NWBFile,
     nwb_io_class: type[hdmf.backends.io.HDMFIO] = hdmf_zarr.NWBZarrIO,
 ) -> None:
     path = from_pathlike(path)
