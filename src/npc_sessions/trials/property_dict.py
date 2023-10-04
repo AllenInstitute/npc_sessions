@@ -16,6 +16,8 @@ import numpy as np
 import pandas as pd
 import polars as pl
 
+import npc_sessions.utils as utils
+
 logger = logging.getLogger(__name__)
 
 EXCLUDE_IF_ONLY_NANS = False
@@ -173,12 +175,12 @@ class PropertyDict(collections.abc.Mapping):
         {
             attr: ""
             for attr in self._properties
-            if not isinstance(cls_attr(attr), (property, functools.cached_property))
+            if not isinstance(cls_attr(attr), (property, functools.cached_property, utils.cached_property))
         }
         property_getters = {
             attr: cls_attr(attr).__doc__ or ""
             for attr in self._properties
-            if isinstance(cls_attr(attr), (property, functools.cached_property))
+            if isinstance(cls_attr(attr), (property, functools.cached_property, utils.cached_property))
         }
 
         def fmt(docstring):

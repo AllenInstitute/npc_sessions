@@ -42,7 +42,7 @@ class OptoTagging(TaskControl):
             hdf5, sync, ephys_recording_dirs=ephys_recording_dirs, **kwargs
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def _stim_recordings(self) -> tuple[utils.StimRecording, ...]:
         recordings = utils.get_stim_latencies_from_sync(
             self._hdf5, self._sync, waveform_type="opto"
@@ -53,46 +53,46 @@ class OptoTagging(TaskControl):
         return tuple(_ for _ in recordings if _ is not None)  # for mypy
         # TODO check this works for all older sessions
 
-    @functools.cached_property
+    @utils.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
         """0-indexed"""
         return np.arange(len(self._hdf5["trialOptoOnsetFrame"]))
 
-    @functools.cached_property
+    @utils.cached_property
     def _inter_trial_interval(self) -> float:
         return self._hdf5["optoInterval"][()] / self._hdf5["frameRate"][()]
 
-    @functools.cached_property
+    @utils.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         return self.stim_start_time - min(0.2, 0.5 * self._inter_trial_interval)
 
-    @functools.cached_property
+    @utils.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         return self.stim_stop_time + min(0.2, 0.5 * self._inter_trial_interval)
 
-    @functools.cached_property
+    @utils.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         return np.array([rec.onset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
         ]
 
-    @functools.cached_property
+    @utils.cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
         return np.array([rec.offset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
         ]
 
-    @functools.cached_property
+    @utils.cached_property
     def stim_name(self) -> npt.NDArray[np.str_]:
         return np.array([recording.name for recording in self._stim_recordings])[
             self.trial_index
         ]
 
-    @functools.cached_property
+    @utils.cached_property
     def duration(self) -> npt.NDArray[np.float64]:
         return self._hdf5["trialOptoDur"][self.trial_index]
 
-    @functools.cached_property
+    @utils.cached_property
     def location(self) -> npt.NDArray[np.str_]:
         if all(str(v).upper() in "ABCDEF" for v in self._location):
             return np.array(
@@ -100,22 +100,22 @@ class OptoTagging(TaskControl):
             )
         return self._location
 
-    @functools.cached_property
+    @utils.cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         bregma = self._hdf5.get("optoBregma", None) or self._hdf5.get("bregmaXY", None)
         galvo = self._hdf5["galvoVoltage"][()]
         trial_voltages = self._hdf5["trialGalvoVoltage"]
         return tuple(tuple(bregma[np.all(galvo == v, axis=1)][0]) for v in trial_voltages)  # type: ignore
 
-    @functools.cached_property
+    @utils.cached_property
     def bregma_x(self) -> npt.NDArray[np.float64]:
         return np.array([bregma[0] for bregma in self._bregma_xy])[self.trial_index]
 
-    @functools.cached_property
+    @utils.cached_property
     def bregma_y(self) -> npt.NDArray[np.float64]:
         return np.array([bregma[1] for bregma in self._bregma_xy])[self.trial_index]
 
-    @functools.cached_property
+    @utils.cached_property
     def _location(self) -> npt.NDArray[np.str_]:
         if trialOptoLabel := self._hdf5.get("trialOptoLabel", None):
             return np.array(trialOptoLabel.asstr()[self.trial_index], dtype=str)
@@ -127,7 +127,7 @@ class OptoTagging(TaskControl):
             )[self.trial_index]
         raise ValueError("No known optotagging location data found")
 
-    @functools.cached_property
+    @utils.cached_property
     def power(self) -> npt.NDArray[np.float64]:
         calibration_data = self._hdf5["optoPowerCalibrationData"]
         trial_voltages = self._hdf5["trialOptoVoltage"][self.trial_index]

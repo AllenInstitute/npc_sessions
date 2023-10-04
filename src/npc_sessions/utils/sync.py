@@ -726,7 +726,7 @@ class SyncDataset:
     def stop_time(self) -> datetime.datetime:
         return self.start_time + datetime.timedelta(seconds=self.total_seconds)
 
-    @functools.cached_property
+    @utils.cached_property
     def stim_running_edges(
         self,
     ) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
@@ -765,7 +765,7 @@ class SyncDataset:
     def total_seconds(self) -> float:
         return self.meta_data["total_samples"] / self.sample_freq
 
-    @functools.cached_property
+    @utils.cached_property
     def vsync_times_in_blocks(self) -> tuple[npt.NDArray[np.floating], ...]:
         """Blocks of vsync falling edge times, in seconds relative to first
         sample: one block per stimulus.
@@ -800,7 +800,7 @@ class SyncDataset:
         assert all(block.size > 0 for block in vsync_times_in_blocks)
         return tuple(vsync_times_in_blocks)
 
-    @functools.cached_property
+    @utils.cached_property
     def expected_diode_flip_rate(self) -> int:
         """Best-guess at what the diode flip period should be, e.g. 1 s for
         MPE/pipeline recordings, 1/60 s for Sam's TaskControl scripts."""
@@ -813,7 +813,7 @@ class SyncDataset:
                 return int(1 / period)
         raise ValueError(f"Unexpected diode flip period: {med} sec")
 
-    @functools.cached_property
+    @utils.cached_property
     def expected_frame_display_rate(self) -> int:
         """Best-guess at what the screen display rate should be. Currently
         [2023] should only be 60 fps."""
@@ -823,7 +823,7 @@ class SyncDataset:
                 return int(1 / period)
         raise ValueError(f"Unexpected vsync period: {med} sec")
 
-    @functools.cached_property
+    @utils.cached_property
     def frame_display_time_blocks(self) -> tuple[npt.NDArray[np.floating], ...]:
         """Blocks of adjusted diode times: one block per stimulus."""
         vsync_times_in_blocks = self.vsync_times_in_blocks

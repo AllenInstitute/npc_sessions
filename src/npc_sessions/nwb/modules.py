@@ -70,7 +70,7 @@ class NWBContainerWithDF(NWBContainer):
     def to_dataframe(self) -> pd.DataFrame:
         return self.df.to_pandas()
 
-    @functools.cached_property
+    @utils.cached_property
     def df(self) -> pl.DataFrame:
         if all(isinstance(record, npc_lims.RecordWithNWB) for record in self.records):
             return pl.from_records(tuple(record.nwb for record in self.records))  # type: ignore [attr-defined]

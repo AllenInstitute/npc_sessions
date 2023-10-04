@@ -251,7 +251,7 @@ class DynamicRoutingSession:
 
     # metadata ------------------------------------------------------------------ #
 
-    @functools.cached_property
+    @utils.cached_property
     def metadata(self) -> pynwb.NWBFile:
         """NWB file with session metadata-alone"""
         return pynwb.NWBFile(
@@ -370,7 +370,7 @@ class DynamicRoutingSession:
         keywords += list(value)
         self._keywords = list(set(keywords))
 
-    @functools.cached_property
+    @utils.cached_property
     def subject(self) -> pynwb.file.Subject:
         try:
             metadata = self._subject_aind_metadata
@@ -455,7 +455,7 @@ class DynamicRoutingSession:
             analysis[module.name] = module
         return analysis
 
-    @functools.cached_property
+    @utils.cached_property
     def _acquisition(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
@@ -470,7 +470,7 @@ class DynamicRoutingSession:
             modules.extend(self._video_frame_times)
         return tuple(modules)
 
-    @functools.cached_property
+    @utils.cached_property
     def _behavior(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
@@ -479,7 +479,7 @@ class DynamicRoutingSession:
         modules.append(self._running_speed)
         return tuple(modules)
 
-    @functools.cached_property
+    @utils.cached_property
     def _ecephys(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
@@ -487,7 +487,7 @@ class DynamicRoutingSession:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         return tuple(modules)
 
-    @functools.cached_property
+    @utils.cached_property
     def _analysis(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
@@ -501,7 +501,7 @@ class DynamicRoutingSession:
 
     # intervals ----------------------------------------------------------------- #
 
-    @functools.cached_property
+    @utils.cached_property
     def invalid_times(self) -> pynwb.epoch.TimeIntervals:
         """Time intervals when recording was interrupted, stim malfunctioned or
         otherwise invalid.
@@ -554,7 +554,7 @@ class DynamicRoutingSession:
         self._cached_nwb_trials = trials
         return trials
 
-    @functools.cached_property
+    @utils.cached_property
     def _trials(self) -> TaskControl.DynamicRouting1:
         """Main behavior task trials"""
         stim_name = next(
@@ -638,7 +638,7 @@ class DynamicRoutingSession:
 
         return nwb_intervals
 
-    @functools.cached_property
+    @utils.cached_property
     def intervals(self) -> pynwb.core.LabelledDict:
         """AKA trials tables other than the main behavior task.
 
@@ -652,7 +652,7 @@ class DynamicRoutingSession:
             intervals[module.name] = module
         return intervals
 
-    @functools.cached_property
+    @utils.cached_property
     def _intervals(self) -> tuple[pynwb.epoch.TimeIntervals, ...]:
         """The version passed to NWBFile.__init__"""
         intervals: list[pynwb.epoch.TimeIntervals] = []
@@ -685,7 +685,7 @@ class DynamicRoutingSession:
         # identify unique stims across stim files
         return tuple(intervals)
 
-    @functools.cached_property
+    @utils.cached_property
     def _all_trials(self) -> utils.LazyDict[str, TaskControl.TaskControl]:
         if self.is_sync:
             # get the only stims for which we have times:
@@ -751,7 +751,7 @@ class DynamicRoutingSession:
                 set_lazy_eval(stim_filename, cls, stim_filename, kwargs)
         return utils.LazyDict((k, v) for k, v in lazy_dict_items.items())
 
-    @functools.cached_property
+    @utils.cached_property
     def epochs(self) -> pynwb.file.TimeIntervals:
         epochs = pynwb.file.TimeIntervals(
             name="epochs",
@@ -775,7 +775,7 @@ class DynamicRoutingSession:
 
     # probes, devices, units ---------------------------------------------------- #
 
-    @functools.cached_property
+    @utils.cached_property
     def _probes(self) -> tuple[pynwb.device.Device, ...]:
         if not self.is_ephys:
             raise AttributeError(f"{self.id} is not an ephys session")
@@ -799,7 +799,7 @@ class DynamicRoutingSession:
             devices.extend(self._probes)
         return tuple(devices)  # add other devices as we need them
 
-    @functools.cached_property
+    @utils.cached_property
     def devices(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
         """Currently just probe model + serial number.
 
@@ -811,7 +811,7 @@ class DynamicRoutingSession:
             devices[module.name] = module
         return devices
 
-    @functools.cached_property
+    @utils.cached_property
     def electrode_groups(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
         """The group of channels on each inserted probe.
 
@@ -825,7 +825,7 @@ class DynamicRoutingSession:
             electrode_groups[module.name] = module
         return electrode_groups
 
-    @functools.cached_property
+    @utils.cached_property
     def _electrode_groups(self) -> tuple[pynwb.ecephys.ElectrodeGroup, ...]:
         """The version passed to NWBFile.__init__"""
         if not self.is_ephys:
@@ -853,7 +853,7 @@ class DynamicRoutingSession:
             )
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def electrodes(self) -> pynwb.core.DynamicTable:
         """Individual channels on an inserted probe, including location, CCF
         coords.
@@ -918,7 +918,7 @@ class DynamicRoutingSession:
                 )
         return electrodes
 
-    @functools.cached_property
+    @utils.cached_property
     def _units(self) -> pd.DataFrame:
         if not self.is_sorted:
             raise AttributeError(f"{self.id} hasn't been spike-sorted")
@@ -933,7 +933,7 @@ class DynamicRoutingSession:
             session=self.id,
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def units(self) -> pynwb.misc.Units:
         units = pynwb.misc.Units(
             name="units",
@@ -967,7 +967,7 @@ class DynamicRoutingSession:
             )
         return units
 
-    @functools.cached_property
+    @utils.cached_property
     def _raw_lfp(self) -> pynwb.ecephys.LFP:
         lfp = pynwb.ecephys.LFP()
 
@@ -1013,7 +1013,7 @@ class DynamicRoutingSession:
 
     # images -------------------------------------------------------------------- #
 
-    @functools.cached_property
+    @utils.cached_property
     def drift_maps(self) -> pynwb.image.Images:
         return pynwb.image.Images(
             name="drift_maps",
@@ -1037,13 +1037,13 @@ class DynamicRoutingSession:
 
     # session ------------------------------------------------------------------- #
 
-    @functools.cached_property
+    @utils.cached_property
     def info(self) -> npc_lims.SessionInfo | None:
         with contextlib.suppress(ValueError):
             return npc_lims.get_session_info(self.id)
         return None
 
-    @functools.cached_property
+    @utils.cached_property
     def is_task(self) -> bool:
         if v := getattr(self, "_is_task", None):
             return v
@@ -1052,7 +1052,7 @@ class DynamicRoutingSession:
             return True
         return False
 
-    @functools.cached_property
+    @utils.cached_property
     def is_sync(self) -> bool:
         if v := getattr(self, "_is_sync", None):
             return v
@@ -1065,7 +1065,7 @@ class DynamicRoutingSession:
                 return True
         return False
 
-    @functools.cached_property
+    @utils.cached_property
     def is_video(self) -> bool:
         if v := getattr(self, "_is_video", None):
             return v
@@ -1076,7 +1076,7 @@ class DynamicRoutingSession:
                 return True
         return False
 
-    @functools.cached_property
+    @utils.cached_property
     def is_ephys(self) -> bool:
         if v := getattr(self, "_is_ephys", None):
             return v
@@ -1087,7 +1087,7 @@ class DynamicRoutingSession:
                 return True
         return False
 
-    @functools.cached_property
+    @utils.cached_property
     def is_sorted(self) -> bool:
         if v := getattr(self, "_is_sorted", None):
             return v
@@ -1100,7 +1100,7 @@ class DynamicRoutingSession:
             return True
         return False
 
-    @functools.cached_property
+    @utils.cached_property
     def _is_units(self) -> bool:
         """Temp attr to check if arjun's processed units files are available"""
         if not self.is_sorted:
@@ -1110,7 +1110,7 @@ class DynamicRoutingSession:
             return True
         return False
 
-    @functools.cached_property
+    @utils.cached_property
     def is_annotated(self) -> bool:
         """CCF annotation data accessible"""
         if not self.is_ephys:
@@ -1120,13 +1120,13 @@ class DynamicRoutingSession:
                 return True
         return False
 
-    @functools.cached_property
+    @utils.cached_property
     def is_lfp(self) -> bool:
         if v := getattr(self, "_is_lfp", None):
             return v
         return self.is_ephys
 
-    @functools.cached_property
+    @utils.cached_property
     def is_opto(self) -> bool:
         """Opto during behavior task && not wt/wt (if genotype info available)"""
         genotype: str | None = (
@@ -1158,7 +1158,7 @@ class DynamicRoutingSession:
             notes=self.notes,
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def record(self) -> npc_lims.Session:
         return self.get_record()
 
@@ -1167,7 +1167,7 @@ class DynamicRoutingSession:
             if attr in nwb.__dict__:
                 nwb.__setattr__(attr, self.record.__getattribute__(attr))
 
-    @functools.cached_property
+    @utils.cached_property
     def _raw_upload_metadata_json_paths(self):
         return tuple(
             file
@@ -1175,7 +1175,7 @@ class DynamicRoutingSession:
             if file.suffix == ".json"
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def sorting_vis(self) -> dict[str, dict | str]:
         """To open links:
         import webbrowser
@@ -1194,7 +1194,7 @@ class DynamicRoutingSession:
     def _nwb_hdf5_path(self) -> upath.UPath | None:
         return npc_lims.get_nwb_file_from_s3(self.id)
 
-    @functools.cached_property
+    @utils.cached_property
     def _subject_aind_metadata(self) -> dict[str, Any]:
         try:
             file = next(
@@ -1240,7 +1240,7 @@ class DynamicRoutingSession:
                 f"Could not find file in {npc_lims.DR_DATA_REPO} for {self.id}"
             ) from None
 
-    @functools.cached_property
+    @utils.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
         if self.root_path:
             return self.get_raw_data_paths_from_root()
@@ -1255,13 +1255,13 @@ class DynamicRoutingSession:
             f"{self.id} is either an untracked ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}"
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
             raise ValueError(f"{self.id} is not a session with ephys")
         return npc_lims.get_sorted_data_paths_from_s3(self.id)
 
-    @functools.cached_property
+    @utils.cached_property
     def sync_path(self) -> upath.UPath:
         if path := getattr(self, "_sync_path", None):
             return path
@@ -1284,7 +1284,7 @@ class DynamicRoutingSession:
             )
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def raw_data_asset_id(self) -> str:
         if not self.is_ephys:
             raise ValueError(
@@ -1292,7 +1292,7 @@ class DynamicRoutingSession:
             )
         return npc_lims.get_session_raw_data_asset(self.id)["id"]
 
-    @functools.cached_property
+    @utils.cached_property
     def sync_file_record(self) -> npc_lims.File:
         path = self.sync_path
         return npc_lims.File(
@@ -1305,7 +1305,7 @@ class DynamicRoutingSession:
             data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def sync_data(self) -> utils.SyncDataset:
         return utils.SyncDataset(io.BytesIO(self.sync_path.read_bytes()))
 
@@ -1313,7 +1313,7 @@ class DynamicRoutingSession:
     def stim_path_root(self) -> upath.UPath:
         return npc_lims.DR_DATA_REPO / str(self.id.subject)
 
-    @functools.cached_property
+    @utils.cached_property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
         def is_valid_stim_file(p) -> bool:
             if not utils.is_stim_file(
@@ -1352,7 +1352,7 @@ class DynamicRoutingSession:
             f"Could not find stim files for {self.id} in {self.stim_path_root}"
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def stim_file_records(self) -> tuple[npc_lims.File, ...]:
         return tuple(
             npc_lims.File(
@@ -1367,7 +1367,7 @@ class DynamicRoutingSession:
             for path in self.stim_paths
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def rig(self) -> str:
         for hdf5 in itertools.chain(
             (self.task_data,) if self.is_task else (),
@@ -1400,7 +1400,7 @@ class DynamicRoutingSession:
     def task_version(self) -> str | None:
         return self.sam.taskVersion if isinstance(self.sam.taskVersion, str) else None
 
-    @functools.cached_property
+    @utils.cached_property
     def stim_data(self) -> utils.LazyDict[str, h5py.File]:
         def h5_dataset(path: upath.UPath) -> h5py.File:
             return h5py.File(io.BytesIO(path.read_bytes()), "r")
@@ -1421,7 +1421,7 @@ class DynamicRoutingSession:
     def video_info_paths(self) -> tuple[upath.UPath, ...]:
         return utils.get_video_info_file_paths(*self.raw_data_paths)
 
-    @functools.cached_property
+    @utils.cached_property
     def video_info_data(self) -> utils.LazyDict[str, utils.MVRInfoData]:
         return utils.LazyDict(
             (
@@ -1432,7 +1432,7 @@ class DynamicRoutingSession:
             for path in self.video_info_paths
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def video_file_records(self) -> tuple[npc_lims.File, ...]:
         return tuple(
             npc_lims.File(
@@ -1453,7 +1453,7 @@ class DynamicRoutingSession:
             for path in self.video_paths
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def video_info_file_records(self) -> tuple[npc_lims.File, ...]:
         return tuple(
             npc_lims.File(
@@ -1470,7 +1470,7 @@ class DynamicRoutingSession:
             for path in self.video_info_paths
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
         """Frame times dict for all stims, containing time arrays or Exceptions."""
         frame_times = utils.get_stim_frame_times(
@@ -1553,7 +1553,7 @@ class DynamicRoutingSession:
             p for p in self.raw_data_paths if re.match(r"^Record Node [0-9]+$", p.name)
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_recording_dirs(self) -> tuple[upath.UPath, ...]:
         return tuple(
             p
@@ -1561,7 +1561,7 @@ class DynamicRoutingSession:
             for p in record_node.glob("experiment*/recording*")
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_timing_data(self) -> tuple[utils.EphysTimingInfoOnSync, ...]:
         return tuple(
             itertools.chain(
@@ -1571,13 +1571,13 @@ class DynamicRoutingSession:
             )
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def drift_map_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
             next(d for d in self.sorted_data_paths if d.name == "drift_maps").iterdir()
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_sync_messages_path(self) -> upath.UPath:
         return next(
             p
@@ -1587,7 +1587,7 @@ class DynamicRoutingSession:
             if "sync_messages.txt" == p.name
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_structure_oebin_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
             p
@@ -1597,19 +1597,19 @@ class DynamicRoutingSession:
             if "structure.oebin" == p.name
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_structure_oebin_data(
         self,
     ) -> dict[Literal["continuous", "events", "spikes"], list[dict[str, Any]]]:
         return utils.get_merged_oebin_file(self.ephys_structure_oebin_paths)
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_sync_messages_data(
         self,
     ) -> dict[str, dict[Literal["start", "rate"], int]]:
         return utils.get_sync_messages_data(self.ephys_sync_messages_path)
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_experiment_dirs(self) -> tuple[upath.UPath, ...]:
         return tuple(
             p
@@ -1617,7 +1617,7 @@ class DynamicRoutingSession:
             for p in record_node.glob("experiment*")
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_settings_xml_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
             raise ValueError(
@@ -1628,7 +1628,7 @@ class DynamicRoutingSession:
             for record_node in self.ephys_record_node_dirs
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_settings_xml_path(self) -> upath.UPath:
         """Single settings.xml path, if applicable"""
         if not self.ephys_settings_xml_paths:
@@ -1638,11 +1638,11 @@ class DynamicRoutingSession:
         utils.assert_xml_files_match(*self.ephys_settings_xml_paths)
         return self.ephys_settings_xml_paths[0]
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_settings_xml_data(self) -> utils.SettingsXmlInfo:
         return utils.get_settings_xml_data(self.ephys_settings_xml_path)
 
-    @functools.cached_property
+    @utils.cached_property
     def ephys_settings_xml_file_record(self) -> npc_lims.File:
         return npc_lims.File(
             session_id=self.id,
@@ -1661,7 +1661,7 @@ class DynamicRoutingSession:
         # TODO get correct channels range from settings xml
         return "Neuropixels 1.0 lower channels (1:384)"
 
-    @functools.cached_property
+    @utils.cached_property
     def probe_insertions(self) -> dict[str, Any] | None:
         path = next(
             (path for path in self.raw_data_paths if "probe_insertions" in path.stem),
@@ -1679,7 +1679,7 @@ class DynamicRoutingSession:
         implant: str = self.probe_insertions["implant"]
         return "2002" if "2002" in implant else implant
 
-    @functools.cached_property
+    @utils.cached_property
     def _all_licks(self) -> tuple[ndx_events.Events, ...]:
         """First item is always `processing['licks']` - the following items are only if sync
         is available, and are raw rising/falling edges of the lick sensor,
@@ -1754,7 +1754,7 @@ class DynamicRoutingSession:
             ),
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def _running_speed(self) -> pynwb.TimeSeries:
         name = "running_speed"
         description = (
@@ -1778,7 +1778,7 @@ class DynamicRoutingSession:
             conversion=conversion,
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def _video_frame_times(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
@@ -1800,7 +1800,7 @@ class DynamicRoutingSession:
             for path, timestamps in path_to_timestamps.items()
         )
 
-    @functools.cached_property
+    @utils.cached_property
     def _rewards(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
         def get_reward_frames(data: h5py.File) -> list[int]:
             r = []
