@@ -1714,7 +1714,7 @@ class DynamicRoutingSession:
             + (
                 f" - filtered to exclude events with duration >{max_contact} s"
                 if self.is_sync
-                else "putatively the starts of licks, but may include other events such as grooming"
+                else " - putatively the starts of licks, but may include other events such as grooming"
             ),
         )
 
