@@ -1699,7 +1699,7 @@ class DynamicRoutingSession:
         )
 
         if not self.is_sync:
-            return tuple(licks)
+            return (licks,)
         return (
             licks,
             ndx_events.Events(
