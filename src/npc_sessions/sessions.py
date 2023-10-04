@@ -1442,9 +1442,11 @@ class DynamicRoutingSession:
                 name=utils.extract_camera_name(path.stem),
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
-                    self.video_info_data[utils.extract_camera_name(path.stem)][  # type: ignore[arg-type]
-                        "TimeStart"
-                    ]
+                    str(
+                        self.video_info_data[utils.extract_camera_name(path.stem)][  
+                            "TimeStart"
+                        ]
+                    )
                 ),
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
@@ -1461,8 +1463,8 @@ class DynamicRoutingSession:
                 name=utils.extract_camera_name(path.stem),
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
-                    self.video_info_data[path.stem]["TimeStart"]  # type: ignore[arg-type]
-                ),
+                    str(self.video_info_data[path.stem]["TimeStart"])
+                ), 
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
                 data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
