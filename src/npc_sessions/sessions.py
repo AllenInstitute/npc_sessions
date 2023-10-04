@@ -4,6 +4,7 @@ import contextlib
 import datetime
 import functools
 import io
+import importlib.metadata
 import itertools
 import json
 import logging
@@ -202,6 +203,7 @@ class DynamicRoutingSession:
             lab=self.lab,
             notes=self.notes,
             source_script=self.source_script,
+            source_script_file_name=self.source_script_file_name,
             subject=self.subject,
             keywords=self.keywords,
             epochs=self.epochs,
@@ -237,6 +239,7 @@ class DynamicRoutingSession:
             lab=self.lab,
             notes=self.notes,
             source_script=self.source_script,
+            source_script_file_name=self.source_script_file_name,
             subject=self.subject,
             epoch_tags=self.stim_names,
             # keywords=self.keywords, # fetches all trials tables
@@ -286,14 +289,21 @@ class DynamicRoutingSession:
         return npc_session.DatetimeRecord(self.session_start_time.isoformat())
 
     @property
-    def source_script(self) -> str | None:
+    def source_script(self) -> str:
+        """`githubTaskScript` from the task stim file, if available. 
+        Otherwise, url to Sam's repo on github"""
         if self.is_task and (script := self.task_data.get("githubTaskScript", None)):
             if isinstance(script[()], bytes):
                 return script.asstr()[()]
             if isinstance(script[()], np.floating) and not np.isnan(script[()]):
                 return str(script[()])
-        return None
-
+        return "https://github.com/samgale/DynamicRoutingTask"
+    
+    @property
+    def source_script_file_name(self) -> str:
+        """url to tagged version of packaging code repo on github"""
+        return f"https://github.com/AllenInstitute/npc_lims/releases/tag/v{importlib.metadata.version('npc_sessions')}"
+        
     @property
     def lab(self) -> str | None:
         with contextlib.suppress(AttributeError):
