@@ -768,7 +768,10 @@ class DynamicRoutingSession:
     @property
     def _devices(self) -> tuple[pynwb.device.Device, ...]:
         """The version passed to NWBFile.__init__"""
-        return tuple(itertools.chain(self._probes))  # add other devices as we need them
+        devices: list[pynwb.device.Device] = []
+        if self.is_ephys:
+            devices.extend(self._probes)
+        return tuple(devices)  # add other devices as we need them
 
     @functools.cached_property
     def devices(self) -> pynwb.core.LabelledDict[str, pynwb.device.Device]:
