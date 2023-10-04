@@ -722,7 +722,7 @@ class DynamicRoutingSession:
             kwargs: dict[str, Any] = {}
             if self.is_sync:
                 kwargs |= {"sync": self.sync_data}
-            if self.is_ephys:
+            if self.is_ephys and self.is_sync:
                 kwargs |= {"ephys_recording_dirs": self.ephys_recording_dirs}
 
             # set items in LazyDict for postponed evaluation
