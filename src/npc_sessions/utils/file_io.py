@@ -8,7 +8,7 @@ import logging
 import os
 import pathlib
 import shutil
-from typing import Union
+from typing import Union, Type
 
 import hdmf.backends.io
 import hdmf_zarr
