@@ -12,8 +12,8 @@ import logging
 import re
 import typing
 import uuid
-from collections.abc import Generator, Iterable
-from typing import Any, Iterator, Literal
+from collections.abc import Iterable, Iterator
+from typing import Any, Literal
 
 import h5py
 import hdmf
@@ -35,22 +35,25 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
+
 @typing.overload
 def get_sessions() -> Iterator[DynamicRoutingSession]:
     ...
-    
+
+
 @typing.overload
 def get_sessions(session: str | npc_session.SessionRecord) -> DynamicRoutingSession:
     ...
-    
+
+
 def get_sessions(
-    session: str | npc_session.SessionRecord | None = None, 
+    session: str | npc_session.SessionRecord | None = None,
     **all_session_kwargs,
 ):
     """Uploaded sessions, tracked in npc_lims via `get_tracked_sessions()`, newest
     to oldest.
-    
-    - if `session` is provided, a single session object is returned 
+
+    - if `session` is provided, a single session object is returned
     - sessions with known issues are excluded
     - `all_session_kwargs` will be applied on top of any session-specific kwargs
         - session-specific config from `npc_lims.get_session_kwargs`
@@ -97,7 +100,9 @@ def get_sessions(
     for session_info in sorted(
         npc_lims.get_session_info(), key=lambda x: x.date, reverse=True
     ):
-        if session_info.is_uploaded and not npc_lims.get_session_issues(session_info.id):
+        if session_info.is_uploaded and not npc_lims.get_session_issues(
+            session_info.id
+        ):
             yield DynamicRoutingSession(
                 session_info.id,
                 **all_session_kwargs,
@@ -164,25 +169,23 @@ class DynamicRoutingSession:
 
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
-        if (issues := npc_lims.get_session_issues(self.id)):
-            logger.warning(
-                f"Session {self.id} has known issues: {issues}"
-            )
+        if issues := npc_lims.get_session_issues(self.id):
+            logger.warning(f"Session {self.id} has known issues: {issues}")
         if (
             any(
                 char in (path := utils.from_pathlike(session_or_path)).as_posix()
                 for char in "\\/."
             )
-            and path.exists() # probably redundant
+            and path.exists()  # probably redundant
         ):
             if path.is_dir():
                 self.root_path = path
             if path.is_file():
                 self.root_path = path.parent
-        
+
         if self.info is not None:
             kwargs = copy.copy(self.info.session_kwargs) | kwargs
-        logger.info(f'Applying session kwargs to {self.id}: {kwargs}')
+        logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
         for key, value in kwargs.items():
             try:
                 setattr(self, key, value)
@@ -1141,7 +1144,7 @@ class DynamicRoutingSession:
         if v := getattr(self, "_is_lfp", None):
             return v
         return self.is_ephys
-    
+
     @functools.cached_property
     def is_opto(self) -> bool:
         """Opto during behavior task && not wt/wt (if genotype info available)"""
@@ -1457,7 +1460,7 @@ class DynamicRoutingSession:
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
                     str(
-                        self.video_info_data[utils.extract_camera_name(path.stem)][  
+                        self.video_info_data[utils.extract_camera_name(path.stem)][
                             "TimeStart"
                         ]
                     )
@@ -1478,7 +1481,7 @@ class DynamicRoutingSession:
                 suffix=path.suffix,
                 timestamp=npc_session.TimeRecord.parse_id(
                     str(self.video_info_data[path.stem]["TimeStart"])
-                ), 
+                ),
                 size=path.stat()["size"],
                 s3_path=path.as_posix(),
                 data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
