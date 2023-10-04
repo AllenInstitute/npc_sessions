@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import copy
 import datetime
 import functools
 import importlib.metadata
@@ -27,7 +28,6 @@ import upath
 import zarr
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
-import npc_sessions.config as config
 import npc_sessions.plots as plots
 import npc_sessions.trials as TaskControl
 import npc_sessions.utils as utils
@@ -40,10 +40,11 @@ def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None,
     to oldest.
 
     - sessions with known issues are excluded
-    - session-specific config from `npc_sessions.config.session_kwargs`
-      is always re-applied: modify it if you want to pass in parameters to each
-      session init
     - `all_session_kwargs` will be applied on top of any session-specific kwargs
+        - session-specific config from `npc_lims.get_session_kwargs`
+          is always applied
+        - add extra kwargs here if you want to override or append
+          parameters passed to every session __init__
     - returns a generator not because objects take long to create (data is
       loaded lazily) but because attributes are cached, so we want to avoid
       keeping references to sessions that are no longer needed
@@ -82,11 +83,10 @@ def get_sessions(**all_session_kwargs) -> Generator[DynamicRoutingSession, None,
     for session in sorted(
         npc_lims.get_tracked_sessions(), key=lambda x: x.date, reverse=True
     ):
-        if session.is_uploaded and str(session.id) not in config.session_issues:
-            session_kwargs = config.session_kwargs.get(str(session.id), {})
+        if session.is_uploaded and not npc_lims.get_session_issues(session.id):
             yield DynamicRoutingSession(
                 session.id,
-                **session_kwargs | all_session_kwargs,
+                **all_session_kwargs,
             )
 
 
@@ -150,17 +150,25 @@ class DynamicRoutingSession:
 
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
+        if (issues := npc_lims.get_session_issues(self.id)):
+            logger.warning(
+                f"Session {self.id} has known issues: {issues}"
+            )
         if (
             any(
                 char in (path := utils.from_pathlike(session_or_path)).as_posix()
                 for char in "\\/."
             )
-            and path.exists()
+            and path.exists() # probably redundant
         ):
             if path.is_dir():
                 self.root_path = path
             if path.is_file():
                 self.root_path = path.parent
+        
+        if self.info is not None:
+            kwargs = copy.copy(self.info.session_kwargs) | kwargs
+        logger.info(f'Applying session kwargs to {self.id}: {kwargs}')
         for key, value in kwargs.items():
             try:
                 setattr(self, key, value)
