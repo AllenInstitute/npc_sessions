@@ -6,8 +6,15 @@ name: Publish Python package
 on:
   push:
     branches: [ "main" ]
-  # pull_request:
-  #   branches: [ "main" ]
+    paths-ignore:
+      - '**.ipynb'
+      - '**.json'
+      - '.vscode'
+      - 'scripts'
+      - 'tests'
+      - 'notebooks'
+      - '**.md'
+      - '**.yml'
     
 concurrency:
   group: ${{ github.ref }}
