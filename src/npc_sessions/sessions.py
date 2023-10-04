@@ -3,8 +3,8 @@ from __future__ import annotations
 import contextlib
 import datetime
 import functools
-import io
 import importlib.metadata
+import io
 import itertools
 import json
 import logging
@@ -290,7 +290,7 @@ class DynamicRoutingSession:
 
     @property
     def source_script(self) -> str:
-        """`githubTaskScript` from the task stim file, if available. 
+        """`githubTaskScript` from the task stim file, if available.
         Otherwise, url to Sam's repo on github"""
         if self.is_task and (script := self.task_data.get("githubTaskScript", None)):
             if isinstance(script[()], bytes):
@@ -298,12 +298,12 @@ class DynamicRoutingSession:
             if isinstance(script[()], np.floating) and not np.isnan(script[()]):
                 return str(script[()])
         return "https://github.com/samgale/DynamicRoutingTask"
-    
+
     @property
     def source_script_file_name(self) -> str:
         """url to tagged version of packaging code repo on github"""
         return f"https://github.com/AllenInstitute/npc_lims/releases/tag/v{importlib.metadata.version('npc_sessions')}"
-        
+
     @property
     def lab(self) -> str | None:
         with contextlib.suppress(AttributeError):
@@ -400,20 +400,18 @@ class DynamicRoutingSession:
     @property
     def processing(
         self,
-    ) -> pynwb.core.LabelledDict[
-        str, pynwb.base.ProcessingModule
-    ]:
+    ) -> pynwb.core.LabelledDict[str, pynwb.base.ProcessingModule]:
         """Data after processing and filtering - raw data goes in
         `acquisition`.
 
         The property as it appears on an NWBFile."""
         # TODO replace with `nwb.add_processing_module`
         processing = pynwb.core.LabelledDict(label="processing", key_attr="name")
-        for module_name in ('behavior', 'ecephys'):
-            module = getattr(self, f'_{module_name}')
+        for module_name in ("behavior", "ecephys"):
+            module = getattr(self, f"_{module_name}")
             processing[module_name] = pynwb.base.ProcessingModule(
                 name=module_name,
-                description=f'processed {module_name} data',
+                description=f"processed {module_name} data",
                 data_interfaces=module,
             )
         return processing
@@ -455,7 +453,7 @@ class DynamicRoutingSession:
         modules.append(self._all_licks[0])
         modules.append(self._running_speed)
         return tuple(modules)
-    
+
     @functools.cached_property
     def _ecephys(
         self,
@@ -1775,9 +1773,9 @@ class DynamicRoutingSession:
             self.sync_data, *self.video_paths
         )
         nwb_names = {
-            'eye': 'eye',
-            'face': 'front',
-            'behavior': 'side',
+            "eye": "eye",
+            "face": "front",
+            "behavior": "side",
         }
         return tuple(
             ndx_events.Events(
