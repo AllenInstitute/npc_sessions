@@ -439,7 +439,7 @@ class DynamicRoutingSession:
         if self.is_sync:
             modules.extend(self._all_licks[1:])
         modules.append(self._rewards)
-        if self.is_ephys:
+        if self.is_lfp:
             modules.append(self._raw_lfp)
         if self.is_video:
             modules.extend(self._video_frame_times)
@@ -1114,6 +1114,12 @@ class DynamicRoutingSession:
                 return True
         return False
 
+    @functools.cached_property
+    def is_lfp(self) -> bool:
+        if v := getattr(self, "_is_lfp", None):
+            return v
+        return self.is_ephys
+    
     @functools.cached_property
     def is_opto(self) -> bool:
         """Opto during behavior task && not wt/wt (if genotype info available)"""
