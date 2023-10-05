@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:fb6bb040268b005141e97e8eddde93b4d568d1f133a39cdbe5dcf2031e0ace58"
+content_hash = "sha256:b89882878dce2c28ebd8856839c46d101474f7d84d90217ec344944619f2dc3e"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -2405,15 +2405,15 @@ files = [
 
 [[package]]
 name = "npc-session"
-version = "0.1.22"
+version = "0.1.25"
 requires_python = ">=3.9"
 summary = "Basic tools for parsing subject, session, date and time associated with data from the Mindscope Neuropixels team, in the cloud."
 dependencies = [
     "typing-extensions>=4.7.1",
 ]
 files = [
-    {file = "npc_session-0.1.22-py3-none-any.whl", hash = "sha256:e11076e5537fd8b8658e750da575358e3807430de047507d543e77ff87a2aa90"},
-    {file = "npc_session-0.1.22.tar.gz", hash = "sha256:6efd41142edd3a3963d4a7ba517d7131580a68296462650b331dd67f8d92bb02"},
+    {file = "npc_session-0.1.25-py3-none-any.whl", hash = "sha256:c0e92b6a50b43f1efb98cd481720875000832c42ccadb06c47178b0cd326c0c2"},
+    {file = "npc_session-0.1.25.tar.gz", hash = "sha256:ca49b28dcb32de32be029b76241decc25fe84fca92ac3a40590ae8c3670c6d3a"},
 ]
 
 [[package]]
