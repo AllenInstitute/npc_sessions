@@ -896,6 +896,8 @@ class DynamicRoutingSession:
             self.ephys_settings_xml_data.probe_letters,
             self.ephys_settings_xml_data.channel_pos_xy,
         ):
+            if probe_letter not in self.probes_inserted:
+                continue
             group = self.electrode_groups[f"probe{probe_letter}"]
             for channel_label, (x, y) in channel_pos_xy.items():
                 channel_idx = int(channel_label.strip("CH"))
