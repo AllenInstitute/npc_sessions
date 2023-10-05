@@ -100,9 +100,7 @@ def get_sessions(
     for session_info in sorted(
         npc_lims.get_session_info(), key=lambda x: x.date, reverse=True
     ):
-        if session_info.is_uploaded and not npc_lims.get_session_issues(
-            session_info.id
-        ):
+        if session_info.is_uploaded and not session_info.issues:
             yield DynamicRoutingSession(
                 session_info.id,
                 **all_session_kwargs,
@@ -169,8 +167,6 @@ class DynamicRoutingSession:
 
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
-        if issues := npc_lims.get_session_issues(self.id):
-            logger.warning(f"Session {self.id} has known issues: {issues}")
         if (
             any(
                 char in (path := utils.from_pathlike(session_or_path)).as_posix()
@@ -184,6 +180,8 @@ class DynamicRoutingSession:
                 self.root_path = path.parent
 
         if self.info is not None:
+            if (issues := self.info.issues):
+                logger.warning(f"Session {self.id} has known issues: {issues}")
             kwargs = copy.copy(self.info.session_kwargs) | kwargs
         logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
         for key, value in kwargs.items():
@@ -952,6 +950,8 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def units(self) -> pynwb.misc.Units:
+        if not self.is_ephys:
+            raise AttributeError(f"{self.id} is not an ephys session")
         units = pynwb.misc.Units(
             name="units",
             description="spike-sorted units from Kilosort 2.5",
@@ -1062,7 +1062,7 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def is_task(self) -> bool:
-        if v := getattr(self, "_is_task", None):
+        if (v := getattr(self, "_is_task", None)) is not None:
             return v
         with contextlib.suppress(FileNotFoundError, ValueError, StopIteration):
             _ = self.task_data
@@ -1071,9 +1071,9 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def is_sync(self) -> bool:
-        if v := getattr(self, "_is_sync", None):
+        if (v := getattr(self, "_is_sync", None)) is not None:
             return v
-        if v := getattr(self, "_sync_path", None):
+        if (v := getattr(self, "_sync_path", None)) is not None:
             return True
         if self.info:
             return self.info.is_sync
@@ -1084,7 +1084,7 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def is_video(self) -> bool:
-        if v := getattr(self, "_is_video", None):
+        if (v := getattr(self, "_is_video", None)) is not None:
             return v
         if not self.is_sync:
             return False
@@ -1095,7 +1095,7 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def is_ephys(self) -> bool:
-        if v := getattr(self, "_is_ephys", None):
+        if (v := getattr(self, "_is_ephys", None)) is not None:
             return v
         if self.info:
             return self.info.is_ephys
@@ -1106,7 +1106,7 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def is_sorted(self) -> bool:
-        if v := getattr(self, "_is_sorted", None):
+        if (v := getattr(self, "_is_sorted", None)) is not None:
             return v
         if not self.is_ephys:
             return False
@@ -1129,7 +1129,7 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def is_lfp(self) -> bool:
-        if v := getattr(self, "_is_lfp", None):
+        if (v := getattr(self, "_is_lfp", None)) is not None:
             return v
         return self.is_ephys
 
@@ -1849,7 +1849,7 @@ class DynamicRoutingSession:
         def get_reward_frames(data: h5py.File) -> list[int]:
             r = []
             for key in ("rewardFrames", "manualRewardFrames"):
-                if v := data.get(key, None):
+                if (v := data.get(key, None)) is not None:
                     r.extend(v[:])
             return r
 
