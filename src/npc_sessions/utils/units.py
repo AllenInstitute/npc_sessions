@@ -177,6 +177,7 @@ def get_units_spike_times_ks25(
 def _device_helper(
     device_timing_on_sync: utils.EphysTimingInfoOnSync,
     spike_interface_data: utils.SpikeInterfaceKS25Data,
+    include_waveform_arrays: bool,
 ) -> pd.DataFrame:
     electrode_group_name = npc_session.ProbeRecord(
         device_timing_on_sync.device.name
@@ -219,11 +220,12 @@ def _device_helper(
         electrode_group_name
     )
     df_device_metrics["amplitude"] = amplitudes
-    df_device_metrics["waveform_mean"] = mean_waveforms
-    df_device_metrics["waveform_sd"] = get_waveform_sd_ks25(
-        spike_interface_data.templates_std(electrode_group_name),
-        df_device_metrics.index.to_list(),
-    )
+    if include_waveform_arrays:
+        df_device_metrics["waveform_mean"] = mean_waveforms
+        df_device_metrics["waveform_sd"] = get_waveform_sd_ks25(
+            spike_interface_data.templates_std(electrode_group_name),
+            df_device_metrics.index.to_list(),
+        )
     df_device_metrics["spike_times"] = unit_spike_times
     df_device_metrics["unit_id"] = df_device_metrics.index.to_list()
 
@@ -235,11 +237,12 @@ def make_units_table_from_spike_interface_ks25(
     | npc_session.SessionRecord
     | utils.PathLike
     | utils.SpikeInterfaceKS25Data,
-    devices_timing: Iterable[utils.EphysTimingInfoOnSync],
+    device_timing_on_sync: Iterable[utils.EphysTimingInfoOnSync],
+    include_waveform_arrays: bool = False,
 ) -> pd.DataFrame:
     """
-    >>> devices_timing = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'))
-    >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', devices_timing)
+    >>> device_timing_on_sync = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'))
+    >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', device_timing_on_sync)
     >>> len(units[units['electrode_group_name'] == 'probeA'])
     237
     """
@@ -248,14 +251,14 @@ def make_units_table_from_spike_interface_ks25(
     )
 
     devices_timing = tuple(
-        timing for timing in devices_timing if timing.device.name.endswith("-AP")
+        timing for timing in device_timing_on_sync if timing.device.name.endswith("-AP")
     )
 
     device_to_future: dict[str, concurrent.futures.Future] = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        for device_timing_on_sync in devices_timing:
-            device_to_future[device_timing_on_sync.device.name] = executor.submit(
-                _device_helper, device_timing_on_sync, spike_interface_data
+        for device_timing in devices_timing:
+            device_to_future[device_timing.device.name] = executor.submit(
+                _device_helper, device_timing, spike_interface_data, include_waveform_arrays
             )
 
     return pd.concat(

@@ -938,6 +938,7 @@ class DynamicRoutingSession:
             units=utils.make_units_table_from_spike_interface_ks25(
                 self.id,  # TODO keep spikeinterface obj in self
                 self.ephys_timing_data,
+                include_waveform_arrays=False,
             ),
             session=self.id,
         )
