@@ -9,7 +9,7 @@ authors = [
     { name = "Corbett Bennett", email = "corbettb@alleninstitute.org" },
 ]
 dependencies = [
-    "npc-session>=0.1.25",
+    "npc-session>=0.1.26",
     "npc-lims>=0.1.75",
     "polars[all]>=0.18.14",
     "h5py>=3.9.0",

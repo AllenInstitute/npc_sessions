@@ -787,7 +787,7 @@ class DynamicRoutingSession:
                 self.ephys_settings_xml_data.probe_types,
                 self.ephys_settings_xml_data.probe_letters,
             )
-            if probe_letter in self.probes_inserted
+            if probe_letter in self.probe_letters_inserted
         )
 
     @property
@@ -850,7 +850,7 @@ class DynamicRoutingSession:
                 self.ephys_settings_xml_data.probe_types,
                 self.ephys_settings_xml_data.probe_letters,
             )
-            if probe_letter in self.probes_inserted
+            if probe_letter in self.probe_letters_inserted
         )
 
     @utils.cached_property
@@ -893,7 +893,7 @@ class DynamicRoutingSession:
             self.ephys_settings_xml_data.probe_letters,
             self.ephys_settings_xml_data.channel_pos_xy,
         ):
-            if probe_letter not in self.probes_inserted:
+            if probe_letter not in self.probe_letters_inserted:
                 continue
             group = self.electrode_groups[f"probe{probe_letter}"]
             for channel_label, (x, y) in channel_pos_xy.items():
@@ -1565,7 +1565,7 @@ class DynamicRoutingSession:
                 self.sync_data, self.ephys_recording_dirs
             )
             if (p := npc_session.extract_probe_letter(timing.device.name)) is None
-            or p in self.probes_inserted
+            or p in self.probe_letters_inserted
         )
 
     @utils.cached_property
@@ -1669,7 +1669,13 @@ class DynamicRoutingSession:
         return json.loads(path.read_text())["probe_insertions"]
 
     @utils.cached_property
-    def probes_inserted(self) -> tuple[npc_session.ProbeRecord, ...]:
+    def probes_inserted(self) -> tuple[str, ...]:
+        """('probeA', 'probeB', ...)"""
+        return tuple(probe.name for probe in self.probe_letters_inserted)
+    
+    @utils.cached_property
+    def probe_letters_inserted(self) -> tuple[npc_session.ProbeRecord, ...]:
+        """('A', 'B', ...)"""
         from_annotation = None
         if self.is_annotated:
             from_annotation = tuple(npc_session.ProbeRecord(probe) for probe in utils.get_tissuecyte_electrodes_table(self.id).group_name.unique())

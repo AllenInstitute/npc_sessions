@@ -67,7 +67,7 @@ def get_tissuecyte_electrodes_table(
     for electrode_file in electrode_files:
         probe_electrodes = pd.read_csv(electrode_file)
 
-        probe_name = npc_session.ProbeRecord(electrode_file.stem)
+        probe_name = npc_session.ProbeRecord(electrode_file.stem).name
 
         probe_electrodes["group_name"] = [str(probe_name)] * len(probe_electrodes)
 

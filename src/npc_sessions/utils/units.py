@@ -178,7 +178,7 @@ def _device_helper(
     device_timing_on_sync: utils.EphysTimingInfoOnSync,
     spike_interface_data: utils.SpikeInterfaceKS25Data,
 ) -> pd.DataFrame:
-    electrode_group_name = npc_session.ProbeRecord(device_timing_on_sync.device.name)
+    electrode_group_name = npc_session.ProbeRecord(device_timing_on_sync.device.name).name
     electrode_positions = spike_interface_data.electrode_locations_xy(
         electrode_group_name
     )

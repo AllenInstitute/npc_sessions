@@ -107,7 +107,7 @@ class SpikeInterfaceKS25Data:
             return next(
                 path
                 for path in self.format_path(self.root, dirname).iterdir()
-                if npc_session.ProbeRecord(probe).lower() in path.as_posix().lower()
+                if npc_session.ProbeRecord(probe) == npc_session.ProbeRecord(path.as_posix())
             )
 
     # json data
