@@ -180,7 +180,7 @@ class DynamicRoutingSession:
                 self.root_path = path.parent
 
         if self.info is not None:
-            if (issues := self.info.issues):
+            if issues := self.info.issues:
                 logger.warning(f"Session {self.id} has known issues: {issues}")
             kwargs = copy.copy(self.info.session_kwargs) | kwargs
         logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
