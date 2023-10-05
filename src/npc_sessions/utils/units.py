@@ -258,7 +258,10 @@ def make_units_table_from_spike_interface_ks25(
     with concurrent.futures.ThreadPoolExecutor() as executor:
         for device_timing in devices_timing:
             device_to_future[device_timing.device.name] = executor.submit(
-                _device_helper, device_timing, spike_interface_data, include_waveform_arrays
+                _device_helper,
+                device_timing,
+                spike_interface_data,
+                include_waveform_arrays,
             )
 
     return pd.concat(
