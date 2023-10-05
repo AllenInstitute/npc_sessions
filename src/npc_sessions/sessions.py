@@ -582,6 +582,7 @@ class DynamicRoutingSession:
         for block, context in enumerate(self.sam.blockStimRewarded):
             block_performance: dict[str, float | str] = {}
 
+            block_performance["block_index"] = block
             block_performance["context"] = context
             block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block]
             block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block]
@@ -614,6 +615,7 @@ class DynamicRoutingSession:
             description=f"behavioral performance for each context block in task (refers to `trials` or `intervals[{self.task_stim_name!r}])",
         )
         column_name_to_description = {
+            "block_index": "presentation order in the task (0-indexed)",
             "context": "context of the block (a.k.a. rewarded stimulus), either vis1 or sound1",
             "cross_modal_dprime": "dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
             "signed_cross_modal_dprime": "same as cross_modal_dprime, but with sign flipped for auditory blocks",
