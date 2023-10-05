@@ -9,7 +9,6 @@ Allen Institute for Brain Science
 from __future__ import annotations
 
 import datetime
-import functools
 import io
 import logging
 import warnings

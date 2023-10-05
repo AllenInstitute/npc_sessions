@@ -10,7 +10,6 @@ getting DR task trials table requires:
 
 from __future__ import annotations
 
-import functools
 import logging
 from collections.abc import Iterable
 

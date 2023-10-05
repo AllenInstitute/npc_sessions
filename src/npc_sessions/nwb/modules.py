@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import functools
 from collections.abc import Iterable, Iterator
 from typing import ClassVar, Protocol
 

@@ -175,12 +175,18 @@ class PropertyDict(collections.abc.Mapping):
         {
             attr: ""
             for attr in self._properties
-            if not isinstance(cls_attr(attr), (property, functools.cached_property, utils.cached_property))
+            if not isinstance(
+                cls_attr(attr),
+                (property, functools.cached_property, utils.cached_property),
+            )
         }
         property_getters = {
             attr: cls_attr(attr).__doc__ or ""
             for attr in self._properties
-            if isinstance(cls_attr(attr), (property, functools.cached_property, utils.cached_property))
+            if isinstance(
+                cls_attr(attr),
+                (property, functools.cached_property, utils.cached_property),
+            )
         }
 
         def fmt(docstring):

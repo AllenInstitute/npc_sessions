@@ -609,7 +609,7 @@ class DynamicRoutingSession:
                 ]
 
             task_performance_by_block[block] = block_performance
-            
+
         nwb_intervals = pynwb.epoch.TimeIntervals(
             name="performance",
             description=f"behavioral performance for each context block in task (refers to `trials` or `intervals[{self.task_stim_name!r}])",

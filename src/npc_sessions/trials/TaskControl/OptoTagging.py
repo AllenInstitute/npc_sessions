@@ -7,7 +7,6 @@ display times to get stim onset times
 """
 from __future__ import annotations
 
-import functools
 from collections.abc import Iterable
 
 import DynamicRoutingTask.TaskUtils
