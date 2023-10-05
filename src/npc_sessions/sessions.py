@@ -295,7 +295,11 @@ class DynamicRoutingSession:
         else:
             description = "ecephys session"
             description += " without sorted units" if not self.is_sorted else ""
-            description += " without CCF-annotated units" if self.is_sorted and not self.is_annotated else ""
+            description += (
+                " without CCF-annotated units"
+                if self.is_sorted and not self.is_annotated
+                else ""
+            )
             description += (
                 f", {'with' if self.is_task else 'without'} behavioral task data"
             )
@@ -353,7 +357,7 @@ class DynamicRoutingSession:
                 self.keywords.append("video")
             if self.is_ephys:
                 self.keywords.append("ephys")
-            if not self.is_sorted: 
+            if not self.is_sorted:
                 self.keywords.append("no units")
             if self.is_sorted and self.is_annotated:
                 self.keywords.append("CCF")
@@ -908,7 +912,13 @@ class DynamicRoutingSession:
                     "reference": "tip",
                     "location": "unannotated",
                 }
-                if self.is_annotated and any((annotated_probes := ccf_df.query(f"group_name == {group.name!r}")).any()):
+                if self.is_annotated and any(
+                    (
+                        annotated_probes := ccf_df.query(
+                            f"group_name == {group.name!r}"
+                        )
+                    ).any()
+                ):
                     kwargs |= (
                         annotated_probes.query(f"channel == {channel_idx}")
                         .iloc[0]
@@ -917,7 +927,7 @@ class DynamicRoutingSession:
                 electrodes.add_row(
                     **kwargs,
                 )
-        
+
         return electrodes
 
     @utils.cached_property
@@ -925,12 +935,12 @@ class DynamicRoutingSession:
         if not self.is_sorted:
             raise AttributeError(f"{self.id} hasn't been spike-sorted")
         units = utils.add_global_unit_ids(
-                units=utils.make_units_table_from_spike_interface_ks25(
-                    self.id,  # TODO keep spikeinterface obj in self
-                    self.ephys_timing_data,
-                ),
-                session=self.id,
-            )
+            units=utils.make_units_table_from_spike_interface_ks25(
+                self.id,  # TODO keep spikeinterface obj in self
+                self.ephys_timing_data,
+            ),
+            session=self.id,
+        )
         # remove units from probes that weren't inserted
         units = units[~units["electrode_group_name"].isin(self.probes_inserted)]
         if self.is_annotated:
@@ -1561,7 +1571,8 @@ class DynamicRoutingSession:
     @utils.cached_property
     def ephys_timing_data(self) -> tuple[utils.EphysTimingInfoOnSync, ...]:
         return tuple(
-            timing for timing in utils.get_ephys_timing_on_sync(
+            timing
+            for timing in utils.get_ephys_timing_on_sync(
                 self.sync_data, self.ephys_recording_dirs
             )
             if (p := npc_session.extract_probe_letter(timing.device.name)) is None
@@ -1672,26 +1683,38 @@ class DynamicRoutingSession:
     def probes_inserted(self) -> tuple[str, ...]:
         """('probeA', 'probeB', ...)"""
         return tuple(probe.name for probe in self.probe_letters_inserted)
-    
+
     @utils.cached_property
     def probe_letters_inserted(self) -> tuple[npc_session.ProbeRecord, ...]:
         """('A', 'B', ...)"""
         from_annotation = None
         if self.is_annotated:
-            from_annotation = tuple(npc_session.ProbeRecord(probe) for probe in utils.get_tissuecyte_electrodes_table(self.id).group_name.unique())
+            from_annotation = tuple(
+                npc_session.ProbeRecord(probe)
+                for probe in utils.get_tissuecyte_electrodes_table(
+                    self.id
+                ).group_name.unique()
+            )
         if self.probe_insertions is not None:
             from_insertion_record = tuple(
-                npc_session.ProbeRecord(k) 
+                npc_session.ProbeRecord(k)
                 for k, v in self.probe_insertions.items()
-                if npc_session.extract_probe_letter(k) is not None and v["hole"] is not None
+                if npc_session.extract_probe_letter(k) is not None
+                and v["hole"] is not None
             )
-            if from_annotation and set(from_annotation).symmetric_difference(set(from_insertion_record)):
-                logger.warning(f"probe_insertions.json and annotation info do not match for {self.id} - using annotation info")
+            if from_annotation and set(from_annotation).symmetric_difference(
+                set(from_insertion_record)
+            ):
+                logger.warning(
+                    f"probe_insertions.json and annotation info do not match for {self.id} - using annotation info"
+                )
         if from_annotation:
             return from_annotation
-        logger.warning(f"No probe_insertions.json or annotation info found for {self.id} - defaulting to ABCDEF")
-        return tuple(npc_session.ProbeRecord(letter) for letter in 'ABCDEF')
-        
+        logger.warning(
+            f"No probe_insertions.json or annotation info found for {self.id} - defaulting to ABCDEF"
+        )
+        return tuple(npc_session.ProbeRecord(letter) for letter in "ABCDEF")
+
     @property
     def implant(self) -> str:
         if self.probe_insertions is None:
