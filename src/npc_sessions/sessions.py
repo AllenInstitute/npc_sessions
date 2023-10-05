@@ -244,9 +244,7 @@ class DynamicRoutingSession:
             devices=self._devices,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
-            units=self.units
-            if self._is_units
-            else None,  # should use is_sorted when processing is done on-demand
+            units=self.units if self.is_sorted else None,
         )
 
     # metadata ------------------------------------------------------------------ #
@@ -297,6 +295,7 @@ class DynamicRoutingSession:
         else:
             description = "ecephys session"
             description += " without sorted units" if not self.is_sorted else ""
+            description += " without CCF-annotated units" if self.is_sorted and not self.is_annotated else ""
             description += (
                 f", {'with' if self.is_task else 'without'} behavioral task data"
             )
@@ -354,11 +353,9 @@ class DynamicRoutingSession:
                 self.keywords.append("video")
             if self.is_ephys:
                 self.keywords.append("ephys")
-            if (
-                not self._is_units
-            ):  # TODO switch back to `is_sorted` when processing is done on-demand
+            if not self.is_sorted: 
                 self.keywords.append("no units")
-            if self.is_annotated:
+            if self.is_sorted and self.is_annotated:
                 self.keywords.append("CCF")
             if self.is_opto:
                 self.keywords.append("opto")
@@ -1107,16 +1104,6 @@ class DynamicRoutingSession:
             return self.info.is_sorted
         with contextlib.suppress(FileNotFoundError, ValueError):
             _ = npc_lims.is_sorted_data_asset(self.id)
-            return True
-        return False
-
-    @utils.cached_property
-    def _is_units(self) -> bool:
-        """Temp attr to check if arjun's processed units files are available"""
-        if not self.is_sorted:
-            return False
-        with contextlib.suppress(FileNotFoundError, ValueError):
-            _ = npc_lims.get_units_codeoean_kilosort_path_from_s3(self.id)
             return True
         return False
 
