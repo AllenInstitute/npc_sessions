@@ -23,7 +23,7 @@ def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSess
         "amplitude_cutoff",
         "presence_ratio",
     ]
-    probes = units["device_name"].unique()
+    probes = units["electrode_group_name"].unique()
 
     x_labels = {
         "presence_ratio": "fraction of session",
@@ -38,7 +38,7 @@ def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSess
         probe_index = 0
         fig.suptitle(f"{metric}")
         for probe in probes:
-            units_probe_metric = units[units["device_name"] == probe][metric]
+            units_probe_metric = units[units["electrode_group_name"] == probe][metric]
             ax[probe_index].hist(units_probe_metric, bins=20)
             ax[probe_index].set_title(f"{probe}")
             ax[probe_index].set_xlabel(x_labels[metric])
@@ -51,11 +51,11 @@ def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSess
 def plot_all_unit_spike_histograms(session: npc_sessions.DynamicRoutingSession):
     units: pd.DataFrame = session.units[:]
 
-    probes = units["device_name"].unique()
+    probes = units["electrode_group_name"].unique()
 
     for probe in probes:
         fig, ax = plt.subplots()
-        unit_spike_times = units[units["device_name"] == probe][
+        unit_spike_times = units[units["electrode_group_name"] == probe][
             "spike_times"
         ].to_numpy()
 
@@ -73,15 +73,15 @@ def plot_unit_spikes_channels(
 ):
     units: pd.DataFrame = session.units[:]
 
-    probes = units["device_name"].unique()
+    probes = units["electrode_group_name"].unique()
     for probe in probes:
         fig, ax = plt.subplots()
-        unit_spike_times = units[units["device_name"] == probe]
+        unit_spike_times = units[units["electrode_group_name"] == probe]
         unit_spike_times_channel = unit_spike_times[
             (unit_spike_times["peak_channel"] >= lower_channel)
             & (unit_spike_times["peak_channel"] <= upper_channel)
         ]["spike_times"].to_numpy()
-        hist, bins = npc_sessions.bin_spike_times(unit_spike_times_channel, bin_time=1)
+        hist, bins = utils.bin_spike_times(unit_spike_times_channel, bin_time=1)
 
         ax.plot(hist)
         ax.set_title(
@@ -95,10 +95,11 @@ def plot_drift_maps(
     session: npc_sessions.DynamicRoutingSession | pynwb.NWBFile,
 ) -> tuple[plt.Figure, ...]:
     figs = []
-    for _k, v in session.analysis["drift_maps"]:
+    for k, v in session.analysis["drift_maps"].images.items():
         fig, ax = plt.subplots()
         ax.imshow(v)
-        ax.set_title(f"{session.session_id}")
+        fig.suptitle(f"{session.session_id}")
+        ax.set_title(k)
         ax.axis("off")
         fig.set_size_inches([8, 8])
         fig.tight_layout()
