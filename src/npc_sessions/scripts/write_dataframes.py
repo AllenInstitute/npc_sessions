@@ -113,14 +113,8 @@ def write_df(
     df.to_pickle(path)
 
 
-def assert_s3_credentials() -> None:
-    test = S3_DATAFRAME_REPO / "test.txt"
-    test.touch()
-    test.unlink()
-
-
 def main() -> None:
-    assert_s3_credentials()  # before we do a load of work, make sure we can write to s3
+    npc_sessions.assert_s3_write_credentials() # before we do a load of work, make sure we can write to s3
     for attr, df in get_all_ephys_session_dfs().items():
         write_df(S3_DATAFRAME_REPO / f"{attr}.pkl", df, append=False)
 
