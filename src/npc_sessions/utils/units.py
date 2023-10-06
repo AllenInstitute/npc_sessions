@@ -125,7 +125,10 @@ def get_peak_channels(
 
 
 def get_amplitudes_mean_waveforms_peak_channels_ks25(
-    templates: npt.NDArray[np.floating], ks_unit_ids: npt.NDArray[np.int64], sampling_rate: float, post_processed_params: dict
+    templates: npt.NDArray[np.floating],
+    ks_unit_ids: npt.NDArray[np.int64],
+    sampling_rate: float,
+    post_processed_params: dict,
 ) -> tuple[list[float], list[npt.NDArray[np.floating]], list[np.int64]]:
     unit_amplitudes: list[float] = []
     templates_mean: list[npt.NDArray[np.floating]] = []
@@ -137,8 +140,10 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
         nbefore = int(self._params["ms_before"] * self.sampling_frequency / 1000.0)
         return nbefore
     """
-    # https://github.com/SpikeInterface/spikeinterface/blob/777a07d3a538394d52a18a05662831a403ee35f9/src/spikeinterface/core/template_tools.py#L8 
-    before = int(post_processed_params['ms_before'] * sampling_rate / 1000.0)  # from spike interface, ms_before = 3, # TODO: #38 @arjunsridhar12345 look at this further
+    # https://github.com/SpikeInterface/spikeinterface/blob/777a07d3a538394d52a18a05662831a403ee35f9/src/spikeinterface/core/template_tools.py#L8
+    before = int(
+        post_processed_params["ms_before"] * sampling_rate / 1000.0
+    )  # from spike interface, ms_before = 3, # TODO: #38 @arjunsridhar12345 look at this further
     for index, _ks_unit_id in enumerate(ks_unit_ids):
         template = templates[index, :, :]
         values = -template[before, :]
@@ -187,7 +192,7 @@ def _device_helper(
     electrode_group_name = npc_session.ProbeRecord(
         device_timing_on_sync.device.name
     ).name
-    electrode_positions = spike_interface_data.electrode_locations_xy(
+    spike_interface_data.electrode_locations_xy(
         electrode_group_name
     )
 
@@ -203,14 +208,18 @@ def _device_helper(
         df_device_metrics
     )
 
-    amplitudes, mean_waveforms, peak_channels = get_amplitudes_mean_waveforms_peak_channels_ks25(
+    (
+        amplitudes,
+        mean_waveforms,
+        peak_channels,
+    ) = get_amplitudes_mean_waveforms_peak_channels_ks25(
         spike_interface_data.templates_average(electrode_group_name),
         df_device_metrics.index.values,
         device_timing_on_sync.sampling_rate,
-        spike_interface_data.postprocessed_params_dict(electrode_group_name)
+        spike_interface_data.postprocessed_params_dict(electrode_group_name),
     )
 
-    df_device_metrics['peak_channel'] = peak_channels
+    df_device_metrics["peak_channel"] = peak_channels
 
     spike_times_aligned = get_aligned_spike_times(
         spike_interface_data.sorting_cached(electrode_group_name)["spike_indexes_seg0"],

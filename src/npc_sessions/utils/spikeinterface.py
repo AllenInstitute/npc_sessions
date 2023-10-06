@@ -137,8 +137,10 @@ class SpikeInterfaceKS25Data:
 
     @functools.cache
     def postprocessed_params_dict(self, probe: str) -> dict:
-        return self.read_json(self.format_path(self.postprocessed(probe), 'params.json'))
-    
+        return self.read_json(
+            self.format_path(self.postprocessed(probe), "params.json")
+        )
+
     @functools.cache
     def quality_metrics_df(self, probe: str) -> pd.DataFrame:
         return self.read_csv(
