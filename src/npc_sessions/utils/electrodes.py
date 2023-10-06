@@ -7,7 +7,6 @@ import npc_session
 import numpy as np
 import pandas as pd
 
-
 TISSUECYTE_MICRONS_PER_PIXEL = 25
 
 

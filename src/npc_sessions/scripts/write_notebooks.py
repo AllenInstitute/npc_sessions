@@ -40,5 +40,6 @@ def main() -> None:
         (QC_REPO / f"{new_name}.ipynb").write_bytes(new_notebook.read_bytes())
         new_notebook.unlink()
 
+
 if __name__ == "__main__":
     main()
