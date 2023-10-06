@@ -35,11 +35,10 @@ def main() -> None:
             env=os.environ,
         )
 
-        # copy to s3
-        (QC_REPO / f"{new_name}.ipynb").write_bytes(
-            notebook.with_name(f"{new_name}.ipynb").read_bytes()
-        )
-
+        # copy to s3, remove local copy
+        new_notebook = notebook.with_name(f"{new_name}.ipynb")
+        (QC_REPO / f"{new_name}.ipynb").write_bytes(new_notebook.read_bytes())
+        new_notebook.unlink()
 
 if __name__ == "__main__":
     main()
