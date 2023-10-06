@@ -1824,7 +1824,41 @@ class DynamicRoutingSession:
             unit=unit,
             conversion=conversion,
         )
+    
+    def get_all_spike_histogram(self, probe: str|npc_session.ProbeRecord) -> pynwb.TimeSeries:
+        probe = npc_session.ProbeRecord(probe)
+        name = probe.name
+        description = (
+            "histogram of spike count across all good units, binned at 1 sec"
+        )
+        unit = "spikes/s"
 
+        units: pd.DataFrame = self.units[:].query('default_qc').query('electrode_group_name == @probe.name')
+
+        hist, bin_edges = utils.bin_spike_times(units['spike_times'].to_numpy(), bin_time=1)
+
+        bin_centers=(bin_edges[:-1]+bin_edges[1:])/2
+
+        return pynwb.TimeSeries(
+            name=name,
+            description=description,
+            data=hist,
+            timestamps=bin_centers,
+            unit=unit,
+        )
+    
+    @utils.cached_property
+    def _all_spike_histograms(self) ->  pynwb.core.LabelledDict[
+        str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
+        ]:
+        module = pynwb.core.LabelledDict(
+            label="all_spike_histograms",
+            key_attr="name",
+        )
+        for probe in self.probes_inserted:
+            module[probe] = self.get_all_spike_histogram(probe)
+        return module
+    
     @utils.cached_property
     def _video_frame_times(
         self,
