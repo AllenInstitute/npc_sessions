@@ -38,6 +38,7 @@ dependencies = [
     "hdmf-zarr>=0.3.0",
     "loky>=3.4.1",
     "hdmf>=3.5.4",
+    "nbconvert>=7.9.2",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
