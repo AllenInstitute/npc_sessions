@@ -212,12 +212,12 @@ def plot_lick_times_on_sync_and_script(
 def plot_diode_flip_intervals(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> matplotlib.figure.Figure:
-    fig, axes = session.sync_data.plot_diode_measured_sync_square_flips()
+    fig = session.sync_data.plot_diode_measured_sync_square_flips()
     names = tuple(
         k for k, v in session.stim_frame_times.items() if not isinstance(v, Exception)
     )
-    for idx, ax in enumerate(axes):
-        if len(names) == len(axes):
+    for idx, ax in enumerate(fig.axes):
+        if len(names) == len(fig.axes):
             ax.set_title(names[idx].split("_")[0])
     fig.set_size_inches(12, 6)
     return fig
@@ -252,19 +252,19 @@ def plot_vsyncs_and_diode_flips_at_ends_of_each_stim(
     names = tuple(
         k for k, v in session.stim_frame_times.items() if not isinstance(v, Exception)
     )
-    fig, axes = session.sync_data.plot_stim_onsets()
-    for idx, ax in enumerate(axes):
-        if len(names) == len(axes):
+    fig = session.sync_data.plot_stim_onsets()
+    for idx, ax in enumerate(fig.axes):
+        if len(names) == len(fig.axes):
             ax.set_title(names[idx].split("_")[0])
-    fig.set_size_inches(10, 5 * len(axes))
+    fig.set_size_inches(10, 5 * len(fig.axes))
     fig.subplots_adjust(hspace=0.3)
 
-    fig, axes = session.sync_data.plot_stim_offsets()
+    fig = session.sync_data.plot_stim_offsets()
     names = tuple(k for k, v in session.stim_frame_times.items() if v is not None)
-    for idx, ax in enumerate(axes):
-        if len(names) == len(axes):
+    for idx, ax in enumerate(fig.axes):
+        if len(names) == len(fig.axes):
             ax.set_title(names[idx].split("_")[0])
-    fig.set_size_inches(10, 5 * len(axes))
+    fig.set_size_inches(10, 5 * len(fig.axes))
     fig.subplots_adjust(hspace=0.3)
 
     return fig
