@@ -60,8 +60,8 @@ Repository = "https://github.com/AllenInstitute/npc_sessions"
 Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 
 [project.scripts]
-write_dataframes = "npc_lims.scripts.write_dataframes:main"
-write_notebooks = "npc_lims.scripts.write_notebooks:main"
+write_dataframes = "npc_sessions.scripts.write_dataframes:main"
+write_notebooks = "npc_sessions.scripts.write_notebooks:main"
 
 [tool.pdm]
 plugins = [
