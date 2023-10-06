@@ -114,7 +114,7 @@ def write_df(
 
 
 def main() -> None:
-    npc_sessions.assert_s3_write_credentials() # before we do a load of work, make sure we can write to s3
+    npc_sessions.assert_s3_write_credentials()  # before we do a load of work, make sure we can write to s3
     for attr, df in get_all_ephys_session_dfs().items():
         write_df(S3_DATAFRAME_REPO / f"{attr}.pkl", df, append=False)
 

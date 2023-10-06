@@ -5,8 +5,8 @@ import contextlib
 import pathlib
 from collections.abc import Iterable, Iterator
 from typing import Literal, SupportsFloat, TypeVar
-import npc_lims
 
+import npc_lims
 import npc_session
 import numpy as np
 import numpy.typing as npt
@@ -153,10 +153,12 @@ class LazyDict(collections.abc.Mapping[K, V]):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(keys={list(self._raw_dict.keys())})"
 
+
 def assert_s3_write_credentials() -> None:
     test = npc_lims.DR_DATA_REPO / "test.txt"
     test.touch()
     test.unlink()
+
 
 if __name__ == "__main__":
     import doctest
