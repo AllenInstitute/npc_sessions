@@ -192,9 +192,7 @@ def _device_helper(
     electrode_group_name = npc_session.ProbeRecord(
         device_timing_on_sync.device.name
     ).name
-    spike_interface_data.electrode_locations_xy(
-        electrode_group_name
-    )
+    spike_interface_data.electrode_locations_xy(electrode_group_name)
 
     df_device_metrics = spike_interface_data.quality_metrics_df(
         electrode_group_name
