@@ -493,7 +493,7 @@ class DynamicRoutingSession:
         """The version passed to NWBFile.__init__"""
         # TODO add RF maps
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
-        if self.is_ephys:
+        if self.is_sorted:
             modules.append(self.drift_maps)
         modules.append(self.performance)
         return tuple(modules)
