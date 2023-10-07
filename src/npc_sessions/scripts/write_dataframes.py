@@ -12,6 +12,18 @@ import npc_sessions
 
 S3_DATAFRAME_REPO = npc_lims.NWB_REPO.parent / "dataframes"
 
+ATTR_TO_DIR = {
+    "units": "units",
+    "electrodes": "metadata",
+    "OptoTagging": "intervals",
+    "DynamicRouting1": "intervals",
+    "VisRFMapping": "intervals",
+    "AudRFMapping": "intervals",
+    "performance": "intervals",
+    "epochs": "intervals",
+    "subject": "metadata",
+    "metadata": "metadata",
+}
 
 def get_session_dfs(
     session: str | npc_session.SessionRecord | npc_sessions.DynamicRoutingSession,
@@ -57,18 +69,7 @@ def get_session_dfs(
 
 
 def write_all_ephys_session_dfs(**session_kwargs) -> None:
-    attrs = (
-        "units",
-        "electrodes",
-        "OptoTagging",
-        "DynamicRouting1",
-        "VisRFMapping",
-        "AudRFMapping",
-        "performance",
-        "epochs",
-        "subject",
-        "metadata",
-    )
+    attrs = ATTR_TO_DIR.keys()
     future_to_session_id: dict[
         concurrent.futures.Future, npc_session.SessionRecord
     ] = {}
@@ -95,9 +96,7 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
                 if (df := session_dfs[attr]).empty:
                     continue
                 if attr == "units":
-                    write_df(
-                        S3_DATAFRAME_REPO / session_id / f"{attr}.pkl", df, append=False
-                    )
+                    write_df(S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / session_id / f"{attr}.pkl", df, append=False)
                     print(f"wrote {session_id} {attr} df")
                     continue
                 attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
@@ -108,7 +107,7 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
     if all(df.empty for df in attr_to_df.values()):
         raise RuntimeError("No dataframes were created")
     for attr, df in attr_to_df.items():
-        write_df(S3_DATAFRAME_REPO / f"{attr}.pkl", df, append=False)
+        write_df(S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / f"{attr}.pkl", df, append=False)
         print(f"wrote all-session {attr} df")
 
 
