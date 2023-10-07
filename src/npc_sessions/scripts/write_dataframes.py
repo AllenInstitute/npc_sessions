@@ -88,16 +88,16 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
         except Exception as exc:
             print(f"{future_to_session_id[future]} generated an exception: {exc!r}")
         else:
-            session = future_to_session_id[future]
+            session_id = future_to_session_id[future]
             for attr in attrs:
                 if (df := session_dfs[attr]).empty:
                     continue
                 if attr == "units":
-                    write_df(S3_DATAFRAME_REPO / session / f"{attr}.pkl", df, append=False)
-                    print(f"wrote {session} {attr} df")
+                    write_df(S3_DATAFRAME_REPO / session_id / f"{attr}.pkl", df, append=False)
+                    print(f"wrote {session_id} {attr} df")
                     continue
                 attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
-                print(f"added {session} {attr} df")
+                print(f"added {session_id} {attr} df")
         finally:
             del future_to_session_id[future]
         
