@@ -421,6 +421,21 @@ class DynamicRoutingSession:
             acquisition[module.name] = module
         return acquisition
 
+    @utils.cached_property
+    def _acquisition(
+        self,
+    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
+        """The version passed to NWBFile.__init__"""
+        modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
+        if self.is_sync:
+            modules.extend(self._all_licks[1:])
+        modules.append(self._rewards)
+        if self.is_lfp:
+            modules.append(self._raw_lfp)
+        if self.is_video:
+            modules.extend(self._video_frame_times)
+        return tuple(modules)
+
     @property
     def processing(
         self,
@@ -440,38 +455,6 @@ class DynamicRoutingSession:
             )
         return processing
 
-    @property
-    def analysis(
-        self,
-    ) -> pynwb.core.LabelledDict[
-        str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
-    ]:
-        """Derived data that would take time to re-compute.
-
-        The property as it appears on an NWBFile"""
-        analysis = pynwb.core.LabelledDict(label="analysis", key_attr="name")
-        for module in self._analysis:
-            if isinstance(module, pynwb.core.LabelledDict):
-                analysis[module.label] = module
-            else:
-                analysis[module.name] = module
-        return analysis
-
-    @utils.cached_property
-    def _acquisition(
-        self,
-    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        """The version passed to NWBFile.__init__"""
-        modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
-        if self.is_sync:
-            modules.extend(self._all_licks[1:])
-        modules.append(self._rewards)
-        if self.is_lfp:
-            modules.append(self._raw_lfp)
-        if self.is_video:
-            modules.extend(self._video_frame_times)
-        return tuple(modules)
-
     @utils.cached_property
     def _behavior(
         self,
@@ -488,6 +471,23 @@ class DynamicRoutingSession:
         # TODO add filtered, sub-sampled LFP
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         return tuple(modules)
+
+    @property
+    def analysis(
+        self,
+    ) -> pynwb.core.LabelledDict[
+        str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
+    ]:
+        """Derived data that would take time to re-compute.
+
+        The property as it appears on an NWBFile"""
+        analysis = pynwb.core.LabelledDict(label="analysis", key_attr="name")
+        for module in self._analysis:
+            if isinstance(module, pynwb.core.LabelledDict):
+                analysis[module.label] = module
+            else:
+                analysis[module.name] = module
+        return analysis
 
     @utils.cached_property
     def _analysis(
