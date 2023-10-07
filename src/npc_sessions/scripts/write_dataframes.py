@@ -86,7 +86,7 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
         future_to_session_id[future] = session.id
         print(f"submitted {session.id}")
 
-    for future in concurrent.futures.as_completed(future_to_session_id):
+    for future in concurrent.futures.as_completed(future_to_session_id.keys()):
         try:
             session_dfs: dict[str, pd.DataFrame] = future.result()
         except Exception as exc:
