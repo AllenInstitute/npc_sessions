@@ -328,7 +328,7 @@ class DynamicRoutingSession:
     @property
     def source_script_file_name(self) -> str:
         """url to tagged version of packaging code repo on github"""
-        return f"https://github.com/AllenInstitute/npc_lims/releases/tag/v{importlib.metadata.version('npc_sessions')}"
+        return f"https://github.com/AllenInstitute/npc_sessions/releases/tag/v{importlib.metadata.version('npc_sessions')}"
 
     @property
     def lab(self) -> str | None:
