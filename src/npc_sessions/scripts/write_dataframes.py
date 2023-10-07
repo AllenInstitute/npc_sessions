@@ -12,7 +12,6 @@ import npc_sessions
 
 S3_DATAFRAME_REPO = npc_lims.NWB_REPO.parent / "dataframes"
 
-
 def get_session_dfs(
     session: str | npc_session.SessionRecord | npc_sessions.DynamicRoutingSession,
     attrs: Iterable[str],
@@ -55,8 +54,7 @@ def get_session_dfs(
         attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
     return attr_to_df
 
-
-def get_all_ephys_session_dfs(**session_kwargs) -> dict[str, pd.DataFrame]:
+def write_all_ephys_session_dfs(**session_kwargs) -> None:
     attrs = (
         "units",
         "electrodes",
@@ -83,21 +81,31 @@ def get_all_ephys_session_dfs(**session_kwargs) -> dict[str, pd.DataFrame]:
         )
         future_to_session_id[future] = session.id
         print(f"submitted {session.id}")
-        if idx > 1:
-            break
 
-    while future_to_session_id:
-        # for future in concurrent.futures.as_completed(future_to_session_id):
-        # with contextlib.suppress(Exception):
-        session_dfs: dict[str, pd.DataFrame] = future.result()
-        for attr in attrs:
-            if not (df := session_dfs[attr]).empty:
+    for future in concurrent.futures.as_completed(future_to_session_id):
+        try:
+            session_dfs: dict[str, pd.DataFrame] = future.result()
+        except Exception as exc:
+            print(f"{future_to_session_id[future]} generated an exception: {exc!r}")
+        else:
+            session = future_to_session_id[future]
+            for attr in attrs:
+                if (df := session_dfs[attr]).empty:
+                    continue
+                if attr == "units":
+                    write_df(S3_DATAFRAME_REPO / session / f"{attr}.pkl", df, append=False)
+                    print(f"wrote {session} {attr} df")
+                    continue
                 attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
-                print(f"added {future_to_session_id[future]} {attr} df")
-        del future_to_session_id[future]
+                print(f"added {session} {attr} df")
+        finally:
+            del future_to_session_id[future]
+        
     if all(df.empty for df in attr_to_df.values()):
         raise RuntimeError("No dataframes were created")
-    return attr_to_df
+    for attr, df in attr_to_df.items():
+        write_df(S3_DATAFRAME_REPO / f"{attr}.pkl", df, append=False)
+        print(f"wrote all-session {attr} df")
 
 
 def write_df(
@@ -115,9 +123,7 @@ def write_df(
 
 def main() -> None:
     npc_sessions.assert_s3_write_credentials()  # before we do a load of work, make sure we can write to s3
-    for attr, df in get_all_ephys_session_dfs().items():
-        write_df(S3_DATAFRAME_REPO / f"{attr}.pkl", df, append=False)
-
+    write_all_ephys_session_dfs()
 
 if __name__ == "__main__":
     main()
