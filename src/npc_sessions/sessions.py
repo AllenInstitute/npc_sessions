@@ -451,7 +451,10 @@ class DynamicRoutingSession:
         The property as it appears on an NWBFile"""
         analysis = pynwb.core.LabelledDict(label="analysis", key_attr="name")
         for module in self._analysis:
-            analysis[module.name] = module
+            if isinstance(module, pynwb.core.LabelledDict):
+                analysis[module.label] = module
+            else:
+                analysis[module.name] = module
         return analysis
 
     @utils.cached_property
@@ -495,6 +498,7 @@ class DynamicRoutingSession:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_sorted:
             modules.append(self.drift_maps)
+            modules.append(self._all_spike_histograms)
         modules.append(self.performance)
         return tuple(modules)
 
