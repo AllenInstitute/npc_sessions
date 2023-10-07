@@ -257,7 +257,7 @@ def write_nwb(
     else:
         assert path.suffix == ".nwb"
         nwb_io_class = pynwb.NWBHDF5IO
-        if not path.protocol or path.protocol == "file":
+        if not path.as_uri().startswith("file"):
             raise ValueError(f"Must use a local path for {nwb_io_class!r}")
 
     with nwb_io_class(path=path.as_posix(), mode="w") as nwb_io:

@@ -256,12 +256,12 @@ def get_pxi_nidaq_data(
             )
         num_channels: int = device_metadata["num_channels"]
 
-        if not (protocol := device.continuous.protocol) or protocol == "file":
+        if not device.continuous.as_uri().startswith("file"):
             # local file we can memory-map
             dat = np.load(device.continuous / "continuous.dat", mmap_mode="r")
         else:
             logger.warning(
-                f"Reading entirety of uncompressed OpenEphys NI-DAQ data from {protocol}. If you only need part of this data, consider using `read_array_range_from_npy` with the path instead."
+                f"Reading entirety of uncompressed OpenEphys NI-DAQ data from {device.continuous}. If you only need part of this data, consider using `read_array_range_from_npy` with the path instead."
             )
             dat = np.frombuffer(
                 (device.continuous / "continuous.dat").read_bytes(), dtype=np.int16
