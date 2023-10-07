@@ -96,7 +96,7 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
                 if (df := session_dfs[attr]).empty:
                     continue
                 if attr == "units":
-                    write_df(S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / session_id / f"{attr}.pkl", df, append=False)
+                    write_df(S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / session_id / f"{attr}.pkl", df.query('default_qc'), append=False)
                     print(f"wrote {session_id} {attr} df")
                     continue
                 attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
