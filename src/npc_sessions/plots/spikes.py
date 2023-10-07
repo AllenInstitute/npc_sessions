@@ -51,7 +51,7 @@ def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSess
 def plot_all_unit_spike_histograms(session: npc_sessions.DynamicRoutingSession):
     units: pd.DataFrame = session.units[:].query('default_qc')
     
-    for probe,obj in session._all_spike_histograms.items():
+    for probe,obj in session.all_spike_histograms.items():
         fig, ax = plt.subplots()
         
         for row,epoch in session.epochs[:].iterrows():
@@ -87,7 +87,7 @@ def plot_unit_spikes_channels(
             (unit_spike_times["peak_channel"] >= lower_channel)
             & (unit_spike_times["peak_channel"] <= upper_channel)
         ]["spike_times"].to_numpy()
-        hist, bins = utils.bin_spike_times(unit_spike_times_channel, bin_time=1)
+        hist, bins = utils.bin_spike_times(unit_spike_times_channel, bin_interval=1)
 
         ax.plot(hist)
         ax.set_title(

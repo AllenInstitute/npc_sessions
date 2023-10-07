@@ -483,10 +483,7 @@ class DynamicRoutingSession:
         The property as it appears on an NWBFile"""
         analysis = pynwb.core.LabelledDict(label="analysis", key_attr="name")
         for module in self._analysis:
-            if isinstance(module, pynwb.core.LabelledDict):
-                analysis[module.label] = module
-            else:
-                analysis[module.name] = module
+            analysis[module.name] = module
         return analysis
 
     @utils.cached_property
@@ -497,8 +494,8 @@ class DynamicRoutingSession:
         # TODO add RF maps
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_sorted:
+            modules.append(self.all_spike_histograms)
             modules.append(self.drift_maps)
-            modules.append(self._all_spike_histograms)
         modules.append(self.performance)
         return tuple(modules)
 
@@ -1829,38 +1826,37 @@ class DynamicRoutingSession:
             conversion=conversion,
         )
     
-    def get_all_spike_histogram(self, probe: str|npc_session.ProbeRecord) -> pynwb.TimeSeries:
-        probe = npc_session.ProbeRecord(probe)
-        name = probe.name
-        description = (
-            "histogram of spike count across all good units, binned at 1 sec"
-        )
-        unit = "spikes/s"
-
-        units: pd.DataFrame = self.units[:].query('default_qc').query('electrode_group_name == @probe.name')
-
-        hist, bin_edges = utils.bin_spike_times(units['spike_times'].to_numpy(), bin_time=1)
-
-        bin_centers=(bin_edges[:-1]+bin_edges[1:])/2
+    def get_all_spike_histogram(self, electrode_group_name: str | npc_session.ProbeRecord) -> pynwb.TimeSeries:
+        probe = npc_session.ProbeRecord(electrode_group_name)
+        units: pd.DataFrame = self.units[:].query('default_qc').query('electrode_group_name == @electrode_group_name')
+        bin_interval = 1 # seconds
+        hist, bin_edges = utils.bin_spike_times(units['spike_times'].to_numpy(), bin_interval=bin_interval)
 
         return pynwb.TimeSeries(
-            name=name,
-            description=description,
+            name=probe.name,
+            description=f"joint spike rate across all good units on {probe.name}, binned at {bin_interval} second intervals",
             data=hist,
-            timestamps=bin_centers,
-            unit=unit,
+            timestamps=(bin_edges[:-1]+bin_edges[1:])/2,
+            unit="spikes/s",
+            resolution=1.0,
         )
     
     @utils.cached_property
-    def _all_spike_histograms(self) ->  pynwb.core.LabelledDict[
-        str, pynwb.core.NWBDataInterface | pynwb.core.DynamicTable
-        ]:
-        module = pynwb.core.LabelledDict(
-            label="all_spike_histograms",
-            key_attr="name",
+    def all_spike_histograms(self) ->  pynwb.core.MultiContainerInterface:
+        ## using this as a generic multi-timeseries container 
+        # class BehavioralEvents(MultiContainerInterface):
+        #     __clsconf__ = {
+        #         'add': 'add_timeseries',
+        #         'get': 'get_timeseries',
+        #         'create': 'create_timeseries',
+        #         'type': pynwb.TimeSeries,
+        #         'attr': 'time_series'
+        #     }
+        module = pynwb.behavior.BehavioralEvents(
+            name="all_spike_histograms",
         )
         for probe in self.probes_inserted:
-            module[probe] = self.get_all_spike_histogram(probe)
+            module.add_timeseries(self.get_all_spike_histogram(probe))
         return module
     
     @utils.cached_property
