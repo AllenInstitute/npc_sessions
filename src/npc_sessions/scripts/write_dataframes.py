@@ -25,6 +25,7 @@ ATTR_TO_DIR = {
     "metadata": "metadata",
 }
 
+
 def get_session_dfs(
     session: str | npc_session.SessionRecord | npc_sessions.DynamicRoutingSession,
     attrs: Iterable[str],
@@ -96,7 +97,14 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
                 if (df := session_dfs[attr]).empty:
                     continue
                 if attr == "units":
-                    write_df(S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / session_id / f"{attr}.pkl", df.query('default_qc'), append=False)
+                    write_df(
+                        S3_DATAFRAME_REPO
+                        / ATTR_TO_DIR[attr]
+                        / session_id
+                        / f"{attr}.pkl",
+                        df.query("default_qc"),
+                        append=False,
+                    )
                     print(f"wrote {session_id} {attr} df")
                     continue
                 attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
@@ -107,7 +115,9 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
     if all(df.empty for df in attr_to_df.values()):
         raise RuntimeError("No dataframes were created")
     for attr, df in attr_to_df.items():
-        write_df(S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / f"{attr}.pkl", df, append=False)
+        write_df(
+            S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / f"{attr}.pkl", df, append=False
+        )
         print(f"wrote all-session {attr} df")
 
 
