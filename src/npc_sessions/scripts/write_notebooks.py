@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 QC_REPO = npc_lims.DR_DATA_REPO.parent.parent / "qc"
 
-QC_NOTEBOOK = upath.UPath(
+QC_NOTEBOOK = npc_sessions.from_pathlike(
     importlib.resources.files('npc_sessions')
     / "notebooks"
     / "dynamic_routing_qc.ipynb"
