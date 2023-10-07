@@ -12,7 +12,6 @@ import shutil
 from typing import Union
 
 import crc32c
-import hdmf.backends.io
 import hdmf_zarr
 import pynwb
 import rich.progress
@@ -253,14 +252,14 @@ def write_nwb(
     path = from_pathlike(path)
     if path.suffix == ".zarr":
         nwb_io_class = hdmf_zarr.NWBZarrIO
-        if '.nwb' not in path.name:
+        if ".nwb" not in path.name:
             path = path.with_suffix(".nwb.zarr")
     else:
         assert path.suffix == ".nwb"
         nwb_io_class = pynwb.NWBHDF5IO
         if not path.protocol or path.protocol == "file":
             raise ValueError(f"Must use a local path for {nwb_io_class!r}")
-        
+
     with nwb_io_class(path=path.as_posix(), mode="w") as nwb_io:
         nwb_io.write(nwb)
 

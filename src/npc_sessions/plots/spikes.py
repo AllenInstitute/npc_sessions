@@ -49,28 +49,37 @@ def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSess
 
 
 def plot_all_unit_spike_histograms(session: npc_sessions.DynamicRoutingSession):
-    units: pd.DataFrame = session.units[:].query('default_qc')
-    
-    for probe,obj in session.all_spike_histograms.items():
+    session.units[:].query("default_qc")
+
+    for probe, obj in session.all_spike_histograms.items():
         fig, ax = plt.subplots()
-        
-        for row,epoch in session.epochs[:].iterrows():
+
+        for _row, epoch in session.epochs[:].iterrows():
             name = next((k for k in epoch.tags if k in epoch_color_map), None)
-            color = epoch_color_map[name] if name else 'black'
-            ax.axvspan(epoch.start_time,epoch.stop_time,alpha=0.1,color=color)
-            ax.text((epoch.stop_time+epoch.start_time)/2,0,epoch.name,ha='center',va='top',fontsize=8)
-        ax.plot(obj.timestamps,obj.data)
+            color = epoch_color_map[name] if name else "black"
+            ax.axvspan(epoch.start_time, epoch.stop_time, alpha=0.1, color=color)
+            ax.text(
+                (epoch.stop_time + epoch.start_time) / 2,
+                0,
+                epoch.name,
+                ha="center",
+                va="top",
+                fontsize=8,
+            )
+        ax.plot(obj.timestamps, obj.data)
         ax.set_title(f"{probe} Spike Histogram")
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Spike Count per 1 second bin")
 
+
 epoch_color_map = {
-    'RFMapping': 'blue',
-    'DynamicRouting1': 'green',
-    'OptoTagging1': 'cyan',
-    'Spontaneous': 'red',
-    'SpontaneousRewards': 'magenta',
+    "RFMapping": "blue",
+    "DynamicRouting1": "green",
+    "OptoTagging1": "cyan",
+    "Spontaneous": "red",
+    "SpontaneousRewards": "magenta",
 }
+
 
 def plot_unit_spikes_channels(
     session: npc_sessions.DynamicRoutingSession,

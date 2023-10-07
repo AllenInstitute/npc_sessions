@@ -12,6 +12,7 @@ import npc_sessions
 
 S3_DATAFRAME_REPO = npc_lims.NWB_REPO.parent / "dataframes"
 
+
 def get_session_dfs(
     session: str | npc_session.SessionRecord | npc_sessions.DynamicRoutingSession,
     attrs: Iterable[str],
@@ -54,6 +55,7 @@ def get_session_dfs(
         attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
     return attr_to_df
 
+
 def write_all_ephys_session_dfs(**session_kwargs) -> None:
     attrs = (
         "units",
@@ -93,14 +95,16 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
                 if (df := session_dfs[attr]).empty:
                     continue
                 if attr == "units":
-                    write_df(S3_DATAFRAME_REPO / session_id / f"{attr}.pkl", df, append=False)
+                    write_df(
+                        S3_DATAFRAME_REPO / session_id / f"{attr}.pkl", df, append=False
+                    )
                     print(f"wrote {session_id} {attr} df")
                     continue
                 attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
                 print(f"added {session_id} {attr} df")
         finally:
             del future_to_session_id[future]
-        
+
     if all(df.empty for df in attr_to_df.values()):
         raise RuntimeError("No dataframes were created")
     for attr, df in attr_to_df.items():
@@ -124,6 +128,7 @@ def write_df(
 def main() -> None:
     npc_sessions.assert_s3_write_credentials()  # before we do a load of work, make sure we can write to s3
     write_all_ephys_session_dfs()
+
 
 if __name__ == "__main__":
     main()

@@ -17,10 +17,9 @@ logger = logging.getLogger(__name__)
 QC_REPO = npc_lims.DR_DATA_REPO.parent.parent / "qc"
 
 QC_NOTEBOOK = npc_sessions.from_pathlike(
-    importlib.resources.files('npc_sessions')
-    / "notebooks"
-    / "dynamic_routing_qc.ipynb"
+    importlib.resources.files("npc_sessions") / "notebooks" / "dynamic_routing_qc.ipynb"
 )
+
 
 def write_qc_notebook(
     session: str | npc_session.SessionRecord | npc_sessions.DynamicRoutingSession,
@@ -29,7 +28,7 @@ def write_qc_notebook(
     """Execute and save (as .ipynb) the DR QC notebook for a given session."""
     if not isinstance(session, npc_sessions.DynamicRoutingSession):
         session = npc_sessions.DynamicRoutingSession(session, **session_kwargs)
-        
+
     # pass session to run in notebook via env var
     if session.info:
         var = session.info.allen_path.as_posix()
@@ -63,6 +62,7 @@ def main() -> None:
     for session in sessions:
         path = write_qc_notebook(session)
         move_to_s3(path)
+
 
 if __name__ == "__main__":
     main()

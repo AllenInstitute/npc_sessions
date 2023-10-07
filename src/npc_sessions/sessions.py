@@ -1825,25 +1825,33 @@ class DynamicRoutingSession:
             unit=unit,
             conversion=conversion,
         )
-    
-    def get_all_spike_histogram(self, electrode_group_name: str | npc_session.ProbeRecord) -> pynwb.TimeSeries:
+
+    def get_all_spike_histogram(
+        self, electrode_group_name: str | npc_session.ProbeRecord
+    ) -> pynwb.TimeSeries:
         probe = npc_session.ProbeRecord(electrode_group_name)
-        units: pd.DataFrame = self.units[:].query('default_qc').query('electrode_group_name == @electrode_group_name')
-        bin_interval = 1 # seconds
-        hist, bin_edges = utils.bin_spike_times(units['spike_times'].to_numpy(), bin_interval=bin_interval)
+        units: pd.DataFrame = (
+            self.units[:]
+            .query("default_qc")
+            .query("electrode_group_name == @electrode_group_name")
+        )
+        bin_interval = 1  # seconds
+        hist, bin_edges = utils.bin_spike_times(
+            units["spike_times"].to_numpy(), bin_interval=bin_interval
+        )
 
         return pynwb.TimeSeries(
             name=probe.name,
             description=f"joint spike rate across all good units on {probe.name}, binned at {bin_interval} second intervals",
             data=hist,
-            timestamps=(bin_edges[:-1]+bin_edges[1:])/2,
+            timestamps=(bin_edges[:-1] + bin_edges[1:]) / 2,
             unit="spikes/s",
             resolution=1.0,
         )
-    
+
     @utils.cached_property
-    def all_spike_histograms(self) ->  pynwb.core.MultiContainerInterface:
-        ## using this as a generic multi-timeseries container 
+    def all_spike_histograms(self) -> pynwb.core.MultiContainerInterface:
+        ## using this as a generic multi-timeseries container
         # class BehavioralEvents(MultiContainerInterface):
         #     __clsconf__ = {
         #         'add': 'add_timeseries',
@@ -1858,7 +1866,7 @@ class DynamicRoutingSession:
         for probe in self.probes_inserted:
             module.add_timeseries(self.get_all_spike_histogram(probe))
         return module
-    
+
     @utils.cached_property
     def _video_frame_times(
         self,
