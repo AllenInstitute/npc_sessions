@@ -1,8 +1,10 @@
 from __future__ import annotations
+from turtle import color
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
+import matplotlib.figure
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -11,9 +13,9 @@ if TYPE_CHECKING:
     import npc_sessions
 
 import npc_sessions.utils as utils
+import npc_sessions.plots.plot_utils as plot_utils  
 
-
-def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSession):
+def plot_unit_quality_metrics_per_probe(session: "npc_sessions.DynamicRoutingSession"):
     units: pd.DataFrame = session.units[:]
 
     metrics = [
@@ -48,41 +50,28 @@ def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSess
     plt.tight_layout()
 
 
-def plot_all_unit_spike_histograms(session: npc_sessions.DynamicRoutingSession):
+def plot_all_unit_spike_histograms(session: "npc_sessions.DynamicRoutingSession") -> tuple[matplotlib.figure.Figure, ...]:# -> tuple:# -> tuple:
     session.units[:].query("default_qc")
-
-    for probe, obj in session.all_spike_histograms.items():
+    figs: list[matplotlib.figure.Figure] = []
+    for obj in session.all_spike_histograms.children:
         fig, ax = plt.subplots()
-
-        for _row, epoch in session.epochs[:].iterrows():
-            name = next((k for k in epoch.tags if k in epoch_color_map), None)
-            color = epoch_color_map[name] if name else "black"
-            ax.axvspan(epoch.start_time, epoch.stop_time, alpha=0.1, color=color)
-            ax.text(
-                (epoch.stop_time + epoch.start_time) / 2,
-                0,
-                epoch.name,
-                ha="center",
-                va="top",
-                fontsize=8,
-            )
-        ax.plot(obj.timestamps, obj.data)
-        ax.set_title(f"{probe} Spike Histogram")
-        ax.set_xlabel("Time (s)")
-        ax.set_ylabel("Spike Count per 1 second bin")
-
-
-epoch_color_map = {
-    "RFMapping": "blue",
-    "DynamicRouting1": "green",
-    "OptoTagging1": "cyan",
-    "Spontaneous": "red",
-    "SpontaneousRewards": "magenta",
-}
+        ax.plot(obj.timestamps, obj.data, linewidth=0.5, alpha=0.8, color="k")
+        plot_utils.add_epoch_color_bars(ax, session.epochs[:], y=50, va="bottom", rotation=90)
+        ax.set_title(obj.description, fontsize=8)
+        fig.suptitle(session.session_id, fontsize=10)
+        ax.set_xlabel(obj.timestamps_unit)
+        ax.set_ylabel(obj.unit)
+        ax.set_ylim([0, ax.get_ylim()[1]])
+        ax.margins(0)
+        ax.set_frame_on(False)
+        fig.set_layout_engine("tight")
+        fig.set_size_inches(5, 5)
+        figs.append(fig)
+    return tuple(figs)
 
 
 def plot_unit_spikes_channels(
-    session: npc_sessions.DynamicRoutingSession,
+    session: "npc_sessions.DynamicRoutingSession",
     lower_channel: int = 0,
     upper_channel: int = 384,
 ):
@@ -107,7 +96,7 @@ def plot_unit_spikes_channels(
 
 
 def plot_drift_maps(
-    session: npc_sessions.DynamicRoutingSession | pynwb.NWBFile,
+    session: "npc_sessions.DynamicRoutingSession" | pynwb.NWBFile,
 ) -> tuple[plt.Figure, ...]:
     figs = []
     for k, v in session.analysis["drift_maps"].images.items():
