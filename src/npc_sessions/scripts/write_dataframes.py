@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import concurrent.futures
 from collections.abc import Iterable
+import contextlib
 
 import loky
 import npc_lims
@@ -75,50 +76,43 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
         concurrent.futures.Future, npc_session.SessionRecord
     ] = {}
     attr_to_df: dict[str, pd.DataFrame] = dict.fromkeys(attrs, pd.DataFrame())
-
+    for file in S3_DATAFRAME_REPO.rglob("*.pkl"):
+        file.unlink()
     for idx, session in enumerate(npc_sessions.get_sessions()):
         if not (session.is_sorted and session.is_annotated):
             continue
-        print(idx)
-        future = loky.get_reusable_executor(max_workers=4).submit(
-            get_session_dfs, session.id, attrs, **session_kwargs
-        )
-        future_to_session_id[future] = session.id
-        print(f"submitted {session.id}")
-
-    for future in concurrent.futures.as_completed(future_to_session_id.keys()):
+        print(f"{idx}: {session.id}")
+        
         try:
-            session_dfs: dict[str, pd.DataFrame] = future.result()
+            session_dfs: dict[str, pd.DataFrame] = get_session_dfs(
+                session.id, attrs, **session_kwargs
+            )
         except Exception as exc:
-            print(f"{future_to_session_id[future]} generated an exception: {exc!r}")
+            print(f"{session.id} errored: {exc!r}")
         else:
-            session_id = future_to_session_id[future]
+            session_id = str(session.id)
             for attr in attrs:
-                if (df := session_dfs[attr]).empty:
+                df = session_dfs[attr]
+                if df.empty:
                     continue
                 if attr == "units":
                     write_df(
                         S3_DATAFRAME_REPO
                         / ATTR_TO_DIR[attr]
-                        / session_id
-                        / f"{attr}.pkl",
+                        / f"{session_id}.pkl",
                         df.query("default_qc"),
                         append=False,
                     )
                     print(f"wrote {session_id} {attr} df")
                     continue
+                
                 attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
+                write_df(
+                    S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / f"{attr}.pkl", 
+                    df, 
+                    append=True
+                )
                 print(f"added {session_id} {attr} df")
-        finally:
-            del future_to_session_id[future]
-
-    if all(df.empty for df in attr_to_df.values()):
-        raise RuntimeError("No dataframes were created")
-    for attr, df in attr_to_df.items():
-        write_df(
-            S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / f"{attr}.pkl", df, append=False
-        )
-        print(f"wrote all-session {attr} df")
 
 
 def write_df(
