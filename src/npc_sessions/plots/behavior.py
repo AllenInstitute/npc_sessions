@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     import pandas as pd
 
     import npc_sessions
-import npc_sessions.plots.plot_utils as plot_utils  
+import npc_sessions.plots.plot_utils as plot_utils
 
 
 def plot_performance_by_block(
@@ -123,26 +123,36 @@ def plot_lick_raster(
 def plot_running(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> matplotlib.figure.Figure:
-    
     timeseries = session.processing["behavior"]["running_speed"]
     epochs: pd.DataFrame = session.epochs[:]
-    plt.style.use('seaborn-v0_8-notebook')
+    plt.style.use("seaborn-v0_8-notebook")
 
     fig, ax = plt.subplots()
 
-    for _, epoch in epochs.iterrows():  
+    for _, epoch in epochs.iterrows():
         epoch_indices = (timeseries.timestamps >= epoch["start_time"]) & (
             timeseries.timestamps <= epoch["stop_time"]
         )
         if len(epoch_indices) > 0:
             ax.plot(
-                timeseries.timestamps[epoch_indices], timeseries.data[epoch_indices],
-                linewidth=0.5, alpha=0.8, color="k",
-                )
+                timeseries.timestamps[epoch_indices],
+                timeseries.data[epoch_indices],
+                linewidth=0.5,
+                alpha=0.8,
+                color="k",
+            )
     k = 100 if "cm" in timeseries.unit else 1
-    plot_utils.add_epoch_color_bars(ax, epochs, rotation=90, y=1*k, va="top")
-    ax.set_ylim([-0.1*k, 1*k])
-    ax.hlines(0, 0, max(timeseries.timestamps), color="k", linestyle="--", linewidth=0.5, zorder=0)
+    plot_utils.add_epoch_color_bars(ax, epochs, rotation=90, y=1 * k, va="top")
+    ax.set_ylim([-0.1 * k, 1 * k])
+    ax.hlines(
+        0,
+        0,
+        max(timeseries.timestamps),
+        color="k",
+        linestyle="--",
+        linewidth=0.5,
+        zorder=0,
+    )
     ax.margins(0)
     ax.set_frame_on(False)
     ax.set_ylabel(timeseries.unit)

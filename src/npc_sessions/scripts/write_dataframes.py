@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-import concurrent.futures
 from collections.abc import Iterable
-import contextlib
 
-import loky
 import npc_lims
 import npc_session
 import pandas as pd
@@ -72,9 +69,6 @@ def get_session_dfs(
 
 def write_all_ephys_session_dfs(**session_kwargs) -> None:
     attrs = ATTR_TO_DIR.keys()
-    future_to_session_id: dict[
-        concurrent.futures.Future, npc_session.SessionRecord
-    ] = {}
     attr_to_df: dict[str, pd.DataFrame] = dict.fromkeys(attrs, pd.DataFrame())
     for file in S3_DATAFRAME_REPO.rglob("*.pkl"):
         file.unlink()
@@ -82,7 +76,7 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
         if not (session.is_sorted and session.is_annotated):
             continue
         print(f"{idx}: {session.id}")
-        
+
         try:
             session_dfs: dict[str, pd.DataFrame] = get_session_dfs(
                 session.id, attrs, **session_kwargs
@@ -97,20 +91,18 @@ def write_all_ephys_session_dfs(**session_kwargs) -> None:
                     continue
                 if attr == "units":
                     write_df(
-                        S3_DATAFRAME_REPO
-                        / ATTR_TO_DIR[attr]
-                        / f"{session_id}.pkl",
+                        S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / f"{session_id}.pkl",
                         df.query("default_qc"),
                         append=False,
                     )
                     print(f"wrote {session_id} {attr} df")
                     continue
-                
+
                 attr_to_df[attr] = pd.concat((attr_to_df[attr], df))
                 write_df(
-                    S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / f"{attr}.pkl", 
-                    df, 
-                    append=True
+                    S3_DATAFRAME_REPO / ATTR_TO_DIR[attr] / f"{attr}.pkl",
+                    df,
+                    append=True,
                 )
                 print(f"added {session_id} {attr} df")
 
