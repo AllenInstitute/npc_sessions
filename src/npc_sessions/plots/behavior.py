@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     import pandas as pd
 
     import npc_sessions
+import npc_sessions.plots.plot_utils as plot_utils  
 
 
 def plot_performance_by_block(
@@ -122,31 +123,35 @@ def plot_lick_raster(
 def plot_running(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> matplotlib.figure.Figure:
+    
     timeseries = session.processing["behavior"]["running_speed"]
     epochs: pd.DataFrame = session.epochs[:]
-    fig, _ = plt.subplots(
-        1,
-        len(epochs),
-        sharey=True,
-        width_ratios=[
-            t_1 - t_0 for t_0, t_1 in epochs[["start_time", "stop_time"]].values
-        ],
-    )
-    for idx, epoch in epochs.iterrows():
-        ax = fig.axes[idx]
-        window_idx = (timeseries.timestamps >= epoch["start_time"]) & (
+    plt.style.use('seaborn-v0_8-notebook')
+
+    fig, ax = plt.subplots()
+
+    for _, epoch in epochs.iterrows():  
+        epoch_indices = (timeseries.timestamps >= epoch["start_time"]) & (
             timeseries.timestamps <= epoch["stop_time"]
         )
-        if len(window_idx) > 0:
-            ax.plot(timeseries.timestamps[window_idx], timeseries.data[window_idx])
-            ax.set_title("\n".join(epoch.tags), fontsize=8)
-            ax.set_xlabel("time (s)")
-        else:
-            ax.xaxis.set_visible(False)
-        if idx == 0:
-            ax.set_ylim(-0.2, 1)
-            ax.set_ylabel(timeseries.unit)
-
+        if len(epoch_indices) > 0:
+            ax.plot(
+                timeseries.timestamps[epoch_indices], timeseries.data[epoch_indices],
+                linewidth=0.5, alpha=0.8, color="k",
+                )
+    k = 100 if "cm" in timeseries.unit else 1
+    plot_utils.add_epoch_color_bars(ax, epochs, rotation=90, y=1*k, va="top")
+    ax.set_ylim([-0.1*k, 1*k])
+    ax.hlines(0, 0, max(timeseries.timestamps), color="k", linestyle="--", linewidth=0.5, zorder=0)
+    ax.margins(0)
+    ax.set_frame_on(False)
+    ax.set_ylabel(timeseries.unit)
+    ax.set_xlabel(timeseries.timestamps_unit)
+    title = timeseries.description
+    if max(timeseries.data) > ax.get_ylim()[1]:
+        title += f"\ndata clipped: {max(timeseries.data) = }{timeseries.unit}"
+    ax.set_title(title, fontsize=8)
     fig.suptitle(session.id, fontsize=10)
-    fig.set_size_inches(12, 3)
+    fig.set_size_inches(10, 4)
+    fig.set_layout_engine("tight")
     return fig
