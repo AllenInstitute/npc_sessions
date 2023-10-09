@@ -125,7 +125,7 @@ where = [
 [tool.setuptools.package-data]
 npc_sessions = [
     "py.typed",
-    "**.ipynb",
+    "notebooks/*.ipynb",
 ]
 
 [tool.ruff]
