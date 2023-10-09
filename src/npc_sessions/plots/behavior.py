@@ -138,12 +138,13 @@ def plot_running(
                 timeseries.timestamps[epoch_indices],
                 timeseries.data[epoch_indices],
                 linewidth=0.5,
-                alpha=0.8,
+                alpha=0.5,
                 color="k",
             )
     k = 100 if "cm" in timeseries.unit else 1
-    plot_utils.add_epoch_color_bars(ax, epochs, rotation=90, y=1 * k, va="top")
-    ax.set_ylim([-0.1 * k, 0.8 * k])
+    ymax = .7 * k
+    plot_utils.add_epoch_color_bars(ax, epochs, rotation=90, y=ymax, va="top")
+    ax.set_ylim([-0.05 * k, ymax])
     ax.hlines(
         0,
         0,
