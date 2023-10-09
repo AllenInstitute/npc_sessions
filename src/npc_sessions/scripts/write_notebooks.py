@@ -51,9 +51,9 @@ def write_qc_notebook(
 def move_to_s3(file: npc_sessions.PathLike) -> None:
     """copy to s3, remove local copy"""
     file = npc_sessions.from_pathlike(file)
-    (QC_REPO / file.name).write_bytes(file.read_bytes())
+    (s3 := QC_REPO / file.name).write_bytes(file.read_bytes())
     file.unlink()
-    logger.info(f"moved {file.name} to s3")
+    logger.info(f"moved {file.name} to {s3.parent}")
 
 
 def main() -> None:
