@@ -137,8 +137,8 @@ def plot_running(
             ax.plot(
                 timeseries.timestamps[epoch_indices],
                 timeseries.data[epoch_indices],
-                linewidth=0.5,
-                alpha=0.5,
+                linewidth=0.1,
+                alpha=0.8,
                 color="k",
             )
     k = 100 if "cm" in timeseries.unit else 1

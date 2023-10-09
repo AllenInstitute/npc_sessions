@@ -57,7 +57,7 @@ def plot_all_unit_spike_histograms(
     figs: list[matplotlib.figure.Figure] = []
     for obj in session.all_spike_histograms.children:
         fig, ax = plt.subplots()
-        ax.plot(obj.timestamps, obj.data, linewidth=0.5, alpha=0.8, color="k")
+        ax.plot(obj.timestamps, obj.data, linewidth=0.1, alpha=0.8, color="k")
         plot_utils.add_epoch_color_bars(
             ax, session.epochs[:], y=50, va="bottom", rotation=90
         )
