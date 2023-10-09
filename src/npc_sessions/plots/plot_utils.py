@@ -28,16 +28,13 @@ def add_epoch_color_bars(
 ) -> None:
     if epoch_color_map is None:
         epoch_color_map = EPOCH_COLOR_MAP
-    text_kwargs = (
-        {
-            "y": 0,
-            "ha": "center",
-            "rotation": 0,
-            "fontsize": 6,
-            "zorder": 1,
-        }
-        | text_kwargs
-    )
+    text_kwargs = {
+        "y": 0,
+        "ha": "center",
+        "rotation": 0,
+        "fontsize": 6,
+        "zorder": 1,
+    } | text_kwargs
     for _, epoch in epochs.iterrows():
         epoch_name = next((k for k in epoch.tags if k in epoch_color_map), "")
         color = epoch_color_map[epoch_name] if epoch_name else "black"
