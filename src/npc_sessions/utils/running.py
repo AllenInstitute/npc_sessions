@@ -15,7 +15,7 @@ FRAMERATE = 60
 """Visual stim f.p.s - assumed to equal running wheel sampling rate. i.e. one
 running wheel sample per camstim vsync"""
 
-RUNNING_SPEED_UNITS: Literal["cm/s", "m/s"] = "m/s"
+RUNNING_SPEED_UNITS: Literal["cm/s", "m/s"] = "cm/s"
 """How to report in NWB - NWB expects SI, SDK might have previously reported cm/s"""
 
 RUNNING_LOWPASS_FILTER_HZ = 4
