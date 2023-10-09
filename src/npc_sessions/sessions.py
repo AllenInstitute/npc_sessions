@@ -1809,8 +1809,7 @@ class DynamicRoutingSession:
             "linear forward running speed on a rotating disk, low-pass filtered "
             f"at {utils.RUNNING_LOWPASS_FILTER_HZ} Hz with a 3rd order Butterworth filter"
         )
-        unit = "m/s"
-        conversion = 100 if utils.RUNNING_SPEED_UNITS == "cm/s" else 1.0
+        unit = utils.RUNNING_SPEED_UNITS
         # comments = f'Assumes mouse runs at `radius = {utils.RUNNING_DISK_RADIUS} {utils.RUNNING_SPEED_UNITS.split("/")[0]}` on disk.'
         data, timestamps = utils.get_running_speed_from_stim_files(
             *self.stim_data.values(),
@@ -1823,7 +1822,6 @@ class DynamicRoutingSession:
             data=data,
             timestamps=timestamps,
             unit=unit,
-            conversion=conversion,
         )
 
     def get_all_spike_histogram(
