@@ -1436,9 +1436,8 @@ class DynamicRoutingSession:
     def video_info_data(self) -> utils.LazyDict[str, utils.MVRInfoData]:
         return utils.LazyDict(
             (
-                utils.extract_camera_name(path.stem),
-                (utils.get_video_info_data, path),
-                {},
+                utils.extract_camera_name(path.stem), 
+                (utils.get_video_info_data, (path,), {}),
             )
             for path in self.video_info_paths
         )
