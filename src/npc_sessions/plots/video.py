@@ -95,7 +95,8 @@ def plot_camera_frame_grabs_simple(
             v.set(cv2.CAP_PROP_POS_FRAMES, int(f))
             ret, frame = v.read()
             ax = fig.add_subplot(gs[idx, i])
-            ax.imshow(frame)
+            im = ax.imshow(frame)
+            im.set_clim([0, 255])
             # ax.axis('off')
             ax.tick_params(
                 top=False,
@@ -181,7 +182,8 @@ def plot_video_frames_with_licks(
                     yspan, xspan = frame.shape[0] // 5, frame.shape[1] // 5
                     x = slice(xmid - xspan, xmid + xspan)
                     y = slice(ymid - yspan, ymid + yspan)
-                ax.imshow(frame[y, x])
+                im = ax.imshow(frame[y, x])
+                im.set_clim([0, 255])
                 ax.axis("off")
                 if frame_index == closest_frame_index:
                     trial = (
