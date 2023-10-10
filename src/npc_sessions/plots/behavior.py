@@ -142,7 +142,7 @@ def plot_running(
                 color="k",
             )
     k = 100 if "cm" in timeseries.unit else 1
-    ymax = .8 * k
+    ymax = 0.8 * k
     plot_utils.add_epoch_color_bars(ax, epochs, rotation=90, y=ymax, va="top")
     ax.set_ylim([-0.05 * k, ymax])
     ax.hlines(
