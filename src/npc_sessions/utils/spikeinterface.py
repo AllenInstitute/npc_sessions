@@ -97,7 +97,7 @@ class SpikeInterfaceKS25Data:
         assert self.root is not None
         return self.read_json(self.format_path(self.root, filename))
 
-    def get_path(self, dirname: str, probe: str | None) -> upath.UPath:
+    def get_path(self, dirname: str, probe: str | None = None) -> upath.UPath:
         """Return a path to a single dir or file: either `self.root/dirname` or, if `probe` is specified,
         the probe-specific sub-path within `self.root/dirname`."""
         assert self.root is not None
