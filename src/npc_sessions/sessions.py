@@ -1126,6 +1126,8 @@ class DynamicRoutingSession:
         """CCF annotation data accessible"""
         if not self.is_ephys:
             return False
+        if self.info:
+            return self.info.is_annotated
         with contextlib.suppress(FileNotFoundError, ValueError):
             if npc_lims.get_tissuecyte_annotation_files_from_s3(self.id):
                 return True
