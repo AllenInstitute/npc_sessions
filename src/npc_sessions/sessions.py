@@ -357,10 +357,10 @@ class DynamicRoutingSession:
                 self.keywords.append("video")
             if self.is_ephys:
                 self.keywords.append("ephys")
-            if not self.is_sorted:
-                self.keywords.append("no units")
-            if self.is_sorted and self.is_annotated:
-                self.keywords.append("CCF")
+                if not self.is_sorted:
+                    self.keywords.append("no units")
+                elif not self.is_annotated:
+                    self.keywords.append("no CCF")
             if self.is_opto:
                 self.keywords.append("opto")
             if self.task_version and "templeton" in self.task_version:
