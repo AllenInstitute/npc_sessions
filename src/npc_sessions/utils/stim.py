@@ -1237,7 +1237,7 @@ def is_opto(
     True
     """
     with contextlib.suppress(TypeError):
-        return (
+        return bool(
             (onset := getattr(get_sam(stim_path_or_data), "trialOptoOnsetFrame", None)) is not None
             and np.any(~np.isnan(onset.squeeze()))
         )
