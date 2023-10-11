@@ -12,9 +12,10 @@ import numpy as np
 import numpy.typing as npt
 import upath
 
+import npc_sessions.utils.file_io as file_io
 
 def is_stim_file(
-    path: str | upath.UPath | pathlib.Path,
+    path: file_io.PathLike,
     subject_spec: str | int | npc_session.SubjectRecord | None = None,
     date_spec: str | npc_session.DateRecord | None = None,
     time_spec: str | npc_session.TimeRecord | None = None,
@@ -30,11 +31,13 @@ def is_stim_file(
     True
     >>> is_stim_file("366123.stim.pkl", subject_spec="366122")
     False
+    >>> is_stim_file("366122/test.stim.pkl", subject_spec="366122")
+    True
     """
-    path = pathlib.Path(path)
-    subject_from_path = npc_session.extract_subject(path.stem)
-    date_from_path = npc_session.extract_isoformat_date(path.stem)
-    time_from_path = npc_session.extract_isoformat_time(path.stem)
+    path = file_io.from_pathlike(path)
+    subject_from_path = npc_session.extract_subject(path.as_posix())
+    date_from_path = npc_session.extract_isoformat_date(path.as_posix())
+    time_from_path = npc_session.extract_isoformat_time(path.as_posix())
 
     is_stim = False
     is_stim |= path.suffix in (".pkl",) and any(
