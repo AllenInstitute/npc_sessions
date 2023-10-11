@@ -1,0 +1,2 @@
+- `.ipynb` files in this folder are for running programatically
+- files are deployed with the package, so outputs should be cleared to minimize size
