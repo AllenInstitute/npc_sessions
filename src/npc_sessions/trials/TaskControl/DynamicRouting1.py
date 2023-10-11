@@ -230,13 +230,11 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def _has_opto(self) -> bool:
-        return utils.is_opto(self._sam) or utils.is_opto(self._hdf5)
+        return utils.is_opto(self._hdf5)
 
     @utils.cached_property
     def _sam(self) -> DynRoutData:
-        obj = DynRoutData()
-        obj.loadBehavData(filePath="dummy_366122_", h5pyFile=self._hdf5)
-        return obj
+        return utils.get_sam(self._hdf5)
 
     @utils.cached_property
     def _len(self) -> int:

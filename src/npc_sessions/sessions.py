@@ -1402,13 +1402,8 @@ class DynamicRoutingSession:
 
     @property
     def sam(self) -> DynRoutData:
-        if not hasattr(self, "_sam"):
-            obj = DynRoutData()
-            obj.loadBehavData(
-                self.task_path.as_posix(),
-                self.task_data,
-            )
-            self._sam = obj
+        if getattr(self, "_sam", None) is None:
+            self._sam = utils.get_sam(self.task_data)
         return self._sam
 
     @property
