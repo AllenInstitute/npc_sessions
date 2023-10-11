@@ -230,15 +230,7 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def _has_opto(self) -> bool:
-        if (
-            (sam := getattr(self._sam, "trialOptoOnsetFrame", None)) is not None
-            and np.any(~np.isnan(sam))
-        ) or (
-            (h5 := self._hdf5.get("trialOptoOnsetFrame")) is not None
-            and np.any(~np.isnan(h5))
-        ):
-            return True
-        return False
+        return utils.is_opto(self._sam) or utils.is_opto(self._hdf5)
 
     @utils.cached_property
     def _sam(self) -> DynRoutData:

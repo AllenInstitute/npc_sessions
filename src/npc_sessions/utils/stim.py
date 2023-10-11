@@ -1217,6 +1217,15 @@ def get_stim_trigger_frames(
         for v in utils.safe_index(start_frames, np.arange(len(start_frames)))
     )
 
+def is_opto(
+    stim_path_or_data: utils.PathLike | h5py.File,
+) -> bool:
+    if (
+        (onset := getattr(get_h5_stim_data(stim_path_or_data), "trialOptoOnsetFrame", None)) is not None
+        and np.any(~np.isnan(onset))
+    ):
+        return True
+    return False
 
 if __name__ == "__main__":
     import doctest

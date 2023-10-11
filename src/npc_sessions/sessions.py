@@ -264,8 +264,8 @@ class DynamicRoutingSession:
             source_script_file_name=self.source_script_file_name,
             stimulus_notes=self.task_version,
             subject=self.subject,
-            epoch_tags=self.stim_names,
-            # keywords=self.keywords, # fetches all trials tables
+            keywords=self.keywords,
+            epoch_tags=self.epoch_tags,
         )
 
     @property
@@ -1149,9 +1149,9 @@ class DynamicRoutingSession:
         genotype: str | None = (
             self.subject.genotype
         )  # won't exist if subject.json not found
-        if self.trials is None:
+        if not self.is_task:
             return False
-        if self._trials._has_opto and (
+        if utils.is_opto(self.task_data) and (
             genotype is None or "wt/wt" not in genotype.lower()
         ):
             if genotype is None:
