@@ -1,4 +1,5 @@
 from __future__ import annotations
+import contextlib
 
 import dataclasses
 import datetime
@@ -11,6 +12,7 @@ from collections.abc import Iterable, Mapping
 from typing import Any, Callable, Literal, Protocol, Union
 
 import DynamicRoutingTask.TaskUtils
+from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 import h5py
 import npc_session
 import numba
@@ -1217,15 +1219,29 @@ def get_stim_trigger_frames(
         for v in utils.safe_index(start_frames, np.arange(len(start_frames)))
     )
 
+def get_sam(
+    stim_path_or_data: utils.PathLike | h5py.File,
+) -> DynRoutData:
+    stim_data = get_stim_data(stim_path_or_data)
+    if not isinstance(stim_data, h5py.File):
+        raise TypeError(f"Expected h5py.File, got {type(stim_data)}")
+    obj = DynRoutData()
+    obj.loadBehavData(filePath="dummy_366122_", h5pyFile=stim_data)
+    return obj
+
 def is_opto(
     stim_path_or_data: utils.PathLike | h5py.File,
 ) -> bool:
-    if (
-        (onset := getattr(get_h5_stim_data(stim_path_or_data), "trialOptoOnsetFrame", None)) is not None
-        and np.any(~np.isnan(onset))
-    ):
-        return True
-    return False
+    """
+    >>> is_opto('s3://aind-ephys-data/ecephys_670248_2023-08-01_11-27-17/behavior/DynamicRouting1_670248_20230801_120304.hdf5')
+    True
+    """
+    with contextlib.suppress(TypeError):
+        return (
+            (onset := getattr(get_sam(stim_path_or_data), "trialOptoOnsetFrame", None)) is not None
+            and np.any(~np.isnan(onset.squeeze()))
+        )
+    raise NotImplementedError
 
 if __name__ == "__main__":
     import doctest
