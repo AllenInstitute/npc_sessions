@@ -946,7 +946,7 @@ class DynamicRoutingSession:
         # remove units from probes that weren't inserted
         units = units[units["electrode_group_name"].isin(self.probes_inserted)]
         if self.is_annotated:
-            utils.add_tissuecyte_annotations(
+            units = utils.add_tissuecyte_annotations(
                 units=units,
                 session=self.id,
             )
