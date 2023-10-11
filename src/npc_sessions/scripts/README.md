@@ -1,0 +1,5 @@
+- `.py` files in this folder are added to the `[project.scripts]` section in [`pyproject.toml`](https://github.com/AllenInstitute/npc_sessions/pyproject.toml)
+- once the package is installed, they can be run as executables from the command line
+- also known as `console_scripts`: 
+  - https://peps.python.org/pep-0621/#entry-points
+  - https://packaging.python.org/en/latest/specifications/entry-points/
