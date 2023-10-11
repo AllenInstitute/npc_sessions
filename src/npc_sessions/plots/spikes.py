@@ -105,7 +105,7 @@ def plot_drift_maps(
     figs = []
     for k, v in session.analysis["drift_maps"].images.items():
         fig, ax = plt.subplots()
-        im = ax.imshow(v)
+        ax.imshow(v)
         fig.suptitle(f"{session.session_id}")
         ax.set_title(k, fontsize=8)
         ax.margins(0)
