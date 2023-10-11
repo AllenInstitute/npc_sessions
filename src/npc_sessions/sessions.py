@@ -941,7 +941,7 @@ class DynamicRoutingSession:
             raise AttributeError(f"{self.id} hasn't been spike-sorted")
         units = utils.add_global_unit_ids(
             units=utils.make_units_table_from_spike_interface_ks25(
-                self.id,  # TODO keep spikeinterface obj in self
+                self.sorted_data,  # TODO keep spikeinterface obj in self
                 self.ephys_timing_data,
                 include_waveform_arrays=False,
             ),
@@ -1272,6 +1272,13 @@ class DynamicRoutingSession:
             f"{self.id} is either an untracked ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}"
         )
 
+    @utils.cached_property
+    def sorted_data(self) -> utils.SpikeInterfaceKS25Data:
+        return utils.SpikeInterfaceKS25Data(
+            self.id,
+            self.sorted_data_paths[0].parent,
+        )
+            
     @utils.cached_property
     def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
