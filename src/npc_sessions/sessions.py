@@ -992,6 +992,12 @@ class DynamicRoutingSession:
             )
         return units
 
+    def good_units(self, units: pynwb.misc.Units | pd.DataFrame, qc_column: str='default_qc') -> pd.DataFrame:
+        if isinstance(units, pynwb.misc.Units):
+            units = units[:]
+        
+        return units[units[qc_column]]
+
     @utils.cached_property
     def _raw_lfp(self) -> pynwb.ecephys.LFP:
         lfp = pynwb.ecephys.LFP()
