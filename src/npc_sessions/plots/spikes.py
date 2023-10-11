@@ -41,8 +41,7 @@ def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSess
         fig.suptitle(f"{metric}")
         for probe in probes:
             units_probe_metric = units[units["electrode_group_name"] == probe][metric]
-            units_probe_metric_good = units_probe_metric[units_probe_metric['default_qc']]
-            ax[probe_index].hist(units_probe_metric_good, bins=20, density=True)
+            ax[probe_index].hist(units_probe_metric, bins=20)
             ax[probe_index].set_title(f"{probe}")
             ax[probe_index].set_xlabel(x_labels[metric])
             probe_index += 1
