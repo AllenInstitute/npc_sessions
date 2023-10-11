@@ -227,6 +227,7 @@ class DynamicRoutingSession:
             notes=self.notes,
             source_script=self.source_script,
             source_script_file_name=self.source_script_file_name,
+            stimulus_notes=self.task_version,
             subject=self.subject,
             keywords=self.keywords,
             epochs=self.epochs,
@@ -261,6 +262,7 @@ class DynamicRoutingSession:
             notes=self.notes,
             source_script=self.source_script,
             source_script_file_name=self.source_script_file_name,
+            stimulus_notes=self.task_version,
             subject=self.subject,
             epoch_tags=self.stim_names,
             # keywords=self.keywords, # fetches all trials tables
@@ -361,6 +363,8 @@ class DynamicRoutingSession:
                 self.keywords.append("CCF")
             if self.is_opto:
                 self.keywords.append("opto")
+            if self.task_version and "templeton" in self.task_version:
+                self.keywords.append("Templeton")
         return self._keywords
 
     @keywords.setter
