@@ -143,7 +143,6 @@ class DynamicRoutingSession:
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
     experimenter: str | None = None
-    experiment_description: str = "visual-auditory task-switching behavior experiment"
     institution: str | None = (
         "Neural Circuits & Behavior | MindScope program | Allen Institute"
     )
@@ -152,13 +151,6 @@ class DynamicRoutingSession:
     # --------------------------------------------------------------------------- #
 
     task_stim_name: str = "DynamicRouting1"
-
-    intervals_descriptions = {
-        TaskControl.VisRFMapping: "visual receptive-field mapping trials",
-        TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
-        TaskControl.DynamicRouting1: "visual-auditory task-switching behavior trials",  # must be "trials" if assigned as main trials table in nwb
-        TaskControl.OptoTagging: "opto-tagging trials",
-    }
 
     root_path: upath.UPath | None = None
     """Assigned on init if session_or_path is a pathlike object.
@@ -313,9 +305,17 @@ class DynamicRoutingSession:
         )
 
     @property
-    def _session_start_time(self) -> npc_session.DatetimeRecord:
-        return npc_session.DatetimeRecord(self.session_start_time.isoformat())
-
+    def experiment_description(self) -> str:   
+        """Also used for description of main behavior task intervals table""" 
+        if (v := getattr(self, "_experiment_description", None)) is not None:
+            desc = v
+        elif self.is_templeton:
+            desc = "sensory discrimination task experiment with task-irrelevant stimuli"
+        else:
+            desc = "visual-auditory task-switching behavior experiment"
+        assert "experiment" in desc, "experiment description should contain 'experiment', due to other function which replaces the word"
+        return desc
+    
     @property
     def source_script(self) -> str:
         """`githubTaskScript` from the task stim file, if available.
@@ -363,7 +363,7 @@ class DynamicRoutingSession:
                     self.keywords.append("no CCF")
             if self.is_opto:
                 self.keywords.append("opto")
-            if self.task_version and "templeton" in self.task_version:
+            if self.is_templeton:
                 self.keywords.append("Templeton")
         return self._keywords
 
@@ -504,7 +504,16 @@ class DynamicRoutingSession:
         return tuple(modules)
 
     # intervals ----------------------------------------------------------------- #
-
+    
+    @property
+    def intervals_descriptions(self) -> dict[type[TaskControl.TaskControl], str]:
+        return {
+            TaskControl.VisRFMapping: "visual receptive-field mapping trials",
+            TaskControl.AudRFMapping: "auditory receptive-field mapping trials",
+            TaskControl.DynamicRouting1: self.experiment_description.replace('experiment', 'trials'),  # name will be "trials" if assigned as main trials table in nwb
+            TaskControl.OptoTagging: "opto-tagging trials",
+        }
+        
     @utils.cached_property
     def invalid_times(self) -> pynwb.epoch.TimeIntervals:
         """Time intervals when recording was interrupted, stim malfunctioned or
@@ -1160,7 +1169,22 @@ class DynamicRoutingSession:
                 )
             return True
         return False
-
+    
+    @property
+    def is_templeton(self) -> bool:
+        if (v := getattr(self, "_is_templeton", None)) is not None:
+            return v
+        if self.task_version is not None:
+            return bool("templeton" in self.task_version)
+        if self.info is not None:
+            return bool(
+                "templeton" in self.info.project.lower()
+                or "templeton" in self.info.allen_path.as_posix().lower()
+                )
+        raise NotImplementedError("Not enough information to tell if this is a Templeton session")
+    
+    # helper properties -------------------------------------------------------- #
+    
     @utils.cached_property
     def _raw_upload_metadata_json_paths(self):
         return tuple(
