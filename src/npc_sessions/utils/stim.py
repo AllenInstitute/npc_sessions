@@ -1,6 +1,6 @@
 from __future__ import annotations
-import contextlib
 
+import contextlib
 import dataclasses
 import datetime
 import enum
@@ -12,12 +12,12 @@ from collections.abc import Iterable, Mapping
 from typing import Any, Callable, Literal, Protocol, Union
 
 import DynamicRoutingTask.TaskUtils
-from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 import h5py
 import npc_session
 import numba
 import numpy as np
 import numpy.typing as npt
+from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 from typing_extensions import TypeAlias
 
 import npc_sessions.utils as utils
@@ -1219,6 +1219,7 @@ def get_stim_trigger_frames(
         for v in utils.safe_index(start_frames, np.arange(len(start_frames)))
     )
 
+
 def get_sam(
     stim_path_or_data: utils.PathLike | h5py.File,
 ) -> DynRoutData:
@@ -1229,6 +1230,7 @@ def get_sam(
     obj.loadBehavData(filePath="dummy_366122_", h5pyFile=stim_data)
     return obj
 
+
 def is_opto(
     stim_path_or_data: utils.PathLike | h5py.File,
 ) -> bool:
@@ -1238,10 +1240,12 @@ def is_opto(
     """
     with contextlib.suppress(TypeError):
         return bool(
-            (onset := getattr(get_sam(stim_path_or_data), "trialOptoOnsetFrame", None)) is not None
+            (onset := getattr(get_sam(stim_path_or_data), "trialOptoOnsetFrame", None))
+            is not None
             and np.any(~np.isnan(onset.squeeze()))
         )
     raise NotImplementedError
+
 
 if __name__ == "__main__":
     import doctest

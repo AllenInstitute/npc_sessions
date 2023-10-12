@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import collections.abc
 import contextlib
-import pathlib
 from collections.abc import Iterable, Iterator
 from typing import Literal, SupportsFloat, TypeVar
 
@@ -10,9 +9,9 @@ import npc_lims
 import npc_session
 import numpy as np
 import numpy.typing as npt
-import upath
 
 import npc_sessions.utils.file_io as file_io
+
 
 def is_stim_file(
     path: file_io.PathLike,

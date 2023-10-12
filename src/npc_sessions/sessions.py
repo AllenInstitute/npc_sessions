@@ -1278,7 +1278,7 @@ class DynamicRoutingSession:
             self.id,
             self.sorted_data_paths[0].parent,
         )
-            
+
     @utils.cached_property
     def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:

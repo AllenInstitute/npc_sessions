@@ -323,11 +323,17 @@ def add_global_unit_ids(
         units.drop(columns=[unit_id_column], inplace=True)
     return units
 
-def good_units(units: pynwb.misc.Units | pd.DataFrame, qc_column: str='default_qc') -> pd.DataFrame:
+
+def good_units(
+    units: pynwb.misc.Units | pd.DataFrame, qc_column: str = "default_qc"
+) -> pd.DataFrame:
     units = units[:]
     if units[qc_column].dtype != bool:
-        raise NotImplementedError(f"currently qc_column {qc_column} must be boolean - either don't use this function or add a fix")
+        raise NotImplementedError(
+            f"currently qc_column {qc_column} must be boolean - either don't use this function or add a fix"
+        )
     return units[units[qc_column]]
+
 
 if __name__ == "__main__":
     import doctest
