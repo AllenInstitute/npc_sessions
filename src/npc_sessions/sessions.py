@@ -785,7 +785,7 @@ class DynamicRoutingSession:
             if self.is_sync and stim.stem not in self.stim_frame_times.keys():
                 continue
             records.append(self.get_epoch_record(stim).nwb)
-        
+
         for record in sorted(records, key=lambda _: str(_["start_time"]), reverse=True):
             # reverse=True puts intervals in chronological order (doesn't make
             # sense, but it's true)
@@ -1009,7 +1009,6 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def _raw_ap(self) -> pynwb.core.MultiContainerInterface:
-
         class AP(pynwb.core.MultiContainerInterface):
             """
             AP-band ephys data from one or more channels. The electrode map in each published ElectricalSeries will
@@ -1018,11 +1017,15 @@ class DynamicRoutingSession:
             """
 
             __clsconf__ = [
-                {'attr': 'electrical_series',
-                'type': pynwb.ecephys.ElectricalSeries,
-                'add': 'add_electrical_series',
-                'get': 'get_electrical_series',
-                'create': 'create_electrical_series'}]
+                {
+                    "attr": "electrical_series",
+                    "type": pynwb.ecephys.ElectricalSeries,
+                    "add": "add_electrical_series",
+                    "get": "get_electrical_series",
+                    "create": "create_electrical_series",
+                }
+            ]
+
         ap = AP()
         #! this will likely not write to disk as the class is not registered with 'CORE_NAMESPACE'
         # there's currently no appropriate ephys MultiContainerInterface
@@ -1038,7 +1041,7 @@ class DynamicRoutingSession:
             electrode_table_region = hdmf.common.DynamicTableRegion(
                 name="electrodes",  # pynwb requires this not be renamed
                 description=f"channels with AP data on {probe.name}",
-                data=tuple(range(0, 384)), # TODO get correct channel indices
+                data=tuple(range(0, 384)),  # TODO get correct channel indices
                 table=self.electrodes,
             )
 
@@ -1084,7 +1087,7 @@ class DynamicRoutingSession:
             electrode_table_region = hdmf.common.DynamicTableRegion(
                 name="electrodes",  # pynwb requires this not be renamed
                 description=f"channels with LFP data on {probe.name}",
-                data=tuple(range(0, 384)), # TODO get correct channel indices
+                data=tuple(range(0, 384)),  # TODO get correct channel indices
                 table=self.electrodes,
             )
 
