@@ -231,7 +231,7 @@ class TestPropertyDict(PropertyDict):
     def no_docstring(self):
         return True
 
-    _invisible_property = None
+    _invisible_property: Any = None
 
     def invisible_method(self):
         """Docstring not available"""
