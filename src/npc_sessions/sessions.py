@@ -1161,29 +1161,6 @@ class DynamicRoutingSession:
             return True
         return False
 
-    def get_record(self) -> npc_lims.Session:
-        return npc_lims.Session(
-            session_id=self.id,
-            subject_id=self.id.subject,
-            session_start_time=self._session_start_time,
-            stimulus_notes=self.task_version,
-            experimenter=self.experimenter,
-            experiment_description=self.experiment_description,
-            # epoch_tags=list(self.epoch_tags),
-            source_script=self.source_script,
-            identifier=self.identifier,
-            notes=self.notes,
-        )
-
-    @utils.cached_property
-    def record(self) -> npc_lims.Session:
-        return self.get_record()
-
-    def to_nwb(self, nwb: pynwb.NWBFile) -> None:
-        for attr in self.record.__dict__:
-            if attr in nwb.__dict__:
-                nwb.__setattr__(attr, self.record.__getattribute__(attr))
-
     @utils.cached_property
     def _raw_upload_metadata_json_paths(self):
         return tuple(
@@ -1317,19 +1294,6 @@ class DynamicRoutingSession:
         return npc_lims.get_session_raw_data_asset(self.id)["id"]
 
     @utils.cached_property
-    def sync_file_record(self) -> npc_lims.File:
-        path = self.sync_path
-        return npc_lims.File(
-            session_id=self.id,
-            name="sync",
-            suffix=path.suffix,
-            timestamp=npc_session.TimeRecord.parse_id(path.stem),
-            size=path.stat()["size"],
-            s3_path=path.as_posix(),
-            data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
-        )
-
-    @utils.cached_property
     def sync_data(self) -> utils.SyncDataset:
         return utils.SyncDataset(io.BytesIO(self.sync_path.read_bytes()))
 
@@ -1374,21 +1338,6 @@ class DynamicRoutingSession:
             return stim_paths
         raise FileNotFoundError(
             f"Could not find stim files for {self.id} in {self.stim_path_root}"
-        )
-
-    @utils.cached_property
-    def stim_file_records(self) -> tuple[npc_lims.File, ...]:
-        return tuple(
-            npc_lims.File(
-                session_id=self.id,
-                name=path.stem.split("_")[0],
-                suffix=path.suffix,
-                timestamp=npc_session.TimeRecord.parse_id(path.stem),
-                size=path.stat()["size"],
-                s3_path=path.as_posix(),
-                data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
-            )
-            for path in self.stim_paths
         )
 
     @utils.cached_property
@@ -1446,44 +1395,6 @@ class DynamicRoutingSession:
             (
                 utils.extract_camera_name(path.stem),
                 (utils.get_video_info_data, (path,), {}),
-            )
-            for path in self.video_info_paths
-        )
-
-    @utils.cached_property
-    def video_file_records(self) -> tuple[npc_lims.File, ...]:
-        return tuple(
-            npc_lims.File(
-                session_id=self.id,
-                name=utils.extract_camera_name(path.stem),
-                suffix=path.suffix,
-                timestamp=npc_session.TimeRecord.parse_id(
-                    str(
-                        self.video_info_data[utils.extract_camera_name(path.stem)][
-                            "TimeStart"
-                        ]
-                    )
-                ),
-                size=path.stat()["size"],
-                s3_path=path.as_posix(),
-                data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
-            )
-            for path in self.video_paths
-        )
-
-    @utils.cached_property
-    def video_info_file_records(self) -> tuple[npc_lims.File, ...]:
-        return tuple(
-            npc_lims.File(
-                session_id=self.id,
-                name=utils.extract_camera_name(path.stem),
-                suffix=path.suffix,
-                timestamp=npc_session.TimeRecord.parse_id(
-                    str(self.video_info_data[path.stem]["TimeStart"])
-                ),
-                size=path.stat()["size"],
-                s3_path=path.as_posix(),
-                data_asset_id=None if not self.is_ephys else self.raw_data_asset_id,
             )
             for path in self.video_info_paths
         )
@@ -1660,20 +1571,6 @@ class DynamicRoutingSession:
     @utils.cached_property
     def ephys_settings_xml_data(self) -> utils.SettingsXmlInfo:
         return utils.get_settings_xml_data(self.ephys_settings_xml_path)
-
-    @utils.cached_property
-    def ephys_settings_xml_file_record(self) -> npc_lims.File:
-        return npc_lims.File(
-            session_id=self.id,
-            name="openephys-settings",
-            suffix=".xml",
-            timestamp=self.ephys_settings_xml_data.start_time.isoformat(
-                timespec="seconds"
-            ),
-            size=self.ephys_settings_xml_path.stat()["size"],
-            s3_path=self.ephys_settings_xml_path.as_posix(),
-            data_asset_id=self.raw_data_asset_id,
-        )
 
     @property
     def electrode_group_description(self) -> str:
