@@ -1008,8 +1008,71 @@ class DynamicRoutingSession:
         return units
 
     @utils.cached_property
+    def _raw_ap(self) -> pynwb.core.MultiContainerInterface:
+
+        class AP(pynwb.core.MultiContainerInterface):
+            """
+            AP-band ephys data from one or more channels. The electrode map in each published ElectricalSeries will
+            identify which channels are providing AP data. Filter properties should be noted in the
+            ElectricalSeries description or comments field.
+            """
+
+            __clsconf__ = [
+                {'attr': 'electrical_series',
+                'type': pynwb.ecephys.ElectricalSeries,
+                'add': 'add_electrical_series',
+                'get': 'get_electrical_series',
+                'create': 'create_electrical_series'}]
+        ap = AP()
+        #! this will likely not write to disk as the class is not registered with 'CORE_NAMESPACE'
+        # there's currently no appropriate ephys MultiContainerInterface
+        # but `pynwb.ecephys.FilteredEphys()` would work if otherwise unused
+        band: str = "0.3-10 kHz"
+        for probe in self.electrode_groups.values():
+            timing_info = next(
+                d
+                for d in self.ephys_timing_data
+                if d.name.endswith("AP") and probe.name.lower() in d.name.lower()
+            )
+
+            electrode_table_region = hdmf.common.DynamicTableRegion(
+                name="electrodes",  # pynwb requires this not be renamed
+                description=f"channels with AP data on {probe.name}",
+                data=tuple(range(0, 384)), # TODO get correct channel indices
+                table=self.electrodes,
+            )
+
+            # as long as we don't index into the data array (ie to take a subset), it
+            # will be instantly inserted into the electrical series container for lazy access
+            if timing_info.device.compressed:
+                data = zarr.open(timing_info.device.compressed, mode="r")["traces_seg0"]
+            else:
+                data = np.memmap(
+                    timing_info.device.continuous / "continuous.dat",
+                    dtype=np.int16,
+                    mode="r",
+                ).reshape(-1, 384)
+
+            ap.create_electrical_series(
+                name=probe.name,
+                data=data,
+                electrodes=electrode_table_region,
+                starting_time=timing_info.start_time,
+                rate=timing_info.sampling_rate,
+                channel_conversion=None,
+                filtering=band,
+                conversion=0.195e-6,  # bit/microVolt from open-ephys
+                comments="",
+                resolution=0.195e-6,
+                description=f"action potential-band voltage timeseries ({band}) from electrodes on {probe.name}",
+                # units=microvolts, # doesn't work - electrical series must be in volts
+            )
+        return ap
+
+    @utils.cached_property
     def _raw_lfp(self) -> pynwb.ecephys.LFP:
         lfp = pynwb.ecephys.LFP()
+        band: str = "0.5-500 Hz"
 
         for probe in self.electrode_groups.values():
             timing_info = next(
@@ -1021,7 +1084,7 @@ class DynamicRoutingSession:
             electrode_table_region = hdmf.common.DynamicTableRegion(
                 name="electrodes",  # pynwb requires this not be renamed
                 description=f"channels with LFP data on {probe.name}",
-                data=tuple(range(0, 384)),
+                data=tuple(range(0, 384)), # TODO get correct channel indices
                 table=self.electrodes,
             )
 
@@ -1043,11 +1106,12 @@ class DynamicRoutingSession:
                 starting_time=timing_info.start_time,
                 rate=timing_info.sampling_rate,
                 channel_conversion=None,
-                filtering="none",
+                filtering=band,
                 conversion=0.195e-6,  # bit/microVolt from open-ephys
                 comments="",
                 resolution=0.195e-6,
-                description=f"local field potential voltage timeseries from electrodes on {probe.name}",
+                description=f"local field potential-band voltage timeseries ({band}) from electrodes on {probe.name}",
+                # units=microvolts, # doesn't work - electrical series must be in volts
             )
         return lfp
 
