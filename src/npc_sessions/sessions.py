@@ -785,8 +785,10 @@ class DynamicRoutingSession:
             if self.is_sync and stim.stem not in self.stim_frame_times.keys():
                 continue
             records.append(self.get_epoch_record(stim).nwb)
-
-        for record in sorted(records, key=lambda _: str(_["start_time"])):
+        
+        for record in sorted(records, key=lambda _: str(_["start_time"]), reverse=True):
+            # reverse=True puts intervals in chronological order (doesn't make
+            # sense, but it's true)
             epochs.add_interval(
                 **record,
             )
