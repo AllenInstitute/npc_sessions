@@ -731,6 +731,8 @@ def xcorr(
             + padding_samples,
             nidaq_channel,
         ]
+        if not nidaq_samples.any():
+            raise IndexError(f"requested range {onset_sample_on_nidaq} to {offset_sample_on_nidaq} is out of bounds")
 
         interp_waveform_times = np.arange(
             0,
