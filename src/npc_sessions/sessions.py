@@ -293,7 +293,7 @@ class DynamicRoutingSession:
                 else ""
             )
             description += (
-                f", {'with' if self.is_task else 'without'} behavioral task data"
+                f" {'with' if self.is_task else 'without'} behavioral task data"
             )
             description += opto
             description += video
