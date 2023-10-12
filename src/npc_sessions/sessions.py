@@ -1186,7 +1186,7 @@ class DynamicRoutingSession:
     # helper properties -------------------------------------------------------- #
     
     @utils.cached_property
-    def _raw_upload_metadata_json_paths(self):
+    def _raw_upload_metadata_json_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
             file
             for file in npc_lims.get_raw_data_root(self.id).iterdir()
