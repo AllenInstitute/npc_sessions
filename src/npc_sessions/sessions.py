@@ -1575,8 +1575,12 @@ class DynamicRoutingSession:
             notes=None if not notes else f"includes invalid times: {'; '.join(notes)}",
         )
 
-    @property
+    @utils.cached_property
     def ephys_record_node_dirs(self) -> tuple[upath.UPath, ...]:
+        if (v := getattr(self, "_ephys_record_node_dirs", None)) is not None:
+            paths = tuple(utils.from_pathlike(path) for path in v)
+            assert all("Record Node" in path.name for path in paths)
+            return paths
         return tuple(
             p for p in self.raw_data_paths if re.match(r"^Record Node [0-9]+$", p.name)
         )
