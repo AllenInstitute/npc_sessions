@@ -29,7 +29,7 @@ def write_qc_notebook(
     
     >>> output_path = write_qc_notebook("664566_20230403", is_ephys=False)
     """    
-    QC_NOTEBOOK = next(PACKAGE_ROOT.rglob("dynamic*routing*qc*.ipynb"))
+    QC_NOTEBOOK = next(MODULE_ROOT.rglob("dynamic*routing*qc*.ipynb"))
     
     # pass config to run in notebook via env vars
     env = {}
