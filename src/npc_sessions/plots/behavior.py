@@ -160,7 +160,7 @@ def plot_running(
     ax.set_xlabel(timeseries.timestamps_unit)
     title = timeseries.description
     if max(timeseries.data) > ax.get_ylim()[1]:
-        title += f"\ndata clipped: {round(max(timeseries.data)) = } {timeseries.unit} at {timeseries.timestamps[np.argmax(timeseries.data)]} {timeseries.timestamps_unit}"
+        title += f"\ndata clipped: {round(max(timeseries.data)) = } {timeseries.unit} at {timeseries.timestamps[np.argmax(timeseries.data)]:.0f} {timeseries.timestamps_unit}"
     ax.set_title(title, fontsize=8)
     fig.suptitle(session.id, fontsize=10)
     fig.set_size_inches(10, 4)
