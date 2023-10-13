@@ -61,12 +61,19 @@ def execute_and_export_notebook(
     save_path = save_path.with_suffix(".ipynb") # just in case
     
     subprocess.run(
-        f"jupyter nbconvert --to notebook --execute {notebook_path.as_posix()} --allow-errors --output {save_path.as_posix()}",
+        [
+            "jupyter",
+            "nbconvert", 
+            "--to notebook",
+            f"--execute {notebook_path.as_posix()}",
+            "--allow-errors",
+            f"--output {save_path.as_posix()}",
+        ],
         check=True,
-        shell=True,
+        # shell=True,
         capture_output=False,
         env=env,
-    )  # pragma: no cover
+    )  
     return save_path
 
 if __name__ == "__main__":
