@@ -125,6 +125,7 @@ def plot_running(
 ) -> matplotlib.figure.Figure:
     timeseries = session.processing["behavior"]["running_speed"]
     epochs: pd.DataFrame = session.epochs[:]
+    licks = session.processing["behavior"]["licks"]
     plt.style.use("seaborn-v0_8-notebook")
 
     fig, ax = plt.subplots()
@@ -138,22 +139,32 @@ def plot_running(
                 timeseries.timestamps[epoch_indices],
                 timeseries.data[epoch_indices],
                 linewidth=0.1,
-                alpha=0.8,
+                alpha=1,
                 color="k",
+                label='speed',
+                zorder=30,
             )
     k = 100 if "cm" in timeseries.unit else 1
     ymax = 0.8 * k
-    plot_utils.add_epoch_color_bars(ax, epochs, rotation=90, y=ymax, va="top")
     ax.set_ylim([-0.05 * k, ymax])
+    ax.vlines(
+        licks.timestamps,
+        *ax.get_ylim(),
+        color="lime",
+        linestyle="-",
+        linewidth=0.05,
+        zorder=10,
+    )
     ax.hlines(
-        0,
+        0,  
         0,
         max(timeseries.timestamps),
         color="k",
         linestyle="--",
         linewidth=0.5,
-        zorder=0,
+        zorder=20,
     )
+    plot_utils.add_epoch_color_bars(ax, epochs, rotation=90, y=ymax, va="top")
     ax.margins(0)
     ax.set_frame_on(False)
     ax.set_ylabel(timeseries.unit)
