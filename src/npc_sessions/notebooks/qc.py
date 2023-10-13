@@ -56,6 +56,7 @@ def execute_and_export_notebook(
     assert (notebook_path).exists()
     save_path = utils.from_pathlike(save_path)
     if save_path.is_dir():
+        save_path.mkdir(exist_ok=True, parents=True)
         save_path = save_path / notebook_path.name
     save_path = save_path.with_suffix(".ipynb") # just in case
     
@@ -64,7 +65,7 @@ def execute_and_export_notebook(
         check=True,
         capture_output=False,
         env=env,
-    )
+    )  # pragma: no cover
     return save_path
 
 if __name__ == "__main__":
