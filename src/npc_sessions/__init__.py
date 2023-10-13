@@ -3,6 +3,7 @@ import dotenv
 from npc_sessions.plots import *
 from npc_sessions.sessions import *
 from npc_sessions.trials import *
+from npc_sessions.notebooks import *
 from npc_sessions.utils import *
 from npc_sessions.widgets import PSTHWidget, session_widget
 

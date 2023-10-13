@@ -34,7 +34,7 @@ def write_qc_notebook(
         var = session.info.allen_path.as_posix()
     else:
         var = str(session.id)
-    os.environ["NPC_SESSION_ID"] = var
+    os.environ["NPC_SESSION_PATH_OR_ID"] = var
 
     new_name = session.id if not session.info else session.info.allen_path.stem
     logger.info(f"running {QC_NOTEBOOK.name} for {session.id}")
