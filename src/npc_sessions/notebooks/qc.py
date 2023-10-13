@@ -63,6 +63,7 @@ def execute_and_export_notebook(
     subprocess.run(
         f"jupyter nbconvert --to notebook --execute {notebook_path.as_posix()} --allow-errors --output {save_path.as_posix()}",
         check=True,
+        shell=True,
         capture_output=False,
         env=env,
     )  # pragma: no cover
