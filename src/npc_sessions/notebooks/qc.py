@@ -28,7 +28,6 @@ def write_qc_notebook(
     - currently assumes dynamic routing sessions
     
     >>> output_path = write_qc_notebook("664566_20230403", is_ephys=False)
-    
     """    
     QC_NOTEBOOK = next(PACKAGE_ROOT.rglob("dynamic*routing*qc*.ipynb"))
     
@@ -62,7 +61,6 @@ def execute_and_export_notebook(
     
     subprocess.run(
         f"jupyter nbconvert --to notebook --execute {notebook_path.as_posix()} --allow-errors --output {save_path.as_posix()}",
-        shell=True,
         check=True,
         capture_output=False,
         env=env,
