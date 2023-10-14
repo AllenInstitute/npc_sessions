@@ -141,7 +141,7 @@ def plot_running(
                 linewidth=0.1,
                 alpha=1,
                 color="k",
-                label='speed',
+                label="speed",
                 zorder=30,
             )
     k = 100 if "cm" in timeseries.unit else 1
@@ -156,7 +156,7 @@ def plot_running(
         zorder=10,
     )
     ax.hlines(
-        0,  
+        0,
         0,
         max(timeseries.timestamps),
         color="k",
