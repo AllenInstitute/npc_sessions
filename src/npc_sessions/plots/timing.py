@@ -188,7 +188,7 @@ def plot_lick_times_on_sync_and_script(
     )
     if not sync_time.shape or not script_time.shape:
         raise ValueError(f"{session.id} has no lick response times")
-    
+
     intervals = sync_time - script_time
     fig1, ax = plt.subplots()
     markerline, stemline, baseline = plt.stem(
