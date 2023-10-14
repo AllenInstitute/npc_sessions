@@ -186,8 +186,8 @@ def plot_lick_times_on_sync_and_script(
     script_time = utils.safe_index(
         session._trials._input_data_times, session._trials._sam.trialResponseFrame
     )
-    if not sync_time.any() or not script_time.any():
-        raise ValueError(f"{session.id} has no lick response data")
+    if not sync_time.shape or not script_time.shape:
+        raise ValueError(f"{session.id} has no lick response times")
     
     intervals = sync_time - script_time
     fig1, ax = plt.subplots()

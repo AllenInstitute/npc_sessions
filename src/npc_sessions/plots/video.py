@@ -133,6 +133,8 @@ def plot_video_frames_with_licks(
             if trial_idx is None
             else (session.trials[trial_idx].response_time.to_numpy())
         )
+        if not response_times.shape:
+            raise ValueError(f"{session.id} has no lick response times")
         lick_times = sorted(
             random.sample(tuple(response_times[~np.isnan(response_times)]), NUM_LICKS)
         )
