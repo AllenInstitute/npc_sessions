@@ -1154,7 +1154,9 @@ class DynamicRoutingSession:
     def is_task(self) -> bool:
         if (v := getattr(self, "_is_task", None)) is not None:
             return v
-        with contextlib.suppress(FileNotFoundError, ValueError, StopIteration, npc_lims.MissingCredentials):
+        with contextlib.suppress(
+            FileNotFoundError, ValueError, StopIteration, npc_lims.MissingCredentials
+        ):
             _ = self.task_data
             return True
         return False
@@ -1167,7 +1169,9 @@ class DynamicRoutingSession:
             return True
         if self.info:
             return self.info.is_sync
-        with contextlib.suppress(FileNotFoundError, ValueError, npc_lims.MissingCredentials):
+        with contextlib.suppress(
+            FileNotFoundError, ValueError, npc_lims.MissingCredentials
+        ):
             if self.get_sync_paths():
                 return True
         return False
@@ -1178,7 +1182,9 @@ class DynamicRoutingSession:
             return v
         if not self.is_sync:
             return False
-        with contextlib.suppress(FileNotFoundError, ValueError, npc_lims.MissingCredentials):
+        with contextlib.suppress(
+            FileNotFoundError, ValueError, npc_lims.MissingCredentials
+        ):
             if self.video_paths:
                 return True
         return False
@@ -1189,7 +1195,9 @@ class DynamicRoutingSession:
             return v
         if self.info:
             return self.info.is_ephys
-        with contextlib.suppress(FileNotFoundError, ValueError, npc_lims.MissingCredentials):
+        with contextlib.suppress(
+            FileNotFoundError, ValueError, npc_lims.MissingCredentials
+        ):
             if self.ephys_record_node_dirs:
                 return True
         return False
@@ -1202,7 +1210,9 @@ class DynamicRoutingSession:
             return False
         if self.info:
             return self.info.is_sorted
-        with contextlib.suppress(FileNotFoundError, ValueError, npc_lims.MissingCredentials):
+        with contextlib.suppress(
+            FileNotFoundError, ValueError, npc_lims.MissingCredentials
+        ):
             _ = npc_lims.is_sorted_data_asset(self.id)
             return True
         return False
@@ -1214,7 +1224,9 @@ class DynamicRoutingSession:
             return False
         if self.info:
             return self.info.is_annotated
-        with contextlib.suppress(FileNotFoundError, ValueError, npc_lims.MissingCredentials):
+        with contextlib.suppress(
+            FileNotFoundError, ValueError, npc_lims.MissingCredentials
+        ):
             if npc_lims.get_tissuecyte_annotation_files_from_s3(self.id):
                 return True
         return False
