@@ -191,6 +191,7 @@ addopts = [
     "--ignore-glob=*scripts*,*examples*",
     "--cov",
     "--cov-report=xml",
+    "--cov-config=pyproject.toml",
     "--doctest-glob=*README.md",
     "-x",
     "-n=auto",
