@@ -183,7 +183,7 @@ def plot_lick_times_on_sync_and_script(
     """
     sync_time = session._trials.response_time
     script_time = utils.safe_index(
-        session._trials._flip_times, session._trials._sam.trialResponseFrame
+        session._trials._input_data_times, session._trials._sam.trialResponseFrame
     )
 
     intervals = sync_time - script_time
