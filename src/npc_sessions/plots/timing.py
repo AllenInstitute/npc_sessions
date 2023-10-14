@@ -178,14 +178,17 @@ def plot_trial_lick_timing(
 def plot_lick_times_on_sync_and_script(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> tuple[plt.Figure, plt.Figure]:
-    """-stem plot of lick times on sync relative to lick times in TaskControl
+    """
+    - stem plot of lick times on sync relative to lick times in TaskControl
     - histogram showing distribution of same intervals
     """
     sync_time = session._trials.response_time
     script_time = utils.safe_index(
         session._trials._input_data_times, session._trials._sam.trialResponseFrame
     )
-
+    if not sync_time.any() or not script_time.any():
+        raise ValueError(f"{session.id} has no lick response data")
+    
     intervals = sync_time - script_time
     fig1, ax = plt.subplots()
     markerline, stemline, baseline = plt.stem(
