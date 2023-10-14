@@ -13,4 +13,3 @@ _ = dotenv.load_dotenv(
 
 Session = DynamicRoutingSession
 """Temp alias for backwards compatibility"""
-    

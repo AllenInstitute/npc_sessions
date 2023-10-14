@@ -1,7 +1,5 @@
 import IPython.display
 import ipywidgets as ipw
-import nwbwidgets.misc
-import pynwb
 
 from npc_sessions.sessions import DynamicRoutingSession, get_sessions
 
