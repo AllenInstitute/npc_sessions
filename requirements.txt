@@ -85,8 +85,8 @@ nbformat==5.9.2
 ndx-events==0.2.0
 neo==0.12.0
 nest-asyncio==1.5.8
-npc-lims==0.1.78
-npc-session==0.1.26
+npc-lims==0.1.81
+npc-session==0.1.28
 numba==0.58.0
 numcodecs==0.11.0
 numexpr==2.8.7
@@ -154,9 +154,6 @@ tomli==2.0.1
 tornado==6.3.3
 tqdm==4.66.1
 traitlets==5.10.1
-types-pyOpenSSL==23.2.0.2
-types-PyYAML==6.0.12.12
-types-redis==4.6.0.7
 typing-extensions==4.8.0
 tzdata==2023.3
 universal-pathlib==0.1.3

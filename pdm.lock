@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:d03dcaad6d3f035edf7c87a2958766e378ec183d17cdf471c93dd0fde4cfcc3f"
+content_hash = "sha256:fc166c583d755ff0549142a0fe677001f0152443c2d47d0c486791ff262a9419"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -2054,39 +2054,38 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.78"
+version = "0.1.81"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
     "aind-codeocean-api>=0.2.4",
-    "npc-session>=0.1.0",
+    "npc-session>=0.1.28",
+    "openpyxl>=3.1.2",
     "pydbhub-bjh>=0.0.8",
     "pyopenssl>=23.2.0",
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0.1",
     "redis>=4.1.4",
     "s3fs>=2023.6.0",
-    "types-PyYAML>=6.0.12.11",
-    "types-redis>=4.6.0.3",
     "typing-extensions>=4.7.1",
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.78-py3-none-any.whl", hash = "sha256:6d0820df96eaed95824813102874e082d7c44e76dc874f53d9816fb761a8e756"},
-    {file = "npc_lims-0.1.78.tar.gz", hash = "sha256:f578f58ed14b4b81014ac365eb87c33c8b630aa15200e00dbaa515c056a18cea"},
+    {file = "npc_lims-0.1.81-py3-none-any.whl", hash = "sha256:4d4a6780c9dab2d34af594e7ad77c6e55e77843a5ada8ba2b987493fb9b90fed"},
+    {file = "npc_lims-0.1.81.tar.gz", hash = "sha256:f88ab74e72c2a43934a2de7b86330c045e40d1183b26cd67e0683a6a7a29d193"},
 ]
 
 [[package]]
 name = "npc-session"
-version = "0.1.26"
+version = "0.1.28"
 requires_python = ">=3.9"
 summary = "Basic tools for parsing subject, session, date and time associated with data from the Mindscope Neuropixels team, in the cloud."
 dependencies = [
     "typing-extensions>=4.7.1",
 ]
 files = [
-    {file = "npc_session-0.1.26-py3-none-any.whl", hash = "sha256:ddc74034625c3794f045807f1d78c4556d46ebde3f1040f64216550c2cb27dcf"},
-    {file = "npc_session-0.1.26.tar.gz", hash = "sha256:8856b040ea09bfec04daae69b2d7b8389cc49de6dae50e19f02cf1d6fb1ba810"},
+    {file = "npc_session-0.1.28-py3-none-any.whl", hash = "sha256:e32e386a3a0f0b86d052e63f0c2f370a74e51c75a3cdf44cb0fe95785d9f45ad"},
+    {file = "npc_session-0.1.28.tar.gz", hash = "sha256:446581ecf4b5b227202a194f93c564302cedb77b329e06a58aae1078b21e9ff9"},
 ]
 
 [[package]]
@@ -3473,40 +3472,6 @@ summary = "Traitlets Python configuration system"
 files = [
     {file = "traitlets-5.10.1-py3-none-any.whl", hash = "sha256:07ab9c5bf8a0499fd7b088ba51be899c90ffc936ffc797d7b6907fc516bcd116"},
     {file = "traitlets-5.10.1.tar.gz", hash = "sha256:db9c4aa58139c3ba850101913915c042bdba86f7c8a0dda1c6f7f92c5da8e542"},
-]
-
-[[package]]
-name = "types-pyopenssl"
-version = "23.2.0.2"
-summary = "Typing stubs for pyOpenSSL"
-dependencies = [
-    "cryptography>=35.0.0",
-]
-files = [
-    {file = "types-pyOpenSSL-23.2.0.2.tar.gz", hash = "sha256:6a010dac9ecd42b582d7dd2cc3e9e40486b79b3b64bb2fffba1474ff96af906d"},
-    {file = "types_pyOpenSSL-23.2.0.2-py3-none-any.whl", hash = "sha256:19536aa3debfbe25a918cf0d898e9f5fbbe6f3594a429da7914bf331deb1b342"},
-]
-
-[[package]]
-name = "types-pyyaml"
-version = "6.0.12.12"
-summary = "Typing stubs for PyYAML"
-files = [
-    {file = "types-PyYAML-6.0.12.12.tar.gz", hash = "sha256:334373d392fde0fdf95af5c3f1661885fa10c52167b14593eb856289e1855062"},
-    {file = "types_PyYAML-6.0.12.12-py3-none-any.whl", hash = "sha256:c05bc6c158facb0676674b7f11fe3960db4f389718e19e62bd2b84d6205cfd24"},
-]
-
-[[package]]
-name = "types-redis"
-version = "4.6.0.7"
-summary = "Typing stubs for redis"
-dependencies = [
-    "cryptography>=35.0.0",
-    "types-pyOpenSSL",
-]
-files = [
-    {file = "types-redis-4.6.0.7.tar.gz", hash = "sha256:28c4153ddb5c9d4f10def44a2454673c361d2d5fc3cd867cf3bb1520f3f59a38"},
-    {file = "types_redis-4.6.0.7-py3-none-any.whl", hash = "sha256:05b1bf92879b25df20433fa1af07784a0d7928c616dc2ebf9087618db77ccbd0"},
 ]
 
 [[package]]
