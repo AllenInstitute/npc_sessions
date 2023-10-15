@@ -381,13 +381,11 @@ class DynamicRoutingSession:
             return self.get_subject_from_aind_metadata()
         with contextlib.suppress(KeyError):
             return self.get_subject_from_training_sheet()
-        logger.warning(
-            f"Limited Subject information is available for {self.id}"
-        )
+        logger.warning(f"Limited Subject information is available for {self.id}")
         return pynwb.file.Subject(
             subject_id=str(self.id.subject),
         )
-    
+
     @property
     def epoch_tags(self) -> list[str]:
         if getattr(self, "_epoch_tags", None) is None:
@@ -1308,8 +1306,10 @@ class DynamicRoutingSession:
             return npc_lims.get_subjects_from_training_db()[self.id.subject]
         with contextlib.suppress(KeyError):
             return npc_lims.get_subjects_from_training_db(nsb=True)[self.id.subject]
-        raise KeyError(f"Could not find {self.id.subject} in training sheets (NSB & non-NSB)")
-    
+        raise KeyError(
+            f"Could not find {self.id.subject} in training sheets (NSB & non-NSB)"
+        )
+
     def get_subject_from_training_sheet(self) -> pynwb.file.Subject:
         metadata = self._subject_training_sheet_metadata
         assert metadata["mouse_id"] == self.id.subject
@@ -1323,7 +1323,7 @@ class DynamicRoutingSession:
             description=None,
             age=f"P{(self.session_start_time - dob.dt).days}D",
         )
-        
+
     def get_subject_from_aind_metadata(self) -> pynwb.file.Subject:
         metadata = self._subject_aind_metadata
         assert metadata["subject_id"] == self.id.subject
@@ -1338,7 +1338,7 @@ class DynamicRoutingSession:
             strain=metadata["background_strain"] or metadata["breeding_group"],
             age=f"P{(self.session_start_time - dob.dt).days}D",
         )
-        
+
     @property
     def stim_names(self) -> tuple[str, ...]:
         """Currently assumes TaskControl hdf5 files"""
