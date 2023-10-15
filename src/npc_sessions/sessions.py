@@ -452,7 +452,7 @@ class DynamicRoutingSession:
         The property as it appears on an NWBFile."""
         # TODO replace with `nwb.add_processing_module`
         processing = pynwb.core.LabelledDict(label="processing", key_attr="name")
-        for module_name in ("behavior", "ecephys"):
+        for module_name in ("behavior", ) + ("ecephys",) if self.is_ephys else ():
             module = getattr(self, f"_{module_name}")
             processing[module_name] = pynwb.base.ProcessingModule(
                 name=module_name,
