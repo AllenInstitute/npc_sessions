@@ -286,9 +286,9 @@ class DynamicRoutingSession:
             return description
         else:
             description = "ecephys session"
-            description += " without sorted units" if not self.is_sorted else ""
+            description += " without sorted units," if not self.is_sorted else ""
             description += (
-                " without CCF-annotated units"
+                " without CCF-annotated units,"
                 if self.is_sorted and not self.is_annotated
                 else ""
             )
