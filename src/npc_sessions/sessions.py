@@ -248,7 +248,7 @@ class DynamicRoutingSession:
             session_description=self.session_description,
             experiment_description=self.experiment_description,
             identifier=self.identifier,
-            session_start_time=self.session_start_time.astimezone(),
+            session_start_time=self.session_start_time,
             experimenter=self.experimenter,
             lab=self.lab,
             notes=self.notes,
@@ -267,8 +267,8 @@ class DynamicRoutingSession:
     @property
     def session_start_time(self) -> datetime.datetime:
         if self.is_sync:
-            return self.sync_data.start_time
-        return utils.get_stim_start_time(self.task_data)
+            return utils.get_aware_dt(self.sync_data.start_time)
+        return utils.get_aware_dt(utils.get_stim_start_time(self.task_data))
 
     @property
     def session_description(self) -> str:
@@ -1313,30 +1313,30 @@ class DynamicRoutingSession:
     def get_subject_from_training_sheet(self) -> pynwb.file.Subject:
         metadata = self._subject_training_sheet_metadata
         assert metadata["mouse_id"] == self.id.subject
-        dob = npc_session.DatetimeRecord(metadata["birthdate"])
+        dob = utils.get_aware_dt(metadata["birthdate"])
         return pynwb.file.Subject(
             subject_id=metadata["mouse_id"],
             species="Mus musculus",
             sex=metadata["sex"][0].upper(),
-            date_of_birth=dob.dt.astimezone(),
+            date_of_birth=dob,
             genotype=metadata["genotype"],
             description=None,
-            age=f"P{(self.session_start_time - dob.dt).days}D",
+            age=f"P{(self.session_start_time - dob).days}D",
         )
-
+    
     def get_subject_from_aind_metadata(self) -> pynwb.file.Subject:
         metadata = self._subject_aind_metadata
         assert metadata["subject_id"] == self.id.subject
-        dob = npc_session.DatetimeRecord(metadata["date_of_birth"])
+        dob = utils.get_aware_dt(metadata["date_of_birth"])
         return pynwb.file.Subject(
             subject_id=metadata["subject_id"],
             species="Mus musculus",
             sex=metadata["sex"][0].upper(),
-            date_of_birth=dob.dt.astimezone(),
+            date_of_birth=dob,
             genotype=metadata["genotype"],
             description=None,
             strain=metadata["background_strain"] or metadata["breeding_group"],
-            age=f"P{(self.session_start_time - dob.dt).days}D",
+            age=f"P{(self.session_start_time - dob).days}D",
         )
 
     @property
