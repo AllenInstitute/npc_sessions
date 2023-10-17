@@ -945,7 +945,7 @@ class DynamicRoutingSession:
             units=utils.make_units_table_from_spike_interface_ks25(
                 self.sorted_data,  # TODO keep spikeinterface obj in self
                 self.ephys_timing_data,
-                include_waveform_arrays=False,
+                include_waveform_arrays=True,
             ),
             session=self.id,
         )
@@ -956,7 +956,7 @@ class DynamicRoutingSession:
                 units=units,
                 session=self.id,
             )
-        return units
+        return utils.good_units(units)
 
     @utils.cached_property
     def units(self) -> pynwb.misc.Units:
