@@ -134,7 +134,7 @@ class DynamicRoutingSession:
 
     # access nwb modules individually before compiling a whole nwb file:
     >>> s.session_start_time
-    datetime.datetime(2023, 8, 3, 12, 4, 15, 854423)
+    datetime.datetime(2023, 8, 3, 12, 4, 15, tzinfo=zoneinfo.ZoneInfo(key='America/Los_Angeles'))
     >>> s.subject.age
     'P166D'
     >>> s.subject.genotype
