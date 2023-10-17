@@ -220,7 +220,7 @@ class DynamicRoutingSession:
             session_description=self.session_description,
             experiment_description=self.experiment_description,
             identifier=self.identifier,
-            session_start_time=self.session_start_time.astimezone(),
+            session_start_time=self.session_start_time,
             experimenter=self.experimenter,
             lab=self.lab,
             notes=self.notes,
