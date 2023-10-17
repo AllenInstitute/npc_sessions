@@ -10,7 +10,7 @@ import os
 import pathlib
 import shutil
 import subprocess
-from typing import Any, Union
+from typing import Any, Literal, Union
 
 import crc32c
 import hdmf_zarr
@@ -318,12 +318,15 @@ def run_and_save_notebook(
     notebook_path: PathLike,
     save_path: PathLike,
     env: dict[str, Any] | None = None,
+    format: Literal['markdown', 'notebook', 'script', 'html', 'pdf'] = 'notebook',
 ) -> upath.UPath:
     """Use jupyter nbconvert to run a specific notebook file in a subprocess,
-    saving the .ipynb to a new file.
+    saving the output to a new file.
     
     - to pass parameters to the notebook, pass them here with the `env` dict, and load
       them from the `os.environ` dict in the notebook
+    - `format` can be specified - available options are here:
+      https://nbconvert.readthedocs.io/en/latest/usage.html#supported-output-formats
     """
     notebook_path = from_pathlike(notebook_path)
     assert (notebook_path).exists()
@@ -331,10 +334,9 @@ def run_and_save_notebook(
     if save_path.is_dir():
         save_path.mkdir(exist_ok=True, parents=True)
         save_path = save_path / notebook_path.name
-    save_path = save_path.with_suffix(".ipynb")  # just in case
 
     subprocess.run(  # pragma: no cover
-        f"jupyter nbconvert --to notebook --execute --allow-errors --output {save_path.as_posix()}  {notebook_path.as_posix()}",
+        f"jupyter nbconvert --to {format} --execute --allow-errors --output {save_path.as_posix()}  {notebook_path.as_posix()}",
         check=True,
         shell=True,
         capture_output=False,
