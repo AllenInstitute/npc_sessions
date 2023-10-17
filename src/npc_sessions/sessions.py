@@ -100,11 +100,18 @@ def get_sessions(
     for session_info in sorted(
         npc_lims.get_session_info(), key=lambda x: x.date, reverse=True
     ):
-        if session_info.is_uploaded and not session_info.issues:
-            yield DynamicRoutingSession(
-                session_info.id,
-                **all_session_kwargs,
-            )
+        if session_info.issues:
+            continue
+        if not session_info.is_uploaded:
+            root_path = session_info.cloud_path or session_info.allen_path
+        else:
+            root_path = None
+            
+        yield DynamicRoutingSession(
+            session_info.id,
+            root_path=root_path,
+            **all_session_kwargs,
+        )
 
 
 class DynamicRoutingSession:
