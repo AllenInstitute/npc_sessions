@@ -165,6 +165,8 @@ def assert_s3_write_credentials() -> None:
 
 def get_aware_dt(dt: str | datetime.datetime) -> datetime.datetime:
     """Add Seattle timezone info to a datetime string or object."""
+    if isinstance(dt, datetime.datetime):
+        dt = dt.isoformat()
     return npc_session.DatetimeRecord(dt).dt.astimezone(zoneinfo.ZoneInfo('America/Los_Angeles'))
 
 if __name__ == "__main__":
