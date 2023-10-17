@@ -50,7 +50,7 @@ def get_sessions(
     session: str | npc_session.SessionRecord | None = None,
     **all_session_kwargs,
 ):
-    """Uploaded sessions, tracked in npc_lims via `get_tracked_sessions()`, newest
+    """Uploaded sessions, tracked in npc_lims via `get_session_info()`, newest
     to oldest.
 
     - if `session` is provided, a single session object is returned
