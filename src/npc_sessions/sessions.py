@@ -1583,7 +1583,7 @@ class DynamicRoutingSession:
         h5 = self.stim_data[stim_file.stem]
         tags = []
         tags.append(stim_file.stem.split("_")[0])
-        if any(label in h5 for label in ("optoRegions", "optoParams")):
+        if utils.is_opto(h5):
             tags.append("opto")
         if any(h5["rewardFrames"][:]):
             tags.append("rewards")
