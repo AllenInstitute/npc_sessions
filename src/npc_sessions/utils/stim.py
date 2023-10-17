@@ -1231,7 +1231,10 @@ def get_sam(
     if not isinstance(stim_data, h5py.File):
         raise TypeError(f"Expected h5py.File, got {type(stim_data)}")
     obj = DynRoutData()
-    obj.loadBehavData(filePath="dummy_366122_", h5pyFile=stim_data)
+    try:
+        obj.loadBehavData(filePath="dummy_366122_", h5pyFile=stim_data)
+    except Exception as exc:
+        raise TypeError("Loading Sam's `DynRoutData` object requires data from a `DynamicRouting1` hdf5 file") from exc
     return obj
 
 
@@ -1248,7 +1251,7 @@ def is_opto(
             is not None
             and np.any(~np.isnan(onset.squeeze()))
         )
-    raise NotImplementedError
+    return False
 
 
 if __name__ == "__main__":
