@@ -1585,7 +1585,7 @@ class DynamicRoutingSession:
         tags.append(stim_file.stem.split("_")[0])
         if utils.is_opto(h5):
             tags.append("opto")
-        if any(h5["rewardFrames"][:]):
+        if (rewards := getattr(h5, "rewardFrames", None)) is not None and any(rewards[:]):
             tags.append("rewards")
 
         if sync:
