@@ -67,7 +67,7 @@ def get_sessions(
     ## getting an indexable sequence of sessions
     Just convert the output to a list or tuple, but see the note below if you intend to
     loop over this sequence to process large amounts of data:
-    >>> sessions = list(get_sessions())
+    >>> sessions = list(get_sessions())                         # doctest: +SKIP
 
     ## looping over sessions
     Data is cached in each session object after fetching from the cloud, so
@@ -82,7 +82,7 @@ def get_sessions(
 
     ### avoid this
     `sessions` will end up storing all data for all sessions in memory:
-    >>> sessions = list(get_sessions())
+    >>> sessions = list(get_sessions())                         # doctest: +SKIP
     >>> nwbs = []
     >>> for session in sessions:                                # doctest: +SKIP
     ...     nwbs.append(session.nwb)

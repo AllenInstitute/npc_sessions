@@ -25,24 +25,23 @@ pip install npc_sessions
 >>> from npc_sessions import DynamicRoutingSession, get_sessions;
 
 # each object is used to get metadata and paths for a session:         
->>> sesssion = DynamicRoutingSession('668755_2023-08-31')  
+>>> session = DynamicRoutingSession('668755_2023-08-31')  
 >>> session.is_ephys                                
 True
 >>> session.stim_paths[0].stem                      
-'DynamicRouting1_626791_20220815_112336'
-
+'DynamicRouting1_668755_20230831_131418'
 # data is processed on-demand to generate individual pynwb modules:
->>> session.subject                                 
-subject pynwb.file.Subject at 0x...
-Fields:
-  age: P145D
-  age__reference: birth
-  date_of_birth: 2022-03-22 20:22:03-07:00
-  genotype: wt/wt
-  sex: M
-  species: Mus musculus
-  strain: C57BL6J(NP)
-  subject_id: 626791
+>>> session.subject                                 # doctest: +SKIP
+  subject pynwb.file.Subject at 0x1999418231888
+  Fields:
+    age: P205D
+    age__reference: birth
+    date_of_birth: 2023-02-06 20:23:02-08:00
+    genotype: wt/wt
+    sex: M
+    species: Mus musculus
+    strain: C57BL6J(NP)
+    subject_id: 668755
 
 # a full NWBFile instance can also be generated with all currently-available data:
 >>> session.nwb                                     # doctest: +SKIP
@@ -59,9 +58,10 @@ Fields:
     19192719021 <class 'pynwb.device.Device'>,
     19192719061 <class 'pynwb.device.Device'>
   }
-   ...     
-# loop over all currently-tracked ephys sessions using the session-generator:
->>> all(s.session_start_time.year >= 2022 for s in get_sessions())
+   ...  
+
+# loop over all currently-tracked sessions using the session-generator:
+>>> all(s.session_start_time.year >= 2022 for s in get_sessions()) # doctest: +SKIP
 True
 >>> trials_dfs = {}
 >>> for session in get_sessions():                  # doctest: +SKIP
