@@ -129,6 +129,8 @@ all of the above also have a `description`, as well as other type-specific attri
 - intervals: `Mapping[str, TimeIntervals]`
   - 1x table per stim epoch with trials
   - behavior performance table (each block an interval)
+- trials: `TimeIntervals` 
+  - same as `intervals[DynamicRouting1]`
 - invalid_times: `TimeIntervals` 
 
 - **acquisition**: `Mapping[str, Any]` *raw data*
