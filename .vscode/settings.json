@@ -1,12 +1,22 @@
 {
     "workbench.colorCustomizations": {
         "commandCenter.border": "#e7e7e799",
-        "panel.border": "#bf25c4",
         "sash.hoverBorder": "#bf25c4",
         "titleBar.activeBackground": "#951d99",
         "titleBar.activeForeground": "#e7e7e7",
         "titleBar.inactiveBackground": "#951d9999",
-        "titleBar.inactiveForeground": "#e7e7e799"
+        "titleBar.inactiveForeground": "#e7e7e799",
+        "activityBar.activeBackground": "#bf25c4",
+        "activityBar.background": "#bf25c4",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#bcb723",
+        "activityBarBadge.foreground": "#15202b",
+        "statusBar.background": "#951d99",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#bf25c4",
+        "statusBarItem.remoteBackground": "#951d99",
+        "statusBarItem.remoteForeground": "#e7e7e7"
     },
     "peacock.color": "#951d99",
     "python.linting.mypyEnabled": true,
