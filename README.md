@@ -86,3 +86,83 @@ git clone git@github.com:AllenInstitute/npc_sessions.git
 cd npc_sessions
 pip install -e .
 ```
+
+# Current NWB components
+
+#### key data types
+
+- `DynamicTable`: for general tabular data. Cells can contain arrays (e.g.
+  `spike_times` in a table of units)
+  - can be accessed as a pandas dataframe
+
+- `TimeIntervals`: subclass of `DynamicTable` which always has a `start_time` and `stop_time`
+column, plus other user-defined columns
+
+- `TimeSeries`: has a vector array of `data`, a `units` string, and either:
+  - `timestamps` (same length as `data`)
+  - or `starting_time` and `rate`
+
+- `ElectricalSeries`: subclass of `TimeSeries` with units fixed as volts
+
+- `Events`: (added via an NWB extension) like `TimeSeries` with timestamps only, without values for `data` (think lick times)
+
+all of the above also have a `description`, as well as other type-specific attributes
+
+---
+- *session metadata* (multiple attributes)
+- subject (multiple attributes)
+- devices: `DynamicTable`	
+  - physical probes (model, serial number)
+  - currently only neuropixels probes
+- electrode_groups: `DynamicTable`
+  - represents the group of channels on one probe inserted in the brain
+  - has session-specific info, like position relative to other probes or stereotactic coords
+- electrodes: `DynamicTable`
+  - individual channels on a probe
+  - has CCF coords
+- units: `DynamicTable`
+  - metrics, links to `electrodes` via `peak_channel`
+
+- epochs: `TimeIntervals` 		
+  - start/stop time of each stim block
+  - has a list of tags (includes `TaskControl` subclass name)
+- intervals: `Mapping[str, TimeIntervals]`
+  - 1x table per stim epoch with trials
+  - behavior performance table (each block an interval)
+- invalid_times: `TimeIntervals` 
+
+- **acquisition**: `Mapping[str, Any]` *raw data*
+  - if is_ephys:
+    - raw AP: `Mapping[str, ElectricalSeries]`
+    - raw LFP: `Mapping[str, ElectricalSeries]`
+  - if is_sync:
+    - lick_sensor_rising_edges: `Events`    
+    - lick_sensor_falling_edges: `Events`   
+  - if is_task:
+    - rewards: `Events`
+  - if is_video:   	
+    - video frame times: 1x `Events` per camera
+	
+- **processing**: `Mapping[str, Any]` *processed/filtered data*
+  - behavior: `Mapping[str, Any]`
+      - licks: `Events`		
+        - from sync or stim file
+      - running_speed: `TimeSeries` 		
+        - from stim file, enhanced with sync info if available
+  - ecephys: `Mapping[str, Any]`
+
+- **analysis**: `Mapping[str, Any]` *derived data, results*
+  - if is_ephys:
+    - all_spike_histograms: 1x `TimeSeries` per probe
+    - drift_maps: `ImageSeries`
+  - if is_task:
+    - performance: `TimeIntervals`
+
+Todo:
+- video feature extraction: pupil size, gaze tracking
+- video processing: facemap
+- filtered LFP
+- stimulus templates (vis, aud, opto)
+- OptogeneticStimulusSite
+- analysis -> RFMaps
+- per-unit response metric for each stim modality
