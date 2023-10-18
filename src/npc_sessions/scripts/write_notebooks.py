@@ -1,20 +1,16 @@
 from __future__ import annotations
 
-import importlib.resources
 import logging
-import os
-import subprocess
 import sys
 
 import npc_lims
-import npc_session
-import upath
 
 import npc_sessions
 
 logger = logging.getLogger(__name__)
 
 QC_REPO = npc_lims.DR_DATA_REPO.parent.parent / "qc"
+
 
 def move_to_s3(file: npc_sessions.PathLike) -> None:
     """copy to s3, remove local copy"""

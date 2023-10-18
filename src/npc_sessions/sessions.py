@@ -106,7 +106,7 @@ def get_sessions(
             root_path = session_info.cloud_path or session_info.allen_path
         else:
             root_path = None
-            
+
         yield DynamicRoutingSession(
             session_info.id,
             root_path=root_path,
@@ -1330,7 +1330,7 @@ class DynamicRoutingSession:
             description=None,
             age=f"P{(self.session_start_time - dob).days}D",
         )
-    
+
     def get_subject_from_aind_metadata(self) -> pynwb.file.Subject:
         metadata = self._subject_aind_metadata
         assert metadata["subject_id"] == self.id.subject
@@ -1585,7 +1585,9 @@ class DynamicRoutingSession:
         tags.append(stim_file.stem.split("_")[0])
         if utils.is_opto(h5):
             tags.append("opto")
-        if (rewards := getattr(h5, "rewardFrames", None)) is not None and any(rewards[:]):
+        if (rewards := getattr(h5, "rewardFrames", None)) is not None and any(
+            rewards[:]
+        ):
             tags.append("rewards")
 
         if sync:

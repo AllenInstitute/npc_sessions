@@ -318,11 +318,11 @@ def run_and_save_notebook(
     notebook_path: PathLike,
     save_path: PathLike,
     env: dict[str, Any] | None = None,
-    format: Literal['markdown', 'notebook', 'script', 'html', 'pdf'] = 'notebook',
+    format: Literal["markdown", "notebook", "script", "html", "pdf"] = "notebook",
 ) -> upath.UPath:
     """Use jupyter nbconvert to run a specific notebook file in a subprocess,
     saving the output to a new file.
-    
+
     - to pass parameters to the notebook, pass them here with the `env` dict, and load
       them from the `os.environ` dict in the notebook
     - `format` can be specified - available options are here:

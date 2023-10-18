@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import collections.abc
 import contextlib
-from collections.abc import Iterable, Iterator
 import datetime
-from typing import Literal, SupportsFloat, TypeVar
 import zoneinfo
+from collections.abc import Iterable, Iterator
+from typing import Literal, SupportsFloat, TypeVar
 
 import npc_lims
 import npc_session
@@ -163,11 +163,15 @@ def assert_s3_write_credentials() -> None:
     test.touch()
     test.unlink()
 
+
 def get_aware_dt(dt: str | datetime.datetime) -> datetime.datetime:
     """Add Seattle timezone info to a datetime string or object."""
     if isinstance(dt, datetime.datetime):
         dt = dt.isoformat()
-    return npc_session.DatetimeRecord(dt).dt.replace(tzinfo=zoneinfo.ZoneInfo('America/Los_Angeles'))
+    return npc_session.DatetimeRecord(dt).dt.replace(
+        tzinfo=zoneinfo.ZoneInfo("America/Los_Angeles")
+    )
+
 
 if __name__ == "__main__":
     import doctest

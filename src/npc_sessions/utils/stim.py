@@ -1234,7 +1234,9 @@ def get_sam(
     try:
         obj.loadBehavData(filePath="dummy_366122_", h5pyFile=stim_data)
     except Exception as exc:
-        raise TypeError("Loading Sam's `DynRoutData` object requires data from a `DynamicRouting1` hdf5 file") from exc
+        raise TypeError(
+            "Loading Sam's `DynRoutData` object requires data from a `DynamicRouting1` hdf5 file"
+        ) from exc
     return obj
 
 

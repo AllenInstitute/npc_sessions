@@ -45,8 +45,8 @@ fonttools==4.42.1
 frozenlist==1.4.0
 fsspec==2023.9.2
 h5py==3.9.0
-hdmf==3.5.4
-hdmf-zarr==0.3.0
+hdmf==3.10.0
+hdmf-zarr==0.4.0
 idna==3.4
 importlib-metadata==4.13.0
 importlib-resources==6.1.0
@@ -85,12 +85,12 @@ nbformat==5.9.2
 ndx-events==0.2.0
 neo==0.12.0
 nest-asyncio==1.5.8
-npc-lims==0.1.83
+npc-lims==0.1.85
 npc-session==0.1.28
 numba==0.58.0
 numcodecs==0.11.0
 numexpr==2.8.7
-numpy==1.23.5
+numpy==1.25.2
 odfpy==1.4.1
 opencv-python-headless==4.8.1.78
 openpyxl==3.1.2
@@ -117,7 +117,7 @@ pycparser==2.21
 pydantic==1.10.13
 pydbhub-bjh==0.0.9
 pygments==2.16.1
-pynwb==2.3.3
+pynwb==2.5.0
 pyopenssl==23.2.0
 pyparsing==3.1.1
 pytest==7.4.2
