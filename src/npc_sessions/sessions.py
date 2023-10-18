@@ -102,14 +102,9 @@ def get_sessions(
     ):
         if session_info.issues:
             continue
-        if not session_info.is_uploaded:
-            root_path = session_info.cloud_path or session_info.allen_path
-        else:
-            root_path = None
 
         yield DynamicRoutingSession(
             session_info.id,
-            root_path=root_path,
             **all_session_kwargs,
         )
 
@@ -171,13 +166,11 @@ class DynamicRoutingSession:
                 char in (path := utils.from_pathlike(session_or_path)).as_posix()
                 for char in "\\/."
             )
-            and path.exists()  # probably redundant
         ):
             if path.is_dir():
                 self.root_path = path
             if path.is_file():
                 self.root_path = path.parent
-
         if self.info is not None:
             if issues := self.info.issues:
                 logger.warning(f"Session {self.id} has known issues: {issues}")
@@ -188,6 +181,8 @@ class DynamicRoutingSession:
                 setattr(self, key, value)
             except AttributeError:
                 setattr(self, f"_{key}", value)
+        if self.root_path is None and self.info is not None and not self.info.is_uploaded:
+            self.root_path = self.info.cloud_path or self.info.allen_path
         self._add_plots_as_methods()
 
     def __repr__(self) -> str:
