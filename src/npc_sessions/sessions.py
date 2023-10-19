@@ -166,7 +166,7 @@ class DynamicRoutingSession:
             self.info is not None
             and not self.info.is_uploaded
         ):
-            for path in (self.info.cloud_path, self.allen_path):
+            for path in (self.info.cloud_path, self.info.allen_path):
                 if path is not None and path.exists():
                     self._root_path = path
                     break
