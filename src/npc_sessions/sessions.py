@@ -153,24 +153,6 @@ class DynamicRoutingSession:
     # --------------------------------------------------------------------------- #
 
     task_stim_name: str = "DynamicRouting1"
-
-    @property
-    def root_path(self) -> upath.UPath | None:
-        """Assigned on init if session_or_path is a pathlike object.
-        May also be assigned later when looking for raw data if Code Ocean upload is missing.
-        """
-        if (v := getattr(self, "_root_path", None)) is not None:
-            return v
-        self._root_path = None
-        if (
-            self.info is not None
-            and not self.info.is_uploaded
-        ):
-            for path in (self.info.cloud_path, self.info.allen_path):
-                if path is not None and path.exists():
-                    self._root_path = path
-                    break
-        return self._root_path
                 
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
@@ -1362,6 +1344,24 @@ class DynamicRoutingSession:
             )
         )
 
+    @property
+    def root_path(self) -> upath.UPath | None:
+        """Assigned on init if session_or_path is a pathlike object.
+        May also be assigned later when looking for raw data if Code Ocean upload is missing.
+        """
+        if (v := getattr(self, "_root_path", None)) is not None:
+            return v
+        self._root_path = None
+        if (
+            self.info is not None
+            and not self.info.is_uploaded
+        ):
+            for path in (self.info.cloud_path, self.info.allen_path):
+                if path is not None and path.exists():
+                    self._root_path = path
+                    break
+        return self._root_path
+    
     def get_raw_data_paths_from_root(self) -> tuple[upath.UPath, ...]:
         if not self.root_path:
             raise ValueError(f"{self.id} does not have a local path assigned yet")
