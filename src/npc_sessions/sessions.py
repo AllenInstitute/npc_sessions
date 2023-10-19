@@ -145,15 +145,13 @@ class DynamicRoutingSession:
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
     experimenter: tuple[str, ...] | list[str] | None = None
-    institution: str | None = (
-        "Neural Circuits & Behavior | MindScope program | Allen Institute for Neural Dynamics"
-    )
+    institution: str | None = "Neural Circuits & Behavior | MindScope program | Allen Institute for Neural Dynamics"
     notes: str | None = None
 
     # --------------------------------------------------------------------------- #
 
     task_stim_name: str = "DynamicRouting1"
-                
+
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
         if any(
@@ -1352,16 +1350,13 @@ class DynamicRoutingSession:
         if (v := getattr(self, "_root_path", None)) is not None:
             return v
         self._root_path = None
-        if (
-            self.info is not None
-            and not self.info.is_uploaded
-        ):
+        if self.info is not None and not self.info.is_uploaded:
             for path in (self.info.cloud_path, self.info.allen_path):
                 if path is not None and path.exists():
                     self._root_path = path
                     break
         return self._root_path
-    
+
     def get_raw_data_paths_from_root(self) -> tuple[upath.UPath, ...]:
         if not self.root_path:
             raise ValueError(f"{self.id} does not have a local path assigned yet")
