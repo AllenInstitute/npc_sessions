@@ -1943,7 +1943,7 @@ class DynamicRoutingSession:
             ndx_events.Events(
                 timestamps=timestamps,
                 name=f"{nwb_names[utils.extract_camera_name(path.stem)]}_camera",
-                description=f"start of video frame exposures for {path.stem}",
+                description=f"start time of each frame exposure for {path.stem}",
             )
             for path, timestamps in path_to_timestamps.items()
         )
