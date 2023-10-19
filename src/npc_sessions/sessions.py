@@ -154,11 +154,24 @@ class DynamicRoutingSession:
 
     task_stim_name: str = "DynamicRouting1"
 
-    root_path: upath.UPath | None = None
-    """Assigned on init if session_or_path is a pathlike object.
-    May also be assigned later when looking for raw data if Code Ocean upload is missing.
-    """
-
+    @property
+    def root_path(self) -> upath.UPath | None:
+        """Assigned on init if session_or_path is a pathlike object.
+        May also be assigned later when looking for raw data if Code Ocean upload is missing.
+        """
+        if (v := getattr(self, "_root_path", None)) is not None:
+            return v
+        self._root_path = None
+        if (
+            self.info is not None
+            and not self.info.is_uploaded
+        ):
+            for path in (self.info.cloud_path, self.allen_path):
+                if path is not None and path.exists():
+                    self._root_path = path
+                    break
+        return self._root_path
+                
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
         if any(
@@ -166,9 +179,9 @@ class DynamicRoutingSession:
             for char in "\\/."
         ):
             if path.is_dir():
-                self.root_path = path
+                self._root_path = path
             if path.is_file():
-                self.root_path = path.parent
+                self._root_path = path.parent
         if self.info is not None:
             if issues := self.info.issues:
                 logger.warning(f"Session {self.id} has known issues: {issues}")
@@ -179,12 +192,6 @@ class DynamicRoutingSession:
                 setattr(self, key, value)
             except AttributeError:
                 setattr(self, f"_{key}", value)
-        if (
-            self.root_path is None
-            and self.info is not None
-            and not self.info.is_uploaded
-        ):
-            self.root_path = self.info.cloud_path or self.info.allen_path
         self._add_plots_as_methods()
 
     def __repr__(self) -> str:
