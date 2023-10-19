@@ -1,6 +1,6 @@
 [project]
 name = "npc_sessions"
-version = "0.0.108"
+version = "0.0.109"
 description = "Tools and interfaces for working with behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 authors = [
     { name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org" },
@@ -38,7 +38,7 @@ dependencies = [
     "hdmf>=3.5.4",
     "nbconvert>=7.9.2",
     "hdmf-zarr>=0.4.0",
-    "traitlets<=5.9.0", # for CodeOcean + JupyterLab 3.6.1 compatibility 
+    "traitlets<=5.9.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

@@ -161,11 +161,9 @@ class DynamicRoutingSession:
 
     def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
         self.id = npc_session.SessionRecord(str(session_or_path))
-        if (
-            any(
-                char in (path := utils.from_pathlike(session_or_path)).as_posix()
-                for char in "\\/."
-            )
+        if any(
+            char in (path := utils.from_pathlike(session_or_path)).as_posix()
+            for char in "\\/."
         ):
             if path.is_dir():
                 self.root_path = path
@@ -181,7 +179,11 @@ class DynamicRoutingSession:
                 setattr(self, key, value)
             except AttributeError:
                 setattr(self, f"_{key}", value)
-        if self.root_path is None and self.info is not None and not self.info.is_uploaded:
+        if (
+            self.root_path is None
+            and self.info is not None
+            and not self.info.is_uploaded
+        ):
             self.root_path = self.info.cloud_path or self.info.allen_path
         self._add_plots_as_methods()
 
