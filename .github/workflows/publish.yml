@@ -64,7 +64,7 @@ jobs:
       
     - name: Add requirements.txt
       run: |
-        pdm export --without-hashes -o requirements.txt
+        pdm export --without-hashes --prod -o requirements.txt
 
     - name: Commit changes
       uses: EndBug/add-and-commit@v9
