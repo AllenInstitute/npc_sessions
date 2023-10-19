@@ -1351,7 +1351,7 @@ class DynamicRoutingSession:
         """
         if (v := getattr(self, "_root_path", None)) is not None:
             return v
-        self._root_path = None
+        self._root_path: upath.UPath | None = None
         if (
             self.info is not None
             and not self.info.is_uploaded
