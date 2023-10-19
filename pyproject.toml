@@ -38,6 +38,7 @@ dependencies = [
     "hdmf>=3.5.4",
     "nbconvert>=7.9.2",
     "hdmf-zarr>=0.4.0",
+    "traitlets<=5.9.0", # for CodeOcean + JupyterLab 3.6.1 compatibility 
 ]
 requires-python = ">=3.9"
 readme = "README.md"
