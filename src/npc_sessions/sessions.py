@@ -144,9 +144,9 @@ class DynamicRoutingSession:
 
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
-    experimenter: str | None = None
+    experimenter: tuple[str, ...] | list[str] | None = None
     institution: str | None = (
-        "Neural Circuits & Behavior | MindScope program | Allen Institute"
+        "Neural Circuits & Behavior | MindScope program | Allen Institute for Neural Dynamics"
     )
     notes: str | None = None
 
@@ -1393,7 +1393,7 @@ class DynamicRoutingSession:
         with contextlib.suppress(StopIteration):
             stim = self.get_task_hdf5_from_s3_repo()
             logger.warning(f"Using {stim.name} in {npc_lims.DR_DATA_REPO}")
-            self.root_path = stim.parent
+            self._root_path = stim.parent
             return self.get_raw_data_paths_from_root()
         raise ValueError(
             f"{self.id} is either an untracked ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}"
