@@ -161,7 +161,7 @@ class DynamicRoutingSession:
             for char in "\\/."
         ):
             if path.is_dir():
-                self._root_path = path
+                self._root_path: upath.UPath | None = path
             if path.is_file():
                 self._root_path = path.parent
         if self.info is not None:
@@ -1351,7 +1351,7 @@ class DynamicRoutingSession:
         """
         if (v := getattr(self, "_root_path", None)) is not None:
             return v
-        self._root_path: upath.UPath | None = None
+        self._root_path = None
         if (
             self.info is not None
             and not self.info.is_uploaded
