@@ -22,7 +22,7 @@ def move_to_s3(file: npc_sessions.PathLike) -> None:
 
 def main() -> None:
     npc_sessions.assert_s3_write_credentials()
-    sessions = sys.argv[1:] or (s.id for s in npc_lims.get_session_info())
+    sessions = sys.argv[1:] or (s.id for s in npc_lims.get_session_info() if s.is_ephys)
     for session in sessions:
         path = npc_sessions.write_qc_notebook(session)
         move_to_s3(path)
