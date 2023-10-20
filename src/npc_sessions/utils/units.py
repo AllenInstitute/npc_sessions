@@ -298,12 +298,19 @@ def add_tissuecyte_annotations(
         logger.warning(f"{e}: returning units without locations.")
         return units
     units = units.merge(
-        electrodes,
+        electrodes[['group_name', 'channel', 'x', 'y', 'z', 'structure', 'location']],
         left_on=["electrode_group_name", "peak_channel"],
         right_on=["group_name", "channel"],
     )
     units.drop(columns=["channel"], inplace=True)
-
+    units.rename(
+        columns={
+            "x": "peak_channel_x",
+            "y": "peak_channel_y",
+            "z": "peak_channel_z",
+        },
+        inplace=True,
+    )
     return units
 
 
