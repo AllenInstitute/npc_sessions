@@ -634,7 +634,8 @@ class DynamicRoutingSession:
                 stop_time=trials[trials["block_index"] == block_index][
                     "stop_time"
                 ].max(),
-                **dict.fromkeys(column_name_to_description, np.nan) | task_performance_by_block[block_index],
+                **dict.fromkeys(column_name_to_description, np.nan)
+                | task_performance_by_block[block_index],
             )
 
         return nwb_intervals
