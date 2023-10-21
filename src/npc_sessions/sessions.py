@@ -583,14 +583,15 @@ class DynamicRoutingSession:
             block_performance: dict[str, float | str] = {}
 
             block_performance["block_index"] = block_idx
-            block_performance["context"] = rewarded_stim
+            rewarded_modality = trials[trials["block_index"] == block_idx]["context_name"].unique().item()
+            block_performance["rewarded_modality"] = rewarded_modality
             block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block_idx]
             block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
             block_performance[
                 "nonrewarded_modal_dprime"
             ] = self.sam.dprimeNonrewardedModal[block_idx]
 
-            if rewarded_stim == "vis1":
+            if rewarded_modality == "vis":
                 block_performance[
                     "signed_cross_modal_dprime"
                 ] = self.sam.dprimeOtherModalGo[block_idx]
@@ -599,7 +600,7 @@ class DynamicRoutingSession:
                     block_idx
                 ]
 
-            elif rewarded_stim == "sound1":
+            elif rewarded_modality in ("aud", "sound"):
                 block_performance[
                     "signed_cross_modal_dprime"
                 ] = -self.sam.dprimeOtherModalGo[block_idx]
@@ -616,7 +617,7 @@ class DynamicRoutingSession:
         )
         column_name_to_description = {
             "block_index": "presentation order in the task (0-indexed)",
-            "context": "context of the block (a.k.a. rewarded stimulus), either vis1 or sound1",
+            "rewarded_modality": "the modality of the target stimulus that was rewarded in each block: normally `vis` or `aud`",
             "cross_modal_dprime": "dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
             "signed_cross_modal_dprime": "same as cross_modal_dprime, but with sign flipped for auditory blocks",
             "same_modal_dprime": "dprime within rewarded modality; hits=response rate to rewarded target stimulus, false alarms=response rate to same modality non-target stimulus",
