@@ -981,7 +981,7 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def is_catch(self) -> npt.NDArray[np.bool_]:
-        """no stimuli were presented"""
+        """no stimulus was presented"""
         return np.isin(self._sam.trialStim, "catch")
 
     @utils.cached_property
