@@ -541,7 +541,13 @@ class DynamicRouting1(TaskControl):
     @utils.cached_property
     def context_name(self) -> npt.NDArray[np.str_]:
         """indicates the rewarded modality in each block"""
-        return np.array([name[:-1] for name in self._trial_rewarded_stim_name])
+        def context(stim: str) -> str:
+            if 'vis' in stim:
+                return 'vis'
+            if 'sound' in stim or 'aud' in stim:
+                return 'aud'
+            return ''.join(i for i in stim if not i.isdigit())
+        return np.array([context(name) for name in self._trial_rewarded_stim_name])
 
     @utils.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
