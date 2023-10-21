@@ -1778,6 +1778,8 @@ class DynamicRoutingSession:
                 )
         if from_annotation:
             return from_annotation
+        if from_insertion_record:
+            return from_insertion_record
         logger.warning(
             f"No probe_insertions.json or annotation info found for {self.id} - defaulting to ABCDEF"
         )
