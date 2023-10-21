@@ -1743,13 +1743,15 @@ class DynamicRoutingSession:
             return tuple(npc_session.ProbeRecord(letter) for letter in v)
         return ()
 
-    def remove_probe_letters_to_skip(self, letters: Iterable[str | npc_session.ProbeRecord]) -> tuple[npc_session.ProbeRecord, ...]:
+    def remove_probe_letters_to_skip(
+        self, letters: Iterable[str | npc_session.ProbeRecord]
+    ) -> tuple[npc_session.ProbeRecord, ...]:
         return tuple(
-            npc_session.ProbeRecord(letter) 
+            npc_session.ProbeRecord(letter)
             for letter in letters
             if npc_session.ProbeRecord(letter) not in self.probe_letters_to_skip
         )
-        
+
     @utils.cached_property
     def probe_insertions(self) -> dict[str, Any] | None:
         path = next(
@@ -1784,7 +1786,9 @@ class DynamicRoutingSession:
                 and v["hole"] is not None
                 and k not in self.probe_letters_to_skip
             )
-            if from_annotation and set(self.remove_probe_letters_to_skip(from_annotation)).symmetric_difference(
+            if from_annotation and set(
+                self.remove_probe_letters_to_skip(from_annotation)
+            ).symmetric_difference(
                 set(self.remove_probe_letters_to_skip(from_insertion_record))
             ):
                 logger.warning(
