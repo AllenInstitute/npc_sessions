@@ -419,7 +419,7 @@ class DynamicRoutingSession:
         if self.is_lfp:
             modules.append(self._raw_lfp)
         if self.is_ephys:
-            modules.extend(self._raw_ap)
+            modules.append(self._raw_ap)
         if self.is_video:
             modules.extend(self._video_frame_times)
         return tuple(modules)
