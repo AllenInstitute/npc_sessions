@@ -1737,6 +1737,19 @@ class DynamicRoutingSession:
         # TODO get correct channels range from settings xml
         return "Neuropixels 1.0 lower channels (1:384)"
 
+    @property
+    def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
+        if (v := getattr(self, "_probe_letters_to_skip", None)) is not None:
+            return tuple(npc_session.ProbeRecord(letter) for letter in v)
+        return ()
+
+    def remove_probe_letters_to_skip(self, letters: Iterable[str | npc_session.ProbeRecord]) -> tuple[npc_session.ProbeRecord, ...]:
+        return tuple(
+            npc_session.ProbeRecord(letter) 
+            for letter in letters
+            if npc_session.ProbeRecord(letter) not in self.probe_letters_to_skip
+        )
+        
     @utils.cached_property
     def probe_insertions(self) -> dict[str, Any] | None:
         path = next(
@@ -1769,17 +1782,18 @@ class DynamicRoutingSession:
                 for k, v in self.probe_insertions.items()
                 if npc_session.extract_probe_letter(k) is not None
                 and v["hole"] is not None
+                and k not in self.probe_letters_to_skip
             )
-            if from_annotation and set(from_annotation).symmetric_difference(
-                set(from_insertion_record)
+            if from_annotation and set(self.remove_probe_letters_to_skip(from_annotation)).symmetric_difference(
+                set(self.remove_probe_letters_to_skip(from_insertion_record))
             ):
                 logger.warning(
                     f"probe_insertions.json and annotation info do not match for {self.id} - using annotation info"
                 )
         if from_annotation:
-            return from_annotation
+            return self.remove_probe_letters_to_skip(from_annotation)
         if from_insertion_record:
-            return from_insertion_record
+            return self.remove_probe_letters_to_skip(from_insertion_record)
         logger.warning(
             f"No probe_insertions.json or annotation info found for {self.id} - defaulting to ABCDEF"
         )
