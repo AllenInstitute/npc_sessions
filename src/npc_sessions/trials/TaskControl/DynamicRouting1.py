@@ -989,7 +989,7 @@ class DynamicRouting1(TaskControl):
         """a stimulus was presented that the subject should respond
         to only in a specific context"""
         return np.isin(self._sam.trialStim, self._targets)
-    
+
     @utils.cached_property
     def is_aud_target(self) -> npt.NDArray[np.bool_]:
         """an auditory stimulus was presented that the subject should respond

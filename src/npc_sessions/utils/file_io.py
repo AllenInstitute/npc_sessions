@@ -10,7 +10,7 @@ import os
 import pathlib
 import shutil
 import subprocess
-from typing import Any, Literal, Union, TypeVar, Generic, Callable, overload
+from typing import Any, Callable, Generic, Literal, TypeVar, Union, overload
 
 import crc32c
 import hdmf_zarr
@@ -268,6 +268,8 @@ def write_nwb(
 
 _NOT_FOUND = object()
 _T = TypeVar("_T")
+
+
 class cached_property(functools.cached_property, Generic[_T]):
     """Copy of stlib functools.cached_property minus faulty thread lock.
 
@@ -277,17 +279,20 @@ class cached_property(functools.cached_property, Generic[_T]):
     each instance's cached properties will no longer be thread-safe - ie. don't
     dispatch the same instance to multiple threads without implementing your own lock.
     """
+
     func: Callable[[Any], _T]
 
     def __init__(self, func: Callable[[Any], _T]) -> None:
         super().__init__(func)
 
     @overload
-    def __get__(self, instance: None, owner: type[Any] | None = None) -> Self: ...
-    
+    def __get__(self, instance: None, owner: type[Any] | None = None) -> Self:
+        ...
+
     @overload
-    def __get__(self, instance: object, owner: type[Any] | None = None) -> _T: ...
-        
+    def __get__(self, instance: object, owner: type[Any] | None = None) -> _T:
+        ...
+
     def __get__(self, instance, owner=None) -> Self | _T | Any:
         if instance is None:
             return self
