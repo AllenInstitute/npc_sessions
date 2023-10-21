@@ -4,6 +4,8 @@ import logging
 import sys
 
 import npc_lims
+import npc_session
+import upath
 
 import npc_sessions
 
@@ -24,7 +26,7 @@ def main() -> None:
     npc_sessions.assert_s3_write_credentials()
     sessions = sys.argv[1:] or (s.id for s in npc_lims.get_session_info() if s.is_ephys)
     for session in sessions:
-        path = npc_sessions.write_qc_notebook(session)
+        path = npc_sessions.write_qc_notebook(session, upath.UPath.cwd() / f"{npc_session.SessionRecord(session)}_qc.ipynb")
         move_to_s3(path)
 
 
