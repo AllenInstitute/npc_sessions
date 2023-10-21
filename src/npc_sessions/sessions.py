@@ -579,36 +579,36 @@ class DynamicRoutingSession:
         trials = self.trials[:]
         task_performance_by_block = {}
 
-        for block, context in enumerate(self.sam.blockStimRewarded):
+        for block_idx, rewarded_stim in enumerate(self.sam.blockStimRewarded):
             block_performance: dict[str, float | str] = {}
 
-            block_performance["block_index"] = block
-            block_performance["context"] = context
-            block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block]
-            block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block]
+            block_performance["block_index"] = block_idx
+            block_performance["context"] = rewarded_stim
+            block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block_idx]
+            block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
             block_performance[
                 "nonrewarded_modal_dprime"
-            ] = self.sam.dprimeNonrewardedModal[block]
+            ] = self.sam.dprimeNonrewardedModal[block_idx]
 
-            if context == "vis1":
+            if rewarded_stim == "vis1":
                 block_performance[
                     "signed_cross_modal_dprime"
-                ] = self.sam.dprimeOtherModalGo[block]
-                block_performance["vis_intra_dprime"] = self.sam.dprimeSameModal[block]
+                ] = self.sam.dprimeOtherModalGo[block_idx]
+                block_performance["vis_intra_dprime"] = self.sam.dprimeSameModal[block_idx]
                 block_performance["aud_intra_dprime"] = self.sam.dprimeNonrewardedModal[
-                    block
+                    block_idx
                 ]
 
-            elif context == "sound1":
+            elif rewarded_stim == "sound1":
                 block_performance[
                     "signed_cross_modal_dprime"
-                ] = -self.sam.dprimeOtherModalGo[block]
-                block_performance["aud_intra_dprime"] = self.sam.dprimeSameModal[block]
+                ] = -self.sam.dprimeOtherModalGo[block_idx]
+                block_performance["aud_intra_dprime"] = self.sam.dprimeSameModal[block_idx]
                 block_performance["vis_intra_dprime"] = self.sam.dprimeNonrewardedModal[
-                    block
+                    block_idx
                 ]
 
-            task_performance_by_block[block] = block_performance
+            task_performance_by_block[block_idx] = block_performance
 
         nwb_intervals = pynwb.epoch.TimeIntervals(
             name="performance",
