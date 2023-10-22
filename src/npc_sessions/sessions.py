@@ -583,9 +583,15 @@ class DynamicRoutingSession:
             block_performance: dict[str, float | str] = {}
 
             block_performance["block_index"] = block_idx
-            rewarded_modality = trials[trials["block_index"] == block_idx]["context_name"].unique().item()
+            rewarded_modality = (
+                trials[trials["block_index"] == block_idx]["context_name"]
+                .unique()
+                .item()
+            )
             block_performance["rewarded_modality"] = rewarded_modality
-            block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block_idx]
+            block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[
+                block_idx
+            ]
             block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
             block_performance[
                 "nonrewarded_modal_dprime"
@@ -595,7 +601,9 @@ class DynamicRoutingSession:
                 block_performance[
                     "signed_cross_modal_dprime"
                 ] = self.sam.dprimeOtherModalGo[block_idx]
-                block_performance["vis_intra_dprime"] = self.sam.dprimeSameModal[block_idx]
+                block_performance["vis_intra_dprime"] = self.sam.dprimeSameModal[
+                    block_idx
+                ]
                 block_performance["aud_intra_dprime"] = self.sam.dprimeNonrewardedModal[
                     block_idx
                 ]
@@ -604,7 +612,9 @@ class DynamicRoutingSession:
                 block_performance[
                     "signed_cross_modal_dprime"
                 ] = -self.sam.dprimeOtherModalGo[block_idx]
-                block_performance["aud_intra_dprime"] = self.sam.dprimeSameModal[block_idx]
+                block_performance["aud_intra_dprime"] = self.sam.dprimeSameModal[
+                    block_idx
+                ]
                 block_performance["vis_intra_dprime"] = self.sam.dprimeNonrewardedModal[
                     block_idx
                 ]
