@@ -579,7 +579,7 @@ class DynamicRoutingSession:
         trials = self.trials[:]
         task_performance_by_block = {}
 
-        for block_idx, rewarded_stim in enumerate(self.sam.blockStimRewarded):
+        for block_idx in trials.block_index.unique():
             block_performance: dict[str, float | str] = {}
 
             block_performance["block_index"] = block_idx
