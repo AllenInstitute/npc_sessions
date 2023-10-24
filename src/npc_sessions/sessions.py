@@ -172,7 +172,7 @@ class DynamicRoutingSession:
                     "`is_sync` and `is_ephys` will be set to False for this session (disabling all related data)."
                 )
                 kwargs["is_sync"] = False
-                
+
         logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
         for key, value in kwargs.items():
             try:
@@ -1137,7 +1137,7 @@ class DynamicRoutingSession:
             "L": pynwb.image.GrayscaleImage,
             "RGB": pynwb.image.RGBImage,
             "RGBA": pynwb.image.RGBAImage,
-        }   
+        }
         return mode_to_nwb_cls[img.mode](
             name=path.stem,
             data=np.array(img.convert(img.mode)),

@@ -6,7 +6,7 @@ groups = ["default", "dev"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:28da08d32cacf9c1b6d74338f9118b394abed283e4f8a018aad268ebdc7ae106"
+content_hash = "sha256:d78d1c91436aa40421760e33b02d0eddf5380bbdccbedadca29cb986a9fb0f42"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -2055,12 +2055,12 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.85"
+version = "0.1.86"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
     "aind-codeocean-api>=0.2.4",
-    "npc-session>=0.1.28",
+    "npc-session>=0.1.30",
     "openpyxl>=3.1.2",
     "pydbhub-bjh>=0.0.8",
     "pyopenssl>=23.2.0",
@@ -2072,21 +2072,21 @@ dependencies = [
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.85-py3-none-any.whl", hash = "sha256:63193b4099c03e233a2f08c6d3e858072f5b84049319747f8473f16964691088"},
-    {file = "npc_lims-0.1.85.tar.gz", hash = "sha256:b5b1774349ff93d2164e41ce0a6e4e87e573ea6fca4b11e95299bf1e0ffdfdd9"},
+    {file = "npc_lims-0.1.86-py3-none-any.whl", hash = "sha256:1bc0116aa81bde1fab7deaadb169cfcc38073d7104c47ee74897f87f35674464"},
+    {file = "npc_lims-0.1.86.tar.gz", hash = "sha256:8c9d60a9572d47015d78b609d56ac70ec7e66c9ad91c4dbefb2ac25aa05c8d86"},
 ]
 
 [[package]]
 name = "npc-session"
-version = "0.1.28"
+version = "0.1.30"
 requires_python = ">=3.9"
 summary = "Basic tools for parsing subject, session, date and time associated with data from the Mindscope Neuropixels team, in the cloud."
 dependencies = [
     "typing-extensions>=4.7.1",
 ]
 files = [
-    {file = "npc_session-0.1.28-py3-none-any.whl", hash = "sha256:e32e386a3a0f0b86d052e63f0c2f370a74e51c75a3cdf44cb0fe95785d9f45ad"},
-    {file = "npc_session-0.1.28.tar.gz", hash = "sha256:446581ecf4b5b227202a194f93c564302cedb77b329e06a58aae1078b21e9ff9"},
+    {file = "npc_session-0.1.30-py3-none-any.whl", hash = "sha256:922dc69683e84b7c96bc378d675c1422bf7b2f01494925fe3333ff889ae21654"},
+    {file = "npc_session-0.1.30.tar.gz", hash = "sha256:64f8f9993138a338f7d0485b5a24fd0f96d240287e94f5c0fe411b822150df98"},
 ]
 
 [[package]]
