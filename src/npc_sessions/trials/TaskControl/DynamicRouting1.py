@@ -433,6 +433,7 @@ class DynamicRouting1(TaskControl):
     def reward_time(self) -> npt.NDArray[np.floating]:
         """delivery time of water reward, for contingent and non-contingent rewards"""
         all_reward_times = utils.safe_index(self._flip_times, self._sam.rewardFrames)
+        all_reward_times = all_reward_times[all_reward_times<=self.stop_time[-1]]
         all_reward_trials = (
             np.searchsorted(
                 self.start_time,
