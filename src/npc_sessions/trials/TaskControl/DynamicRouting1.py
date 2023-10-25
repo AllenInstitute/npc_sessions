@@ -380,54 +380,49 @@ class DynamicRouting1(TaskControl):
         return utils.safe_index(self._flip_times, self._response_window_stop_frame)
 
     @utils.cached_property
-    def response_time(self) -> npt.NDArray[np.float64]:
-        """time of first lick within the response window
-
-        - nan if no lick occurred"""
+    def task_control_response_time(self) -> npt.NDArray[np.float64]:
+        """time of first lick in trial, according to the task control script.
+        
+        - a bug present until 2023-10-16 allowed a lick ocurring before
+          `response_window_start_time` to be registered as a response, which
+          then affected trial outcome
+        - values in this column represent the time that the task control script
+          registered as a response (regardless of whether the bug was present or not)
+        - nan if the task control script did not register a response
+        """
         if not self._sync:
             return utils.safe_index(
                 self._input_data_times, self._sam.trialResponseFrame
             )
-        response_frame_flip = utils.safe_index(
-            self._flip_times, self._sam.trialResponseFrame
+        return utils.safe_index(
+            self._input_data_times, self._sam.trialResponseFrame
         )
-        sync_times = self._sync.get_rising_edges("lick_sensor", units="seconds")
-        preceding_lick_sync_time_idx = (
-            np.searchsorted(
-                sync_times,
-                response_frame_flip,
-                side="right",
-            )
-            - 1
-        )
-        times = np.full(self._len, np.nan)
+        
+    @utils.cached_property
+    def response_time(self) -> npt.NDArray[np.float64]:
+        """time of first lick within the response window
+
+        - nan if no lick occurred
+        - may be nan even if `is_response` is True, for sessions prior to
+          2023-10-20 (see `task_control_response_time.description`)
+        """
+        if not self._sync:
+            return self.task_control_response_time
+
+        lick_times = self._sync.get_rising_edges("lick_sensor", units="seconds")
+        all_response_times = np.full(self._len, np.nan)
         for idx in self.trial_index:
-            if not self.is_response[idx]:
+            trial_response_times = lick_times[
+                (lick_times > self.response_window_start_time[idx]) & (lick_times < self.response_window_stop_time[idx])
+                ] 
+            if not trial_response_times.any():
+                if self.is_response[idx]:
+                    logger.warning(
+                        f"No lick time found within response window on sync for trial {idx}, despite being marked as a response trial."
+                    )
                 continue
-            start = self.response_window_start_time[idx]
-            stop = self.response_window_stop_time[idx]
-            lick = sync_times[preceding_lick_sync_time_idx[idx]]
-            if (lick_time := lick - self.stim_start_time[idx]) < (
-                min_resp_time := self._hdf5["responseWindow"][()][0]
-                / self._sam.frameRate
-            ):
-                logger.error(
-                    f"Lick time found for trial {idx} violates minimum response time: {lick_time=}s, {min_resp_time=}s. "
-                )
-            elif lick_time > (
-                max_resp_time := self._hdf5["responseWindow"][()][1]
-                / self._sam.frameRate
-            ):
-                logger.error(
-                    f"Lick time found for trial {idx} violates maximum response time: {lick_time=}s, {max_resp_time=}s. "
-                )
-            elif not (start <= lick <= stop):
-                logger.warning(
-                    f"Lick time found for trial {idx} is outside of response window: [{start=}s : {stop=}s], lick on sync={lick=}s. "
-                    f"Response frame reported from Sam's object corresponds to: {response_frame_flip[idx - 1]}s."
-                )
-            times[idx] = lick
-        return times
+            all_response_times[idx] = trial_response_times[0]
+        return all_response_times
 
     @utils.cached_property
     def reward_time(self) -> npt.NDArray[np.floating]:
