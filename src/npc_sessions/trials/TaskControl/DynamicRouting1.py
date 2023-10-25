@@ -382,7 +382,7 @@ class DynamicRouting1(TaskControl):
     @utils.cached_property
     def task_control_response_time(self) -> npt.NDArray[np.float64]:
         """time of first lick in trial, according to the task control script.
-        
+
         - a bug present until 2023-10-16 allowed a lick ocurring before
           `response_window_start_time` to be registered as a response, which
           then affected trial outcome
@@ -394,10 +394,8 @@ class DynamicRouting1(TaskControl):
             return utils.safe_index(
                 self._input_data_times, self._sam.trialResponseFrame
             )
-        return utils.safe_index(
-            self._input_data_times, self._sam.trialResponseFrame
-        )
-        
+        return utils.safe_index(self._input_data_times, self._sam.trialResponseFrame)
+
     @utils.cached_property
     def response_time(self) -> npt.NDArray[np.float64]:
         """time of first lick within the response window
@@ -413,8 +411,9 @@ class DynamicRouting1(TaskControl):
         all_response_times = np.full(self._len, np.nan)
         for idx in self.trial_index:
             trial_response_times = lick_times[
-                (lick_times > self.response_window_start_time[idx]) & (lick_times < self.response_window_stop_time[idx])
-                ] 
+                (lick_times > self.response_window_start_time[idx])
+                & (lick_times < self.response_window_stop_time[idx])
+            ]
             if not trial_response_times.any():
                 if self.is_response[idx]:
                     logger.warning(
@@ -428,7 +427,7 @@ class DynamicRouting1(TaskControl):
     def reward_time(self) -> npt.NDArray[np.floating]:
         """delivery time of water reward, for contingent and non-contingent rewards"""
         all_reward_times = utils.safe_index(self._flip_times, self._sam.rewardFrames)
-        all_reward_times = all_reward_times[all_reward_times<=self.stop_time[-1]]
+        all_reward_times = all_reward_times[all_reward_times <= self.stop_time[-1]]
         all_reward_trials = (
             np.searchsorted(
                 self.start_time,
