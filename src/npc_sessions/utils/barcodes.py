@@ -167,7 +167,7 @@ def find_matching_index(
                 f"Multiple barcode matches found: {master_barcode_index=}. "
                 "Using first match, but if this happens frequently there's probably a bug."
                 )
-            master_barcode_index = master_barcode_index[probe_barcode_index] # take first or last
+            master_barcode_index = np.array([master_barcode_index[probe_barcode_index]]) # take first or last
             
         if len(master_barcode_index) == 1:
             foundMatch = True
