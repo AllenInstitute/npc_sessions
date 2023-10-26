@@ -152,7 +152,7 @@ def find_matching_index(
             master_barcodes == probe_barcodes[probe_barcode_index]
         )[0]
 
-        assert len(master_barcode_index) < 2
+        assert len(master_barcode_index) <= 1, f"Multiple barcode matches found: {master_barcode_index=}"
 
         if len(master_barcode_index) == 1:
             foundMatch = True
