@@ -8,11 +8,13 @@ from the ecephys repo (https://github.com/AllenInstitute/ecephys_pipeline)
 from __future__ import annotations
 
 from collections.abc import Sequence
+import logging
 from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
 
+logger = logging.getLogger(__name__)
 
 def extract_barcodes_from_times(
     on_times: np.ndarray,
@@ -160,8 +162,13 @@ def find_matching_index(
             master_barcodes == probe_barcodes[probe_barcode_index]
         )[0]
 
-        assert len(master_barcode_index) <= 1, f"Multiple barcode matches found: {master_barcode_index=}"
-
+        if len(master_barcode_index) > 1:
+            logger.warning(
+                f"Multiple barcode matches found: {master_barcode_index=}. "
+                "Using first match, but if this happens frequently there's probably a bug."
+                )
+            master_barcode_index = master_barcode_index[probe_barcode_index] # take first or last
+            
         if len(master_barcode_index) == 1:
             foundMatch = True
         else:
