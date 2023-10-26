@@ -22,6 +22,7 @@ def plot_barcode_times(session: "npc_sessions.DynamicRoutingSession"):
             / device.sampling_rate,
             off_times=device.ttl_sample_numbers[device.ttl_states < 0]
             / device.sampling_rate,
+            total_time_on_line=device.ttl_sample_numbers[-1] / device.sampling_rate,
         )
         plt.plot(np.diff(ephys_barcode_times))
 
@@ -39,7 +40,7 @@ def plot_barcode_intervals(session: "npc_sessions.DynamicRoutingSession"):
     barcode_rising = session.sync_data.get_rising_edges(0, "seconds")
     barcode_falling = session.sync_data.get_falling_edges(0, "seconds")
     barcode_times, barcodes = utils.extract_barcodes_from_times(
-        barcode_rising, barcode_falling
+        barcode_rising, barcode_falling, total_time_on_line=session.sync_data.total_seconds,
     )
 
     devices_pxi = utils.get_ephys_timing_on_pxi(full_exp_recording_dirs)
@@ -61,6 +62,7 @@ def plot_barcode_intervals(session: "npc_sessions.DynamicRoutingSession"):
             / device.sampling_rate,
             off_times=device.ttl_sample_numbers[device.ttl_states < 0]
             / device.sampling_rate,
+            total_time_on_line=device.ttl_sample_numbers[-1] / device.sampling_rate,
         )
         raw = ephys_barcode_times
         corrected = ephys_barcode_times * (30000 / device_sync.sampling_rate)

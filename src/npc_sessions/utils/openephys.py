@@ -319,6 +319,7 @@ def get_ephys_timing_on_sync(
     sync_barcode_times, sync_barcode_ids = utils.extract_barcodes_from_times(
         on_times=sync.get_rising_edges("barcode_ephys", units="seconds"),
         off_times=sync.get_falling_edges("barcode_ephys", units="seconds"),
+        total_time_on_line=sync.total_seconds,
     )
     if devices and not isinstance(devices, Iterable):
         devices = (devices,)
@@ -339,6 +340,7 @@ def get_ephys_timing_on_sync(
             / device.sampling_rate,
             off_times=device.ttl_sample_numbers[device.ttl_states < 0]
             / device.sampling_rate,
+            total_time_on_line=device.ttl_sample_numbers[-1] / device.sampling_rate,
         )
 
         timeshift, sampling_rate, _ = utils.get_probe_time_offset(

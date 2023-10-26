@@ -21,6 +21,7 @@ def extract_barcodes_from_times(
     bar_duration: float = 0.015,
     barcode_duration_ceiling: float = 2,
     nbits: int = 32,
+    total_time_on_line: float | None = None,
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.int64]]:
     # from ecephys repo
     """Read barcodes from timestamped rising and falling edges.
@@ -38,6 +39,9 @@ def extract_barcodes_from_times(
         The maximum duration of a single barcode
     nbits : int, optional
         The bit-depth of each barcode
+    total_time_on_line: float, optional
+        Timestamp of the last sample on the line (not the last falling edge) used
+        to disgard barcodes that are truncated by the end of the recording
     Returns
     -------
     barcode_start_times : list of numeric
@@ -56,7 +60,11 @@ def extract_barcodes_from_times(
     if on_times[0] > barcode_duration_ceiling:
         a = np.insert(a, 0, -1)  # to add back first barcode
     barcode_start_times = on_times[a + 1]
-
+    
+    # remove last barcode if it's possible it was truncated
+    if total_time_on_line is not None and total_time_on_line - off_times[-1] < barcode_duration_ceiling:
+        off_times = off_times[:-1]
+        
     barcodes = []
 
     for _i, t in enumerate(barcode_start_times):
