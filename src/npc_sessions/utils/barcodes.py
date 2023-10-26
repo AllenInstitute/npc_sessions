@@ -7,14 +7,15 @@ from the ecephys repo (https://github.com/AllenInstitute/ecephys_pipeline)
 """
 from __future__ import annotations
 
-from collections.abc import Sequence
 import logging
+from collections.abc import Sequence
 from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
 
 logger = logging.getLogger(__name__)
+
 
 def extract_barcodes_from_times(
     on_times: np.ndarray,
@@ -62,11 +63,14 @@ def extract_barcodes_from_times(
     if on_times[0] > barcode_duration_ceiling:
         a = np.insert(a, 0, -1)  # to add back first barcode
     barcode_start_times = on_times[a + 1]
-    
+
     # remove last barcode if it's possible it was truncated
-    if total_time_on_line is not None and total_time_on_line - off_times[-1] < barcode_duration_ceiling:
+    if (
+        total_time_on_line is not None
+        and total_time_on_line - off_times[-1] < barcode_duration_ceiling
+    ):
         off_times = off_times[:-1]
-        
+
     barcodes = []
 
     for _i, t in enumerate(barcode_start_times):
@@ -166,9 +170,11 @@ def find_matching_index(
             logger.warning(
                 f"Multiple barcode matches found: {master_barcode_index=}. "
                 "Using first match, but if this happens frequently there's probably a bug."
-                )
-            master_barcode_index = np.array([master_barcode_index[probe_barcode_index]]) # take first or last
-            
+            )
+            master_barcode_index = np.array(
+                [master_barcode_index[probe_barcode_index]]
+            )  # take first or last
+
         if len(master_barcode_index) == 1:
             foundMatch = True
         else:

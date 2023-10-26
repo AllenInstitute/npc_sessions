@@ -40,7 +40,9 @@ def plot_barcode_intervals(session: "npc_sessions.DynamicRoutingSession"):
     barcode_rising = session.sync_data.get_rising_edges(0, "seconds")
     barcode_falling = session.sync_data.get_falling_edges(0, "seconds")
     barcode_times, barcodes = utils.extract_barcodes_from_times(
-        barcode_rising, barcode_falling, total_time_on_line=session.sync_data.total_seconds,
+        barcode_rising,
+        barcode_falling,
+        total_time_on_line=session.sync_data.total_seconds,
     )
 
     devices_pxi = utils.get_ephys_timing_on_pxi(full_exp_recording_dirs)
