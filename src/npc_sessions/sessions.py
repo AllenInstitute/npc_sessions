@@ -1788,7 +1788,7 @@ class DynamicRoutingSession:
     @utils.cached_property
     def probe_letters_inserted(self) -> tuple[npc_session.ProbeRecord, ...]:
         """('A', 'B', ...)"""
-        from_annotation = None
+        from_annotation = from_insertion_record = None
         if self.is_annotated:
             from_annotation = tuple(
                 npc_session.ProbeRecord(probe)
