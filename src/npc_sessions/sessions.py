@@ -1406,13 +1406,14 @@ class DynamicRoutingSession:
             return self.get_raw_data_paths_from_root()
         with contextlib.suppress(FileNotFoundError, ValueError):
             return npc_lims.get_raw_data_paths_from_s3(self.id)
-        with contextlib.suppress(StopIteration):
-            stim = self.get_task_hdf5_from_s3_repo()
-            logger.warning(f"Using {stim.name} in {npc_lims.DR_DATA_REPO}")
-            self._root_path = stim.parent
-            return self.get_raw_data_paths_from_root()
+        if getattr(self, '_is_task', None) is not False: # using regular version will cause infinite recursion
+            with contextlib.suppress(StopIteration):
+                if (stims := npc_lims.get_hdf5_stim_files_from_s3(self.id)):
+                    self._root_path = stims[0].parent
+                    logger.warning(f"Using {self._root_path} as root path for {self.id}")
+                    return self.get_raw_data_paths_from_root()
         raise ValueError(
-            f"{self.id} is either an untracked ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}"
+            f"{self.id} is either an ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}"
         )
 
     @utils.cached_property
