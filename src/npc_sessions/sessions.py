@@ -1408,8 +1408,8 @@ class DynamicRoutingSession:
             return npc_lims.get_raw_data_paths_from_s3(self.id)
         if getattr(self, '_is_task', None) is not False: # using regular version will cause infinite recursion
             with contextlib.suppress(StopIteration):
-                if (stims := npc_lims.get_hdf5_stim_files_from_s3(self.id)):
-                    self._root_path = stims[0].parent
+                if (stim_files := npc_lims.get_hdf5_stim_files_from_s3(self.id)):
+                    self._root_path = stim_files[0].path.parent
                     logger.warning(f"Using {self._root_path} as root path for {self.id}")
                     return self.get_raw_data_paths_from_root()
         raise ValueError(
