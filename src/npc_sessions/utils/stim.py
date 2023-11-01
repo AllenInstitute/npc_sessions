@@ -477,8 +477,13 @@ def get_audio_waveforms_from_stim_file(
                 name = sound_type[idx].decode()
             elif (noise := stim_data.get("trialAMNoiseFreq")) and ~np.isnan(noise[idx]):
                 name = "AM_noise"
-            elif (tone := stim_data.get("trialToneFreq")) and ~np.isnan(tone[idx]):
+            elif (noise := stim_data.get("trialNoiseFreq")) and ~np.isnan(noise[idx]).any():
+                # older sessions use `trialNoiseFreq`, which contains two values
+                name = "bandpass_filtered_noise"
+            elif (tone := stim_data.get("trialToneFreq") or stim_data.get("trialSoundFreq")) and ~np.isnan(tone[idx]):
                 name = "tone"
+            elif (sound_type := stim_data.get('soundType')) is not None:
+                name = sound_type[()].decode()
             else:
                 raise ValueError(
                     f"Could not determine sound type for trial {idx} in {stim_file_or_dataset}"
