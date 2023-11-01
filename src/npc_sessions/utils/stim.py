@@ -367,9 +367,9 @@ class FlexStimRecording(StimRecording):
             return self._onset_time_on_sync
         assert self.latency is not None
         if self.presentation is not None:
-            return self.presentation.trigger_time_on_sync + self.latency
+            return np.nansum([self.presentation.trigger_time_on_sync, self.latency])
         assert self.trigger_time_on_sync is not None
-        return self.trigger_time_on_sync + self.latency
+        return np.nansum([self.trigger_time_on_sync, self.latency])
 
     @property
     def offset_time_on_sync(self) -> float:
@@ -386,6 +386,9 @@ class FlexStimRecording(StimRecording):
             return self.waveform.duration
         return self.offset_time_on_sync - self.onset_time_on_sync
 
+class NullRecording(FlexStimRecording):
+    """A recording which didn't yield any useful information"""
+    pass
 
 def get_input_data_times(
     stim: utils.StimPathOrDataset,
@@ -712,7 +715,7 @@ def xcorr(
     num_presentations = len(tuple(presentations))
     recordings: list[StimRecording | None] = [None] * num_presentations
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
-    xcorr_values = []
+    xcorr_values: list[float] = []
     for idx, presentation in enumerate(presentations):
         # print(f"{idx+1}/{num_presentations}\r", end=' ', flush=True)
         if presentation is None:
@@ -742,10 +745,18 @@ def xcorr(
             nidaq_channel,
         ]
         if not nidaq_samples.any():
-            raise IndexError(
-                f"requested range {onset_sample_on_nidaq} to {offset_sample_on_nidaq} is out of bounds"
+            if ~np.isnan(xcorr_values).any():
+                logger.warning(
+                    f"Requested range {onset_sample_on_nidaq} to {offset_sample_on_nidaq} on {nidaq_channel=} is out of bounds: {nidaq_data.shape=}"
+                )
+            logger.warning(f"No sound recording for trial {idx} aud stim ({presentation.trigger_time_on_sync=} s) - setting latency=np.nan")
+            xcorr_values.append(np.nan)
+            recordings[idx] = NullRecording(
+                presentation=presentation,
+                latency=np.nan,
             )
-
+            continue
+            
         interp_waveform_times = np.arange(
             0,
             presentation.duration,
@@ -803,7 +814,7 @@ def xcorr(
         plt.title(f"{recordings[-1].latency = }")
         """
     logger.info(
-        f"Cross-correlation values: {max(xcorr_values)=}, {min(xcorr_values)=}, {np.mean(xcorr_values)=}"
+        f"Cross-correlation values: {np.nanmax(xcorr_values)=}, {np.nanmin(xcorr_values)=}, {np.nanmean(xcorr_values)=}"
     )
     return tuple(recordings)
 
