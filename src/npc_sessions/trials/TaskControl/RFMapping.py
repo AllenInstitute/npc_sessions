@@ -131,12 +131,19 @@ class RFMapping(TaskControl):
     def _all_aud_freq(self) -> npt.NDArray[np.float64]:
         # don't use self._idx here
         freq = np.full(self._len_all_trials, np.nan)
-        for key in ("trialToneFreq", "trialSoundFreq", "trialAMNoiseFreq", "trialNoiseFreq"):
+        for key in (
+            "trialToneFreq",
+            "trialSoundFreq",
+            "trialAMNoiseFreq",
+            "trialNoiseFreq",
+        ):
             if key in self._hdf5:
                 array = self._hdf5[key][()]
                 if key == "trialNoiseFreq":
                     idx = ~np.isnan(array).all(axis=1)
-                    freq[idx] = np.nanmean(array[idx], axis=1) #! used to determine if trial is sound, not as a meaningful parameter
+                    freq[idx] = np.nanmean(
+                        array[idx], axis=1
+                    )  #! used to determine if trial is sound, not as a meaningful parameter
                 else:
                     freq[~np.isnan(array)] = array[~np.isnan(array)]
         return freq
@@ -228,6 +235,7 @@ class RFMapping(TaskControl):
             if "trialAMNoiseFreq" in self._hdf5
             else np.full(self._len, np.nan)
         )
+
     @utils.cached_property
     def _white_noise_bandpass_freq(self) -> npt.NDArray[np.float64]:
         """2x trials array of low/high freq for bandpass filter"""
@@ -302,10 +310,9 @@ class AudRFMapping(RFMapping):
 
     @utils.cached_property
     def is_white_noise(self) -> npt.NDArray[np.bool_]:
-        return np.array([
-            ~np.isnan(freqs).any() 
-            for freqs in self._white_noise_bandpass_freq
-        ])
+        return np.array(
+            [~np.isnan(freqs).any() for freqs in self._white_noise_bandpass_freq]
+        )
 
     @utils.cached_property
     def is_pure_tone(self) -> npt.NDArray[np.bool_]:
