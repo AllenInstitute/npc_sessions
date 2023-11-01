@@ -386,9 +386,12 @@ class FlexStimRecording(StimRecording):
             return self.waveform.duration
         return self.offset_time_on_sync - self.onset_time_on_sync
 
+
 class NullRecording(FlexStimRecording):
     """A recording which didn't yield any useful information"""
+
     pass
+
 
 def get_input_data_times(
     stim: utils.StimPathOrDataset,
@@ -749,14 +752,16 @@ def xcorr(
                 logger.warning(
                     f"Requested range {onset_sample_on_nidaq} to {offset_sample_on_nidaq} on {nidaq_channel=} is out of bounds: {nidaq_data.shape=}"
                 )
-            logger.warning(f"No sound recording for trial {idx} aud stim ({presentation.trigger_time_on_sync=} s) - setting latency=np.nan")
+            logger.warning(
+                f"No sound recording for trial {idx} aud stim ({presentation.trigger_time_on_sync=} s) - setting latency=np.nan"
+            )
             xcorr_values.append(np.nan)
             recordings[idx] = NullRecording(
                 presentation=presentation,
                 latency=np.nan,
             )
             continue
-            
+
         interp_waveform_times = np.arange(
             0,
             presentation.duration,
