@@ -794,7 +794,7 @@ class DynamicRoutingSession:
         for stim in self.stim_paths:
             if self.is_sync and stim.stem not in self.stim_frame_times.keys():
                 continue
-            records.append(self.get_epoch_record(stim).nwb)
+            records.append(self.get_epoch_record(stim))
 
         for record in sorted(records, key=lambda _: str(_["start_time"]), reverse=True):
             # reverse=True puts intervals in chronological order (doesn't make
@@ -1618,7 +1618,7 @@ class DynamicRoutingSession:
 
     def get_epoch_record(
         self, stim_file: utils.PathLike, sync: utils.SyncPathOrDataset | None = None
-    ) -> npc_lims.Epoch:
+    ) -> dict[str, Any]:
         stim_file = utils.from_pathlike(stim_file)
         h5 = self.stim_data[stim_file.stem]
         tags = []
@@ -1652,8 +1652,7 @@ class DynamicRoutingSession:
                 notes.append(invalid_interval["reason"])
                 if "invalid_times" not in tags:
                     tags.append("invalid_times")
-        return npc_lims.Epoch(
-            session_id=self.id,
+        return dict(
             start_time=start_time,
             stop_time=stop_time,
             tags=tags,
