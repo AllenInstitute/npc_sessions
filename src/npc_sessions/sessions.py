@@ -900,23 +900,23 @@ class DynamicRoutingSession:
         electrodes = pynwb.file.ElectrodeTable()
 
         column_names: tuple[str, ...] = (
+            "channel",
             "rel_x",
             "rel_y",
-            "channel",
             "reference",
             "imp",
         )
         if self.is_annotated:
-            column_names = ("x", "y", "z", "structure") + column_names
+            column_names = ("structure", "x", "y", "z") + column_names
             ccf_df = utils.get_tissuecyte_electrodes_table(self.id)
         column_description = {
-            "rel_x": "position on the short-axis of the probe surface, in microns",
-            "rel_y": "position on the long-axis of the probe surface, relative to the tip, in microns",
-            "channel": "channel index on the probe, as used in OpenEphys (0 at probe tip)",
+            "structure": "acronym for the Allen CCF structure that the electrode recorded from - less-specific than `location`",
             "x": "x coordinate in the Allen CCF, +x is posterior",
             "y": "y coordinate in the Allen CCF, +y is inferior",
             "z": "z coordinate in the Allen CCF, +z is right",
-            "structure": "acronym for the Allen CCF structure that the electrode recorded from - less-specific than `location`",
+            "channel": "channel index on the probe, as used in OpenEphys (0 at probe tip)",
+            "rel_x": "position on the short-axis of the probe surface, in microns",
+            "rel_y": "position on the long-axis of the probe surface, relative to the tip, in microns",
             "reference": "the reference electrode or referencing scheme used",
             "imp": "impedance, in ohms",
         }
