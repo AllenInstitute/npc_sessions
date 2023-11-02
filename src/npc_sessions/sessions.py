@@ -749,16 +749,17 @@ class DynamicRoutingSession:
             if "RFMapping" in stim_filename:
                 # create two separate trials tables
                 set_lazy_eval(
-                    f"Aud{stim_filename}",
-                    TaskControl.AudRFMapping,
-                    stim_filename,
-                    kwargs,
+                    key=f"Aud{stim_filename}",
+                    cls=TaskControl.AudRFMapping,
+                    stim_filename=stim_filename,
+                    taskcontrol_kwargs=kwargs,
                 )
                 set_lazy_eval(
-                    f"Vis{stim_filename}",
-                    TaskControl.VisRFMapping,
-                    stim_filename,
-                    kwargs,
+                    key=f"Vis{stim_filename}",
+                    cls=TaskControl.VisRFMapping,
+                    stim_filename=stim_filename,
+                    taskcontrol_kwargs={k:v for k, v in kwargs.items() if k != 'ephys_recording_dirs'},
+                    # passing ephys_recordings would run sound alignment unnecessarily
                 )
             else:
                 try:
@@ -768,7 +769,12 @@ class DynamicRoutingSession:
                 except AttributeError:
                     # some stims (e.g. Spontaneous) have no trials class
                     continue
-                set_lazy_eval(stim_filename, cls, stim_filename, kwargs)
+                set_lazy_eval(
+                    key=stim_filename,
+                    cls=cls,
+                    stim_filename=stim_filename, 
+                    taskcontrol_kwargs=kwargs,
+                    )
         return utils.LazyDict((k, v) for k, v in lazy_dict_items.items())
 
     @utils.cached_property
