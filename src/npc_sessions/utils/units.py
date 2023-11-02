@@ -14,6 +14,7 @@ import numpy.typing as npt
 import pandas as pd
 import polars as pl
 import pynwb
+import tqdm 
 
 import npc_sessions.utils as utils
 
@@ -282,6 +283,21 @@ def make_units_table_from_spike_interface_ks25(
                 spike_interface_data,
                 include_waveform_arrays,
             )
+
+        for future in tqdm.tqdm(
+            iterable=concurrent.futures.as_completed(device_to_future.values()),
+            desc="fetching units",
+            unit="devices",
+            total=len(device_to_future),
+            ncols=80,
+            ascii=False,
+        ):
+            try:
+                _ = future.result()
+            except Exception as e: 
+                # raise with full traceback
+                device = next(k for k, v in device_to_future.items() if v == future)
+                raise RuntimeError(f"Failed to fetch units for {device}") from e
 
     return pd.concat(
         device_to_future[device].result() for device in sorted(device_to_future.keys())
