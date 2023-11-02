@@ -14,7 +14,7 @@ import numpy.typing as npt
 import pandas as pd
 import polars as pl
 import pynwb
-import tqdm 
+import tqdm
 
 import npc_sessions.utils as utils
 
@@ -294,7 +294,7 @@ def make_units_table_from_spike_interface_ks25(
         ):
             try:
                 _ = future.result()
-            except Exception as e: 
+            except Exception as e:
                 # raise with full traceback
                 device = next(k for k, v in device_to_future.items() if v == future)
                 raise RuntimeError(f"Failed to fetch units for {device}") from e
