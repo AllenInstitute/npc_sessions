@@ -1430,6 +1430,10 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
+    def sorted_data_asset_id(self) -> str | None:
+        return getattr(self, "_sorted_data_asset_id", None)
+    
+    @utils.cached_property
     def sorted_data(self) -> utils.SpikeInterfaceKS25Data:
         return utils.SpikeInterfaceKS25Data(
             self.id,
@@ -1440,7 +1444,7 @@ class DynamicRoutingSession:
     def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
         if not self.is_ephys:
             raise ValueError(f"{self.id} is not a session with ephys")
-        return npc_lims.get_sorted_data_paths_from_s3(self.id)
+        return npc_lims.get_sorted_data_paths_from_s3(self.id, self.sorted_data_asset_id)
 
     @utils.cached_property
     def sync_path(self) -> upath.UPath:
