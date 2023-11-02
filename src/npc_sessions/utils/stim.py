@@ -17,6 +17,7 @@ import npc_session
 import numba
 import numpy as np
 import numpy.typing as npt
+import tqdm
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 from typing_extensions import TypeAlias
 
@@ -716,11 +717,19 @@ def xcorr(
     **kwargs,
 ) -> tuple[StimRecording | None, ...]:
     num_presentations = len(tuple(presentations))
+    waveform_modality = next(p for p in presentations if p is not None).waveform.modality
     recordings: list[StimRecording | None] = [None] * num_presentations
     padding_samples = int(padding_sec * nidaq_timing.sampling_rate)
     xcorr_values: list[float] = []
-    for idx, presentation in enumerate(presentations):
-        # print(f"{idx+1}/{num_presentations}\r", end=' ', flush=True)
+    
+    for idx, presentation in tqdm.tqdm(
+        iterable=enumerate(presentations),
+        desc=f'aligning {waveform_modality.name.lower()} waveforms',
+        unit='trials',
+        total=num_presentations,
+        ncols=80,   
+        ascii=False, 
+    ):
         if presentation is None:
             continue
         trigger_time_on_nidaq = (
