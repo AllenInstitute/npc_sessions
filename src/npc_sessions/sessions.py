@@ -678,7 +678,7 @@ class DynamicRoutingSession:
         intervals: list[pynwb.epoch.TimeIntervals] = []
         for k, v in self._all_trials.items():
             if self.task_stim_name in k and self.is_task:
-                intervals.append(self.trials)
+                # intervals.append(self.trials)
                 intervals.append(self.performance)
             if not any(
                 existing := [i for i in intervals if i.name == v.__class__.__name__]
