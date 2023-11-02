@@ -1643,20 +1643,20 @@ class DynamicRoutingSession:
 
         assert start_time != stop_time
 
-        notes: list[str] = []
+        invalid_times_notes: list[str] = []
         for _, invalid_interval in self.invalid_times[:].iterrows():
             if any(
                 start_time <= invalid_interval[time] <= stop_time
                 for time in ("start_time", "stop_time")
             ):
-                notes.append(invalid_interval["reason"])
+                invalid_times_notes.append(invalid_interval["reason"])
                 if "invalid_times" not in tags:
                     tags.append("invalid_times")
         return dict(
             start_time=start_time,
             stop_time=stop_time,
             tags=tags,
-            notes=None if not notes else f"includes invalid times: {'; '.join(notes)}",
+            notes="" if not invalid_times_notes else f"includes invalid times: {'; '.join(invalid_times_notes)}",
         )
 
     @property
