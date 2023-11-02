@@ -759,7 +759,9 @@ class DynamicRoutingSession:
                     key=f"Vis{stim_filename}",
                     cls=TaskControl.VisRFMapping,
                     stim_filename=stim_filename,
-                    taskcontrol_kwargs={k:v for k, v in kwargs.items() if k != 'ephys_recording_dirs'},
+                    taskcontrol_kwargs={
+                        k: v for k, v in kwargs.items() if k != "ephys_recording_dirs"
+                    },
                     # passing ephys_recordings would run sound alignment unnecessarily
                 )
             else:
@@ -773,9 +775,9 @@ class DynamicRoutingSession:
                 set_lazy_eval(
                     key=stim_filename,
                     cls=cls,
-                    stim_filename=stim_filename, 
+                    stim_filename=stim_filename,
                     taskcontrol_kwargs=kwargs,
-                    )
+                )
         return utils.LazyDict((k, v) for k, v in lazy_dict_items.items())
 
     @utils.cached_property
