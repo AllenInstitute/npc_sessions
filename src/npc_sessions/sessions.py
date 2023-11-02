@@ -172,8 +172,8 @@ class DynamicRoutingSession:
                     "`is_sync` and `is_ephys` will be set to False for this session (disabling all related data)."
                 )
                 kwargs["is_sync"] = False
-
-        logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
+        if kwargs:
+            logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
         for key, value in kwargs.items():
             try:
                 setattr(self, key, value)
@@ -720,6 +720,7 @@ class DynamicRoutingSession:
         def get_intervals(
             cls: type[TaskControl.TaskControl], stim_filename: str, **kwargs
         ) -> TaskControl.TaskControl:
+            logger.info(f"Generating intervals: {cls.__name__}({stim_filename!r})")
             return cls(self.stim_data[stim_filename], **kwargs)
 
         lazy_dict_items: dict[str, tuple] = {}  # tuple of (func, args, kwargs)
