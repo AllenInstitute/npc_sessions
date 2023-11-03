@@ -25,6 +25,7 @@ import numpy.typing as npt
 import pandas as pd
 import PIL.Image
 import pynwb
+from sqlalchemy import FallbackAsyncAdaptedQueuePool
 import upath
 import zarr
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
@@ -224,6 +225,7 @@ class DynamicRoutingSession:
             epochs=self.epochs,
             epoch_tags=self.epoch_tags,
             stimulus_template=None,  # TODO pass tuple of stimulus templates
+            invalid_times=self.invalid_times,
             trials=self.trials
             if self.is_task
             else None,  # we have one sessions without trials (670248_2023-08-02)
@@ -258,6 +260,7 @@ class DynamicRoutingSession:
             subject=self.subject,
             keywords=self.keywords,
             epoch_tags=self.epoch_tags,
+            invalid_times=self.invalid_times,
         )
 
     @property
@@ -507,14 +510,31 @@ class DynamicRoutingSession:
             TaskControl.OptoTagging: "opto-tagging trials",
         }
 
+    def is_valid_interval(self, start_time: Any, stop_time: Any) -> bool:
+        """Check if time interval is valid, based on `invalid_intervals`"""
+        if self.invalid_times is not None:
+            for _, invalid_interval in self.invalid_times.iterrows():
+                if any(
+                    start_time <= invalid_interval[time] <= stop_time
+                    for time in ("start_time", "stop_time")
+                ):
+                    return False
+        return True
+    
     @utils.cached_property
-    def invalid_times(self) -> pynwb.epoch.TimeIntervals:
+    def invalid_times(self) -> pynwb.epoch.TimeIntervals | None:
         """Time intervals when recording was interrupted, stim malfunctioned or
         otherwise invalid.
 
+        - current strategy is to not include intervals (in trials tables) where
+          they overlap with entries in `invalid_times`
+        
         A separate attribute can mark invalid times for individual ecephys units:
         see `NWBFile.Units.get_unit_obs_intervals()`
         """
+        invalid_intervals = getattr(self, "_invalid_intervals", None)
+        if invalid_intervals is None:
+            return None
         intervals = pynwb.epoch.TimeIntervals(
             name="invalid_times",
             description="time intervals to be removed from analysis",
@@ -525,8 +545,7 @@ class DynamicRoutingSession:
         )
         if (
             self.info
-            and (invalid_intervals := getattr(self, "_invalid_intervals", None))
-            is not None
+            and invalid_intervals is not None
         ):
             for interval in invalid_intervals:
                 if (
@@ -556,7 +575,8 @@ class DynamicRoutingSession:
         for column in self._trials.to_add_trial_column():
             trials.add_column(**column)
         for trial in self._trials.to_add_trial():
-            trials.add_interval(**trial)
+            if not self.is_valid_interval(trial["start_time"], trial["stop_time"]):
+                trials.add_interval(**trial)
         self._cached_nwb_trials = trials
         return trials
 
@@ -645,17 +665,16 @@ class DynamicRoutingSession:
         for name, description in column_name_to_description.items():
             nwb_intervals.add_column(name=name, description=description)
         for block_index in task_performance_by_block:
+            start_time = trials[trials["block_index"] == block_index]["start_time"].min()
+            stop_time = trials[trials["block_index"] == block_index]["stop_time"].max()
+            items = dict.fromkeys(column_name_to_description, np.nan)
+            if self.is_valid_interval(start_time, stop_time):
+                items |= task_performance_by_block[block_index]
             nwb_intervals.add_interval(
-                start_time=trials[trials["block_index"] == block_index][
-                    "start_time"
-                ].min(),
-                stop_time=trials[trials["block_index"] == block_index][
-                    "stop_time"
-                ].max(),
-                **dict.fromkeys(column_name_to_description, np.nan)
-                | task_performance_by_block[block_index],
+                start_time=start_time,
+                stop_time=stop_time,
+                **items,
             )
-
         return nwb_intervals
 
     @utils.cached_property
@@ -697,7 +716,8 @@ class DynamicRoutingSession:
                     b := set(v.keys())
                 ), f"columns don't match for {k} and existing {nwb_intervals.name} intervals: {a.symmetric_difference(b) = }"
             for trial in v.to_add_trial():
-                nwb_intervals.add_interval(**trial)
+                if self.is_valid_interval(trial["start_time"], trial["stop_time"]):
+                    nwb_intervals.add_interval(**trial)
             if trial_idx_offset == 0:
                 intervals.append(nwb_intervals)
         # TODO deal with stimuli across epochs
@@ -799,9 +819,8 @@ class DynamicRoutingSession:
         for record in sorted(records, key=lambda _: str(_["start_time"]), reverse=True):
             # reverse=True puts intervals in chronological order (doesn't make
             # sense, but it's true)
-            epochs.add_interval(
-                **record,
-            )
+            if self.is_valid_interval(record["start_time"], record["stop_time"]):
+                epochs.add_interval(**record)
         return epochs
 
     # probes, devices, units ---------------------------------------------------- #
@@ -1669,14 +1688,15 @@ class DynamicRoutingSession:
         assert start_time != stop_time
 
         invalid_times_notes: list[str] = []
-        for _, invalid_interval in self.invalid_times[:].iterrows():
-            if any(
-                start_time <= invalid_interval[time] <= stop_time
-                for time in ("start_time", "stop_time")
-            ):
-                invalid_times_notes.append(invalid_interval["reason"])
-                if "invalid_times" not in tags:
-                    tags.append("invalid_times")
+        if self.invalid_times is not None:
+            for _, invalid_interval in self.invalid_times[:].iterrows():
+                if any(
+                    start_time <= invalid_interval[time] <= stop_time
+                    for time in ("start_time", "stop_time")
+                ):
+                    invalid_times_notes.append(invalid_interval["reason"])
+                    if "invalid_times" not in tags:
+                        tags.append("invalid_times")
         return {
             "start_time": start_time,
             "stop_time": stop_time,
