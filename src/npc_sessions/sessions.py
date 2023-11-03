@@ -818,8 +818,7 @@ class DynamicRoutingSession:
         for record in sorted(records, key=lambda _: str(_["start_time"]), reverse=True):
             # reverse=True puts intervals in chronological order (doesn't make
             # sense, but it's true)
-            if self.is_valid_interval(record["start_time"], record["stop_time"]):
-                epochs.add_interval(**record)
+            epochs.add_interval(**record)
         return epochs
 
     # probes, devices, units ---------------------------------------------------- #
