@@ -581,7 +581,7 @@ class DynamicRoutingSession:
         for column in self._trials.to_add_trial_column():
             trials.add_column(**column)
         for trial in self._trials.to_add_trial():
-            if not self.is_valid_interval(trial["start_time"], trial["stop_time"]):
+            if self.is_valid_interval(trial["start_time"], trial["stop_time"]):
                 trials.add_interval(**trial)
         self._cached_nwb_trials = trials
         return trials
