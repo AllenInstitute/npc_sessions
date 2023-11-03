@@ -554,6 +554,8 @@ class DynamicRoutingSession:
                 if (
                     stop_time := interval.get("stop_time", None)
                 ) is None or stop_time == -1:
+                    interval["stop_time"] = self.sync_data.total_seconds if self.is_sync else self.sam.frameTimes[-1]
+                _ = interval.setdefault("reason", "unknown")
                 for time in ("start_time", "stop_time"):
                     interval[time] = float(interval[time])
                 intervals.add_interval(**interval)
