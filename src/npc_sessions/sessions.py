@@ -175,10 +175,14 @@ class DynamicRoutingSession:
         if kwargs:
             logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
         for key, value in kwargs.items():
-            try:
-                setattr(self, key, value)
-            except AttributeError:
+            if isinstance(getattr(self.__class__, key, None), functools.cached_property):
+                # avoid overwriting cached properties 
                 setattr(self, f"_{key}", value)
+            else:
+                try:
+                    setattr(self, key, value)
+                except AttributeError:
+                    setattr(self, f"_{key}", value)
         self._add_plots_as_methods()
 
     def __repr__(self) -> str:
