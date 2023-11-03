@@ -25,7 +25,6 @@ import numpy.typing as npt
 import pandas as pd
 import PIL.Image
 import pynwb
-from sqlalchemy import FallbackAsyncAdaptedQueuePool
 import upath
 import zarr
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
@@ -604,7 +603,7 @@ class DynamicRoutingSession:
     @property
     def performance(self) -> pynwb.epoch.TimeIntervals:
         trials: pd.DataFrame = self.trials[:]
-        task_performance_by_block: dict[str, float | str] = {}
+        task_performance_by_block: dict[str, dict[str, float | str]] = {}
 
         for block_idx in trials.block_index.unique():
             block_performance: dict[str, float | str] = {}
