@@ -1,5 +1,6 @@
 """Tools for working with Open Ephys raw data files."""
 from __future__ import annotations
+import dataclasses
 
 import doctest
 import io
@@ -57,8 +58,8 @@ def get_sync_messages_data(
         for line in utils.from_pathlike(sync_messages_path).read_text().splitlines()[1:]
     }
 
-
-class EphysTimingInfoOnPXI(NamedTuple):
+@dataclasses.dataclass(frozen=True, eq=True, unsafe_hash=True)
+class EphysTimingInfoOnPXI:
     name: str
     continuous: upath.UPath
     """Abs path to device's folder within raw data/continuous/"""
@@ -78,8 +79,12 @@ class EphysTimingInfoOnPXI(NamedTuple):
     ttl_states: npt.NDArray
     """Contents of ttl/states.npy"""
 
-
-class EphysTimingInfoOnSync(NamedTuple):
+    @utils.cached_property
+    def num_samples(self) -> int:
+        return get_ephys_data(self.continuous.parent.parent, device=self).shape[0]
+    
+@dataclasses.dataclass(frozen=True, eq=True, unsafe_hash=True)
+class EphysTimingInfoOnSync:
     name: str
     device: EphysTimingInfoOnPXI
     """Info with paths"""
@@ -87,6 +92,11 @@ class EphysTimingInfoOnSync(NamedTuple):
     """Sample rate assessed on the sync clock"""
     start_time: float
     """First sample time (sec) relative to the start of the sync clock"""
+
+    @utils.cached_property
+    def stop_time(self) -> float:
+        """Last sample time (sec) relative to the start of the sync clock"""
+        return self.start_time + (self.device.num_samples / self.sampling_rate)
 
 
 def read_array_range_from_npy(path: utils.PathLike, _range: int | slice) -> npt.NDArray:
@@ -213,29 +223,14 @@ def clipped_path_to_compressed(path: utils.PathLike) -> upath.UPath:
         if path.name == compressed_name
     )
 
-
-def get_pxi_nidaq_data(
+def get_ephys_data(
     *recording_dirs: utils.PathLike,
-    device_name: str | None = None,
+    device: str | EphysTimingInfoOnPXI,
 ) -> npt.NDArray[np.int16]:
-    """
-    -channel_idx: 0-indexed
-    - if device_name not specified, first and only (assumed) NI-DAQ will be used
-
-    ```
-    speaker_channel, mic_channel = 1, 3
-    ```
-
-    >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
-    >>> get_pxi_nidaq_data(path).shape
-    (142823472, 8)
-    """
-    if device_name:
+    if not isinstance(device, EphysTimingInfoOnPXI):
         device = next(
-            get_ephys_timing_on_pxi(recording_dirs, only_devices_including=device_name)
+            get_ephys_timing_on_pxi(recording_dirs, only_devices_including=device)
         )
-    else:
-        device = get_pxi_nidaq_device(recording_dirs)
     if device.compressed:
         data = zarr.open(device.compressed, mode="r")
         return data["traces_seg0"]
@@ -261,13 +256,37 @@ def get_pxi_nidaq_data(
             dat = np.load(device.continuous / "continuous.dat", mmap_mode="r")
         else:
             logger.warning(
-                f"Reading entirety of uncompressed OpenEphys NI-DAQ data from {device.continuous}. If you only need part of this data, consider using `read_array_range_from_npy` with the path instead."
+                f"Reading entirety of uncompressed OpenEphys data from {device.continuous}. If you only need part of this data, consider using `read_array_range_from_npy` with the path instead."
             )
             dat = np.frombuffer(
                 (device.continuous / "continuous.dat").read_bytes(), dtype=np.int16
             )
         return np.reshape(dat, (int(dat.size / num_channels), -1))
 
+
+def get_pxi_nidaq_data(
+    *recording_dirs: utils.PathLike,
+    device_name: str | None = None,
+) -> npt.NDArray[np.int16]:
+    """
+    -channel_idx: 0-indexed
+    - if device_name not specified, first and only (assumed) NI-DAQ will be used
+
+    ```
+    speaker_channel, mic_channel = 1, 3
+    ```
+
+    >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
+    >>> get_pxi_nidaq_data(path).shape
+    (142823472, 8)
+    """
+    if device_name:
+        device = next(
+            get_ephys_timing_on_pxi(recording_dirs, only_devices_including=device_name)
+        )
+    else:
+        device = get_pxi_nidaq_device(recording_dirs)
+    return get_ephys_data(*recording_dirs, device=device)
 
 def get_pxi_nidaq_device(
     recording_dir: Iterable[utils.PathLike],
