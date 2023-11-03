@@ -603,8 +603,8 @@ class DynamicRoutingSession:
 
     @property
     def performance(self) -> pynwb.epoch.TimeIntervals:
-        trials = self.trials[:]
-        task_performance_by_block = {}
+        trials: pd.DataFrame = self.trials[:]
+        task_performance_by_block: dict[str, float | str] = {}
 
         for block_idx in trials.block_index.unique():
             block_performance: dict[str, float | str] = {}
@@ -667,7 +667,7 @@ class DynamicRoutingSession:
         for block_index in task_performance_by_block:
             start_time = trials[trials["block_index"] == block_index]["start_time"].min()
             stop_time = trials[trials["block_index"] == block_index]["stop_time"].max()
-            items = dict.fromkeys(column_name_to_description, np.nan)
+            items: dict[str, str | float] = dict.fromkeys(column_name_to_description, np.nan)
             if self.is_valid_interval(start_time, stop_time):
                 items |= task_performance_by_block[block_index]
             nwb_intervals.add_interval(
