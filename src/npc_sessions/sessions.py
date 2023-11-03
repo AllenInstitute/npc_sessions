@@ -175,8 +175,10 @@ class DynamicRoutingSession:
         if kwargs:
             logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
         for key, value in kwargs.items():
-            if isinstance(getattr(self.__class__, key, None), functools.cached_property):
-                # avoid overwriting cached properties 
+            if isinstance(
+                getattr(self.__class__, key, None), functools.cached_property
+            ):
+                # avoid overwriting cached properties
                 setattr(self, f"_{key}", value)
             else:
                 try:
@@ -523,7 +525,7 @@ class DynamicRoutingSession:
                 ):
                     return False
         return True
-    
+
     @utils.cached_property
     def invalid_times(self) -> pynwb.epoch.TimeIntervals | None:
         """Time intervals when recording was interrupted, stim malfunctioned or
@@ -531,7 +533,7 @@ class DynamicRoutingSession:
 
         - current strategy is to not include intervals (in trials tables) where
           they overlap with entries in `invalid_times`
-        
+
         A separate attribute can mark invalid times for individual ecephys units:
         see `NWBFile.Units.get_unit_obs_intervals()`
         """
@@ -546,15 +548,16 @@ class DynamicRoutingSession:
             name="reason",
             description="reason for invalidation",
         )
-        if (
-            self.info
-            and invalid_times is not None
-        ):
+        if self.info and invalid_times is not None:
             for interval in invalid_times:
                 if (
                     stop_time := interval.get("stop_time", None)
                 ) is None or stop_time == -1:
-                    interval["stop_time"] = self.sync_data.total_seconds if self.is_sync else self.sam.frameTimes[-1]
+                    interval["stop_time"] = (
+                        self.sync_data.total_seconds
+                        if self.is_sync
+                        else self.sam.frameTimes[-1]
+                    )
                 _ = interval.setdefault("reason", "unknown")
                 for time in ("start_time", "stop_time"):
                     interval[time] = float(interval[time])
@@ -671,9 +674,13 @@ class DynamicRoutingSession:
         for name, description in column_name_to_description.items():
             nwb_intervals.add_column(name=name, description=description)
         for block_index in task_performance_by_block:
-            start_time = trials[trials["block_index"] == block_index]["start_time"].min()
+            start_time = trials[trials["block_index"] == block_index][
+                "start_time"
+            ].min()
             stop_time = trials[trials["block_index"] == block_index]["stop_time"].max()
-            items: dict[str, str | float] = dict.fromkeys(column_name_to_description, np.nan)
+            items: dict[str, str | float] = dict.fromkeys(
+                column_name_to_description, np.nan
+            )
             if self.is_valid_interval(start_time, stop_time):
                 items |= task_performance_by_block[block_index]
             nwb_intervals.add_interval(
