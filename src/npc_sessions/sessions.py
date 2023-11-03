@@ -554,7 +554,8 @@ class DynamicRoutingSession:
                 if (
                     stop_time := interval.get("stop_time", None)
                 ) is None or stop_time == -1:
-                    interval["stop_time"] = self.epochs[:].stop_time.max()
+                for time in ("start_time", "stop_time"):
+                    interval[time] = float(interval[time])
                 intervals.add_interval(**interval)
         return intervals
 
