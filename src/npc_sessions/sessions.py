@@ -514,7 +514,7 @@ class DynamicRoutingSession:
         }
 
     def is_valid_interval(self, start_time: Any, stop_time: Any) -> bool:
-        """Check if time interval is valid, based on `invalid_intervals`"""
+        """Check if time interval is valid, based on `invalid_times`"""
         if self.invalid_times is not None:
             for _, invalid_interval in self.invalid_times.iterrows():
                 if any(
@@ -535,8 +535,8 @@ class DynamicRoutingSession:
         A separate attribute can mark invalid times for individual ecephys units:
         see `NWBFile.Units.get_unit_obs_intervals()`
         """
-        invalid_intervals = getattr(self, "_invalid_intervals", None)
-        if invalid_intervals is None:
+        invalid_times = getattr(self, "_invalid_times", None)
+        if invalid_times is None:
             return None
         intervals = pynwb.epoch.TimeIntervals(
             name="invalid_times",
@@ -548,9 +548,9 @@ class DynamicRoutingSession:
         )
         if (
             self.info
-            and invalid_intervals is not None
+            and invalid_times is not None
         ):
-            for interval in invalid_intervals:
+            for interval in invalid_times:
                 if (
                     stop_time := interval.get("stop_time", None)
                 ) is None or stop_time == -1:
