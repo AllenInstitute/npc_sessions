@@ -981,22 +981,29 @@ class DynamicRoutingSession:
             )
         return utils.good_units(units)
 
-
-    def get_obs_intervals(self, probe: str | npc_session.ProbeRecord) -> tuple[tuple[float, float], ...]:
+    def get_obs_intervals(
+        self, probe: str | npc_session.ProbeRecord
+    ) -> tuple[tuple[float, float], ...]:
         """[[start stop], ...] for intervals in which ephys data is available for
         a given probe.
-        
+
         - effectively start and stop of ephys recording for most sessions
         - multiple intervals when recording is split into parts # TODO not supported yet
         - times are on sync clock, relative to start
         """
-        timing_data = next((t for t in self.ephys_timing_data if npc_session.extract_probe_letter(t.name) == npc_session.ProbeRecord(probe)), None)
+        timing_data = next(
+            (
+                t
+                for t in self.ephys_timing_data
+                if npc_session.extract_probe_letter(t.name)
+                == npc_session.ProbeRecord(probe)
+            ),
+            None,
+        )
         if timing_data is None:
             raise ValueError(f"no ephys timing data for {self.id} {probe}")
-        return (
-            (timing_data.start_time, timing_data.stop_time),
-        )
-    
+        return ((timing_data.start_time, timing_data.stop_time),)
+
     @utils.cached_property
     def units(self) -> pynwb.misc.Units:
         if not self.is_ephys:

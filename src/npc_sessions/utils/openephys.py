@@ -1,14 +1,14 @@
 """Tools for working with Open Ephys raw data files."""
 from __future__ import annotations
-import dataclasses
 
+import dataclasses
 import doctest
 import io
 import json
 import logging
 import re
 from collections.abc import Generator, Iterable, Sequence
-from typing import Any, Literal, NamedTuple
+from typing import Any, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -58,6 +58,7 @@ def get_sync_messages_data(
         for line in utils.from_pathlike(sync_messages_path).read_text().splitlines()[1:]
     }
 
+
 @dataclasses.dataclass(frozen=True, eq=True, unsafe_hash=True)
 class EphysTimingInfoOnPXI:
     name: str
@@ -82,7 +83,8 @@ class EphysTimingInfoOnPXI:
     @utils.cached_property
     def num_samples(self) -> int:
         return get_ephys_data(self.continuous.parent.parent, device=self).shape[0]
-    
+
+
 @dataclasses.dataclass(frozen=True, eq=True, unsafe_hash=True)
 class EphysTimingInfoOnSync:
     name: str
@@ -223,6 +225,7 @@ def clipped_path_to_compressed(path: utils.PathLike) -> upath.UPath:
         if path.name == compressed_name
     )
 
+
 def get_ephys_data(
     *recording_dirs: utils.PathLike,
     device: str | EphysTimingInfoOnPXI,
@@ -287,6 +290,7 @@ def get_pxi_nidaq_data(
     else:
         device = get_pxi_nidaq_device(recording_dirs)
     return get_ephys_data(*recording_dirs, device=device)
+
 
 def get_pxi_nidaq_device(
     recording_dir: Iterable[utils.PathLike],
