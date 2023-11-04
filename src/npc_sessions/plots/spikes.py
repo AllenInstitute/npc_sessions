@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING
 
-import matplotlib.figure
 import matplotlib.colors
+import matplotlib.figure
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -117,68 +117,96 @@ def plot_drift_maps(
         figs.append(fig)
     return tuple(figs)
 
-def plot_unit_waveform(units: pynwb.Units, index_or_id: int | str) -> matplotlib.figure.Figure:
+
+def plot_unit_waveform(
+    units: pynwb.Units, index_or_id: int | str
+) -> matplotlib.figure.Figure:
     """Waveform on peak channel"""
     fig = plt.figure()
-    unit = units[:].iloc[index_or_id] if isinstance(index_or_id, int) else units[:].query('unit_id == @index_or_id').iloc[0]
+    unit = (
+        units[:].iloc[index_or_id]
+        if isinstance(index_or_id, int)
+        else units[:].query("unit_id == @index_or_id").iloc[0]
+    )
 
-    mean = unit['waveform_mean'][:, unit['peak_channel']]
-    sd = unit['waveform_sd'][:, unit['peak_channel']]
-    t =  np.arange(mean.size) / units.waveform_rate * 1000 # convert to ms
-    t -= max(t) / 2 # center around 0
+    mean = unit["waveform_mean"][:, unit["peak_channel"]]
+    sd = unit["waveform_sd"][:, unit["peak_channel"]]
+    t = np.arange(mean.size) / units.waveform_rate * 1000  # convert to ms
+    t -= max(t) / 2  # center around 0
 
     ax = fig.add_subplot(111)
     # ax.hlines(0, t[0], t[-1], color='grey', linestyle='--')
     m = ax.plot(t, mean, label=f"Unit {unit['unit_id']}")
     ax.fill_between(t, mean + sd, mean - sd, color=m[0].get_color(), alpha=0.25)
-    ax.set_xlabel('milliseconds')
+    ax.set_xlabel("milliseconds")
     ax.set_ylabel(units.waveform_unit)
     ax.set_xmargin(0)
     # if units.waveform_unit == "microvolts":
-    ax.set_aspect(1/25)
+    ax.set_aspect(1 / 25)
     ax.grid(True)
     fig.show()
     return fig
 
+
 def plot_unit_spatiotemporal_waveform(
-    units: pynwb.Units, 
-    electrodes: pynwb.core.DynamicTable, 
-    index_or_id: int | str, 
+    units: pynwb.Units,
+    electrodes: pynwb.core.DynamicTable,
+    index_or_id: int | str,
     vertical_span_microns: int = 300,
 ) -> matplotlib.figure.Figure:
     """Waveforms across channels around peak channel - currently no interpolation"""
 
-    unit = units[:].iloc[index_or_id] if isinstance(index_or_id, int) else units[:].query('unit_id == @index_or_id').iloc[0]
+    unit = (
+        units[:].iloc[index_or_id]
+        if isinstance(index_or_id, int)
+        else units[:].query("unit_id == @index_or_id").iloc[0]
+    )
 
-    peak_channel = unit['peak_channel']
-    electrode_group_name = unit['electrode_group_name']
-    electrode_group = electrodes[:].query('group_name == @electrode_group_name').sort_values('channel').reset_index()
+    unit["peak_channel"]
+    unit["electrode_group_name"]
+    electrode_group = (
+        electrodes[:]
+        .query("group_name == @electrode_group_name")
+        .sort_values("channel")
+        .reset_index()
+    )
 
-    peak_electrode = electrode_group.query('channel == @peak_channel')
-    peak_electrode_rel_x, peak_electrode_rel_y =  peak_electrode.iloc[0].rel_x, peak_electrode.iloc[0].rel_y
-    min_rel_y = max(peak_electrode_rel_y - vertical_span_microns / 2, electrode_group.rel_y.min())
-    max_rel_y = min(peak_electrode_rel_y + vertical_span_microns / 2, electrode_group.rel_y.max())
-    selected_electrodes = electrode_group.query('rel_y >= @min_rel_y and rel_y <= @max_rel_y').query('rel_x == @peak_electrode_rel_x')
+    peak_electrode = electrode_group.query("channel == @peak_channel")
+    peak_electrode_rel_x, peak_electrode_rel_y = (
+        peak_electrode.iloc[0].rel_x,
+        peak_electrode.iloc[0].rel_y,
+    )
+    max(
+        peak_electrode_rel_y - vertical_span_microns / 2, electrode_group.rel_y.min()
+    )
+    min(
+        peak_electrode_rel_y + vertical_span_microns / 2, electrode_group.rel_y.max()
+    )
+    selected_electrodes = electrode_group.query(
+        "rel_y >= @min_rel_y and rel_y <= @max_rel_y"
+    ).query("rel_x == @peak_electrode_rel_x")
 
-    waveforms = unit['waveform_mean'][:, selected_electrodes.index]
+    waveforms = unit["waveform_mean"][:, selected_electrodes.index]
     #! note waveforms.shape[1] != len(selected_electrodes) - some waveforms missing
-    # TODO presumably surface channels missing, but need to confirm 
+    # TODO presumably surface channels missing, but need to confirm
 
-    t =  np.arange(waveforms.shape[0]) / units.waveform_rate * 1000 # convert to ms
-    t -= max(t) / 2 # center around 0
+    t = np.arange(waveforms.shape[0]) / units.waveform_rate * 1000  # convert to ms
+    t -= max(t) / 2  # center around 0
     y = sorted(selected_electrodes.rel_y)
 
     fig = plt.figure()
-    norm = matplotlib.colors.TwoSlopeNorm(vmin=waveforms.min(), vcenter=0, vmax=waveforms.max())
-    _ = plt.pcolormesh(t, y, waveforms.T, norm=norm, cmap='bwr')   
+    norm = matplotlib.colors.TwoSlopeNorm(
+        vmin=waveforms.min(), vcenter=0, vmax=waveforms.max()
+    )
+    _ = plt.pcolormesh(t, y, waveforms.T, norm=norm, cmap="bwr")
     ax = fig.gca()
     ax.set_xmargin(0)
     ax.set_xlim(-1, 1)
-    ax.set_xlabel('milliseconds')
-    ax.set_ylabel('distance from tip (microns)')
+    ax.set_xlabel("milliseconds")
+    ax.set_ylabel("distance from tip (microns)")
     ax.set_yticks(y)
-    # plt.set_cmap('bwr') 
-    ax.set_aspect(1/100)
+    # plt.set_cmap('bwr')
+    ax.set_aspect(1 / 100)
     cbar = plt.colorbar()
     cbar.set_label(units.waveform_unit)
 
