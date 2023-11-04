@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Mapping
 
 import matplotlib.figure
+import matplotlib.colors
 import matplotlib.pyplot as plt
+import numpy as np
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -114,3 +116,27 @@ def plot_drift_maps(
         fig.tight_layout()
         figs.append(fig)
     return tuple(figs)
+
+def plot_unit_waveform(units: pynwb.Units, index_or_id: int | str) -> matplotlib.figure.Figure:
+    """Waveform on peak channel"""
+    fig = plt.figure()
+    unit = units[:].iloc[index_or_id] if isinstance(index_or_id, int) else units[:].query('unit_id == @index_or_id').iloc[0]
+
+    mean = unit['waveform_mean'][:, unit['peak_channel']]
+    sd = unit['waveform_sd'][:, unit['peak_channel']]
+    t =  np.arange(mean.size) / units.waveform_rate * 1000 # convert to ms
+    t -= max(t) / 2 # center around 0
+
+    ax = fig.add_subplot(111)
+    # ax.hlines(0, t[0], t[-1], color='grey', linestyle='--')
+    m = ax.plot(t, mean, label=f"Unit {unit['unit_id']}")
+    ax.fill_between(t, mean + sd, mean - sd, color=m[0].get_color(), alpha=0.25)
+    ax.set_xlabel('milliseconds')
+    ax.set_ylabel(units.waveform_unit)
+    ax.set_xmargin(0)
+    # if units.waveform_unit == "microvolts":
+    ax.set_aspect(1/25)
+    ax.grid(True)
+    fig.show()
+    return fig
+
