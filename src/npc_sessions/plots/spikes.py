@@ -140,3 +140,46 @@ def plot_unit_waveform(units: pynwb.Units, index_or_id: int | str) -> matplotlib
     fig.show()
     return fig
 
+def plot_unit_spatiotemporal_waveform(
+    units: pynwb.Units, 
+    electrodes: pynwb.core.DynamicTable, 
+    index_or_id: int | str, 
+    vertical_span_microns: int = 300,
+) -> matplotlib.figure.Figure:
+    """Waveforms across channels around peak channel - currently no interpolation"""
+
+    unit = units[:].iloc[index_or_id] if isinstance(index_or_id, int) else units[:].query('unit_id == @index_or_id').iloc[0]
+
+    peak_channel = unit['peak_channel']
+    electrode_group_name = unit['electrode_group_name']
+    electrode_group = electrodes[:].query('group_name == @electrode_group_name').sort_values('channel').reset_index()
+
+    peak_electrode = electrode_group.query('channel == @peak_channel')
+    peak_electrode_rel_x, peak_electrode_rel_y =  peak_electrode.iloc[0].rel_x, peak_electrode.iloc[0].rel_y
+    min_rel_y = max(peak_electrode_rel_y - vertical_span_microns / 2, electrode_group.rel_y.min())
+    max_rel_y = min(peak_electrode_rel_y + vertical_span_microns / 2, electrode_group.rel_y.max())
+    selected_electrodes = electrode_group.query('rel_y >= @min_rel_y and rel_y <= @max_rel_y').query('rel_x == @peak_electrode_rel_x')
+
+    waveforms = unit['waveform_mean'][:, selected_electrodes.index]
+    #! note waveforms.shape[1] != len(selected_electrodes) - some waveforms missing
+    # TODO presumably surface channels missing, but need to confirm 
+
+    t =  np.arange(waveforms.shape[0]) / units.waveform_rate * 1000 # convert to ms
+    t -= max(t) / 2 # center around 0
+    y = sorted(selected_electrodes.rel_y)
+
+    fig = plt.figure()
+    norm = matplotlib.colors.TwoSlopeNorm(vmin=waveforms.min(), vcenter=0, vmax=waveforms.max())
+    _ = plt.pcolormesh(t, y, waveforms.T, norm=norm, cmap='bwr')   
+    ax = fig.gca()
+    ax.set_xmargin(0)
+    ax.set_xlim(-1, 1)
+    ax.set_xlabel('milliseconds')
+    ax.set_ylabel('distance from tip (microns)')
+    ax.set_yticks(y)
+    # plt.set_cmap('bwr') 
+    ax.set_aspect(1/100)
+    cbar = plt.colorbar()
+    cbar.set_label(units.waveform_unit)
+
+    return fig
