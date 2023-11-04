@@ -287,7 +287,7 @@ def make_units_table_from_spike_interface_ks25(
         for future in tqdm.tqdm(
             iterable=concurrent.futures.as_completed(device_to_future.values()),
             desc="fetching units",
-            unit="devices",
+            unit="device",
             total=len(device_to_future),
             ncols=80,
             ascii=False,

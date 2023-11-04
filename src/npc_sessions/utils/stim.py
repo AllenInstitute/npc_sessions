@@ -727,7 +727,7 @@ def xcorr(
     for idx, presentation in tqdm.tqdm(
         iterable=enumerate(presentations),
         desc=f"aligning {waveform_modality.name.lower()} waveforms",
-        unit="trials",
+        unit="trial",
         total=num_presentations,
         ncols=80,
         ascii=False,
