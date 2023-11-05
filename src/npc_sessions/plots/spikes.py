@@ -223,8 +223,10 @@ def plot_unit_spatiotemporal_waveform(
 
     fig = plt.figure()
     norm = matplotlib.colors.TwoSlopeNorm(
-        vmin=-100, vcenter=0, vmax=50,
-    ) # otherwise, if all waveforms are zeros the vmin/vmax args become invalid
+        vmin=-100,
+        vcenter=0,
+        vmax=50,
+    )  # otherwise, if all waveforms are zeros the vmin/vmax args become invalid
     _ = plt.pcolormesh(t, y, waveforms.T, norm=norm, cmap="bwr")
     ax = fig.gca()
     ax.set_xmargin(0)
@@ -233,9 +235,9 @@ def plot_unit_spatiotemporal_waveform(
     ax.set_ylabel("microns")
     ax.set_yticks(y)
     ax.set_aspect(1 / 50)
-    ax.grid(True, axis='x', lw=0.5, color='grey', alpha=0.5)
+    ax.grid(True, axis="x", lw=0.5, color="grey", alpha=0.5)
     cbar = plt.colorbar()
-    
+
     cbar.set_label(session.units.waveform_unit)
 
     return fig
