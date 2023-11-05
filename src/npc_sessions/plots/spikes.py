@@ -140,9 +140,11 @@ def plot_unit_waveform(
     ax.fill_between(t, mean + sd, mean - sd, color=m[0].get_color(), alpha=0.25)
     ax.set_xlabel("milliseconds")
     ax.set_ylabel(session.units.waveform_unit)
+    ax.set_xlim(-1.25, 1.25)
+    ax.set_ylim(min(-100, ax.get_ylim()[0]), max(50, ax.get_ylim()[1]))
     ax.set_xmargin(0)
-    # if units.waveform_unit == "microvolts":
-    ax.set_aspect(1 / 25)
+    if session.units.waveform_unit == "microvolts":
+        ax.set_aspect(1 / 25)
     ax.grid(True)
     fig.show()
     return fig
@@ -221,20 +223,19 @@ def plot_unit_spatiotemporal_waveform(
 
     fig = plt.figure()
     norm = matplotlib.colors.TwoSlopeNorm(
-        vmin=waveforms.min() or -1.0,
-        vcenter=0,
-        vmax=waveforms.max() or 1.0,
-    )  # otherwise, if all waveforms are zeros the vmin/vmax args become invalid
+        vmin=-100, vcenter=0, vmax=50,
+    ) # otherwise, if all waveforms are zeros the vmin/vmax args become invalid
     _ = plt.pcolormesh(t, y, waveforms.T, norm=norm, cmap="bwr")
     ax = fig.gca()
     ax.set_xmargin(0)
-    ax.set_xlim(-1, 1)
+    ax.set_xlim(-1.25, 1.25)
     ax.set_xlabel("milliseconds")
-    ax.set_ylabel("Gmicrons")
+    ax.set_ylabel("microns")
     ax.set_yticks(y)
-    ax.set_aspect(1 / 100)
-    ax.vlines(0, y[0], y[-1], color="grey", linestyle="--")
+    ax.set_aspect(1 / 50)
+    ax.grid(True, axis='x', lw=0.5, color='grey', alpha=0.5)
     cbar = plt.colorbar()
+    
     cbar.set_label(session.units.waveform_unit)
 
     return fig
