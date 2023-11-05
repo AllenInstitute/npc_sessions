@@ -119,8 +119,7 @@ def plot_drift_maps(
 
 
 def plot_unit_waveform(
-    session: npc_sessions.DynamicRoutingSession | pynwb.NWBFile,
-    index_or_id: int | str
+    session: npc_sessions.DynamicRoutingSession | pynwb.NWBFile, index_or_id: int | str
 ) -> matplotlib.figure.Figure:
     """Waveform on peak channel"""
     fig = plt.figure()
@@ -162,8 +161,8 @@ def plot_unit_spatiotemporal_waveform(
         else session.units[:].query("unit_id == @index_or_id").iloc[0]
     )
 
-    peak_channel = unit["peak_channel"] # fmt: skip
-    electrode_group_name = unit["electrode_group_name"] # fmt: skip
+    unit["peak_channel"]  # fmt: skip
+    unit["electrode_group_name"]  # fmt: skip
     electrode_group = (
         session.electrodes[:]
         .query("group_name == @electrode_group_name")
@@ -178,42 +177,54 @@ def plot_unit_spatiotemporal_waveform(
         peak_electrode.iloc[0].rel_x,
         peak_electrode.iloc[0].rel_y,
     )
-    min_rel_y = max(
+    max(
         peak_electrode_rel_y - vertical_span_microns / 2, electrode_group.rel_y.min()
-    ) # fmt: skip
-    max_rel_y = min(
+    )  # fmt: skip
+    min(
         peak_electrode_rel_y + vertical_span_microns / 2, electrode_group.rel_y.max()
-    ) # fmt: skip
+    )  # fmt: skip
     selected_electrodes = electrode_group.query(
         "rel_y >= @min_rel_y and rel_y <= @max_rel_y"
     )
-    
+
     # find index of "column" of electrodes the peak electrode is in (but don't assume
     # a column means shared x position: they're staggered in 1.0 probes)
-    shared_peak_y = electrode_group.query("rel_y == @peak_electrode_rel_y").sort_values('rel_x').reset_index()
-    peak_x_index = shared_peak_y.query('channel == @peak_channel').index[0]
-    
+    shared_peak_y = (
+        electrode_group.query("rel_y == @peak_electrode_rel_y")
+        .sort_values("rel_x")
+        .reset_index()
+    )
+    peak_x_index = shared_peak_y.query("channel == @peak_channel").index[0]
+
     rows = []
-    for rel_y in selected_electrodes.rel_y.unique(): # fmt: skip
+    for _rel_y in selected_electrodes.rel_y.unique():  # fmt: skip
         # get all channels at this y position
-        y = selected_electrodes.query("rel_y == @rel_y").sort_values('rel_x').reset_index()
+        y = (
+            selected_electrodes.query("rel_y == @rel_y")
+            .sort_values("rel_x")
+            .reset_index()
+        )
         rows.append(y.iloc[peak_x_index])
     column_electrodes = pd.DataFrame(rows)
     assert len(column_electrodes) == len(selected_electrodes.rel_y.unique())
-    
-    waveforms = unit["waveform_mean"][:, column_electrodes['id']]
+
+    waveforms = unit["waveform_mean"][:, column_electrodes["id"]]
     #! note waveforms.shape[1] != len(electrodes), some waveforms missing
     # TODO presumably surface channels missing, but need to confirm
 
-    t = np.arange(waveforms.shape[0]) / session.units.waveform_rate * 1000  # convert to ms
+    t = (
+        np.arange(waveforms.shape[0]) / session.units.waveform_rate * 1000
+    )  # convert to ms
     t -= max(t) / 2  # center around 0
-    y = sorted(column_electrodes.rel_y) 
-    y -= peak_electrode_rel_y # center around peak electrode
+    y = sorted(column_electrodes.rel_y)
+    y -= peak_electrode_rel_y  # center around peak electrode
 
     fig = plt.figure()
     norm = matplotlib.colors.TwoSlopeNorm(
-        vmin=waveforms.min() or -1.0, vcenter=0, vmax=waveforms.max() or 1.0,
-    ) # otherwise, if all waveforms are zeros the vmin/vmax args become invalid
+        vmin=waveforms.min() or -1.0,
+        vcenter=0,
+        vmax=waveforms.max() or 1.0,
+    )  # otherwise, if all waveforms are zeros the vmin/vmax args become invalid
     _ = plt.pcolormesh(t, y, waveforms.T, norm=norm, cmap="bwr")
     ax = fig.gca()
     ax.set_xmargin(0)
