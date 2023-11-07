@@ -922,7 +922,7 @@ class DynamicRouting1(TaskControl):
 
         - target stim presented in rewarded context block
         """
-        return self._sam.goTrials
+        return self._sam.trialStim == self._sam.rewardedStim
 
     @utils.cached_property
     def is_nogo(self) -> npt.NDArray[np.bool_]:
