@@ -949,8 +949,8 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def is_contingent_reward(self) -> npt.NDArray[np.bool_]:
-        """the subject received a reward for a correct response in a GO trial"""
-        return self.is_rewarded & self.is_hit
+        """the subject received a reward for a correct response"""
+        return self._sam.rewardEarned
 
     @utils.cached_property
     def is_reward_scheduled(self) -> npt.NDArray[np.bool_]:
