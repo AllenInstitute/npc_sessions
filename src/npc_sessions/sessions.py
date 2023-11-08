@@ -1066,21 +1066,26 @@ class DynamicRoutingSession:
                 "electrode_group",
             ):
                 continue
-            units.add_column(name=column, description="")
+            units.add_column(name=column, description="") # TODO add descriptions
+        units.add_column(name="peak_electrode", description="index in `electrodes` table of channel with largest amplitude waveform") 
+        electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
             units.add_unit(
                 **row,  # contains spike_times
-                electrodes=[
-                    self.electrodes[:]
-                    .query(f"channel == {row['peak_channel']}")
-                    .query(f"group_name == {row['electrode_group_name']!r}")
-                    .index.item()
-                ],
+                electrodes=(e := electrodes.query(f"group_name == {row['electrode_group_name']!r}"))
+                    .query(f"channel in {self.sorted_channel_indices[npc_session.ProbeRecord(row['electrode_group_name'])]}")
+                    .index.to_list()
+                ,
                 electrode_group=self.electrode_groups[row["electrode_group_name"]],
+                peak_electrode=e.query(f"channel == {row['peak_channel']}").index.item(),
                 obs_intervals=self.get_obs_intervals(row["electrode_group_name"]),
             )
+        if "waveform_mean" in units:
+            assert all(len(unit.electrodes) == unit.waveform_mean.shape[1] for _, unit in units[:].iterrows())
+        if "waveform_sd" in units:
+            assert all(len(unit.electrodes) == unit.waveform_sd.shape[1] for _, unit in units[:].iterrows())
         return units
 
     @utils.cached_property
