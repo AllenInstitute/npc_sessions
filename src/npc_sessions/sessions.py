@@ -1035,6 +1035,18 @@ class DynamicRoutingSession:
             raise ValueError(f"no ephys timing data for {self.id} {probe}")
         return ((timing_data.start_time, timing_data.stop_time),)
 
+
+    @utils.cached_property
+    def sorted_channel_indices(self) -> dict[npc_session.ProbeRecord, tuple[int, ...]]:
+        """SpikeInterface stores channels as 1-indexed integers: "AP1", ...,
+        "AP384". This method returns the 0-indexed *integers* for each probe
+        recorded, for use in indexing into the electrode table.
+        """
+        return {
+            probe: self.sorted_data.sparse_channel_indices(probe)
+            for probe in self.probe_letters_inserted
+        }
+        
     @utils.cached_property
     def units(self) -> pynwb.misc.Units:
         if not self.is_ephys:
