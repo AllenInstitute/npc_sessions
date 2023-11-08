@@ -111,7 +111,7 @@ def plot_drift_maps(
         fig.suptitle(f"{session.session_id}")
         ax.set_title(k, fontsize=8)
         ax.margins(0)
-        ax.axis("off")
+        ax.axis("off")  
         fig.set_size_inches([5, 5])
         fig.tight_layout()
         figs.append(fig)
@@ -129,8 +129,10 @@ def plot_unit_waveform(
         else session.units[:].query("unit_id == @index_or_id").iloc[0]
     )
 
-    mean = unit["waveform_mean"][:, unit["peak_channel"]]
-    sd = unit["waveform_sd"][:, unit["peak_channel"]]
+    electrodes: list[int] = unit["electrodes"]
+    peak_channel_idx = electrodes.index(unit["peak_electrode"])
+    mean = unit["waveform_mean"][:, peak_channel_idx]
+    sd = unit["waveform_sd"][:, peak_channel_idx]
     t = np.arange(mean.size) / session.units.waveform_rate * 1000  # convert to ms
     t -= max(t) / 2  # center around 0
 
@@ -146,7 +148,7 @@ def plot_unit_waveform(
     if session.units.waveform_unit == "microvolts":
         ax.set_aspect(1 / 25)
     ax.grid(True)
-    fig.show()
+    
     return fig
 
 
@@ -161,45 +163,40 @@ def plot_unit_spatiotemporal_waveform(
         session.units[:].iloc[index_or_id]
         if isinstance(index_or_id, int)
         else session.units[:].query("unit_id == @index_or_id").iloc[0]
-    )
+    ) 
 
-    unit["peak_channel"]  # fmt: skip
-    unit["electrode_group_name"]  # fmt: skip
-    electrode_group = (
-        session.electrodes[:]
-        .query("group_name == @electrode_group_name")
-        .sort_values("channel")
-        .reset_index()
-    )
-
+                    
     # assemble df of channels whose data we'll plot
-    # TODO replace with unit.electrodes (indices in electrodes table) when populated
-    peak_electrode = electrode_group.query("channel == @peak_channel")
-    peak_electrode_rel_x, peak_electrode_rel_y = (
-        peak_electrode.iloc[0].rel_x,
-        peak_electrode.iloc[0].rel_y,
-    )
-    max(
+    
+    # electrodes with waveforms for this unit:
+    electrode_group = session.electrodes[:].loc[unit["electrodes"]] 
+    
+    peak_electrode = session.electrodes[:].loc[unit['peak_electrode']]
+    peak_electrode_rel_y = peak_electrode.rel_y
+    # fmt: off
+    min_rel_y = max( 
         peak_electrode_rel_y - vertical_span_microns / 2, electrode_group.rel_y.min()
-    )  # fmt: skip
-    min(
+    ) 
+    max_rel_y = min(
         peak_electrode_rel_y + vertical_span_microns / 2, electrode_group.rel_y.max()
-    )  # fmt: skip
+    ) 
+    # fmt: on
     selected_electrodes = electrode_group.query(
         "rel_y >= @min_rel_y and rel_y <= @max_rel_y"
     )
 
     # find index of "column" of electrodes the peak electrode is in (but don't assume
     # a column means shared x position: they're staggered in 1.0 probes)
-    shared_peak_y = (
+    # TODO would be better to start from the peak and radiate outward, taking
+    # whichever electrode has the highest peak
+    peak_x_index = (
         electrode_group.query("rel_y == @peak_electrode_rel_y")
         .sort_values("rel_x")
         .reset_index()
-    )
-    peak_x_index = shared_peak_y.query("channel == @peak_channel").index[0]
+    ).query(f"channel == {peak_electrode.channel.item()}").index[0]
 
     rows = []
-    for _rel_y in selected_electrodes.rel_y.unique():  # fmt: skip
+    for rel_y in selected_electrodes.rel_y.unique(): 
         # get all channels at this y position
         y = (
             selected_electrodes.query("rel_y == @rel_y")
@@ -210,9 +207,8 @@ def plot_unit_spatiotemporal_waveform(
     column_electrodes = pd.DataFrame(rows)
     assert len(column_electrodes) == len(selected_electrodes.rel_y.unique())
 
-    waveforms = unit["waveform_mean"][:, column_electrodes["id"]]
-    #! note waveforms.shape[1] != len(electrodes), some waveforms missing
-    # TODO presumably surface channels missing, but need to confirm
+    electrode_indices: list[int] = unit["electrodes"]
+    waveforms = unit["waveform_mean"][:, np.searchsorted(electrode_indices, column_electrodes['id'])]
 
     t = (
         np.arange(waveforms.shape[0]) / session.units.waveform_rate * 1000
