@@ -997,7 +997,7 @@ class DynamicRoutingSession:
             raise AttributeError(f"{self.id} hasn't been spike-sorted")
         units = utils.add_global_unit_ids(
             units=utils.make_units_table_from_spike_interface_ks25(
-                self.sorted_data,  # TODO keep spikeinterface obj in self
+                self.sorted_data,
                 self.ephys_timing_data,
                 include_waveform_arrays=True,
             ),
