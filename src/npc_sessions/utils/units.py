@@ -132,43 +132,50 @@ def get_peak_channels(
 
 
 def get_amplitudes_mean_waveforms_peak_channels_ks25(
+    spike_interface_data: utils.SpikeInterfaceKS25Data,
+    electrode_group_name: str,
     templates: npt.NDArray[np.floating],
-    ks_unit_ids: npt.NDArray[np.int64],
     sampling_rate: float,
     post_processed_params: dict,
-) -> tuple[list[float], list[npt.NDArray[np.floating]], list[np.int64]]:
-    unit_amplitudes: list[float] = []
+) -> tuple[list[np.floating], list[npt.NDArray[np.floating]], list[int]]:
+    
+    unit_amplitudes: list[np.floating] = []
     templates_mean: list[npt.NDArray[np.floating]] = []
     peak_channels = []
 
+    # nbefore sets the sample index (in each waveform timeseries) at which to
+    # extract values -> the timeseries with the highest value becomes the peak channel
     """
     @property
     def nbefore(self) -> int:
         nbefore = int(self._params["ms_before"] * self.sampling_frequency / 1000.0)
         return nbefore
     """
+    
     # https://github.com/SpikeInterface/spikeinterface/blob/777a07d3a538394d52a18a05662831a403ee35f9/src/spikeinterface/core/template_tools.py#L8
-    before = int(
+    nbefore = int(
         post_processed_params["ms_before"] * sampling_rate / 1000.0
-    )  # from spike interface, ms_before = 3, # TODO: #38 @arjunsridhar12345 look at this further
-    for index, _ks_unit_id in enumerate(ks_unit_ids):
-        template = templates[index, :, :]
-        values = -template[before, :]
-        # emailed Josh to see how he was getting peak channel - using waveforms, peak channel might be part of metrics in future
-        peak_channel = np.argmax(values)
-        unit_amplitudes.append(values[peak_channel])
-        templates_mean.append(template)
+    )  # from spike interface, ms_before = 3,
+    sparse_channel_indices = spike_interface_data.sparse_channel_indices(electrode_group_name)
+    assert len(sparse_channel_indices) == templates.shape[2], f"Expected {len(sparse_channel_indices)=} channels to match {templates.shape[2]=}"
+    for unit_index in range(templates.shape[0]):        
+        unit_templates = templates[unit_index, :, :]
+        pk_to_pk = np.max(unit_templates, axis=0) - np.min(unit_templates, axis=0) # use same method as Allen ecephys pipeline
+        # https://github.com/bjhardcastle/ecephys_spike_sorting/blob/7e567a6fc3fd2fc0eedef750b83b8b8a0d469544/ecephys_spike_sorting/modules/mean_waveforms/extract_waveforms.py#L87
+        peak_channel = sparse_channel_indices[m := np.argmax(pk_to_pk)]
+        unit_amplitudes.append(pk_to_pk[m].item())
+        templates_mean.append(unit_templates)
         peak_channels.append(peak_channel)
 
     return unit_amplitudes, templates_mean, peak_channels
 
 
 def get_waveform_sd_ks25(
-    templates_std: npt.NDArray[np.floating], ks_unit_ids: list[int]
+    templates_std: npt.NDArray[np.floating]
 ) -> list[npt.NDArray[np.floating]]:
     unit_templates_std: list[npt.NDArray[np.floating]] = []
-    for index, _ks_unit_id in enumerate(ks_unit_ids):
-        template = templates_std[index, :, :]
+    for unit_index in range(templates_std.shape[0]):        
+        template = templates_std[unit_index, :, :]
         unit_templates_std.append(template)
 
     return unit_templates_std
@@ -218,10 +225,11 @@ def _device_helper(
         mean_waveforms,
         peak_channels,
     ) = get_amplitudes_mean_waveforms_peak_channels_ks25(
-        spike_interface_data.templates_average(electrode_group_name),
-        df_device_metrics.index.values,
-        device_timing_on_sync.sampling_rate,
-        spike_interface_data.postprocessed_params_dict(electrode_group_name),
+        spike_interface_data=spike_interface_data,
+        electrode_group_name=electrode_group_name,
+        templates=spike_interface_data.templates_average(electrode_group_name),
+        sampling_rate=device_timing_on_sync.sampling_rate,
+        post_processed_params=spike_interface_data.postprocessed_params_dict(electrode_group_name),
     )
 
     df_device_metrics["peak_channel"] = peak_channels
@@ -244,7 +252,6 @@ def _device_helper(
         df_device_metrics["waveform_mean"] = mean_waveforms
         df_device_metrics["waveform_sd"] = get_waveform_sd_ks25(
             spike_interface_data.templates_std(electrode_group_name),
-            df_device_metrics.index.to_list(),
         )
     df_device_metrics["spike_times"] = unit_spike_times
     df_device_metrics["unit_id"] = df_device_metrics.index.to_list()
