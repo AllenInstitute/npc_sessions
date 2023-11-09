@@ -1035,7 +1035,6 @@ class DynamicRoutingSession:
             raise ValueError(f"no ephys timing data for {self.id} {probe}")
         return ((timing_data.start_time, timing_data.stop_time),)
 
-
     @utils.cached_property
     def sorted_channel_indices(self) -> dict[npc_session.ProbeRecord, tuple[int, ...]]:
         """SpikeInterface stores channels as 1-indexed integers: "AP1", ...,
@@ -1046,7 +1045,7 @@ class DynamicRoutingSession:
             probe: self.sorted_data.sparse_channel_indices(probe)
             for probe in self.probe_letters_inserted
         }
-        
+
     @utils.cached_property
     def units(self) -> pynwb.misc.Units:
         if not self.is_ephys:
@@ -1066,26 +1065,42 @@ class DynamicRoutingSession:
                 "electrode_group",
             ):
                 continue
-            units.add_column(name=column, description="") # TODO add descriptions
-        units.add_column(name="peak_electrode", description="index in `electrodes` table of channel with largest amplitude waveform") 
+            units.add_column(name=column, description="")  # TODO add descriptions
+        units.add_column(
+            name="peak_electrode",
+            description="index in `electrodes` table of channel with largest amplitude waveform",
+        )
         electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
             units.add_unit(
                 **row,  # contains spike_times
-                electrodes=(e := electrodes.query(f"group_name == {row['electrode_group_name']!r}"))
-                    .query(f"channel in {self.sorted_channel_indices[npc_session.ProbeRecord(row['electrode_group_name'])]}")
-                    .index.to_list()
-                ,
+                electrodes=(
+                    e := electrodes.query(
+                        f"group_name == {row['electrode_group_name']!r}"
+                    )
+                )
+                .query(
+                    f"channel in {self.sorted_channel_indices[npc_session.ProbeRecord(row['electrode_group_name'])]}"
+                )
+                .index.to_list(),
                 electrode_group=self.electrode_groups[row["electrode_group_name"]],
-                peak_electrode=e.query(f"channel == {row['peak_channel']}").index.item(),
+                peak_electrode=e.query(
+                    f"channel == {row['peak_channel']}"
+                ).index.item(),
                 obs_intervals=self.get_obs_intervals(row["electrode_group_name"]),
             )
         if "waveform_mean" in units:
-            assert all(len(unit.electrodes) == unit.waveform_mean.shape[1] for _, unit in units[:].iterrows())
+            assert all(
+                len(unit.electrodes) == unit.waveform_mean.shape[1]
+                for _, unit in units[:].iterrows()
+            )
         if "waveform_sd" in units:
-            assert all(len(unit.electrodes) == unit.waveform_sd.shape[1] for _, unit in units[:].iterrows())
+            assert all(
+                len(unit.electrodes) == unit.waveform_sd.shape[1]
+                for _, unit in units[:].iterrows()
+            )
         return units
 
     @utils.cached_property

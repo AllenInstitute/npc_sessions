@@ -221,32 +221,40 @@ class SpikeInterfaceKS25Data:
         return self.read_json(
             self.format_path(self.postprocessed(probe), "sorting.json")
         )
-        
+
     @functools.cache
     def recording_attributes_json(self, probe: str) -> dict:
         return self.read_json(
-            self.format_path(self.postprocessed(probe), "recording_info", "recording_attributes.json")
+            self.format_path(
+                self.postprocessed(probe), "recording_info", "recording_attributes.json"
+            )
         )
-        
+
     @functools.cache
     def sparse_channel_indices(self, probe: str) -> tuple[int, ...]:
         """SpikeInterface stores channels as 1-indexed integers: "AP1", ...,
         "AP384". This method returns the 0-indexed *integers* for each probe
         recorded, for use in indexing into the electrode table.
         """
+
         def int_ids(recording_attributes_json: dict) -> tuple[int, ...]:
             """
             >>> int_ids({'channel_ids': ['AP1', '2', 'CH3', ]})
             (0, 1, 2)
             """
-            values = tuple(sorted(
-                int(''.join(i for i in str(id_) if i.isdigit())) - 1
-                for id_ in recording_attributes_json['channel_ids']
-                ))
-            assert (m := min(values)) >= 0, f"Expected all channel_ids from SpikeInterface to be 1-indexed: min = {m + 1}"
+            values = tuple(
+                sorted(
+                    int("".join(i for i in str(id_) if i.isdigit())) - 1
+                    for id_ in recording_attributes_json["channel_ids"]
+                )
+            )
+            assert (
+                m := min(values)
+            ) >= 0, f"Expected all channel_ids from SpikeInterface to be 1-indexed: min = {m + 1}"
             return values
+
         return int_ids(self.recording_attributes_json(probe))
-        
+
     @functools.cache
     def electrode_locations_xy(self, probe: str) -> npt.NDArray[np.floating]:
         return np.array(

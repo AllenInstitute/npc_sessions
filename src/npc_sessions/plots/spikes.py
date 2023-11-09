@@ -111,7 +111,7 @@ def plot_drift_maps(
         fig.suptitle(f"{session.session_id}")
         ax.set_title(k, fontsize=8)
         ax.margins(0)
-        ax.axis("off")  
+        ax.axis("off")
         fig.set_size_inches([5, 5])
         fig.tight_layout()
         figs.append(fig)
@@ -148,7 +148,7 @@ def plot_unit_waveform(
     if session.units.waveform_unit == "microvolts":
         ax.set_aspect(1 / 25)
     ax.grid(True)
-    
+
     return fig
 
 
@@ -163,23 +163,22 @@ def plot_unit_spatiotemporal_waveform(
         session.units[:].iloc[index_or_id]
         if isinstance(index_or_id, int)
         else session.units[:].query("unit_id == @index_or_id").iloc[0]
-    ) 
+    )
 
-                    
     # assemble df of channels whose data we'll plot
-    
+
     # electrodes with waveforms for this unit:
-    electrode_group = session.electrodes[:].loc[unit["electrodes"]] 
-    
-    peak_electrode = session.electrodes[:].loc[unit['peak_electrode']]
+    electrode_group = session.electrodes[:].loc[unit["electrodes"]]
+
+    peak_electrode = session.electrodes[:].loc[unit["peak_electrode"]]
     peak_electrode_rel_y = peak_electrode.rel_y
     # fmt: off
-    min_rel_y = max( 
+    max(
         peak_electrode_rel_y - vertical_span_microns / 2, electrode_group.rel_y.min()
-    ) 
-    max_rel_y = min(
+    )
+    min(
         peak_electrode_rel_y + vertical_span_microns / 2, electrode_group.rel_y.max()
-    ) 
+    )
     # fmt: on
     selected_electrodes = electrode_group.query(
         "rel_y >= @min_rel_y and rel_y <= @max_rel_y"
@@ -190,13 +189,17 @@ def plot_unit_spatiotemporal_waveform(
     # TODO would be better to start from the peak and radiate outward, taking
     # whichever electrode has the highest peak
     peak_x_index = (
-        electrode_group.query("rel_y == @peak_electrode_rel_y")
-        .sort_values("rel_x")
-        .reset_index()
-    ).query(f"channel == {peak_electrode.channel.item()}").index[0]
+        (
+            electrode_group.query("rel_y == @peak_electrode_rel_y")
+            .sort_values("rel_x")
+            .reset_index()
+        )
+        .query(f"channel == {peak_electrode.channel.item()}")
+        .index[0]
+    )
 
     rows = []
-    for rel_y in selected_electrodes.rel_y.unique(): 
+    for _rel_y in selected_electrodes.rel_y.unique():
         # get all channels at this y position
         y = (
             selected_electrodes.query("rel_y == @rel_y")
@@ -208,7 +211,9 @@ def plot_unit_spatiotemporal_waveform(
     assert len(column_electrodes) == len(selected_electrodes.rel_y.unique())
 
     electrode_indices: list[int] = unit["electrodes"]
-    waveforms = unit["waveform_mean"][:, np.searchsorted(electrode_indices, column_electrodes['id'])]
+    waveforms = unit["waveform_mean"][
+        :, np.searchsorted(electrode_indices, column_electrodes["id"])
+    ]
 
     t = (
         np.arange(waveforms.shape[0]) / session.units.waveform_rate * 1000

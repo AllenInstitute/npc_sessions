@@ -138,7 +138,6 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
     sampling_rate: float,
     post_processed_params: dict,
 ) -> tuple[list[np.floating], list[npt.NDArray[np.floating]], list[int]]:
-    
     unit_amplitudes: list[np.floating] = []
     templates_mean: list[npt.NDArray[np.floating]] = []
     peak_channels = []
@@ -151,16 +150,22 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
         nbefore = int(self._params["ms_before"] * self.sampling_frequency / 1000.0)
         return nbefore
     """
-    
+
     # https://github.com/SpikeInterface/spikeinterface/blob/777a07d3a538394d52a18a05662831a403ee35f9/src/spikeinterface/core/template_tools.py#L8
-    nbefore = int(
+    int(
         post_processed_params["ms_before"] * sampling_rate / 1000.0
     )  # from spike interface, ms_before = 3,
-    sparse_channel_indices = spike_interface_data.sparse_channel_indices(electrode_group_name)
-    assert len(sparse_channel_indices) == templates.shape[2], f"Expected {len(sparse_channel_indices)=} channels to match {templates.shape[2]=}"
-    for unit_index in range(templates.shape[0]):        
+    sparse_channel_indices = spike_interface_data.sparse_channel_indices(
+        electrode_group_name
+    )
+    assert (
+        len(sparse_channel_indices) == templates.shape[2]
+    ), f"Expected {len(sparse_channel_indices)=} channels to match {templates.shape[2]=}"
+    for unit_index in range(templates.shape[0]):
         unit_templates = templates[unit_index, :, :]
-        pk_to_pk = np.max(unit_templates, axis=0) - np.min(unit_templates, axis=0) # use same method as Allen ecephys pipeline
+        pk_to_pk = np.max(unit_templates, axis=0) - np.min(
+            unit_templates, axis=0
+        )  # use same method as Allen ecephys pipeline
         # https://github.com/bjhardcastle/ecephys_spike_sorting/blob/7e567a6fc3fd2fc0eedef750b83b8b8a0d469544/ecephys_spike_sorting/modules/mean_waveforms/extract_waveforms.py#L87
         peak_channel = sparse_channel_indices[(m := np.argmax(pk_to_pk))]
         unit_amplitudes.append(pk_to_pk[m].item())
@@ -171,10 +176,10 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
 
 
 def get_waveform_sd_ks25(
-    templates_std: npt.NDArray[np.floating]
+    templates_std: npt.NDArray[np.floating],
 ) -> list[npt.NDArray[np.floating]]:
     unit_templates_std: list[npt.NDArray[np.floating]] = []
-    for unit_index in range(templates_std.shape[0]):        
+    for unit_index in range(templates_std.shape[0]):
         template = templates_std[unit_index, :, :]
         unit_templates_std.append(template)
 
@@ -229,7 +234,9 @@ def _device_helper(
         electrode_group_name=electrode_group_name,
         templates=spike_interface_data.templates_average(electrode_group_name),
         sampling_rate=device_timing_on_sync.sampling_rate,
-        post_processed_params=spike_interface_data.postprocessed_params_dict(electrode_group_name),
+        post_processed_params=spike_interface_data.postprocessed_params_dict(
+            electrode_group_name
+        ),
     )
 
     df_device_metrics["peak_channel"] = peak_channels
