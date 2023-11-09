@@ -52,6 +52,7 @@ jobs:
         CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
         CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
       run: |
+        mkdir .mypy_cache
         pdm run prebuild
         
     - name: Bump project version
