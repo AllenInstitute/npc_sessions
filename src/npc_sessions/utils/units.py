@@ -162,7 +162,7 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
         unit_templates = templates[unit_index, :, :]
         pk_to_pk = np.max(unit_templates, axis=0) - np.min(unit_templates, axis=0) # use same method as Allen ecephys pipeline
         # https://github.com/bjhardcastle/ecephys_spike_sorting/blob/7e567a6fc3fd2fc0eedef750b83b8b8a0d469544/ecephys_spike_sorting/modules/mean_waveforms/extract_waveforms.py#L87
-        peak_channel = sparse_channel_indices[m := np.argmax(pk_to_pk)]
+        peak_channel = sparse_channel_indices[(m := np.argmax(pk_to_pk))]
         unit_amplitudes.append(pk_to_pk[m].item())
         templates_mean.append(unit_templates)
         peak_channels.append(peak_channel)
