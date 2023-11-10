@@ -137,10 +137,10 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
     templates: npt.NDArray[np.floating],
     sampling_rate: float,
     post_processed_params: dict,
-) -> tuple[list[np.floating], list[npt.NDArray[np.floating]], list[int]]:
+) -> tuple[tuple[np.floating, ...], tuple[npt.NDArray[np.floating], ...], tuple[np.intp, ...]]:
     unit_amplitudes: list[np.floating] = []
     templates_mean: list[npt.NDArray[np.floating]] = []
-    peak_channels = []
+    peak_channels: list[np.intp] = []
 
     # nbefore sets the sample index (in each waveform timeseries) at which to
     # extract values -> the timeseries with the highest value becomes the peak channel
@@ -164,7 +164,7 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
         templates_mean.append(template)
         peak_channels.append(peak_channel)
 
-    return unit_amplitudes, templates_mean, peak_channels
+    return tuple(unit_amplitudes), tuple(templates_mean), tuple(peak_channels)
 
 
 def get_waveform_sd_ks25(
