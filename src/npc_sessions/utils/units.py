@@ -152,12 +152,12 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
     """
 
     # https://github.com/SpikeInterface/spikeinterface/blob/777a07d3a538394d52a18a05662831a403ee35f9/src/spikeinterface/core/template_tools.py#L8
-    int(
+    nbefore = int(
         post_processed_params["ms_before"] * sampling_rate / 1000.0
     )  # from spike interface, ms_before = 3, # TODO: #38 @arjunsridhar12345 look at this further
     for unit_index in range(templates.shape[0]):
         template = templates[unit_index, :, :]
-        values = -template[before, :]
+        values = -template[nbefore, :]
         # emailed Josh to see how he was getting peak channel - using waveforms, peak channel might be part of metrics in future
         peak_channel = np.argmax(values)
         unit_amplitudes.append(values[peak_channel])
