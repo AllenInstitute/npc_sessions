@@ -154,22 +154,14 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
     # https://github.com/SpikeInterface/spikeinterface/blob/777a07d3a538394d52a18a05662831a403ee35f9/src/spikeinterface/core/template_tools.py#L8
     int(
         post_processed_params["ms_before"] * sampling_rate / 1000.0
-    )  # from spike interface, ms_before = 3,
-    sparse_channel_indices = spike_interface_data.sparse_channel_indices(
-        electrode_group_name
-    )
-    assert (
-        len(sparse_channel_indices) == templates.shape[2]
-    ), f"Expected {len(sparse_channel_indices)=} channels to match {templates.shape[2]=}"
+    )  # from spike interface, ms_before = 3, # TODO: #38 @arjunsridhar12345 look at this further
     for unit_index in range(templates.shape[0]):
-        unit_templates = templates[unit_index, :, :]
-        pk_to_pk = np.max(unit_templates, axis=0) - np.min(
-            unit_templates, axis=0
-        )  # use same method as Allen ecephys pipeline
-        # https://github.com/bjhardcastle/ecephys_spike_sorting/blob/7e567a6fc3fd2fc0eedef750b83b8b8a0d469544/ecephys_spike_sorting/modules/mean_waveforms/extract_waveforms.py#L87
-        peak_channel = sparse_channel_indices[(m := np.argmax(pk_to_pk))]
-        unit_amplitudes.append(pk_to_pk[m].item())
-        templates_mean.append(unit_templates)
+        template = templates[unit_index, :, :]
+        values = -template[before, :]
+        # emailed Josh to see how he was getting peak channel - using waveforms, peak channel might be part of metrics in future
+        peak_channel = np.argmax(values)
+        unit_amplitudes.append(values[peak_channel])
+        templates_mean.append(template)
         peak_channels.append(peak_channel)
 
     return unit_amplitudes, templates_mean, peak_channels
