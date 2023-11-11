@@ -165,8 +165,8 @@ class SpikeInterfaceKS25Data:
             )
         )
 
-    @functools.cache
     def templates_average(self, probe: str) -> npt.NDArray[np.floating]:
+        """[units x channels(sparse) x samples]"""
         return np.load(
             io.BytesIO(
                 self.format_path(
@@ -174,9 +174,9 @@ class SpikeInterfaceKS25Data:
                 ).read_bytes()
             )
         )
-
-    @functools.cache
+    
     def templates_std(self, probe: str) -> npt.NDArray[np.floating]:
+        """[units x channels(sparse) x samples(many all all-zeros)]"""
         return np.load(
             io.BytesIO(
                 self.format_path(
@@ -184,6 +184,31 @@ class SpikeInterfaceKS25Data:
                 ).read_bytes()
             )
         )
+    
+    def sparse_array(self, array: npt.NDArray) -> npt.NDArray:
+        """[units x channels(sparse) x _(entries where mean templates are not all-zeros)]"""
+        return array[
+            np.any(self.templates_average, axis=2)
+        ]
+    
+    @functools.cache
+    def sparse_templates_average(self) -> npt.NDArray[np.floating]:
+        """[units x channels(sparse) x samples(all-zeros removed)]"""
+        return self.templates_average[
+            np.any(self.templates_average, axis=2)
+        ]
+    
+    @functools.cache
+    def sparse_templates_std(self) -> npt.NDArray[np.floating]:
+        """[units x channels(sparse) x samples(all-zeros removed)]"""
+        return self.templates_std[
+            np.any(self.templates_average, axis=2) # keep where averages non-zero
+        ]
+
+    @functools.cache
+    def sparse_array_indices(self) -> npt.NDArray[int]:
+        """[units x channels(sparse) x indices kept in sparse_templates]"""
+        return self.
 
     @functools.cache
     def sorting_cached(self, probe: str) -> dict[str, npt.NDArray]:
