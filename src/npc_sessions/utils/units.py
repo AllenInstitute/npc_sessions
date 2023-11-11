@@ -72,36 +72,6 @@ def get_unit_spike_times_dict(
     return spike_times_dict
 
 
-def get_units_electrodes_spike_times(session: str, *args, **kwargs) -> pl.DataFrame:
-    units_df = get_units_electrodes(session, *args, **kwargs)
-    unit_ids = units_df["unit_name"].to_list()
-    spike_times_dict = get_unit_spike_times_dict(
-        session, tuple(unit_ids), *args, **kwargs
-    )
-    spike_times_df = pl.DataFrame(
-        {
-            "unit_name": tuple(spike_times_dict.keys()),
-            "spike_times": tuple(t for t in spike_times_dict.values()),
-        }
-    )
-    units = pl.DataFrame(units_df).join(spike_times_df, on="unit_name")
-    return (
-        units.with_columns(
-            pl.col("device_name").str.replace("P", "p").alias("device_name"),
-            pl.concat_str(
-                pl.col("device_name").str.replace("Probe", f"{session}_"),
-                pl.col("ks_unit_id").cast(pl.Int64),
-                separator="_",
-            ).alias("unit_id"),
-        ).select(
-            pl.exclude("unit_name", "id"),
-        )
-        # .filter(
-        #    "default_qc",
-        # )
-    )
-
-
 def get_aligned_spike_times(
     spike_times: npt.NDArray[np.floating],
     device_timing_on_sync: utils.EphysTimingInfoOnSync,
@@ -109,26 +79,6 @@ def get_aligned_spike_times(
     return (
         spike_times / device_timing_on_sync.sampling_rate
     ) + device_timing_on_sync.start_time
-
-
-def get_closest_channel(
-    unit_location: npt.NDArray[np.float64], channel_positions: npt.NDArray[np.floating]
-) -> int:
-    distances = np.sum((channel_positions - unit_location) ** 2, axis=1)
-    return int(np.argmin(distances))
-
-
-def get_peak_channels(
-    units_locations: npt.NDArray[np.float64],
-    electrode_positions: npt.NDArray[np.floating],
-) -> list[int]:
-    peak_channels: list[int] = []
-
-    for location in units_locations:
-        unit_location = np.array([location[0], location[1]])
-        peak_channels.append(get_closest_channel(unit_location, electrode_positions))
-
-    return peak_channels
 
 
 def get_amplitudes_mean_waveforms_peak_channels_ks25(
