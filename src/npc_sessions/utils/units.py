@@ -134,9 +134,7 @@ def get_peak_channels(
 def get_amplitudes_mean_waveforms_peak_channels_ks25(
     spike_interface_data: utils.SpikeInterfaceKS25Data,
     electrode_group_name: str,
-    templates: npt.NDArray[np.floating],
     sampling_rate: float,
-    post_processed_params: dict,
 ) -> tuple[tuple[np.floating, ...], tuple[npt.NDArray[np.floating], ...], tuple[np.intp, ...]]:
     unit_amplitudes: list[np.floating] = []
     templates_mean: list[npt.NDArray[np.floating]] = []
@@ -150,10 +148,10 @@ def get_amplitudes_mean_waveforms_peak_channels_ks25(
         nbefore = int(self._params["ms_before"] * self.sampling_frequency / 1000.0)
         return nbefore
     """
-
+    templates = spike_interface_data.templates_average(electrode_group_name)
     # https://github.com/SpikeInterface/spikeinterface/blob/777a07d3a538394d52a18a05662831a403ee35f9/src/spikeinterface/core/template_tools.py#L8
     nbefore = int(
-        post_processed_params["ms_before"] * sampling_rate / 1000.0
+        spike_interface_data.postprocessed_params_dict(electrode_group_name)["ms_before"] * sampling_rate / 1000.0
     )  # from spike interface, ms_before = 3, # TODO: #38 @arjunsridhar12345 look at this further
     for unit_index in range(templates.shape[0]):
         template = templates[unit_index, :, :]
@@ -224,11 +222,7 @@ def _device_helper(
     ) = get_amplitudes_mean_waveforms_peak_channels_ks25(
         spike_interface_data=spike_interface_data,
         electrode_group_name=electrode_group_name,
-        templates=spike_interface_data.templates_average(electrode_group_name),
         sampling_rate=device_timing_on_sync.sampling_rate,
-        post_processed_params=spike_interface_data.postprocessed_params_dict(
-            electrode_group_name
-        ),
     )
 
     df_device_metrics["peak_channel"] = peak_channels
