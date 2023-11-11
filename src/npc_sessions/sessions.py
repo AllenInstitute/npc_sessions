@@ -198,7 +198,8 @@ class DynamicRoutingSession:
     def __hash__(self) -> int:
         return hash(self.id)
 
-    def _add_plots_as_methods(self) -> None:
+    @classmethod
+    def _add_plots_as_methods(cls) -> None:
         """Add plots as methods to session object, so they can be called
         directly, e.g. `session.plot_drift_maps()`.
 
@@ -206,7 +207,7 @@ class DynamicRoutingSession:
         """
         for attr in (attr for attr in plots.__dict__ if attr.startswith("plot_")):
             if getattr((fn := getattr(plots, attr)), "__call__", None) is not None:
-                setattr(self, attr, functools.partial(fn, self))
+                setattr(cls, attr, fn)
 
     @property
     def nwb(self) -> pynwb.NWBFile:
