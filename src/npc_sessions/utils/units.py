@@ -12,7 +12,6 @@ import npc_session
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import polars as pl
 import pynwb
 import tqdm
 
