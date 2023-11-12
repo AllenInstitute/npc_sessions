@@ -199,18 +199,18 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def sparser_templates_average(self, probe: str) -> npt.NDArray[np.floating]:
         """[units x channels(sparse) x samples(all-zeros removed)]"""
-        idx = self.sparse_array_indices(probe) # stores templates in cache
+        idx = self.sparser_array_indices(probe) # stores templates in cache
         a = self._templates_temp_cache.pop(npc_session.ProbeRecord(probe))
         return a[idx]
     
     @functools.cache
     def sparser_templates_std(self, probe: str) -> npt.NDArray[np.floating]:
         """[units x channels(sparse) x samples(all-zeros removed)]"""
-        return self.templates_std(probe)[self.sparse_array_indices(probe)]
+        return self.templates_std(probe)[self.sparser_array_indices(probe)]
 
     @functools.cache
-    def sparser_channel_ids(self, probe: str) -> tuple[int, ...]:
-        return tuple(np.array(self.sparse_channel_indices(probe))[self.sparse_array_indices(probe)])
+    def sparser_channel_indices(self, probe: str) -> tuple[int, ...]:
+        return tuple(np.array(self.sparse_channel_indices(probe))[self.sparser_array_indices(probe)])
 
     @functools.cache
     def sorting_cached(self, probe: str) -> dict[str, npt.NDArray]:
