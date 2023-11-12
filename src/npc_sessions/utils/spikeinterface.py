@@ -185,30 +185,32 @@ class SpikeInterfaceKS25Data:
             )
         )
     
-    def sparse_array(self, array: npt.NDArray) -> npt.NDArray:
-        """[units x channels(sparse) x _(entries where mean templates are not all-zeros)]"""
-        return array[
-            np.any(self.templates_average, axis=2)
+    @functools.cache
+    def sparser_array_indices(self, probe: str) -> npt.NDArray:
+        """[units x channels(sparse) x idx(entries where mean templates are not all-zero)]"""
+        a = self.templates_average(probe)
+        if (v := getattr(self, '_templates_temp_cache')) is None:
+            self._templates_temp_cache = {}
+        self._templates_temp_cache[npc_session.ProbeRecord(probe)] = a
+        return np.indices(a.shape)[1][
+            np.any(a, axis=2)
         ]
     
     @functools.cache
-    def sparse_templates_average(self) -> npt.NDArray[np.floating]:
+    def sparser_templates_average(self, probe: str) -> npt.NDArray[np.floating]:
         """[units x channels(sparse) x samples(all-zeros removed)]"""
-        return self.templates_average[
-            np.any(self.templates_average, axis=2)
-        ]
+        idx = self.sparse_array_indices(probe) # stores templates in cache
+        a = self._templates_temp_cache.pop(npc_session.ProbeRecord(probe))
+        return a[idx]
     
     @functools.cache
-    def sparse_templates_std(self) -> npt.NDArray[np.floating]:
+    def sparser_templates_std(self, probe: str) -> npt.NDArray[np.floating]:
         """[units x channels(sparse) x samples(all-zeros removed)]"""
-        return self.templates_std[
-            np.any(self.templates_average, axis=2) # keep where averages non-zero
-        ]
+        return self.templates_std(probe)[self.sparse_array_indices(probe)]
 
     @functools.cache
-    def sparse_array_indices(self) -> npt.NDArray[int]:
-        """[units x channels(sparse) x indices kept in sparse_templates]"""
-        return self.
+    def sparser_channel_ids(self, probe: str) -> tuple[int, ...]:
+        return tuple(np.array(self.sparse_channel_indices(probe))[self.sparse_array_indices(probe)])
 
     @functools.cache
     def sorting_cached(self, probe: str) -> dict[str, npt.NDArray]:
