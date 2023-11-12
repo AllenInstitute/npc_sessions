@@ -189,7 +189,7 @@ class SpikeInterfaceKS25Data:
     def sparser_array_indices(self, probe: str) -> npt.NDArray:
         """[units x channels(sparse) x idx(entries where mean templates are not all-zero)]"""
         a = self.templates_average(probe)
-        if (v := getattr(self, '_templates_temp_cache')) is None:
+        if getattr(self, '_templates_temp_cache', None) is None:
             self._templates_temp_cache = {}
         self._templates_temp_cache[npc_session.ProbeRecord(probe)] = a
         return np.indices(a.shape)[1][
