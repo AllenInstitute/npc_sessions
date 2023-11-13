@@ -9,6 +9,7 @@ import dataclasses
 import functools
 import io
 import json
+import logging
 from typing import Union
 
 import npc_lims
@@ -20,6 +21,8 @@ import upath
 from typing_extensions import TypeAlias
 
 import npc_sessions.utils as utils
+
+logger = logging.getLogger(__name__)
 
 SpikeInterfaceData: TypeAlias = Union[
     str, npc_session.SessionRecord, utils.PathLike, "SpikeInterfaceKS25Data"
@@ -165,8 +168,8 @@ class SpikeInterfaceKS25Data:
             )
         )
 
-    @functools.cache
     def templates_average(self, probe: str) -> npt.NDArray[np.floating]:
+        logger.debug("Loading templates_average.npy for %s - typically ~200 MB", probe)
         return np.load(
             io.BytesIO(
                 self.format_path(
@@ -175,8 +178,8 @@ class SpikeInterfaceKS25Data:
             )
         )
 
-    @functools.cache
     def templates_std(self, probe: str) -> npt.NDArray[np.floating]:
+        logger.debug("Loading templates_std.npy for %s - typically ~200 MB", probe)
         return np.load(
             io.BytesIO(
                 self.format_path(
