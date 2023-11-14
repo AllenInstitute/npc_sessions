@@ -37,50 +37,53 @@ logger = logging.getLogger(__name__)
 
 
 @typing.overload
-def get_sessions() -> Iterator[DynamicRoutingSession]:
-    ...
-
-
-@typing.overload
-def get_sessions(session: str | npc_session.SessionRecord) -> DynamicRoutingSession:
-    ...
-
-
 def get_sessions(
-    session: str | npc_session.SessionRecord | None = None,
+    id_or_ids: str | npc_session.SessionRecord | npc_lims.SessionInfo,
+    **all_session_kwargs,   
+    ) -> DynamicRoutingSession:
+    ...
+    
+@typing.overload
+def get_sessions(
+    id_or_ids: None | Iterable[str | npc_session.SessionRecord | npc_lims.SessionInfo],
     **all_session_kwargs,
-):
+    ) -> Iterator[DynamicRoutingSession]:
+    ...
+
+# see overloads above for type hints
+def get_sessions(id_or_ids = None, **all_session_kwargs):
     """Uploaded sessions, tracked in npc_lims via `get_session_info()`, newest
     to oldest.
 
-    - if `session` is provided, a single session object is returned
+    - if `id_or_ids` is provided as a single string or record, a single session object is returned
+    - if `id_or_ids` is an iterable of strings or records, a generator of session
+      objects is returned for those sessions
+    - if `id_or_ids` is None, a generator over all sessions is returned
+    
     - sessions with known issues are excluded
+    
     - `all_session_kwargs` will be applied on top of any session-specific kwargs
         - session-specific config from `npc_lims.get_session_kwargs`
           is always applied
         - add extra kwargs here if you want to override or append
           parameters passed to every session __init__
+          
     - returns a generator not because objects take long to create (data is
-      loaded lazily) but because attributes are cached, so we want to avoid
-      keeping references to sessions that are no longer needed
-
-    ## getting an indexable sequence of sessions
-    Just convert the output to a list or tuple, but see the note below if you intend to
-    loop over this sequence to process large amounts of data:
-    >>> sessions = list(get_sessions())                         # doctest: +SKIP
+      loaded lazily) but because some large attributes are cached in memory, so 
+      we want to avoid keeping references to sessions that are no longer needed
 
     ## looping over sessions
     Data is cached in each session object after fetching from the cloud, so
     looping over all sessions can use a lot of memory if all sessions are
     retained.
 
-    ### do this
+    ### do this:
     loop over the generator so each session object is discarded after use:
     >>> nwbs = []
     >>> for session in get_sessions():                          # doctest: +SKIP
     ...     nwbs.append(session.nwb)
 
-    ### avoid this
+    ### avoid this:
     `sessions` will end up storing all data for all sessions in memory:
     >>> sessions = list(get_sessions())                         # doctest: +SKIP
     >>> nwbs = []
@@ -95,18 +98,42 @@ def get_sessions(
     >>> for session in get_sessions(is_sync=False):             # doctest: +SKIP
     ...     trials_dfs.append(session.trials)
     """
-    if session:
-        return DynamicRoutingSession(session, **all_session_kwargs)
-    for session_info in sorted(
-        npc_lims.get_session_info(), key=lambda x: x.date, reverse=True
-    ):
-        if session_info.issues:
-            continue
-
-        yield DynamicRoutingSession(
-            session_info.id,
-            **all_session_kwargs,
+    cls = DynamicRoutingSession # may dispatch type in future
+    
+    is_single_session: bool = (
+        id_or_ids is not None 
+        and (
+            isinstance(id_or_ids, str)  # single str is iterable
+            or not isinstance(id_or_ids, Iterable) 
         )
+    )
+    if is_single_session:
+        return cls(id_or_ids, **all_session_kwargs)
+
+    def multi_session_generator() -> Iterator[DynamicRoutingSession]:
+        if id_or_ids is None:
+            session_infos = sorted(
+                npc_lims.get_session_info(), key=lambda x: x.date, reverse=True
+            )
+        else: 
+            session_infos = (npc_lims.get_session_info(id_) for id_ in id_or_ids)
+        for session_info in session_infos:
+            if session_info.issues:
+                logger.warning(
+                    f"Skipping session {session_info.id} due to known issues: {session_info.issues}"
+                )
+                continue
+            try:
+                yield cls(
+                    session_info.id,
+                    **all_session_kwargs,
+                )
+            except Exception as exc:
+                logger.warning(
+                    f"Error instantiating {cls}({session_info.id!r}): {exc!r}"
+                )
+                continue
+    return multi_session_generator()
 
 
 class DynamicRoutingSession:
@@ -152,7 +179,9 @@ class DynamicRoutingSession:
 
     task_stim_name: str = "DynamicRouting1"
 
-    def __init__(self, session_or_path: str | utils.PathLike, **kwargs) -> None:
+    def __init__(self, session_or_path: str | utils.PathLike | npc_lims.SessionInfo, **kwargs) -> None:
+        if isinstance(session_or_path, npc_lims.SessionInfo):
+            session_or_path = session_or_path.id
         self.id = npc_session.SessionRecord(str(session_or_path))
         if any(
             char in (path := utils.from_pathlike(session_or_path)).as_posix()
