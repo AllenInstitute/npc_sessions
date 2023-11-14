@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-import matplotlib.pyplot as plt
 import matplotlib.figure
+import matplotlib.pyplot as plt
 import numpy as np
 import rich
 
@@ -12,7 +12,9 @@ import npc_sessions.plots.plot_utils as plot_utils
 import npc_sessions.utils as utils
 
 
-def plot_barcode_times(session: "npc_sessions.DynamicRoutingSession") -> matplotlib.figure.Figure:
+def plot_barcode_times(
+    session: "npc_sessions.DynamicRoutingSession",
+) -> matplotlib.figure.Figure:
     devices = utils.get_ephys_timing_on_pxi(session.ephys_recording_dirs)
     fig = plt.figure()
     for device in devices:
@@ -29,7 +31,10 @@ def plot_barcode_times(session: "npc_sessions.DynamicRoutingSession") -> matplot
         plt.plot(np.diff(ephys_barcode_times))
     return fig
 
-def plot_barcode_intervals(session: "npc_sessions.DynamicRoutingSession") -> matplotlib.figure.Figure:
+
+def plot_barcode_intervals(
+    session: "npc_sessions.DynamicRoutingSession",
+) -> matplotlib.figure.Figure:
     """
     Plot barcode intervals for sync and for each probe after sample rate
     correction
