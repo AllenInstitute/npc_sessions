@@ -333,12 +333,16 @@ class DynamicRoutingSession:
         sync = ", without precise timing information" if not self.is_sync else ""
         if not self.is_ephys:
             description = "training session with behavioral task data"
+            if self.info and not self.is_templeton:
+                description += f" (day {self.info.behavior_day})"
             description += opto
             description += video
             description += sync
             return description
         else:
             description = "ecephys session"
+            if self.info and (e := self.info.experiment_day) is not None:
+                description += f" (day {e})"
             description += " without sorted units," if not self.is_sorted else ""
             description += (
                 " without CCF-annotated units,"
@@ -348,6 +352,8 @@ class DynamicRoutingSession:
             description += (
                 f" {'with' if self.is_task else 'without'} behavioral task data"
             )
+            if self.info and not self.is_templeton and self.is_task:
+                description += f" (day {self.info.behavior_day})"
             description += opto
             description += video
             description += sync
