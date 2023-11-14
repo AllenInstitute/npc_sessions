@@ -13,7 +13,7 @@ import re
 import typing
 import uuid
 from collections.abc import Iterable, Iterator
-from typing import Any, Literal
+from typing import Any, Literal, Sequence
 
 import h5py
 import hdmf
@@ -35,23 +35,29 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
+@typing.overload
+def get_sessions(
+    id_or_ids: None = None,
+    **all_session_kwargs,
+    ) -> Iterator[DynamicRoutingSession]:
+    ...
 
 @typing.overload
 def get_sessions(
     id_or_ids: str | npc_session.SessionRecord | npc_lims.SessionInfo,
-    **all_session_kwargs,   
+    **all_session_kwargs,
     ) -> DynamicRoutingSession:
     ...
     
 @typing.overload
 def get_sessions(
-    id_or_ids: None | Iterable[str | npc_session.SessionRecord | npc_lims.SessionInfo],
+    id_or_ids: None | list | tuple | set = None, # insufficient, but mypy sees str & Iterable[str] as unsafe overlap
     **all_session_kwargs,
     ) -> Iterator[DynamicRoutingSession]:
     ...
 
 # see overloads above for type hints
-def get_sessions(id_or_ids = None, **all_session_kwargs):
+def get_sessions(id_or_ids = None, **all_session_kwargs) -> DynamicRoutingSession | Iterator[DynamicRoutingSession]:
     """Uploaded sessions, tracked in npc_lims via `get_session_info()`, newest
     to oldest.
 
@@ -116,7 +122,7 @@ def get_sessions(id_or_ids = None, **all_session_kwargs):
                 npc_lims.get_session_info(), key=lambda x: x.date, reverse=True
             )
         else: 
-            session_infos = (npc_lims.get_session_info(id_) for id_ in id_or_ids)
+            session_infos = [npc_lims.get_session_info(id_) for id_ in id_or_ids]
         for session_info in session_infos:
             if session_info.issues:
                 logger.warning(
