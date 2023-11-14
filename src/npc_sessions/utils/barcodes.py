@@ -245,6 +245,12 @@ def match_barcodes(
     else:
         t_m_end, t_p_end = None, None
 
+    if not any([t_m_start, t_m_end, t_p_start, t_p_end]):
+        raise ValueError(
+            "No matching barcodes found between master and probe lines. "
+            "Either the sync file did not capture this ephys recording (session mix-up), "
+            "or there was a problem with barcode generation or recording (a line disconnected)"
+        )
     return np.array([t_p_start, t_p_end]), np.array([t_m_start, t_m_end])
 
 
