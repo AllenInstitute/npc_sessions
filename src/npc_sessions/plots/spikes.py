@@ -170,57 +170,30 @@ def plot_unit_spatiotemporal_waveform(
     # electrodes with waveforms for this unit:
     electrode_group = session.electrodes[:].loc[unit["electrodes"]]
 
+    # get largest signal from each row of electrodes on probe
+    electrode_group['amplitudes'] = np.max(unit["waveform_mean"], axis=0) - np.min(unit["waveform_mean"], axis=0)
+    
     peak_electrode = session.electrodes[:].loc[unit["peak_electrode"]]
-    peak_electrode_rel_y = peak_electrode.rel_y
-    # fmt: off
-    max(
-        peak_electrode_rel_y - vertical_span_microns / 2, electrode_group.rel_y.min()
-    )
-    min(
-        peak_electrode_rel_y + vertical_span_microns / 2, electrode_group.rel_y.max()
-    )
-    # fmt: on
-    selected_electrodes = electrode_group.query(
-        "rel_y >= @min_rel_y and rel_y <= @max_rel_y"
-    )
-
-    # find index of "column" of electrodes the peak electrode is in (but don't assume
-    # a column means shared x position: they're staggered in 1.0 probes)
-    # TODO would be better to start from the peak and radiate outward, taking
-    # whichever electrode has the highest peak
-    peak_x_index = (
-        (
-            electrode_group.query("rel_y == @peak_electrode_rel_y")
-            .sort_values("rel_x")
-            .reset_index()
-        )
-        .query(f"channel == {peak_electrode.channel.item()}")
-        .index[0]
-    )
+    # ^ this is incorrect until annotations have been updated
+    peak_electrode = electrode_group.sort_values(by='amplitudes').iloc[-1]
 
     rows = []
-    for _rel_y in selected_electrodes.rel_y.unique():
-        # get all channels at this y position
-        y = (
-            selected_electrodes.query("rel_y == @rel_y")
-            .sort_values("rel_x")
-            .reset_index()
-        )
-        rows.append(y.iloc[peak_x_index])
-    column_electrodes = pd.DataFrame(rows)
-    assert len(column_electrodes) == len(selected_electrodes.rel_y.unique())
+    for _rel_y in electrode_group.rel_y.unique():
+        rows.append(electrode_group.query(f"rel_y == {_rel_y}").sort_values(by='amplitudes').iloc[-1])
+    selected_electrodes = pd.DataFrame(rows)
+    assert len(selected_electrodes) == len(electrode_group.rel_y.unique())
 
     electrode_indices: list[int] = unit["electrodes"]
     waveforms = unit["waveform_mean"][
-        :, np.searchsorted(electrode_indices, column_electrodes["id"])
+        :, np.searchsorted(electrode_indices, selected_electrodes.index)
     ]
 
     t = (
         np.arange(waveforms.shape[0]) / session.units.waveform_rate * 1000
     )  # convert to ms
     t -= max(t) / 2  # center around 0
-    y = sorted(column_electrodes.rel_y)
-    y -= peak_electrode_rel_y  # center around peak electrode
+    absolute_y = sorted(selected_electrodes.rel_y)
+    relative_y =  absolute_y - peak_electrode.rel_y  # center around peak electrode
 
     fig = plt.figure()
     norm = matplotlib.colors.TwoSlopeNorm(
