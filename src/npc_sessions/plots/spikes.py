@@ -171,15 +171,21 @@ def plot_unit_spatiotemporal_waveform(
     electrode_group = session.electrodes[:].loc[unit["electrodes"]]
 
     # get largest signal from each row of electrodes on probe
-    electrode_group['amplitudes'] = np.max(unit["waveform_mean"], axis=0) - np.min(unit["waveform_mean"], axis=0)
-    
+    electrode_group["amplitudes"] = np.max(unit["waveform_mean"], axis=0) - np.min(
+        unit["waveform_mean"], axis=0
+    )
+
     peak_electrode = session.electrodes[:].loc[unit["peak_electrode"]]
     # ^ this is incorrect until annotations have been updated
-    peak_electrode = electrode_group.sort_values(by='amplitudes').iloc[-1]
+    peak_electrode = electrode_group.sort_values(by="amplitudes").iloc[-1]
 
     rows = []
     for _rel_y in electrode_group.rel_y.unique():
-        rows.append(electrode_group.query(f"rel_y == {_rel_y}").sort_values(by='amplitudes').iloc[-1])
+        rows.append(
+            electrode_group.query(f"rel_y == {_rel_y}")
+            .sort_values(by="amplitudes")
+            .iloc[-1]
+        )
     selected_electrodes = pd.DataFrame(rows)
     assert len(selected_electrodes) == len(electrode_group.rel_y.unique())
 
@@ -193,7 +199,7 @@ def plot_unit_spatiotemporal_waveform(
     )  # convert to ms
     t -= max(t) / 2  # center around 0
     absolute_y = sorted(selected_electrodes.rel_y)
-    relative_y =  absolute_y - peak_electrode.rel_y  # center around peak electrode
+    relative_y = absolute_y - peak_electrode.rel_y  # center around peak electrode
 
     fig = plt.figure()
     norm = matplotlib.colors.TwoSlopeNorm(
@@ -201,7 +207,7 @@ def plot_unit_spatiotemporal_waveform(
         vcenter=0,
         vmax=150,
     )  # otherwise, if all waveforms are zeros the vmin/vmax args become invalid
-    
+
     pcolormesh_kwargs.setdefault("cmap", "bwr")
     _ = plt.pcolormesh(t, relative_y, waveforms.T, norm=norm, **pcolormesh_kwargs)
     ax = fig.gca()
@@ -210,17 +216,23 @@ def plot_unit_spatiotemporal_waveform(
     ax.set_xlabel("milliseconds")
     ax.set_ylabel("microns from peak channel")
     ax.set_yticks(relative_y)
-    secax = ax.secondary_yaxis('right', functions=(lambda y: y + peak_electrode.rel_y, lambda y: y - peak_electrode.rel_y))
-    secax.set_ylabel('microns from tip')
+    secax = ax.secondary_yaxis(
+        "right",
+        functions=(
+            lambda y: y + peak_electrode.rel_y,
+            lambda y: y - peak_electrode.rel_y,
+        ),
+    )
+    secax.set_ylabel("microns from tip")
     secax.set_yticks(absolute_y)
     ax.set_aspect(1 / 50)
     ax.grid(True, axis="x", lw=0.5, color="grey", alpha=0.5)
     plt.colorbar(
-        ax=ax, 
-        fraction=.01, 
-        pad=0.2, 
+        ax=ax,
+        fraction=0.01,
+        pad=0.2,
         label=session.units.waveform_unit,
         ticks=[norm.vmin, norm.vcenter, norm.vmax],
-        )
+    )
 
     return fig

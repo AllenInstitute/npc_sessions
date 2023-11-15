@@ -1,14 +1,10 @@
 from __future__ import annotations
 
 import concurrent.futures
-import functools
-import io
 import logging
-import os
 from collections.abc import Iterable
 from typing import NamedTuple
 
-import npc_lims
 import npc_session
 import numpy as np
 import numpy.typing as npt
@@ -19,7 +15,6 @@ import tqdm
 import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
-
 
 
 def bin_spike_times(
@@ -42,20 +37,22 @@ def get_aligned_spike_times(
         spike_times / device_timing_on_sync.sampling_rate
     ) + device_timing_on_sync.start_time
 
+
 class AmplitudesWaveformsChannels(NamedTuple):
     """Data class, each entry a sequence with len == N units"""
+
     amplitudes: tuple[np.floating, ...]
     templates_mean: tuple[npt.NDArray[np.floating], ...]
     templates_sd: tuple[npt.NDArray[np.floating], ...]
     peak_channels: tuple[np.intp, ...]
     channels: tuple[tuple[np.intp, ...], ...]
-    
+
+
 def get_amplitudes_waveforms_channels_ks25(
     spike_interface_data: utils.SpikeInterfaceKS25Data,
     electrode_group_name: str,
     sampling_rate: float,
 ) -> AmplitudesWaveformsChannels:
-    
     unit_amplitudes: list[np.floating] = []
     templates_mean: list[npt.NDArray[np.floating]] = []
     templates_sd: list[npt.NDArray[np.floating]] = []
@@ -70,10 +67,12 @@ def get_amplitudes_waveforms_channels_ks25(
         nbefore = int(self._params["ms_before"] * self.sampling_frequency / 1000.0)
         return nbefore
     """
-    sparse_channel_indices = spike_interface_data.sparse_channel_indices(electrode_group_name)
+    sparse_channel_indices = spike_interface_data.sparse_channel_indices(
+        electrode_group_name
+    )
     _templates_mean = spike_interface_data.templates_average(electrode_group_name)
     _templates_sd = spike_interface_data.templates_std(electrode_group_name)
-    
+
     # https://github.com/SpikeInterface/spikeinterface/blob/777a07d3a538394d52a18a05662831a403ee35f9/src/spikeinterface/core/template_tools.py#L8
     nbefore = int(
         spike_interface_data.postprocessed_params_dict(electrode_group_name)[
@@ -98,7 +97,7 @@ def get_amplitudes_waveforms_channels_ks25(
         templates_sd.append(_sd[:, idx])
         peak_channels.append(peak_channel)
         logger.debug(f"very_sparse_channel_indices: {very_sparse_channel_indices}")
-        channels.append(tuple(idx)) # TODO switch to very_sparse_channel_indices
+        channels.append(tuple(idx))  # TODO switch to very_sparse_channel_indices
 
     return AmplitudesWaveformsChannels(
         amplitudes=tuple(unit_amplitudes),

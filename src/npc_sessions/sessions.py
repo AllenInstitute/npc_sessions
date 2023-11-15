@@ -1132,9 +1132,9 @@ class DynamicRoutingSession:
                     e := electrodes.query(
                         f"group_name == {row['electrode_group_name']!r}"
                     )
-                ).query(
-                    f"channel in {row['channels']}"
-                ).index.to_list(),
+                )
+                .query(f"channel in {row['channels']}")
+                .index.to_list(),
                 electrode_group=self.electrode_groups[row["electrode_group_name"]],
                 peak_electrode=e.query(
                     f"channel == {row['peak_channel']}"
