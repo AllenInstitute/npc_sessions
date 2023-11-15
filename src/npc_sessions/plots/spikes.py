@@ -155,7 +155,7 @@ def plot_unit_waveform(
 def plot_unit_spatiotemporal_waveform(
     session: npc_sessions.DynamicRoutingSession | pynwb.NWBFile,
     index_or_id: int | str,
-    vertical_span_microns: int = 190,
+    **pcolormesh_kwargs,
 ) -> matplotlib.figure.Figure:
     """Waveforms across channels around peak channel - currently no interpolation"""
 
@@ -197,21 +197,30 @@ def plot_unit_spatiotemporal_waveform(
 
     fig = plt.figure()
     norm = matplotlib.colors.TwoSlopeNorm(
-        vmin=-100,
+        vmin=-150,
         vcenter=0,
-        vmax=50,
+        vmax=150,
     )  # otherwise, if all waveforms are zeros the vmin/vmax args become invalid
-    _ = plt.pcolormesh(t, y, waveforms.T, norm=norm, cmap="bwr")
+    
+    pcolormesh_kwargs.setdefault("cmap", "bwr")
+    _ = plt.pcolormesh(t, relative_y, waveforms.T, norm=norm, **pcolormesh_kwargs)
     ax = fig.gca()
     ax.set_xmargin(0)
     ax.set_xlim(-1.25, 1.25)
     ax.set_xlabel("milliseconds")
-    ax.set_ylabel("microns")
-    ax.set_yticks(y)
+    ax.set_ylabel("microns from peak channel")
+    ax.set_yticks(relative_y)
+    secax = ax.secondary_yaxis('right', functions=(lambda y: y + peak_electrode.rel_y, lambda y: y - peak_electrode.rel_y))
+    secax.set_ylabel('microns from tip')
+    secax.set_yticks(absolute_y)
     ax.set_aspect(1 / 50)
     ax.grid(True, axis="x", lw=0.5, color="grey", alpha=0.5)
-    cbar = plt.colorbar()
-
-    cbar.set_label(session.units.waveform_unit)
+    plt.colorbar(
+        ax=ax, 
+        fraction=.01, 
+        pad=0.2, 
+        label=session.units.waveform_unit,
+        ticks=[norm.vmin, norm.vcenter, norm.vmax],
+        )
 
     return fig
