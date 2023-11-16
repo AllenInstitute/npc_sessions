@@ -569,14 +569,7 @@ class DynamicRoutingSession:
 
     def is_valid_interval(self, start_time: Any, stop_time: Any) -> bool:
         """Check if time interval is valid, based on `invalid_times`"""
-        if self.invalid_times is not None:
-            for _, invalid_interval in self.invalid_times.iterrows():
-                if any(
-                    start_time <= invalid_interval[time] <= stop_time
-                    for time in ("start_time", "stop_time")
-                ):
-                    return False
-        return True
+        return utils.is_valid_interval(self, start_time, stop_time)
 
     @utils.cached_property
     def invalid_times(self) -> pynwb.epoch.TimeIntervals | None:
