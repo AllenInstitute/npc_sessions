@@ -1914,7 +1914,7 @@ class DynamicRoutingSession:
             timing
             for timing in utils.get_ephys_timing_on_pxi(self.surface_recording_dirs)
             if (p := npc_session.extract_probe_letter(timing.name)) is None
-            or p in self.probe_letters_with_surface_channels
+            or p in self.probe_letters_with_surface_channel_recording
         )
 
     @utils.cached_property
