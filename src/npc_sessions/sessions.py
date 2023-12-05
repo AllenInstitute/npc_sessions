@@ -1218,7 +1218,7 @@ class DynamicRoutingSession:
         # there's currently no appropriate ephys MultiContainerInterface
         # but `pynwb.ecephys.FilteredEphys()` would work if otherwise unused
         band: str = "0.3-10 kHz"
-        for probe in self.electrode_groups.values():
+        for probe in self.probe_letters_with_surface_channel_recording:
             timing_info = next(
                 d
                 for d in self.surface_recording_timing_data
