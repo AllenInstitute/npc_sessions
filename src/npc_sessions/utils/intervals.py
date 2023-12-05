@@ -30,12 +30,12 @@ def parse_intervals(
     for i in intervals:
         times: tuple[float, float]
         try:
-            times = (i.get("start_time"), i.get('stop_time')) # type: ignore [attr-defined, assignment, union-attr]
+            times = (i.get("start_time"), i.get('stop_time')) # type: ignore [union-attr]
         except AttributeError:
             times = tuple(i) # type: ignore [assignment]
         if all(isinstance(t, hdmf.common.table.VectorData) for t in times):
             t = typing.cast(tuple[hdmf.common.table.VectorData, hdmf.common.table.VectorData], times)
-            times = (t[0].data, t[1].data) # type: ignore [attr-defined]
+            times = (t[0].data, t[1].data) 
         if all(isinstance(t, Iterable) for t in times):
             t = typing.cast(tuple[Iterable[float], Iterable[float]], times)
             _intervals.extend(parse_intervals(zip(*t)))
