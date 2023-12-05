@@ -1162,10 +1162,9 @@ class DynamicRoutingSession:
                 "create": "create_electrical_series",
             }
         ]
-        
+
     @utils.cached_property
     def _raw_ap(self) -> pynwb.core.MultiContainerInterface:
-
         ap = self.AP()
         #! this will likely not write to disk as the class is not registered with 'CORE_NAMESPACE'
         # there's currently no appropriate ephys MultiContainerInterface
@@ -1212,10 +1211,8 @@ class DynamicRoutingSession:
             )
         return ap
 
-
     @utils.cached_property
     def _raw_surface_ap(self) -> pynwb.core.MultiContainerInterface:
-
         ap = self.AP()
         #! this will likely not write to disk as the class is not registered with 'CORE_NAMESPACE'
         # there's currently no appropriate ephys MultiContainerInterface
@@ -1426,7 +1423,7 @@ class DynamicRoutingSession:
         if self.info and self.info.is_surface_channels:
             return True
         return False
-    
+
     @utils.cached_property
     def is_lfp(self) -> bool:
         if (v := getattr(self, "_is_lfp", None)) is not None:
@@ -1573,7 +1570,9 @@ class DynamicRoutingSession:
                     break
         return self._root_path
 
-    def get_raw_data_paths_from_root(self, root: upath.UPath | None = None) -> tuple[upath.UPath, ...]:
+    def get_raw_data_paths_from_root(
+        self, root: upath.UPath | None = None
+    ) -> tuple[upath.UPath, ...]:
         root = root or self.root_path
         if root is None:
             raise ValueError(f"{self.id} does not have a local root_path assigned yet")
@@ -1615,7 +1614,7 @@ class DynamicRoutingSession:
         raise ValueError(
             f"{self.id} is either an ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}"
         )
-        
+
     @utils.cached_property
     def sorted_data_asset_id(self) -> str | None:
         return getattr(self, "_sorted_data_asset_id", None)
@@ -1876,11 +1875,13 @@ class DynamicRoutingSession:
             for record_node in self.ephys_record_node_dirs
             for p in record_node.glob("experiment*/recording*")
         )
-        
+
     @utils.cached_property
     def surface_record_node_dirs(self) -> tuple[upath.UPath, ...]:
         if self.root_path:
-            surface_channel_root = self.root_path.parent / f"{self.root_path.name}_surface_channels"
+            surface_channel_root = (
+                self.root_path.parent / f"{self.root_path.name}_surface_channels"
+            )
         else:
             surface_channel_root = npc_lims.get_surface_channel_root(self.id)
         return tuple(
@@ -1900,12 +1901,12 @@ class DynamicRoutingSession:
     @utils.cached_property
     def surface_recording_timing_data(self) -> tuple[utils.EphysTimingInfoOnPXI, ...]:
         if not self.is_surface_channels:
-            raise AttributeError(f"{self.id} is not a session with a surface channel recording")
+            raise AttributeError(
+                f"{self.id} is not a session with a surface channel recording"
+            )
         return tuple(
             timing
-            for timing in utils.get_ephys_timing_on_pxi(
-                self.surface_recording_dirs
-            )
+            for timing in utils.get_ephys_timing_on_pxi(self.surface_recording_dirs)
             if (p := npc_session.extract_probe_letter(timing.name)) is None
             or p in self.probe_letters_with_surface_channels
         )
@@ -1998,11 +1999,15 @@ class DynamicRoutingSession:
         return "Neuropixels 1.0 lower channels (1:384)"
 
     @property
-    def probe_letters_with_surface_channels(self) -> tuple[npc_session.ProbeRecord, ...]:
-        if (v := getattr(self, "_probe_letters_with_surface_channel_recordings", None)) is not None:
+    def probe_letters_with_surface_channels(
+        self,
+    ) -> tuple[npc_session.ProbeRecord, ...]:
+        if (
+            v := getattr(self, "_probe_letters_with_surface_channel_recordings", None)
+        ) is not None:
             return tuple(npc_session.ProbeRecord(letter) for letter in v)
         return () if not self.is_surface_channels else self.probe_letters_inserted
-    
+
     @property
     def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
         if (v := getattr(self, "_probe_letters_to_skip", None)) is not None:

@@ -237,5 +237,5 @@ def plot_unit_spatiotemporal_waveform(
     fig.suptitle(
         f"{unit['unit_id']}\n{unit.peak_channel=}\nunit.amplitude={electrode_group['amplitudes'].max():.0f} {session.units.waveform_unit}",
         fontsize=8,
-        )
+    )
     return fig
