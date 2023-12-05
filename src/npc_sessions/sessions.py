@@ -2009,7 +2009,7 @@ class DynamicRoutingSession:
         self,
     ) -> tuple[npc_session.ProbeRecord, ...]:
         if (
-            v := getattr(self, "_probe_letters_with_surface_channel_recordings", None)
+            v := getattr(self, "_probe_letters_with_surface_channel_recording", None)
         ) is not None:
             return tuple(npc_session.ProbeRecord(letter) for letter in v)
         return () if not self.is_surface_channels else self.probe_letters_inserted
