@@ -1247,8 +1247,8 @@ class DynamicRoutingSession:
                 name=probe.name,
                 data=data,
                 electrodes=electrode_table_region,
-                starting_time=-1,
-                rate=timing_info.sampling_rate,
+                starting_time=-1.0,
+                rate=float(timing_info.sampling_rate),
                 channel_conversion=None,
                 filtering=band,
                 conversion=0.195e-6,  # volts/bit
@@ -1422,6 +1422,8 @@ class DynamicRoutingSession:
     def is_surface_channels(self) -> bool:
         if self.info and self.info.is_surface_channels:
             return True
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            return bool(self.surface_root_path)
         return False
 
     @utils.cached_property
@@ -1877,16 +1879,22 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
-    def surface_record_node_dirs(self) -> tuple[upath.UPath, ...]:
+    def surface_root_path(self) -> upath.UPath:
         if self.root_path:
-            surface_channel_root = (
-                self.root_path.parent / f"{self.root_path.name}_surface_channels"
-            )
+            surface_channel_root = self.root_path.parent / f"{self.root_path.name}_surface_channels"
+            if not surface_channel_root.exists():
+                raise FileNotFoundError(
+                    f"Could not find surface channel root at expected {surface_channel_root}"
+                )
         else:
             surface_channel_root = npc_lims.get_surface_channel_root(self.id)
+        return surface_channel_root
+    
+    @utils.cached_property
+    def surface_record_node_dirs(self) -> tuple[upath.UPath, ...]:
         return tuple(
             p
-            for p in self.get_raw_data_paths_from_root(surface_channel_root)
+            for p in self.get_raw_data_paths_from_root(self.surface_root_path)
             if re.match(r"^Record Node [0-9]+$", p.name)
         )
 
@@ -1901,9 +1909,7 @@ class DynamicRoutingSession:
     @utils.cached_property
     def surface_recording_timing_data(self) -> tuple[utils.EphysTimingInfoOnPXI, ...]:
         if not self.is_surface_channels:
-            raise AttributeError(
-                f"{self.id} is not a session with a surface channel recording"
-            )
+            raise AttributeError(f"{self.id} is not a session with a surface channel recording")
         return tuple(
             timing
             for timing in utils.get_ephys_timing_on_pxi(self.surface_recording_dirs)
