@@ -199,6 +199,7 @@ def make_units_table_from_spike_interface_ks25(
     include_waveform_arrays: bool = False,
 ) -> pd.DataFrame:
     """
+    >>> import npc_lims
     >>> device_timing_on_sync = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'))
     >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', device_timing_on_sync)
     >>> len(units[units['electrode_group_name'] == 'probeA'])
