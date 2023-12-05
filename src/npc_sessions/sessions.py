@@ -1037,6 +1037,13 @@ class DynamicRoutingSession:
         return electrodes
 
     @utils.cached_property
+    def is_waveforms(self) -> bool:
+        """Whether to include waveform arrays in the units table"""
+        if (v := getattr(self, "_is_waveforms", None)) is not None:
+            return v
+        return True
+    
+    @utils.cached_property
     def _units(self) -> pd.DataFrame:
         if not self.is_sorted:
             raise AttributeError(f"{self.id} hasn't been spike-sorted")
@@ -1044,7 +1051,7 @@ class DynamicRoutingSession:
             units=utils.make_units_table_from_spike_interface_ks25(
                 self.sorted_data,
                 self.ephys_timing_data,
-                include_waveform_arrays=True,
+                include_waveform_arrays=self.is_waveforms,
             ),
             session=self.id,
         )
@@ -1117,17 +1124,15 @@ class DynamicRoutingSession:
         )
         electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
+            e = electrodes.query(
+                    f"group_name == {row['electrode_group_name']!r}"
+                )
+            if self.is_waveforms:
+                row['electrodes'] = e.query(f"channel in {row['channels']}").index.to_list()
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
             units.add_unit(
                 **row,  # contains spike_times
-                electrodes=(
-                    e := electrodes.query(
-                        f"group_name == {row['electrode_group_name']!r}"
-                    )
-                )
-                .query(f"channel in {row['channels']}")
-                .index.to_list(),
                 electrode_group=self.electrode_groups[row["electrode_group_name"]],
                 peak_electrode=e.query(
                     f"channel == {row['peak_channel']}"
