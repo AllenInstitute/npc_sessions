@@ -2005,7 +2005,7 @@ class DynamicRoutingSession:
         return "Neuropixels 1.0 lower channels (1:384)"
 
     @property
-    def probe_letters_with_surface_channels(
+    def probe_letters_with_surface_channel_recording(
         self,
     ) -> tuple[npc_session.ProbeRecord, ...]:
         if (
