@@ -929,7 +929,7 @@ class SyncDataset:
         ):
             # keep flips after first vsync + an empirically determined min latency
             # between vsync and screen update
-            MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC = 0.018  # 0.22 is typical
+            MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC = 0.018  # 0.022 is typical
             falling = falling[
                 falling > (vsyncs[0] + MIN_VSYNC_DIODE_FLIP_SEPARATION_SEC)
             ]
