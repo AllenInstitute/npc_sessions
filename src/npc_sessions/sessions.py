@@ -334,8 +334,8 @@ class DynamicRoutingSession:
         sync = ", without precise timing information" if not self.is_sync else ""
         if not self.is_ephys:
             description = "training session with behavioral task data"
-            if self.info and not self.is_templeton:
-                description += f" (day {self.info.behavior_day})"
+            if self.info and (b := self.info.behavior_day) is not None:
+                description += f" (day {b})"
             description += opto
             description += video
             description += sync
