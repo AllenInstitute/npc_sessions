@@ -353,8 +353,8 @@ class DynamicRoutingSession:
             description += (
                 f" {'with' if self.is_task else 'without'} behavioral task data"
             )
-            if self.info and not self.is_templeton and self.is_task:
-                description += f" (day {self.info.behavior_day})"
+            if self.info and (b := self.info.behavior_day) is not None:
+                description += f" (day {b})"
             description += opto
             description += video
             description += sync
