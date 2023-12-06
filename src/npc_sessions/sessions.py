@@ -210,7 +210,7 @@ class DynamicRoutingSession:
             if issues := self.info.issues:
                 logger.warning(f"Session {self.id} has known issues: {issues}")
             kwargs = copy.copy(self.info.session_kwargs) | kwargs
-            if self.info.is_sync and not (self.info.is_uploaded or self._root_path):
+            if self.info.is_sync and not (self.info.is_uploaded or self.root_path):
                 logger.warning(
                     f"Session {self.id} is marked as `is_sync=True` by `npc_lims`, but raw data has not been uploaded. "
                     "`is_sync` and `is_ephys` will be set to False for this session (disabling all related data)."
