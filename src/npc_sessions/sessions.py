@@ -17,6 +17,7 @@ from typing import Any, Literal
 
 import h5py
 import hdmf
+import hdmf.common
 import ndx_events
 import npc_lims
 import npc_session
@@ -525,6 +526,7 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         # TODO add filtered, sub-sampled LFP
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
+        modules.append(self._manipulator_info)
         return tuple(modules)
 
     @property
@@ -900,12 +902,27 @@ class DynamicRoutingSession:
             if probe_letter in self.probe_letters_inserted
         )
 
+    @utils.cached_property
+    def _manipulators(self) -> tuple[pynwb.device.Device, ...]:
+        if not self.is_ephys:
+            raise AttributeError(f"{self.id} is not an ephys session")
+        return tuple(
+            pynwb.device.Device(
+                name=row['device'],
+                description=f"Motorized 3-axis micromanipulator for positioning and inserting {probe.name}",
+                manufacturer="NewScale",
+            )
+            for _, row in self._manipulator_info[:].iterrows()
+            if (probe := npc_session.ProbeRecord(row['electrode_group'])) in self.probe_letters_inserted
+        )
+
     @property
     def _devices(self) -> tuple[pynwb.device.Device, ...]:
         """The version passed to NWBFile.__init__"""
         devices: list[pynwb.device.Device] = []
         if self.is_ephys:
             devices.extend(self._probes)
+            devices.extend(self._manipulators)
         return tuple(devices)  # add other devices as we need them
 
     @utils.cached_property
@@ -1601,7 +1618,42 @@ class DynamicRoutingSession:
             raise FileNotFoundError(
                 f"Could not find file in {npc_lims.DR_DATA_REPO} for {self.id}"
             ) from None
+            
+    @utils.cached_property
+    def newscale_log_path(self) -> upath.UPath:
+        if not self.is_ephys:
+            raise AttributeError(f"{self.id} is not an ephys session: no NewScale logs available")
+        p = tuple(p for p in self.raw_data_paths if p.suffix == '.csv' and any(v in p.stem for v in ('log', 'loc')))
+        if not p:
+            raise FileNotFoundError(f"Cannot find .csv")
+        if len(p) > 1:
+            raise ValueError(f"Multiple NewScale log files found: {p}")
+        return p[0]
+    
+    @utils.cached_property
+    def _manipulator_info(self) -> pynwb.core.DynamicTable:
+        if not self.is_ephys:
+            raise AttributeError(f"{self.id} is not an ephys session: no manipulator coords available")
 
+        df = utils.get_newscale_coordinates(self.newscale_log_path, self.session_start_time)
+        t = pynwb.core.DynamicTable(
+            name='manipulator_info',
+            description='position of the motorized stages on each probe\'s manipulator at the time of ecephys recording',
+        )
+        colnames={
+                'electrode_group': "probe device mounted on the manipulator",
+                'device': "serial number of NewScale device",
+                'last_movement': "datetime of last movement of the manipulator",
+                'x': "horizontal position in microns (direction of axis varies)",
+                'y': "horizontal position in microns (direction of axis varies)",
+                'z': "vertical position in microns (+z is inferior, 0 is fully retracted)",
+            }
+        for name, description in colnames.items():
+            t.add_column(name=name, description=description)
+        for _, row in df.iterrows():
+            t.add_row(data=dict(row))
+        return t
+        
     @utils.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
         if self.root_path:
