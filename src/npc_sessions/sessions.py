@@ -908,12 +908,13 @@ class DynamicRoutingSession:
             raise AttributeError(f"{self.id} is not an ephys session")
         return tuple(
             pynwb.device.Device(
-                name=row['device'],
+                name=row["device"],
                 description=f"Motorized 3-axis micromanipulator for positioning and inserting {probe.name}",
                 manufacturer="NewScale",
             )
             for _, row in self._manipulator_info[:].iterrows()
-            if (probe := npc_session.ProbeRecord(row['electrode_group'])) in self.probe_letters_inserted
+            if (probe := npc_session.ProbeRecord(row["electrode_group"]))
+            in self.probe_letters_inserted
         )
 
     @property
@@ -1059,7 +1060,7 @@ class DynamicRoutingSession:
         if (v := getattr(self, "_is_waveforms", None)) is not None:
             return v
         return True
-    
+
     @utils.cached_property
     def _units(self) -> pd.DataFrame:
         if not self.is_sorted:
@@ -1141,11 +1142,11 @@ class DynamicRoutingSession:
         )
         electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
-            e = electrodes.query(
-                    f"group_name == {row['electrode_group_name']!r}"
-                )
+            e = electrodes.query(f"group_name == {row['electrode_group_name']!r}")
             if self.is_waveforms:
-                row['electrodes'] = e.query(f"channel in {row['channels']}").index.to_list()
+                row["electrodes"] = e.query(
+                    f"channel in {row['channels']}"
+                ).index.to_list()
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
             units.add_unit(
@@ -1618,42 +1619,52 @@ class DynamicRoutingSession:
             raise FileNotFoundError(
                 f"Could not find file in {npc_lims.DR_DATA_REPO} for {self.id}"
             ) from None
-            
+
     @utils.cached_property
     def newscale_log_path(self) -> upath.UPath:
         if not self.is_ephys:
-            raise AttributeError(f"{self.id} is not an ephys session: no NewScale logs available")
-        p = tuple(p for p in self.raw_data_paths if p.suffix == '.csv' and any(v in p.stem for v in ('log', 'loc')))
+            raise AttributeError(
+                f"{self.id} is not an ephys session: no NewScale logs available"
+            )
+        p = tuple(
+            p
+            for p in self.raw_data_paths
+            if p.suffix == ".csv" and any(v in p.stem for v in ("log", "loc"))
+        )
         if not p:
-            raise FileNotFoundError(f"Cannot find .csv")
+            raise FileNotFoundError("Cannot find .csv")
         if len(p) > 1:
             raise ValueError(f"Multiple NewScale log files found: {p}")
         return p[0]
-    
+
     @utils.cached_property
     def _manipulator_info(self) -> pynwb.core.DynamicTable:
         if not self.is_ephys:
-            raise AttributeError(f"{self.id} is not an ephys session: no manipulator coords available")
+            raise AttributeError(
+                f"{self.id} is not an ephys session: no manipulator coords available"
+            )
 
-        df = utils.get_newscale_coordinates(self.newscale_log_path, self.session_start_time)
-        t = pynwb.core.DynamicTable(
-            name='manipulator_info',
-            description='position of the motorized stages on each probe\'s manipulator at the time of ecephys recording',
+        df = utils.get_newscale_coordinates(
+            self.newscale_log_path, self.session_start_time
         )
-        colnames={
-                'electrode_group': "probe device mounted on the manipulator",
-                'device': "serial number of NewScale device",
-                'last_movement': "datetime of last movement of the manipulator",
-                'x': "horizontal position in microns (direction of axis varies)",
-                'y': "horizontal position in microns (direction of axis varies)",
-                'z': "vertical position in microns (+z is inferior, 0 is fully retracted)",
-            }
+        t = pynwb.core.DynamicTable(
+            name="manipulator_info",
+            description="position of the motorized stages on each probe's manipulator at the time of ecephys recording",
+        )
+        colnames = {
+            "electrode_group": "probe device mounted on the manipulator",
+            "device": "serial number of NewScale device",
+            "last_movement": "datetime of last movement of the manipulator",
+            "x": "horizontal position in microns (direction of axis varies)",
+            "y": "horizontal position in microns (direction of axis varies)",
+            "z": "vertical position in microns (+z is inferior, 0 is fully retracted)",
+        }
         for name, description in colnames.items():
             t.add_column(name=name, description=description)
         for _, row in df.iterrows():
             t.add_row(data=dict(row))
         return t
-        
+
     @utils.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
         if self.root_path:
