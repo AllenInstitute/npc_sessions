@@ -239,3 +239,48 @@ def plot_unit_spatiotemporal_waveform(
         fontsize=8,
     )
     return fig
+
+def plot_raw_ap_vs_surface(
+    session: npc_sessions.DynamicRoutingSession | pynwb.NWBFile
+) -> tuple[plt.Figure, ...]:
+
+    time_window=0.5  
+
+    figs = []
+    for probe in list(session._raw_ap.fields['electrical_series'].keys()):
+        
+        n_samples=int(time_window*session._raw_ap[probe].rate)
+        offset_corrected=session._raw_ap[probe].data[-n_samples:,:]-np.median(session._raw_ap[probe].data[-n_samples:,:],axis=0)
+        car=(offset_corrected.T-np.median(offset_corrected,axis=1)).T
+
+        if probe in session._raw_surface_ap.fields['electrical_series']:
+            n_samples=int(time_window*session._raw_surface_ap[probe].rate)
+            offset_corrected_surface=session._raw_surface_ap[probe].data[-n_samples:,:]-np.median(session._raw_surface_ap[probe].data[-n_samples:,:],axis=0)
+            car_surface=(offset_corrected_surface.T-np.median(offset_corrected_surface,axis=1)).T
+            surface_channel_recording=True
+        else:
+            surface_channel_recording=False
+
+        range=np.nanstd(car.flatten())*3
+
+        fig, ax = plt.subplots(1,2,figsize=(15,8))
+
+        ax[0].imshow(car.T,aspect='auto',interpolation='none',cmap='bwr',vmin=-range,vmax=range)
+        ax[0].invert_yaxis()
+        ax[0].set_title('deep channels (last '+str(time_window)+' sec of recording)')
+        ax[0].set_ylabel('channel number')
+        ax[0].set_xlabel('samples')
+
+        if surface_channel_recording:
+            ax[1].imshow(car_surface.T,aspect='auto',interpolation='none',cmap='bwr',vmin=-range,vmax=range)
+
+        ax[1].invert_yaxis()
+        ax[1].set_title('surface channels (first '+str(time_window)+' sec of recording)')
+        ax[1].set_xlabel('samples')
+
+        fig.suptitle(session.session_id+' '+probe)
+
+        figs.append(fig)
+
+
+    return tuple(figs)
