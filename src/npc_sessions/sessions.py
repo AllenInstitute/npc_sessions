@@ -899,7 +899,7 @@ class DynamicRoutingSession:
                 self.ephys_settings_xml_data.probe_types,
                 self.ephys_settings_xml_data.probe_letters,
             )
-            if probe_letter in self.probe_letters_inserted
+            if probe_letter in self.probe_letters_to_use
         )
 
     @utils.cached_property
@@ -914,7 +914,7 @@ class DynamicRoutingSession:
             )
             for _, row in self._manipulator_info[:].iterrows()
             if (probe := npc_session.ProbeRecord(row["electrode_group"]))
-            in self.probe_letters_inserted
+            in self.probe_letters_to_use
         )
 
     @property
@@ -978,7 +978,7 @@ class DynamicRoutingSession:
                 self.ephys_settings_xml_data.probe_types,
                 self.ephys_settings_xml_data.probe_letters,
             )
-            if probe_letter in self.probe_letters_inserted
+            if probe_letter in self.probe_letters_to_use
         )
 
     @utils.cached_property
@@ -1021,7 +1021,7 @@ class DynamicRoutingSession:
             self.ephys_settings_xml_data.probe_letters,
             self.ephys_settings_xml_data.channel_pos_xy,
         ):
-            if probe_letter not in self.probe_letters_inserted:
+            if probe_letter not in self.probe_letters_to_use:
                 continue
             group = self.electrode_groups[f"probe{probe_letter}"]
             for channel_label, (x, y) in channel_pos_xy.items():
@@ -1113,7 +1113,7 @@ class DynamicRoutingSession:
         """
         return {
             probe: self.sorted_data.sparse_channel_indices(probe)
-            for probe in self.probe_letters_inserted
+            for probe in self.probe_letters_to_use
         }
 
     @utils.cached_property
@@ -1954,7 +1954,7 @@ class DynamicRoutingSession:
                 self.sync_data, self.ephys_recording_dirs
             )
             if (p := npc_session.extract_probe_letter(timing.device.name)) is None
-            or p in self.probe_letters_inserted
+            or p in self.probe_letters_to_use
         )
 
     @utils.cached_property
@@ -2037,11 +2037,11 @@ class DynamicRoutingSession:
     def probe_letters_with_surface_channel_recording(
         self,
     ) -> tuple[npc_session.ProbeRecord, ...]:
-        if (
-            v := getattr(self, "_probe_letters_with_surface_channel_recording", None)
-        ) is not None:
-            return tuple(npc_session.ProbeRecord(letter) for letter in v)
-        return () if not self.is_surface_channels else self.probe_letters_inserted
+        try:
+            _ = self.surface_recording
+        except AttributeError:
+            return ()
+        return self.surface_recording.probe_letters_to_use
 
     @property
     def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
@@ -2071,10 +2071,10 @@ class DynamicRoutingSession:
     @utils.cached_property
     def probes_inserted(self) -> tuple[str, ...]:
         """('probeA', 'probeB', ...)"""
-        return tuple(probe.name for probe in self.probe_letters_inserted)
+        return tuple(probe.name for probe in self.probe_letters_to_use)
 
     @utils.cached_property
-    def probe_letters_inserted(self) -> tuple[npc_session.ProbeRecord, ...]:
+    def probe_letters_to_use(self) -> tuple[npc_session.ProbeRecord, ...]:
         """('A', 'B', ...)"""
         from_annotation = from_insertion_record = None
         if self.is_annotated:
