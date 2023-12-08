@@ -2297,7 +2297,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         )
 
     @property
-    def probe_letters_to_skip(self) -> tuple[ProbeRecord, ...]:
+    def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
         probes_with_modified_channel_bank = tuple(
             npc_session.ProbeRecord(letter)
             for letter, is_tip_channel_bank
