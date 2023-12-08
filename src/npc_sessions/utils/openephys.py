@@ -8,7 +8,7 @@ import json
 import logging
 import re
 from collections.abc import Generator, Iterable, Sequence
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 import numpy as np
 import numpy.typing as npt
@@ -60,7 +60,7 @@ def get_sync_messages_data(
 
 
 @dataclasses.dataclass(frozen=True, eq=True, unsafe_hash=True)
-class EphysTimingInfoOnPXI:
+class EphysDeviceInfo:
     name: str
     continuous: upath.UPath
     """Abs path to device's folder within raw data/continuous/"""
@@ -70,10 +70,6 @@ class EphysTimingInfoOnPXI:
     """Abs path to device's folder within events/"""
     compressed: upath.UPath | None
     """Abs path to device's zarr storage within ecephys_compressed/, or None if not found"""
-    start_sample: int
-    """Start sample reported in sync_messages.txt"""
-    sampling_rate: float
-    """Nominal sample rate reported in sync_messages.txt"""
     ttl_sample_numbers: npt.NDArray
     """Sample numbers on open ephys clock, after subtracting first sample reported in
     sync_messages.txt"""
@@ -84,21 +80,51 @@ class EphysTimingInfoOnPXI:
     def num_samples(self) -> int:
         return get_ephys_data(self.continuous.parent.parent, device=self).shape[0]
 
+class EphysTimingInfo(Protocol):
+    @property
+    def device(self) -> EphysDeviceInfo: ...
+    @property
+    def sampling_rate(self) -> float: ...
+    """Samples per second"""
+    @property
+    def start_time(self) -> float: ...
+    """Sec, relative to start of experiment"""
+    @property
+    def stop_time(self) -> float: ...
+    """Sec, relative to start of experiment"""
+
+@dataclasses.dataclass(frozen=True, eq=True, unsafe_hash=True)
+class EphysTimingInfoOnPXI:
+    device: EphysDeviceInfo
+    """Info with paths"""
+    start_sample: int
+    """Start sample reported in sync_messages.txt"""
+    sampling_rate: float
+    """Nominal sample rate reported in sync_messages.txt"""
+
+    start_time: float = 0
+    """No sync available, so start_time is meaningless (set to 0)"""
+
+    @property
+    def stop_time(self) -> float:
+        """Simple length of recording using nominal sample rate"""
+        return self.start_time + (self.device.num_samples / self.sampling_rate)
 
 @dataclasses.dataclass(frozen=True, eq=True, unsafe_hash=True)
 class EphysTimingInfoOnSync:
-    name: str
-    device: EphysTimingInfoOnPXI
+    device: EphysDeviceInfo
     """Info with paths"""
     sampling_rate: float
     """Sample rate assessed on the sync clock"""
     start_time: float
     """First sample time (sec) relative to the start of the sync clock"""
 
-    @utils.cached_property
+    @property
     def stop_time(self) -> float:
         """Last sample time (sec) relative to the start of the sync clock"""
         return self.start_time + (self.device.num_samples / self.sampling_rate)
+
+
 
 
 def read_array_range_from_npy(path: utils.PathLike, _range: int | slice) -> npt.NDArray:
@@ -125,7 +151,6 @@ def read_array_range_from_npy(path: utils.PathLike, _range: int | slice) -> npt.
         ),
         dtype=dtype,
     )
-
 
 def get_ephys_timing_on_pxi(
     recording_dirs: Iterable[utils.PathLike],
@@ -183,15 +208,17 @@ def get_ephys_timing_on_pxi(
                 logger.info(f"No compressed data found for {continuous}")
                 compressed = None
             yield EphysTimingInfoOnPXI(
-                name=device,
-                continuous=continuous,
-                events=events,
-                ttl=ttl,
-                compressed=compressed,
+                device=EphysDeviceInfo(
+                    name=device,
+                    continuous=continuous,
+                    events=events,
+                    ttl=ttl,
+                    compressed=compressed,
+                    ttl_sample_numbers=ttl_sample_numbers,
+                    ttl_states=ttl_states,
+                ),
                 start_sample=first_sample_on_ephys_clock,
                 sampling_rate=sampling_rate,
-                ttl_sample_numbers=ttl_sample_numbers,
-                ttl_states=ttl_states,
             )
 
 
@@ -228,12 +255,12 @@ def clipped_path_to_compressed(path: utils.PathLike) -> upath.UPath:
 
 def get_ephys_data(
     *recording_dirs: utils.PathLike,
-    device: str | EphysTimingInfoOnPXI,
+    device: str | EphysDeviceInfo,
 ) -> npt.NDArray[np.int16]:
-    if not isinstance(device, EphysTimingInfoOnPXI):
+    if not isinstance(device, EphysDeviceInfo):
         device = next(
             get_ephys_timing_on_pxi(recording_dirs, only_devices_including=device)
-        )
+        ).device
     if device.compressed:
         data = zarr.open(device.compressed, mode="r")
         return data["traces_seg0"]
@@ -286,33 +313,33 @@ def get_pxi_nidaq_data(
     if device_name:
         device = next(
             get_ephys_timing_on_pxi(recording_dirs, only_devices_including=device_name)
-        )
+        ).device
     else:
-        device = get_pxi_nidaq_device(recording_dirs)
+        device = get_pxi_nidaq_info(recording_dirs).device
     return get_ephys_data(*recording_dirs, device=device)
 
 
-def get_pxi_nidaq_device(
+def get_pxi_nidaq_info(
     recording_dir: Iterable[utils.PathLike],
 ) -> EphysTimingInfoOnPXI:
     """NI-DAQmx device info
 
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
-    >>> get_pxi_nidaq_device(path).ttl.parent.name
+    >>> get_pxi_nidaq_info(path).device.ttl.parent.name
     'NI-DAQmx-105.PXI-6133'
     """
-    device = tuple(
-        get_ephys_timing_on_pxi(recording_dir, only_devices_including="NI-DAQmx-")
+    info = tuple(
+        t for t in get_ephys_timing_on_pxi(recording_dir, only_devices_including="NI-DAQmx-")
     )
-    if not device:
+    if not info:
         raise FileNotFoundError(
             f"No */continuous/NI-DAQmx-*/ dir found in {recording_dir = }"
         )
-    if device and len(device) != 1:
+    if info and len(info) != 1:
         raise FileNotFoundError(
-            f"Expected a single NI-DAQmx folder to exist, but found: {[d.continuous for d in device]}"
+            f"Expected a single NI-DAQmx folder to exist, but found: {[d.device.continuous for d in info]}"
         )
-    return device[0]
+    return info[0]
 
 
 def get_ephys_timing_on_sync(
@@ -354,16 +381,16 @@ def get_ephys_timing_on_sync(
         devices = get_ephys_timing_on_pxi(recording_dirs, only_devices_including)
 
     assert devices is not None
-    for device in devices:
+    for info in devices:
         (
             ephys_barcode_times,
             ephys_barcode_ids,
         ) = utils.extract_barcodes_from_times(
-            on_times=device.ttl_sample_numbers[device.ttl_states > 0]
-            / device.sampling_rate,
-            off_times=device.ttl_sample_numbers[device.ttl_states < 0]
-            / device.sampling_rate,
-            total_time_on_line=device.ttl_sample_numbers[-1] / device.sampling_rate,
+            on_times=info.device.ttl_sample_numbers[info.device.ttl_states > 0]
+            / info.sampling_rate,
+            off_times=info.device.ttl_sample_numbers[info.device.ttl_states < 0]
+            / info.sampling_rate,
+            total_time_on_line=info.device.ttl_sample_numbers[-1] / info.sampling_rate,
         )
 
         timeshift, sampling_rate, _ = utils.get_probe_time_offset(
@@ -372,15 +399,14 @@ def get_ephys_timing_on_sync(
             probe_times=ephys_barcode_times,
             probe_barcodes=ephys_barcode_ids,
             acq_start_index=0,
-            local_probe_rate=device.sampling_rate,
+            local_probe_rate=info.sampling_rate,
         )
         start_time = -timeshift
         if (np.isnan(sampling_rate)) | (~np.isfinite(sampling_rate)):
-            sampling_rate = device.sampling_rate
+            sampling_rate = info.sampling_rate
 
         yield EphysTimingInfoOnSync(
-            name=device.name,
-            device=device,
+            device=info.device,
             sampling_rate=sampling_rate,
             start_time=start_time,
         )

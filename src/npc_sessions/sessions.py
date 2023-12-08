@@ -1096,7 +1096,7 @@ class DynamicRoutingSession:
             (
                 t
                 for t in self.ephys_timing_data
-                if npc_session.extract_probe_letter(t.name)
+                if npc_session.extract_probe_letter(t.device.name)
                 == npc_session.ProbeRecord(probe)
             ),
             None,
@@ -1197,7 +1197,7 @@ class DynamicRoutingSession:
             timing_info = next(
                 d
                 for d in self.ephys_timing_data
-                if d.name.endswith("AP") and probe.name.lower() in d.name.lower()
+                if d.device.name.endswith("AP") and probe.name.lower() in d.device.name.lower()
             )
 
             electrode_table_region = hdmf.common.DynamicTableRegion(
@@ -1291,7 +1291,7 @@ class DynamicRoutingSession:
             timing_info = next(
                 d
                 for d in self.ephys_timing_data
-                if d.name.endswith("LFP") and probe.name.lower() in d.name.lower()
+                if d.device.name.endswith("LFP") and probe.name.lower() in d.device.name.lower()
             )
 
             electrode_table_region = hdmf.common.DynamicTableRegion(
@@ -1947,50 +1947,7 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
-    def surface_root_path(self) -> upath.UPath:
-        if self.root_path:
-            surface_channel_root = (
-                self.root_path.parent / f"{self.root_path.name}_surface_channels"
-            )
-            if not surface_channel_root.exists():
-                raise FileNotFoundError(
-                    f"Could not find surface channel root at expected {surface_channel_root}"
-                )
-        else:
-            surface_channel_root = npc_lims.get_surface_channel_root(self.id)
-        return surface_channel_root
-
-    @utils.cached_property
-    def surface_record_node_dirs(self) -> tuple[upath.UPath, ...]:
-        return tuple(
-            p
-            for p in self.get_raw_data_paths_from_root(self.surface_root_path)
-            if re.match(r"^Record Node [0-9]+$", p.name)
-        )
-
-    @utils.cached_property
-    def surface_recording_dirs(self) -> tuple[upath.UPath, ...]:
-        return tuple(
-            p
-            for record_node in self.surface_record_node_dirs
-            for p in record_node.glob("experiment*/recording*")
-        )
-
-    @utils.cached_property
-    def surface_recording_timing_data(self) -> tuple[utils.EphysTimingInfoOnPXI, ...]:
-        if not self.is_surface_channels:
-            raise AttributeError(
-                f"{self.id} is not a session with a surface channel recording"
-            )
-        return tuple(
-            timing
-            for timing in utils.get_ephys_timing_on_pxi(self.surface_recording_dirs)
-            if (p := npc_session.extract_probe_letter(timing.name)) is None
-            or p in self.probe_letters_with_surface_channel_recording
-        )
-
-    @utils.cached_property
-    def ephys_timing_data(self) -> tuple[utils.EphysTimingInfoOnSync, ...]:
+    def ephys_timing_data(self) -> tuple[utils.EphysTimingInfo, ...]:
         return tuple(
             timing
             for timing in utils.get_ephys_timing_on_sync(

@@ -254,11 +254,11 @@ def plot_raw_ap_vs_surface(
         )
         car = (offset_corrected.T - np.median(offset_corrected, axis=1)).T
 
-        if probe in session._raw_surface_ap.fields["electrical_series"]:
-            n_samples = int(time_window * session._raw_surface_ap[probe].rate)
-            offset_corrected_surface = session._raw_surface_ap[probe].data[
+        if session.is_surface_channels and probe in session.surface_recording._raw_ap.fields["electrical_series"]:
+            n_samples = int(time_window * session.surface_recording._raw_ap[probe].rate)
+            offset_corrected_surface = session.surface_recording._raw_ap[probe].data[
                 -n_samples:, :
-            ] - np.median(session._raw_surface_ap[probe].data[-n_samples:, :], axis=0)
+            ] - np.median(session.surface_recording._raw_ap[probe].data[-n_samples:, :], axis=0)
             car_surface = (
                 offset_corrected_surface.T - np.median(offset_corrected_surface, axis=1)
             ).T

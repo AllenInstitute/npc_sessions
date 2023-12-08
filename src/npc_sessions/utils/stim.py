@@ -714,7 +714,7 @@ def _xcorr(v, w, t) -> tuple[float, float]:
 
 def xcorr(
     nidaq_data: npt.NDArray[np.int16],
-    nidaq_timing: utils.EphysTimingInfoOnSync,
+    nidaq_timing: utils.EphysTimingInfo,
     nidaq_channel: int,
     presentations: Iterable[StimPresentation | None],
     use_envelope: bool = False,
@@ -849,7 +849,7 @@ def get_stim_latencies_from_nidaq_recording(
     correlation_method: Callable[
         [
             npt.NDArray[np.int16],
-            utils.EphysTimingInfoOnSync,
+            utils.EphysTimingInfo,
             int,
             Iterable[StimPresentation | None],
             bool,
@@ -872,7 +872,7 @@ def get_stim_latencies_from_nidaq_recording(
     """
     sync = utils.get_sync_data(sync)
     if not nidaq_device_name:
-        nidaq_device = utils.get_pxi_nidaq_device(recording_dirs)
+        nidaq_device = utils.get_pxi_nidaq_info(recording_dirs)
     else:
         nidaq_device = next(
             utils.get_ephys_timing_on_pxi(
@@ -890,7 +890,7 @@ def get_stim_latencies_from_nidaq_recording(
 
     nidaq_data = utils.get_pxi_nidaq_data(
         *recording_dirs,
-        device_name=nidaq_device.name,
+        device_name=nidaq_device.device.name,
     )
 
     nidaq_channel = get_nidaq_channel_for_stim_onset(

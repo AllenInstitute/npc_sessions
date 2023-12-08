@@ -31,7 +31,7 @@ def bin_spike_times(
 
 def get_aligned_spike_times(
     spike_times: npt.NDArray[np.floating],
-    device_timing_on_sync: utils.EphysTimingInfoOnSync,
+    device_timing_on_sync: utils.EphysTimingInfo,
 ) -> npt.NDArray[np.float64]:
     return (
         spike_times / device_timing_on_sync.sampling_rate
@@ -137,7 +137,7 @@ def get_units_spike_times_ks25(
 
 
 def _device_helper(
-    device_timing_on_sync: utils.EphysTimingInfoOnSync,
+    device_timing_on_sync: utils.EphysTimingInfo,
     spike_interface_data: utils.SpikeInterfaceKS25Data,
     include_waveform_arrays: bool,
 ) -> pd.DataFrame:
@@ -195,7 +195,7 @@ def make_units_table_from_spike_interface_ks25(
     | npc_session.SessionRecord
     | utils.PathLike
     | utils.SpikeInterfaceKS25Data,
-    device_timing_on_sync: Iterable[utils.EphysTimingInfoOnSync],
+    device_timing_on_sync: Iterable[utils.EphysTimingInfo],
     include_waveform_arrays: bool = False,
 ) -> pd.DataFrame:
     """
