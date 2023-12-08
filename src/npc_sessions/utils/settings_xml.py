@@ -40,7 +40,7 @@ import npc_sessions.utils as utils
 @dataclasses.dataclass
 class SettingsXmlInfo:
     """Info from a settings.xml file from an Open Ephys recording.
-    
+
     assumptions:
         - 2 slots
         - 3 ports in use per slot
@@ -58,7 +58,7 @@ class SettingsXmlInfo:
     channel_pos_xy: tuple[dict[str, tuple[int, int]], ...]
     is_tip_channel_bank: tuple[bool, ...]
     """All channels are in the bank closest to the tip"""
-    
+
     def __eq__(self, other) -> bool:
         if not isinstance(other, SettingsXmlInfo):
             return NotImplemented
@@ -173,7 +173,8 @@ def _probe_serial_number_to_channel_pos_xy(
             ),
         )
     )
-    
+
+
 def _probe_serial_number_to_bank_idx(
     et: ET.ElementTree,
 ) -> dict[int, dict[str, int]]:
@@ -186,10 +187,7 @@ def _probe_serial_number_to_bank_idx(
     return dict(
         zip(
             _probe_serial_numbers(et),
-            (
-                {k: int(c.attrib[k]) for k in c.attrib.keys()}
-                for c in channels_iter
-            ),
+            ({k: int(c.attrib[k]) for k in c.attrib.keys()} for c in channels_iter),
         )
     )
 
@@ -224,6 +222,7 @@ def _open_ephys_version(et: ET.ElementTree) -> str:
         raise LookupError(f"No version found: {result!r}")
     return result
 
+
 def _is_tip_channel_bank(
     et: ET.ElementTree,
 ) -> tuple[bool, ...]:
@@ -233,10 +232,10 @@ def _is_tip_channel_bank(
     (True, True, True, False, True, True)
     """
     return tuple(
-        all(channel == 0 for channel in all_channels_for_probe.values()) 
+        all(channel == 0 for channel in all_channels_for_probe.values())
         for all_channels_for_probe in _probe_serial_number_to_bank_idx(et).values()
     )
-    
+
 
 def _settings_xml_md5(path: str | upath.UPath) -> str:
     return hashlib.md5(upath.UPath(path).read_bytes()).hexdigest()

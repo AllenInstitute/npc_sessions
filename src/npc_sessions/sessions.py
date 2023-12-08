@@ -1016,7 +1016,11 @@ class DynamicRoutingSession:
             "imp": "impedance, in ohms",
         }
         for column in column_names:
-            electrodes.add_column(name=column, description=column_description[column], enum=column in ('reference', 'imp'))
+            electrodes.add_column(
+                name=column,
+                description=column_description[column],
+                enum=column in ("reference", "imp"),
+            )
 
         for probe_letter, channel_pos_xy in zip(
             self.ephys_settings_xml_data.probe_letters,
@@ -1198,7 +1202,8 @@ class DynamicRoutingSession:
             timing_info = next(
                 d
                 for d in self.ephys_timing_data
-                if d.device.name.endswith("AP") and probe.name.lower() in d.device.name.lower()
+                if d.device.name.endswith("AP")
+                and probe.name.lower() in d.device.name.lower()
             )
 
             electrode_table_region = hdmf.common.DynamicTableRegion(
@@ -1244,7 +1249,8 @@ class DynamicRoutingSession:
             timing_info = next(
                 d
                 for d in self.ephys_timing_data
-                if d.device.name.endswith("LFP") and probe.name.lower() in d.device.name.lower()
+                if d.device.name.endswith("LFP")
+                and probe.name.lower() in d.device.name.lower()
             )
 
             electrode_table_region = hdmf.common.DynamicTableRegion(
@@ -2271,7 +2277,6 @@ class DynamicRoutingSession:
             surface_channel_root = npc_lims.get_surface_channel_root(self.id)
         return surface_channel_root
 
-
     @utils.cached_property
     def surface_recording(self) -> DynamicRoutingSurfaceRecording:
         if not self.is_surface_channels:
@@ -2284,8 +2289,8 @@ class DynamicRoutingSession:
             **self.kwargs,
         )
 
-class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
 
+class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     @utils.cached_property
     def ephys_timing_data(self) -> tuple[utils.EphysTimingInfo, ...]:
         """Sync data not available, so timing info not accurate"""
@@ -2300,18 +2305,22 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
         probes_with_modified_channel_bank = tuple(
             npc_session.ProbeRecord(letter)
-            for letter, is_tip_channel_bank
-            in zip(
+            for letter, is_tip_channel_bank in zip(
                 self.ephys_settings_xml_data.probe_letters,
-                self.ephys_settings_xml_data.is_tip_channel_bank
+                self.ephys_settings_xml_data.is_tip_channel_bank,
             )
             if is_tip_channel_bank
         )
-        return tuple(sorted(set(probes_with_modified_channel_bank + super().probe_letters_to_skip)))
+        return tuple(
+            sorted(
+                set(probes_with_modified_channel_bank + super().probe_letters_to_skip)
+            )
+        )
 
     class AP(DynamicRoutingSession.AP):
         def __init__(self, *args, **kwargs) -> None:
-            super().__init__(*args, **kwargs | {"name": 'surface_AP'})
+            super().__init__(*args, **kwargs | {"name": "surface_AP"})
+
 
 if __name__ == "__main__":
     import doctest

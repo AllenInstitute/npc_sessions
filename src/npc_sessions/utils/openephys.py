@@ -80,18 +80,30 @@ class EphysDeviceInfo:
     def num_samples(self) -> int:
         return get_ephys_data(self.continuous.parent.parent, device=self).shape[0]
 
+
 class EphysTimingInfo(Protocol):
     @property
-    def device(self) -> EphysDeviceInfo: ...
+    def device(self) -> EphysDeviceInfo:
+        ...
+
     @property
-    def sampling_rate(self) -> float: ...
+    def sampling_rate(self) -> float:
+        ...
+
     """Samples per second"""
+
     @property
-    def start_time(self) -> float: ...
+    def start_time(self) -> float:
+        ...
+
     """Sec, relative to start of experiment"""
+
     @property
-    def stop_time(self) -> float: ...
+    def stop_time(self) -> float:
+        ...
+
     """Sec, relative to start of experiment"""
+
 
 @dataclasses.dataclass(frozen=True, eq=True, unsafe_hash=True)
 class EphysTimingInfoOnPXI:
@@ -110,6 +122,7 @@ class EphysTimingInfoOnPXI:
         """Simple length of recording using nominal sample rate"""
         return self.start_time + (self.device.num_samples / self.sampling_rate)
 
+
 @dataclasses.dataclass(frozen=True, eq=True, unsafe_hash=True)
 class EphysTimingInfoOnSync:
     device: EphysDeviceInfo
@@ -123,8 +136,6 @@ class EphysTimingInfoOnSync:
     def stop_time(self) -> float:
         """Last sample time (sec) relative to the start of the sync clock"""
         return self.start_time + (self.device.num_samples / self.sampling_rate)
-
-
 
 
 def read_array_range_from_npy(path: utils.PathLike, _range: int | slice) -> npt.NDArray:
@@ -151,6 +162,7 @@ def read_array_range_from_npy(path: utils.PathLike, _range: int | slice) -> npt.
         ),
         dtype=dtype,
     )
+
 
 def get_ephys_timing_on_pxi(
     recording_dirs: Iterable[utils.PathLike],
@@ -329,7 +341,10 @@ def get_pxi_nidaq_info(
     'NI-DAQmx-105.PXI-6133'
     """
     info = tuple(
-        t for t in get_ephys_timing_on_pxi(recording_dir, only_devices_including="NI-DAQmx-")
+        t
+        for t in get_ephys_timing_on_pxi(
+            recording_dir, only_devices_including="NI-DAQmx-"
+        )
     )
     if not info:
         raise FileNotFoundError(
