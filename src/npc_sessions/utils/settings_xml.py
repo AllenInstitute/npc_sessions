@@ -39,7 +39,13 @@ import npc_sessions.utils as utils
 
 @dataclasses.dataclass
 class SettingsXmlInfo:
-    """Info from a settings.xml file from an Open Ephys recording."""
+    """Info from a settings.xml file from an Open Ephys recording.
+    
+    assumptions:
+        - 2 slots
+        - 3 ports in use per slot
+        - probes ABCDEF connected in sequence
+    """
 
     path: upath.UPath
     probe_serial_numbers: tuple[int, ...]
@@ -50,7 +56,9 @@ class SettingsXmlInfo:
     start_time: datetime.time
     open_ephys_version: str
     channel_pos_xy: tuple[dict[str, tuple[int, int]], ...]
-
+    is_tip_channel_bank: tuple[bool, ...]
+    """All channels are in the bank closest to the tip"""
+    
     def __eq__(self, other) -> bool:
         if not isinstance(other, SettingsXmlInfo):
             return NotImplemented
@@ -82,6 +90,7 @@ def get_settings_xml_data(path: utils.PathLike | SettingsXmlInfo) -> SettingsXml
         start_time=_date_time(et)[1],
         open_ephys_version=_open_ephys_version(et),
         channel_pos_xy=tuple(_probe_serial_number_to_channel_pos_xy(et).values()),
+        is_tip_channel_bank=_is_tip_channel_bank(et),
     )
 
 
@@ -164,6 +173,25 @@ def _probe_serial_number_to_channel_pos_xy(
             ),
         )
     )
+    
+def _probe_serial_number_to_bank_idx(
+    et: ET.ElementTree,
+) -> dict[int, dict[str, int]]:
+    """`CHANNELS` in settings xml, corresponding to the "bank" index for each
+    channel.
+    - 0 is bank closest to tip
+    """
+    channels_iter = tuple(a for a in et.getroot().iter() if a.tag == "CHANNELS")
+
+    return dict(
+        zip(
+            _probe_serial_numbers(et),
+            (
+                {k: int(c.attrib[k]) for k in c.attrib.keys()}
+                for c in channels_iter
+            ),
+        )
+    )
 
 
 def _probe_idx(et: ET.ElementTree) -> tuple[int, ...]:
@@ -196,6 +224,19 @@ def _open_ephys_version(et: ET.ElementTree) -> str:
         raise LookupError(f"No version found: {result!r}")
     return result
 
+def _is_tip_channel_bank(
+    et: ET.ElementTree,
+) -> tuple[bool, ...]:
+    """
+    >>> x = get_settings_xml_etree('s3://aind-ephys-data/ecephys_660023_2023-08-08_15-11-14/ecephys_clipped/Record Node 102/settings.xml')
+    >>> _is_tip_channel_bank(x)
+    (True, True, True, False, True, True)
+    """
+    return tuple(
+        all(channel == 0 for channel in all_channels_for_probe.values()) 
+        for all_channels_for_probe in _probe_serial_number_to_bank_idx(et).values()
+    )
+    
 
 def _settings_xml_md5(path: str | upath.UPath) -> str:
     return hashlib.md5(upath.UPath(path).read_bytes()).hexdigest()
