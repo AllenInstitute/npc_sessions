@@ -220,6 +220,7 @@ class DynamicRoutingSession:
                 kwargs["is_ephys"] = False
         if kwargs:
             logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
+            self.kwargs = kwargs
         for key, value in kwargs.items():
             if isinstance(
                 getattr(self.__class__, key, None), functools.cached_property
@@ -1227,54 +1228,6 @@ class DynamicRoutingSession:
                 channel_conversion=None,
                 filtering=band,
                 conversion=0.195e-6,  # bit/microVolt from open-ephys
-                comments="",
-                resolution=0.195e-6,
-                description=f"action potential-band voltage timeseries ({band}) from electrodes on {probe.name}",
-                # units=microvolts, # doesn't work - electrical series must be in volts
-            )
-        return ap
-
-    @utils.cached_property
-    def _raw_surface_ap(self) -> pynwb.core.MultiContainerInterface:
-        ap = self.AP()
-        #! this will likely not write to disk as the class is not registered with 'CORE_NAMESPACE'
-        # there's currently no appropriate ephys MultiContainerInterface
-        # but `pynwb.ecephys.FilteredEphys()` would work if otherwise unused
-        band: str = "0.3-10 kHz"
-        for probe in self.probe_letters_with_surface_channel_recording:
-            timing_info = next(
-                d
-                for d in self.surface_recording_timing_data
-                if d.name.endswith("AP") and probe.name.lower() in d.name.lower()
-            )
-
-            electrode_table_region = hdmf.common.DynamicTableRegion(
-                name="electrodes",  # pynwb requires this not be renamed
-                description=f"channels with AP data on {probe.name}",
-                data=tuple(range(0, 384)),  # TODO get correct channel indices
-                table=self.electrodes,
-            )
-
-            # as long as we don't index into the data array (ie to take a subset), it
-            # will be instantly inserted into the electrical series container for lazy access
-            if timing_info.compressed:
-                data = zarr.open(timing_info.compressed, mode="r")["traces_seg0"]
-            else:
-                data = np.memmap(
-                    timing_info.continuous / "continuous.dat",
-                    dtype=np.int16,
-                    mode="r",
-                ).reshape(-1, 384)
-
-            ap.create_electrical_series(
-                name=probe.name,
-                data=data,
-                electrodes=electrode_table_region,
-                starting_time=-1.0,
-                rate=float(timing_info.sampling_rate),
-                channel_conversion=None,
-                filtering=band,
-                conversion=0.195e-6,  # volts/bit
                 comments="",
                 resolution=0.195e-6,
                 description=f"action potential-band voltage timeseries ({band}) from electrodes on {probe.name}",
@@ -2304,6 +2257,61 @@ class DynamicRoutingSession:
             description="individual water rewards delivered to the subject",
         )
 
+    @utils.cached_property
+    def surface_root_path(self) -> upath.UPath:
+        if self.root_path:
+            surface_channel_root = (
+                self.root_path.parent / f"{self.root_path.name}_surface_channels"
+            )
+            if not surface_channel_root.exists():
+                raise FileNotFoundError(
+                    f"Could not find surface channel root at expected {surface_channel_root}"
+                )
+        else:
+            surface_channel_root = npc_lims.get_surface_channel_root(self.id)
+        return surface_channel_root
+
+
+    @utils.cached_property
+    def surface_recording(self) -> DynamicRoutingSurfaceRecording:
+        if not self.is_surface_channels:
+            raise AttributeError(
+                f"{self.id} is not a session with a surface channel recording"
+            )
+        return DynamicRoutingSurfaceRecording(
+            self.surface_root_path,
+            _probe_letters_to_skip=self.probe_letters_to_skip,
+            **self.kwargs,
+        )
+
+class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
+
+    @utils.cached_property
+    def ephys_timing_data(self) -> tuple[utils.EphysTimingInfo, ...]:
+        """Sync data not available, so timing info not accurate"""
+        return tuple(
+            timing
+            for timing in utils.get_ephys_timing_on_pxi(self.ephys_recording_dirs)
+            if (p := npc_session.extract_probe_letter(timing.device.name)) is None
+            or p in self.probe_letters_to_use
+        )
+
+    @property
+    def probe_letters_to_skip(self) -> tuple[ProbeRecord, ...]:
+        probes_with_modified_channel_bank = tuple(
+            npc_session.ProbeRecord(letter)
+            for letter, is_tip_channel_bank
+            in zip(
+                self.ephys_settings_xml_data.probe_letters,
+                self.ephys_settings_xml_data.is_tip_channel_bank
+            )
+            if is_tip_channel_bank
+        )
+        return tuple(sorted(set(probes_with_modified_channel_bank + super().probe_letters_to_skip)))
+
+    class AP(DynamicRoutingSession.AP):
+        def __init__(self, *args, **kwargs) -> None:
+            super().__init__(*args, **kwargs | {"name": 'surface_AP'})
 
 if __name__ == "__main__":
     import doctest
