@@ -970,7 +970,7 @@ class DynamicRoutingSession:
         return tuple(
             pynwb.ecephys.ElectrodeGroup(
                 name=f"probe{probe_letter}",
-                device=self.devices[str(serial_number)],
+                device=next(p for p in self._probes if p.name == str(serial_number)),
                 description=probe_type,
                 location=locations.get(probe_letter, probe_letter),
             )
