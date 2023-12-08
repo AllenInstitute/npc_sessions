@@ -1016,7 +1016,7 @@ class DynamicRoutingSession:
             "imp": "impedance, in ohms",
         }
         for column in column_names:
-            electrodes.add_column(name=column, description=column_description[column])
+            electrodes.add_column(name=column, description=column_description[column], enum=column in ('reference', 'imp'))
 
         for probe_letter, channel_pos_xy in zip(
             self.ephys_settings_xml_data.probe_letters,
