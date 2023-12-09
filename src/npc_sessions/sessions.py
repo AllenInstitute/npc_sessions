@@ -1554,13 +1554,24 @@ class DynamicRoutingSession:
                     break
         return self._root_path
 
+    @utils.cached_property
+    def ephys_paths(self) -> tuple[upath.UPath, ...] | None:
+        """Paths to specific Record Node * folders, in case they live outside of `root_path`"""
+        if (v := getattr(self, "_ephys_paths", None)) is not None:
+            v = json.loads(v)
+            if isinstance(v, str):
+                v = [v]
+            assert isinstance(v, list)
+            return tuple({upath.UPath(_) for _ in v})
+        return None
+    
     def get_raw_data_paths_from_root(
         self, root: upath.UPath | None = None
     ) -> tuple[upath.UPath, ...]:
         root = root or self.root_path
         if root is None:
             raise ValueError(f"{self.id} does not have a local root_path assigned yet")
-        ephys_paths = itertools.chain(
+        ephys_paths = self.ephys_paths or itertools.chain(
             root.glob("Record Node *"),
             root.glob("*/Record Node *"),
         )
