@@ -17,7 +17,8 @@ if TYPE_CHECKING:
 import npc_sessions.plots.plot_utils as plot_utils
 import npc_sessions.utils as utils
 
-matplotlib.rcParams.update({'font.size': 8})
+matplotlib.rcParams.update({"font.size": 8})
+
 
 def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSession):
     units: pd.DataFrame = utils.good_units(session.units)
@@ -242,6 +243,7 @@ def plot_unit_spatiotemporal_waveform(
     )
     return fig
 
+
 def plot_ephys_noise(
     timeseries: pynwb.TimeSeries,
     interval: utils.Interval | None = None,
@@ -255,9 +257,11 @@ def plot_ephys_noise(
     t0, t1 = utils.parse_intervals(interval)[0]
     s0, s1 = np.searchsorted(timestamps, (t0, t1))
     if s0 == s1:
-        raise ValueError(f"{interval=} is out of bounds ({timestamps[0]=}, {timestamps[-1]=})")
+        raise ValueError(
+            f"{interval=} is out of bounds ({timestamps[0]=}, {timestamps[-1]=})"
+        )
     samples = np.arange(s0, s1)
-    data = timeseries.data[samples, :] * timeseries.conversion * 1000 # microvolts
+    data = timeseries.data[samples, :] * timeseries.conversion * 1000  # microvolts
 
     def std(data):
         std = np.nanstd(data, axis=0)
@@ -265,22 +269,26 @@ def plot_ephys_noise(
 
     if ax is None:
         ax = plt.subplot()
-    
-    plot_kwargs.setdefault('lw', .5)
-    plot_kwargs.setdefault('color', 'k')
+
+    plot_kwargs.setdefault("lw", 0.5)
+    plot_kwargs.setdefault("color", "k")
     ax.plot(
-        std(data), np.arange(data.shape[1]),
-        color='k',
+        std(data),
+        np.arange(data.shape[1]),
+        color="k",
         **plot_kwargs,
     )
     if median_subtraction:
         offset_corrected_data = data - np.nanmedian(data, axis=0)
-        median_subtracted_data = (offset_corrected_data.T - np.nanmedian(offset_corrected_data, axis=1)).T
+        median_subtracted_data = (
+            offset_corrected_data.T - np.nanmedian(offset_corrected_data, axis=1)
+        ).T
         ax.plot(
-            std(median_subtracted_data), np.arange(median_subtracted_data.shape[1]),
-            color='r',
-            alpha=.5,
-        **plot_kwargs,
+            std(median_subtracted_data),
+            np.arange(median_subtracted_data.shape[1]),
+            color="r",
+            alpha=0.5,
+            **plot_kwargs,
         )
     ax.set_ymargin(0)
     ax.set_xlabel("SD (microvolts)")
@@ -290,6 +298,7 @@ def plot_ephys_noise(
     assert fig is not None
     return fig
 
+
 def plot_ephys_image(
     timeseries: pynwb.TimeSeries,
     interval: utils.Interval | None = None,
@@ -297,14 +306,15 @@ def plot_ephys_image(
     ax: matplotlib.axes.Axes | None = None,
     **imshow_kwargs,
 ) -> matplotlib.figure.Figure:
-
     timestamps = timeseries.get_timestamps()
     if interval is None:
         interval = ((t := np.ceil(timestamps)[0]), t + 1)
     t0, t1 = utils.parse_intervals(interval)[0]
     s0, s1 = np.searchsorted(timestamps, (t0, t1))
     if s0 == s1:
-        raise ValueError(f"{interval=} is out of bounds ({timestamps[0]=}, {timestamps[-1]=})")
+        raise ValueError(
+            f"{interval=} is out of bounds ({timestamps[0]=}, {timestamps[-1]=})"
+        )
     samples = np.arange(s0, s1)
     data = timeseries.data[samples, :] * timeseries.conversion
     if median_subtraction:
@@ -313,17 +323,17 @@ def plot_ephys_image(
 
     if ax is None:
         ax = plt.subplot()
-    
-    imshow_kwargs.setdefault('vmin', -(vrange := np.nanstd(data) * 3))
-    imshow_kwargs.setdefault('vmax', vrange)
-    imshow_kwargs.setdefault('cmap', 'bwr')
-    imshow_kwargs.setdefault('interpolation', 'none')
-    
+
+    imshow_kwargs.setdefault("vmin", -(vrange := np.nanstd(data) * 3))
+    imshow_kwargs.setdefault("vmax", vrange)
+    imshow_kwargs.setdefault("cmap", "bwr")
+    imshow_kwargs.setdefault("interpolation", "none")
+
     ax.imshow(
         data.T,
-        aspect=5 / data.shape[1], # assumes`extent` provided with seconds
+        aspect=5 / data.shape[1],  # assumes`extent` provided with seconds
         extent=(t0, t1, data.shape[1], 0),
-        **imshow_kwargs
+        **imshow_kwargs,
     )
     ax.invert_yaxis()
     ax.set_ylabel("channel number")
@@ -332,8 +342,9 @@ def plot_ephys_image(
     assert fig is not None
     return fig
 
+
 def plot_session_noise(
-    session: "npc_sessions.DynamicRoutingSession",
+    session: npc_sessions.DynamicRoutingSession,
     lfp: bool = False,
     interval: utils.Interval = None,
     median_subtraction: bool = True,
@@ -343,28 +354,34 @@ def plot_session_noise(
         container = session._raw_lfp
     else:
         container = session._raw_ap
-    fig, axes = plt.subplots(1, len(container.electrical_series), sharex=True, sharey=True)
+    fig, axes = plt.subplots(
+        1, len(container.electrical_series), sharex=True, sharey=True
+    )
     for idx, (label, timeseries) in enumerate(container.electrical_series.items()):
         ax = axes[idx]
         plot_ephys_noise(
-            timeseries, ax=ax, 
-            interval=interval, 
-            median_subtraction=median_subtraction, 
+            timeseries,
+            ax=ax,
+            interval=interval,
+            median_subtraction=median_subtraction,
             **plot_kwargs,
         )
         ax.set_title(label, fontsize=8)
         if idx > 0:
-                ax.yaxis.set_visible(False)
+            ax.yaxis.set_visible(False)
 
         if idx != round(len(axes) / 2):
-                ax.xaxis.set_visible(False)
+            ax.xaxis.set_visible(False)
 
-    fig.suptitle(f'noise on channels with {"LFP" if lfp else "AP"} data | {session.session_id}', fontsize=10)
+    fig.suptitle(
+        f'noise on channels with {"LFP" if lfp else "AP"} data | {session.session_id}',
+        fontsize=10,
+    )
     return fig
 
 
 def plot_session_ephys_images(
-    session: "npc_sessions.DynamicRoutingSession",
+    session: npc_sessions.DynamicRoutingSession,
     lfp: bool = False,
     interval: utils.Interval = None,
     median_subtraction: bool = True,
@@ -375,23 +392,30 @@ def plot_session_ephys_images(
     else:
         container = session._raw_ap
 
-    fig, axes = plt.subplots(1, len(container.electrical_series), sharex=True, sharey=True)
+    fig, axes = plt.subplots(
+        1, len(container.electrical_series), sharex=True, sharey=True
+    )
     for idx, (label, timeseries) in enumerate(container.electrical_series.items()):
         ax = axes[idx]
         plot_ephys_image(
-            timeseries, ax=ax, 
-            interval=interval, 
-            median_subtraction=median_subtraction, 
+            timeseries,
+            ax=ax,
+            interval=interval,
+            median_subtraction=median_subtraction,
             **imshow_kwargs,
         )
         ax.set_title(label, fontsize=8)
         if idx > 0:
-                ax.yaxis.set_visible(False)
+            ax.yaxis.set_visible(False)
 
         if idx != round(len(axes) / 2):
-                ax.xaxis.set_visible(False)
-    fig.suptitle(f'noise on channels with {"LFP" if lfp else "AP"} data | {median_subtraction=} | {session.session_id}', fontsize=10)
+            ax.xaxis.set_visible(False)
+    fig.suptitle(
+        f'noise on channels with {"LFP" if lfp else "AP"} data | {median_subtraction=} | {session.session_id}',
+        fontsize=10,
+    )
     return fig
+
 
 def plot_raw_ap_vs_surface(
     session: npc_sessions.DynamicRoutingSession | pynwb.NWBFile,
