@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import importlib.resources
-import json
 import logging
 import os
-from typing import Iterable
 
 import npc_session
 import upath
@@ -19,7 +17,6 @@ PACKAGE_ROOT = utils.from_pathlike(importlib.resources.files("npc_sessions"))
 
 def write_qc_notebook(
     session_path_or_id: str,
-    ephys_paths: str | list[str] | None,
     save_path: utils.PathLike = upath.UPath.cwd(),
     **session_kwargs,
 ) -> upath.UPath:
@@ -35,8 +32,6 @@ def write_qc_notebook(
     # pass config to run in notebook via env vars
     env = {}
     env["NPC_SESSION_PATH_OR_ID"] = session_path_or_id
-    if ephys_paths:
-        env["NPC_SESSION_EPHYS_PATHS"] = json.dumps(ephys_paths)
     for k, v in session_kwargs.items():
         env[f"NPC_SESSION_{k}"] = str(v)
         # notebook should eval or json.loads env vars to pass to session init
