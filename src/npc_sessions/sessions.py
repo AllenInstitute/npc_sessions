@@ -220,7 +220,7 @@ class DynamicRoutingSession:
                 kwargs["is_ephys"] = False
         if kwargs:
             logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
-            self.kwargs = kwargs
+        self.kwargs = kwargs
         for key, value in kwargs.items():
             if isinstance(
                 getattr(self.__class__, key, None), functools.cached_property
@@ -1228,8 +1228,8 @@ class DynamicRoutingSession:
                 name=probe.name,
                 data=data,
                 electrodes=electrode_table_region,
-                starting_time=timing_info.start_time,
-                rate=timing_info.sampling_rate,
+                starting_time=float(timing_info.start_time),
+                rate=float(timing_info.sampling_rate),
                 channel_conversion=None,
                 filtering=band,
                 conversion=0.195e-6,  # bit/microVolt from open-ephys
@@ -1275,8 +1275,8 @@ class DynamicRoutingSession:
                 name=probe.name,
                 data=data,
                 electrodes=electrode_table_region,
-                starting_time=timing_info.start_time,
-                rate=timing_info.sampling_rate,
+                starting_time=float(timing_info.start_time),
+                rate=float(timing_info.sampling_rate),
                 channel_conversion=None,
                 filtering=band,
                 conversion=0.195e-6,  # bit/microVolt from open-ephys

@@ -230,7 +230,7 @@ def get_ephys_timing_on_pxi(
                     ttl_states=ttl_states,
                 ),
                 start_sample=first_sample_on_ephys_clock,
-                sampling_rate=sampling_rate,
+                sampling_rate=float(sampling_rate),
             )
 
 
@@ -422,8 +422,8 @@ def get_ephys_timing_on_sync(
 
         yield EphysTimingInfoOnSync(
             device=info.device,
-            sampling_rate=sampling_rate,
-            start_time=start_time,
+            sampling_rate=float(sampling_rate),
+            start_time=float(start_time),
         )
 
 
