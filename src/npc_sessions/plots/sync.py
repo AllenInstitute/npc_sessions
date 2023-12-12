@@ -15,18 +15,18 @@ import npc_sessions.utils as utils
 def plot_barcode_times(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> matplotlib.figure.Figure:
-    devices = utils.get_ephys_timing_on_pxi(session.ephys_recording_dirs)
+    timing_info = utils.get_ephys_timing_on_pxi(session.ephys_recording_dirs)
     fig = plt.figure()
-    for device in devices:
+    for info in timing_info:
         (
             ephys_barcode_times,
             ephys_barcode_ids,
         ) = utils.extract_barcodes_from_times(
-            on_times=device.ttl_sample_numbers[device.ttl_states > 0]
-            / device.sampling_rate,
-            off_times=device.ttl_sample_numbers[device.ttl_states < 0]
-            / device.sampling_rate,
-            total_time_on_line=device.ttl_sample_numbers[-1] / device.sampling_rate,
+            on_times=info.device.ttl_sample_numbers[info.device.ttl_states > 0]
+            / info.sampling_rate,
+            off_times=info.device.ttl_sample_numbers[info.device.ttl_states < 0]
+            / info.sampling_rate,
+            total_time_on_line=info.device.ttl_sample_numbers[-1] / info.sampling_rate,
         )
         plt.plot(np.diff(ephys_barcode_times))
     return fig
@@ -52,40 +52,40 @@ def plot_barcode_intervals(
         total_time_on_line=session.sync_data.total_seconds,
     )
 
-    devices_pxi = utils.get_ephys_timing_on_pxi(full_exp_recording_dirs)
-    devices_sync = tuple(
+    timing_pxi = utils.get_ephys_timing_on_pxi(full_exp_recording_dirs)
+    timing_sync = tuple(
         utils.get_ephys_timing_on_sync(session.sync_path, session.ephys_recording_dirs)
     )
     device_barcode_dict = {}
-    for device in devices_pxi:
-        if "NI-DAQmx" in device.name or "LFP" in device.name:
+    for info in timing_pxi:
+        if "NI-DAQmx" in info.device.name or "LFP" in info.device.name:
             continue
 
-        device_sync = [d for d in devices_sync if d.name == device.name][0]
+        device_sync = [d for d in timing_sync if d.device.name == info.device.name][0]
 
         (
             ephys_barcode_times,
             ephys_barcode_ids,
         ) = utils.extract_barcodes_from_times(
-            on_times=device.ttl_sample_numbers[device.ttl_states > 0]
-            / device.sampling_rate,
-            off_times=device.ttl_sample_numbers[device.ttl_states < 0]
-            / device.sampling_rate,
-            total_time_on_line=device.ttl_sample_numbers[-1] / device.sampling_rate,
+            on_times=info.device.ttl_sample_numbers[info.device.ttl_states > 0]
+            / info.sampling_rate,
+            off_times=info.device.ttl_sample_numbers[info.device.ttl_states < 0]
+            / info.sampling_rate,
+            total_time_on_line=info.device.ttl_sample_numbers[-1] / info.sampling_rate,
         )
         raw = ephys_barcode_times
         corrected = ephys_barcode_times * (30000 / device_sync.sampling_rate)
         intervals = np.diff(corrected)
         max_deviation = np.max(np.abs(intervals - np.median(intervals)))
 
-        device_barcode_dict[device.name] = {
+        device_barcode_dict[info.device.name] = {
             "barcode_times_raw": raw,
             "barcode_times_corrected": corrected,
             "max_deviation_from_median_interval": max_deviation,
         }
 
     fig, ax = plt.subplots(1, 3)
-    fig.set_size_inches([8, 4])
+    fig.set_size_inches((8, 4))
     sync_intervals = np.diff(barcode_times)
     sync_max_deviation_from_median_interval = np.max(
         np.abs(sync_intervals - np.median(sync_intervals))
