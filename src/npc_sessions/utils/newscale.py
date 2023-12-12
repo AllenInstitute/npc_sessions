@@ -110,7 +110,7 @@ def get_newscale_coordinates(
         .top_k(6, by=movement)
     )
     if isinstance(df, pl.LazyFrame):
-        df.collect()
+        df = df.collect()
 
     # serial numbers have an extra leading space
     manipulators = df.get_column(NEWSCALE_LOG_COLUMNS[1]).map_elements(
