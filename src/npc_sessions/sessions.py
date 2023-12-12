@@ -2286,12 +2286,12 @@ class DynamicRoutingSession:
             )
         return DynamicRoutingSurfaceRecording(
             self.surface_root_path,
-            _probe_letters_to_skip=self.probe_letters_to_skip,
             **self.kwargs,
         )
 
 
 class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
+
     @utils.cached_property
     def ephys_timing_data(self) -> tuple[utils.EphysTimingInfo, ...]:
         """Sync data not available, so timing info not accurate"""
@@ -2304,7 +2304,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
 
     @property
     def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
-        probes_with_modified_channel_bank = tuple(
+        probes_with_tip_channel_bank = set(
             npc_session.ProbeRecord(letter)
             for letter, is_tip_channel_bank in zip(
                 self.ephys_settings_xml_data.probe_letters,
@@ -2312,9 +2312,13 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
             )
             if is_tip_channel_bank
         )
+        manual_skip = set(
+            npc_session.ProbeRecord(letter)
+            for letter in getattr(self, "_surface_recording_probe_letters_to_skip", '')
+        )
         return tuple(
             sorted(
-                set(probes_with_modified_channel_bank + super().probe_letters_to_skip)
+                (set(super().probe_letters_to_skip) | probes_with_tip_channel_bank) - manual_skip
             )
         )
 
