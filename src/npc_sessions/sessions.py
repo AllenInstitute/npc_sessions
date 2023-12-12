@@ -1604,7 +1604,8 @@ class DynamicRoutingSession:
             )
 
         df = utils.get_newscale_coordinates(
-            self.newscale_log_path, self.session_start_time
+            self.newscale_log_path, 
+            f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}"
         )
         t = pynwb.core.DynamicTable(
             name="manipulator_info",
