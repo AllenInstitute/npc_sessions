@@ -275,7 +275,6 @@ def plot_ephys_noise(
     ax.plot(
         std(data),
         np.arange(data.shape[1]),
-        color="k",
         **plot_kwargs,
     )
     if median_subtraction:
