@@ -343,7 +343,7 @@ def plot_ephys_image(
     return fig
 
 
-def plot_session_noise(
+def plot_session_ephys_noise(
     session: npc_sessions.DynamicRoutingSession,
     lfp: bool = False,
     interval: utils.Interval = None,
