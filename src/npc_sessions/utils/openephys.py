@@ -171,7 +171,7 @@ def get_ephys_timing_on_pxi(
     """
     >>> path = upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/ecephys_clipped/Record Node 102/experiment1/recording1')
     >>> next(get_ephys_timing_on_pxi(path)).sampling_rate
-    30000
+    30000.0
     """
     if not isinstance(recording_dirs, Iterable):
         recording_dirs = (recording_dirs,)
