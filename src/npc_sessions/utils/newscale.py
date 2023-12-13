@@ -116,7 +116,7 @@ def get_newscale_coordinates(
     manipulators = df.get_column(NEWSCALE_LOG_COLUMNS[1]).map_elements(
         lambda _: _.strip()
     )
-    df.replace(NEWSCALE_LOG_COLUMNS[1], manipulators)
+    df = df.with_columns(manipulators)
     probes = manipulators.map_dict(
         {k: f"probe{v}" for k, v in SERIAL_NUM_TO_PROBE_LETTER.items()}
     ).alias("electrode_group")
