@@ -170,7 +170,7 @@ def get_video_file_paths(*paths: utils.PathLike) -> tuple[upath.UPath, ...]:
     return tuple(
         p
         for p in upaths
-        if p.suffix in (".avi", ".mp4", ".zip")
+        if p.suffix in (".avi", ".mp4")
         and any(label in p.stem.lower() for label in ("eye", "face", "beh"))
     )
 
