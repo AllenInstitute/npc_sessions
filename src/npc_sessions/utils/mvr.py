@@ -5,6 +5,7 @@ import logging
 from collections.abc import Container, Iterable, Mapping
 from typing import Literal, TypeVar, Union
 
+import boto3
 import cv2
 import numpy as np
 import numpy.typing as npt
@@ -199,18 +200,34 @@ def get_video_info_data(path_or_info_data: utils.PathLike | Mapping) -> MVRInfoD
 def get_video_data(
     video_or_video_path: cv2.VideoCapture | utils.PathLike,
 ) -> cv2.VideoCapture:
+    """
+    >>> path = 's3://aind-ephys-data/ecephys_660023_2023-08-08_07-58-13/behavior/Behavior_20230808T130057.mp4'
+    >>> v = get_video_data(path)
+    >>> assert isinstance(v, cv2.VideoCapture)
+    """
     if isinstance(video_or_video_path, cv2.VideoCapture):
         return video_or_video_path
 
     video_path = utils.from_pathlike(video_or_video_path)
     # check if this is a local or cloud path
     is_local = video_path.as_uri()[:4] == "file"
-    if not is_local:
-        raise NotImplementedError(
-            "Getting video data not yet implemented for cloud resources"
-        )
-    return cv2.VideoCapture(video_path.as_posix())
+    if is_local:
+        path = video_path.as_posix()
+    else:
+        path = generate_presigned_url(video_path)
+    return cv2.VideoCapture(path)
 
+
+def generate_presigned_url(video_path: utils.PathLike) -> str:
+    video_path = utils.from_pathlike(video_path)
+    bucket = tuple(video_path.parents)[-1].as_posix().split("://")[-1].strip("/")
+    key = video_path.as_posix().split(bucket)[-1]
+    url = boto3.client("s3").generate_presigned_url(
+        ClientMethod="get_object",
+        Params={"Bucket": bucket, "Key": key},
+        ExpiresIn=24 * 3600,
+    )
+    return url
 
 def get_total_frames_in_video(
     video_path: utils.PathLike,
@@ -268,7 +285,6 @@ def get_augmented_camera_info(
         augmented_camera_info[camera] = camera_info
 
     return augmented_camera_info
-
 
 if __name__ == "__main__":
     import doctest
