@@ -204,6 +204,7 @@ def get_video_data(
     >>> path = 's3://aind-ephys-data/ecephys_660023_2023-08-08_07-58-13/behavior/Behavior_20230808T130057.mp4'
     >>> v = get_video_data(path)
     >>> assert isinstance(v, cv2.VideoCapture)
+    >>> assert v.get(cv2.CAP_PROP_FRAME_COUNT) != 0
     """
     if isinstance(video_or_video_path, cv2.VideoCapture):
         return video_or_video_path
@@ -220,11 +221,11 @@ def get_video_data(
 
 def generate_presigned_url(video_path: utils.PathLike) -> str:
     video_path = utils.from_pathlike(video_path)
-    bucket = tuple(video_path.parents)[-1].as_posix().split("://")[-1].strip("/")
+    bucket = tuple(video_path.parents)[-1].as_posix().split("://")[-1]
     key = video_path.as_posix().split(bucket)[-1]
     url = boto3.client("s3").generate_presigned_url(
         ClientMethod="get_object",
-        Params={"Bucket": bucket, "Key": key},
+        Params={"Bucket": bucket.strip("/"), "Key": key},
         ExpiresIn=24 * 3600,
     )
     return url
