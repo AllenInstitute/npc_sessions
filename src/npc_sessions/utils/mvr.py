@@ -229,6 +229,7 @@ def generate_presigned_url(video_path: utils.PathLike) -> str:
     )
     return url
 
+
 def get_total_frames_in_video(
     video_path: utils.PathLike,
 ) -> int:
@@ -285,6 +286,7 @@ def get_augmented_camera_info(
         augmented_camera_info[camera] = camera_info
 
     return augmented_camera_info
+
 
 if __name__ == "__main__":
     import doctest
