@@ -1780,11 +1780,12 @@ class DynamicRoutingSession:
                 f"{self.id} is not a session with sync data (required for video)"
             )
         return utils.get_video_file_paths(*self.raw_data_paths)
-    
+
     @utils.cached_property
     def video_data(self) -> utils.LazyDict[str, cv2.VideoCapture]:
         return utils.LazyDict(
-            (path.stem, (utils.get_video_data, (path,), {})) for path in self.video_paths
+            (path.stem, (utils.get_video_data, (path,), {}))
+            for path in self.video_paths
         )
 
     @property
