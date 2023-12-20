@@ -1721,16 +1721,15 @@ class DynamicRoutingSession:
             ) < self.sync_data.start_time:
                 return False
             if (
-                dt > self.sync_data.stop_time # this check first can save opening file
-                or dt + datetime.timedelta(seconds=utils.get_stim_duration(p)) > self.sync_data.stop_time
+                dt > self.sync_data.stop_time  # this check first can save opening file
+                or dt + datetime.timedelta(seconds=utils.get_stim_duration(p))
+                > self.sync_data.stop_time
             ):
                 return False
             return True
 
         raw_data_paths = self.raw_data_paths or self.stim_path_root.iterdir()
-        if stim_paths := tuple(
-            p for p in raw_data_paths if is_valid_stim_file(p)
-        ):
+        if stim_paths := tuple(p for p in raw_data_paths if is_valid_stim_file(p)):
             return stim_paths
         raise FileNotFoundError(
             f"Could not find stim files for {self.id} in {self.stim_path_root}"
