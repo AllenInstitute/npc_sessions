@@ -1604,8 +1604,8 @@ class DynamicRoutingSession:
             )
 
         df = utils.get_newscale_coordinates(
-            self.newscale_log_path, 
-            f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}"
+            self.newscale_log_path,
+            f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
         )
         t = pynwb.core.DynamicTable(
             name="manipulator_info",
@@ -2291,7 +2291,6 @@ class DynamicRoutingSession:
 
 
 class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
-
     @utils.cached_property
     def ephys_timing_data(self) -> tuple[utils.EphysTimingInfo, ...]:
         """Sync data not available, so timing info not accurate"""
@@ -2304,21 +2303,22 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
 
     @property
     def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
-        probes_with_tip_channel_bank = set(
+        probes_with_tip_channel_bank = {
             npc_session.ProbeRecord(letter)
             for letter, is_tip_channel_bank in zip(
                 self.ephys_settings_xml_data.probe_letters,
                 self.ephys_settings_xml_data.is_tip_channel_bank,
             )
             if is_tip_channel_bank
-        )
-        manual_skip = set(
+        }
+        manual_skip = {
             npc_session.ProbeRecord(letter)
-            for letter in getattr(self, "_surface_recording_probe_letters_to_skip", '')
-        )
+            for letter in getattr(self, "_surface_recording_probe_letters_to_skip", "")
+        }
         return tuple(
             sorted(
-                (set(super().probe_letters_to_skip) | probes_with_tip_channel_bank) - manual_skip
+                (set(super().probe_letters_to_skip) | probes_with_tip_channel_bank)
+                - manual_skip
             )
         )
 
