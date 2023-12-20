@@ -15,18 +15,19 @@ def kwargsets(request):
     """Fixture to test different combinations of kwargs applied to Session"""
     return request.param
 
-class TestParameters(NamedTuple):
+class Parameters(NamedTuple):
+    
     session_id: str
     session_kwargs: dict[str, Any]
     """session-specific config: kwargsets will be updated with this"""
     expected: dict[str, dict[str, Any]]
 
-opto_sessions: tuple[TestParameters, ...] = (
+opto_sessions: tuple[Parameters, ...] = (
     
     # early experiments with galvo ------------------------------------- #
     # always a single device 
     
-    TestParameters(
+    Parameters(
         session_id='636766_2023-01-23',
         session_kwargs=dict(),
         expected=dict(
@@ -40,7 +41,7 @@ opto_sessions: tuple[TestParameters, ...] = (
     
     # a 'simple' mode opto experiment ---------------------------------- #
     
-    TestParameters(
+    Parameters(
         session_id='670248_2023-08-01',
         session_kwargs=dict(),
         expected=dict(
@@ -63,7 +64,7 @@ opto_sessions: tuple[TestParameters, ...] = (
     #      [n_devices x ntrials] (e.g. trialOptoVoltage)
     #   or [n_devices x nlocations x ntrials] (`trialGalvoVoltage`)  
     
-    TestParameters(
+    Parameters(
         session_id='658096 2023-08-15',
         session_kwargs=dict(is_sync=False),
         expected=dict(
