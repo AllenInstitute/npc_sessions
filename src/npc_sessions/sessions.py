@@ -1720,7 +1720,10 @@ class DynamicRoutingSession:
                 dt := npc_session.DatetimeRecord(p.stem).dt
             ) < self.sync_data.start_time:
                 return False
-            if dt > self.sync_data.stop_time:
+            if (
+                dt > self.sync_data.stop_time # this check first can save opening file
+                or dt + datetime.timedelta(seconds=utils.get_stim_duration(p)) > self.sync_data.stop_time
+            ):
                 return False
             return True
 
