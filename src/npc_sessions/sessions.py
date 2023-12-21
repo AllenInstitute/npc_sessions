@@ -2256,7 +2256,8 @@ class DynamicRoutingSession:
             reward_times.extend(
                 utils.safe_index(
                     utils.get_flip_times(
-                        stim_data, sync=self.sync_data if self.is_sync else None
+                        stim=stim_data,
+                        sync=self.sync_data if self.is_sync else None,
                     ),
                     get_reward_frames(stim_data),
                 )
