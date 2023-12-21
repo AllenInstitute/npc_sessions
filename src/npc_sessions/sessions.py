@@ -486,6 +486,8 @@ class DynamicRoutingSession:
         if self.is_sync:
             modules.extend(self._all_licks[1:])
         modules.append(self._rewards)
+        if self.is_task:
+            modules.append(self._quiescent_violations)
         if self.is_lfp:
             modules.append(self._raw_lfp)
         if self.is_ephys:
@@ -2263,6 +2265,22 @@ class DynamicRoutingSession:
             timestamps=np.sort(np.unique(reward_times)),
             name="rewards",
             description="individual water rewards delivered to the subject",
+        )
+        
+    @utils.cached_property
+    def _quiescent_violations(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
+        frames: npt.NDArray[np.int32] = self.sam.quiescentViolationFrames
+        times: npt.NDArray[np.floating] = utils.safe_index(
+            utils.get_input_data_times(
+                stim=self.task_data, 
+                sync=self.sync_data if self.is_sync else None,
+            ),
+            frames,
+        )
+        return ndx_events.Events(
+            timestamps=np.sort(np.unique(times)),
+            name="quiescent_violations",
+            description="times at which the subject made contact with the lick spout during a quiescent interval, triggering a restart of the trial",
         )
 
     @utils.cached_property
