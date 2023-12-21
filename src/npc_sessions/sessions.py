@@ -2267,13 +2267,15 @@ class DynamicRoutingSession:
             name="rewards",
             description="individual water rewards delivered to the subject",
         )
-        
+
     @utils.cached_property
-    def _quiescent_violations(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
+    def _quiescent_violations(
+        self,
+    ) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
         frames: npt.NDArray[np.int32] = self.sam.quiescentViolationFrames
         times: npt.NDArray[np.floating] = utils.safe_index(
             utils.get_input_data_times(
-                stim=self.task_data, 
+                stim=self.task_data,
                 sync=self.sync_data if self.is_sync else None,
             ),
             frames,
