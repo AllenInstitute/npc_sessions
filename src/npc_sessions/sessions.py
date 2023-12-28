@@ -875,9 +875,7 @@ class DynamicRoutingSession:
                 continue
             records.append(self.get_epoch_record(stim))
 
-        for record in sorted(records, key=lambda _: str(_["start_time"]), reverse=True):
-            # reverse=True puts intervals in chronological order (doesn't make
-            # sense, but it's true)
+        for record in sorted(records, key=lambda _: _["start_time"]):
             epochs.add_interval(**record)
         return epochs
 
