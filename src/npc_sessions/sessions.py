@@ -56,19 +56,14 @@ def get_sessions(
 
 @typing.overload
 def get_sessions(
-    id_or_ids: None
-    | list
-    | tuple
-    | set = None,  # insufficient, but mypy sees str & Iterable[str] as unsafe overlap
+    id_or_ids: list | set | tuple, 
     **all_session_kwargs,
 ) -> Iterator[DynamicRoutingSession]:
     ...
 
 
 # see overloads above for type hints
-def get_sessions(
-    id_or_ids=None, **all_session_kwargs
-) -> DynamicRoutingSession | Iterator[DynamicRoutingSession]:
+def get_sessions(id_or_ids=None, **all_session_kwargs):
     """Uploaded sessions, tracked in npc_lims via `get_session_info()`, newest
     to oldest.
 
