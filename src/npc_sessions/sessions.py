@@ -56,7 +56,7 @@ def get_sessions(
 
 @typing.overload
 def get_sessions(
-    id_or_ids: list | set | tuple, 
+    id_or_ids: list | set | tuple,
     **all_session_kwargs,
 ) -> Iterator[DynamicRoutingSession]:
     ...
