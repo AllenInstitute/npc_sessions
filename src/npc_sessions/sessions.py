@@ -1724,11 +1724,14 @@ class DynamicRoutingSession:
                 return False
             return True
 
-        raw_data_paths = self.raw_data_paths or self.stim_path_root.iterdir()
-        if stim_paths := tuple(p for p in raw_data_paths if is_valid_stim_file(p)):
-            return stim_paths
+        # look for stim files in raw data folder, then in stim file repo if none
+        # are found. Rationale is that raw data folder may have curated set,
+        # with some unwanted stim files removed 
+        for raw_data_paths in (self.raw_data_paths, self.stim_path_root.iterdir()):
+            if stim_paths := tuple(p for p in raw_data_paths if is_valid_stim_file(p)):
+                return stim_paths
         raise FileNotFoundError(
-            f"Could not find stim files for {self.id} in {self.stim_path_root}"
+            f"Could not find stim files for {self.id} in raw data paths or {self.stim_path_root}"
         )
 
     @utils.cached_property
