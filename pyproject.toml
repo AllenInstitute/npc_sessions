@@ -37,7 +37,7 @@ dependencies = [
     "loky>=3.4.1",
     "hdmf>=3.5.4",
     "nbconvert>=7.9.2",
-    "hdmf-zarr>=0.4.0",
+    "hdmf-zarr>=0.5.0",
     "traitlets<=5.9.0",
 ]
 requires-python = ">=3.9"
