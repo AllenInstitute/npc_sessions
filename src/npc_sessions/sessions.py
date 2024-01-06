@@ -1141,6 +1141,10 @@ class DynamicRoutingSession:
             name="peak_electrode",
             description="index in `electrodes` table of channel with largest amplitude waveform",
         )
+        units.add_column(
+            name="peak_waveform_index",
+            description="index in `waveform_mean` and `waveform_sd` arrays for channel with largest amplitude waveform",
+        )
         electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
             e = electrodes.query(f"group_name == {row['electrode_group_name']!r}")
@@ -1153,9 +1157,10 @@ class DynamicRoutingSession:
             units.add_unit(
                 **row,  # contains spike_times
                 electrode_group=self.electrode_groups[row["electrode_group_name"]],
-                peak_electrode=e.query(
+                peak_electrode=(peak_electrode := e.query(
                     f"channel == {row['peak_channel']}"
-                ).index.item(),
+                ).index.item()),
+                peak_waveform_index=row["electrodes"].index(peak_electrode),
                 obs_intervals=self.get_obs_intervals(row["electrode_group_name"]),
             )
         if "waveform_mean" in units:
