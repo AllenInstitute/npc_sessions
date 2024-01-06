@@ -1378,7 +1378,7 @@ class DynamicRoutingSession:
         with contextlib.suppress(
             FileNotFoundError, ValueError, npc_lims.MissingCredentials
         ):
-            _ = npc_lims.is_sorted_data_asset(self.id)
+            _ = npc_lims.get_session_sorted_data_asset(self.id)
             return True
         return False
 
