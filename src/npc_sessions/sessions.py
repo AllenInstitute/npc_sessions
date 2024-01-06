@@ -1293,7 +1293,8 @@ class DynamicRoutingSession:
     def drift_maps(self) -> pynwb.image.Images:
         return pynwb.image.Images(
             name="drift_maps",
-            images=tuple(self.img_to_nwb(p) for p in self.drift_map_paths),
+            images=tuple(self.img_to_nwb(p) for p in self.drift_map_paths
+                        if npc_session.ProbeRecord(p.as_posix()) in self.probe_letters_to_use),
             description="activity plots (time x probe depth x firing rate) over the entire ecephys recording, for assessing probe drift",
         )
 
@@ -2047,6 +2048,7 @@ class DynamicRoutingSession:
                     self.id
                 ).group_name.unique()
             )
+            from_annotation = self.remove_probe_letters_to_skip(from_annotation)
         if self.probe_insertions is not None:
             from_insertion_record = tuple(
                 npc_session.ProbeRecord(k)
@@ -2054,19 +2056,20 @@ class DynamicRoutingSession:
                 if npc_session.extract_probe_letter(k) is not None
                 and v["hole"] is not None
             )
+            from_insertion_record = self.remove_probe_letters_to_skip(from_insertion_record)
         if from_annotation and from_insertion_record:
             if set(
-                self.remove_probe_letters_to_skip(from_annotation)
+                from_annotation
             ).symmetric_difference(
-                set(self.remove_probe_letters_to_skip(from_insertion_record))
+                set(from_insertion_record)
             ):
                 logger.warning(
                     f"probe_insertions.json and annotation info do not match for {self.id} - using annotation info"
                 )
         if from_annotation:
-            return self.remove_probe_letters_to_skip(from_annotation)
+            return from_annotation
         if from_insertion_record:
-            return self.remove_probe_letters_to_skip(from_insertion_record)
+            return from_insertion_record
         logger.warning(
             f"No probe_insertions.json or annotation info found for {self.id} - defaulting to ABCDEF"
         )
