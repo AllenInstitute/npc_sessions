@@ -50,7 +50,7 @@ gevent==23.9.1
 greenlet==3.0.0rc3; platform_machine == "win32" or platform_machine == "WIN32" or platform_machine == "AMD64" or platform_machine == "amd64" or platform_machine == "x86_64" or platform_machine == "ppc64le" or platform_machine == "aarch64" or platform_python_implementation == "CPython"
 h5py==3.9.0
 hdmf==3.10.0
-hdmf-zarr==0.4.0
+hdmf-zarr==0.5.0
 idna==3.4
 importlib-metadata==4.13.0; python_version < "3.10"
 importlib-resources==6.1.0; python_version < "3.10"

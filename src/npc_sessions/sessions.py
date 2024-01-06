@@ -1156,9 +1156,11 @@ class DynamicRoutingSession:
             units.add_unit(
                 **row,  # contains spike_times
                 electrode_group=self.electrode_groups[row["electrode_group_name"]],
-                peak_electrode=(peak_electrode := e.query(
-                    f"channel == {row['peak_channel']}"
-                ).index.item()),
+                peak_electrode=(
+                    peak_electrode := e.query(
+                        f"channel == {row['peak_channel']}"
+                    ).index.item()
+                ),
                 peak_waveform_index=row["electrodes"].index(peak_electrode),
                 obs_intervals=self.get_obs_intervals(row["electrode_group_name"]),
             )
@@ -1293,8 +1295,11 @@ class DynamicRoutingSession:
     def drift_maps(self) -> pynwb.image.Images:
         return pynwb.image.Images(
             name="drift_maps",
-            images=tuple(self.img_to_nwb(p) for p in self.drift_map_paths
-                        if npc_session.ProbeRecord(p.as_posix()) in self.probe_letters_to_use),
+            images=tuple(
+                self.img_to_nwb(p)
+                for p in self.drift_map_paths
+                if npc_session.ProbeRecord(p.as_posix()) in self.probe_letters_to_use
+            ),
             description="activity plots (time x probe depth x firing rate) over the entire ecephys recording, for assessing probe drift",
         )
 
@@ -2056,13 +2061,11 @@ class DynamicRoutingSession:
                 if npc_session.extract_probe_letter(k) is not None
                 and v["hole"] is not None
             )
-            from_insertion_record = self.remove_probe_letters_to_skip(from_insertion_record)
+            from_insertion_record = self.remove_probe_letters_to_skip(
+                from_insertion_record
+            )
         if from_annotation and from_insertion_record:
-            if set(
-                from_annotation
-            ).symmetric_difference(
-                set(from_insertion_record)
-            ):
+            if set(from_annotation).symmetric_difference(set(from_insertion_record)):
                 logger.warning(
                     f"probe_insertions.json and annotation info do not match for {self.id} - using annotation info"
                 )

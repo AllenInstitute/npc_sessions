@@ -285,7 +285,7 @@ def plot_ephys_noise(
         ax.plot(
             std(median_subtracted_data),
             np.arange(median_subtracted_data.shape[1]),
-            **plot_kwargs | dict(color="r", alpha=0.5),
+            **plot_kwargs | {"color": "r", "alpha": 0.5},
         )
     ax.set_ymargin(0)
     ax.set_xlabel("SD (microvolts)")
@@ -351,9 +351,7 @@ def plot_session_ephys_noise(
         container = session._raw_lfp
     else:
         container = session._raw_ap
-    fig, _ = plt.subplots(
-        1, len(container.electrical_series), sharex=True, sharey=True
-    )
+    fig, _ = plt.subplots(1, len(container.electrical_series), sharex=True, sharey=True)
     for idx, (label, timeseries) in enumerate(container.electrical_series.items()):
         ax = fig.axes[idx]
         plot_ephys_noise(
@@ -389,9 +387,7 @@ def plot_session_ephys_images(
     else:
         container = session._raw_ap
 
-    fig, _ = plt.subplots(
-        1, len(container.electrical_series), sharex=True, sharey=True
-    )
+    fig, _ = plt.subplots(1, len(container.electrical_series), sharex=True, sharey=True)
     for idx, (label, timeseries) in enumerate(container.electrical_series.items()):
         ax = fig.axes[idx]
         plot_ephys_image(
