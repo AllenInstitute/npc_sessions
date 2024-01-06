@@ -41,14 +41,14 @@ def plot_unit_quality_metrics_per_probe(session: npc_sessions.DynamicRoutingSess
     }
 
     for metric in metrics:
-        fig, ax = plt.subplots(1, len(probes))
+        fig, _ = plt.subplots(1, len(probes))
         probe_index = 0
         fig.suptitle(f"{metric}")
         for probe in probes:
             units_probe_metric = units[units["electrode_group_name"] == probe][metric]
-            ax[probe_index].hist(units_probe_metric, bins=20, density=True)
-            ax[probe_index].set_title(f"{probe}")
-            ax[probe_index].set_xlabel(x_labels[metric])
+            fig.axes[probe_index].hist(units_probe_metric, bins=20, density=True)
+            fig.axes[probe_index].set_title(f"{probe}")
+            fig.axes[probe_index].set_xlabel(x_labels[metric])
             probe_index += 1
 
         fig.set_size_inches([10, 6])
@@ -285,9 +285,7 @@ def plot_ephys_noise(
         ax.plot(
             std(median_subtracted_data),
             np.arange(median_subtracted_data.shape[1]),
-            color="r",
-            alpha=0.5,
-            **plot_kwargs,
+            **plot_kwargs | dict(color="r", alpha=0.5),
         )
     ax.set_ymargin(0)
     ax.set_xlabel("SD (microvolts)")
@@ -353,11 +351,11 @@ def plot_session_ephys_noise(
         container = session._raw_lfp
     else:
         container = session._raw_ap
-    fig, axes = plt.subplots(
+    fig, _ = plt.subplots(
         1, len(container.electrical_series), sharex=True, sharey=True
     )
     for idx, (label, timeseries) in enumerate(container.electrical_series.items()):
-        ax = axes[idx]
+        ax = fig.axes[idx]
         plot_ephys_noise(
             timeseries,
             ax=ax,
@@ -369,7 +367,7 @@ def plot_session_ephys_noise(
         if idx > 0:
             ax.yaxis.set_visible(False)
 
-        if idx != round(len(axes) / 2):
+        if idx != round(len(fig.axes) / 2):
             ax.xaxis.set_visible(False)
 
     fig.suptitle(
@@ -391,11 +389,11 @@ def plot_session_ephys_images(
     else:
         container = session._raw_ap
 
-    fig, axes = plt.subplots(
+    fig, _ = plt.subplots(
         1, len(container.electrical_series), sharex=True, sharey=True
     )
     for idx, (label, timeseries) in enumerate(container.electrical_series.items()):
-        ax = axes[idx]
+        ax = fig.axes[idx]
         plot_ephys_image(
             timeseries,
             ax=ax,
@@ -407,7 +405,7 @@ def plot_session_ephys_images(
         if idx > 0:
             ax.yaxis.set_visible(False)
 
-        if idx != round(len(axes) / 2):
+        if idx != round(len(fig.axes) / 2):
             ax.xaxis.set_visible(False)
     fig.suptitle(
         f'noise on channels with {"LFP" if lfp else "AP"} data | {median_subtraction=} | {session.session_id}',
