@@ -1015,7 +1015,6 @@ class DynamicRoutingSession:
             electrodes.add_column(
                 name=column,
                 description=column_description[column],
-                enum=column in ("reference", "imp"),
             )
 
         for probe_letter, channel_pos_xy in zip(
