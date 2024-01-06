@@ -2053,9 +2053,9 @@ class DynamicRoutingSession:
                 for k, v in self.probe_insertions.items()
                 if npc_session.extract_probe_letter(k) is not None
                 and v["hole"] is not None
-                and k not in self.probe_letters_to_skip
             )
-            if from_annotation and set(
+        if from_annotation and from_insertion_record:
+            if set(
                 self.remove_probe_letters_to_skip(from_annotation)
             ).symmetric_difference(
                 set(self.remove_probe_letters_to_skip(from_insertion_record))
@@ -2070,7 +2070,7 @@ class DynamicRoutingSession:
         logger.warning(
             f"No probe_insertions.json or annotation info found for {self.id} - defaulting to ABCDEF"
         )
-        return tuple(npc_session.ProbeRecord(letter) for letter in "ABCDEF")
+        return self.remove_probe_letters_to_skip("ABCDEF")
 
     @property
     def implant(self) -> str:
