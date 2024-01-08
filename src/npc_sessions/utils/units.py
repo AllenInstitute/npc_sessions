@@ -260,9 +260,9 @@ def add_tissuecyte_annotations(
     units.drop(columns=["channel"], inplace=True)
     units.rename(
         columns={
-            "x": "peak_channel_x",
-            "y": "peak_channel_y",
-            "z": "peak_channel_z",
+            "x": "ccf_ap",
+            "y": "ccf_dv",
+            "z": "ccf_ml",
         },
         inplace=True,
     )
