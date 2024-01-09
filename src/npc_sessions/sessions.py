@@ -1594,7 +1594,7 @@ class DynamicRoutingSession:
         p = tuple(
             p
             for p in self.raw_data_paths
-            if p.suffix == ".csv" and any(v in p.stem for v in ("log", "loc"))
+            if p.suffix == ".csv" and any(v in p.stem for v in ("log", "motor-locs", "motor_locs"))
         )
         if not p:
             raise FileNotFoundError("Cannot find .csv")
