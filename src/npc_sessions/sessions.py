@@ -1750,8 +1750,14 @@ class DynamicRoutingSession:
             (self.task_data,) if self.is_task else (),
             (v for v in self.stim_data.values()),
         ):
-            if rig := hdf5.get("rigName", None):
-                return rig.asstr()[()]
+            if rigName := hdf5.get("rigName", None):
+                rig: str = rigName.asstr()[()]
+                add_period = False # sam's h5 files store "NP3" and "BEH.E" 
+                # sam probably relies on this format, but we migth want to convert
+                # to "NP.3" format at some point
+                if add_period and rig.startswith("NP") and rig[2] != ".":
+                    rig = ".".join(rig.split("NP"))
+                return rig
         raise AttributeError(f"Could not find rigName for {self.id} in stim files")
 
     @property
