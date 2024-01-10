@@ -72,6 +72,7 @@ def write_nwb_component_to_cache(
     component: pynwb.core.NWBContainer | pd.DataFrame,
     component_name: npc_lims.NWBComponentStr,
     session_id: npc_session.SessionRecord,
+    version: str | None = None,
     skip_existing: bool = True,
 ) -> None:
     """Write units to cache file (e.g. .parquet) after processing columns.
@@ -89,6 +90,7 @@ def write_nwb_component_to_cache(
         session_id=session_id,
         component_name=component_name,
         df=df,
+        version=version,
         skip_existing=skip_existing,
     )
 
@@ -96,6 +98,7 @@ def write_nwb_component_to_cache(
 def write_all_components_to_cache(
     session: pynwb.NWBFile | npc_sessions.DynamicRoutingSession,
     skip_existing: bool = True,
+    version: str | None = None,
 ) -> None:
     """Write all components to cache files (e.g. .parquet) after processing columns.
 
@@ -110,7 +113,7 @@ def write_all_components_to_cache(
         if (
             skip_existing
             and npc_lims.get_cache_path(
-                nwb_component=component_name, session_id=session.id
+                nwb_component=component_name, session_id=session.id, version=version
             ).exists()
         ):
             logger.info(
@@ -129,6 +132,7 @@ def write_all_components_to_cache(
             component=component,
             component_name=component_name,
             session_id=session.id,
+            version=version,
             skip_existing=skip_existing,
         )
 
@@ -148,10 +152,11 @@ def _write_to_cache(
     session_id: str | npc_session.SessionRecord,
     component_name: npc_lims.NWBComponentStr,
     df: pd.DataFrame,
+    version: str | None = None,
     skip_existing: bool = True,
 ) -> None:
     """Write dataframe to cache file (e.g. .parquet)."""
-    version = importlib.metadata.version("npc-sessions")
+    version = version or importlib.metadata.version("npc-sessions")
     cache_path = npc_lims.get_cache_path(
         nwb_component=component_name, session_id=session_id, version=version
     )
