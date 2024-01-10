@@ -219,6 +219,11 @@ def _flatten_units(units: pynwb.misc.Units | pd.DataFrame) -> pd.DataFrame:
     # deal with links to other NWBContainers
     units["device_name"] = units["electrode_group"].apply(lambda eg: eg.device.name)
     units["electrode_group_name"] = units["electrode_group"].apply(lambda eg: eg.name)
+    
+    # deal with waveform_mean and waveform_sd
+    for k in ("waveform_mean", "waveform_sd"):
+        if k in units:
+            units[k] = units[k].apply(lambda v: list(v))
     return _remove_pynwb_containers(units)
 
 
