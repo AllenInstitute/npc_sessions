@@ -123,7 +123,7 @@ def write_all_components_to_cache(
         try:
             component = _get_nwb_component(session, component_name)
             # component may be None
-        except AttributeError:
+        except ValueError:
             component = None
         if component is None:
             logger.debug(f"{component_name} not available for {session.id}")
