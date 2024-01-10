@@ -23,6 +23,8 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+class MissingComponentError(AttributeError):
+    pass
 
 def _get_nwb_component(
     session: pynwb.NWBFile | npc_sessions.DynamicRoutingSession,
@@ -62,7 +64,7 @@ def _get_nwb_component(
     else:
         c = getattr(session, component_name, None)
         if c is None:
-            raise ValueError(
+            raise MissingComponentError(
                 f"Unknown NWB component {component_name!r} - available tables include {typing.get_args(npc_lims.NWBComponentStr)}"
             )
         return c
