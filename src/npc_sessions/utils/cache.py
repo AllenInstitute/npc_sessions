@@ -42,6 +42,14 @@ def _get_nwb_component(
             index=[0],
         )
 
+    def _labelled_dict_to_df(component):
+        df = pd.DataFrame()
+        for k, v in component.items():
+            v_df = _component_metadata_to_single_row_df(v)
+            v_df["device_id"] = k
+            df = pd.concat([df, v_df])
+        return df
+    
     if component_name == "session":
         if not isinstance(session, pynwb.NWBFile):
             session = session.metadata
@@ -67,6 +75,8 @@ def _get_nwb_component(
             raise MissingComponentError(
                 f"Unknown NWB component {component_name!r} - available tables include {typing.get_args(npc_lims.NWBComponentStr)}"
             )
+        if isinstance(c, pynwb.core.LabelledDict):
+            return _labelled_dict_to_df(c)
         return c
 
 
