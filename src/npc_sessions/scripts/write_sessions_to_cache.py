@@ -10,7 +10,7 @@ import npc_sessions
 
 
 def write_training_sessions_to_cache(
-    skip_existing: bool = False,
+    skip_existing: bool = True,
 ) -> None:
     t0 = time.time()
     future_to_session = {}
@@ -38,7 +38,7 @@ def write_training_sessions_to_cache(
 
 
 def write_ephys_sessions_to_cache(
-    skip_existing: bool = False,
+    skip_existing: bool = True,
 ) -> None:
     t0 = time.time()
     future_to_session = {}
@@ -64,8 +64,8 @@ def write_ephys_sessions_to_cache(
 
 
 def main() -> None:
-    write_training_sessions_to_cache(skip_existing=False)
-    write_ephys_sessions_to_cache(skip_existing=False)
+    write_ephys_sessions_to_cache(skip_existing=True)
+    write_training_sessions_to_cache(skip_existing=True)
 
 
 if __name__ == "__main__":
