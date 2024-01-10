@@ -3,12 +3,16 @@ name: Write all sessions to cache
 on: 
   schedule:
     # every _ hours
-    - cron: '0 */1 * * *'
+    - cron: '0 */6.1 * * *'
   release:
     types: [published]
   
   workflow_dispatch:
-  
+
+concurrency:
+  group: cache
+  cancel-in-progress: true
+          
 jobs:
   package:
 
