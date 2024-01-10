@@ -32,10 +32,10 @@ jobs:
         update-python: true
         cache: true
 
-    - name: Install package
+    - name: Install package (to use project CLI/executable)
       run: |
         pip install -e .
-        
+
     - name: Update session status
       env:
         DBHUB_API_KEY: ${{ secrets.DBHUB_API_KEY }}
