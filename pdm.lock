@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:9b94d108c751517c8abc0c1d7ff2465a55052a05f0bc24966ed0a40acc486c45"
+content_hash = "sha256:1cd460b542e44d3c5973a61c58eab08792a8054f6384178d618df336cb7f7ff4"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -2053,13 +2053,14 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.92"
+version = "0.1.96"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
     "aind-codeocean-api>=0.2.4",
     "npc-session>=0.1.30",
     "openpyxl>=3.1.2",
+    "packaging>=23.2",
     "pydbhub-bjh>=0.0.8",
     "pyopenssl>=23.2.0",
     "python-dotenv>=1.0.0",
@@ -2070,8 +2071,8 @@ dependencies = [
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.92-py3-none-any.whl", hash = "sha256:74e2ab54881a7ade5eaf5f1b840a113c4b3bb267700ab9ddfeb07032c24593e6"},
-    {file = "npc_lims-0.1.92.tar.gz", hash = "sha256:980ce141f8567f091cb1aaefd3f136c79b6d858d718211fd3dcfddca4e93d4bc"},
+    {file = "npc_lims-0.1.96-py3-none-any.whl", hash = "sha256:b4ae0c4fa0454d8a273d01546d2e57d34b4c08e77bd7146c81b943546256058e"},
+    {file = "npc_lims-0.1.96.tar.gz", hash = "sha256:4278d61ab8d62dc93e4130c69a2be2a4ce72d1823207e0b98e60d7e746825794"},
 ]
 
 [[package]]
@@ -2261,12 +2262,12 @@ files = [
 
 [[package]]
 name = "packaging"
-version = "23.1"
+version = "23.2"
 requires_python = ">=3.7"
 summary = "Core utilities for Python packages"
 files = [
-    {file = "packaging-23.1-py3-none-any.whl", hash = "sha256:994793af429502c4ea2ebf6bf664629d07c1a9fe974af92966e4b8d2df7edc61"},
-    {file = "packaging-23.1.tar.gz", hash = "sha256:a392980d2b6cffa644431898be54b0045151319d1e7ec34f0cfed48767dd334f"},
+    {file = "packaging-23.2-py3-none-any.whl", hash = "sha256:8c491190033a9af7e1d931d0b5dacc2ef47509b34dd0de67ed209b5203fc88c7"},
+    {file = "packaging-23.2.tar.gz", hash = "sha256:048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5"},
 ]
 
 [[package]]
