@@ -227,7 +227,7 @@ def _remove_pynwb_containers(
 ) -> pd.DataFrame:
     df = table_or_df[:].copy()
     return df.drop(
-        [col for col in df.columns if isinstance(df[col][0], pynwb.core.NWBContainer)]
+        columns=[col for col in df.columns if isinstance(df[col][0], pynwb.core.Container)],
     )
 
 
