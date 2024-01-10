@@ -37,7 +37,7 @@ def _get_nwb_component(
             {
                 k: (v if not isinstance(v, list) else [v])
                 for k, v in component.fields.items()
-                if not isinstance(v, (Mapping, pynwb.core.NWBContainer))
+                if not isinstance(v, (Mapping, pynwb.core.Container))
             },
             index=[0],
         )
