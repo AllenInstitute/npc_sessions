@@ -118,6 +118,10 @@ def write_all_components_to_cache(
       with data for peak channel only, or dropped entirely
     - links to NWBContainers cannot be stored, so extract necessary 'foreign key'
       to enable joining tables later
+
+    >>> import npc_sessions
+    >>> session = npc_sessions.DynamicRoutingSession("DRpilot_667252_20230926", probe_letters_to_skip="BCDEF")
+    >>> write_all_components_to_cache(session, skip_existing=False)
     """
     logger.info(f"Writing all components to cache for {session.id}")
     for component_name in typing.get_args(npc_lims.NWBComponentStr):
