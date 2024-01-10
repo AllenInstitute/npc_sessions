@@ -63,6 +63,7 @@ Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 [project.scripts]
 write_dataframes = "npc_sessions.scripts.write_dataframes:main"
 write_notebooks = "npc_sessions.scripts.write_notebooks:main"
+write_session_caches = "npc_sessions.scripts.write_notebooks:main"
 
 [tool.pdm]
 plugins = [
