@@ -71,7 +71,7 @@ def _get_nwb_component(
 def write_nwb_component_to_cache(
     component: pynwb.core.NWBContainer | pd.DataFrame,
     component_name: npc_lims.NWBComponentStr,
-    session_id: npc_session.SessionRecord,
+    session_id: str | npc_session.SessionRecord,
     version: str | None = None,
     skip_existing: bool = True,
 ) -> None:
