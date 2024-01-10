@@ -179,21 +179,22 @@ def _write_to_cache(
             f"Skipping write to {cache_path} - already exists and skip_existing=True"
         )
         return
-    table = pyarrow.Table.from_pandas(df, preserve_index=False)
-    if component_name == "units" and "location" in table.schema.names:
-        table = table.sort_by("location")
+    if component_name == "units" and "location" in df.columns:
         # most common access will be units from the same areas, so make sure
         # these rows are stored together
-    pyarrow.parquet.write_table(
-        table=table,
-        where=cache_path.as_posix(),
+        df = df.sort_values("location")
+    df.to_parquet(
+        path=cache_path,
+        engine="pyarrow",
+        compression='zstd',
+        index=False,
+        # additional kwargs for `pyarrow.write_table()`:
+        compression_level=15,
         row_group_size=20 if "component" == "units" else None,
-        # each list in the spike_times column is large - should not really be
+        # each list in the units.spike_times column is large & should not really be
         # stored in this format. But we can at least optimize for it by creating
         # smaller row groups, so querying a single unit returns a chunk of rows
-        # equal to row_group_size, instead of default 10,000 rows per session
-        compression="zstd",
-        compression_level=15,
+        # equal to row_group_size, instead of default 10,000 rows per file
     )
     logger.info(f"Wrote {cache_path}")
 
