@@ -86,7 +86,7 @@ nbformat==5.9.2
 ndx-events==0.2.0
 neo==0.12.0
 nest-asyncio==1.5.8
-npc-lims==0.1.92
+npc-lims==0.1.96
 npc-session==0.1.30
 numba==0.58.0
 numcodecs==0.11.0
@@ -95,7 +95,7 @@ numpy==1.25.2
 odfpy==1.4.1
 opencv-python-headless==4.8.1.78
 openpyxl==3.1.2
-packaging==23.1
+packaging==23.2
 pandas==2.1.0
 pandocfilters==1.5.0
 parso==0.8.3
@@ -110,7 +110,7 @@ psutil==5.9.5
 ptyprocess==0.7.0; sys_platform != "win32"
 pure-eval==0.2.2
 py-cpuinfo==9.0.0
-pyarrow==13.0.0
+pyarrow==14.0.2
 pycparser==2.21
 pydantic==1.10.13
 pydbhub-bjh==0.0.9
@@ -158,6 +158,7 @@ wcwidth==0.2.7
 webencodings==0.5.1
 widgetsnbextension==4.0.9
 wrapt==1.15.0
+xarray==2023.12.0
 xlrd==2.0.1
 xlsx2csv==0.8.1
 xlsxwriter==3.1.5

@@ -1594,7 +1594,8 @@ class DynamicRoutingSession:
         p = tuple(
             p
             for p in self.raw_data_paths
-            if p.suffix == ".csv" and any(v in p.stem for v in ("log", "motor-locs", "motor_locs"))
+            if p.suffix == ".csv"
+            and any(v in p.stem for v in ("log", "motor-locs", "motor_locs"))
         )
         if not p:
             raise FileNotFoundError("Cannot find .csv")
@@ -1752,7 +1753,7 @@ class DynamicRoutingSession:
         ):
             if rigName := hdf5.get("rigName", None):
                 rig: str = rigName.asstr()[()]
-                add_period = False # sam's h5 files store "NP3" and "BEH.E" 
+                add_period = False  # sam's h5 files store "NP3" and "BEH.E"
                 # sam probably relies on this format, but we migth want to convert
                 # to "NP.3" format at some point
                 if add_period and rig.startswith("NP") and rig[2] != ".":
