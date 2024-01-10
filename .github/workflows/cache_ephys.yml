@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: cache
+  group: cache-ephys
   cancel-in-progress: true
           
 jobs:
