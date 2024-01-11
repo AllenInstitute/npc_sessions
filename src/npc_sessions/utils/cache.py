@@ -145,7 +145,7 @@ def write_all_components_to_cache(
             component = None
         if component is None:
             logger.debug(f"{component_name} not available for {session.id}")
-            return
+            continue
         write_nwb_component_to_cache(
             component=component,
             component_name=component_name,
