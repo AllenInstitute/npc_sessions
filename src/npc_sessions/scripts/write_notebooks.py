@@ -23,7 +23,7 @@ QC_REPO = npc_lims.S3_SCRATCH_ROOT / "qc"
 def get_qc_path(
     session_id: str | npc_session.SessionRecord,
     version: str | None = None,
-    ) -> upath.UPath:
+) -> upath.UPath:
     """get path to notebook for session"""
     version = version or npc_lims.get_current_cache_version()
     return QC_REPO / version / f"{npc_session.SessionRecord(session_id)}_qc.ipynb"
@@ -42,7 +42,7 @@ def helper(
     session: str | npc_session.SessionRecord,
     version: str | None = None,
     skip_existing: bool = True,
-    ) -> None:
+) -> None:
     dest_path = get_qc_path(session_id=session, version=version)
     if skip_existing and dest_path.exists():
         logger.info(f"skipping {session} - {dest_path} already exists")
@@ -60,25 +60,27 @@ def write_notebooks(
     skip_existing: bool = True,
     version: str | None = None,
     parallel: bool = True,
-    ) -> None:
+) -> None:
     t0 = time.time()
     session_infos = utils.get_session_infos(session_type=session_type)
-    
-    helper_opts = dict(
-        version=version,
-        skip_existing=skip_existing,
-    )
+
+    helper_opts = {
+        "version": version,
+        "skip_existing": skip_existing,
+    }
     if len(session_infos) == 1:
         parallel = False
     if parallel:
         future_to_session = {}
         pool = concurrent.futures.ProcessPoolExecutor(utils.get_max_workers())
         for session in tqdm.tqdm(session_infos, desc="Submitting jobs"):
-            future_to_session[pool.submit(
-                helper,
-                session.id, 
-                **helper_opts, # type: ignore[arg-type]
-            )] = session.id
+            future_to_session[
+                pool.submit(
+                    helper,
+                    session.id,
+                    **helper_opts,  # type: ignore[arg-type]
+                )
+            ] = session.id
         for future in tqdm.tqdm(
             concurrent.futures.as_completed(future_to_session.keys()),
             desc="Processing jobs",
@@ -89,8 +91,8 @@ def write_notebooks(
     else:
         for session in tqdm.tqdm(session_infos, desc="Processing jobs"):
             helper(
-                session.id, 
-                **helper_opts, # type: ignore[arg-type]
+                session.id,
+                **helper_opts,  # type: ignore[arg-type]
             )
             logger.info(f"{session.id} done")
     logger.info(f"Time elapsed: {datetime.timedelta(seconds=time.time() - t0)}")
@@ -99,7 +101,8 @@ def write_notebooks(
 def main() -> None:
     npc_sessions.assert_s3_write_credentials()
     kwargs = utils.setup()
-    write_notebooks(**kwargs) # type: ignore[misc, arg-type]
+    write_notebooks(**kwargs)  # type: ignore[misc, arg-type]
+
 
 if __name__ == "__main__":
     main()

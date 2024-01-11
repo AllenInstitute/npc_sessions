@@ -16,6 +16,7 @@ import npc_sessions.scripts.utils as utils
 
 logger = logging.getLogger()
 
+
 def helper(
     session_id: str | npc_session.SessionRecord | npc_lims.SessionInfo,
     **write_all_components_kwargs,
@@ -35,11 +36,11 @@ def write_sessions_to_cache(
 ) -> None:
     t0 = time.time()
     session_infos = utils.get_session_infos(session_type=session_type)
-    
-    helper_opts = dict(
-        version=version,
-        skip_existing=skip_existing,
-    )
+
+    helper_opts = {
+        "version": version,
+        "skip_existing": skip_existing,
+    }
     if len(session_infos) == 1:
         parallel = False
     if parallel:
@@ -50,7 +51,7 @@ def write_sessions_to_cache(
                 pool.submit(
                     helper,
                     session_id=info,
-                    **helper_opts, # type: ignore[arg-type]
+                    **helper_opts,  # type: ignore[arg-type]
                 )
             ] = info.id
         for future in tqdm.tqdm(
@@ -64,7 +65,7 @@ def write_sessions_to_cache(
         for info in tqdm.tqdm(session_infos, desc="Processing jobs"):
             helper(
                 session_id=info,
-                **helper_opts, # type: ignore[arg-type]
+                **helper_opts,  # type: ignore[arg-type]
             )
             logger.info(f"{info.id} done")
     logger.info(f"Time elapsed: {datetime.timedelta(seconds=time.time() - t0)}")
@@ -72,7 +73,8 @@ def write_sessions_to_cache(
 
 def main() -> None:
     kwargs = utils.setup()
-    write_sessions_to_cache(**kwargs) # type: ignore[misc, arg-type]
+    write_sessions_to_cache(**kwargs)  # type: ignore[misc, arg-type]
+
 
 if __name__ == "__main__":
     main()

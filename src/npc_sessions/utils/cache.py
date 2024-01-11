@@ -129,9 +129,15 @@ def write_all_components_to_cache(
         # skip before we potentially do a lot of processing to get component
         if (
             skip_existing
-            and (path := (npc_lims.get_cache_path(
-                nwb_component=component_name, session_id=session.id, version=version
-            ))).exists()
+            and (
+                path := (
+                    npc_lims.get_cache_path(
+                        nwb_component=component_name,
+                        session_id=session.id,
+                        version=version,
+                    )
+                )
+            ).exists()
         ):
             logger.info(
                 f"Skipping {session.id} {component_name} - {path} already exists"

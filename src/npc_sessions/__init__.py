@@ -3,7 +3,6 @@ import importlib.metadata
 import dotenv
 import numpy as np
 
-
 from npc_sessions.notebooks import *
 from npc_sessions.plots import *
 from npc_sessions.sessions import *
@@ -17,7 +16,7 @@ _ = dotenv.load_dotenv(
     dotenv.find_dotenv(usecwd=True)
 )  # take environment variables from .env
 
-np.seterr(divide='ignore', invalid='ignore') 
+np.seterr(divide="ignore", invalid="ignore")
 # suppress common warning from sam's DynamicRoutingAnalysisUtils
 
 Session = DynamicRoutingSession
