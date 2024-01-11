@@ -45,7 +45,7 @@ def helper(
     ) -> None:
     dest_path = get_qc_path(session_id=session, version=version)
     if skip_existing and dest_path.exists():
-        logger.info(f"skipping {session} - already exists")
+        logger.info(f"skipping {session} - {dest_path} already exists")
         return
     local_path = npc_sessions.write_qc_notebook(
         session,
