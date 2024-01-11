@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:751891b0faeb42081ea82fbe043ab1bbf01b8cc862ba711620e4f6c36e99e369"
+content_hash = "sha256:72428db9754cf7907c99496272b5cfab37efc7ad58e2c7ec7625d58a0672c5a9"
 
 [[package]]
 name = "adbc-driver-manager"
@@ -2053,11 +2053,12 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.97"
+version = "0.1.99"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
     "aind-codeocean-api>=0.2.4",
+    "boto3==1.28.17",
     "npc-session>=0.1.30",
     "openpyxl>=3.1.2",
     "packaging>=23.2",
@@ -2071,8 +2072,8 @@ dependencies = [
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.97-py3-none-any.whl", hash = "sha256:7c33591695c8b05657db2c83c7f018e86a9e389cb4b379f495c59c0fb825c41b"},
-    {file = "npc_lims-0.1.97.tar.gz", hash = "sha256:5b522ef4f7c4c4d63dd641e59bf799ec5fac7cda81aa909dc2b87934d5a802e2"},
+    {file = "npc_lims-0.1.99-py3-none-any.whl", hash = "sha256:a67ffa617a91ea7c486690675d3e286b9c169952027ccff9685f8c46fea8fe1a"},
+    {file = "npc_lims-0.1.99.tar.gz", hash = "sha256:2786f93a856db30e9e0394742a43ee1a5f5c87bec6647d221e7f8f20820f0c15"},
 ]
 
 [[package]]
