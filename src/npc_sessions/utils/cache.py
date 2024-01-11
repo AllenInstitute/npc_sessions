@@ -122,7 +122,7 @@ def write_all_components_to_cache(
 
     >>> import npc_sessions
     >>> session = npc_sessions.DynamicRoutingSession("DRpilot_667252_20230926", probe_letters_to_skip="BCDEF")
-    >>> write_all_components_to_cache(session, skip_existing=False)
+    >>> write_all_components_to_cache(session, version="test", skip_existing=False)
     """
     logger.info(f"Writing all components to cache for {session.id}")
     for component_name in typing.get_args(npc_lims.NWBComponentStr):
