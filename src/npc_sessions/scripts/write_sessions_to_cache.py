@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import concurrent.futures
 import datetime
+import logging
+import logging.config
 import time
 from typing import Literal
 
@@ -10,17 +12,15 @@ import npc_session
 import tqdm
 
 import npc_sessions
+import npc_sessions.scripts.utils as utils
 
+logger = logging.getLogger()
 
 def helper(
     session_id: str | npc_session.SessionRecord | npc_lims.SessionInfo,
-    is_ephys: bool | None,
     **write_all_components_kwargs,
 ) -> None:
-    if is_ephys is None:
-        session = npc_sessions.DynamicRoutingSession(session_id)
-    else:
-        session = npc_sessions.DynamicRoutingSession(session_id, is_ephys=is_ephys)
+    session = npc_sessions.DynamicRoutingSession(session_id)
     npc_sessions.write_all_components_to_cache(
         session,
         **write_all_components_kwargs,
@@ -34,30 +34,23 @@ def write_sessions_to_cache(
     parallel: bool = True,
 ) -> None:
     t0 = time.time()
-    if session_type not in ("training", "ephys", "all"):
-        raise ValueError(f"{session_type=} must be one of 'training', 'ephys', 'all'")
-
-    is_ephys: bool | None = None
-    if session_type == "all":
-        is_ephys = None
-        session_infos = npc_lims.get_session_info()
-    else:
-        is_ephys = session_type == "ephys"
-        session_infos = tuple(
-            s for s in npc_lims.get_session_info() if s.is_ephys == is_ephys
-        )
-
+    session_infos = utils.get_session_infos(session_type=session_type)
+    
+    helper_opts = dict(
+        version=version,
+        skip_existing=skip_existing,
+    )
+    if len(session_infos) == 1:
+        parallel = False
     if parallel:
         future_to_session = {}
-        pool = concurrent.futures.ProcessPoolExecutor()
+        pool = concurrent.futures.ProcessPoolExecutor(utils.get_max_workers())
         for info in tqdm.tqdm(session_infos, desc="Submitting jobs"):
             future_to_session[
                 pool.submit(
                     helper,
                     session_id=info,
-                    is_ephys=is_ephys,
-                    skip_existing=skip_existing,
-                    version=version,
+                    **helper_opts, # type: ignore[arg-type]
                 )
             ] = info.id
         for future in tqdm.tqdm(
@@ -65,31 +58,21 @@ def write_sessions_to_cache(
             desc="Processing jobs",
             total=len(future_to_session),
         ):
-            print(f"{future_to_session[future]} done")
+            logger.info(f"{future_to_session[future]} done")
             continue
     else:
         for info in tqdm.tqdm(session_infos, desc="Processing jobs"):
             helper(
                 session_id=info,
-                is_ephys=is_ephys,
-                skip_existing=skip_existing,
-                version=version,
+                **helper_opts, # type: ignore[arg-type]
             )
-            print(f"{info.id} done")
-    print(f"Time elapsed: {datetime.timedelta(seconds=time.time() - t0)}")
-
-
-def write_ephys_sessions_to_cache() -> None:
-    write_sessions_to_cache(session_type="ephys")
-
-
-def write_training_sessions_to_cache() -> None:
-    write_sessions_to_cache(session_type="training")
+            logger.info(f"{info.id} done")
+    logger.info(f"Time elapsed: {datetime.timedelta(seconds=time.time() - t0)}")
 
 
 def main() -> None:
-    write_sessions_to_cache()
-
+    kwargs = utils.setup()
+    write_sessions_to_cache(**kwargs) # type: ignore[misc, arg-type]
 
 if __name__ == "__main__":
     main()
