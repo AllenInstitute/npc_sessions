@@ -45,4 +45,4 @@ jobs:
         CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
         CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
       run: |
-        write_training_cache
+        write_cache --session-type training --log-level DEBUG

@@ -63,8 +63,7 @@ Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 [project.scripts]
 write_dataframes = "npc_sessions.scripts.write_dataframes:main"
 write_notebooks = "npc_sessions.scripts.write_notebooks:main"
-write_ephys_cache = "npc_sessions.scripts.write_sessions_to_cache:write_ephys_sessions_to_cache"
-write_training_cache = "npc_sessions.scripts.write_sessions_to_cache:write_training_sessions_to_cache"
+write_cache = "npc_sessions.scripts.write_sessions_to_cache:main"
 
 [tool.pdm]
 plugins = [
