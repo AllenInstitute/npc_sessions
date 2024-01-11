@@ -40,7 +40,7 @@ def setup() -> dict[Literal["session_type", "skip_existing", "version", "paralle
 def parse_args() -> argparse.Namespace:
     """
     >>> parse_args()
-    Namespace(session_type='all', skip_existing=True, version=None, parallel=False, log_level='INFO')
+    Namespace(session_type='ephys', skip_existing=True, version=None, parallel=False, log_level='INFO')
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
