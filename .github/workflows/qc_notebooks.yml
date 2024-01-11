@@ -1,4 +1,4 @@
-name: Run and store QC notebooks in S3
+name: Cache QC notebooks
 
 on: 
   schedule:
