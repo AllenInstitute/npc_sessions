@@ -5,7 +5,6 @@
 """
 from __future__ import annotations
 
-import importlib.metadata
 import logging
 import typing
 from collections.abc import Mapping
@@ -174,7 +173,6 @@ def _write_to_cache(
     skip_existing: bool = True,
 ) -> None:
     """Write dataframe to cache file (e.g. .parquet)."""
-    version = version or importlib.metadata.version("npc-sessions")
     cache_path = npc_lims.get_cache_path(
         nwb_component=component_name, session_id=session_id, version=version
     )
