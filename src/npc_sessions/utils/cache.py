@@ -23,8 +23,10 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 class MissingComponentError(AttributeError):
     pass
+
 
 def _get_nwb_component(
     session: pynwb.NWBFile | npc_sessions.DynamicRoutingSession,
@@ -49,7 +51,7 @@ def _get_nwb_component(
             v_df["device_id"] = k
             df = pd.concat([df, v_df])
         return df
-    
+
     if component_name == "session":
         if not isinstance(session, pynwb.NWBFile):
             session = session.metadata
@@ -190,7 +192,7 @@ def _write_to_cache(
     df.to_parquet(
         path=cache_path,
         engine="pyarrow",
-        compression='zstd',
+        compression="zstd",
         index=False,
         # additional kwargs for `pyarrow.write_table()`:
         compression_level=15,
@@ -224,7 +226,7 @@ def _flatten_units(units: pynwb.misc.Units | pd.DataFrame) -> pd.DataFrame:
     # deal with links to other NWBContainers
     units["device_name"] = units["electrode_group"].apply(lambda eg: eg.device.name)
     units["electrode_group_name"] = units["electrode_group"].apply(lambda eg: eg.name)
-    
+
     # deal with waveform_mean and waveform_sd
     for k in ("waveform_mean", "waveform_sd"):
         if k in units:
@@ -237,7 +239,9 @@ def _remove_pynwb_containers(
 ) -> pd.DataFrame:
     df = table_or_df[:].copy()
     return df.drop(
-        columns=[col for col in df.columns if isinstance(df[col][0], pynwb.core.Container)],
+        columns=[
+            col for col in df.columns if isinstance(df[col][0], pynwb.core.Container)
+        ],
     )
 
 
