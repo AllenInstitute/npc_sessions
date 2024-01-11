@@ -4,9 +4,9 @@ on:
   schedule:
     # every _ hours
     - cron: '0 */6 * * *'
-  release:
-    types: [published]
-  
+  push:
+    tags:        
+      - '*'           # Push events to every tag not containing /
   workflow_dispatch:
 
 concurrency:
@@ -31,7 +31,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         update-python: true
         cache: true
-        
+
     - name: Install package (to use project CLI/executable)
       run: |
         pip install -e .

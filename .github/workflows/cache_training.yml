@@ -4,9 +4,9 @@ on:
   schedule:
     # every _ hours
     - cron: '* */6 * * *'
-  release:
-    types: [published]
-  
+  push:
+    tags:        
+      - '*'           # Push events to every tag not containing /
   workflow_dispatch:
 
 concurrency:
