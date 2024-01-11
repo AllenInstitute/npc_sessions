@@ -1,3 +1,5 @@
+from __future__ import annotations 
+
 import concurrent.futures
 import datetime
 import time
@@ -11,7 +13,7 @@ import npc_sessions
 
 
 def helper(
-    session_id: str| npc_session.SessionRecord | npc_lims.SessionInfo,
+    session_id: str | npc_session.SessionRecord | npc_lims.SessionInfo,
     is_ephys: bool | None,
     **write_all_components_kwargs
 ) -> None:
