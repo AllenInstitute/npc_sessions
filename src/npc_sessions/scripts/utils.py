@@ -24,9 +24,12 @@ training sessions."""
 
 
 def get_max_workers() -> int:
-    return int(min(
-        psutil.cpu_count(), psutil.virtual_memory().available * 0.7 // MEMORY_PER_SESSION
-    ))
+    return int(
+        min(
+            psutil.cpu_count(),
+            psutil.virtual_memory().available * 0.7 // MEMORY_PER_SESSION,
+        )
+    )
 
 
 def setup() -> (
