@@ -1,13 +1,13 @@
 from __future__ import annotations
 
+import concurrent.futures
 import logging
 import sys
-import concurrent.futures
 
 import npc_lims
 import npc_session
-import upath
 import tqdm
+import upath
 
 import npc_sessions
 
@@ -20,6 +20,7 @@ def get_qc_path(session_id: str | npc_session.SessionRecord) -> upath.UPath:
     """get path to notebook for session"""
     return QC_REPO / f"{npc_session.SessionRecord(session_id)}_qc.ipynb"
 
+
 def move(src: npc_sessions.PathLike, dest: npc_sessions.PathLike) -> None:
     """copy to dest, remove local copy"""
     src = npc_sessions.from_pathlike(src)
@@ -27,6 +28,7 @@ def move(src: npc_sessions.PathLike, dest: npc_sessions.PathLike) -> None:
     dest.write_bytes(src.read_bytes())
     src.unlink()
     logger.info(f"moved {src.name} to {dest}")
+
 
 def helper(session: str | npc_session.SessionRecord) -> None:
     dest_path = get_qc_path(session)
@@ -36,10 +38,13 @@ def helper(session: str | npc_session.SessionRecord) -> None:
     )
     move(local_path, dest_path)
     logger.info(f"done with {session}")
-    
+
+
 def write_notebooks(parallel: bool = True) -> None:
     npc_sessions.assert_s3_write_credentials()
-    sessions = sys.argv[1:] or tuple(s.id for s in npc_lims.get_session_info(is_ephys=True))
+    sessions = sys.argv[1:] or tuple(
+        s.id for s in npc_lims.get_session_info(is_ephys=True)
+    )
     if len(sessions) < 5:
         parallel = False
     if parallel:
@@ -58,10 +63,11 @@ def write_notebooks(parallel: bool = True) -> None:
         for session in sessions:
             helper(session)
     logger.info("done")
-    
+
+
 def main() -> None:
     write_notebooks()
-    
+
 
 if __name__ == "__main__":
     main()

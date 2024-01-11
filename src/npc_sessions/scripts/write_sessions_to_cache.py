@@ -1,4 +1,4 @@
-from __future__ import annotations 
+from __future__ import annotations
 
 import concurrent.futures
 import datetime
@@ -15,16 +15,17 @@ import npc_sessions
 def helper(
     session_id: str | npc_session.SessionRecord | npc_lims.SessionInfo,
     is_ephys: bool | None,
-    **write_all_components_kwargs
+    **write_all_components_kwargs,
 ) -> None:
     if is_ephys is None:
-        session=npc_sessions.DynamicRoutingSession(session_id)
+        session = npc_sessions.DynamicRoutingSession(session_id)
     else:
-        session=npc_sessions.DynamicRoutingSession(session_id, is_ephys=is_ephys)
+        session = npc_sessions.DynamicRoutingSession(session_id, is_ephys=is_ephys)
     npc_sessions.write_all_components_to_cache(
         session,
         **write_all_components_kwargs,
     )
+
 
 def write_sessions_to_cache(
     session_type: Literal["training", "ephys", "all"] = "all",
@@ -45,14 +46,18 @@ def write_sessions_to_cache(
         session_infos = tuple(
             s for s in npc_lims.get_session_info() if s.is_ephys == is_ephys
         )
-        
+
     if parallel:
         future_to_session = {}
         pool = concurrent.futures.ProcessPoolExecutor()
         for info in tqdm.tqdm(session_infos, desc="Submitting jobs"):
             future_to_session[
                 pool.submit(
-                    helper, session_id=info, is_ephys=is_ephys, skip_existing=skip_existing, version=version
+                    helper,
+                    session_id=info,
+                    is_ephys=is_ephys,
+                    skip_existing=skip_existing,
+                    version=version,
                 )
             ] = info.id
         for future in tqdm.tqdm(
@@ -65,7 +70,10 @@ def write_sessions_to_cache(
     else:
         for info in tqdm.tqdm(session_infos, desc="Processing jobs"):
             helper(
-                session_id=info, is_ephys=is_ephys, skip_existing=skip_existing, version=version
+                session_id=info,
+                is_ephys=is_ephys,
+                skip_existing=skip_existing,
+                version=version,
             )
             print(f"{info.id} done")
     print(f"Time elapsed: {datetime.timedelta(seconds=time.time() - t0)}")
@@ -74,9 +82,11 @@ def write_sessions_to_cache(
 def write_ephys_sessions_to_cache() -> None:
     write_sessions_to_cache(session_type="ephys")
 
+
 def write_training_sessions_to_cache() -> None:
     write_sessions_to_cache(session_type="training")
-    
+
+
 def main() -> None:
     write_sessions_to_cache()
 
