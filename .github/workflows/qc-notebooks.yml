@@ -1,0 +1,48 @@
+name: Run and store QC notebooks in S3
+
+on: 
+  schedule:
+    # every _ hours
+    - cron: '0 */6 * * *'
+  release:
+    types: [published]
+  
+  workflow_dispatch:
+
+concurrency:
+  group: cache-qc-notebooks
+  cancel-in-progress: true
+          
+jobs:
+  package:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.11"]
+    permissions: write-all
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - uses: pdm-project/setup-pdm@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+        update-python: true
+        cache: true
+        
+    - name: Install package (to use project CLI/executable)
+      run: |
+        pip install -e .
+
+    - name: Update session status
+      env:
+        DBHUB_API_KEY: ${{ secrets.DBHUB_API_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
+        CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
+      run: |
+        write_notebooks
