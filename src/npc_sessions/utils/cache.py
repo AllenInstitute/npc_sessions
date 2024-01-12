@@ -198,7 +198,7 @@ def _write_to_cache(
         where=cache_path,
         row_group_size=20 if "component" == "units" else None,
         # each list in the units.spike_times column is large & should not really be
-        # stored in this format. But we can at least optimize access. 
+        # stored in this format. But we can at least optimize access.
         # Row groups are indivisible, so querying a single row will download a
         # chunk of row_group_size rows: default is 10,000 rows, so accessing spike_times
         # for a single unit would take the same as accessing 10,000.
