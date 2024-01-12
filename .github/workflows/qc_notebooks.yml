@@ -6,7 +6,7 @@ on:
     - cron: '0 */6 * * *'
   push:
     tags:        
-      - '*'           # Push events to every tag not containing /
+      - '**'         
   workflow_dispatch:
 
 concurrency:
