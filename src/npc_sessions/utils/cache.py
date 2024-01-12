@@ -193,18 +193,21 @@ def _write_to_cache(
         # most common access will be units from the same areas, so make sure
         # these rows are stored together
         df = df.sort_values("location")
-    df.to_parquet(
-        path=cache_path,
-        engine="pyarrow",
-        compression="zstd",
-        index=False,
-        # additional kwargs for `pyarrow.write_table()`:
-        compression_level=15,
+    pyarrow.parquet.write_table(
+        table=pyarrow.Table.from_pandas(df, preserve_index=True),
+        where=cache_path,
         row_group_size=20 if "component" == "units" else None,
         # each list in the units.spike_times column is large & should not really be
-        # stored in this format. But we can at least optimize for it by creating
-        # smaller row groups, so querying a single unit returns a chunk of rows
-        # equal to row_group_size, instead of default 10,000 rows per file
+        # stored in this format. But we can at least optimize access. 
+        # Row groups are indivisible, so querying a single row will download a
+        # chunk of row_group_size rows: default is 10,000 rows, so accessing spike_times
+        # for a single unit would take the same as accessing 10,000.
+        # Per session, each area has 10-200 units per 'location', so we probably
+        # want a row_group_size in that range.
+        # Tradeoff is row_group_size gives worse compression and worse access speeds
+        # across chunks (so querying entire columns will be much slower than default)
+        compression="zstd",
+        compression_level=15,
     )
     logger.info(f"Wrote {cache_path}")
 
