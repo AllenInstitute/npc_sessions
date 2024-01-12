@@ -45,11 +45,18 @@ def from_pathlike(pathlike) -> upath.UPath:
             )
         for parent in p.parents:
             if "#" in parent.name:
+                # we can't create or join the problematic `#`, so we have to 'discover' it
                 new = upath.UPath(path).with_name(parent.name)
                 for part in p.relative_to(parent).parts:
-                    new = next(
-                        new.glob(part)
+                    result = next(
+                        new.glob(part),
+                        None,
                     )  # we can't create or join the problem-#, so we have to 'discover' it
+                    if result is None:
+                        raise FileNotFoundError(
+                            f"In attempting to handle a path containing '#', we couldn't find {path}"
+                        )
+                    new = result
                 return new
     return upath.UPath(path)
 
