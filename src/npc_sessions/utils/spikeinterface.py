@@ -28,6 +28,8 @@ SpikeInterfaceData: TypeAlias = Union[
     str, npc_session.SessionRecord, utils.PathLike, "SpikeInterfaceKS25Data"
 ]
 
+class ProbeNotFoundError(FileNotFoundError):
+    pass
 
 def get_spikeinterface_data(
     session_or_root_path: SpikeInterfaceData,
@@ -105,14 +107,17 @@ class SpikeInterfaceKS25Data:
         the probe-specific sub-path within `self.root/dirname`."""
         assert self.root is not None
         if probe is None:
-            return self.format_path(self.root, dirname)
+            path = self.format_path(self.root, dirname)
         else:
-            return next(
+            path = next(
                 path
                 for path in self.format_path(self.root, dirname).iterdir()
                 if npc_session.ProbeRecord(probe)
                 == npc_session.ProbeRecord(path.as_posix())
             )
+            if not path.exists():
+                raise ProbeNotFoundError(f"{path} does not exist")
+        return path
 
     # json data
     processing_json = functools.partialmethod(get_json, "processing.json")

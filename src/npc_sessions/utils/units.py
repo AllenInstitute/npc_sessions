@@ -234,10 +234,15 @@ def make_units_table_from_spike_interface_ks25(
             try:
                 _ = future.result()
             except Exception as e:
-                # raise with full traceback
                 device = next(k for k, v in device_to_future.items() if v == future)
-                raise RuntimeError(f"Failed to fetch units for {device}") from e
-
+                session = spike_interface_data.session or ""
+                if isinstance(e, utils.ProbeNotFoundError):
+                    logger.warning(f"{session}{' ' if session else ''}{device} path not found: likely skipped by SpikeInterface")
+                    del device_to_future[device]
+                else:
+                    # raise with full traceback
+                    raise RuntimeError(f"Failed to fetch units for {session}{' ' if session else ''}{device}") from e
+                
     return pd.concat(
         device_to_future[device].result() for device in sorted(device_to_future.keys())
     )
