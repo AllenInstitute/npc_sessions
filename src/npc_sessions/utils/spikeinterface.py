@@ -88,6 +88,8 @@ class SpikeInterfaceKS25Data:
     def format_path(*path_components: utils.PathLike) -> upath.UPath:
         """SpikeInterface makes paths with '#' in them, which is not allowed in s3
         paths in general - run paths through this function to fix them."""
+        if not path_components:
+            raise ValueError("Must provide at least one path component")
         return utils.from_pathlike("/".join(str(path) for path in path_components))
 
     @staticmethod
@@ -106,17 +108,25 @@ class SpikeInterfaceKS25Data:
         """Return a path to a single dir or file: either `self.root/dirname` or, if `probe` is specified,
         the probe-specific sub-path within `self.root/dirname`."""
         assert self.root is not None
+        if not dirname:
+            raise ValueError("Must provide a dirname to get path")
+        path: upath.UPath | None
         if probe is None:
             path = self.format_path(self.root, dirname)
+            if not path.exists():
+                raise FileNotFoundError(f"{path} does not exist")
         else:
             path = next(
-                path
-                for path in self.format_path(self.root, dirname).iterdir()
-                if npc_session.ProbeRecord(probe)
-                == npc_session.ProbeRecord(path.as_posix())
+                (
+                    path
+                    for path in self.format_path(self.root, dirname).iterdir()
+                    if npc_session.ProbeRecord(probe)
+                    == npc_session.ProbeRecord(path.as_posix())
+                ),
+                None,
             )
-            if not path.exists():
-                raise ProbeNotFoundError(f"{path} does not exist")
+            if path is None or not path.exists():
+                raise ProbeNotFoundError(f"{path} does not exist - sorting likely skipped by SpikeInterface due to fraction of bad channels")
         return path
 
     # json data
