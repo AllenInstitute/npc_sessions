@@ -73,6 +73,11 @@ class SpikeInterfaceKS25Data:
            'drift_ptp', 'drift_std', 'drift_mad', 'isolation_distance', 'l_ratio',
            'd_prime'],
           dtype='object')
+    
+    >>> paths.version
+    '0.97.1'
+    >>> ''.join(paths.probes)
+    'ABCEF'
     """
 
     session: str | npc_session.SessionRecord | None = None
@@ -84,6 +89,23 @@ class SpikeInterfaceKS25Data:
         if self.root is None:
             self.root = npc_lims.get_sorted_data_paths_from_s3(self.session)[0].parent
 
+    @property
+    def probes(self) -> tuple[npc_session.ProbeRecord, ...]:
+        """Probes available from this SpikeInterface dataset."""
+        probes = set()
+        for path in self.spikesorted().iterdir():
+            with contextlib.suppress(ValueError):
+                probes.add(npc_session.ProbeRecord(path.name))
+        return tuple(sorted(probes))
+    
+    @property
+    def version(self) -> str:
+        return self.provenance(self.probes[0])['kwargs']['parent_sorting']['version']
+    
+    @property
+    def is_pre_v0_99(self) -> bool:
+        return self.version < '0.99'
+    
     @staticmethod
     @functools.cache
     def get_correct_path(*path_components: utils.PathLike) -> upath.UPath:
