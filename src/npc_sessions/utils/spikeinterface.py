@@ -4,8 +4,8 @@ with the aind kilosort 2.5 "pipeline" spike-sorting capsule).
 """
 
 from __future__ import annotations
-import contextlib
 
+import contextlib
 import dataclasses
 import functools
 import io
@@ -29,8 +29,10 @@ SpikeInterfaceData: TypeAlias = Union[
     str, npc_session.SessionRecord, utils.PathLike, "SpikeInterfaceKS25Data"
 ]
 
+
 class ProbeNotFoundError(FileNotFoundError):
     pass
+
 
 def get_spikeinterface_data(
     session_or_root_path: SpikeInterfaceData,
@@ -74,7 +76,7 @@ class SpikeInterfaceKS25Data:
            'drift_ptp', 'drift_std', 'drift_mad', 'isolation_distance', 'l_ratio',
            'd_prime'],
           dtype='object')
-    
+
     >>> paths.version
     '0.97.1'
     >>> ''.join(paths.probes)
@@ -98,15 +100,15 @@ class SpikeInterfaceKS25Data:
             with contextlib.suppress(ValueError):
                 probes.add(npc_session.ProbeRecord(path.name))
         return tuple(sorted(probes))
-    
+
     @property
     def version(self) -> str:
-        return self.provenance(self.probes[0])['kwargs']['parent_sorting']['version']
-    
+        return self.provenance(self.probes[0])["kwargs"]["parent_sorting"]["version"]
+
     @property
     def is_pre_v0_99(self) -> bool:
-        return self.version < '0.99'
-    
+        return self.version < "0.99"
+
     @staticmethod
     @functools.cache
     def get_correct_path(*path_components: utils.PathLike) -> upath.UPath:
@@ -153,7 +155,9 @@ class SpikeInterfaceKS25Data:
                 None,
             )
             if path is None or not path.exists():
-                raise ProbeNotFoundError(f"{path} does not exist - sorting likely skipped by SpikeInterface due to fraction of bad channels")
+                raise ProbeNotFoundError(
+                    f"{path} does not exist - sorting likely skipped by SpikeInterface due to fraction of bad channels"
+                )
         return path
 
     # json data
@@ -233,7 +237,9 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def sorting_cached(self, probe: str) -> dict[str, npt.NDArray]:
         if not self.is_pre_v0_99:
-            raise NotImplementedError("sorting_cached.npz not used for SpikeInterface>=0.99")
+            raise NotImplementedError(
+                "sorting_cached.npz not used for SpikeInterface>=0.99"
+            )
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
@@ -246,23 +252,21 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def provenance(self, probe: str) -> dict:
         return self.read_json(
-            self.get_correct_path(
-                self.sorting_precurated(probe), "provenance.json"
-            )
+            self.get_correct_path(self.sorting_precurated(probe), "provenance.json")
         )
-        
+
     @functools.cache
     def sparsity(self, probe: str) -> dict:
         return self.read_json(
-            self.get_correct_path(
-                self.postprocessed(probe), "sparsity.json"
-            )
+            self.get_correct_path(self.postprocessed(probe), "sparsity.json")
         )
 
     @functools.cache
     def numpysorting_info(self, probe: str) -> dict:
         if self.is_pre_v0_99:
-            raise NotImplementedError("numpysorting_info.json not used for SpikeInterface<0.99")
+            raise NotImplementedError(
+                "numpysorting_info.json not used for SpikeInterface<0.99"
+            )
         return self.read_json(
             self.get_correct_path(
                 self.sorting_precurated(probe), "numpysorting_info.json"
@@ -274,7 +278,7 @@ class SpikeInterfaceKS25Data:
         """format: array[(sample_index, unit_index, segment_index), ...]"""
         if self.is_pre_v0_99:
             raise NotImplementedError("spikes.npy not used for SpikeInterface<0.99")
-        if self.numpysorting_info(probe)['num_segments'] > 1:
+        if self.numpysorting_info(probe)["num_segments"] > 1:
             raise NotImplementedError("num_segments > 1 not supported yet")
         return np.load(
             io.BytesIO(
@@ -283,7 +287,7 @@ class SpikeInterfaceKS25Data:
                 ).read_bytes()
             )
         )
-        
+
     @functools.cache
     def spike_indexes(self, probe: str) -> npt.NDArray[np.floating]:
         if self.is_pre_v0_99:
@@ -291,7 +295,7 @@ class SpikeInterfaceKS25Data:
         else:
             original = np.array([v[0] for v in self.spikes_npy(probe)])
         return original
-    
+
     @functools.cache
     def unit_indexes(self, probe: str) -> npt.NDArray[np.int64]:
         if self.is_pre_v0_99:
@@ -299,25 +303,27 @@ class SpikeInterfaceKS25Data:
         else:
             original = np.array([v[1] for v in self.spikes_npy(probe)])
         return original
-    
+
     @functools.cache
     def cluster_indexes(self, probe: str) -> npt.NDArray[np.int64]:
         return np.take_along_axis(
-                self.unit_indexes(probe, de_duplicated=False),
-                self.original_cluster_id(probe),
-                axis=0,
-            )
-    
+            self.unit_indexes(probe, de_duplicated=False),
+            self.original_cluster_id(probe),
+            axis=0,
+        )
+
     @functools.cache
     def original_cluster_id(self, probe: str) -> npt.NDArray[np.int64]:
         """Array of cluster IDs, one per unit in unique('unit_indexes')"""
         if self.is_pre_v0_99:
-            #TODO! verify this is correct
-            return self.sorting_cached(probe)["unit_ids"] 
+            # TODO! verify this is correct
+            return self.sorting_cached(probe)["unit_ids"]
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
-                    self.sorting_precurated(probe), "properties", "original_cluster_id.npy"
+                    self.sorting_precurated(probe),
+                    "properties",
+                    "original_cluster_id.npy",
                 ).read_bytes()
             )
         )

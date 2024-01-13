@@ -131,14 +131,17 @@ def get_units_x_spike_times(
     (array([0.2, 0.5]), array([0.3, 0.4]), array([0.1]))
     """
     if len(spike_times) != len(unit_indexes):
-        raise ValueError("spike_times and unit_indexes must be same length (values should correspond)")
-    units = sorted(np.unique(unit_indexes)) # may have gaps
-    units_x_spike_times = tuple(
-        spike_times[unit_indexes == unit]
-        for unit in units
-    )
-    assert spike_times[0] == units_x_spike_times[np.argwhere(units == unit_indexes[0]).item()][0], "Interpretation of unit_indexes/spike_times is faulty"
+        raise ValueError(
+            "spike_times and unit_indexes must be same length (values should correspond)"
+        )
+    units = sorted(np.unique(unit_indexes))  # may have gaps
+    units_x_spike_times = tuple(spike_times[unit_indexes == unit] for unit in units)
+    assert (
+        spike_times[0]
+        == units_x_spike_times[np.argwhere(units == unit_indexes[0]).item()][0]
+    ), "Interpretation of unit_indexes/spike_times is faulty"
     return units_x_spike_times
+
 
 def _device_helper(
     device_timing_on_sync: utils.EphysTimingInfo,
@@ -170,7 +173,9 @@ def _device_helper(
 
     df_device_metrics["peak_channel"] = awc.peak_channels
     cluster_id = df_device_metrics.index.to_list()
-    assert np.array_equal(cluster_id, spike_interface_data.original_cluster_id(electrode_group_name)), "cluster-ids from npy file do not match index column in metrics.csv"
+    assert np.array_equal(
+        cluster_id, spike_interface_data.original_cluster_id(electrode_group_name)
+    ), "cluster-ids from npy file do not match index column in metrics.csv"
     df_device_metrics["cluster_id"] = df_device_metrics.index.to_list()
     df_device_metrics["default_qc"] = spike_interface_data.default_qc(
         electrode_group_name
@@ -190,8 +195,13 @@ def _device_helper(
         spike_times=spike_times_aligned,
         unit_indexes=unit_indexes,
     )
-    assert len(units_x_spike_times) == len(df_device_metrics), "Mismatch number of units in spike_times and metrics.csv"
-    assert np.array_equal(df_device_metrics["num_spikes"].array, [len(unit) for unit in units_x_spike_times]), "Mismatch between rows in spike_times and metrics.csv"
+    assert len(units_x_spike_times) == len(
+        df_device_metrics
+    ), "Mismatch number of units in spike_times and metrics.csv"
+    assert np.array_equal(
+        df_device_metrics["num_spikes"].array,
+        [len(unit) for unit in units_x_spike_times],
+    ), "Mismatch between rows in spike_times and metrics.csv"
     df_device_metrics["spike_times"] = units_x_spike_times
 
     return df_device_metrics
@@ -243,15 +253,19 @@ def make_units_table_from_spike_interface_ks25(
             try:
                 _ = future.result()
             except utils.ProbeNotFoundError:
-                logger.warning(f"Path to {session}{' ' if session else ''}{device} sorted data not found: likely skipped by SpikeInterface")
+                logger.warning(
+                    f"Path to {session}{' ' if session else ''}{device} sorted data not found: likely skipped by SpikeInterface"
+                )
                 del device_to_future[device]
             except AssertionError as e:
                 logger.error(f"{session}{' ' if session else ''}{device}")
                 raise e from None
             except Exception as e:
                 logger.error(f"{session}{' ' if session else ''}{device}")
-                raise RuntimeError(f"Error fetching units for {session} - see original exception above/below") from e
-                        
+                raise RuntimeError(
+                    f"Error fetching units for {session} - see original exception above/below"
+                ) from e
+
     return pd.concat(
         device_to_future[device].result() for device in sorted(device_to_future.keys())
     )
