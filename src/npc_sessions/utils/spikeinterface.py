@@ -305,26 +305,23 @@ class SpikeInterfaceKS25Data:
         return original
     
     @functools.cache
-    def cluster_indexes(self, probe: str, de_duplicated=True) -> npt.NDArray[np.int64]:
-        original = self.unit_indexes(probe, de_duplicated=False)[self.original_cluster_id(probe)]
-        if de_duplicated:
-            return original[self.de_duplicatate_mask(probe)]
-        return original
+    def cluster_indexes(self, probe: str) -> npt.NDArray[np.int64]:
+        return np.take_along_axis(
+                self.unit_indexes(probe, de_duplicated=False),
+                self.original_cluster_id(probe),
+                axis=0,
+            )
     
-    @functools.cache
-    def de_duplicatate_mask(self, probe: str) -> npt.NDArray[np.bool_]:
-        """Boolean mask for `unit_indexes` and `spike_indexes` that removes
-        duplicate units"""
-        cluster_indexes = self.unit_indexes(probe, de_duplicated=False)[self.original_cluster_id(probe)]
-        return np.isin(cluster_indexes, self.sparsity(probe)['unit_ids'])
-        
     @functools.cache
     def original_cluster_id(self, probe: str) -> npt.NDArray[np.int64]:
         """Array of cluster IDs, one per unit in unique('unit_indexes')"""
+        if self.is_pre_v0_99:
+            #TODO! verify this is correct
+            return self.sorting_cached(probe)["unit_ids"] 
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
-                    self.spikesorted(probe), "properties", "original_cluster_id.npy"
+                    self.sorting_precurated(probe), "properties", "original_cluster_id.npy"
                 ).read_bytes()
             )
         )
