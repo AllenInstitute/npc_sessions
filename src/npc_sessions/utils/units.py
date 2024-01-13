@@ -119,22 +119,23 @@ def get_waveform_sd_ks25(
     return unit_templates_std
 
 
-def get_units_spike_times_ks25(
-    sorting_cached: dict[str, npt.NDArray],
-    spike_times_aligned: npt.NDArray[np.float64],
-    ks_unit_ids: npt.NDArray[np.int64],
-) -> list[npt.NDArray[np.float64]]:
-    units_spike_times: list[npt.NDArray[np.float64]] = []
-
-    spike_labels = sorting_cached["spike_labels_seg0"]
-
-    for ks_unit_id in ks_unit_ids:
-        label_indices = np.argwhere(spike_labels == ks_unit_id)
-        unit_spike_time = spike_times_aligned[label_indices].flatten()
-        units_spike_times.append(unit_spike_time)
-
-    return units_spike_times
-
+def get_units_x_spike_times(
+    spike_times: npt.NDArray[np.float64],
+    unit_indexes: npt.NDArray[np.int64],
+) -> tuple[npt.NDArray[np.float64], ...]:
+    """
+    >>> spike_times = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
+    >>> unit_indexes = np.array([1, 0, 1, 1, 0])
+    >>> get_units_x_spike_times(spike_times, unit_indexes)
+    (array([0.2, 0.5]), array([0.1, 0.3, 0.4]))
+    """
+    units = sorted(np.unique(unit_indexes))
+    units_x_spike_times = tuple(
+        spike_times[np.argwhere(unit_indexes == unit)].flatten()
+        for unit in units
+    )
+    assert spike_times[0] == units_x_spike_times[unit_indexes[0]][0], "Interpretation of spike information is faulty"
+    return units_x_spike_times
 
 def _device_helper(
     device_timing_on_sync: utils.EphysTimingInfo,
@@ -167,15 +168,14 @@ def _device_helper(
     df_device_metrics["peak_channel"] = awc.peak_channels
 
     spike_times_aligned = get_aligned_spike_times(
-        spike_interface_data.sorting_cached(electrode_group_name)["spike_indexes_seg0"],
+        spike_interface_data.spike_indexes(electrode_group_name, de_duplicated=True),
         device_timing_on_sync,
     )
-    unit_spike_times = get_units_spike_times_ks25(
-        spike_interface_data.sorting_cached(electrode_group_name),
-        spike_times_aligned,
-        df_device_metrics.index.values,  # TODO #37 @arjunsridhar12345 is this safe?
+    unit_indexes = spike_interface_data.unit_indexes(electrode_group_name, de_duplicated=True)
+    units_x_spike_times = get_units_x_spike_times(
+        spike_times=spike_times_aligned,
+        unit_indexes=unit_indexes,
     )
-
     df_device_metrics["default_qc"] = spike_interface_data.default_qc(
         electrode_group_name
     )
@@ -184,8 +184,7 @@ def _device_helper(
         df_device_metrics["waveform_mean"] = awc.templates_mean
         df_device_metrics["waveform_sd"] = awc.templates_sd
         df_device_metrics["channels"] = awc.channels
-    df_device_metrics["spike_times"] = unit_spike_times
-    df_device_metrics["cluster_id"] = df_device_metrics.index.to_list()
+    df_device_metrics["spike_times"] = units_x_spike_times
 
     return df_device_metrics
 
