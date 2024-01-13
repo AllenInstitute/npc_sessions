@@ -231,18 +231,16 @@ def make_units_table_from_spike_interface_ks25(
             ncols=80,
             ascii=False,
         ):
+            device = next(k for k, v in device_to_future.items() if v == future)
+            session = spike_interface_data.session or ""
             try:
                 _ = future.result()
+            except utils.ProbeNotFoundError:
+                logger.warning(f"Path to {session}{' ' if session else ''}{device} sorted data not found: likely skipped by SpikeInterface")
+                del device_to_future[device]
             except Exception as e:
-                device = next(k for k, v in device_to_future.items() if v == future)
-                session = spike_interface_data.session or ""
-                if isinstance(e, utils.ProbeNotFoundError):
-                    logger.warning(f"{session}{' ' if session else ''}{device} path not found: likely skipped by SpikeInterface")
-                    del device_to_future[device]
-                else:
-                    # raise with full traceback
-                    raise RuntimeError(f"Failed to fetch units for {session}{' ' if session else ''}{device}") from e
-                
+                raise RuntimeError(f"Error fetching units for {session} - see exception above") from e
+                        
     return pd.concat(
         device_to_future[device].result() for device in sorted(device_to_future.keys())
     )
