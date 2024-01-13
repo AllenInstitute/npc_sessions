@@ -166,19 +166,8 @@ def _device_helper(
     )
 
     df_device_metrics["peak_channel"] = awc.peak_channels
-
-    spike_times_aligned = get_aligned_spike_times(
-        spike_interface_data.spike_indexes(electrode_group_name, de_duplicated=True),
-        device_timing_on_sync,
-    )
-    unit_indexes = spike_interface_data.unit_indexes(electrode_group_name, de_duplicated=True)
-    units_x_spike_times = get_units_x_spike_times(
-        spike_times=spike_times_aligned,
-        unit_indexes=unit_indexes,
-    )
-    
     cluster_id = df_device_metrics.index.to_list()
-    assert cluster_id == spike_interface_data.original_cluster_id(electrode_group_name), "cluster-ids from npy file do not match index column in metrics.csv"
+    assert np.array_equal(cluster_id, spike_interface_data.original_cluster_id(electrode_group_name)), "cluster-ids from npy file do not match index column in metrics.csv"
     df_device_metrics["cluster_id"] = df_device_metrics.index.to_list()
     df_device_metrics["default_qc"] = spike_interface_data.default_qc(
         electrode_group_name
@@ -188,6 +177,17 @@ def _device_helper(
         df_device_metrics["waveform_mean"] = awc.templates_mean
         df_device_metrics["waveform_sd"] = awc.templates_sd
         df_device_metrics["channels"] = awc.channels
+
+    spike_times_aligned = get_aligned_spike_times(
+        spike_interface_data.spike_indexes(electrode_group_name),
+        device_timing_on_sync,
+    )
+    unit_indexes = spike_interface_data.unit_indexes(electrode_group_name)
+    units_x_spike_times = get_units_x_spike_times(
+        spike_times=spike_times_aligned,
+        unit_indexes=unit_indexes,
+    )
+    assert np.array_equal(df_device_metrics["num_spikes"].array, [len(unit) for unit in units_x_spike_times]), "Mismatch between rows in spike_times and metrics.csv"
     df_device_metrics["spike_times"] = units_x_spike_times
 
     return df_device_metrics

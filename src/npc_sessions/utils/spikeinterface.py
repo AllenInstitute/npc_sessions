@@ -237,7 +237,7 @@ class SpikeInterfaceKS25Data:
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
-                    self.spikesorted(probe), "sorting_cached.npz"
+                    self.sorting_precurated(probe), "sorting_cached.npz"
                 ).read_bytes()
             ),
             allow_pickle=True,
@@ -247,7 +247,7 @@ class SpikeInterfaceKS25Data:
     def provenance(self, probe: str) -> dict:
         return self.read_json(
             self.get_correct_path(
-                self.spikesorted(probe), "provenance.json"
+                self.sorting_precurated(probe), "provenance.json"
             )
         )
         
@@ -265,7 +265,7 @@ class SpikeInterfaceKS25Data:
             raise NotImplementedError("numpysorting_info.json not used for SpikeInterface<0.99")
         return self.read_json(
             self.get_correct_path(
-                self.spikesorted(probe), "numpysorting_info.json"
+                self.sorting_precurated(probe), "numpysorting_info.json"
             )
         )
 
@@ -279,29 +279,25 @@ class SpikeInterfaceKS25Data:
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
-                    self.spikesorted(probe), "spikes.npy"
+                    self.sorting_precurated(probe), "spikes.npy"
                 ).read_bytes()
             )
         )
         
     @functools.cache
-    def spike_indexes(self, probe: str, de_duplicated=True) -> npt.NDArray[np.floating]:
+    def spike_indexes(self, probe: str) -> npt.NDArray[np.floating]:
         if self.is_pre_v0_99:
             original = self.sorting_cached(probe)["spike_indexes_seg0"]
         else:
             original = np.array([v[0] for v in self.spikes_npy(probe)])
-        if de_duplicated:
-            return original[self.de_duplicatate_mask(probe)]
         return original
     
     @functools.cache
-    def unit_indexes(self, probe: str, de_duplicated=True) -> npt.NDArray[np.int64]:
+    def unit_indexes(self, probe: str) -> npt.NDArray[np.int64]:
         if self.is_pre_v0_99:
             original = self.sorting_cached(probe)["spike_labels_seg0"]
         else:
             original = np.array([v[1] for v in self.spikes_npy(probe)])
-        if de_duplicated:
-            return original[self.de_duplicatate_mask(probe)]
         return original
     
     @functools.cache
