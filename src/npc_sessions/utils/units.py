@@ -176,6 +176,10 @@ def _device_helper(
         spike_times=spike_times_aligned,
         unit_indexes=unit_indexes,
     )
+    
+    cluster_id = df_device_metrics.index.to_list()
+    assert cluster_id == spike_interface_data.original_cluster_id(electrode_group_name), "cluster-ids from npy file do not match index column in metrics.csv"
+    df_device_metrics["cluster_id"] = df_device_metrics.index.to_list()
     df_device_metrics["default_qc"] = spike_interface_data.default_qc(
         electrode_group_name
     )
