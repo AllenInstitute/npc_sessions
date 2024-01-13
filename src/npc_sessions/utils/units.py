@@ -126,7 +126,7 @@ def get_units_x_spike_times(
     """
     Note: index in tuple != unit_index (may be gaps in unique(unit_indexes)))
     >>> spike_times = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
-    >>> unit_indexes = np.array([3, 0, 1, 1, 0])    # must handle gaps
+    >>> unit_indexes = np.array([3, 0, 1, 1, 0])    # [0, 1, 3] ... must handle gaps
     >>> get_units_x_spike_times(spike_times, unit_indexes)
     (array([0.2, 0.5]), array([0.3, 0.4]), array([0.1]))
     """
