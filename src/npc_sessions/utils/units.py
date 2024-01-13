@@ -185,7 +185,7 @@ def _device_helper(
         df_device_metrics["waveform_sd"] = awc.templates_sd
         df_device_metrics["channels"] = awc.channels
     df_device_metrics["spike_times"] = unit_spike_times
-    df_device_metrics["unit_id"] = df_device_metrics.index.to_list()
+    df_device_metrics["cluster_id"] = df_device_metrics.index.to_list()
 
     return df_device_metrics
 
@@ -278,14 +278,10 @@ def add_global_unit_ids(
     unit_id_column: str = "unit_id",
 ) -> pd.DataFrame:
     """Add session and probe letter"""
-    units["unit_id"] = [
-        f"{session}_{row.electrode_group_name.replace('probe', '')}-{row[unit_id_column]}"
-        if session not in str(row[unit_id_column])  # in case we aready ran this fn
-        else row[unit_id_column]
+    units[unit_id_column] = [
+        f"{session}_{row.electrode_group_name.replace('probe', '')}-{row['cluster_id']}"
         for _, row in units.iterrows()
     ]
-    if unit_id_column != "unit_id":
-        units.drop(columns=[unit_id_column], inplace=True)
     return units
 
 
