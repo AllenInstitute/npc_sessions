@@ -4,6 +4,7 @@ with the aind kilosort 2.5 "pipeline" spike-sorting capsule).
 """
 
 from __future__ import annotations
+import contextlib
 
 import dataclasses
 import functools
@@ -231,6 +232,8 @@ class SpikeInterfaceKS25Data:
 
     @functools.cache
     def sorting_cached(self, probe: str) -> dict[str, npt.NDArray]:
+        if not self.is_pre_v0_99:
+            raise NotImplementedError("sorting_cached.npz not used for SpikeInterface>=0.99")
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
@@ -238,6 +241,92 @@ class SpikeInterfaceKS25Data:
                 ).read_bytes()
             ),
             allow_pickle=True,
+        )
+
+    @functools.cache
+    def provenance(self, probe: str) -> dict:
+        return self.read_json(
+            self.get_correct_path(
+                self.spikesorted(probe), "provenance.json"
+            )
+        )
+        
+    @functools.cache
+    def sparsity(self, probe: str) -> dict:
+        return self.read_json(
+            self.get_correct_path(
+                self.postprocessed(probe), "sparsity.json"
+            )
+        )
+
+    @functools.cache
+    def numpysorting_info(self, probe: str) -> dict:
+        if self.is_pre_v0_99:
+            raise NotImplementedError("numpysorting_info.json not used for SpikeInterface<0.99")
+        return self.read_json(
+            self.get_correct_path(
+                self.spikesorted(probe), "numpysorting_info.json"
+            )
+        )
+
+    @functools.cache
+    def spikes_npy(self, probe: str) -> npt.NDArray[np.floating]:
+        """format: array[(sample_index, unit_index, segment_index), ...]"""
+        if self.is_pre_v0_99:
+            raise NotImplementedError("spikes.npy not used for SpikeInterface<0.99")
+        if self.numpysorting_info(probe)['num_segments'] > 1:
+            raise NotImplementedError("num_segments > 1 not supported yet")
+        return np.load(
+            io.BytesIO(
+                self.get_correct_path(
+                    self.spikesorted(probe), "spikes.npy"
+                ).read_bytes()
+            )
+        )
+        
+    @functools.cache
+    def spike_indexes(self, probe: str, de_duplicated=True) -> npt.NDArray[np.floating]:
+        if self.is_pre_v0_99:
+            original = self.sorting_cached(probe)["spike_indexes_seg0"]
+        else:
+            original = np.array([v[0] for v in self.spikes_npy(probe)])
+        if de_duplicated:
+            return original[self.de_duplicatate_mask(probe)]
+        return original
+    
+    @functools.cache
+    def unit_indexes(self, probe: str, de_duplicated=True) -> npt.NDArray[np.int64]:
+        if self.is_pre_v0_99:
+            original = self.sorting_cached(probe)["spike_labels_seg0"]
+        else:
+            original = np.array([v[1] for v in self.spikes_npy(probe)])
+        if de_duplicated:
+            return original[self.de_duplicatate_mask(probe)]
+        return original
+    
+    @functools.cache
+    def cluster_indexes(self, probe: str, de_duplicated=True) -> npt.NDArray[np.int64]:
+        original = self.unit_indexes(probe, de_duplicated=False)[self.original_cluster_id(probe)]
+        if de_duplicated:
+            return original[self.de_duplicatate_mask(probe)]
+        return original
+    
+    @functools.cache
+    def de_duplicatate_mask(self, probe: str) -> npt.NDArray[np.bool_]:
+        """Boolean mask for `unit_indexes` and `spike_indexes` that removes
+        duplicate units"""
+        cluster_indexes = self.unit_indexes(probe, de_duplicated=False)[self.original_cluster_id(probe)]
+        return np.isin(cluster_indexes, self.sparsity(probe)['unit_ids'])
+        
+    @functools.cache
+    def original_cluster_id(self, probe: str) -> npt.NDArray[np.int64]:
+        """Array of cluster IDs, one per unit in unique('unit_indexes')"""
+        return np.load(
+            io.BytesIO(
+                self.get_correct_path(
+                    self.spikesorted(probe), "properties", "original_cluster_id.npy"
+                ).read_bytes()
+            )
         )
 
     @functools.cache
