@@ -124,17 +124,20 @@ def get_units_x_spike_times(
     unit_indexes: npt.NDArray[np.int64],
 ) -> tuple[npt.NDArray[np.float64], ...]:
     """
+    Note: index in tuple != unit_index (may be gaps in unique(unit_indexes)))
     >>> spike_times = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
-    >>> unit_indexes = np.array([1, 0, 1, 1, 0])
+    >>> unit_indexes = np.array([3, 0, 1, 1, 0])    # must handle gaps
     >>> get_units_x_spike_times(spike_times, unit_indexes)
-    (array([0.2, 0.5]), array([0.1, 0.3, 0.4]))
+    (array([0.2, 0.5]), array([0.3, 0.4]), array([0.1]))
     """
-    units = sorted(np.unique(unit_indexes))
+    if len(spike_times) != len(unit_indexes):
+        raise ValueError("spike_times and unit_indexes must be same length (values should correspond)")
+    units = sorted(np.unique(unit_indexes)) # may have gaps
     units_x_spike_times = tuple(
-        spike_times[np.argwhere(unit_indexes == unit)].flatten()
+        spike_times[unit_indexes == unit]
         for unit in units
     )
-    assert spike_times[0] == units_x_spike_times[unit_indexes[0]][0], "Interpretation of spike information is faulty"
+    assert spike_times[0] == units_x_spike_times[np.argwhere(units == unit_indexes[0]).item()][0], "Interpretation of unit_indexes/spike_times is faulty"
     return units_x_spike_times
 
 def _device_helper(
@@ -187,6 +190,7 @@ def _device_helper(
         spike_times=spike_times_aligned,
         unit_indexes=unit_indexes,
     )
+    assert len(units_x_spike_times) == len(df_device_metrics), "Mismatch number of units in spike_times and metrics.csv"
     assert np.array_equal(df_device_metrics["num_spikes"].array, [len(unit) for unit in units_x_spike_times]), "Mismatch between rows in spike_times and metrics.csv"
     df_device_metrics["spike_times"] = units_x_spike_times
 
@@ -203,7 +207,7 @@ def make_units_table_from_spike_interface_ks25(
 ) -> pd.DataFrame:
     """
     >>> import npc_lims
-    >>> device_timing_on_sync = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'))
+    >>> device_timing_on_sync = utils.get_ephys_timing_on_sync(npc_lims.get_h5_sync_from_s3('662892_20230821'), npc_lims.get_recording_dirs_experiment_path_from_s3('662892_20230821'), only_devices_including='ProbeA')
     >>> units = make_units_table_from_spike_interface_ks25('662892_20230821', device_timing_on_sync)
     >>> len(units[units['electrode_group_name'] == 'probeA'])
     237
@@ -241,8 +245,12 @@ def make_units_table_from_spike_interface_ks25(
             except utils.ProbeNotFoundError:
                 logger.warning(f"Path to {session}{' ' if session else ''}{device} sorted data not found: likely skipped by SpikeInterface")
                 del device_to_future[device]
+            except AssertionError as e:
+                logger.error(f"{session}{' ' if session else ''}{device}")
+                raise e from None
             except Exception as e:
-                raise RuntimeError(f"Error fetching units for {session} - see exception above") from e
+                logger.error(f"{session}{' ' if session else ''}{device}")
+                raise RuntimeError(f"Error fetching units for {session} - see original exception above/below") from e
                         
     return pd.concat(
         device_to_future[device].result() for device in sorted(device_to_future.keys())
