@@ -85,12 +85,16 @@ class SpikeInterfaceKS25Data:
             self.root = npc_lims.get_sorted_data_paths_from_s3(self.session)[0].parent
 
     @staticmethod
-    def format_path(*path_components: utils.PathLike) -> upath.UPath:
+    @functools.cache
+    def get_correct_path(*path_components: utils.PathLike) -> upath.UPath:
         """SpikeInterface makes paths with '#' in them, which is not allowed in s3
         paths in general - run paths through this function to fix them."""
         if not path_components:
             raise ValueError("Must provide at least one path component")
-        return utils.from_pathlike("/".join(str(path) for path in path_components))
+        path = utils.from_pathlike("/".join(str(path) for path in path_components))
+        if not path.exists():
+            raise FileNotFoundError(f"{path} does not exist")
+        return path
 
     @staticmethod
     def read_json(path: upath.UPath) -> dict:
@@ -102,7 +106,7 @@ class SpikeInterfaceKS25Data:
 
     def get_json(self, filename: str) -> dict:
         assert self.root is not None
-        return self.read_json(self.format_path(self.root, filename))
+        return self.read_json(self.get_correct_path(self.root, filename))
 
     def get_path(self, dirname: str, probe: str | None = None) -> upath.UPath:
         """Return a path to a single dir or file: either `self.root/dirname` or, if `probe` is specified,
@@ -112,14 +116,14 @@ class SpikeInterfaceKS25Data:
             raise ValueError("Must provide a dirname to get path")
         path: upath.UPath | None
         if probe is None:
-            path = self.format_path(self.root, dirname)
+            path = self.get_correct_path(self.root, dirname)
             if not path.exists():
                 raise FileNotFoundError(f"{path} does not exist")
         else:
             path = next(
                 (
                     path
-                    for path in self.format_path(self.root, dirname).iterdir()
+                    for path in self.get_correct_path(self.root, dirname).iterdir()
                     if npc_session.ProbeRecord(probe)
                     == npc_session.ProbeRecord(path.as_posix())
                 ),
@@ -148,7 +152,7 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def quality_metrics_dict(self, probe: str) -> dict:
         return self.read_json(
-            self.format_path(
+            self.get_correct_path(
                 self.postprocessed(probe), "quality_metrics", "params.json"
             )
         )
@@ -156,13 +160,13 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def postprocessed_params_dict(self, probe: str) -> dict:
         return self.read_json(
-            self.format_path(self.postprocessed(probe), "params.json")
+            self.get_correct_path(self.postprocessed(probe), "params.json")
         )
 
     @functools.cache
     def quality_metrics_df(self, probe: str) -> pd.DataFrame:
         return self.read_csv(
-            self.format_path(
+            self.get_correct_path(
                 self.postprocessed(probe), "quality_metrics", "metrics.csv"
             )
         )
@@ -170,7 +174,7 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def template_metrics_dict(self, probe: str) -> dict:
         return self.read_json(
-            self.format_path(
+            self.get_correct_path(
                 self.postprocessed(probe), "template_metrics", "params.json"
             )
         )
@@ -178,7 +182,7 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def template_metrics_df(self, probe: str) -> pd.DataFrame:
         return self.read_csv(
-            self.format_path(
+            self.get_correct_path(
                 self.postprocessed(probe), "template_metrics", "metrics.csv"
             )
         )
@@ -187,7 +191,7 @@ class SpikeInterfaceKS25Data:
         logger.debug("Loading templates_average.npy for %s - typically ~200 MB", probe)
         return np.load(
             io.BytesIO(
-                self.format_path(
+                self.get_correct_path(
                     self.postprocessed(probe), "templates_average.npy"
                 ).read_bytes()
             )
@@ -197,7 +201,7 @@ class SpikeInterfaceKS25Data:
         logger.debug("Loading templates_std.npy for %s - typically ~200 MB", probe)
         return np.load(
             io.BytesIO(
-                self.format_path(
+                self.get_correct_path(
                     self.postprocessed(probe), "templates_std.npy"
                 ).read_bytes()
             )
@@ -207,7 +211,7 @@ class SpikeInterfaceKS25Data:
     def sorting_cached(self, probe: str) -> dict[str, npt.NDArray]:
         return np.load(
             io.BytesIO(
-                self.format_path(
+                self.get_correct_path(
                     self.spikesorted(probe), "sorting_cached.npz"
                 ).read_bytes()
             ),
@@ -218,7 +222,7 @@ class SpikeInterfaceKS25Data:
     def default_qc(self, probe: str) -> npt.NDArray[np.floating]:
         return np.load(
             io.BytesIO(
-                self.format_path(
+                self.get_correct_path(
                     self.sorting_precurated(probe), "properties", "default_qc.npy"
                 ).read_bytes()
             )
@@ -228,7 +232,7 @@ class SpikeInterfaceKS25Data:
     def unit_locations(self, probe: str) -> npt.NDArray[np.floating]:
         return np.load(
             io.BytesIO(
-                self.format_path(
+                self.get_correct_path(
                     self.postprocessed(probe), "unit_locations", "unit_locations.npy"
                 ).read_bytes()
             )
@@ -237,13 +241,13 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def sorting_json(self, probe: str) -> dict:
         return self.read_json(
-            self.format_path(self.postprocessed(probe), "sorting.json")
+            self.get_correct_path(self.postprocessed(probe), "sorting.json")
         )
 
     @functools.cache
     def recording_attributes_json(self, probe: str) -> dict:
         return self.read_json(
-            self.format_path(
+            self.get_correct_path(
                 self.postprocessed(probe), "recording_info", "recording_attributes.json"
             )
         )
