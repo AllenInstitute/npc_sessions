@@ -33,14 +33,17 @@ jobs:
 
     steps:
     
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.PAT }} 
+          # otherwise, push comes from `github-actions` bot, which can't trigger
+          # other workflows
+
     - uses: pdm-project/setup-pdm@v3
       with:
         python-version: ${{ matrix.python-version }}
         update-python: true
         cache: true
-        token: ${{ secrets.PAT }} 
-          # otherwise, push comes from `github-actions` bot, which can't trigger
-          # other workflows
 
     - name: Install dependencies
       run: |
