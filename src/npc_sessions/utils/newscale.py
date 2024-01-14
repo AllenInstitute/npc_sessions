@@ -97,13 +97,13 @@ def get_newscale_coordinates(
     if time is None:
         p = utils.from_pathlike(newscale_log_path)
         try:
-            time = npc_session.DatetimeRecord(p.as_posix())
+            start = npc_session.DatetimeRecord(p.as_posix())
         except ValueError as exc:
             raise ValueError(
                 f"`time` must be provided to indicate start of ephys recording: no time could be parsed from {p.as_posix()}"
             ) from exc
     else:
-        time = npc_session.DatetimeRecord(time)
+        start = npc_session.DatetimeRecord(time)
         
     movement = pl.col(NEWSCALE_LOG_COLUMNS[0])
     serial_number = pl.col(NEWSCALE_LOG_COLUMNS[1])
