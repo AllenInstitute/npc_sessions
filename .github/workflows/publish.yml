@@ -75,6 +75,10 @@ jobs:
         message: "Bump [skip actions]"
         
     - name: Tag commit
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }} 
+        # otherwise, push comes from `github-actions` bot, which can't trigger
+        # other workflows
       run: |
         pdm run tag
         git push --tags
