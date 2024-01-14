@@ -695,7 +695,10 @@ class DynamicRouting1(TaskControl):
         bregma = self._hdf5.get("optoBregma") or self._hdf5.get("bregmaXY")
         if bregma is not None:
             galvo = self._hdf5["galvoVoltage"][()]
-            return tuple(tuple(bregma[np.all(galvo == v, axis=1)][0]) for v in self._galvo_voltage_xy)
+            return tuple(
+                tuple(bregma[np.all(galvo == v, axis=1)][0])
+                for v in self._galvo_voltage_xy
+            )
         if (calibration_data := self._hdf5.get("bregmaGalvoCalibrationData")) is None:
             calibration_data = self.getBregmaGalvoCalibrationData()
         else:
