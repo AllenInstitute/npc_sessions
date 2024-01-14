@@ -82,23 +82,31 @@ def get_newscale_data_lazy(path: utils.PathLike) -> pl.LazyFrame:
 
 def get_newscale_coordinates(
     newscale_log_path: utils.PathLike,
-    time: str | datetime.datetime | npc_session.DatetimeRecord,
+    time: str | datetime.datetime | npc_session.DatetimeRecord | None = None,
 ) -> pd.DataFrame:
-    """Returns the coordinates of each probe at the given time.
+    """Returns the coordinates of each probe at the given time, by scanning for the most-recent prior movement on each motor.
 
     - looks up the timestamp of movement preceding `time`
+    - if not provided, attempt to parse experiment start time from `newscale_log_path`: 
+      assumes manipulators were not moved after the start time
 
     >>> df = get_newscale_coordinates('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior_videos/log.csv', '2023-10-23 14-11-05')
     >>> list(df['x'])
     [6278.0, 6943.5, 7451.0, 4709.0, 4657.0, 5570.0]
     """
-    start = npc_session.DatetimeRecord(time)
+    if start is not None:
+        start = npc_session.DatetimeRecord(time)
+    else:
+        try:
+            start = npc_session.DatetimeRecord(newscale_log_path)
+        except ValueError as exc:
+            raise ValueError(f"time must be provided to indicate start of ephys recording: no time could be parsed from {newscale_log_path}") 
     movement = pl.col(NEWSCALE_LOG_COLUMNS[0])
     serial_number = pl.col(NEWSCALE_LOG_COLUMNS[1])
     df: pl.DataFrame
     try:
         df = get_newscale_data_lazy(newscale_log_path)  # type: ignore [assignment]
-    except pl.ComputeError:
+    except (pl.ComputeError, FileNotFoundError):
         df = get_newscale_data(newscale_log_path)
 
     df = (
