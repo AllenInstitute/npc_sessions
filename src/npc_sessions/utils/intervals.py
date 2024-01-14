@@ -33,7 +33,7 @@ def parse_intervals(
         try:
             times = (i.get("start_time"), i.get("stop_time"))  # type: ignore [union-attr]
         except AttributeError:
-            times = tuple(i)  # type: ignore [assignment]
+            times = tuple(i)
         if all(isinstance(t, hdmf.common.table.VectorData) for t in times):
             t = typing.cast(
                 tuple[hdmf.common.table.VectorData, hdmf.common.table.VectorData], times
