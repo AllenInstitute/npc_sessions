@@ -110,7 +110,7 @@ def get_newscale_coordinates(
     df: pl.DataFrame
     try:
         df = get_newscale_data_lazy(newscale_log_path)  # type: ignore [assignment]
-    except (pl.ComputeError, FileNotFoundError):
+    except (pl.ComputeError, OSError):
         df = get_newscale_data(newscale_log_path)
 
     df = (
