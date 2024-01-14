@@ -4,7 +4,7 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
-lock_version = "4.4.1"
+lock_version = "4.4"
 content_hash = "sha256:72428db9754cf7907c99496272b5cfab37efc7ad58e2c7ec7625d58a0672c5a9"
 
 [[package]]
@@ -2053,7 +2053,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.99"
+version = "0.1.100"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -2072,8 +2072,8 @@ dependencies = [
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.99-py3-none-any.whl", hash = "sha256:a67ffa617a91ea7c486690675d3e286b9c169952027ccff9685f8c46fea8fe1a"},
-    {file = "npc_lims-0.1.99.tar.gz", hash = "sha256:2786f93a856db30e9e0394742a43ee1a5f5c87bec6647d221e7f8f20820f0c15"},
+    {file = "npc_lims-0.1.100-py3-none-any.whl", hash = "sha256:02505f174f83394e68aac8e44855d4c49e721e43ca5743788f9cfb4e6102ca50"},
+    {file = "npc_lims-0.1.100.tar.gz", hash = "sha256:8caeaee5a31eb08e77f1fc862313ef2d016a7d0a7006b39b4f738feacb1ad2b1"},
 ]
 
 [[package]]
@@ -3335,7 +3335,7 @@ version = "2.0.21"
 requires_python = ">=3.7"
 summary = "Database Abstraction Library"
 dependencies = [
-    "greenlet!=0.4.17; platform_machine == \"win32\" or platform_machine == \"WIN32\" or platform_machine == \"AMD64\" or platform_machine == \"amd64\" or platform_machine == \"x86_64\" or platform_machine == \"ppc64le\" or platform_machine == \"aarch64\"",
+    "greenlet!=0.4.17; platform_machine == \"aarch64\" or (platform_machine == \"ppc64le\" or (platform_machine == \"x86_64\" or (platform_machine == \"amd64\" or (platform_machine == \"AMD64\" or (platform_machine == \"win32\" or platform_machine == \"WIN32\")))))",
     "typing-extensions>=4.2.0",
 ]
 files = [
