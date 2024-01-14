@@ -95,11 +95,11 @@ def get_session_infos(
     if session_type not in ("training", "ephys", "all"):
         raise ValueError(f"{session_type=} must be one of 'training', 'ephys', 'all'")
     if session_type == "all":
-        session_infos = npc_lims.get_session_info()
+        session_infos = npc_lims.get_session_info(issues=[])
     else:
         session_infos = tuple(
             s
-            for s in npc_lims.get_session_info()
+            for s in npc_lims.get_session_info(issues=[])
             if s.is_ephys == is_ephys(session_type=session_type)
         )
     return session_infos
