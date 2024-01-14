@@ -32,14 +32,16 @@ jobs:
     permissions: write-all
 
     steps:
-    - uses: actions/checkout@v3
     
     - uses: pdm-project/setup-pdm@v3
       with:
         python-version: ${{ matrix.python-version }}
         update-python: true
         cache: true
-        
+        token: ${{ secrets.PAT }} 
+          # otherwise, push comes from `github-actions` bot, which can't trigger
+          # other workflows
+
     - name: Install dependencies
       run: |
         pdm install -G dev
@@ -59,10 +61,6 @@ jobs:
     - name: Bump project version
       run: |
         pdm run bumpver
-                
-    - name: Publish
-      run: |
-        pdm publish
       
     - name: Add requirements.txt
       run: |
@@ -75,13 +73,19 @@ jobs:
         message: "Bump [skip actions]"
         
     - name: Tag commit
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT }} 
-        # otherwise, push comes from `github-actions` bot, which can't trigger
-        # other workflows
+      # pull in case non-published files were changed since job started
       run: |
         pdm run tag
+        git pull --rebase 
         git push --tags
+      env:
+          GITHUB_TOKEN: ${{ secrets.PAT }} 
+          # use PAT, or push comes from `github-actions` bot, which can't trigger
+          # other workflows   
+
+    - name: Publish
+      run: |
+        pdm publish
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
