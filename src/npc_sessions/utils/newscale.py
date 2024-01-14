@@ -87,7 +87,7 @@ def get_newscale_coordinates(
     """Returns the coordinates of each probe at the given time, by scanning for the most-recent prior movement on each motor.
 
     - looks up the timestamp of movement preceding `time`
-    - if not provided, attempt to parse experiment start time from `newscale_log_path`: 
+    - if not provided, attempt to parse experiment start time from `newscale_log_path`:
       assumes manipulators were not moved after the start time
 
     >>> df = get_newscale_coordinates('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior_videos/log.csv', '2023-10-23 14-11-05')
@@ -104,7 +104,7 @@ def get_newscale_coordinates(
             ) from exc
     else:
         start = npc_session.DatetimeRecord(time)
-        
+
     movement = pl.col(NEWSCALE_LOG_COLUMNS[0])
     serial_number = pl.col(NEWSCALE_LOG_COLUMNS[1])
     df: pl.DataFrame
