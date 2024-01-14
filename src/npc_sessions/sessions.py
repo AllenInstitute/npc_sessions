@@ -2229,7 +2229,7 @@ class DynamicRoutingSession:
         module = pynwb.behavior.BehavioralEvents(
             name="all_spike_histograms",
         )
-        for probe in self.probes_inserted:
+        for probe in sorted(set(self.units.electrode_group_name[:])):
             module.add_timeseries(self.get_all_spike_histogram(probe))
         return module
 
