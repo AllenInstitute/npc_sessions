@@ -231,14 +231,16 @@ class DynamicRouting1(TaskControl):
     @utils.cached_property
     def _is_opto(self) -> bool:
         return utils.is_opto(self._hdf5)
-    
+
     @utils.cached_property
     def _is_galvo_opto(self) -> bool:
         is_galvo_opto = utils.is_galvo_opto(self._hdf5)
         if is_galvo_opto and not self._is_opto:
-            raise AssertionError(f"Conflicting results: {self._is_opto=}, {is_galvo_opto=}")
+            raise AssertionError(
+                f"Conflicting results: {self._is_opto=}, {is_galvo_opto=}"
+            )
         return is_galvo_opto
-    
+
     @utils.cached_property
     def _sam(self) -> DynRoutData:
         return utils.get_sam(self._hdf5)
