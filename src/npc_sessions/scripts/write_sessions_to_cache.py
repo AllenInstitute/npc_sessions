@@ -47,7 +47,9 @@ def write_sessions_to_cache(
         parallel = False
     if parallel:
         future_to_session = {}
-        pool = concurrent.futures.ProcessPoolExecutor(utils.get_max_workers(), mp_context=multiprocessing.get_context('spawn'))
+        pool = concurrent.futures.ProcessPoolExecutor(
+            utils.get_max_workers(), mp_context=multiprocessing.get_context("spawn")
+        )
         for info in tqdm.tqdm(session_infos, desc="Submitting jobs"):
             future_to_session[
                 pool.submit(

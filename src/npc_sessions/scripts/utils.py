@@ -31,30 +31,36 @@ def get_max_workers() -> int:
             get_available_memory() * 0.7 // MEMORY_PER_SESSION,
         )
     )
-    
+
+
 def get_available_memory() -> int:
     """Assumes linux means containerized - get cgroups memory."""
-    if sys.platform == 'linux':
+    if sys.platform == "linux":
         return get_available_container_memory()
     else:
         return psutil.virtual_memory().available
 
+
 def get_available_container_memory() -> int:
     """Available memory in the container, in bytes.
-    
+
     `psutil.virtual_memory()` gives system memory, not container memory.
     In a github action or codeocean capsule, psutil will overestimate the available memory.
     """
-    if sys.platform != 'linux':
-        raise NotImplementedError('Only implemented for linux')
+    if sys.platform != "linux":
+        raise NotImplementedError("Only implemented for linux")
+
     def _format(out: bytes) -> int:
-        return int(out.decode().strip('\n'))
+        return int(out.decode().strip("\n"))
+
     def _run(cmd: list[str]) -> bytes:
         return subprocess.run(cmd, capture_output=True).stdout
-    limit = _format(_run(['cat', '/sys/fs/cgroup/memory/memory.limit_in_bytes']))
-    usage = _format(_run(['cat', '/sys/fs/cgroup/memory/memory.usage_in_bytes']))
+
+    limit = _format(_run(["cat", "/sys/fs/cgroup/memory/memory.limit_in_bytes"]))
+    usage = _format(_run(["cat", "/sys/fs/cgroup/memory/memory.usage_in_bytes"]))
     return limit - usage
-    
+
+
 def setup() -> (
     dict[
         Literal["session_type", "skip_existing", "version", "parallel"],
