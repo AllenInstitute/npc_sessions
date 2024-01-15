@@ -23,7 +23,7 @@ logger = logging.getLogger()
 MEMORY_PER_EPHYS_SESSION = 2 * 1024**3
 """Conservative estimate of a whole ephys session in memory."""
 
-MEMORY_PER_TRAINING_SESSION = .2 * 1024**3
+MEMORY_PER_TRAINING_SESSION = 0.2 * 1024**3
 
 DEFAULT_CONTAINER_MEMORY = 7 * 1024**3
 """Default available memory in codeocean capsule or github action runner, in case
@@ -32,12 +32,13 @@ we can't query it.
 https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
 """
 
-def get_max_workers(session_type: Literal['ephys', 'training', 'all'] = 'ephys') -> int:
+
+def get_max_workers(session_type: Literal["ephys", "training", "all"] = "ephys") -> int:
     if session_type == "training":
         memory_per_session = MEMORY_PER_TRAINING_SESSION
     else:
         memory_per_session = MEMORY_PER_EPHYS_SESSION
-        
+
     return int(
         min(
             psutil.cpu_count(),
