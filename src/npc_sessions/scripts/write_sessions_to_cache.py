@@ -21,8 +21,8 @@ def helper(
     session_id: str | npc_session.SessionRecord | npc_lims.SessionInfo,
     **write_all_components_kwargs,
 ) -> None:
-    logger.info(f"Processing {session_id}")
     session = npc_sessions.DynamicRoutingSession(session_id)
+    logger.info(f"Processing {session.id}")
     npc_sessions.write_all_components_to_cache(
         session,
         **write_all_components_kwargs,
