@@ -1297,6 +1297,22 @@ def is_opto(
         )
     return False
 
+def is_galvo_opto(
+    stim_path_or_data: utils.PathLike | h5py.File,
+) -> bool:
+    """
+    >>> is_galvo_opto('s3://aind-ephys-data/ecephys_670248_2023-08-01_11-27-17/behavior/DynamicRouting1_670248_20230801_120304.hdf5')
+    True
+    >>> is_galvo_opto('s3://aind-scratch-data/ben.hardcastle/DynamicRoutingTask/Data/677352/DynamicRouting1_677352_20231013_155330.hdf5')
+    False
+    """
+    with contextlib.suppress(TypeError, AttributeError):
+        return bool(
+            (voltage := getattr(get_sam(stim_path_or_data), "trialGalvoVoltage", None))
+            is not None
+            and not all(np.isnan(a).any() for a in voltage)
+        )
+    return False
 
 if __name__ == "__main__":
     import doctest

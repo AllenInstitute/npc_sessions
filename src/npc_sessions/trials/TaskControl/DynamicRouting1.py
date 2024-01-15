@@ -111,7 +111,7 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def _opto_stim_waveforms(self) -> tuple[utils.Waveform | None, ...]:
-        if not self._has_opto:
+        if not self._is_opto:
             return tuple(None for _ in range(self._len))
         return utils.get_opto_waveforms_from_stim_file(self._hdf5)
 
@@ -229,9 +229,16 @@ class DynamicRouting1(TaskControl):
     # helper-properties that won't become columns:
 
     @utils.cached_property
-    def _has_opto(self) -> bool:
+    def _is_opto(self) -> bool:
         return utils.is_opto(self._hdf5)
-
+    
+    @utils.cached_property
+    def _is_galvo_opto(self) -> bool:
+        is_galvo_opto = utils.is_galvo_opto(self._hdf5)
+        if is_galvo_opto and not self._is_opto:
+            raise AssertionError(f"Conflicting results: {self._is_opto=}, {is_galvo_opto=}")
+        return is_galvo_opto
+    
     @utils.cached_property
     def _sam(self) -> DynRoutData:
         return utils.get_sam(self._hdf5)
@@ -349,14 +356,14 @@ class DynamicRouting1(TaskControl):
     @utils.cached_property
     def opto_start_time(self) -> npt.NDArray[np.float64]:
         """Onset of optogenetic inactivation"""
-        if not self._has_opto:
+        if not self._is_opto:
             return np.full(self._len, np.nan)
         return self.get_trial_opto_onset(self.trial_index)
 
     @utils.cached_property
     def opto_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of optogenetic inactivation"""
-        if not self._has_opto:
+        if not self._is_opto:
             return np.full(self._len, np.nan)
         return self.get_trial_opto_offset(self.trial_index)
 
@@ -632,7 +639,7 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def _opto_params_index(self) -> npt.NDArray[np.float64] | None:
-        if not self._has_opto:
+        if not self._is_opto:
             return np.full(self._len, np.nan)
         if found := self._hdf5.get("trialOptoParamsIndex"):
             return found[()][self.trial_index]
@@ -671,7 +678,7 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def _galvo_voltage_xy(self):
-        if not self._has_opto:
+        if not self._is_galvo_opto:
             return np.full(self._len, np.nan)
         if len(self._sam.trialGalvoVoltage.shape) < 3:
             if not all(len(v) == 2 for v in self._sam.trialGalvoVoltage):
@@ -715,20 +722,20 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def opto_location_bregma_x(self) -> npt.NDArray[np.float64]:
-        if not self._has_opto:
+        if not self._is_galvo_opto:
             return np.full(self._len, np.nan)
         return np.array([bregma[0] for bregma in self._opto_location_bregma_xy])
 
     @utils.cached_property
     def opto_location_bregma_y(self) -> npt.NDArray[np.float64]:
-        if not self._has_opto:
+        if not self._is_galvo_opto:
             return np.full(self._len, np.nan)
         return np.array([bregma[1] for bregma in self._opto_location_bregma_xy])
 
     @utils.cached_property
     def _opto_location_name(self) -> npt.NDArray[np.str_]:
         """target location for optogenetic inactivation during the trial"""
-        if not self._has_opto:
+        if not self._is_galvo_opto:
             return np.full(self._len, np.nan)
         if trialOptoLabel := self._hdf5.get("trialOptoLabel", None):
             labels = trialOptoLabel.asstr()[()]
@@ -765,14 +772,14 @@ class DynamicRouting1(TaskControl):
     def _opto_location_index(self) -> npt.NDArray[np.int32]:
         """0-indexed target location for optogenetic inactivation during the trial"""
         # TODO
-        if not self._has_opto:
+        if not self._is_opto:
             return np.full(self._len, np.nan)
         return np.full(self._len, np.nan)
 
     @utils.cached_property
     def _opto_voltage(self) -> npt.NDArray[np.float64]:
         voltages = np.full(self._len, np.nan)
-        if not self._has_opto:
+        if not self._is_opto:
             return voltages
         for idx in range(self._len):
             if self._opto_params_index is None:
@@ -787,7 +794,7 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def opto_power(self) -> npt.NDArray[np.float64]:
-        if not self._has_opto:
+        if not self._is_opto:
             return np.full(self._len, np.nan)
         if (voltage := self._hdf5["trialOptoVoltage"]).ndim == 1:
             voltages = voltage[: self._len]
@@ -833,7 +840,7 @@ class DynamicRouting1(TaskControl):
     def opto_stim_name(self) -> npt.NDArray[np.str_] | npt.NDArray[np.floating]:
         """stimulus presented during optogenetic inactivation, corresponding to
         keys in `stimulus` dict"""
-        if not self._has_opto:
+        if not self._is_opto:
             return np.full(self._len, np.nan)
         return np.array(
             [
