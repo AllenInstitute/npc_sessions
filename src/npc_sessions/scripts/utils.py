@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import logging
 import logging.config
 import subprocess
@@ -19,26 +20,39 @@ logging.config.dictConfig(
 
 logger = logging.getLogger()
 
-MEMORY_PER_SESSION = 2 * 1024**3
-"""Conservative estimate of a whole ephys session in memory. Will be much less for
-training sessions."""
+MEMORY_PER_EPHYS_SESSION = 2 * 1024**3
+"""Conservative estimate of a whole ephys session in memory."""
 
+MEMORY_PER_TRAINING_SESSION = .2 * 1024**3
 
-def get_max_workers() -> int:
+DEFAULT_CONTAINER_MEMORY = 7 * 1024**3
+"""Default available memory in codeocean capsule or github action runner, in case
+we can't query it.
+
+https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+"""
+
+def get_max_workers(session_type: Literal['ephys', 'training', 'all'] = 'ephys') -> int:
+    if session_type == "training":
+        memory_per_session = MEMORY_PER_TRAINING_SESSION
+    else:
+        memory_per_session = MEMORY_PER_EPHYS_SESSION
+        
     return int(
         min(
             psutil.cpu_count(),
-            get_available_memory() * 0.7 // MEMORY_PER_SESSION,
+            get_available_memory() * 0.8 // memory_per_session,
         )
     )
 
 
 def get_available_memory() -> int:
-    """Assumes linux means containerized - get cgroups memory."""
+    """Assumes linux means containerized - get cgroups memory if possible."""
     if sys.platform == "linux":
-        return get_available_container_memory()
-    else:
-        return psutil.virtual_memory().available
+        with contextlib.suppress(ValueError):
+            return get_available_container_memory()
+        return DEFAULT_CONTAINER_MEMORY
+    return psutil.virtual_memory().available
 
 
 def get_available_container_memory() -> int:
