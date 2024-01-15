@@ -1740,9 +1740,18 @@ class DynamicRoutingSession:
             raise FileNotFoundError(
                 f"Could not find stim files for {self.id} in raw data paths or {self.stim_path_root}"
             )
-        if len(tasks := sorted([p for p in stim_paths if self.task_stim_name in p.stem])) > 1:
+        if (
+            len(
+                tasks := sorted(
+                    [p for p in stim_paths if self.task_stim_name in p.stem]
+                )
+            )
+            > 1
+        ):
             # ensure only one task file (e.g. 676909_2023-11-09 has two)
-            logger.warning(f"{self.id} has multiple {self.task_stim_name} stim files. Only the first will be used.")
+            logger.warning(
+                f"{self.id} has multiple {self.task_stim_name} stim files. Only the first will be used."
+            )
             for extra_task in tasks[1:]:
                 stim_paths.remove(extra_task)
         return tuple(stim_paths)
@@ -1771,11 +1780,15 @@ class DynamicRoutingSession:
 
     @property
     def task_path(self) -> upath.UPath:
-        return next(path for path in self.stim_paths if self.task_stim_name in path.stem)
+        return next(
+            path for path in self.stim_paths if self.task_stim_name in path.stem
+        )
 
     @property
     def task_data(self) -> h5py.File:
-        return next(self.stim_data[k] for k in self.stim_data if self.task_stim_name in k)
+        return next(
+            self.stim_data[k] for k in self.stim_data if self.task_stim_name in k
+        )
 
     @property
     def task_version(self) -> str | None:
@@ -1785,6 +1798,7 @@ class DynamicRoutingSession:
     def stim_data(self) -> utils.LazyDict[str, h5py.File]:
         def h5_dataset(path: upath.UPath) -> h5py.File:
             return h5py.File(io.BytesIO(path.read_bytes()), "r")
+
         return utils.LazyDict(
             (path.stem, (h5_dataset, (path,), {})) for path in self.stim_paths
         )

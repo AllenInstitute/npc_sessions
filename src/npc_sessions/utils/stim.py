@@ -1297,6 +1297,7 @@ def is_opto(
         )
     return False
 
+
 def is_galvo_opto(
     stim_path_or_data: utils.PathLike | h5py.File,
 ) -> bool:
@@ -1313,6 +1314,7 @@ def is_galvo_opto(
             and not all(np.isnan(a).any() for a in voltage)
         )
     return False
+
 
 if __name__ == "__main__":
     import doctest
