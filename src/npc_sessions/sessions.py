@@ -155,8 +155,8 @@ class DynamicRoutingSession:
     # paths/raw data processing:
     >>> 'DynamicRouting1' in s.stim_names
     True
-    >>> s.stim_paths[0]
-    S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
+    >>> s.stim_paths[0].name
+    'DynamicRouting1_670248_20230803_123154.hdf5'
     >>> s.sync_path
     S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
     >>> s.ephys_timing_data[0].device.name, s.ephys_timing_data[0].sampling_rate, s.ephys_timing_data[0].start_time
