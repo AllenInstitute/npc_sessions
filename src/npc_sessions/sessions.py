@@ -638,21 +638,15 @@ class DynamicRoutingSession:
     @utils.cached_property
     def _trials(self) -> TaskControl.DynamicRouting1:
         """Main behavior task trials"""
-        stim_name = next(
-            (_ for _ in self.stim_paths if self.task_stim_name in _.stem), None
-        )
-        if stim_name is None:
+        try:
+            _ = self.task_path
+        except StopIteration:
             raise ValueError(
                 f"no stim named {self.task_stim_name}* found for {self.id}"
-            )
+            ) from None
         # avoid iterating over values and checking for type, as this will
         # create all intervals in lazydict if they don't exist
-        if stim_name.stem not in self._all_trials.keys():
-            raise KeyError(
-                f"no intervals named {self.task_stim_name}* found for {self.id}"
-            )
-
-        trials = self._all_trials[stim_name.stem]
+        trials = self._all_trials[self.task_path.stem]
         assert isinstance(trials, TaskControl.DynamicRouting1)  # for mypy
         return trials
 
@@ -1741,11 +1735,17 @@ class DynamicRoutingSession:
         # are found. Rationale is that raw data folder may have curated set,
         # with some unwanted stim files removed
         for raw_data_paths in (self.raw_data_paths, self.stim_path_root.iterdir()):
-            if stim_paths := tuple(p for p in raw_data_paths if is_valid_stim_file(p)):
-                return stim_paths
-        raise FileNotFoundError(
-            f"Could not find stim files for {self.id} in raw data paths or {self.stim_path_root}"
-        )
+            stim_paths = [p for p in raw_data_paths if is_valid_stim_file(p)]
+        if not stim_paths:
+            raise FileNotFoundError(
+                f"Could not find stim files for {self.id} in raw data paths or {self.stim_path_root}"
+            )
+        if len(tasks := sorted([p for p in stim_paths if self.task_stim_name in p.stem])) > 1:
+            # ensure only one task file (e.g. 676909_2023-11-09 has two)
+            logger.warning(f"{self.id} has multiple {self.task_stim_name} stim files. Only the first will be used.")
+            for extra_task in tasks[1:]:
+                stim_paths.remove(extra_task)
+        return tuple(stim_paths)
 
     @utils.cached_property
     def rig(self) -> str:
@@ -1771,11 +1771,11 @@ class DynamicRoutingSession:
 
     @property
     def task_path(self) -> upath.UPath:
-        return next(path for path in self.stim_paths if "DynamicRouting" in path.stem)
+        return next(path for path in self.stim_paths if self.task_stim_name in path.stem)
 
     @property
     def task_data(self) -> h5py.File:
-        return next(self.stim_data[k] for k in self.stim_data if "DynamicRouting" in k)
+        return next(self.stim_data[k] for k in self.stim_data if self.task_stim_name in k)
 
     @property
     def task_version(self) -> str | None:
@@ -1785,7 +1785,6 @@ class DynamicRoutingSession:
     def stim_data(self) -> utils.LazyDict[str, h5py.File]:
         def h5_dataset(path: upath.UPath) -> h5py.File:
             return h5py.File(io.BytesIO(path.read_bytes()), "r")
-
         return utils.LazyDict(
             (path.stem, (h5_dataset, (path,), {})) for path in self.stim_paths
         )
