@@ -44,7 +44,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
         update-python: true
         cache: true
-
+        token: ${{ secrets.PAT }} 
+          # otherwise, push comes from `github-actions` bot, which can't trigger
+          # other workflows
+          
     - name: Install dependencies
       run: |
         pdm install -G dev
