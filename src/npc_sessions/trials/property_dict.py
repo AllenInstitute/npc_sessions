@@ -20,8 +20,11 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
-EXCLUDE_IF_ONLY_NANS = False
-"""If True, exclude columns with all NaN values from the resulting dict."""
+EXCLUDE_IF_ONLY_NANS = True
+"""If True, exclude columns with all NaN values from the resulting dict. This is
+the behavior expected from nwb validation. For some columns that are not always
+available (such as `opto_location_name`) we return `np.full(np.nan)`: if those
+columns aren't dropped, then dataframe schemas will become inconsistent (str vs double)"""
 
 
 class PropertyDict(collections.abc.Mapping):
