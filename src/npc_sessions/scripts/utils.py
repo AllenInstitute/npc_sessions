@@ -114,9 +114,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--version",
-        default=None,
         type=str,
-        help="Subfolder that cached files are written to - if None, uses the current version of npc_sessions",
+        metavar='v?.?.?',
+        help="Subfolder that cached files are written to - default uses the current version of npc_sessions",
     )
     parser.add_argument(
         "--parallel",
@@ -130,6 +130,13 @@ def parse_args() -> argparse.Namespace:
         choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
         help="Level for the root logger (default INFO)",
     )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        metavar='N',
+        help="If --parallel is used, override the number of workers in ProcessPool - default calculates appropriate number based on available memory",
+    )
+    
     return parser.parse_args()
 
 

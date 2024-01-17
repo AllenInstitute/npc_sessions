@@ -35,6 +35,7 @@ def write_sessions_to_cache(
     skip_existing: bool = True,
     version: str | None = None,
     parallel: bool = True,
+    max_workers: int | None = None,
 ) -> None:
     t0 = time.time()
     session_infos = utils.get_session_infos(session_type=session_type)
@@ -48,7 +49,7 @@ def write_sessions_to_cache(
     if parallel:
         future_to_session = {}
         pool = concurrent.futures.ProcessPoolExecutor(
-            utils.get_max_workers(session_type),
+            max_workers or utils.get_max_workers(session_type),
             mp_context=multiprocessing.get_context("spawn"),
         )
         for info in tqdm.tqdm(session_infos, desc="Submitting jobs"):

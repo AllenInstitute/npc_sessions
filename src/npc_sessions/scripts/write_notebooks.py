@@ -60,6 +60,7 @@ def write_notebooks(
     skip_existing: bool = True,
     version: str | None = None,
     parallel: bool = True,
+    max_workers: int | None = None,
 ) -> None:
     t0 = time.time()
     session_infos = utils.get_session_infos(session_type=session_type)
@@ -72,7 +73,7 @@ def write_notebooks(
         parallel = False
     if parallel:
         future_to_session = {}
-        pool = concurrent.futures.ProcessPoolExecutor(utils.get_max_workers())
+        pool = concurrent.futures.ProcessPoolExecutor(max_workers or utils.get_max_workers())
         for session in tqdm.tqdm(session_infos, desc="Submitting jobs"):
             future_to_session[
                 pool.submit(
