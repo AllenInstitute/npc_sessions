@@ -10,7 +10,7 @@ authors = [
 ]
 dependencies = [
     "npc-session>=0.1.31",
-    "npc-lims>=0.1.101",
+    "npc-lims>=0.1.103",
     "h5py>=3.9.0",
     "pandas>=2.0",
     "polars>=0.20.4",

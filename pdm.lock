@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
-lock_version = "4.4"
-content_hash = "sha256:fd034e9105853c5918684b7119c25226f40103af062deaef046b50089fe3d95d"
+lock_version = "4.4.1"
+content_hash = "sha256:707338332ae9a84a00f34f8bd64282d3602611c4eb810346e520a3d77cdad9cd"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -1718,7 +1718,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.102"
+version = "0.1.103"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -1737,8 +1737,8 @@ dependencies = [
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.102-py3-none-any.whl", hash = "sha256:20e0cd32e1afdcf4ef3df992726941aba3ff95a4f07f07edc2401b733aa1e9a1"},
-    {file = "npc_lims-0.1.102.tar.gz", hash = "sha256:d8327cc734151318d9d1904d5125a1eecdd035de9a4e7355d0e4ded069575a58"},
+    {file = "npc_lims-0.1.103-py3-none-any.whl", hash = "sha256:25db2f32ce026d27f33b24a8041df61920d77b1be2c6f19811e1911063c19b43"},
+    {file = "npc_lims-0.1.103.tar.gz", hash = "sha256:f00cb158252aa593074268e967232cd3cddf99172a42fd930f8f43275b1e997c"},
 ]
 
 [[package]]
