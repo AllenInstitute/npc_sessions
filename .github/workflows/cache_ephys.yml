@@ -3,7 +3,7 @@ name: Cache ephys
 on: 
   schedule:
     # every _ hours
-    - cron: '0 */6 * * *'
+    - cron: '0/30 * * * *'
   push:
     tags:        
       - '*'           # Push events to every tag not containing /
