@@ -169,18 +169,22 @@ def consolidate_all_caches() -> None:
     for component_name in typing.get_args(npc_lims.NWBComponentStr):
         if component_name == "units":
             continue
-        logger.info(f"Consolidating {component_name} caches")
-        cache_dir = npc_lims.get_cache_path(component_name, consolidated=False)
-        if not cache_dir.exists() or not tuple(cache_dir.iterdir()):
-            continue
-        consolidated_cache_path = npc_lims.get_cache_path(component_name, consolidated=True)
-        pyarrow.parquet.write_table(
-            table=pyarrow.dataset.dataset(cache_dir).to_table(),
-            where=consolidated_cache_path,
-            compression=_PARQUET_COMPRESSION,
-            compression_level=_COMPRESSION_LEVEL,
-        )
-        logger.info(f"Wrote {consolidated_cache_path}")
+        consolidate_cache(component_name)
+        
+def consolidate_cache(component_name: npc_lims.NWBComponentStr) -> None:
+    logger.info(f"Consolidating {component_name} caches")
+    cache_dir = npc_lims.get_cache_path(component_name, consolidated=False)
+    if not cache_dir.exists() or not tuple(cache_dir.iterdir()):
+        logger.info(f"No cache files found for {component_name}")
+        return
+    consolidated_cache_path = npc_lims.get_cache_path(component_name, consolidated=True)
+    pyarrow.parquet.write_table(
+        table=pyarrow.dataset.dataset(cache_dir).to_table(),
+        where=consolidated_cache_path,
+        compression=_PARQUET_COMPRESSION,
+        compression_level=_COMPRESSION_LEVEL,
+    )
+    logger.info(f"Wrote {consolidated_cache_path}")
         
     
 def add_session_metadata(
@@ -239,13 +243,15 @@ def get_dataset(
     nwb_component: npc_lims.NWBComponentStr,
     session_id: str | npc_session.SessionRecord | None = None,
     version: str | None = None,
+    consolidated: bool = True,
 ) -> pyarrow.dataset.Dataset:
     """Get dataset for all sessions, for all components, for the latest version."""
     return pyarrow.dataset.dataset(
-        paths=npc_lims.get_cache_path(
+        npc_lims.get_cache_path(
             nwb_component=nwb_component,
             session_id=session_id,
             version=version,
+            consolidated=consolidated,
         ),
         format=npc_lims.get_cache_file_suffix(nwb_component).lstrip("."),
     )
