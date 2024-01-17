@@ -1439,13 +1439,10 @@ class DynamicRoutingSession:
     def is_templeton(self) -> bool:
         if (v := getattr(self, "_is_templeton", None)) is not None:
             return v
-        if self.task_version is not None:
-            return bool("templeton" in self.task_version)
         if self.info is not None:
-            return bool(
-                "templeton" in self.info.project.lower()
-                or "templeton" in self.info.allen_path.as_posix().lower()
-            )
+            return self.info.is_templeton
+        if self.is_task and self.task_version is not None:
+            return bool("templeton" in self.task_version)
         raise NotImplementedError(
             "Not enough information to tell if this is a Templeton session"
         )
