@@ -37,6 +37,7 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
+EXCLUDED_PATH_COMPONENTS = ("DynamicRouting1_670248_20230802_120703", )
 
 @typing.overload
 def get_sessions(
@@ -268,7 +269,7 @@ class DynamicRoutingSession:
             notes=self.notes,
             source_script=self.source_script,
             source_script_file_name=self.source_script_file_name,
-            stimulus_notes=self.task_version,
+            stimulus_notes=self.task_version if self.is_task else None,
             subject=self.subject,
             keywords=self.keywords,
             epochs=self.epochs,
@@ -305,7 +306,7 @@ class DynamicRoutingSession:
             notes=self.notes,
             source_script=self.source_script,
             source_script_file_name=self.source_script_file_name,
-            stimulus_notes=self.task_version,
+            stimulus_notes=self.task_version if self.is_task else None,
             subject=self.subject,
             keywords=self.keywords,
             epoch_tags=self.epoch_tags,
@@ -1632,10 +1633,12 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
+        def _filter(paths: tuple[upath.UPath, ...]) -> tuple[upath.UPath, ...]:
+            return tuple(p for p in paths if not any(e in p.as_posix() for e in EXCLUDED_PATH_COMPONENTS))
         if self.root_path:
-            return self.get_raw_data_paths_from_root()
+            return _filter(self.get_raw_data_paths_from_root())
         with contextlib.suppress(FileNotFoundError, ValueError):
-            return npc_lims.get_raw_data_paths_from_s3(self.id)
+            return _filter(npc_lims.get_raw_data_paths_from_s3(self.id))
         if (
             getattr(self, "_is_task", None) is not False
         ):  # using regular version will cause infinite recursion
@@ -1645,7 +1648,7 @@ class DynamicRoutingSession:
                     logger.warning(
                         f"Using {self._root_path} as root path for {self.id}"
                     )
-                    return self.get_raw_data_paths_from_root()
+                    return _filter(self.get_raw_data_paths_from_root())
         raise ValueError(
             f"{self.id} is either an ephys session with no Code Ocean upload, or a behavior session with no data in the synced s3 repo {npc_lims.DR_DATA_REPO}"
         )
@@ -1715,6 +1718,8 @@ class DynamicRoutingSession:
                 p, subject_spec=self.id.subject, date_spec=self.id.date
             ):
                 return False
+            if any(e in p.as_posix() for e in EXCLUDED_PATH_COMPONENTS):
+                return False
             if not self.is_sync:
                 if self.task_stim_name not in p.stem:
                     return (
@@ -1738,6 +1743,8 @@ class DynamicRoutingSession:
         # with some unwanted stim files removed
         for raw_data_paths in (self.raw_data_paths, self.stim_path_root.iterdir()):
             stim_paths = [p for p in raw_data_paths if is_valid_stim_file(p)]
+            if stim_paths:
+                break
         if not stim_paths:
             raise FileNotFoundError(
                 f"Could not find stim files for {self.id} in raw data paths or {self.stim_path_root}"
@@ -1760,18 +1767,22 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def rig(self) -> str:
+        add_period = False  # sam's h5 files store "NP3" and "BEH.E"
+        # sam probably relies on this format, but we might want to convert
+        # to "NP.3" format at some point
+        def _format(rig: str) -> str:
+            if add_period and rig.startswith("NP") and rig[2] != ".":
+                rig = ".".join(rig.split("NP"))
+            return rig
+        if (v := getattr(self, "_rig", None)) is not None:
+            return _format(v)
         for hdf5 in itertools.chain(
             (self.task_data,) if self.is_task else (),
             (v for v in self.stim_data.values()),
         ):
             if rigName := hdf5.get("rigName", None):
                 rig: str = rigName.asstr()[()]
-                add_period = False  # sam's h5 files store "NP3" and "BEH.E"
-                # sam probably relies on this format, but we migth want to convert
-                # to "NP.3" format at some point
-                if add_period and rig.startswith("NP") and rig[2] != ".":
-                    rig = ".".join(rig.split("NP"))
-                return rig
+                return _format(rig)
         raise AttributeError(f"Could not find rigName for {self.id} in stim files")
 
     @property
@@ -1788,6 +1799,8 @@ class DynamicRoutingSession:
 
     @property
     def task_data(self) -> h5py.File:
+        if not self.is_task:
+            raise AttributeError(f"{self.id} is not a session with task data")
         return next(
             self.stim_data[k] for k in self.stim_data if self.task_stim_name in k
         )
