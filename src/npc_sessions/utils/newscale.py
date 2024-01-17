@@ -100,6 +100,7 @@ def get_newscale_coordinates(
     >>> list(df['x'])
     [6278.0, 6943.5, 7451.0, 4709.0, 4657.0, 5570.0]
     >>> list(df['z'])
+    [11080.0, 8573.0, 6500.0, 8107.0, 8038.0, 9125.0]
     """
     if recording_start_time is None:
         p = utils.from_pathlike(newscale_log_path)
