@@ -73,6 +73,7 @@ def write_sessions_to_cache(
                 **helper_opts,  # type: ignore[arg-type]
             )
             logger.info(f"{info.id} done")
+    npc_sessions.consolidate_all_caches()
     logger.info(f"Time elapsed: {datetime.timedelta(seconds=time.time() - t0)}")
 
 

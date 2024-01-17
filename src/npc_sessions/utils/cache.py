@@ -16,12 +16,15 @@ import pyarrow
 import pyarrow.dataset
 import pyarrow.parquet
 import pynwb
+import upath
 
 if typing.TYPE_CHECKING:
     import npc_sessions
 
 logger = logging.getLogger(__name__)
 
+_PARQUET_COMPRESSION = "zstd"
+_COMPRESSION_LEVEL = 15
 
 class MissingComponentError(AttributeError):
     pass
@@ -135,6 +138,7 @@ def write_all_components_to_cache(
                         nwb_component=component_name,
                         session_id=session.id,
                         version=version,
+                        consolidated=False,
                     )
                 )
             ).exists()
@@ -159,7 +163,26 @@ def write_all_components_to_cache(
             skip_existing=skip_existing,
         )
 
-
+def consolidate_all_caches() -> None:
+    """Consolidate all caches into a single file per component - with the
+    exception of `units`, which are already reasonable size."""
+    for component_name in typing.get_args(npc_lims.NWBComponentStr):
+        if component_name == "units":
+            continue
+        logger.info(f"Consolidating {component_name} caches")
+        cache_dir = npc_lims.get_cache_path(component_name, consolidated=False)
+        if not cache_dir.exists() or not tuple(cache_dir.iterdir()):
+            continue
+        consolidated_cache_path = npc_lims.get_cache_path(component_name, consolidated=True)
+        pyarrow.parquet.write_table(
+            table=pyarrow.dataset.dataset(cache_dir).to_table(),
+            where=consolidated_cache_path,
+            compression=_PARQUET_COMPRESSION,
+            compression_level=_COMPRESSION_LEVEL,
+        )
+        logger.info(f"Wrote {consolidated_cache_path}")
+        
+    
 def add_session_metadata(
     df: pd.DataFrame, session_id: str | npc_session.SessionRecord
 ) -> pd.DataFrame:
@@ -180,7 +203,7 @@ def _write_to_cache(
 ) -> None:
     """Write dataframe to cache file (e.g. .parquet)."""
     cache_path = npc_lims.get_cache_path(
-        nwb_component=component_name, session_id=session_id, version=version
+        nwb_component=component_name, session_id=session_id, version=version, consolidated=False,
     )
     if cache_path.suffix != ".parquet":
         raise NotImplementedError(f"{cache_path.suffix=}")
@@ -206,8 +229,8 @@ def _write_to_cache(
         # want a row_group_size in that range.
         # Tradeoff is row_group_size gives worse compression and worse access speeds
         # across chunks (so querying entire columns will be much slower than default)
-        compression="zstd",
-        compression_level=15,
+        compression=_PARQUET_COMPRESSION,
+        compression_level=_COMPRESSION_LEVEL,
     )
     logger.info(f"Wrote {cache_path}")
 
