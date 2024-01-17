@@ -525,7 +525,8 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         # TODO add filtered, sub-sampled LFP
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
-        modules.append(self._manipulator_info)
+        with contextlib.suppress(AttributeError):
+            modules.append(self._manipulator_info)
         return tuple(modules)
 
     @property
@@ -1605,7 +1606,11 @@ class DynamicRoutingSession:
             raise AttributeError(
                 f"{self.id} is not an ephys session: no manipulator coords available"
             )
-
+        start_of_np3_logging = datetime.date(2023, 1, 30)
+        if self.id.date.dt < start_of_np3_logging:
+            raise AttributeError(
+                f"{self.id} is an ephys session, but no NewScale log file available"
+            ) from None
         df = utils.get_newscale_coordinates(
             self.newscale_log_path,
             f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
