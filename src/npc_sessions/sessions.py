@@ -1799,8 +1799,7 @@ class DynamicRoutingSession:
 
     @property
     def task_data(self) -> h5py.File:
-        if not self.is_task:
-            raise AttributeError(f"{self.id} is not a session with task data")
+        # don't check if self.is_task here, as this is used to determine that!
         return next(
             self.stim_data[k] for k in self.stim_data if self.task_stim_name in k
         )
