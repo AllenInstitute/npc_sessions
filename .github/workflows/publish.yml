@@ -40,6 +40,8 @@ jobs:
           # other workflows
 
     - uses: pdm-project/setup-pdm@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }} 
       with:
         python-version: ${{ matrix.python-version }}
         update-python: true
