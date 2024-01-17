@@ -16,7 +16,6 @@ import pyarrow
 import pyarrow.dataset
 import pyarrow.parquet
 import pynwb
-import upath
 
 if typing.TYPE_CHECKING:
     import npc_sessions
@@ -25,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 _PARQUET_COMPRESSION = "zstd"
 _COMPRESSION_LEVEL = 15
+
 
 class MissingComponentError(AttributeError):
     pass
@@ -163,6 +163,7 @@ def write_all_components_to_cache(
             skip_existing=skip_existing,
         )
 
+
 def consolidate_all_caches() -> None:
     """Consolidate all caches into a single file per component - with the
     exception of `units`, which are already reasonable size."""
@@ -170,7 +171,8 @@ def consolidate_all_caches() -> None:
         if component_name == "units":
             continue
         consolidate_cache(component_name)
-        
+
+
 def consolidate_cache(component_name: npc_lims.NWBComponentStr) -> None:
     logger.info(f"Consolidating {component_name} caches")
     cache_dir = npc_lims.get_cache_path(component_name, consolidated=False)
@@ -185,8 +187,8 @@ def consolidate_cache(component_name: npc_lims.NWBComponentStr) -> None:
         compression_level=_COMPRESSION_LEVEL,
     )
     logger.info(f"Wrote {consolidated_cache_path}")
-        
-    
+
+
 def add_session_metadata(
     df: pd.DataFrame, session_id: str | npc_session.SessionRecord
 ) -> pd.DataFrame:
@@ -207,7 +209,10 @@ def _write_to_cache(
 ) -> None:
     """Write dataframe to cache file (e.g. .parquet)."""
     cache_path = npc_lims.get_cache_path(
-        nwb_component=component_name, session_id=session_id, version=version, consolidated=False,
+        nwb_component=component_name,
+        session_id=session_id,
+        version=version,
+        consolidated=False,
     )
     if cache_path.suffix != ".parquet":
         raise NotImplementedError(f"{cache_path.suffix=}")

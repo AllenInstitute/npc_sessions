@@ -75,7 +75,7 @@ nbformat==5.9.2
 ndx-events==0.2.0
 neo==0.12.0
 nest-asyncio==1.5.8
-npc-lims==0.1.102
+npc-lims==0.1.103
 npc-session==0.1.31
 numba==0.58.1
 numcodecs==0.11.0

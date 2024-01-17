@@ -73,7 +73,9 @@ def write_notebooks(
         parallel = False
     if parallel:
         future_to_session = {}
-        pool = concurrent.futures.ProcessPoolExecutor(max_workers or utils.get_max_workers())
+        pool = concurrent.futures.ProcessPoolExecutor(
+            max_workers or utils.get_max_workers()
+        )
         for session in tqdm.tqdm(session_infos, desc="Submitting jobs"):
             future_to_session[
                 pool.submit(

@@ -37,7 +37,8 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
-EXCLUDED_PATH_COMPONENTS = ("DynamicRouting1_670248_20230802_120703", )
+EXCLUDED_PATH_COMPONENTS = ("DynamicRouting1_670248_20230802_120703",)
+
 
 @typing.overload
 def get_sessions(
@@ -1634,7 +1635,12 @@ class DynamicRoutingSession:
     @utils.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
         def _filter(paths: tuple[upath.UPath, ...]) -> tuple[upath.UPath, ...]:
-            return tuple(p for p in paths if not any(e in p.as_posix() for e in EXCLUDED_PATH_COMPONENTS))
+            return tuple(
+                p
+                for p in paths
+                if not any(e in p.as_posix() for e in EXCLUDED_PATH_COMPONENTS)
+            )
+
         if self.root_path:
             return _filter(self.get_raw_data_paths_from_root())
         with contextlib.suppress(FileNotFoundError, ValueError):
@@ -1768,12 +1774,14 @@ class DynamicRoutingSession:
     @utils.cached_property
     def rig(self) -> str:
         add_period = False  # sam's h5 files store "NP3" and "BEH.E"
+
         # sam probably relies on this format, but we might want to convert
         # to "NP.3" format at some point
         def _format(rig: str) -> str:
             if add_period and rig.startswith("NP") and rig[2] != ".":
                 rig = ".".join(rig.split("NP"))
             return rig
+
         if (v := getattr(self, "_rig", None)) is not None:
             return _format(v)
         for hdf5 in itertools.chain(

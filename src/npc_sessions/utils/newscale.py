@@ -1,12 +1,11 @@
 from __future__ import annotations
-import collections
 
+import collections
 import datetime
 import logging
-from typing import Iterable
+from collections.abc import Iterable
 
 import npc_session
-import numpy as np
 import pandas as pd
 import polars as pl
 
@@ -48,7 +47,14 @@ SERIAL_NUM_TO_PROBE_LETTER = (
         "SN40902": "F",
     }  # NP.3
 )
-SHORT_TRAVEL_SERIAL_NUMBERS = {"SN32148", "SN32142", "SN32144", "SN32149", "SN32135", "SN24273"}
+SHORT_TRAVEL_SERIAL_NUMBERS = {
+    "SN32148",
+    "SN32142",
+    "SN32144",
+    "SN32149",
+    "SN32135",
+    "SN24273",
+}
 SHORT_TRAVEL_RANGE = 6_000
 LONG_TRAVEL_RANGE = 15_000
 NEWSCALE_LOG_COLUMNS = (
@@ -88,7 +94,10 @@ def get_newscale_data_lazy(path: utils.PathLike) -> pl.LazyFrame:
 
 def get_newscale_coordinates(
     newscale_log_path: utils.PathLike,
-    recording_start_time: str | datetime.datetime | npc_session.DatetimeRecord | None = None,
+    recording_start_time: str
+    | datetime.datetime
+    | npc_session.DatetimeRecord
+    | None = None,
 ) -> pd.DataFrame:
     """Returns the coordinates of each probe at the given time, by scanning for the most-recent prior movement on each motor.
 
@@ -120,16 +129,16 @@ def get_newscale_coordinates(
         df = get_newscale_data_lazy(newscale_log_path)  # type: ignore [assignment]
     except (pl.ComputeError, OSError):
         df = get_newscale_data(newscale_log_path)
-    
-    z_df = df.select(['z'])
+
+    z_df = df.select(["z"])
     if isinstance(df, pl.LazyFrame):
         z_df = z_df.collect()
-    z_values = z_df['z']
+    z_values = z_df["z"]
     z_inverted: bool = is_z_inverted(z_values)
-    
+
     if isinstance(df, pl.LazyFrame):
         df = df.collect()
-    
+
     df = (
         df.filter(movement < start.dt)
         .group_by(serial_number)
@@ -140,7 +149,7 @@ def get_newscale_coordinates(
     )
     if isinstance(df, pl.LazyFrame):
         df = df.collect()
-    
+
     # serial numbers have an extra leading space
     manipulators = df.get_column(NEWSCALE_LOG_COLUMNS[1]).map_elements(
         lambda _: _.strip()
@@ -149,14 +158,14 @@ def get_newscale_coordinates(
     probes = manipulators.map_dict(
         {k: f"probe{v}" for k, v in SERIAL_NUM_TO_PROBE_LETTER.items()}
     ).alias("electrode_group")
-    
+
     # correct z values
-    z = df['z']
-    for idx, device in enumerate(df['device']):
+    z = df["z"]
+    for idx, device in enumerate(df["device"]):
         if z_inverted:
             z[idx] = get_z_travel(device) - z[idx]
     df.replace("z", z)
-    
+
     return df.insert_at_idx(0, probes).sort(pl.col("electrode_group")).to_pandas()
 
 
@@ -168,18 +177,21 @@ def get_z_travel(serial_number: str) -> int:
     15000
     """
     if serial_number not in SERIAL_NUM_TO_PROBE_LETTER:
-        raise ValueError(f"{serial_number=} is not a known serial number: need to update {__file__}")
+        raise ValueError(
+            f"{serial_number=} is not a known serial number: need to update {__file__}"
+        )
     if serial_number in SHORT_TRAVEL_SERIAL_NUMBERS:
         return SHORT_TRAVEL_RANGE
     return LONG_TRAVEL_RANGE
-    
+
+
 def is_z_inverted(z_values: Iterable[float]) -> bool:
     """
     The limits of the z-axis are [0-6000] for NP.0 and [0-15000] for NP.1-3. The
     NewScale software sometimes (but not consistently) inverts the z-axis, so
     retracted probes have a z-coordinate of 6000 or 15000 not 0. This function checks
     the values in the z-column and tries to determine if the z-axis is inverted.
-    
+
     Assumptions:
     - the manipulators spend more time completely retracted than completely extended
 
@@ -192,6 +204,7 @@ def is_z_inverted(z_values: Iterable[float]) -> bool:
     is_long_travel = bool(c[LONG_TRAVEL_RANGE])
     travel_range = LONG_TRAVEL_RANGE if is_long_travel else SHORT_TRAVEL_RANGE
     return c[0] < c[travel_range]
+
 
 if __name__ == "__main__":
     import doctest
