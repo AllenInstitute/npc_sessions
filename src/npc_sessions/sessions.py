@@ -282,7 +282,7 @@ class DynamicRoutingSession:
             acquisition=self._acquisition,
             processing=tuple(self.processing.values()),
             analysis=self._analysis,
-            devices=self._devices,
+            devices=self._devices if self._devices else None,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
             units=self.units if self.is_sorted else None,
