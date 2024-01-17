@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: cache-training
+  group: ${{ github.ref }}
   cancel-in-progress: true
           
 jobs:

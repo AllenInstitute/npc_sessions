@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: cache-qc-notebooks
+  group: ${{ github.ref }}
   cancel-in-progress: true
           
 jobs:
