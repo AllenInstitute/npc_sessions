@@ -97,10 +97,14 @@ def write_nwb_component_to_cache(
       with data for peak channel only, or dropped entirely
     - links to NWBContainers cannot be stored, so extract necessary 'foreign key'
       to enable joining tables later
+    - does not write empty components
     """
     if component_name == "units":
         component = _flatten_units(component)
     df = _remove_pynwb_containers(component)
+    if df.empty:
+        logger.info(f"Skipping {session_id} {component_name} - empty")
+        return
     df = add_session_metadata(df, session_id)
     _write_to_cache(
         session_id=session_id,
@@ -208,6 +212,8 @@ def _write_to_cache(
     skip_existing: bool = True,
 ) -> None:
     """Write dataframe to cache file (e.g. .parquet)."""
+    if df.empty:
+        raise ValueError(f"{session_id} {component_name} df is empty")
     cache_path = npc_lims.get_cache_path(
         nwb_component=component_name,
         session_id=session_id,
@@ -287,6 +293,7 @@ def _remove_pynwb_containers(
 
 
 if __name__ == "__main__":
+    consolidate_cache('devices')
     import doctest
 
     doctest.testmod(
