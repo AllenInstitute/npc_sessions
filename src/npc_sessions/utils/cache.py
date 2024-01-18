@@ -293,7 +293,6 @@ def _remove_pynwb_containers(
 
 
 if __name__ == "__main__":
-    consolidate_cache('devices')
     import doctest
 
     doctest.testmod(
