@@ -555,7 +555,8 @@ class DynamicRoutingSession:
         if self.is_sorted:
             modules.append(self.all_spike_histograms)
             modules.append(self.drift_maps)
-        modules.append(self.performance)
+        if self.is_task:
+            modules.append(self.performance)
         return tuple(modules)
 
     # intervals ----------------------------------------------------------------- #
@@ -655,6 +656,10 @@ class DynamicRoutingSession:
 
     @property
     def performance(self) -> pynwb.epoch.TimeIntervals:
+        if not self.is_task:
+            raise AttributeError(
+                f"No performance table available for {self.id}: {self.is_task=}"
+            )
         trials: pd.DataFrame = self.trials[:]
         task_performance_by_block: dict[str, dict[str, float | str]] = {}
 
