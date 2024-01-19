@@ -173,8 +173,20 @@ class SpikeInterfaceKS25Data:
     drift_maps = functools.partialmethod(get_path, "drift_maps")
     output = functools.partialmethod(get_path, "output")
     postprocessed = functools.partialmethod(get_path, "postprocessed")
-    sorting_precurated = functools.partialmethod(get_path, "sorting_precurated")
     spikesorted = functools.partialmethod(get_path, "spikesorted")
+    
+    
+    @functools.cache
+    def curated(self, probe: str) -> upath.UPath:
+        """Path changed Jan 2024
+        
+        https://github.com/AllenNeuralDynamics/aind-ephys-spikesort-kilosort25-full/blob/main/RELEASE_NOTES.md#v30---jan-18-2024
+        """
+        try:
+            dir_path = self.get_path("sorting_precurated")
+        except FileNotFoundError:
+            dir_path = self.get_path("curated")
+        return self.get_path(dir_path.name, probe)
 
     @functools.cache
     def quality_metrics_dict(self, probe: str) -> dict:
@@ -243,7 +255,7 @@ class SpikeInterfaceKS25Data:
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
-                    self.sorting_precurated(probe), "sorting_cached.npz"
+                    self.curated(probe), "sorting_cached.npz"
                 ).read_bytes()
             ),
             allow_pickle=True,
@@ -252,7 +264,7 @@ class SpikeInterfaceKS25Data:
     @functools.cache
     def provenance(self, probe: str) -> dict:
         return self.read_json(
-            self.get_correct_path(self.sorting_precurated(probe), "provenance.json")
+            self.get_correct_path(self.curated(probe), "provenance.json")
         )
 
     @functools.cache
@@ -269,7 +281,7 @@ class SpikeInterfaceKS25Data:
             )
         return self.read_json(
             self.get_correct_path(
-                self.sorting_precurated(probe), "numpysorting_info.json"
+                self.curated(probe), "numpysorting_info.json"
             )
         )
 
@@ -283,7 +295,7 @@ class SpikeInterfaceKS25Data:
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
-                    self.sorting_precurated(probe), "spikes.npy"
+                    self.curated(probe), "spikes.npy"
                 ).read_bytes()
             )
         )
@@ -321,7 +333,7 @@ class SpikeInterfaceKS25Data:
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
-                    self.sorting_precurated(probe),
+                    self.curated(probe),
                     "properties",
                     "original_cluster_id.npy",
                 ).read_bytes()
@@ -333,7 +345,7 @@ class SpikeInterfaceKS25Data:
         return np.load(
             io.BytesIO(
                 self.get_correct_path(
-                    self.sorting_precurated(probe), "properties", "default_qc.npy"
+                    self.curated(probe), "properties", "default_qc.npy"
                 ).read_bytes()
             )
         )
