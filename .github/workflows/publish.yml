@@ -73,18 +73,17 @@ jobs:
     - name: Add requirements.txt
       run: |
         pdm export --without-hashes --prod -o requirements.txt
-
-    - name: Commit changes
-      uses: EndBug/add-and-commit@v9
-      with:
-        default_author: github_actions
-        message: "Bump [skip actions]"
         
-    - name: Tag commit
-      # pull in case non-published files were changed since job started
+    - name: Bump, pull, tag commit
+      # pull in case non-packaged files were changed since job started (packaged
+      # files would trigger a new job and cancel this one)
       run: |
-        pdm run tag
+        git stash
         git pull --rebase 
+        git stash pop
+        pdm run bumpver
+        git commit -am "Bump [skip actions]"
+        pdm run tag
         git push --tags
       env:
           GITHUB_TOKEN: ${{ secrets.PAT }} 
