@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:707338332ae9a84a00f34f8bd64282d3602611c4eb810346e520a3d77cdad9cd"
+content_hash = "sha256:093944e67b35a8a456c859e579000fe5745e8837148930a68141a5b313651fac"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -963,7 +963,7 @@ files = [
 
 [[package]]
 name = "hdmf"
-version = "3.11.0"
+version = "3.12.0"
 requires_python = ">=3.8"
 summary = "A hierarchical data modeling framework for modern science data standards"
 dependencies = [
@@ -975,8 +975,8 @@ dependencies = [
     "scipy>=1.4",
 ]
 files = [
-    {file = "hdmf-3.11.0-py3-none-any.whl", hash = "sha256:18e293c720efb580ff718a943e24dc8bc14f4c1113e95fe8ab191fc089c01c57"},
-    {file = "hdmf-3.11.0.tar.gz", hash = "sha256:722a5b02846038854ff403d2efe52de9e7f3d5de000229db736cb8a28ab14317"},
+    {file = "hdmf-3.12.0-py3-none-any.whl", hash = "sha256:55e07c5d0d907ee07b7066c64dc698a39e46fec738abc829e9d78470058d45a4"},
+    {file = "hdmf-3.12.0.tar.gz", hash = "sha256:32d25eeef93c0ada76df782c18dd6733a0ea52d334efd86e022c6220afe81bdf"},
 ]
 
 [[package]]
