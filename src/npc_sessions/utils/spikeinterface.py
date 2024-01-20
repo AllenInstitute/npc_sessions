@@ -174,12 +174,11 @@ class SpikeInterfaceKS25Data:
     output = functools.partialmethod(get_path, "output")
     postprocessed = functools.partialmethod(get_path, "postprocessed")
     spikesorted = functools.partialmethod(get_path, "spikesorted")
-    
-    
+
     @functools.cache
     def curated(self, probe: str) -> upath.UPath:
         """Path changed Jan 2024
-        
+
         https://github.com/AllenNeuralDynamics/aind-ephys-spikesort-kilosort25-full/blob/main/RELEASE_NOTES.md#v30---jan-18-2024
         """
         try:
@@ -280,9 +279,7 @@ class SpikeInterfaceKS25Data:
                 "numpysorting_info.json not used for SpikeInterface<0.99"
             )
         return self.read_json(
-            self.get_correct_path(
-                self.curated(probe), "numpysorting_info.json"
-            )
+            self.get_correct_path(self.curated(probe), "numpysorting_info.json")
         )
 
     @functools.cache
@@ -294,9 +291,7 @@ class SpikeInterfaceKS25Data:
             raise NotImplementedError("num_segments > 1 not supported yet")
         return np.load(
             io.BytesIO(
-                self.get_correct_path(
-                    self.curated(probe), "spikes.npy"
-                ).read_bytes()
+                self.get_correct_path(self.curated(probe), "spikes.npy").read_bytes()
             )
         )
 
