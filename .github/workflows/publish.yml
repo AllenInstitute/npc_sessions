@@ -33,22 +33,17 @@ jobs:
 
     steps:
     
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
-        token: ${{ secrets.PAT }} 
-          # otherwise, push comes from `github-actions` bot, which can't trigger
-          # other workflows
+        fetch-depth: 0
+        token: ${{ secrets.PAT }}
+        fetch-tags: true
 
     - uses: pdm-project/setup-pdm@v3
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT }} 
       with:
         python-version: ${{ matrix.python-version }}
         update-python: true
         cache: true
-        token: ${{ secrets.PAT }} 
-          # otherwise, push comes from `github-actions` bot, which can't trigger
-          # other workflows
           
     - name: Install dependencies
       run: |
@@ -78,6 +73,8 @@ jobs:
       # pull in case non-packaged files were changed since job started (packaged
       # files would trigger a new job and cancel this one)
       run: |
+        git config --global user.email "ben.hardcastle@alleninstitute.org"
+        git config --global user.name "Ben Hardcastle"
         git stash
         git pull --rebase 
         git stash pop
