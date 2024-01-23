@@ -3,15 +3,11 @@ name: Cache ephys
 on: 
   schedule:
     # every _ hours
-    - cron: '0/30 * * * *'
+    - cron: '0 */6 * * *'
   push:
     tags:        
       - '*'           # Push events to every tag not containing /
   workflow_dispatch:
-
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: false
           
 jobs:
   package:
