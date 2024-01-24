@@ -28,4 +28,4 @@ jobs:
         CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
       run: |
         pip install npc_lims
-        run_session_cache_capsule
+        source run_session_cache_capsule
