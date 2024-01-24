@@ -68,6 +68,14 @@ jobs:
     - name: Add requirements.txt
       run: |
         pdm export --without-hashes --prod -o requirements.txt
+    
+    - name: Pull
+      # pull in case non-packaged files were changed since job started (packaged
+      # files would trigger a new job and cancel this one)
+      run: |
+        git stash
+        git pull --rebase
+        git stash pop
         
     - name: Commit changes
       uses: EndBug/add-and-commit@v9
@@ -79,8 +87,6 @@ jobs:
         # workflows
         
     - name: Tag commit
-      # pull in case non-packaged files were changed since job started (packaged
-      # files would trigger a new job and cancel this one)
       run: |
         pdm run tag
         git push --tags 
