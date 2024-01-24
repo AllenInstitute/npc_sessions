@@ -3,7 +3,7 @@ name: Cache all sessions (codeocean)
 on: 
   push:
     tags:        
-      - '*'           # Push events to every tag not containing /
+      - '**'           
   workflow_dispatch:
           
 jobs:
