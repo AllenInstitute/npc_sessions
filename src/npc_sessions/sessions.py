@@ -410,11 +410,10 @@ class DynamicRoutingSession:
     def keywords(self) -> list[str]:
         if getattr(self, "_keywords", None) is None:
             self._keywords: list[str] = []
-            self.keywords.append("behavior")
+            if self.is_task:
+                self.keywords.append("task")
             if self.is_sync:
                 self.keywords.append("sync")
-            if not self.is_task:
-                self.keywords.append("no trials")
             if self.is_video:
                 self.keywords.append("video")
             if self.is_ephys:
@@ -423,10 +422,17 @@ class DynamicRoutingSession:
                     self.keywords.append("no units")
                 elif not self.is_annotated:
                     self.keywords.append("no CCF")
+            elif self.is_training:
+                self.keywords.append("training")
             if self.is_opto:
                 self.keywords.append("opto")
             if self.is_templeton:
                 self.keywords.append("Templeton")
+            #TODO these should be moved to `lab_metadata` when we have an ndx extension:
+            if self.info and self.info.experiment_day is not None:
+                self.keywords.append(f"experiment day={self.info.experiment_day}")
+            if self.info and self.info.behavior_day is not None:
+                self.keywords.append(f"behavior day={self.info.behavior_day}")
         return self._keywords
 
     @keywords.setter
@@ -1380,6 +1386,12 @@ class DynamicRoutingSession:
             if self.ephys_record_node_dirs:
                 return True
         return False
+    
+    @utils.cached_property
+    def is_training(self) -> bool:
+        if (v := getattr(self, "_is_training", None)) is not None:
+            return v
+        return not self.is_ephys
 
     @utils.cached_property
     def is_sorted(self) -> bool:
