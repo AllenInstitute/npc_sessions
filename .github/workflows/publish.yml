@@ -68,28 +68,22 @@ jobs:
     - name: Add requirements.txt
       run: |
         pdm export --without-hashes --prod -o requirements.txt
-        author_name: Author Name
         
     - name: Commit changes
       uses: EndBug/add-and-commit@v9
       with:
         message: "Bump [skip actions]"
         author_name: Ben Hardcastle
-    
-        # The email of the user that will be displayed as the author of the commit.
-        # Default: depends on the default_author input
         author_email: ben.hardcastle@alleninstitute.org
-
+        # if the default github actions bot is used, we can't trigger other
+        # workflows
+        
     - name: Tag commit
       # pull in case non-packaged files were changed since job started (packaged
       # files would trigger a new job and cancel this one)
       run: |
         pdm run tag
-        git push --tags
-      env:
-          GITHUB_TOKEN: ${{ secrets.PAT }} 
-          # use PAT, or push comes from `github-actions` bot, which can't trigger
-          # other workflows   
+        git push --tags 
 
     - name: Publish
       run: |
