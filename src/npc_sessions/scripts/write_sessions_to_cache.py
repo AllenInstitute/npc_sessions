@@ -28,7 +28,7 @@ def helper(
         session,
         **write_all_components_kwargs,
     )
-
+    del session
 
 def write_sessions_to_cache(
     session_type: Literal["training", "ephys", "all"] = "all",
