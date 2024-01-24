@@ -428,7 +428,7 @@ class DynamicRoutingSession:
                 self.keywords.append("opto")
             if self.is_templeton:
                 self.keywords.append("Templeton")
-            #TODO these should be moved to `lab_metadata` when we have an ndx extension:
+            # TODO these should be moved to `lab_metadata` when we have an ndx extension:
             if self.info and self.info.experiment_day is not None:
                 self.keywords.append(f"experiment day={self.info.experiment_day}")
             if self.info and self.info.behavior_day is not None:
@@ -1386,7 +1386,7 @@ class DynamicRoutingSession:
             if self.ephys_record_node_dirs:
                 return True
         return False
-    
+
     @utils.cached_property
     def is_training(self) -> bool:
         if (v := getattr(self, "_is_training", None)) is not None:
