@@ -7,16 +7,16 @@ import zoneinfo
 from collections.abc import Iterable, Iterator
 from typing import Literal, SupportsFloat, TypeVar
 
+import npc_io
 import npc_lims
 import npc_session
 import numpy as np
 import numpy.typing as npt
 
-import npc_sessions.utils.file_io as file_io
 
 
 def is_stim_file(
-    path: file_io.PathLike,
+    path: npc_io.PathLike,
     subject_spec: str | int | npc_session.SubjectRecord | None = None,
     date_spec: str | npc_session.DateRecord | None = None,
     time_spec: str | npc_session.TimeRecord | None = None,
@@ -35,7 +35,7 @@ def is_stim_file(
     >>> is_stim_file("366122/test.stim.pkl", subject_spec="366122")
     True
     """
-    path = file_io.from_pathlike(path)
+    path = npc_io.from_pathlike(path)
     subject_from_path = npc_session.extract_subject(path.as_posix())
     date_from_path = npc_session.extract_isoformat_date(path.as_posix())
     time_from_path = npc_session.extract_isoformat_time(path.as_posix())
@@ -113,50 +113,6 @@ def safe_index(
         assert result.size == 1
         return result.item()
     return result
-
-
-K = TypeVar("K")
-V = TypeVar("V")
-
-
-class LazyDict(collections.abc.Mapping[K, V]):
-    """Dict for postponed evaluation of functions and caching of results.
-
-    Assign values as a tuple of (callable, args, kwargs). The callable will be
-    evaluated when the key is first accessed. The result will be cached and
-    returned directly on subsequent access.
-
-    Effectively immutable after initialization.
-
-    Initialize with a dict:
-    >>> d = LazyDict({'a': (lambda x: x + 1, (1,), {})})
-    >>> d['a']
-    2
-
-    or with keyword arguments:
-    >>> d = LazyDict(b=(min, (1, 2), {}))
-    >>> d['b']
-    1
-    """
-
-    def __init__(self, *args, **kwargs) -> None:
-        self._raw_dict = dict(*args, **kwargs)
-
-    def __getitem__(self, key) -> V:
-        with contextlib.suppress(TypeError):
-            func, args, *kwargs = self._raw_dict.__getitem__(key)
-            self._raw_dict.__setitem__(key, func(*args, **kwargs[0]))
-        return self._raw_dict.__getitem__(key)
-
-    def __iter__(self) -> Iterator[K]:
-        return iter(self._raw_dict)
-
-    def __len__(self) -> int:
-        return len(self._raw_dict)
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(keys={list(self._raw_dict.keys())})"
-
 
 def assert_s3_write_credentials() -> None:
     test = npc_lims.DR_DATA_REPO / "test.txt"

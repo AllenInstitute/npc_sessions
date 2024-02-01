@@ -38,6 +38,7 @@ dependencies = [
     "hdmf-zarr>=0.5.0",
     "traitlets<=5.9.0",
     "hdmf>=3.9.0",
+    "npc-io>=0.1.17",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
