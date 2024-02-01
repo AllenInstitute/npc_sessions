@@ -1865,7 +1865,7 @@ class DynamicRoutingSession:
     def video_info_data(self) -> utils.LazyDict[str, utils.MVRInfoData]:
         return utils.LazyDict(
             (
-                utils.extract_camera_name(path.stem),
+                utils.get_camera_name(path.stem),
                 (utils.get_video_info_data, (path,), {}),
             )
             for path in self.video_info_paths
@@ -2301,7 +2301,7 @@ class DynamicRoutingSession:
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=f"{nwb_names[utils.extract_camera_name(path.stem)]}_camera",
+                name=f"{nwb_names[utils.get_camera_name(path.stem)]}_camera",
                 description=f"start time of each frame exposure for {path.stem}",
             )
             for path, timestamps in path_to_timestamps.items()

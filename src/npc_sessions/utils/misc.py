@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-import collections.abc
-import contextlib
 import datetime
 import zoneinfo
-from collections.abc import Iterable, Iterator
-from typing import Literal, SupportsFloat, TypeVar
+from collections.abc import Iterable
+from typing import Literal, SupportsFloat
 
 import npc_io
 import npc_lims
 import npc_session
 import numpy as np
 import numpy.typing as npt
-
 
 
 def is_stim_file(
@@ -55,18 +52,6 @@ def is_stim_file(
     if time_spec:
         is_correct &= time_from_path == npc_session.TimeRecord(time_spec)
     return is_stim and is_correct
-
-
-def extract_camera_name(path: str) -> Literal["eye", "face", "behavior"]:
-    names: dict[str, Literal["eye", "face", "behavior"]] = {
-        "eye": "eye",
-        "face": "face",
-        "beh": "behavior",
-    }
-    try:
-        return names[next(n for n in names if n in str(path).lower())]
-    except StopIteration as exc:
-        raise ValueError(f"Could not extract camera name from {path}") from exc
 
 
 def safe_index(

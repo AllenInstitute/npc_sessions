@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:f1dc2c938a85c5cd2cb52a41a9506765275e9b636a12450dfe9ce391eea325f7"
+content_hash = "sha256:b6e73a19eafa1a17e5dff042c86030fd4d471360d0cf751cf9efcdca6aa47e64"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -1718,10 +1718,11 @@ files = [
 
 [[package]]
 name = "npc-io"
-version = "0.1.17"
+version = "0.1.21"
 requires_python = ">=3.9"
 summary = "File IO tools for MindScope Neuropixels projects in the cloud."
 dependencies = [
+    "boto3==1.28.17",
     "crc32c>=2.3.post0",
     "python-dotenv>=1.0.1",
     "s3fs>=2023.12.2",
@@ -1729,13 +1730,13 @@ dependencies = [
     "universal-pathlib>=0.1.4",
 ]
 files = [
-    {file = "npc-io-0.1.17.tar.gz", hash = "sha256:affe43147fc7e29793980086761630ada186892b1b125b3dcee63e90a6326639"},
-    {file = "npc_io-0.1.17-py3-none-any.whl", hash = "sha256:495155222af121f8cb6107eda4210d5419d47dbddb3846f1e85b95108f4707e3"},
+    {file = "npc-io-0.1.21.tar.gz", hash = "sha256:f81fca5d7238662d0dd643e3abea9b98a2ff82424214db74eecd131291e9ece5"},
+    {file = "npc_io-0.1.21-py3-none-any.whl", hash = "sha256:98caf8e88532e5db3d53e0a38841bd73512f79b4ace39b5d7fccbf540e298609"},
 ]
 
 [[package]]
 name = "npc-lims"
-version = "0.1.109"
+version = "0.1.114"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -1750,25 +1751,77 @@ dependencies = [
     "pyyaml>=6.0.1",
     "redis>=4.1.4",
     "s3fs>=2023.6.0",
+    "types-pyYAML>=6.0.12.12",
+    "types-requests>=2.31.0.6",
     "typing-extensions>=4.7.1",
     "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.109-py3-none-any.whl", hash = "sha256:e945815e1a6884ae42eaa836e49664d37a772d0d364e4d7e8c41486927357834"},
-    {file = "npc_lims-0.1.109.tar.gz", hash = "sha256:656dd6e5d79ff5de8e4989f38e5caa92dc7b03f7c5ae0ca2b1448d211f692c3d"},
+    {file = "npc_lims-0.1.114-py3-none-any.whl", hash = "sha256:dfde326ced242668f80ed773df2e32563041e3143abfc636adb952522aac4f5f"},
+    {file = "npc_lims-0.1.114.tar.gz", hash = "sha256:359488a71b46e73bec56d970116bbcf439923b3d082b3d0ff6966ed4c894a16e"},
+]
+
+[[package]]
+name = "npc-mvr"
+version = "0.1.1"
+requires_python = ">=3.9"
+summary = "Tools for reading raw video data from MindScope Neuropixels experiments, compatible with data in the cloud."
+dependencies = [
+    "npc-io>=0.1.20",
+    "npc-sync>=0.1.2",
+    "opencv-python-headless>=4.9.0.80",
+    "typing-extensions>=4.9.0",
+]
+files = [
+    {file = "npc-mvr-0.1.1.tar.gz", hash = "sha256:1e69c0d0f03eaf93a63a9874e992fb62a0af5619a57c691b073ab2779b826eb9"},
+    {file = "npc_mvr-0.1.1-py3-none-any.whl", hash = "sha256:bb8bae1ab3136441f32f756e364ed304c2bb41f3ed3a04cfa559b8426461fdf6"},
 ]
 
 [[package]]
 name = "npc-session"
-version = "0.1.31"
+version = "0.1.33"
 requires_python = ">=3.9"
 summary = "Basic tools for parsing subject, session, date and time associated with data from the Mindscope Neuropixels team, in the cloud."
 dependencies = [
     "typing-extensions>=4.7.1",
 ]
 files = [
-    {file = "npc_session-0.1.31-py3-none-any.whl", hash = "sha256:8934002ca0fd8c385af553bbe6aceb2412ebca34125ced7b3601ded8cc8c5126"},
-    {file = "npc_session-0.1.31.tar.gz", hash = "sha256:93f4f4370007072eb93e7c7cbd57ce211ceaf438a05d2730c19980dfa308471a"},
+    {file = "npc_session-0.1.33-py3-none-any.whl", hash = "sha256:a26a2dfc5f88b5f0b0c5ef76fe6a7dbaa63c0eea2df8c7390e74e5e5d3364d6e"},
+    {file = "npc_session-0.1.33.tar.gz", hash = "sha256:3f008c58e0f4a9b6ed76b413b91e8525e5ff6a0e8c9cc3960ab9e893443b8d52"},
+]
+
+[[package]]
+name = "npc-sync"
+version = "0.1.2"
+requires_python = ">=3.9"
+summary = "Repackaging of AllenSDK.SyncDataset with extra functionality, compatible with data in the cloud."
+dependencies = [
+    "h5py>=3.10.0",
+    "matplotlib>=3.8.2",
+    "npc-io>=0.1.20",
+    "numpy>=1.26.3",
+    "typing-extensions>=4.9.0",
+]
+files = [
+    {file = "npc-sync-0.1.2.tar.gz", hash = "sha256:21cbe107c222dc455fd6ffd3c88249278b1e7846bbeb98c7bb7c10b228cdf5e5"},
+    {file = "npc_sync-0.1.2-py3-none-any.whl", hash = "sha256:7ca8a843a7f95e0645f2392808eeab1317c0aed02ed3edf89ea3d2ad6a55df0c"},
+]
+
+[[package]]
+name = "npc-utils"
+version = "0.1.1"
+requires_python = ">=3.9"
+summary = "Collection of MindScope Neuropixels packages, simplifying installation and keeping versions updated."
+dependencies = [
+    "npc-io>=0.1.21",
+    "npc-lims>=0.1.114",
+    "npc-mvr>=0.1.1",
+    "npc-session>=0.1.33",
+    "npc-sync>=0.1.2",
+]
+files = [
+    {file = "npc-utils-0.1.1.tar.gz", hash = "sha256:e4339cf1f4289c099a68614c4256a289a5410d666163bdaa19a4022a37d217d2"},
+    {file = "npc_utils-0.1.1-py3-none-any.whl", hash = "sha256:313d008e86ccf18adfa2378d4bacb94be1f3bfa472e88753a0887417fb288809"},
 ]
 
 [[package]]
@@ -3052,6 +3105,37 @@ summary = "Traitlets Python configuration system"
 files = [
     {file = "traitlets-5.9.0-py3-none-any.whl", hash = "sha256:9e6ec080259b9a5940c797d58b613b5e31441c2257b87c2e795c5228ae80d2d8"},
     {file = "traitlets-5.9.0.tar.gz", hash = "sha256:f6cde21a9c68cf756af02035f72d5a723bf607e862e7be33ece505abf4a3bad9"},
+]
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.12.12"
+summary = "Typing stubs for PyYAML"
+files = [
+    {file = "types-PyYAML-6.0.12.12.tar.gz", hash = "sha256:334373d392fde0fdf95af5c3f1661885fa10c52167b14593eb856289e1855062"},
+    {file = "types_PyYAML-6.0.12.12-py3-none-any.whl", hash = "sha256:c05bc6c158facb0676674b7f11fe3960db4f389718e19e62bd2b84d6205cfd24"},
+]
+
+[[package]]
+name = "types-requests"
+version = "2.31.0.6"
+requires_python = ">=3.7"
+summary = "Typing stubs for requests"
+dependencies = [
+    "types-urllib3",
+]
+files = [
+    {file = "types-requests-2.31.0.6.tar.gz", hash = "sha256:cd74ce3b53c461f1228a9b783929ac73a666658f223e28ed29753771477b3bd0"},
+    {file = "types_requests-2.31.0.6-py3-none-any.whl", hash = "sha256:a2db9cb228a81da8348b49ad6db3f5519452dd20a9c1e1a868c83c5fe88fd1a9"},
+]
+
+[[package]]
+name = "types-urllib3"
+version = "1.26.25.14"
+summary = "Typing stubs for urllib3"
+files = [
+    {file = "types-urllib3-1.26.25.14.tar.gz", hash = "sha256:229b7f577c951b8c1b92c1bc2b2fdb0b49847bd2af6d1cc2a2e3dd340f3bda8f"},
+    {file = "types_urllib3-1.26.25.14-py3-none-any.whl", hash = "sha256:9683bbb7fb72e32bfe9d2be6e04875fbe1b3eeec3cbb4ea231435aa7fd6b4f0e"},
 ]
 
 [[package]]
