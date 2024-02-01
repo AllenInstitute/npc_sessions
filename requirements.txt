@@ -75,8 +75,12 @@ nbformat==5.9.2
 ndx-events==0.2.0
 neo==0.12.0
 nest-asyncio==1.5.8
-npc-lims==0.1.109
-npc-session==0.1.31
+npc-io==0.1.21
+npc-lims==0.1.114
+npc-mvr==0.1.1
+npc-session==0.1.33
+npc-sync==0.1.2
+npc-utils==0.1.1
 numba==0.58.1
 numcodecs==0.11.0
 numpy==1.26.3
@@ -107,7 +111,7 @@ pynwb==2.5.0
 pyopenssl==23.2.0
 pyparsing==3.1.1
 python-dateutil==2.8.2
-python-dotenv==1.0.0
+python-dotenv==1.0.1
 pytz==2023.3.post1
 pywin32==306; sys_platform == "win32" and platform_python_implementation != "PyPy"
 pyyaml==6.0.1
@@ -134,7 +138,10 @@ tinycss2==1.2.1
 tornado==6.3.3
 tqdm==4.66.1
 traitlets==5.9.0
-typing-extensions==4.8.0
+types-pyYAML==6.0.12.12
+types-requests==2.31.0.6
+types-urllib3==1.26.25.14
+typing-extensions==4.9.0
 tzdata==2023.3
 universal-pathlib==0.1.4
 urllib3==1.26.16

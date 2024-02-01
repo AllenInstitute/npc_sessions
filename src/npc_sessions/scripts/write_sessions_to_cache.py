@@ -30,6 +30,7 @@ def helper(
     )
     del session
 
+
 def write_sessions_to_cache(
     session_type: Literal["training", "ephys", "all"] = "all",
     skip_existing: bool = True,

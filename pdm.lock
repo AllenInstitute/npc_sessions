@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:b6e73a19eafa1a17e5dff042c86030fd4d471360d0cf751cf9efcdca6aa47e64"
+content_hash = "sha256:99e6755d9a46114720a1591c0a24ceae9dc4aa6a10336ad2c6cb6ccad92499cb"
 
 [[package]]
 name = "aind-codeocean-api"

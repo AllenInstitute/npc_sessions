@@ -12,7 +12,7 @@ import npc_sessions.utils as utils
 logger = logging.getLogger(__name__)
 
 MODULE_ROOT = upath.UPath(__file__).parent
-PACKAGE_ROOT = utils.from_pathlike(importlib.resources.files("npc_sessions")) # type: ignore[arg-type]
+PACKAGE_ROOT = utils.from_pathlike(importlib.resources.files("npc_sessions"))  # type: ignore[arg-type]
 
 
 def write_qc_notebook(

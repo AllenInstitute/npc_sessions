@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import zoneinfo
 from collections.abc import Iterable
-from typing import Literal, SupportsFloat
+from typing import SupportsFloat
 
 import npc_io
 import npc_lims
@@ -98,6 +98,7 @@ def safe_index(
         assert result.size == 1
         return result.item()
     return result
+
 
 def assert_s3_write_credentials() -> None:
     test = npc_lims.DR_DATA_REPO / "test.txt"
