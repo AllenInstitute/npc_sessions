@@ -35,6 +35,8 @@ use NI-DAQ analog recording on OpenEphys PXI"""
 def get_stim_data(stim_path: StimPathOrDataset, **kwargs) -> h5py.File | dict:
     if isinstance(stim_path, h5py.File):
         return stim_path
+    if isinstance(stim_path, Mapping): # ie. from pkl file
+        return dict(stim_path)
     path = utils.from_pathlike(stim_path)
     if path.suffix in (".hdf5", ".h5"):
         return get_h5_stim_data(path, **kwargs)
@@ -46,15 +48,19 @@ def get_stim_data(stim_path: StimPathOrDataset, **kwargs) -> h5py.File | dict:
 def get_h5_stim_data(stim_path: StimPathOrDataset, **kwargs) -> h5py.File:
     if isinstance(stim_path, h5py.File):
         return stim_path
+    if isinstance(stim_path, Mapping):
+        raise ValueError("Susepcted pickle date encountered: use `get_pkl_stim_data`")
     kwargs.setdefault("mode", "r")
-    return h5py.File(io.BytesIO(utils.from_pathlike(stim_path).read_bytes()), **kwargs)
+    return h5py.File(io.BytesIO(utils.from_pathlike(stim_path).read_bytes()), **kwargs) 
 
 
 def get_pkl_stim_data(stim_path: StimPathOrDataset, **kwargs) -> dict:
     if isinstance(stim_path, Mapping):
         return dict(stim_path)
+    if isinstance(stim_path, h5py.File):
+        raise ValueError("Susepcted hdf5 date encountered: use `get_h5_stim_data`")
     kwargs.setdefault("encoding", "latin1")
-    return pickle.loads(utils.from_pathlike(stim_path).read_bytes())
+    return pickle.loads(utils.from_pathlike(stim_path).read_bytes()) 
 
 
 class WaveformModality(enum.Enum):
