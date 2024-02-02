@@ -2,14 +2,10 @@ from __future__ import annotations
 
 import datetime
 import zoneinfo
-from collections.abc import Iterable
-from typing import SupportsFloat
 
 import npc_io
 import npc_lims
 import npc_session
-import numpy as np
-import numpy.typing as npt
 
 
 def is_stim_file(
