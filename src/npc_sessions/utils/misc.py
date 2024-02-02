@@ -54,52 +54,6 @@ def is_stim_file(
     return is_stim and is_correct
 
 
-def safe_index(
-    array: npt.ArrayLike, indices: SupportsFloat | Iterable[SupportsFloat]
-) -> npt.NDArray:
-    """Checks `indices` can be safely used as array indices (i.e. all
-    numerical float values are integers), then indexes into `array` using `np.where`.
-
-    - returns nans where `indices` is nan
-    - returns a scalar if `indices` is a scalar #TODO current type annotation is insufficient
-
-    >>> safe_index([1, 2], 0)
-    1
-    >>> safe_index([1., 2.], 0)
-    1.0
-    >>> safe_index([1., 2.], np.nan)
-    nan
-    >>> safe_index([1., 2., 3.1], [0, np.nan, 2.0])
-    array([1. , nan, 3.1])
-
-    Type of array is preserved, if possible:
-    >>> safe_index([1, 2, 3], [0., 1., 2.])
-    array([1, 2, 3])
-
-    Type of array can't be preserved if any indices are nan:
-    >>> safe_index([1, 2, 3], [0, np.nan, 2.0])
-    array([ 1., nan,  3.])
-    """
-    idx: npt.NDArray = np.array(indices)  # copy
-    if not all(idx[~np.isnan(idx)] == idx[~np.isnan(idx)].astype(np.int32)):
-        raise TypeError(
-            f"Non-integer numerical values cannot be used as indices: {idx[np.isnan(idx)][0]}"
-        )
-    array = np.array(array)  # copy/make sure array can be fancy-indexed
-    int_idx = np.where(np.isnan(idx), -1, idx)
-    result = np.where(np.isnan(idx), np.nan, array[int_idx.astype(np.int32)])
-    # np.where casts indexed array to floats just because of the
-    # possibility of nans being in result, even if they aren't:
-    # cast back if appropriate
-    if not np.isnan(result).any():
-        result = result.astype(array.dtype)
-    # if indices was a scalar, return a scalar instead of a 0d array
-    if not isinstance(indices, Iterable):
-        assert result.size == 1
-        return result.item()
-    return result
-
-
 def assert_s3_write_credentials() -> None:
     test = npc_lims.DR_DATA_REPO / "test.txt"
     test.touch()
