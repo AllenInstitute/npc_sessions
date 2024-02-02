@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 from matplotlib import pyplot as plt
 
-import npc_sessions.utils.stim as stim
+import npc_sessions.utils as utils
 
 if TYPE_CHECKING:
     import npc_sessions
@@ -19,7 +19,7 @@ def get_audio_latencies(
         sel_stim = next(s for s in session.stim_paths if "RFMapping" in s.stem)
 
     # get nidaq latencies
-    lat_nidaq_env = stim.get_stim_latencies_from_nidaq_recording(
+    lat_nidaq_env = utils.get_stim_latencies_from_nidaq_recording(
         sel_stim,
         session.sync_path,
         session.ephys_recording_dirs,
@@ -27,7 +27,7 @@ def get_audio_latencies(
         use_envelope=True,
     )
 
-    lat_nidaq_sig = stim.get_stim_latencies_from_nidaq_recording(
+    lat_nidaq_sig = utils.get_stim_latencies_from_nidaq_recording(
         sel_stim,
         session.sync_path,
         session.ephys_recording_dirs,
@@ -52,11 +52,11 @@ def get_audio_latencies(
         sync_sound_on = False
 
     if sync_sound_on:
-        sync_line = stim.get_sync_line_for_stim_onset(
+        sync_line = utils.get_sync_line_for_stim_onset(
             "audio", session.sync_data.start_time.date()
         )
 
-        lat_sync = stim.get_stim_latencies_from_sync(
+        lat_sync = utils.get_stim_latencies_from_sync(
             sel_stim, session.sync_path, "audio", sync_line
         )
 
