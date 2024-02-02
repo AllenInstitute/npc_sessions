@@ -121,14 +121,22 @@ def get_sessions(id_or_ids=None, **all_session_kwargs):
     if is_single_session:
         return cls(id_or_ids, **all_session_kwargs)
 
-    session_info_kwargs = {k: v for k, v in all_session_kwargs.items() if not k.startswith("_")}
+    session_info_kwargs = {
+        k: v for k, v in all_session_kwargs.items() if not k.startswith("_")
+    }
+
     def multi_session_generator() -> Iterator[DynamicRoutingSession]:
         if id_or_ids is None:
             session_infos = sorted(
-                npc_lims.get_session_info(**session_info_kwargs), key=lambda x: x.date, reverse=True
+                npc_lims.get_session_info(**session_info_kwargs),
+                key=lambda x: x.date,
+                reverse=True,
             )
         else:
-            session_infos = [npc_lims.get_session_info(id_, **session_info_kwargs) for id_ in id_or_ids]
+            session_infos = [
+                npc_lims.get_session_info(id_, **session_info_kwargs)
+                for id_ in id_or_ids
+            ]
         for session_info in session_infos:
             if session_info.issues:
                 logger.warning(
