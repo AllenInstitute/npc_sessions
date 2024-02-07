@@ -20,6 +20,7 @@ import h5py
 import hdmf
 import hdmf.common
 import ndx_events
+import ndx_pose
 import npc_lims
 import npc_session
 import numpy as np
@@ -34,7 +35,6 @@ from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 import npc_sessions.plots as plots
 import npc_sessions.trials as TaskControl
 import npc_sessions.utils as utils
-import ndx_pose
 
 logger = logging.getLogger(__name__)
 
@@ -2320,11 +2320,17 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def _dlc_eye_output(self) -> ndx_pose.pose.PoseEstimation:
-        df_dlc_eye = utils.get_dlc_session_model_dataframe_from_h5(self.id, model_name='dlc_eye')
+        df_dlc_eye = utils.get_dlc_session_model_dataframe_from_h5(
+            self.id, model_name="dlc_eye"
+        )
         video_path = npc_lims.get_eye_video_path_from_s3(self.id)
-        video_timestamps = utils.get_video_frame_times(self.sync_path, video_path.parent)[video_path]
+        video_timestamps = utils.get_video_frame_times(
+            self.sync_path, video_path.parent
+        )[video_path]
 
-        pose_estimation_series = utils.get_pose_series_from_dataframe(self.id, df_dlc_eye, video_timestamps)
+        pose_estimation_series = utils.get_pose_series_from_dataframe(
+            self.id, df_dlc_eye, video_timestamps
+        )
         pose_estimation_dlc_eye = ndx_pose.pose.PoseEstimation(
             pose_estimation_series=pose_estimation_series,
             description="Deeplab cut run on eye video.",
@@ -2336,11 +2342,17 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def _dlc_side_output(self) -> ndx_pose.pose.PoseEstimation:
-        df_dlc_side = utils.get_dlc_session_model_dataframe_from_h5(self.id, model_name='dlc_side')
+        df_dlc_side = utils.get_dlc_session_model_dataframe_from_h5(
+            self.id, model_name="dlc_side"
+        )
         video_path = npc_lims.get_eye_video_path_from_s3(self.id)
-        video_timestamps = utils.get_video_frame_times(self.sync_path, video_path.parent)[video_path]
+        video_timestamps = utils.get_video_frame_times(
+            self.sync_path, video_path.parent
+        )[video_path]
 
-        pose_estimation_series = utils.get_pose_series_from_dataframe(self.id, df_dlc_side, video_timestamps)
+        pose_estimation_series = utils.get_pose_series_from_dataframe(
+            self.id, df_dlc_side, video_timestamps
+        )
         pose_estimation_dlc_side = ndx_pose.pose.PoseEstimation(
             pose_estimation_series=pose_estimation_series,
             description="Deeplab cut run on side video.",
@@ -2349,14 +2361,20 @@ class DynamicRoutingSession:
         )
 
         return pose_estimation_dlc_side
-    
+
     @utils.cached_property
     def _dlc_face_output(self) -> ndx_pose.pose.PoseEstimation:
-        df_dlc_face = utils.get_dlc_session_model_dataframe_from_h5(self.id, model_name='dlc_face')
+        df_dlc_face = utils.get_dlc_session_model_dataframe_from_h5(
+            self.id, model_name="dlc_face"
+        )
         video_path = npc_lims.get_eye_video_path_from_s3(self.id)
-        video_timestamps = utils.get_video_frame_times(self.sync_path, video_path.parent)[video_path]
+        video_timestamps = utils.get_video_frame_times(
+            self.sync_path, video_path.parent
+        )[video_path]
 
-        pose_estimation_series = utils.get_pose_series_from_dataframe(self.id, df_dlc_face, video_timestamps)
+        pose_estimation_series = utils.get_pose_series_from_dataframe(
+            self.id, df_dlc_face, video_timestamps
+        )
         pose_estimation_dlc_face = ndx_pose.pose.PoseEstimation(
             pose_estimation_series=pose_estimation_series,
             description="Deeplab cut run on face video.",
