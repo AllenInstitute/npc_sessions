@@ -3,9 +3,10 @@
 
 [metadata]
 groups = ["default", "dev"]
-strategy = ["cross_platform"]
-lock_version = "4.4.1"
-content_hash = "sha256:20f2ef9de8a80a0616072287cea664fba1a6e0614e1d1429b1695794dc59181c"
+cross_platform = true
+static_urls = false
+lock_version = "4.3"
+content_hash = "sha256:332c2d801160f7e1aa84660e30d7fd84115354337cf1528593ccc731e1f21891"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -1692,6 +1693,19 @@ dependencies = [
 files = [
     {file = "ndx-events-0.2.0.tar.gz", hash = "sha256:25eceed121a9b889b35e7d32dba8c7c3d53ae22c28757942643ace970344c25b"},
     {file = "ndx_events-0.2.0-py2.py3-none-any.whl", hash = "sha256:9db80ab09b11979c1678d948f6a7cb7ee2833f3d743e660391b731f6c15320af"},
+]
+
+[[package]]
+name = "ndx-pose"
+version = "0.1.1"
+summary = "NWB extension to store pose estimation data"
+dependencies = [
+    "hdmf<4,>=2.5.6",
+    "pynwb<3,>=1.5.0",
+]
+files = [
+    {file = "ndx-pose-0.1.1.tar.gz", hash = "sha256:167dc25f13ba1abc924543cbe44123703303b3f61e5baf6108334a3fe6def11c"},
+    {file = "ndx_pose-0.1.1-py2.py3-none-any.whl", hash = "sha256:229718b494bf34f2e7f73d6e185b074a46169420b57e8573944a14b280b0a472"},
 ]
 
 [[package]]
