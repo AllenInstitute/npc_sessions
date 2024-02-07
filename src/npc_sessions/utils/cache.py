@@ -234,7 +234,7 @@ def _write_to_cache(
     pyarrow.parquet.write_table(
         table=pyarrow.Table.from_pandas(df, preserve_index=True),
         where=cache_path,
-        row_group_size=20 if "component" == "units" else None,
+        row_group_size=20 if component_name == "units" else None,
         # each list in the units.spike_times column is large & should not really be
         # stored in this format. But we can at least optimize access.
         # Row groups are indivisible, so querying a single row will download a
