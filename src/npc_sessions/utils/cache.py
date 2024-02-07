@@ -50,7 +50,7 @@ def _get_nwb_component(
         df = pd.DataFrame()
         for k, v in component.items():
             v_df = _component_metadata_to_single_row_df(v)
-            v_df["device_id"] = k
+            v_df["name"] = k
             df = pd.concat([df, v_df])
         return df
 
