@@ -38,6 +38,7 @@ dependencies = [
     "hdmf>=3.9.0",
     "npc-utils>=0.1.4",
     "ndx-pose>=0.1.1",
+    "tables>=3.9.2",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
