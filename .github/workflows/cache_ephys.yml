@@ -31,6 +31,7 @@ jobs:
     - name: Install package (to use project CLI/executable)
       run: |
         pip install -e .
+        pdm update --prod
 
     - name: Update session status
       env:
