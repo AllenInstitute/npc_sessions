@@ -109,7 +109,7 @@ def get_newscale_coordinates(
     >>> list(df['x'])
     [6278.0, 6943.5, 7451.0, 4709.0, 4657.0, 5570.0]
     >>> list(df['z'])
-    [11080.0, 8573.0, 6500.0, 8107.0, 8038.0, 9125.0]
+    [3920.0, 6427.0, 8500.0, 6893.0, 6962.0, 5875.0]
     """
     if recording_start_time is None:
         p = utils.from_pathlike(newscale_log_path)
@@ -155,6 +155,11 @@ def get_newscale_coordinates(
         lambda _: _.strip()
     )
     df = df.with_columns(manipulators)
+    # convert str floats to floats 
+    for column in NEWSCALE_LOG_COLUMNS[2:8]:
+        if column not in df.columns:
+            continue
+        df = df.with_columns(df.get_column(column).map_elements(lambda _: _.strip()).cast(pl.Float64))
     probes = manipulators.map_dict(
         {k: f"probe{v}" for k, v in SERIAL_NUM_TO_PROBE_LETTER.items()}
     ).alias("electrode_group")
@@ -164,9 +169,9 @@ def get_newscale_coordinates(
     for idx, device in enumerate(df["device"]):
         if z_inverted:
             z[idx] = get_z_travel(device) - z[idx]
-    df.replace("z", z)
+    df = df.with_columns(z)
 
-    return df.insert_at_idx(0, probes).sort(pl.col("electrode_group")).to_pandas()
+    return df.insert_column(index=0, column=probes).sort(pl.col("electrode_group")).to_pandas()
 
 
 def get_z_travel(serial_number: str) -> int:
