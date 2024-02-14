@@ -234,8 +234,7 @@ def _write_to_cache(
         version=version,
         consolidated=False,
     )
-    if cache_path.suffix != ".parquet":
-        raise NotImplementedError(f"{cache_path.suffix=}")
+
     if skip_existing and cache_path.exists():
         logger.debug(
             f"Skipping write to {cache_path} - already exists and skip_existing=True"
@@ -250,7 +249,7 @@ def _write_to_cache(
             df,
             version=version,
         )
-    else:
+    elif cache_path.suffix == ".parquet":
         pyarrow.parquet.write_table(
             table=pyarrow.Table.from_pandas(df, preserve_index=True),
             where=cache_path,
@@ -269,6 +268,8 @@ def _write_to_cache(
             compression=_PARQUET_COMPRESSION,
             compression_level=_COMPRESSION_LEVEL,
         )
+    else:
+        raise NotImplementedError(f"{cache_path.suffix=}")
     logger.info(f"Wrote {cache_path}")
 
 
