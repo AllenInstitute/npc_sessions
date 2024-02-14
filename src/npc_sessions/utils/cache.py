@@ -63,7 +63,7 @@ def _get_nwb_component(
             columns="file_create_date"
         )
     elif component_name == "spike_times":
-        return session.get("units")
+        return session.units
     elif component_name == "subject":
         return _component_metadata_to_single_row_df(session.subject)
     elif component_name in ("vis_rf_mapping", "VisRFMapping"):
