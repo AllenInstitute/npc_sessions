@@ -846,9 +846,11 @@ class DynamicRouting1(TaskControl):
             return np.full(self._len, np.nan)
         return np.array(
             [
-                f"opto{self._unique_opto_waveforms.index(w)}_{loc}"
-                if w is not None
-                else ""
+                (
+                    f"opto{self._unique_opto_waveforms.index(w)}_{loc}"
+                    if w is not None
+                    else ""
+                )
                 for w, loc in zip(self._opto_stim_waveforms, self.opto_location_name)
             ],
             dtype=str,

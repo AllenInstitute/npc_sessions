@@ -203,9 +203,9 @@ class PropertyDict(collections.abc.Mapping):
             )
 
         return {
-            attr: fmt(cls_attr(attr).__doc__)
-            if cls_attr(attr).__doc__
-            else ""  # if no docstring present, __doc__ is None
+            attr: (
+                fmt(cls_attr(attr).__doc__) if cls_attr(attr).__doc__ else ""
+            )  # if no docstring present, __doc__ is None
             for attr in property_getters
         }
 

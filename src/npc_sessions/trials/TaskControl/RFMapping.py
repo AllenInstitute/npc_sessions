@@ -12,6 +12,7 @@ display times to get stim onset times
 >>> assert not vis_mapping_trials._df.is_empty()
 >>> assert not aud_mapping_trials._df.is_empty()
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable

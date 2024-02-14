@@ -5,6 +5,7 @@ getting Optotagging trials table requires:
 - latency estimate for each stim presentation, to be added to frame
 display times to get stim onset times
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable

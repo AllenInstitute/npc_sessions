@@ -76,12 +76,10 @@ def get_available_container_memory() -> int:
     return limit - usage
 
 
-def setup() -> (
-    dict[
-        Literal["session_type", "skip_existing", "version", "parallel"],
-        str | bool | None,
-    ]
-):
+def setup() -> dict[
+    Literal["session_type", "skip_existing", "version", "parallel"],
+    str | bool | None,
+]:
     args = parse_args()
     kwargs = vars(args)
     logging.basicConfig(

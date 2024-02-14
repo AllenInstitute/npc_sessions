@@ -94,10 +94,9 @@ def get_newscale_data_lazy(path: utils.PathLike) -> pl.LazyFrame:
 
 def get_newscale_coordinates(
     newscale_log_path: utils.PathLike,
-    recording_start_time: str
-    | datetime.datetime
-    | npc_session.DatetimeRecord
-    | None = None,
+    recording_start_time: (
+        str | datetime.datetime | npc_session.DatetimeRecord | None
+    ) = None,
 ) -> pd.DataFrame:
     """Returns the coordinates of each probe at the given time, by scanning for the most-recent prior movement on each motor.
 
@@ -155,11 +154,13 @@ def get_newscale_coordinates(
         lambda _: _.strip()
     )
     df = df.with_columns(manipulators)
-    # convert str floats to floats 
+    # convert str floats to floats
     for column in NEWSCALE_LOG_COLUMNS[2:8]:
         if column not in df.columns:
             continue
-        df = df.with_columns(df.get_column(column).map_elements(lambda _: _.strip()).cast(pl.Float64))
+        df = df.with_columns(
+            df.get_column(column).map_elements(lambda _: _.strip()).cast(pl.Float64)
+        )
     probes = manipulators.map_dict(
         {k: f"probe{v}" for k, v in SERIAL_NUM_TO_PROBE_LETTER.items()}
     ).alias("electrode_group")
@@ -171,7 +172,11 @@ def get_newscale_coordinates(
             z[idx] = get_z_travel(device) - z[idx]
     df = df.with_columns(z)
 
-    return df.insert_column(index=0, column=probes).sort(pl.col("electrode_group")).to_pandas()
+    return (
+        df.insert_column(index=0, column=probes)
+        .sort(pl.col("electrode_group"))
+        .to_pandas()
+    )
 
 
 def get_z_travel(serial_number: str) -> int:

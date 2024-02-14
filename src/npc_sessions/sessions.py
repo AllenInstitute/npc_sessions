@@ -45,24 +45,21 @@ EXCLUDED_PATH_COMPONENTS = ("DynamicRouting1_670248_20230802_120703",)
 def get_sessions(
     id_or_ids: None = None,
     **all_session_kwargs,
-) -> Iterator[DynamicRoutingSession]:
-    ...
+) -> Iterator[DynamicRoutingSession]: ...
 
 
 @typing.overload
 def get_sessions(
     id_or_ids: str | npc_session.SessionRecord | npc_lims.SessionInfo,
     **all_session_kwargs,
-) -> DynamicRoutingSession:
-    ...
+) -> DynamicRoutingSession: ...
 
 
 @typing.overload
 def get_sessions(
     id_or_ids: list | set | tuple,
     **all_session_kwargs,
-) -> Iterator[DynamicRoutingSession]:
-    ...
+) -> Iterator[DynamicRoutingSession]: ...
 
 
 # see overloads above for type hints
@@ -194,7 +191,9 @@ class DynamicRoutingSession:
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
     experimenter: tuple[str, ...] | list[str] | None = None
-    institution: str | None = "Neural Circuits & Behavior | MindScope program | Allen Institute for Neural Dynamics"
+    institution: str | None = (
+        "Neural Circuits & Behavior | MindScope program | Allen Institute for Neural Dynamics"
+    )
     notes: str | None = None
 
     # --------------------------------------------------------------------------- #
@@ -287,9 +286,9 @@ class DynamicRoutingSession:
             epoch_tags=self.epoch_tags,
             stimulus_template=None,  # TODO pass tuple of stimulus templates
             invalid_times=self.invalid_times,
-            trials=self.trials
-            if self.is_task
-            else None,  # we have one sessions without trials (670248_2023-08-02)
+            trials=(
+                self.trials if self.is_task else None
+            ),  # we have one sessions without trials (670248_2023-08-02)
             intervals=self._intervals,
             acquisition=self._acquisition,
             processing=tuple(self.processing.values()),
@@ -694,14 +693,14 @@ class DynamicRoutingSession:
                 block_idx
             ]
             block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
-            block_performance[
-                "nonrewarded_modal_dprime"
-            ] = self.sam.dprimeNonrewardedModal[block_idx]
+            block_performance["nonrewarded_modal_dprime"] = (
+                self.sam.dprimeNonrewardedModal[block_idx]
+            )
 
             if rewarded_modality == "vis":
-                block_performance[
-                    "signed_cross_modal_dprime"
-                ] = self.sam.dprimeOtherModalGo[block_idx]
+                block_performance["signed_cross_modal_dprime"] = (
+                    self.sam.dprimeOtherModalGo[block_idx]
+                )
                 block_performance["vis_intra_dprime"] = self.sam.dprimeSameModal[
                     block_idx
                 ]
@@ -710,9 +709,9 @@ class DynamicRoutingSession:
                 ]
 
             elif rewarded_modality in ("aud", "sound"):
-                block_performance[
-                    "signed_cross_modal_dprime"
-                ] = -self.sam.dprimeOtherModalGo[block_idx]
+                block_performance["signed_cross_modal_dprime"] = (
+                    -self.sam.dprimeOtherModalGo[block_idx]
+                )
                 block_performance["aud_intra_dprime"] = self.sam.dprimeSameModal[
                     block_idx
                 ]
@@ -1956,9 +1955,11 @@ class DynamicRoutingSession:
             "start_time": start_time,
             "stop_time": stop_time,
             "tags": tags,
-            "notes": ""
-            if not invalid_times_notes
-            else f"includes invalid times: {'; '.join(invalid_times_notes)}",
+            "notes": (
+                ""
+                if not invalid_times_notes
+                else f"includes invalid times: {'; '.join(invalid_times_notes)}"
+            ),
         }
 
     @property
