@@ -1501,10 +1501,6 @@ class DynamicRoutingSession:
         )
         return json.loads(path.read_text())
 
-    @property
-    def _nwb_hdf5_path(self) -> upath.UPath | None:
-        return npc_lims.get_nwb_file_from_s3(self.id)
-
     @utils.cached_property
     def _subject_aind_metadata(self) -> dict[str, Any]:
         try:
