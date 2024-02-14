@@ -63,7 +63,7 @@ def _get_nwb_component(
             columns="file_create_date"
         )
     elif component_name == "spike_times":
-        return session.units
+        component_name = "units"
     elif component_name == "subject":
         return _component_metadata_to_single_row_df(session.subject)
     elif component_name in ("vis_rf_mapping", "VisRFMapping"):
@@ -77,15 +77,15 @@ def _get_nwb_component(
             return session.analysis.get("performance", None)
         else:
             return None
-    else:
-        c = getattr(session, component_name, None)
-        if c is None:
-            raise MissingComponentError(
-                f"Unknown NWB component {component_name!r} - available tables include {typing.get_args(npc_lims.NWBComponentStr)}"
-            )
-        if isinstance(c, pynwb.core.LabelledDict):
-            return _labelled_dict_to_df(c)
-        return c
+        
+    c = getattr(session, component_name, None)
+    if c is None:
+        raise MissingComponentError(
+            f"Unknown NWB component {component_name!r} - available tables include {typing.get_args(npc_lims.NWBComponentStr)}"
+        )
+    if isinstance(c, pynwb.core.LabelledDict):
+        return _labelled_dict_to_df(c)
+    return c
 
 
 def write_nwb_component_to_cache(
