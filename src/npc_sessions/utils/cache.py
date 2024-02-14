@@ -17,7 +17,7 @@ import pyarrow
 import pyarrow.dataset
 import pyarrow.parquet
 import pynwb
-import zarr 
+import zarr
 
 if typing.TYPE_CHECKING:
     import npc_sessions
@@ -186,7 +186,13 @@ def consolidate_cache(component_name: npc_lims.NWBComponentStr) -> None:
     consolidated_cache_path = npc_lims.get_cache_path(component_name, consolidated=True)
     if component_name == "units":
         dataset = pyarrow.dataset.dataset(cache_dir)
-        table = dataset.to_table(columns=[c for c in dataset.schema.names if c not in ("spike_times", "waveform_mean", "waveform_sd")])
+        table = dataset.to_table(
+            columns=[
+                c
+                for c in dataset.schema.names
+                if c not in ("spike_times", "waveform_mean", "waveform_sd")
+            ]
+        )
     else:
         table = pyarrow.dataset.dataset(cache_dir).to_table()
     pyarrow.parquet.write_table(
@@ -206,7 +212,7 @@ def add_session_metadata(
     df["session_idx"] = session_id.idx
     df["date"] = session_id.date.dt
     df["subject_id"] = session_id.subject
-    df['session_id'] = session_id.id
+    df["session_id"] = session_id.id
     return df
 
 
@@ -239,7 +245,8 @@ def _write_to_cache(
         df = df.sort_values("location")
     if component_name == "units":
         _write_spike_times_to_zarr_cache(
-            df, version=version,
+            df,
+            version=version,
         )
     pyarrow.parquet.write_table(
         table=pyarrow.Table.from_pandas(df, preserve_index=True),
@@ -261,14 +268,19 @@ def _write_to_cache(
     )
     logger.info(f"Wrote {cache_path}")
 
+
 def _write_spike_times_to_zarr_cache(
     units: pd.DataFrame,
     version: str | None = None,
 ) -> None:
-    zarr_path = npc_lims.get_cache_path('units', consolidated=True, version=version).parent / 'spike_times.zarr'
-    z = zarr.open(zarr_path, mode='a')
+    zarr_path = (
+        npc_lims.get_cache_path("units", consolidated=True, version=version).parent
+        / "spike_times.zarr"
+    )
+    z = zarr.open(zarr_path, mode="a")
     for _, row in units.iterrows():
-        z[row['unit_id']] = row['spike_times']
+        z[row["unit_id"]] = row["spike_times"]
+
 
 def get_dataset(
     nwb_component: npc_lims.NWBComponentStr,
