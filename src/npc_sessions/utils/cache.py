@@ -17,6 +17,7 @@ import pyarrow
 import pyarrow.dataset
 import pyarrow.parquet
 import pynwb
+import zarr 
 
 if typing.TYPE_CHECKING:
     import npc_sessions
@@ -173,8 +174,6 @@ def consolidate_all_caches() -> None:
     """Consolidate all caches into a single file per component - with the
     exception of `units`, which are already reasonable size."""
     for component_name in typing.get_args(npc_lims.NWBComponentStr):
-        if component_name == "units":
-            continue
         consolidate_cache(component_name)
 
 
@@ -185,8 +184,13 @@ def consolidate_cache(component_name: npc_lims.NWBComponentStr) -> None:
         logger.info(f"No cache files found for {component_name}")
         return
     consolidated_cache_path = npc_lims.get_cache_path(component_name, consolidated=True)
+    if component_name == "units":
+        dataset = pyarrow.dataset.dataset(cache_dir)
+        table = dataset.to_table(columns=[c for c in dataset.schema.names if c not in ("spike_times", "waveform_mean", "waveform_sd")])
+    else:
+        table = pyarrow.dataset.dataset(cache_dir).to_table()
     pyarrow.parquet.write_table(
-        table=pyarrow.dataset.dataset(cache_dir).to_table(),
+        table=table,
         where=consolidated_cache_path,
         compression=_PARQUET_COMPRESSION,
         compression_level=_COMPRESSION_LEVEL,
@@ -202,6 +206,7 @@ def add_session_metadata(
     df["session_idx"] = session_id.idx
     df["date"] = session_id.date.dt
     df["subject_id"] = session_id.subject
+    df['session_id'] = session_id.id
     return df
 
 
@@ -232,10 +237,16 @@ def _write_to_cache(
         # most common access will be units from the same areas, so make sure
         # these rows are stored together
         df = df.sort_values("location")
+    if component_name == "units":
+        _write_spike_times_to_zarr_cache(
+            df, version=version,
+        )
     pyarrow.parquet.write_table(
         table=pyarrow.Table.from_pandas(df, preserve_index=True),
         where=cache_path,
-        row_group_size=20 if component_name == "units" else None,
+        # disabled --------------------------------------------------------- #
+        ## row_group_size=20 if component_name == "units" else None,
+        # - ---------------------------------------------------------------- #
         # each list in the units.spike_times column is large & should not really be
         # stored in this format. But we can at least optimize access.
         # Row groups are indivisible, so querying a single row will download a
@@ -250,6 +261,14 @@ def _write_to_cache(
     )
     logger.info(f"Wrote {cache_path}")
 
+def _write_spike_times_to_zarr_cache(
+    units: pd.DataFrame,
+    version: str | None = None,
+) -> None:
+    zarr_path = npc_lims.get_cache_path('units', consolidated=True, version=version).parent / 'spike_times.zarr'
+    z = zarr.open(zarr_path, mode='a')
+    for _, row in units.iterrows():
+        z[row['unit_id']] = row['spike_times']
 
 def get_dataset(
     nwb_component: npc_lims.NWBComponentStr,
