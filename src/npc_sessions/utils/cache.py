@@ -62,6 +62,8 @@ def _get_nwb_component(
         return _component_metadata_to_single_row_df(session).drop(
             columns="file_create_date"
         )
+    elif component_name == "spike_times":
+        return session.get("units")
     elif component_name == "subject":
         return _component_metadata_to_single_row_df(session.subject)
     elif component_name in ("vis_rf_mapping", "VisRFMapping"):
@@ -243,29 +245,30 @@ def _write_to_cache(
         # most common access will be units from the same areas, so make sure
         # these rows are stored together
         df = df.sort_values("location")
-    if component_name == "units":
+    if component_name == "spike_times":
         _write_spike_times_to_zarr_cache(
             df,
             version=version,
         )
-    pyarrow.parquet.write_table(
-        table=pyarrow.Table.from_pandas(df, preserve_index=True),
-        where=cache_path,
-        # disabled --------------------------------------------------------- #
-        ## row_group_size=20 if component_name == "units" else None,
-        # - ---------------------------------------------------------------- #
-        # each list in the units.spike_times column is large & should not really be
-        # stored in this format. But we can at least optimize access.
-        # Row groups are indivisible, so querying a single row will download a
-        # chunk of row_group_size rows: default is 10,000 rows, so accessing spike_times
-        # for a single unit would take the same as accessing 10,000.
-        # Per session, each area has 10-200 units per 'location', so we probably
-        # want a row_group_size in that range.
-        # Tradeoff is row_group_size gives worse compression and worse access speeds
-        # across chunks (so querying entire columns will be much slower than default)
-        compression=_PARQUET_COMPRESSION,
-        compression_level=_COMPRESSION_LEVEL,
-    )
+    else:
+        pyarrow.parquet.write_table(
+            table=pyarrow.Table.from_pandas(df, preserve_index=True),
+            where=cache_path,
+            # disabled --------------------------------------------------------- #
+            ## row_group_size=20 if component_name == "units" else None,
+            # - ---------------------------------------------------------------- #
+            # each list in the units.spike_times column is large & should not really be
+            # stored in this format. But we can at least optimize access.
+            # Row groups are indivisible, so querying a single row will download a
+            # chunk of row_group_size rows: default is 10,000 rows, so accessing spike_times
+            # for a single unit would take the same as accessing 10,000.
+            # Per session, each area has 10-200 units per 'location', so we probably
+            # want a row_group_size in that range.
+            # Tradeoff is row_group_size gives worse compression and worse access speeds
+            # across chunks (so querying entire columns will be much slower than default)
+            compression=_PARQUET_COMPRESSION,
+            compression_level=_COMPRESSION_LEVEL,
+        )
     logger.info(f"Wrote {cache_path}")
 
 
@@ -273,11 +276,8 @@ def _write_spike_times_to_zarr_cache(
     units: pd.DataFrame,
     version: str | None = None,
 ) -> None:
-    zarr_path = (
-        npc_lims.get_cache_path("units", consolidated=True, version=version).parent
-        / "spike_times.zarr"
-    )
-    z = zarr.open(zarr_path, mode="a")
+    zarr_path = npc_lims.get_cache_path('spike_times', consolidated=True, version=version)
+    z = zarr.open(zarr_path, mode='a')
     for _, row in units.iterrows():
         z[row["unit_id"]] = row["spike_times"]
 
