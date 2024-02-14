@@ -152,7 +152,7 @@ types-requests==2.31.0.6
 types-urllib3==1.26.25.14
 typing-extensions==4.9.0
 tzdata==2023.3
-universal-pathlib==0.2.0
+universal-pathlib==0.1.4
 urllib3==1.26.16
 wavpack-numcodecs==0.1.5
 wcwidth==0.2.7
