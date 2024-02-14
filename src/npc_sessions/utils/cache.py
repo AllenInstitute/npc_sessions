@@ -77,7 +77,7 @@ def _get_nwb_component(
             return session.analysis.get("performance", None)
         else:
             return None
-        
+
     c = getattr(session, component_name, None)
     if c is None:
         raise MissingComponentError(
@@ -276,8 +276,10 @@ def _write_spike_times_to_zarr_cache(
     units: pd.DataFrame,
     version: str | None = None,
 ) -> None:
-    zarr_path = npc_lims.get_cache_path('spike_times', consolidated=True, version=version)
-    z = zarr.open(zarr_path, mode='a')
+    zarr_path = npc_lims.get_cache_path(
+        "spike_times", consolidated=True, version=version
+    )
+    z = zarr.open(zarr_path, mode="a")
     for _, row in units.iterrows():
         z[row["unit_id"]] = row["spike_times"]
 
