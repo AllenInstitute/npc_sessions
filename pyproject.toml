@@ -12,7 +12,7 @@ dependencies = [
     "h5py>=3.9.0",
     "pandas>=2.0",
     "polars>=0.20.4",
-    "universal-pathlib>=0.1.1",
+    "universal-pathlib<0.2.0",
     "s3fs>=2023.6.0",
     "pynwb",
     "crc32c>=2.3.post0",

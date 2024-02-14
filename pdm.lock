@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:7e69f0b1b8e0aad06b784d0a071c2eef553160323debbfa6a57feccdc9a1f11c"
+content_hash = "sha256:3346e1f29bfca717ee7848a3e3305248639e94508006b693e37f67bbcce4c19b"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -3416,15 +3416,15 @@ files = [
 
 [[package]]
 name = "universal-pathlib"
-version = "0.2.0"
+version = "0.1.4"
 requires_python = ">=3.8"
 summary = "pathlib api extended to use fsspec backends"
 dependencies = [
     "fsspec>=2022.1.0",
 ]
 files = [
-    {file = "universal_pathlib-0.2.0-py3-none-any.whl", hash = "sha256:e842d1d95ee2d5685f5512039cb9d3d70abac670046ed794b034bfffd4d02576"},
-    {file = "universal_pathlib-0.2.0.tar.gz", hash = "sha256:1cbd589d1c3ebbb787ad866527f785daff0de20b7540aa557b8285a05a176912"},
+    {file = "universal_pathlib-0.1.4-py3-none-any.whl", hash = "sha256:f99186cf950bde1262de9a590bb019613ef84f9fabd9f276e8b019722201943a"},
+    {file = "universal_pathlib-0.1.4.tar.gz", hash = "sha256:82e5d86d16a27e0ea1adc7d88acbcba9d02d5a45488163174f96d9ac289db2e4"},
 ]
 
 [[package]]
