@@ -101,7 +101,7 @@ jobs:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   update_cache:
-
+    needs: package
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
