@@ -182,6 +182,8 @@ class DynamicRoutingSession:
     'VGAT-ChR2-YFP/wt'
     >>> 'DynamicRouting1' in s.epoch_tags
     True
+    >>> s.probe_insertions['probe_insertions']['probeA']['hole']
+    'A2'
     """
 
     suppress_errors = False
@@ -2098,6 +2100,7 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def probe_insertions(self) -> dict[str, Any] | None:
+        """
         path = next(
             (path for path in self.raw_data_paths if "probe_insertions" in path.stem),
             None,
@@ -2105,6 +2108,8 @@ class DynamicRoutingSession:
         if not path:
             return None
         return json.loads(path.read_text())["probe_insertions"]
+        """
+        return npc_lims.get_probe_insertion_metadata(self.id)
 
     @utils.cached_property
     def probes_inserted(self) -> tuple[str, ...]:
