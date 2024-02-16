@@ -209,16 +209,18 @@ class DynamicRoutingSession:
             session_or_path = session_or_path.id
         self.id = npc_session.SessionRecord(str(session_or_path))
         
-        # if a local path was supplied, set it as the root data path for the session
+        # if a path was supplied and it exists, set it as the root data path for the session
         if any(
             char in (path := utils.from_pathlike(session_or_path)).as_posix()
             for char in "\\/."
         ):
             if path.is_dir():
                 self._root_path: upath.UPath | None = path
-            if path.is_file():
+            elif path.is_file():
                 self._root_path = path.parent
-                
+            elif not path.exists():
+                raise FileNotFoundError(f"{path} does not exist")
+            
         # if available, get session config kwargs from the npc_lims session-tracking yaml file
         if self.info is not None:
             if issues := self.info.issues:
