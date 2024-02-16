@@ -201,13 +201,15 @@ class DynamicRoutingSession:
     # --------------------------------------------------------------------------- #
 
     task_stim_name: str = "DynamicRouting1"
-
+    """Used to distinguish the main behavior task stim file from others"""
     def __init__(
         self, session_or_path: str | utils.PathLike | npc_lims.SessionInfo, **kwargs
     ) -> None:
         if isinstance(session_or_path, npc_lims.SessionInfo):
             session_or_path = session_or_path.id
         self.id = npc_session.SessionRecord(str(session_or_path))
+        
+        # if a local path was supplied, set it as the root data path for the session
         if any(
             char in (path := utils.from_pathlike(session_or_path)).as_posix()
             for char in "\\/."
@@ -216,6 +218,8 @@ class DynamicRoutingSession:
                 self._root_path: upath.UPath | None = path
             if path.is_file():
                 self._root_path = path.parent
+                
+        # if available, get session config kwargs from the npc_lims session-tracking yaml file
         if self.info is not None:
             if issues := self.info.issues:
                 logger.warning(f"Session {self.id} has known issues: {issues}")
@@ -227,6 +231,7 @@ class DynamicRoutingSession:
                 )
                 kwargs["is_sync"] = False
                 kwargs["is_ephys"] = False
+        
         if kwargs:
             logger.info(f"Applying session kwargs to {self.id}: {kwargs}")
         self.kwargs = kwargs
@@ -241,6 +246,8 @@ class DynamicRoutingSession:
                     setattr(self, key, value)
                 except AttributeError:
                     setattr(self, f"_{key}", value)
+                    
+        # as a shortcut, make all plotting functions available as instance methods 
         self._add_plots_as_methods()
 
     def __repr__(self) -> str:
