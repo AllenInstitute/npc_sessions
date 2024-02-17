@@ -18,7 +18,6 @@ import pyarrow
 import pyarrow.dataset
 import pyarrow.parquet
 import pynwb
-from requests import get
 import zarr
 
 if typing.TYPE_CHECKING:
@@ -74,8 +73,8 @@ def _get_nwb_component(
         return session.intervals.get("AudRFMapping", None)
     elif component_name in ("optotagging", "OptoTagging"):
         return session.intervals.get("OptoTagging", None)
-    elif component_name in session.acquisition.get('behavior', {}).keys():
-        return session.acquisition['behavior'][component_name]
+    elif component_name in session.acquisition.get("behavior", {}).keys():
+        return session.acquisition["behavior"][component_name]
     elif component_name == "performance":
         if session.analysis:
             return session.analysis.get("performance", None)
@@ -109,7 +108,7 @@ def write_nwb_component_to_cache(
     """
     if component_name == "units":
         component = _flatten_units(component)
-    if hasattr(component, 'timestamps'):
+    if hasattr(component, "timestamps"):
         _write_timeseries_to_cache(
             session_id=session_id,
             component_name=component_name,
@@ -230,6 +229,7 @@ def add_session_metadata(
     df["session_id"] = session_id.id
     return df
 
+
 def _write_timeseries_to_cache(
     session_id: str | npc_session.SessionRecord,
     component_name: npc_lims.NWBComponentStr,
@@ -253,7 +253,8 @@ def _write_timeseries_to_cache(
     z[session_id]["timestamps"] = timeseries.timestamps
     if (data := getattr(timeseries, "data", None)) is not None and any(data):
         z[session_id]["data"] = data
-    
+
+
 def _write_df_to_cache(
     session_id: str | npc_session.SessionRecord,
     component_name: npc_lims.NWBComponentStr,
