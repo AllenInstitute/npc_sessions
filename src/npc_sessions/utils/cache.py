@@ -10,6 +10,7 @@ import logging
 import typing
 from collections.abc import Mapping
 
+import ndx_events
 import npc_lims
 import npc_session
 import pandas as pd
@@ -17,6 +18,7 @@ import pyarrow
 import pyarrow.dataset
 import pyarrow.parquet
 import pynwb
+from requests import get
 import zarr
 
 if typing.TYPE_CHECKING:
@@ -72,6 +74,8 @@ def _get_nwb_component(
         return session.intervals.get("AudRFMapping", None)
     elif component_name in ("optotagging", "OptoTagging"):
         return session.intervals.get("OptoTagging", None)
+    elif component_name in session.acquisition['behavior'].keys():
+        return session.acquisition['behavior'][component_name]
     elif component_name == "performance":
         if session.analysis:
             return session.analysis.get("performance", None)
@@ -105,18 +109,27 @@ def write_nwb_component_to_cache(
     """
     if component_name == "units":
         component = _flatten_units(component)
-    df = _remove_pynwb_containers(component)
-    if df.empty:
-        logger.info(f"Skipping {session_id} {component_name} - empty")
-        return
-    df = add_session_metadata(df, session_id)
-    _write_to_cache(
-        session_id=session_id,
-        component_name=component_name,
-        df=df,
-        version=version,
-        skip_existing=skip_existing,
-    )
+    if hasattr(component, 'timestamps'):
+        _write_timeseries_to_cache(
+            session_id=session_id,
+            component_name=component_name,
+            timeseries=component,
+            version=version,
+            skip_existing=skip_existing,
+        )
+    else:
+        df = _remove_pynwb_containers_from_table(component)
+        if df.empty:
+            logger.info(f"Skipping {session_id} {component_name} - empty")
+            return
+        df = add_session_metadata(df, session_id)
+        _write_df_to_cache(
+            session_id=session_id,
+            component_name=component_name,
+            df=df,
+            version=version,
+            skip_existing=skip_existing,
+        )
 
 
 def write_all_components_to_cache(
@@ -217,8 +230,31 @@ def add_session_metadata(
     df["session_id"] = session_id.id
     return df
 
-
-def _write_to_cache(
+def _write_timeseries_to_cache(
+    session_id: str | npc_session.SessionRecord,
+    component_name: npc_lims.NWBComponentStr,
+    timeseries: pynwb.TimeSeries | ndx_events.Events,
+    version: str | None = None,
+    skip_existing: bool = True,
+) -> None:
+    session_id = npc_session.SessionRecord(session_id)
+    cache_path = npc_lims.get_cache_path(
+        nwb_component=component_name,
+        version=version,
+        consolidated=True,
+    )
+    z = zarr.open(cache_path, mode="a")
+    if skip_existing and session_id in z:
+        logger.debug(
+            f"Skipping write to {cache_path} - {session_id} already exists and skip_existing=True"
+        )
+        return
+    z.create_group(session_id, overwrite=True)
+    z[session_id]["timestamps"] = timeseries.timestamps
+    if (data := getattr(timeseries, "data", None)) is not None and any(data):
+        z[session_id]["data"] = data
+    
+def _write_df_to_cache(
     session_id: str | npc_session.SessionRecord,
     component_name: npc_lims.NWBComponentStr,
     df: pd.DataFrame,
@@ -313,10 +349,10 @@ def _flatten_units(units: pynwb.misc.Units | pd.DataFrame) -> pd.DataFrame:
     for k in ("waveform_mean", "waveform_sd"):
         if k in units:
             units[k] = units[k].apply(lambda v: list(v))
-    return _remove_pynwb_containers(units)
+    return _remove_pynwb_containers_from_table(units)
 
 
-def _remove_pynwb_containers(
+def _remove_pynwb_containers_from_table(
     table_or_df: pynwb.core.DynamicTable | pd.DataFrame,
 ) -> pd.DataFrame:
     df = table_or_df[:].copy()
