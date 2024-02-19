@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
-lock_version = "4.4.1"
-content_hash = "sha256:34c115ad25f7dc5b8e0b3902e6ae71bf0aec03c6bd55cf4f1e9889c6f9a31f9d"
+lock_version = "4.4"
+content_hash = "sha256:e24788604c5969ed67adb5f17320a4762383193b0cbd7314e3053d09812f63a6"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -1849,7 +1849,7 @@ files = [
 
 [[package]]
 name = "npc-io"
-version = "0.1.23"
+version = "0.1.24"
 requires_python = ">=3.9"
 summary = "File IO tools for MindScope Neuropixels projects in the cloud."
 dependencies = [
@@ -1858,37 +1858,34 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "s3fs>=2023.12.2",
     "typing-extensions>=4.9.0",
-    "universal-pathlib>=0.1.4",
+    "universal-pathlib<0.2.0",
 ]
 files = [
-    {file = "npc-io-0.1.23.tar.gz", hash = "sha256:197e1e39a069ca322151fd790300ffc1b3138b04a0b6a9705b8fc2940dd730fe"},
-    {file = "npc_io-0.1.23-py3-none-any.whl", hash = "sha256:e677006b14180dee966fa91c51ea41201aa29a2ec1a4b6e69247a2107607e776"},
+    {file = "npc-io-0.1.24.tar.gz", hash = "sha256:0fb08f8a69eb82df217e56ec4603b081b661824f47962a42247b0ad82c788d2e"},
+    {file = "npc_io-0.1.24-py3-none-any.whl", hash = "sha256:56d4adf1c934097d96396fc32646a2b566be0f6448f33972463fa99793a00e1c"},
 ]
 
 [[package]]
 name = "npc-lims"
-version = "0.1.121"
+version = "0.1.122"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
     "aind-codeocean-api>=0.4.0",
-    "boto3==1.28.17",
+    "npc-io>=0.1.24",
     "npc-session>=0.1.30",
     "openpyxl>=3.1.2",
     "packaging>=23.2",
     "pydbhub-bjh>=0.0.8",
     "pyopenssl>=23.2.0",
-    "python-dotenv>=1.0.0",
     "pyyaml>=6.0.1",
     "redis>=4.1.4",
-    "s3fs>=2023.6.0",
     "types-pyYAML>=6.0.12.12",
     "types-requests>=2.31.0.6",
-    "typing-extensions>=4.7.1",
-    "universal-pathlib>=0.1.1",
 ]
 files = [
-    {file = "npc_lims-0.1.121-py3-none-any.whl", hash = "sha256:73fff5d8d3c9e7c222a817a3da1a01c540a77779f74a19571f8e8c9f5d4b3b30"},
+    {file = "npc_lims-0.1.122-py3-none-any.whl", hash = "sha256:7f8de849467af9a263d626ac7ea3b738620d95e7872e8ad19cda719d0cb0b209"},
+    {file = "npc_lims-0.1.122.tar.gz", hash = "sha256:8edb4a1d83298606322257ec88f499c8f38be862f2f771a61bdb8fc20c052bc2"},
 ]
 
 [[package]]
