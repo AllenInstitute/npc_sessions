@@ -17,7 +17,6 @@ MODEL_FUNCTION_MAPPING = {
     "dlc_face": npc_lims.get_dlc_face_s3_paths,
 }
 
-
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
     """
     https://github.com/DeepLabCut/DLC2NWB/blob/main/dlc2nwb/utils.py#L139
@@ -56,6 +55,7 @@ def h5_to_dataframe(h5_path: upath.UPath, key_name: str | None = None) -> pd.Dat
     return df_h5
 
 
+# helper functions below taken from allensdk
 def compute_elliptical_area(df_row: pd.Series) -> float:
     """Calculate the area of corneal reflection (cr) or eye ellipse fits using
     the ellipse formula.
@@ -183,12 +183,45 @@ def filter_on_blinks(eye_tracking_data: pd.DataFrame):
     eye_tracking_data.loc[likely_blinks, "pupil_phi"] = np.nan
 
 
-def get_computed_ellipse_metrics_dataframe(
-    eye_data: pd.DataFrame, z_threshold: float = 3.0, dilation_frames: int = 2
-) -> pd.DataFrame:
+def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
     """
     >>> df_ellipse = get_ellipse_session_dataframe_from_h5('676909_2023-12-12')
-    >>> df_eliipse_computed_metrics = get_computed_ellipse_metrics_dataframe(df_ellipse)
+    >>> len(df_ellipse)
+    512347
+    """
+    eye_s3_paths = npc_lims.get_dlc_eye_s3_paths(session)
+    ellipse_h5_path = tuple(path for path in eye_s3_paths if path.stem == "ellipses")
+    if not ellipse_h5_path:
+        raise FileNotFoundError(
+            f"No ellipse h5 file found for {session}. Check dlc eye capsule"
+        )
+
+    # verbatim from allensdk: allensdk.brain_observatory.behavior.eye_tracking_processing.py
+    eye_tracking_fields = ["cr", "eye", "pupil"]
+
+    eye_tracking_dfs = []
+    for field_name in eye_tracking_fields:
+        df_ellipse = h5_to_dataframe(ellipse_h5_path[0], key_name=field_name)
+        new_col_name_map = {
+            col_name: f"{field_name}_{col_name}" for col_name in df_ellipse.columns
+        }
+        df_ellipse.rename(new_col_name_map, axis=1, inplace=True)
+        eye_tracking_dfs.append(df_ellipse)
+
+    eye_tracking_data = pd.concat(eye_tracking_dfs, axis=1)
+    eye_tracking_data.index.name = "frame"
+
+    # Values in the hdf5 may be complex (likely an artifact of the ellipse
+    # fitting process). Take only the real component.
+    eye_tracking_data = eye_tracking_data.apply(lambda x: np.real(x.to_numpy()))
+
+    return eye_tracking_data.astype(float)
+
+def get_computed_ellipse_metrics_dataframe(
+    session: str, z_threshold: float = 3.0, dilation_frames: int = 2
+) -> pd.DataFrame:
+    """
+    >>> df_eliipse_computed_metrics = get_computed_ellipse_metrics_dataframe('676909_2023-12-12')
     >>> df_eliipse_computed_metrics.columns
     Index(['cr_area', 'eye_area', 'pupil_area', 'likely_blink', 'pupil_area_raw',
            'cr_area_raw', 'eye_area_raw', 'cr_center_x', 'cr_center_y', 'cr_width',
@@ -197,6 +230,7 @@ def get_computed_ellipse_metrics_dataframe(
            'pupil_width', 'pupil_height', 'pupil_phi'],
           dtype='object')
     """
+    eye_data = get_ellipse_session_dataframe_from_h5(session)
     cr_areas = eye_data[["cr_width", "cr_height"]].apply(
         compute_elliptical_area, axis=1
     )
@@ -232,42 +266,6 @@ def get_computed_ellipse_metrics_dataframe(
     filter_on_blinks(eye_data)
 
     return eye_data
-
-
-def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
-    """
-    >>> df_ellipse = get_ellipse_session_dataframe_from_h5('676909_2023-12-12')
-    >>> len(df_ellipse)
-    512347
-    """
-    eye_s3_paths = npc_lims.get_dlc_eye_s3_paths(session)
-    ellipse_h5_path = tuple(path for path in eye_s3_paths if path.stem == "ellipses")
-    if not ellipse_h5_path:
-        raise FileNotFoundError(
-            f"No ellipse h5 file found for {session}. Check dlc eye capsule"
-        )
-
-    # verbatim from allensdk: allensdk.brain_observatory.behavior.eye_tracking_processing.py
-    eye_tracking_fields = ["cr", "eye", "pupil"]
-
-    eye_tracking_dfs = []
-    for field_name in eye_tracking_fields:
-        df_ellipse = h5_to_dataframe(ellipse_h5_path[0], key_name=field_name)
-        new_col_name_map = {
-            col_name: f"{field_name}_{col_name}" for col_name in df_ellipse.columns
-        }
-        df_ellipse.rename(new_col_name_map, axis=1, inplace=True)
-        eye_tracking_dfs.append(df_ellipse)
-
-    eye_tracking_data = pd.concat(eye_tracking_dfs, axis=1)
-    eye_tracking_data.index.name = "frame"
-
-    # Values in the hdf5 may be complex (likely an artifact of the ellipse
-    # fitting process). Take only the real component.
-    eye_tracking_data = eye_tracking_data.apply(lambda x: np.real(x.to_numpy()))
-
-    return eye_tracking_data.astype(float)
-
 
 def get_dlc_session_model_dataframe_from_h5(
     session: str, model_name: str

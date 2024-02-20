@@ -182,7 +182,7 @@ class DynamicRoutingSession:
     'VGAT-ChR2-YFP/wt'
     >>> 'DynamicRouting1' in s.epoch_tags
     True
-    >>> s.probe_insertions['probe_insertions']['probeA']['hole']
+    >>> s.probe_insertions['probeA']['hole']
     'A2'
     """
 
@@ -486,7 +486,7 @@ class DynamicRoutingSession:
         self._epoch_tags = list(set(epoch_tags))
 
     # LabelledDicts ------------------------------------------------------------- #
-
+        
     @property
     def acquisition(
         self,
@@ -2119,7 +2119,7 @@ class DynamicRoutingSession:
             return None
         return json.loads(path.read_text())["probe_insertions"]
         """
-        return npc_lims.get_probe_insertion_metadata(self.id)
+        return npc_lims.get_probe_insertion_metadata(self.id)['probe_insertions']
 
     @utils.cached_property
     def probes_inserted(self) -> tuple[str, ...]:
@@ -2244,7 +2244,7 @@ class DynamicRoutingSession:
                 ),
             ),
         )
-
+    
     @utils.cached_property
     def _running_speed(self) -> pynwb.TimeSeries:
         name = "running_speed"
@@ -2331,6 +2331,28 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
+    def _ellipse_eye_tracking(self) -> pynwb.TimeSeries:
+        video_path = npc_lims.get_eye_video_path_from_s3(self.id)
+        video_timestamps = utils.get_video_frame_times(
+            self.sync_path, video_path.parent
+        )[video_path]
+        eye_tracking_table = utils.get_computed_ellipse_metrics_dataframe(self.id)
+        return pynwb.TimeSeries(
+            name='Ellipse eye tracking',
+            data=eye_tracking_table.to_numpy(),
+            unit='pixels',
+            timestamps=video_timestamps,
+            # TODO: find better way to specify columns in timeseries array
+            description = 'Ellipse eye tracking fits and derived area metrics. Features in order: cr_area, eye_area, pupil_area, \
+            likely_blink, pupil_area_raw, \
+            cr_area_raw, eye_area_raw, cr_center_x, cr_center_y, cr_width, \
+            cr_height, cr_phi, eye_center_x, eye_center_y, eye_width, \
+            eye_height, eye_phi, pupil_center_x, pupil_center_y, \
+            pupil_width, pupil_height, pupil_phi'
+        )
+
+
+    @utils.cached_property
     def _dlc_eye_output(self) -> ndx_pose.pose.PoseEstimation:
         df_dlc_eye = utils.get_dlc_session_model_dataframe_from_h5(
             self.id, model_name="dlc_eye"
@@ -2357,7 +2379,7 @@ class DynamicRoutingSession:
         df_dlc_side = utils.get_dlc_session_model_dataframe_from_h5(
             self.id, model_name="dlc_side"
         )
-        video_path = npc_lims.get_eye_video_path_from_s3(self.id)
+        video_path = npc_lims.get_behavior_video_path_from_s3(self.id) # change to side
         video_timestamps = utils.get_video_frame_times(
             self.sync_path, video_path.parent
         )[video_path]
@@ -2367,7 +2389,7 @@ class DynamicRoutingSession:
         )
         pose_estimation_dlc_side = ndx_pose.pose.PoseEstimation(
             pose_estimation_series=pose_estimation_series,
-            description="Deeplab cut run on side video.",
+            description="Deeplab cut run on behavior side video.",
             original_videos=[video_path],
             source_software="DeepLabCut",
         )
@@ -2379,7 +2401,7 @@ class DynamicRoutingSession:
         df_dlc_face = utils.get_dlc_session_model_dataframe_from_h5(
             self.id, model_name="dlc_face"
         )
-        video_path = npc_lims.get_eye_video_path_from_s3(self.id)
+        video_path = npc_lims.get_face_video_path_from_s3(self.id)
         video_timestamps = utils.get_video_frame_times(
             self.sync_path, video_path.parent
         )[video_path]
