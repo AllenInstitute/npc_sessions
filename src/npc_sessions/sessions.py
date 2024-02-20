@@ -2110,15 +2110,6 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def probe_insertions(self) -> dict[str, Any] | None:
-        """
-        path = next(
-            (path for path in self.raw_data_paths if "probe_insertions" in path.stem),
-            None,
-        )
-        if not path:
-            return None
-        return json.loads(path.read_text())["probe_insertions"]
-        """
         return npc_lims.get_probe_insertion_metadata(self.id)["probe_insertions"]
 
     @utils.cached_property
