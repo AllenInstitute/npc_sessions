@@ -17,6 +17,7 @@ MODEL_FUNCTION_MAPPING = {
     "dlc_face": npc_lims.get_dlc_face_s3_paths,
 }
 
+
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
     """
     https://github.com/DeepLabCut/DLC2NWB/blob/main/dlc2nwb/utils.py#L139
@@ -217,6 +218,7 @@ def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
 
     return eye_tracking_data.astype(float)
 
+
 def get_computed_ellipse_metrics_dataframe(
     session: str, z_threshold: float = 3.0, dilation_frames: int = 2
 ) -> pd.DataFrame:
@@ -266,6 +268,7 @@ def get_computed_ellipse_metrics_dataframe(
     filter_on_blinks(eye_data)
 
     return eye_data
+
 
 def get_dlc_session_model_dataframe_from_h5(
     session: str, model_name: str
