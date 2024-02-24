@@ -547,6 +547,11 @@ class DynamicRoutingSession:
         modules.append(self._all_licks[0])
         modules.append(self._running_speed)
         modules.append(self._dlc_eye_output)
+        modules.append(self._dlc_side_output)
+        modules.append(self._dlc_face_output)
+        modules.append(self._facemap_behavior_output)
+        modules.append(self._facemap_face_output)
+
         return tuple(modules)
 
     @utils.cached_property
@@ -2343,6 +2348,42 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
+    def _facemap_face_output(self) -> pynwb.TimeSeries:
+        video_path = npc_lims.get_behavior_video_path_from_s3(self.id)
+        video_timestamps = utils.get_video_frame_times(
+            self.sync_path, video_path.parent
+        )[video_path]
+    
+        behavior_proc = utils.get_facemap_output_from_s3(self.id, 'Behavior')
+        motion_svd = behavior_proc['motSVD'] # add other variables if needed
+
+        return pynwb.TimeSeries(
+            name='Facemap Behavior Proc Output',
+            data = motion_svd,
+            unit='pixels',
+            timestamps=video_timestamps,
+            description='Motion SVD for behavior video. Shape is number of frames by number of components (500)'
+        )
+    
+    @utils.cached_property
+    def _facemap_behavior_output(self) -> pynwb.TimeSeries:
+        video_path = npc_lims.get_behavior_video_path_from_s3(self.id)
+        video_timestamps = utils.get_video_frame_times(
+            self.sync_path, video_path.parent
+        )[video_path]
+    
+        behavior_proc = utils.get_facemap_output_from_s3(self.id, 'Face')
+        motion_svd = behavior_proc['motSVD'] # add other variables if needed
+
+        return pynwb.TimeSeries(
+            name='Facemap Face Proc Output',
+            data = motion_svd,
+            unit='pixels',
+            timestamps=video_timestamps,
+            description='Motion SVD for face video. Shape is number of frames by number of components (500)'
+        )
+
+    @utils.cached_property
     def _dlc_eye_output(self) -> ndx_pose.pose.PoseEstimation:
         df_dlc_eye = utils.get_dlc_session_model_dataframe_from_h5(
             self.id, model_name="dlc_eye"
@@ -2369,7 +2410,7 @@ class DynamicRoutingSession:
         df_dlc_side = utils.get_dlc_session_model_dataframe_from_h5(
             self.id, model_name="dlc_side"
         )
-        video_path = npc_lims.get_behavior_video_path_from_s3(self.id)  # change to side
+        video_path = npc_lims.get_behavior_video_path_from_s3(self.id)
         video_timestamps = utils.get_video_frame_times(
             self.sync_path, video_path.parent
         )[video_path]
