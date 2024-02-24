@@ -2353,34 +2353,34 @@ class DynamicRoutingSession:
         video_timestamps = utils.get_video_frame_times(
             self.sync_path, video_path.parent
         )[video_path]
-    
-        behavior_proc = utils.get_facemap_output_from_s3(self.id, 'Behavior')
-        motion_svd = behavior_proc['motSVD'] # add other variables if needed
+
+        behavior_proc = utils.get_facemap_output_from_s3(self.id, "Behavior")
+        motion_svd = behavior_proc["motSVD"]  # add other variables if needed
 
         return pynwb.TimeSeries(
-            name='Facemap Behavior Proc Output',
-            data = motion_svd,
-            unit='pixels',
+            name="Facemap Behavior Proc Output",
+            data=motion_svd,
+            unit="pixels",
             timestamps=video_timestamps,
-            description='Motion SVD for behavior video. Shape is number of frames by number of components (500)'
+            description="Motion SVD for behavior video. Shape is number of frames by number of components (500)",
         )
-    
+
     @utils.cached_property
     def _facemap_behavior_output(self) -> pynwb.TimeSeries:
         video_path = npc_lims.get_behavior_video_path_from_s3(self.id)
         video_timestamps = utils.get_video_frame_times(
             self.sync_path, video_path.parent
         )[video_path]
-    
-        behavior_proc = utils.get_facemap_output_from_s3(self.id, 'Face')
-        motion_svd = behavior_proc['motSVD'] # add other variables if needed
+
+        behavior_proc = utils.get_facemap_output_from_s3(self.id, "Face")
+        motion_svd = behavior_proc["motSVD"]  # add other variables if needed
 
         return pynwb.TimeSeries(
-            name='Facemap Face Proc Output',
-            data = motion_svd,
-            unit='pixels',
+            name="Facemap Face Proc Output",
+            data=motion_svd,
+            unit="pixels",
             timestamps=video_timestamps,
-            description='Motion SVD for face video. Shape is number of frames by number of components (500)'
+            description="Motion SVD for face video. Shape is number of frames by number of components (500)",
         )
 
     @utils.cached_property

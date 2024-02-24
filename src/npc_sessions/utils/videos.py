@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import io
 import tempfile
+from typing import Any
 
 import ndx_pose
 import npc_lims
@@ -9,8 +11,6 @@ import numpy.typing as npt
 import pandas as pd
 import upath
 from scipy import ndimage, stats
-import io
-from typing import Any
 
 # nice little trick from carter peene
 MODEL_FUNCTION_MAPPING = {
@@ -19,7 +19,8 @@ MODEL_FUNCTION_MAPPING = {
     "dlc_face": npc_lims.get_dlc_face_s3_paths,
 }
 
-FACEMAP_VIDEO_OUTPUT_CATEGORIES = ['Behavior', 'Face']
+FACEMAP_VIDEO_OUTPUT_CATEGORIES = ["Behavior", "Face"]
+
 
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
     """
@@ -315,6 +316,7 @@ def get_pose_series_from_dataframe(
 
     return pose_estimations_series
 
+
 def get_facemap_output_from_s3(session: str, video_type: str) -> dict[str, Any]:
     """
     >>> proc = get_facemap_output_from_s3('676909_2023-12-12', 'Behavior')
@@ -324,18 +326,23 @@ def get_facemap_output_from_s3(session: str, video_type: str) -> dict[str, Any]:
     session_facemap_paths = npc_lims.get_facemap_s3_paths(session)
 
     if video_type not in FACEMAP_VIDEO_OUTPUT_CATEGORIES:
-        raise ValueError(f'{video_type} not part of facemap output')
-    
-    facemap_path = tuple(path for path in session_facemap_paths if video_type in path.stem)
+        raise ValueError(f"{video_type} not part of facemap output")
+
+    facemap_path = tuple(
+        path for path in session_facemap_paths if video_type in path.stem
+    )
 
     if not facemap_path:
-        raise FileNotFoundError(f'No {video_type} proc file found for session {session}. Check codeocean')
-    
+        raise FileNotFoundError(
+            f"No {video_type} proc file found for session {session}. Check codeocean"
+        )
+
     facemap_proc_path = facemap_path[0]
     with io.BytesIO(facemap_proc_path.read_bytes()) as f:
         proc = np.load(f, allow_pickle=True).item()
-    
+
     return proc
+
 
 if __name__ == "__main__":
     import doctest
