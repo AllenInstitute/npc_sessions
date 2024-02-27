@@ -546,7 +546,7 @@ class DynamicRoutingSession:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         modules.append(self._all_licks[0])
         modules.append(self._running_speed)
-        modules.append(self._dlc_eye_output)
+        #modules.append(self._dlc_eye_output)
         #modules.append(self._dlc_side_output)
         #modules.append(self._dlc_face_output)
         #modules.append(self._facemap_behavior_output)
