@@ -93,6 +93,7 @@ def _get_nwb_component(
         return _labelled_dict_to_df(c)
     return c
 
+
 def component_exists(
     session_id: str | npc_session.SessionRecord,
     component_name: npc_lims.NWBComponentStr,
@@ -119,6 +120,7 @@ def component_exists(
             return True
         else:
             return False
+
 
 def write_nwb_component_to_cache(
     component: pynwb.core.NWBContainer | pd.DataFrame,
@@ -179,9 +181,8 @@ def write_all_components_to_cache(
     logger.info(f"Writing all components to cache for {session.session_id}")
     for component_name in typing.get_args(npc_lims.NWBComponentStr):
         # skip before we potentially do a lot of processing to get component
-        if (
-            skip_existing
-            and component_exists(session.session_id, component_name, version=version)
+        if skip_existing and component_exists(
+            session.session_id, component_name, version=version
         ):
             logger.info(
                 f"Skipping {session.session_id} {component_name} - already exists"
