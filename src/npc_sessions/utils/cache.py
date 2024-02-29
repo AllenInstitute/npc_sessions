@@ -288,6 +288,7 @@ def _write_df_to_cache(
         df = df.sort_values("location")
     if component_name == "spike_times":
         _write_spike_times_to_zarr_cache(
+            session_id,
             df,
             version=version,
         )
@@ -316,6 +317,7 @@ def _write_df_to_cache(
 
 
 def _write_spike_times_to_zarr_cache(
+    session_id: str | npc_session.SessionRecord,
     units: pd.DataFrame,
     version: str | None = None,
 ) -> None:
@@ -323,8 +325,9 @@ def _write_spike_times_to_zarr_cache(
         "spike_times", consolidated=True, version=version
     )
     z = zarr.open(zarr_path, mode="a")
+    z.create_group(session_id, overwrite=True)
     for _, row in units.iterrows():
-        z[row["unit_id"]] = row["spike_times"]
+        z[session_id][row["unit_id"]] = row["spike_times"]
 
 
 def get_dataset(
