@@ -149,8 +149,6 @@ def write_all_components_to_cache(
     """
     logger.info(f"Writing all components to cache for {session.id}")
     for component_name in typing.get_args(npc_lims.NWBComponentStr):
-        if component_name == "spike_times":
-            continue
         # skip before we potentially do a lot of processing to get component
         if (
             skip_existing
