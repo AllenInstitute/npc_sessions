@@ -129,7 +129,7 @@ def write_nwb_component_to_cache(
 ) -> None:
     """Write units to cache file (e.g. .parquet) after processing columns.
 
-    - ND arrays are not supported, so waveform mean/sd are condensed to 1D arrays
+    - ND arrays are not supported in parquet, so waveform mean/sd are condensed to 1D arrays
       with data for peak channel only, or dropped entirely
     - links to NWBContainers cannot be stored, so extract necessary 'foreign key'
       to enable joining tables later
