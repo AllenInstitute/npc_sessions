@@ -1379,8 +1379,6 @@ class DynamicRoutingSession:
             return v
         if (v := getattr(self, "_sync_path", None)) is not None:
             return True
-        if self.info:
-            return self.info.is_sync
         with contextlib.suppress(
             FileNotFoundError, ValueError, npc_lims.MissingCredentials
         ):
