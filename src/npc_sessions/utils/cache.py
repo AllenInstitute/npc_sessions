@@ -200,23 +200,26 @@ def consolidate_cache(component_name: npc_lims.NWBComponentStr) -> None:
         logger.info(f"No cache files found for {component_name}")
         return
     consolidated_cache_path = npc_lims.get_cache_path(component_name, consolidated=True)
-    if component_name == "units":
-        dataset = pyarrow.dataset.dataset(cache_dir)
-        table = dataset.to_table(
-            columns=[
-                c
-                for c in dataset.schema.names
-                if c not in ("spike_times", "waveform_mean", "waveform_sd")
-            ]
+    if consolidated_cache_path.suffix == ".parquet":
+        if component_name == "units":
+            dataset = pyarrow.dataset.dataset(cache_dir)
+            table = dataset.to_table(
+                columns=[
+                    c
+                    for c in dataset.schema.names
+                    if c not in ("spike_times", "waveform_mean", "waveform_sd")
+                ]
+            )
+        else:
+            table = pyarrow.dataset.dataset(cache_dir).to_table()
+        pyarrow.parquet.write_table(
+            table=table,
+            where=consolidated_cache_path,
+            compression=_PARQUET_COMPRESSION,
+            compression_level=_COMPRESSION_LEVEL,
         )
-    else:
-        table = pyarrow.dataset.dataset(cache_dir).to_table()
-    pyarrow.parquet.write_table(
-        table=table,
-        where=consolidated_cache_path,
-        compression=_PARQUET_COMPRESSION,
-        compression_level=_COMPRESSION_LEVEL,
-    )
+    elif consolidated_cache_path.suffix == ".zarr":
+        logger.info(f"Consolidating {component_name} zarr cache not supported yet")
     logger.info(f"Wrote {consolidated_cache_path}")
 
 
