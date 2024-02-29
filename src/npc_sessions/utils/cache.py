@@ -73,7 +73,10 @@ def _get_nwb_component(
         return session.intervals.get("AudRFMapping", None)
     elif component_name in ("optotagging", "OptoTagging"):
         return session.intervals.get("OptoTagging", None)
-    elif component_name in session.processing["behavior"].fields['data_interfaces'].keys():
+    elif (
+        component_name
+        in session.processing["behavior"].fields["data_interfaces"].keys()
+    ):
         return session.processing["behavior"].get(component_name)
     elif component_name == "performance":
         if session.analysis:
