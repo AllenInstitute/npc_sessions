@@ -11,6 +11,7 @@ import numpy.typing as npt
 import pandas as pd
 import upath
 from scipy import ndimage, stats
+import zarr
 
 # nice little trick from carter peene
 MODEL_FUNCTION_MAPPING = {
@@ -283,7 +284,6 @@ def get_dlc_session_model_dataframe_from_h5(
     512347
     """
     model_s3_paths = MODEL_FUNCTION_MAPPING[model_name](session)
-    # TODO figure out ellipses.h5
     h5_files = tuple(path for path in model_s3_paths if path.suffix == ".h5")
 
     if not h5_files:
@@ -317,11 +317,11 @@ def get_pose_series_from_dataframe(
     return pose_estimations_series
 
 
-def get_facemap_output_from_s3(session: str, video_type: str) -> dict[str, Any]:
+def get_facemap_output_from_s3(session: str, video_type: str, key: str) -> zarr.array:
     """
-    >>> proc = get_facemap_output_from_s3('676909_2023-12-12', 'Behavior')
-    >>> proc['motSVD'][1].shape
-    (512370, 500)
+    >>> behavior_motion_svd = get_facemap_output_from_s3('646318_2023-01-17', 'Behavior', 'motSVD')
+    >>> behavior_motion_svd.shape
+    (284190, 500)
     """
     session_facemap_paths = npc_lims.get_facemap_s3_paths(session)
 
@@ -329,7 +329,7 @@ def get_facemap_output_from_s3(session: str, video_type: str) -> dict[str, Any]:
         raise ValueError(f"{video_type} not part of facemap output")
 
     facemap_path = tuple(
-        path for path in session_facemap_paths if video_type in path.stem
+        path for path in session_facemap_paths if video_type in path.stem and key in path.stem and 'zarr' in path.suffix
     )
 
     if not facemap_path:
@@ -337,11 +337,8 @@ def get_facemap_output_from_s3(session: str, video_type: str) -> dict[str, Any]:
             f"No {video_type} proc file found for session {session}. Check codeocean"
         )
 
-    facemap_proc_path = facemap_path[0]
-    with io.BytesIO(facemap_proc_path.read_bytes()) as f:
-        proc = np.load(f, allow_pickle=True).item()
-
-    return proc
+    facemap_key_path = facemap_path[0]
+    return zarr.open(facemap_key_path)
 
 
 if __name__ == "__main__":

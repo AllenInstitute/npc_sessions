@@ -2352,15 +2352,14 @@ class DynamicRoutingSession:
             self.sync_path, video_path.parent
         )[video_path]
 
-        behavior_proc = utils.get_facemap_output_from_s3(self.id, "Behavior")
-        motion_svd = behavior_proc["motSVD"]  # add other variables if needed
+        face_motion_svd = utils.get_facemap_output_from_s3(self.id, "Face", 'motSVD')
 
         return pynwb.TimeSeries(
-            name="Facemap Behavior Proc Output",
-            data=motion_svd,
+            name="Facemap Face Motion SVD Output",
+            data=face_motion_svd,
             unit="pixels",
             timestamps=video_timestamps,
-            description="Motion SVD for behavior video. Shape is number of frames by number of components (500)",
+            description="Motion SVD for face video. Shape is number of frames by number of components (500)",
         )
 
     @utils.cached_property
@@ -2370,15 +2369,14 @@ class DynamicRoutingSession:
             self.sync_path, video_path.parent
         )[video_path]
 
-        behavior_proc = utils.get_facemap_output_from_s3(self.id, "Face")
-        motion_svd = behavior_proc["motSVD"]  # add other variables if needed
+        behavior_motion_svd = utils.get_facemap_output_from_s3(self.id, "Behavior", 'motSVD')
 
         return pynwb.TimeSeries(
-            name="Facemap Face Proc Output",
-            data=motion_svd,
+            name="Facemap Behavior Motion SVD Output",
+            data=behavior_motion_svd,
             unit="pixels",
             timestamps=video_timestamps,
-            description="Motion SVD for face video. Shape is number of frames by number of components (500)",
+            description="Motion SVD for behavior video. Shape is number of frames by number of components (500)",
         )
 
     @utils.cached_property
