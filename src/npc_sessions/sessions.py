@@ -2014,10 +2014,12 @@ class DynamicRoutingSession:
     def drift_map_paths(self) -> tuple[upath.UPath, ...]:
         if utils.SpikeInterfaceKS25Data(self.id).is_pre_v0_99:
             return tuple(
-                next(d for d in self.sorted_data_paths if d.name == "drift_maps").iterdir()
+                next(
+                    d for d in self.sorted_data_paths if d.name == "drift_maps"
+                ).iterdir()
             )
-        
-        return () # TODO: think about what to do, issue already open about making drift maps from scratch
+
+        return ()  # TODO: think about what to do, issue already open about making drift maps from scratch
 
     @utils.cached_property
     def ephys_sync_messages_path(self) -> upath.UPath:
@@ -2355,7 +2357,7 @@ class DynamicRoutingSession:
             self.sync_path, video_path.parent
         )[video_path]
 
-        face_motion_svd = utils.get_facemap_output_from_s3(self.id, "Face", 'motSVD')
+        face_motion_svd = utils.get_facemap_output_from_s3(self.id, "Face", "motSVD")
 
         return pynwb.TimeSeries(
             name="Facemap Face Motion SVD Output",
@@ -2372,7 +2374,9 @@ class DynamicRoutingSession:
             self.sync_path, video_path.parent
         )[video_path]
 
-        behavior_motion_svd = utils.get_facemap_output_from_s3(self.id, "Behavior", 'motSVD')
+        behavior_motion_svd = utils.get_facemap_output_from_s3(
+            self.id, "Behavior", "motSVD"
+        )
 
         return pynwb.TimeSeries(
             name="Facemap Behavior Motion SVD Output",

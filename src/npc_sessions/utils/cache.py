@@ -174,7 +174,7 @@ def write_all_components_to_cache(
     - links to NWBContainers cannot be stored, so extract necessary 'foreign key'
       to enable joining tables later
 
-    #>>> write_all_components_to_cache(session, version="test", skip_existing=False) TODO: put back 
+    #>>> write_all_components_to_cache(session, version="test", skip_existing=False) TODO: put back
     >>> import npc_sessions
     >>> session = npc_sessions.DynamicRoutingSession("DRpilot_667252_20230926", probe_letters_to_skip="BCDEF")
     """

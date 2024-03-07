@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:fa604de183f4cd1a919e69b2820e1408ada401d83a8efa00819caa604f513cb3"
+content_hash = "sha256:9af7770c54bac317af5cb63130ae99217682663140f7fb65c917dd6dc1d1e98c"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -1829,7 +1829,7 @@ files = [
 
 [[package]]
 name = "npc-ephys"
-version = "0.1.9"
+version = "0.1.10"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing raw ephys data, compatible with data in the cloud."
 dependencies = [
@@ -1842,8 +1842,8 @@ dependencies = [
     "zarr>=2.16.1",
 ]
 files = [
-    {file = "npc-ephys-0.1.9.tar.gz", hash = "sha256:a7fd0c2d8988441eaa66852c5a84de6cdd18a0dfde4184006c17daaf7fc9303e"},
-    {file = "npc_ephys-0.1.9-py3-none-any.whl", hash = "sha256:23b07df2de0ccc8571576c4e41c2c312a1fa5071d9df93b86f2deeec5fe485fa"},
+    {file = "npc-ephys-0.1.10.tar.gz", hash = "sha256:c3ceb35b14db39db321d4bf79a0292e23ecdab3e7796a07d479c64826106c5e7"},
+    {file = "npc_ephys-0.1.10-py3-none-any.whl", hash = "sha256:e6c726c7d18c19e25d1d785c8e4e6a86f0364983a4610c7a582206805d488a6e"},
 ]
 
 [[package]]
@@ -1866,7 +1866,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.131"
+version = "0.1.133"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -1883,8 +1883,8 @@ dependencies = [
     "types-requests>=2.31.0.6",
 ]
 files = [
-    {file = "npc_lims-0.1.131-py3-none-any.whl", hash = "sha256:efed9b3c03885140dece4cf9c00b45b70f614a38f5c0a872ab4ed33c1183643d"},
-    {file = "npc_lims-0.1.131.tar.gz", hash = "sha256:d651a479a47ddfeee6d42aef393d563dc00f0a9ec9058b94fefa163caf3ab8e1"},
+    {file = "npc_lims-0.1.133-py3-none-any.whl", hash = "sha256:4491188754aee497aa387615752e4c187c2c711da209de0fcd3cbe5d2c24eb3a"},
+    {file = "npc_lims-0.1.133.tar.gz", hash = "sha256:2209f365abf95d34ffb482993e775e2300f77953e2002c8f46af37a25ec007bc"},
 ]
 
 [[package]]
@@ -1968,13 +1968,13 @@ files = [
 
 [[package]]
 name = "npc-utils"
-version = "0.1.5"
+version = "0.1.6"
 requires_python = ">=3.9"
 summary = "Collection of MindScope Neuropixels packages, simplifying installation and keeping versions updated."
 dependencies = [
-    "npc-ephys>=0.1.8",
+    "npc-ephys>=0.1.10",
     "npc-io>=0.1.24",
-    "npc-lims>=0.1.122",
+    "npc-lims>=0.1.133",
     "npc-mvr>=0.1.2",
     "npc-samstim>=0.1.2",
     "npc-session>=0.1.33",
@@ -1982,8 +1982,8 @@ dependencies = [
     "npc-sync>=0.1.6",
 ]
 files = [
-    {file = "npc-utils-0.1.5.tar.gz", hash = "sha256:37caacaacb4f104b296860a97a4db7991e105211445bf96b430beacb14dd66fc"},
-    {file = "npc_utils-0.1.5-py3-none-any.whl", hash = "sha256:6970a08e9f64aed310de523c50299afe9fd68703b9df4163815f6f562d884430"},
+    {file = "npc-utils-0.1.6.tar.gz", hash = "sha256:1c31f1b4581202b86a7c3797c2e9ecad506baf45114abd991c7904e1ff318baf"},
+    {file = "npc_utils-0.1.6-py3-none-any.whl", hash = "sha256:df0f687eaa02e3394426cffe0e6d5855d9cfbbe5c4b33a67c06b62cee2428878"},
 ]
 
 [[package]]

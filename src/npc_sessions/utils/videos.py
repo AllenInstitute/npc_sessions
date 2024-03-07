@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import io
 import tempfile
-from typing import Any
 
 import ndx_pose
 import npc_lims
@@ -10,8 +8,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import upath
-from scipy import ndimage, stats
 import zarr
+from scipy import ndimage, stats
 
 # nice little trick from carter peene
 MODEL_FUNCTION_MAPPING = {
@@ -329,7 +327,9 @@ def get_facemap_output_from_s3(session: str, video_type: str, key: str) -> zarr.
         raise ValueError(f"{video_type} not part of facemap output")
 
     facemap_path = tuple(
-        path for path in session_facemap_paths if video_type in path.stem and key in path.stem and 'zarr' in path.suffix
+        path
+        for path in session_facemap_paths
+        if video_type in path.stem and key in path.stem and "zarr" in path.suffix
     )
 
     if not facemap_path:
