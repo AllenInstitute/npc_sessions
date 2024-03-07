@@ -32,11 +32,9 @@ dependencies = [
     "hdmf-zarr>=0.5.0",
     "traitlets<=5.9.0",
     "hdmf>=3.9.0",
-    "npc-utils>=0.1.5",
+    "npc-utils>=0.1.6",
     "ndx-pose>=0.1.1",
     "tables>=3.9.2",
-    "npc-lims>=0.1.131",
-    "npc-ephys>=0.1.9",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
