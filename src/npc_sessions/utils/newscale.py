@@ -71,7 +71,7 @@ NEWSCALE_LOG_COLUMNS = (
 
 def get_newscale_data(path: utils.PathLike) -> pl.DataFrame:
     """
-    >>> df = get_newscale_data('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior_videos/log.csv')
+    >>> df = get_newscale_data('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior/log.csv')
     """
     return pl.read_csv(
         source=utils.from_pathlike(path).as_posix(),
@@ -82,7 +82,7 @@ def get_newscale_data(path: utils.PathLike) -> pl.DataFrame:
 
 def get_newscale_data_lazy(path: utils.PathLike) -> pl.LazyFrame:
     """
-    # >>> df = get_newscale_data_lazy('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior_videos/log.csv')
+    # >>> df = get_newscale_data_lazy('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior/log.csv')
     """
     # TODO not working with s3 paths
     return pl.scan_csv(
@@ -104,7 +104,7 @@ def get_newscale_coordinates(
     - if not provided, attempt to parse experiment (sync) start time from `newscale_log_path`:
       assumes manipulators were not moved after the start time
 
-    >>> df = get_newscale_coordinates('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior_videos/log.csv', '2023-10-23 14-11-05')
+    >>> df = get_newscale_coordinates('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior/log.csv', '2023-10-23 14-11-05')
     >>> list(df['x'])
     [6278.0, 6943.5, 7451.0, 4709.0, 4657.0, 5570.0]
     >>> list(df['z'])
