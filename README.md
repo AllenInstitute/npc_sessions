@@ -87,6 +87,9 @@ cd npc_sessions
 pip install -e .
 ```
 
+# Hierarchy of required packages 
+![packages](./map.excalidraw.png)
+
 # Current NWB components
 
 #### key data types
