@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:fea0f205c54605d78d890fa7c25b87eaa005d850e65239e31ef79d18903d5fa9"
+content_hash = "sha256:fa604de183f4cd1a919e69b2820e1408ada401d83a8efa00819caa604f513cb3"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -1829,7 +1829,7 @@ files = [
 
 [[package]]
 name = "npc-ephys"
-version = "0.1.8"
+version = "0.1.9"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing raw ephys data, compatible with data in the cloud."
 dependencies = [
@@ -1842,8 +1842,8 @@ dependencies = [
     "zarr>=2.16.1",
 ]
 files = [
-    {file = "npc-ephys-0.1.8.tar.gz", hash = "sha256:6f89756729adba9e1746dd620d4d7649ff256241a89ef85a6c1556192f58259d"},
-    {file = "npc_ephys-0.1.8-py3-none-any.whl", hash = "sha256:045c4f10142ea7636226b12fa9db8534860d6d1491b5169290b2e52cb72bc2dc"},
+    {file = "npc-ephys-0.1.9.tar.gz", hash = "sha256:a7fd0c2d8988441eaa66852c5a84de6cdd18a0dfde4184006c17daaf7fc9303e"},
+    {file = "npc_ephys-0.1.9-py3-none-any.whl", hash = "sha256:23b07df2de0ccc8571576c4e41c2c312a1fa5071d9df93b86f2deeec5fe485fa"},
 ]
 
 [[package]]

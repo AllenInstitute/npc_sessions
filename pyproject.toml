@@ -36,6 +36,7 @@ dependencies = [
     "ndx-pose>=0.1.1",
     "tables>=3.9.2",
     "npc-lims>=0.1.131",
+    "npc-ephys>=0.1.9",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
