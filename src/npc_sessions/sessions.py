@@ -2012,9 +2012,12 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def drift_map_paths(self) -> tuple[upath.UPath, ...]:
-        return tuple(
-            next(d for d in self.sorted_data_paths if d.name == "drift_maps").iterdir()
-        )
+        if utils.SpikeInterfaceKS25Data(self.id).is_pre_v0_99:
+            return tuple(
+                next(d for d in self.sorted_data_paths if d.name == "drift_maps").iterdir()
+            )
+        
+        return () # TODO: think about what to do, issue already open about making drift maps from scratch
 
     @utils.cached_property
     def ephys_sync_messages_path(self) -> upath.UPath:
