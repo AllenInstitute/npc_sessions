@@ -15,6 +15,8 @@ import uuid
 from collections.abc import Iterable, Iterator
 from typing import Any, Literal
 
+import aind_data_schema.core.session
+import aind_data_schema.models.modalities
 import cv2
 import h5py
 import hdmf
@@ -192,11 +194,9 @@ class DynamicRoutingSession:
 
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
-    experimenter: tuple[str, ...] | list[str] | None = None
     institution: str | None = (
         "Neural Circuits & Behavior | MindScope program | Allen Institute for Neural Dynamics"
     )
-    notes: str | None = None
 
     # --------------------------------------------------------------------------- #
 
@@ -344,6 +344,63 @@ class DynamicRoutingSession:
         if self.is_sync:
             return utils.get_aware_dt(self.sync_data.start_time)
         return utils.get_aware_dt(utils.get_stim_start_time(self.task_data))
+
+    @property
+    def notes(self) -> str | None:
+        notes = ""
+        if self.info:
+            notes += ";".join([self.info.notes] + self.info.issues)
+        return notes or None
+    
+    @property
+    def exp_path(self) -> upath.UPath | None:
+        """Dir with record of experiment workflow, environment lock file, logs
+        etc."""
+        behavior_path = next((p.parent for p in self.raw_data_paths if p.parent.name == 'behavior'), None)
+        if behavior_path is None:
+            return None
+        exp_path = next((p for p in behavior_path.glob('exp')), None)
+        return exp_path
+    
+    @property
+    def exp_log_path(self) -> upath.UPath | None:
+        if self.exp_path is None:
+            return None
+        if (log_path := self.exp_path / 'logs' / 'debug.log').exists():
+            return log_path
+        return None
+    
+    def get_experimenter_from_experiment_log(self) -> str | None:
+        """Returns lims user name, if found in the experiment log file. Otherwise,
+        None.
+        
+        >>> s = DynamicRoutingSession('DRpilot_662892_20230822')
+        >>> s.get_experimenter_from_experiment_log()
+        'hannah.cabasco'
+        """
+        if (log_path := self.exp_log_path) is None:
+            return None
+        text = log_path.read_text()
+        matches = re.findall(r"User\(\'(.+)\'\)", text)
+        if not matches:
+            return None
+        def _get_name(match: str) -> str:
+            if '.' in match:
+                return match.replace('.', ' ').title()
+            return {
+                'samg': 'Sam Gale',
+                'corbettb': 'Corbett Bennett',
+            }.get(match)
+        return _get_name(matches[-1]) # last user, in case it changed at the start of the session
+    
+    @property
+    def experimenter(self) -> list[str] | None:
+        with contextlib.suppress(FileNotFoundError, ValueError):
+            return [self.get_experimenter_from_experiment_log()]
+        if self.id.date.dt < datetime.date(2023, 8, 8):
+            # older DR/Templeton sessions, prior to Hannah C becoming 100% DR
+            return ["Jackie Kuyat"]
+        return None
 
     @property
     def session_description(self) -> str:
@@ -2523,6 +2580,74 @@ class DynamicRoutingSession:
             **self.kwargs,
         )
 
+    @utils.cached_property
+    def _aind_reward_delivery(self) -> aind_data_schema.core.session.RewardDeliveryConfig:
+        return aind_data_schema.core.session.RewardDeliveryConfig(
+            reward_solution='Water',
+            reward_spouts=[
+                aind_data_schema.core.session.RewardSpoutConfig(
+                    side='Center',
+                    starting_position=None,
+                    variable_position=False,
+                )
+            ]
+        )
+        
+    @utils.cached_property
+    def _aind_data_streams(self) -> tuple[aind_data_schema.core.session.Stream, ...]:
+        data_streams = []
+        # sync, mvr cameras, ephys probes
+        if self.is_sync:
+            data_streams += aind_data_schema.core.session.Stream(
+                stream_start_time=self.sync_data.start_time,
+                stream_end_time=self.sync_data.stop_time,
+                daq_names=["sync"],
+            )
+        if self.is_video:
+            data_streams += aind_data_schema.core.session.Stream(
+                stream_start_time=self.session_start_time + datetime.timedelta(seconds=min(times.timestamps[0] for times in self._video_frame_times)),
+                stream_end_time=self.session_start_time + datetime.timedelta(seconds=max(times.timestamps[-1] for times in self._video_frame_times)),
+                camera_names=["front", "side", "eye"],
+            )
+        if self.is_ephys:
+            pxi_daq_name = next((timing.device.name for timing in self.ephys_timing_data if "PXI" in timing.device.name), None)
+            data_streams += aind_data_schema.core.session.Stream(
+                stream_start_time=self.session_start_time + datetime.timedelta(seconds=min(timing.start_time for timing in self.ephys_timing_data)),
+                stream_end_time=self.session_start_time + datetime.timedelta(seconds=max(timing.stop_time for timing in self.ephys_timing_data)),
+                daq_names=["OpenEphys"] + ([pxi_daq_name] if pxi_daq_name else []),
+            )
+        return tuple(data_streams)
+    
+    @utils.cached_property
+    def _aind_stimulus_epochs(self) -> tuple[aind_data_schema.core.session.StimulusEpoch, ...]:
+        aind_epochs = []
+        for nwb_epoch in self.epochs:
+            aind_epochs += aind_data_schema.core.session.StimulusEpoch(
+                # stimulus=,
+                stimulus_start_time=datetime.timedelta(seconds=nwb_epoch.start_time) + self.session_start_time,
+                stimulus_end_time=datetime.timedelta(seconds=nwb_epoch.stop_time) + self.session_start_time,
+            )
+        return tuple(aind_epochs)
+       
+    @utils.cached_property
+    def _aind_session_metadata(self) -> aind_data_schema.core.session:
+        return aind_data_schema.core.session.Session(
+            experimenter_full_name=self.experimenter or ["NSB Trainer"], # will overwrite NSB at point of upload
+            session_start_time=self.session_start_time,
+            session_end_time=self.sync_data.stop_time if self.is_sync else None,
+            session_type=self.session_description,
+            rig_id=self.rig,
+            subject_id=self.id.subject,
+            iacuc_protocol="2104",
+            # animal_weight_post=,
+            # animal_weight_prior=,
+            reward_delivery=self._aind_reward_delivery if self.is_task else None,
+            reward_consumed_total=(self.sam.rewardSize * len(self.sam.rewardTimes)) if self.is_task else None,
+            notes=self.notes,
+            data_streams=list(self._aind_stimulus_epochs),
+            stimulus_epochs=list(self._aind_stimulus_epochs),
+        )
+
 
 class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     @utils.cached_property
@@ -2560,8 +2685,11 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs | {"name": "surface_AP"})
 
-
+    
 if __name__ == "__main__":
+    s = DynamicRoutingSession("681532_2023-10-09")
+    m = s._aind_session_metadata
+    print(m)
     import doctest
 
     import dotenv
