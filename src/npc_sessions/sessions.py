@@ -384,7 +384,7 @@ class DynamicRoutingSession:
         matches = re.findall(r"User\(\'(.+)\'\)", text)
         if not matches:
             return None
-        def _get_name(match: str) -> str:
+        def _get_name(match: str) -> str | None:
             if '.' in match:
                 return match.replace('.', ' ').title()
             return {
