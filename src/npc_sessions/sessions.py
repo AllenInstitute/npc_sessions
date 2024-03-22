@@ -719,7 +719,7 @@ class DynamicRoutingSession:
             return cached
         trials = pynwb.epoch.TimeIntervals(
             name="trials",
-            description=self.intervals_descriptions[self._trials.__class__],
+            description=self.intervals_descriptions.get(self._trials.__class__, f"trials table for {self._trials.__class__.__name__}"),
         )
         for column in self._trials.to_add_trial_column():
             trials.add_column(**column)
