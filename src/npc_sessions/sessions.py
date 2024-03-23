@@ -2400,7 +2400,7 @@ class DynamicRoutingSession:
         video_timestamps = utils.get_video_frame_times(
             self.sync_path, video_path.parent
         )[video_path]
-        eye_tracking_table = utils.get_computed_ellipse_metrics_dataframe(self.id)
+        eye_tracking_table = utils.get_ellipse_session_dataframe_from_h5(self.id)
         return pynwb.TimeSeries(
             name="Ellipse eye tracking",
             data=eye_tracking_table.to_numpy(),
