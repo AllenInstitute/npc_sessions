@@ -404,7 +404,8 @@ class DynamicRoutingSession:
     @property
     def experimenter(self) -> list[str] | None:
         with contextlib.suppress(FileNotFoundError, ValueError):
-            return [self.get_experimenter_from_experiment_log()]
+            if (experimenter := self.get_experimenter_from_experiment_log()):
+                return [experimenter]
         if self.id.date.dt < datetime.date(2023, 8, 8):
             # older DR/Templeton sessions, prior to Hannah C becoming 100% DR
             return ["Jackie Kuyat"]
