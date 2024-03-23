@@ -44,11 +44,11 @@ class LuminanceTest(TaskControl):
         if key in self._hdf5:
             return ~np.isnan(self._hdf5[key][()])
         return None
-    
+
     @utils.cached_property
     def _len_all_trials(self) -> int:
         return len(self._hdf5["trialStartFrame"][()])
-    
+
     @utils.cached_property
     def _idx(self) -> npt.NDArray[np.int32]:
         """Used for extracting a subset of inds throughout all properties.
@@ -66,10 +66,9 @@ class LuminanceTest(TaskControl):
     def stop_time(self) -> npt.NDArray[np.float64]:
         """falling edge of vsync after stimulus end + inter-stim frames"""
         return utils.safe_index(
-                self._flip_times,
-                self._hdf5["trialStartFrame"][self._idx]
-                + self._hdf5["framesPerLevel"][()]
-            )
+            self._flip_times,
+            self._hdf5["trialStartFrame"][self._idx] + self._hdf5["framesPerLevel"][()],
+        )
 
     @utils.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
@@ -82,6 +81,7 @@ class LuminanceTest(TaskControl):
     @utils.cached_property
     def _len(self) -> int:
         return len(self._idx)
+
 
 if __name__ == "__main__":
     import doctest

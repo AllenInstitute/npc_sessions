@@ -9,7 +9,6 @@ import numpy.typing as npt
 import pandas as pd
 import upath
 import zarr
-from scipy import ndimage, stats
 
 # nice little trick from carter peene
 MODEL_FUNCTION_MAPPING = {
@@ -58,6 +57,7 @@ def h5_to_dataframe(h5_path: upath.UPath, key_name: str | None = None) -> pd.Dat
 
     return df_h5
 
+
 def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
     """
     >>> df_ellipse = get_ellipse_session_dataframe_from_h5('676909_2023-12-12')
@@ -65,7 +65,9 @@ def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
     512347
     """
     eye_s3_paths = npc_lims.get_dlc_eye_s3_paths(session)
-    ellipse_h5_path = tuple(path for path in eye_s3_paths if path.stem == "ellipses_processed")
+    ellipse_h5_path = tuple(
+        path for path in eye_s3_paths if path.stem == "ellipses_processed"
+    )
     if not ellipse_h5_path:
         raise FileNotFoundError(
             f"No ellipse h5 file found for {session}. Check dlc eye capsule"
@@ -78,8 +80,12 @@ def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
     for field_name in eye_tracking_fields:
         df_ellipse = h5_to_dataframe(ellipse_h5_path[0], key_name=field_name)
         new_col_name_map = {
-            col_name: f"{field_name}_{col_name}" for col_name in df_ellipse.columns if 'center' in col_name or 'width' in col_name 
-            or 'height' in col_name or 'phi' in col_name
+            col_name: f"{field_name}_{col_name}"
+            for col_name in df_ellipse.columns
+            if "center" in col_name
+            or "width" in col_name
+            or "height" in col_name
+            or "phi" in col_name
         }
         df_ellipse.rename(new_col_name_map, axis=1, inplace=True)
         eye_tracking_dfs.append(df_ellipse)
@@ -103,7 +109,11 @@ def get_dlc_session_model_dataframe_from_h5(
     512347
     """
     model_s3_paths = MODEL_FUNCTION_MAPPING[model_name](session)
-    h5_files = tuple(path for path in model_s3_paths if path.suffix == ".h5" and "ellipses" not in path.stem)
+    h5_files = tuple(
+        path
+        for path in model_s3_paths
+        if path.suffix == ".h5" and "ellipses" not in path.stem
+    )
 
     if not h5_files:
         raise FileNotFoundError(
@@ -136,7 +146,9 @@ def get_pose_series_from_dataframe(
     return pose_estimations_series
 
 
-def get_facemap_output_from_s3(session: str, video_type: str, key: str) -> zarr.Array: # currently only saving motSVD
+def get_facemap_output_from_s3(
+    session: str, video_type: str, key: str
+) -> zarr.Array:  # currently only saving motSVD
     """
     >>> behavior_motion_svd = get_facemap_output_from_s3('646318_2023-01-17', 'Behavior', 'motSVD')
     >>> behavior_motion_svd.shape

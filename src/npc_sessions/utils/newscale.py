@@ -156,9 +156,7 @@ def get_newscale_coordinates(
     for column in NEWSCALE_LOG_COLUMNS[2:8]:
         if column not in df.columns:
             continue
-        df = df.with_columns(
-            df.get_column(column).str.strip_chars().cast(pl.Float64)
-        )
+        df = df.with_columns(df.get_column(column).str.strip_chars().cast(pl.Float64))
     probes = manipulators.replace(
         {k: f"probe{v}" for k, v in SERIAL_NUM_TO_PROBE_LETTER.items()}
     ).alias("electrode_group")

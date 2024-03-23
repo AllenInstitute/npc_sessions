@@ -356,32 +356,39 @@ class DynamicRoutingSession:
     @property
     def exp_path(self) -> upath.UPath | None:
         """Dir with record of experiment workflow, environment lock file, logs
-        etc. - may not be a dedicated subfolder if contents were moved to behavior root"""
-        behavior_path = next((p.parent for p in self.raw_data_paths if p.parent.name == 'behavior'), None)
+        etc. - may not be a dedicated subfolder if contents were moved to behavior root
+        """
+        behavior_path = next(
+            (p.parent for p in self.raw_data_paths if p.parent.name == "behavior"), None
+        )
         if behavior_path is None:
             return None
-        exp_path = next(behavior_path.glob('exp'), None)
+        exp_path = next(behavior_path.glob("exp"), None)
         if exp_path:
             return exp_path
-        assert (behavior_path / 'pdm.lock').exists(), f"Could not verify that {behavior_path} contains contents of `exp` folder"
+        assert (
+            behavior_path / "pdm.lock"
+        ).exists(), (
+            f"Could not verify that {behavior_path} contains contents of `exp` folder"
+        )
         return behavior_path
 
     @property
     def exp_log_path(self) -> upath.UPath | None:
         """Debug log file from experiment.
-         
+
         - used to be in a subfolder: `behavior/exp/logs/debug.log`
-        - directories may be flattened too: `behavior/debug.log` 
+        - directories may be flattened too: `behavior/debug.log`
         """
         if self.exp_path is None:
             return None
-        log_path = next(self.exp_path.rglob('debug.log'), None)
+        log_path = next(self.exp_path.rglob("debug.log"), None)
         return log_path
 
     def get_experimenter_from_experiment_log(self) -> str | None:
         """Returns lims user name, if found in the experiment log file. Otherwise,
         None.
-        
+
         >>> s = DynamicRoutingSession('DRpilot_662892_20230822')
         >>> s.get_experimenter_from_experiment_log()
         'Hannah Cabasco'
@@ -392,19 +399,23 @@ class DynamicRoutingSession:
         matches = re.findall(r"User\(\'(.+)\'\)", text)
         if not matches:
             return None
+
         def _get_name(match: str) -> str | None:
-            if '.' in match:
-                return match.replace('.', ' ').title()
+            if "." in match:
+                return match.replace(".", " ").title()
             return {
-                'samg': 'Sam Gale',
-                'corbettb': 'Corbett Bennett',
+                "samg": "Sam Gale",
+                "corbettb": "Corbett Bennett",
             }.get(match)
-        return _get_name(matches[-1]) # last user, in case it changed at the start of the session
+
+        return _get_name(
+            matches[-1]
+        )  # last user, in case it changed at the start of the session
 
     @property
     def experimenter(self) -> list[str] | None:
         with contextlib.suppress(FileNotFoundError, ValueError):
-            if (experimenter := self.get_experimenter_from_experiment_log()):
+            if experimenter := self.get_experimenter_from_experiment_log():
                 return [experimenter]
         if self.id.date.dt < datetime.date(2023, 8, 8):
             # older DR/Templeton sessions, prior to Hannah C becoming 100% DR
@@ -728,7 +739,10 @@ class DynamicRoutingSession:
             return cached
         trials = pynwb.epoch.TimeIntervals(
             name="trials",
-            description=self.intervals_descriptions.get(self._trials.__class__, f"trials table for {self._trials.__class__.__name__}"),
+            description=self.intervals_descriptions.get(
+                self._trials.__class__,
+                f"trials table for {self._trials.__class__.__name__}",
+            ),
         )
         for column in self._trials.to_add_trial_column():
             trials.add_column(**column)
@@ -2590,16 +2604,18 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
-    def _aind_reward_delivery(self) -> aind_data_schema.core.session.RewardDeliveryConfig:
+    def _aind_reward_delivery(
+        self,
+    ) -> aind_data_schema.core.session.RewardDeliveryConfig:
         return aind_data_schema.core.session.RewardDeliveryConfig(
-            reward_solution='Water',
+            reward_solution="Water",
             reward_spouts=[
                 aind_data_schema.core.session.RewardSpoutConfig(
-                    side='Center',
+                    side="Center",
                     starting_position=None,
                     variable_position=False,
                 )
-            ]
+            ],
         )
 
     @utils.cached_property
@@ -2614,24 +2630,50 @@ class DynamicRoutingSession:
             )
         if self.is_video:
             data_streams += aind_data_schema.core.session.Stream(
-                stream_start_time=self.session_start_time + datetime.timedelta(seconds=min(times.timestamps[0] for times in self._video_frame_times)),
-                stream_end_time=self.session_start_time + datetime.timedelta(seconds=max(times.timestamps[-1] for times in self._video_frame_times)),
+                stream_start_time=self.session_start_time
+                + datetime.timedelta(
+                    seconds=min(
+                        times.timestamps[0] for times in self._video_frame_times
+                    )
+                ),
+                stream_end_time=self.session_start_time
+                + datetime.timedelta(
+                    seconds=max(
+                        times.timestamps[-1] for times in self._video_frame_times
+                    )
+                ),
                 camera_names=["front", "side", "eye"],
             )
         if self.is_ephys:
-            pxi_daq_name = next((timing.device.name for timing in self.ephys_timing_data if "PXI" in timing.device.name), None)
+            pxi_daq_name = next(
+                (
+                    timing.device.name
+                    for timing in self.ephys_timing_data
+                    if "PXI" in timing.device.name
+                ),
+                None,
+            )
             data_streams += aind_data_schema.core.session.Stream(
-                stream_start_time=self.session_start_time + datetime.timedelta(seconds=min(timing.start_time for timing in self.ephys_timing_data)),
-                stream_end_time=self.session_start_time + datetime.timedelta(seconds=max(timing.stop_time for timing in self.ephys_timing_data)),
+                stream_start_time=self.session_start_time
+                + datetime.timedelta(
+                    seconds=min(timing.start_time for timing in self.ephys_timing_data)
+                ),
+                stream_end_time=self.session_start_time
+                + datetime.timedelta(
+                    seconds=max(timing.stop_time for timing in self.ephys_timing_data)
+                ),
                 daq_names=["OpenEphys"] + ([pxi_daq_name] if pxi_daq_name else []),
             )
         return tuple(data_streams)
 
     @utils.cached_property
-    def _aind_stimulus_epochs(self) -> tuple[aind_data_schema.core.session.StimulusEpoch, ...]:
+    def _aind_stimulus_epochs(
+        self,
+    ) -> tuple[aind_data_schema.core.session.StimulusEpoch, ...]:
         aind_epochs = []
+
         def get_stimuli(nwb_epoch) -> aind_data_schema.core.session.AindModel:
-            if 'OptoTagging' in nwb_epoch.name:
+            if "OptoTagging" in nwb_epoch.name:
                 return aind_data_schema.core.models.OptoTagging(
                     name=nwb_epoch.name,
                     description=nwb_epoch.description,
@@ -2642,18 +2684,22 @@ class DynamicRoutingSession:
                 description=nwb_epoch.description,
                 file_path=nwb_epoch.file_path,
             )
+
         for nwb_epoch in self.epochs:
             aind_epochs += aind_data_schema.core.session.StimulusEpoch(
                 stimulus=get_stimuli(nwb_epoch),
-                stimulus_start_time=datetime.timedelta(seconds=nwb_epoch.start_time) + self.session_start_time,
-                stimulus_end_time=datetime.timedelta(seconds=nwb_epoch.stop_time) + self.session_start_time,
+                stimulus_start_time=datetime.timedelta(seconds=nwb_epoch.start_time)
+                + self.session_start_time,
+                stimulus_end_time=datetime.timedelta(seconds=nwb_epoch.stop_time)
+                + self.session_start_time,
             )
         return tuple(aind_epochs)
 
     @utils.cached_property
     def _aind_session_metadata(self) -> aind_data_schema.core.session:
         return aind_data_schema.core.session.Session(
-            experimenter_full_name=self.experimenter or ["NSB Trainer"], # will overwrite NSB at point of upload
+            experimenter_full_name=self.experimenter
+            or ["NSB Trainer"],  # will overwrite NSB at point of upload
             session_start_time=self.session_start_time,
             session_end_time=self.sync_data.stop_time if self.is_sync else None,
             session_type=self.session_description,
@@ -2663,7 +2709,11 @@ class DynamicRoutingSession:
             # TODO get, if possible: animal_weight_post=,
             # TODO get, if possible: animal_weight_prior=,
             reward_delivery=self._aind_reward_delivery if self.is_task else None,
-            reward_consumed_total=(self.sam.rewardSize * len(self.sam.rewardTimes)) if self.is_task else None,
+            reward_consumed_total=(
+                (self.sam.rewardSize * len(self.sam.rewardTimes))
+                if self.is_task
+                else None
+            ),
             notes=self.notes,
             data_streams=list(self._aind_stimulus_epochs),
             stimulus_epochs=list(self._aind_stimulus_epochs),
