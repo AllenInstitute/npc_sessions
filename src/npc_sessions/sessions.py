@@ -17,6 +17,7 @@ from typing import Any, Literal
 
 import aind_data_schema.core.session
 import aind_data_schema.models.modalities
+import aind_data_schema.models.stimulus
 import cv2
 import h5py
 import hdmf
@@ -351,7 +352,7 @@ class DynamicRoutingSession:
         if self.info:
             notes += ";".join([self.info.notes] + self.info.issues)
         return notes or None
-    
+
     @property
     def exp_path(self) -> upath.UPath | None:
         """Dir with record of experiment workflow, environment lock file, logs
@@ -361,7 +362,7 @@ class DynamicRoutingSession:
             return None
         exp_path = next((p for p in behavior_path.glob('exp')), None)
         return exp_path
-    
+
     @property
     def exp_log_path(self) -> upath.UPath | None:
         if self.exp_path is None:
@@ -369,7 +370,7 @@ class DynamicRoutingSession:
         if (log_path := self.exp_path / 'logs' / 'debug.log').exists():
             return log_path
         return None
-    
+
     def get_experimenter_from_experiment_log(self) -> str | None:
         """Returns lims user name, if found in the experiment log file. Otherwise,
         None.
@@ -392,7 +393,7 @@ class DynamicRoutingSession:
                 'corbettb': 'Corbett Bennett',
             }.get(match)
         return _get_name(matches[-1]) # last user, in case it changed at the start of the session
-    
+
     @property
     def experimenter(self) -> list[str] | None:
         with contextlib.suppress(FileNotFoundError, ValueError):
@@ -2592,7 +2593,7 @@ class DynamicRoutingSession:
                 )
             ]
         )
-        
+
     @utils.cached_property
     def _aind_data_streams(self) -> tuple[aind_data_schema.core.session.Stream, ...]:
         data_streams = []
@@ -2617,18 +2618,30 @@ class DynamicRoutingSession:
                 daq_names=["OpenEphys"] + ([pxi_daq_name] if pxi_daq_name else []),
             )
         return tuple(data_streams)
-    
+
     @utils.cached_property
     def _aind_stimulus_epochs(self) -> tuple[aind_data_schema.core.session.StimulusEpoch, ...]:
         aind_epochs = []
+        def get_stimuli(nwb_epoch) -> aind_data_schema.core.session.AindModel:
+            if 'OptoTagging' in nwb_epoch.name:
+                return aind_data_schema.core.models.OptoTagging(
+                    name=nwb_epoch.name,
+                    description=nwb_epoch.description,
+                    file_path=nwb_epoch.file_path,
+                )
+            return aind_data_schema.core.models.Stimulus(
+                name=nwb_epoch.name,
+                description=nwb_epoch.description,
+                file_path=nwb_epoch.file_path,
+            )
         for nwb_epoch in self.epochs:
             aind_epochs += aind_data_schema.core.session.StimulusEpoch(
-                # stimulus=,
+                stimulus=get_stimuli(nwb_epoch),
                 stimulus_start_time=datetime.timedelta(seconds=nwb_epoch.start_time) + self.session_start_time,
                 stimulus_end_time=datetime.timedelta(seconds=nwb_epoch.stop_time) + self.session_start_time,
             )
         return tuple(aind_epochs)
-       
+
     @utils.cached_property
     def _aind_session_metadata(self) -> aind_data_schema.core.session:
         return aind_data_schema.core.session.Session(
@@ -2639,8 +2652,8 @@ class DynamicRoutingSession:
             rig_id=self.rig,
             subject_id=self.id.subject,
             iacuc_protocol="2104",
-            # animal_weight_post=,
-            # animal_weight_prior=,
+            # TODO get, if possible: animal_weight_post=,
+            # TODO get, if possible: animal_weight_prior=,
             reward_delivery=self._aind_reward_delivery if self.is_task else None,
             reward_consumed_total=(self.sam.rewardSize * len(self.sam.rewardTimes)) if self.is_task else None,
             notes=self.notes,
@@ -2685,7 +2698,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs | {"name": "surface_AP"})
 
-    
+
 if __name__ == "__main__":
     s = DynamicRoutingSession("681532_2023-10-09")
     m = s._aind_session_metadata
