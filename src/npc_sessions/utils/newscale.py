@@ -150,18 +150,16 @@ def get_newscale_coordinates(
         df = df.collect()
 
     # serial numbers have an extra leading space
-    manipulators = df.get_column(NEWSCALE_LOG_COLUMNS[1]).map_elements(
-        lambda _: _.strip()
-    )
+    manipulators = df.get_column(NEWSCALE_LOG_COLUMNS[1]).str.strip_chars()
     df = df.with_columns(manipulators)
     # convert str floats to floats
     for column in NEWSCALE_LOG_COLUMNS[2:8]:
         if column not in df.columns:
             continue
         df = df.with_columns(
-            df.get_column(column).map_elements(lambda _: _.strip()).cast(pl.Float64)
+            df.get_column(column).str.strip_chars().cast(pl.Float64)
         )
-    probes = manipulators.map_dict(
+    probes = manipulators.replace(
         {k: f"probe{v}" for k, v in SERIAL_NUM_TO_PROBE_LETTER.items()}
     ).alias("electrode_group")
 
