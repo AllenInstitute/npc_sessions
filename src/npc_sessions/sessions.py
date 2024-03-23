@@ -384,7 +384,7 @@ class DynamicRoutingSession:
         
         >>> s = DynamicRoutingSession('DRpilot_662892_20230822')
         >>> s.get_experimenter_from_experiment_log()
-        'hannah.cabasco'
+        'Hannah Cabasco'
         """
         if (log_path := self.exp_log_path) is None:
             return None
