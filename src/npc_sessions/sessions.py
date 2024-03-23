@@ -356,20 +356,27 @@ class DynamicRoutingSession:
     @property
     def exp_path(self) -> upath.UPath | None:
         """Dir with record of experiment workflow, environment lock file, logs
-        etc."""
+        etc. - may not be a dedicated subfolder if contents were moved to behavior root"""
         behavior_path = next((p.parent for p in self.raw_data_paths if p.parent.name == 'behavior'), None)
         if behavior_path is None:
             return None
-        exp_path = next((p for p in behavior_path.glob('exp')), None)
-        return exp_path
+        exp_path = next(behavior_path.glob('exp'), None)
+        if exp_path:
+            return exp_path
+        assert (behavior_path / 'pdm.lock').exists(), f"Could not verify that {behavior_path} contains contents of `exp` folder"
+        return behavior_path
 
     @property
     def exp_log_path(self) -> upath.UPath | None:
+        """Debug log file from experiment.
+         
+        - used to be in a subfolder: `behavior/exp/logs/debug.log`
+        - directories may be flattened too: `behavior/debug.log` 
+        """
         if self.exp_path is None:
             return None
-        if (log_path := self.exp_path / 'logs' / 'debug.log').exists():
-            return log_path
-        return None
+        log_path = next(self.exp_path.rglob('debug.log'), None)
+        return log_path
 
     def get_experimenter_from_experiment_log(self) -> str | None:
         """Returns lims user name, if found in the experiment log file. Otherwise,
@@ -2700,9 +2707,6 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
 
 
 if __name__ == "__main__":
-    s = DynamicRoutingSession("681532_2023-10-09")
-    m = s._aind_session_metadata
-    print(m)
     import doctest
 
     import dotenv
