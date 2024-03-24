@@ -4,6 +4,7 @@ import npc_sessions.utils as utils
 from npc_sessions.trials.property_dict import PropertyDict
 from npc_sessions.trials.TaskControl import TaskControl
 from npc_sessions.trials.TaskControl.DynamicRouting1 import DynamicRouting1
+from npc_sessions.trials.TaskControl.LuminanceTest import LuminanceTest
 from npc_sessions.trials.TaskControl.OptoTagging import OptoTagging
 from npc_sessions.trials.TaskControl.RFMapping import AudRFMapping, VisRFMapping
 
@@ -35,6 +36,8 @@ def get_trials(
         elif "RFMapping" in stim_name:
             trials.append(AudRFMapping(stim, sync_path_or_data, **kwargs))
             trials.append(VisRFMapping(stim, sync_path_or_data, **kwargs))
+        elif "LuminanceTest" in stim_name:
+            trials.append(LuminanceTest(stim, sync_path_or_data, **kwargs))
         else:
             raise NotImplementedError(f"Stimulus file {stim_name} not supported.")
     return tuple(trials)
@@ -47,5 +50,6 @@ __all__ = [
     "AudRFMapping",
     "VisRFMapping",
     "DynamicRouting1",
+    "LuminanceTest",
     "get_trials",
 ]
