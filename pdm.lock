@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:2b4ddb673d61fa8b53fe116b9f8c6c59b6af1f0b258d1371f8293f9ea578ec5b"
+content_hash = "sha256:f9721abe54fa19df5e88063f84df221865b70624eeff2a11c584b372b52a01a8"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -1980,7 +1980,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.134"
+version = "0.1.135"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -1997,8 +1997,8 @@ dependencies = [
     "types-requests>=2.31.0.6",
 ]
 files = [
-    {file = "npc_lims-0.1.134-py3-none-any.whl", hash = "sha256:ad4cb67c6a8cde3c9ca1140953e4681599e8250353848ade0bd6d445f703a8d5"},
-    {file = "npc_lims-0.1.134.tar.gz", hash = "sha256:bfc8bc0db5d6436b3060b4fabb4d68479ce67f30ae0838a3cc9364cd38fb165b"},
+    {file = "npc_lims-0.1.135-py3-none-any.whl", hash = "sha256:9061e8058468527c70c6674be7599c9e5f5d333509057df08abc166679629a6c"},
+    {file = "npc_lims-0.1.135.tar.gz", hash = "sha256:28c60b21abd400b4c48431a34d0488a47812818e03bd596e1c4133e327f94910"},
 ]
 
 [[package]]
@@ -2083,13 +2083,13 @@ files = [
 
 [[package]]
 name = "npc-utils"
-version = "0.1.10"
+version = "0.1.11"
 requires_python = ">=3.9"
 summary = "Collection of MindScope Neuropixels packages, simplifying installation and keeping versions updated."
 dependencies = [
     "npc-ephys>=0.1.11",
     "npc-io>=0.1.26",
-    "npc-lims>=0.1.133",
+    "npc-lims>=0.1.135",
     "npc-mvr>=0.1.2",
     "npc-samstim>=0.1.2",
     "npc-session>=0.1.34",
@@ -2097,8 +2097,8 @@ dependencies = [
     "npc-sync>=0.1.9",
 ]
 files = [
-    {file = "npc-utils-0.1.10.tar.gz", hash = "sha256:77518f9154f7ecf640349f11474cf6a0c85798e77e7dc5f7e34745c5c4f099ff"},
-    {file = "npc_utils-0.1.10-py3-none-any.whl", hash = "sha256:7b3418a40dca9a4cb6b00daf97d31965df7bdea475c5b1caf62f1d2a32bf5120"},
+    {file = "npc-utils-0.1.11.tar.gz", hash = "sha256:1528f4ef3c5f018b1e6ad27e04bc2a9df6fbbbc9069d81017d4f60d417f2d35c"},
+    {file = "npc_utils-0.1.11-py3-none-any.whl", hash = "sha256:d820cc431e4a4af84f29b62e93e66df98ab6b7fc97887337db98c295500c9367"},
 ]
 
 [[package]]

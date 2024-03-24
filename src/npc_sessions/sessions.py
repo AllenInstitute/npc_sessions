@@ -881,7 +881,7 @@ class DynamicRoutingSession:
                     description=self.intervals_descriptions.get(
                         v.__class__,
                         f"trials table for {v.__class__.__name__}",
-                    )
+                    ),
                 )
                 trial_idx_offset = 0
                 for column in v.to_add_trial_column():
