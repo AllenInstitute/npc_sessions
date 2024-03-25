@@ -75,8 +75,9 @@ class LuminanceTest(TaskControl):
         return np.arange(self._len_all_trials)[self._idx]
 
     @utils.cached_property
-    def trial_level(self) -> npt.NDArray[np.int32]:
-        return self._hdf5["trialLevel"][self._idx]
+    def level(self) -> npt.NDArray[np.int32]:
+        # round because some values end up as -0.40000000000000013
+        return np.round(self._hdf5["trialLevel"][self._idx], 3)
 
     @utils.cached_property
     def _len(self) -> int:
