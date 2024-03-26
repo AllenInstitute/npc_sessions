@@ -623,12 +623,17 @@ class DynamicRoutingSession:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         modules.append(self._all_licks[0])
         modules.append(self._running_speed)
-        # modules.append(self._dlc_eye_output)
-        # modules.append(self._dlc_side_output)
-        # modules.append(self._dlc_face_output)
-        # modules.append(self._facemap_behavior_output)
-        # modules.append(self._facemap_face_output)
-
+        if self.is_video:
+            if not self.info or self.info.is_dlc_eye:
+                modules.append(self._dlc_eye)
+                modules.append(self._eye_tracking)
+            if not self.info or self.info.is_dlc_side:
+                modules.append(self._dlc_side)
+            if not self.info or self.info.is_dlc_face:
+                modules.append(self._dlc_front)
+            if not self.info or self.info.is_facemap:
+                modules.append(self._facemap_side)
+                modules.append(self._facemap_front)
         return tuple(modules)
 
     @utils.cached_property
@@ -2447,7 +2452,7 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
-    def _facemap_face_output(self) -> pynwb.TimeSeries:
+    def _facemap_front(self) -> pynwb.TimeSeries:
         video_path = npc_lims.get_behavior_video_path_from_s3(self.id)
         video_timestamps = utils.get_video_frame_times(
             self.sync_path, video_path.parent
@@ -2460,11 +2465,11 @@ class DynamicRoutingSession:
             data=face_motion_svd,
             unit="pixels",
             timestamps=video_timestamps,
-            description="Motion SVD for face video. Shape is number of frames by number of components (500)",
+            description="Motion SVD for front video. Shape is number of frames by number of components (500)",
         )
 
     @utils.cached_property
-    def _facemap_behavior_output(self) -> pynwb.TimeSeries:
+    def _facemap_side(self) -> pynwb.TimeSeries:
         video_path = npc_lims.get_behavior_video_path_from_s3(self.id)
         video_timestamps = utils.get_video_frame_times(
             self.sync_path, video_path.parent
@@ -2479,11 +2484,11 @@ class DynamicRoutingSession:
             data=behavior_motion_svd,
             unit="pixels",
             timestamps=video_timestamps,
-            description="Motion SVD for behavior video. Shape is number of frames by number of components (500)",
+            description="Motion SVD for side video. Shape is number of frames by number of components (500)",
         )
 
     @utils.cached_property
-    def _dlc_eye_output(self) -> ndx_pose.pose.PoseEstimation:
+    def _dlc_eye(self) -> ndx_pose.pose.PoseEstimation:
         df_dlc_eye = utils.get_dlc_session_model_dataframe_from_h5(
             self.id, model_name="dlc_eye"
         )
@@ -2505,7 +2510,7 @@ class DynamicRoutingSession:
         return pose_estimation_dlc_eye
 
     @utils.cached_property
-    def _dlc_side_output(self) -> ndx_pose.pose.PoseEstimation:
+    def _dlc_side(self) -> ndx_pose.pose.PoseEstimation:
         df_dlc_side = utils.get_dlc_session_model_dataframe_from_h5(
             self.id, model_name="dlc_side"
         )
@@ -2527,9 +2532,9 @@ class DynamicRoutingSession:
         return pose_estimation_dlc_side
 
     @utils.cached_property
-    def _dlc_face_output(self) -> ndx_pose.pose.PoseEstimation:
+    def _dlc_front(self) -> ndx_pose.pose.PoseEstimation:
         df_dlc_face = utils.get_dlc_session_model_dataframe_from_h5(
-            self.id, model_name="dlc_face"
+            self.id, model_name="dlc_front"
         )
         video_path = npc_lims.get_face_video_path_from_s3(self.id)
         video_timestamps = utils.get_video_frame_times(
