@@ -628,7 +628,7 @@ class DynamicRoutingSession:
         modules.append(self._all_licks[0])
         modules.append(self._running_speed)
         if self.is_video:
-            if not self.info and self.info.is_dlc_eye:
+            if self.info and self.info.is_dlc_eye:
                 modules.append(self._eye_tracking)
             modules.extend(self._dlc)
             modules.extend(self._facemap)
