@@ -133,7 +133,7 @@ def get_pose_series_from_dataframe(
         data = xy_positions.to_numpy()
         pose_estimation_series = ndx_pose.pose.PoseEstimationSeries(
             name=keypoint,
-            description=f"{keypoint} keypoint position in each frame", # TODO use a lookup table of abbreviation: description
+            description=f"{keypoint} keypoint position in each frame",  # TODO use a lookup table of abbreviation: description
             data=data[:, :2],
             unit="pixels",
             reference_frame="(0,0) corresponds to the top left corner of the video frame",

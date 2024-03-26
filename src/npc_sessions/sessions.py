@@ -48,6 +48,7 @@ NWB_CAMERA_NAMES = {
     "behavior": "side",
 }
 
+
 @typing.overload
 def get_sessions(
     id_or_ids: None = None,
@@ -2414,14 +2415,16 @@ class DynamicRoutingSession:
     def _eye_tracking(self) -> pynwb.core.DynamicTable:
         if not self.is_video:
             raise ValueError(f"{self.id} is not a session with video")
-        timestamps = next(t for t in self._video_frame_times if "eye" in t.name).timestamps
+        timestamps = next(
+            t for t in self._video_frame_times if "eye" in t.name
+        ).timestamps
         df = utils.get_ellipse_session_dataframe_from_h5(self.id)
-        df['timestamps'] = timestamps
+        df["timestamps"] = timestamps
         name = "eye_tracking"
         table_description = (
             "Ellipses fit to three features in each frame of the eye video: "
             "pupil: perimeter of the pupil | eye: inner perimeter of the eyelid | cr: corneal reflection, a bright spot near the center of the eye which is always smaller than the pupil"
-            )
+        )
         column_descriptions = {}
         for feature in ("cr", "eye", "pupil"):
             feature_name = "corneal reflection" if feature == "cr" else feature
@@ -2436,7 +2439,7 @@ class DynamicRoutingSession:
                 is_bad_frame=f"[bool] frames which should not be used due to low confidence in {feature_name} ellipse (typically caused by blinking, grooming, poor lighting)",
             ).items():
                 column_descriptions[f"{feature}_{column_suffix}"] = description
-            
+
         return pynwb.core.DynamicTable.from_dataframe(
             name=name,
             df=df,
@@ -2457,10 +2460,14 @@ class DynamicRoutingSession:
             if camera_name == "eye":
                 continue
             nwb_camera_name = NWB_CAMERA_NAMES[camera_name]
-            timestamps = next(t for t in self._video_frame_times if t.name == nwb_camera_name).timestamps
+            timestamps = next(
+                t for t in self._video_frame_times if t.name == nwb_camera_name
+            ).timestamps
             assert len(timestamps) == utils.get_total_frames_in_video(video_path)
             try:
-                face_motion_svd = utils.get_facemap_output_from_s3(self.id, camera_to_facemap_name[camera_name], "motSVD")
+                face_motion_svd = utils.get_facemap_output_from_s3(
+                    self.id, camera_to_facemap_name[camera_name], "motSVD"
+                )
             except FileNotFoundError:
                 logger.warning(f"{camera_name} DLC has not been run for {self.id}")
                 continue
@@ -2474,7 +2481,7 @@ class DynamicRoutingSession:
                 )
             )
         return tuple(facemap_series)
-    
+
     @utils.cached_property
     def _dlc(self) -> tuple[ndx_pose.pose.PoseEstimation, ...]:
         if not self.is_video:
@@ -2490,12 +2497,15 @@ class DynamicRoutingSession:
             nwb_camera_name = NWB_CAMERA_NAMES[camera_name]
             try:
                 df = utils.get_dlc_session_model_dataframe_from_h5(
-                    self.id, model_name=camera_to_dlc_model[camera_name],
+                    self.id,
+                    model_name=camera_to_dlc_model[camera_name],
                 )
             except FileNotFoundError:
                 logger.warning(f"{camera_name} DLC has not been run for {self.id}")
                 continue
-            timestamps = next(t for t in self._video_frame_times if t.name == nwb_camera_name).timestamps
+            timestamps = next(
+                t for t in self._video_frame_times if t.name == nwb_camera_name
+            ).timestamps
             assert len(timestamps) == utils.get_total_frames_in_video(video_path)
             pose_estimation_series = utils.get_pose_series_from_dataframe(
                 self.id, df, timestamps
