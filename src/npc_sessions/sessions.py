@@ -2394,7 +2394,6 @@ class DynamicRoutingSession:
     def _video_frame_times(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        # currently doesn't require opening videos
         path_to_timestamps = utils.get_video_frame_times(
             self.sync_data, *self.video_paths
         )
@@ -2413,24 +2412,38 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
-    def _ellipse_eye_tracking(self) -> pynwb.TimeSeries:
-        video_path = npc_lims.get_eye_video_path_from_s3(self.id)
-        video_timestamps = utils.get_video_frame_times(
-            self.sync_path, video_path.parent
-        )[video_path]
-        eye_tracking_table = utils.get_ellipse_session_dataframe_from_h5(self.id)
-        return pynwb.TimeSeries(
-            name="Ellipse eye tracking",
-            data=eye_tracking_table.to_numpy(),
-            unit="pixels",
-            timestamps=video_timestamps,
-            # TODO: find better way to specify columns in timeseries array
-            description="Ellipse eye tracking fits and derived area metrics. Features in order: cr_area, eye_area, pupil_area, \
-            likely_blink, pupil_area_raw, \
-            cr_area_raw, eye_area_raw, cr_center_x, cr_center_y, cr_width, \
-            cr_height, cr_phi, eye_center_x, eye_center_y, eye_width, \
-            eye_height, eye_phi, pupil_center_x, pupil_center_y, \
-            pupil_width, pupil_height, pupil_phi",
+    def _eye_tracking(self) -> pynwb.core.DynamicTable:
+        if not self.is_video:
+            raise ValueError(f"{self.id} is not a session with video")
+        timestamps = next(t for t in self._video_frame_times if "eye" in t.name).timestamps
+        df = utils.get_ellipse_session_dataframe_from_h5(self.id)
+        df['timestamps'] = timestamps
+        name = "eye_tracking"
+        table_description = (
+            "Ellipses fit to three features in each frame of the eye video: "
+            "pupil: perimeter of the pupil | eye: inner perimeter of the eyelid | cr: corneal reflection, a bright spot near the center of the eye which is always smaller than the pupil"
+            )
+        column_descriptions = {}
+        for feature in ("cr", "eye", "pupil"):
+            feature_name = "corneal reflection" if feature == "cr" else feature
+            for column_suffix, description in dict(
+                center_x=f"center of {feature_name} ellipse in pixels, with (0, 0) at top-left of frame",
+                center_y=f"center of {feature_name} ellipse in pixels, with (0, 0) at top-left of frame",
+                area=f"area of {feature_name} ellipse in pixels^2",
+                width=f"length of semi-major axis of {feature_name} ellipse in pixels",
+                height=f"length of semi-minor axis of {feature_name} ellipse in pixels",
+                phi=f"counterclockwise rotation of major-axis of {feature_name} ellipse, relative to horizontal-axis of video, in radians",
+                average_confidece=f"mean confidence [0-1] for the up-to-12 points from DLC used to fit {feature_name} ellipse",
+                is_bad_frame=f"[bool] frames which should not be used due to low confidence in {feature_name} ellipse (typically caused by blinking, grooming, poor lighting)",
+            ).items():
+                column_descriptions[f"{feature}_{column_suffix}"] = description
+            
+        return pynwb.core.DynamicTable.from_dataframe(
+            name=name,
+            df=df,
+            columns=None,
+            table_description=table_description,
+            column_descriptions=column_descriptions,
         )
 
     @utils.cached_property
