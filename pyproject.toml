@@ -32,7 +32,7 @@ dependencies = [
     "hdmf-zarr>=0.5.0",
     "traitlets<=5.9.0",
     "hdmf>=3.9.0",
-    "npc-utils>=0.1.11",
+    "npc-utils>=0.1.12",
     "ndx-pose>=0.1.1",
     "tables>=3.9.2",
     "aind-data-schema>=0.31.3",
@@ -63,9 +63,7 @@ write_notebooks = "npc_sessions.scripts.write_notebooks:main"
 write_cache = "npc_sessions.scripts.write_sessions_to_cache:main"
 
 [tool.pdm]
-plugins = [
-    "pdm-bump",
-]
+plugins = ["pdm-bump"]
 
 [tool.pdm.dev-dependencies]
 dev = [
@@ -84,92 +82,46 @@ test = "pytest --cov --cov-report=xml"
 mypy = "mypy src --install-types --non-interactive"
 
 [tool.pdm.scripts.prebuild]
-composite = [
-    "mypy",
-    "test",
-    "black",
-    "ruff",
-]
+composite = ["mypy", "test", "black", "ruff"]
 
 [tool.pdm.scripts.dryrun]
-composite = [
-    "prebuild",
-    "pdm publish --repository testpypi",
-]
+composite = ["prebuild", "pdm publish --repository testpypi"]
 
 [tool.pdm.scripts.bumpver]
-composite = [
-    "pdm self add pdm-bump",
-    "pdm bump micro",
-]
+composite = ["pdm self add pdm-bump", "pdm bump micro"]
 
 [tool.pdm.scripts.tag]
-composite = [
-    "pdm self add pdm-bump",
-    "pdm bump tag",
-]
+composite = ["pdm self add pdm-bump", "pdm bump tag"]
 
 [tool.pdm.scripts.pub]
-composite = [
-    "prebuild",
-    "bumpver",
-    "pdm publish",
-]
+composite = ["prebuild", "bumpver", "pdm publish"]
 
 [tool.setuptools.packages.find]
-where = [
-    "src",
-]
+where = ["src"]
 
 [tool.setuptools.package-data]
-npc_sessions = [
-    "py.typed",
-    "notebooks/*.ipynb",
-]
+npc_sessions = ["py.typed", "notebooks/*.ipynb"]
 
 [tool.ruff]
 fix = true
 ignore-init-module-imports = true
-select = [
-    "ANN",
-    "B",
-    "C",
-    "E",
-    "F",
-    "I",
-    "RUF100",
-    "N",
-    "UP",
-    "W",
-    "YTT",
-]
-extend-exclude = [
-    "tests",
-]
-src = [
-    "src",
-    "tests",
-]
+select = ["ANN", "B", "C", "E", "F", "I", "RUF100", "N", "UP", "W", "YTT"]
+extend-exclude = ["tests"]
+src = ["src", "tests"]
 target-version = "py39"
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
 
 [tool.black]
-target-version = [
-    "py39",
-]
+target-version = ["py39"]
 
 [tool.coverage.paths]
-source = [
-    "src",
-]
+source = ["src"]
 
 [tool.coverage.run]
 branch = true
-source = [
-    "src",
-]
+source = ["src"]
 
 [tool.coverage.report]
 skip_covered = true
@@ -200,10 +152,7 @@ doctest_optionflags = [
     "IGNORE_EXCEPTION_DETAIL",
     "ELLIPSIS",
 ]
-testpaths = [
-    "src",
-    "tests",
-]
+testpaths = ["src", "tests"]
 
 [tool.mypy]
 check_untyped_defs = false
@@ -217,14 +166,8 @@ no_implicit_optional = true
 show_error_codes = true
 ignore_missing_imports = true
 implicit_reexport = false
-exclude = [
-    "src/npc_sessions/plots",
-    "src/npc_sessions/scripts",
-]
+exclude = ["src/npc_sessions/plots", "src/npc_sessions/scripts"]
 
 [build-system]
-requires = [
-    "setuptools>=61",
-    "wheel",
-]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
