@@ -42,7 +42,11 @@ import npc_sessions.utils as utils
 logger = logging.getLogger(__name__)
 
 EXCLUDED_PATH_COMPONENTS = ("DynamicRouting1_670248_20230802_120703",)
-
+NWB_CAMERA_NAMES = {
+    "eye": "eye",
+    "face": "front",
+    "behavior": "side",
+}
 
 @typing.overload
 def get_sessions(
@@ -624,16 +628,10 @@ class DynamicRoutingSession:
         modules.append(self._all_licks[0])
         modules.append(self._running_speed)
         if self.is_video:
-            if not self.info or self.info.is_dlc_eye:
-                modules.append(self._dlc_eye)
+            if not self.info and self.info.is_dlc_eye:
                 modules.append(self._eye_tracking)
-            if not self.info or self.info.is_dlc_side:
-                modules.append(self._dlc_side)
-            if not self.info or self.info.is_dlc_face:
-                modules.append(self._dlc_front)
-            if not self.info or self.info.is_facemap:
-                modules.append(self._facemap_side)
-                modules.append(self._facemap_front)
+            modules.extend(self._dlc)
+            modules.extend(self._facemap)
         return tuple(modules)
 
     @utils.cached_property
@@ -2402,15 +2400,11 @@ class DynamicRoutingSession:
         path_to_timestamps = utils.get_video_frame_times(
             self.sync_data, *self.video_paths
         )
-        nwb_names = {
-            "eye": "eye",
-            "face": "front",
-            "behavior": "side",
-        }
+
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=f"{nwb_names[utils.get_camera_name(path.stem)]}_camera",
+                name=f"{NWB_CAMERA_NAMES[utils.get_camera_name(path.stem)]}_camera",
                 description=f"start time of each frame exposure for {path.stem}",
             )
             for path, timestamps in path_to_timestamps.items()
@@ -2452,106 +2446,70 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
-    def _facemap_front(self) -> pynwb.TimeSeries:
-        video_path = npc_lims.get_behavior_video_path_from_s3(self.id)
-        video_timestamps = utils.get_video_frame_times(
-            self.sync_path, video_path.parent
-        )[video_path]
-
-        face_motion_svd = utils.get_facemap_output_from_s3(self.id, "Face", "motSVD")
-
-        return pynwb.TimeSeries(
-            name="Facemap Face Motion SVD Output",
-            data=face_motion_svd,
-            unit="pixels",
-            timestamps=video_timestamps,
-            description="Motion SVD for front video. Shape is number of frames by number of components (500)",
-        )
-
+    def _facemap(self) -> tuple[pynwb.TimeSeries, ...]:
+        camera_to_facemap_name = {
+            "face": "Face",
+            "behavior": "Behavior",
+        }
+        facemap_series = []
+        for video_path in self.video_paths:
+            camera_name = utils.get_camera_name(video_path.name)
+            if camera_name == "eye":
+                continue
+            nwb_camera_name = NWB_CAMERA_NAMES[camera_name]
+            timestamps = next(t for t in self._video_frame_times if t.name == nwb_camera_name).timestamps
+            assert len(timestamps) == utils.get_total_frames_in_video(video_path)
+            try:
+                face_motion_svd = utils.get_facemap_output_from_s3(self.id, camera_to_facemap_name[camera_name], "motSVD")
+            except FileNotFoundError:
+                logger.warning(f"{camera_name} DLC has not been run for {self.id}")
+                continue
+            facemap_series.append(
+                pynwb.TimeSeries(
+                    name=f"facemap_{nwb_camera_name}",
+                    data=face_motion_svd,
+                    unit="pixels",
+                    timestamps=timestamps,
+                    description=f"Motion SVD for {nwb_camera_name} camera video. Shape is number of frames by number of components ({face_motion_svd.shape[1]})",
+                )
+            )
+        return tuple(facemap_series)
+    
     @utils.cached_property
-    def _facemap_side(self) -> pynwb.TimeSeries:
-        video_path = npc_lims.get_behavior_video_path_from_s3(self.id)
-        video_timestamps = utils.get_video_frame_times(
-            self.sync_path, video_path.parent
-        )[video_path]
-
-        behavior_motion_svd = utils.get_facemap_output_from_s3(
-            self.id, "Behavior", "motSVD"
-        )
-
-        return pynwb.TimeSeries(
-            name="Facemap Behavior Motion SVD Output",
-            data=behavior_motion_svd,
-            unit="pixels",
-            timestamps=video_timestamps,
-            description="Motion SVD for side video. Shape is number of frames by number of components (500)",
-        )
-
-    @utils.cached_property
-    def _dlc_eye(self) -> ndx_pose.pose.PoseEstimation:
-        df_dlc_eye = utils.get_dlc_session_model_dataframe_from_h5(
-            self.id, model_name="dlc_eye"
-        )
-        video_path = npc_lims.get_eye_video_path_from_s3(self.id)
-        video_timestamps = utils.get_video_frame_times(
-            self.sync_path, video_path.parent
-        )[video_path]
-
-        pose_estimation_series = utils.get_pose_series_from_dataframe(
-            self.id, df_dlc_eye, video_timestamps
-        )
-        pose_estimation_dlc_eye = ndx_pose.pose.PoseEstimation(
-            pose_estimation_series=pose_estimation_series,
-            description="Deeplab cut run on eye video.",
-            original_videos=[video_path],
-            source_software="DeepLabCut",
-        )
-
-        return pose_estimation_dlc_eye
-
-    @utils.cached_property
-    def _dlc_side(self) -> ndx_pose.pose.PoseEstimation:
-        df_dlc_side = utils.get_dlc_session_model_dataframe_from_h5(
-            self.id, model_name="dlc_side"
-        )
-        video_path = npc_lims.get_behavior_video_path_from_s3(self.id)
-        video_timestamps = utils.get_video_frame_times(
-            self.sync_path, video_path.parent
-        )[video_path]
-
-        pose_estimation_series = utils.get_pose_series_from_dataframe(
-            self.id, df_dlc_side, video_timestamps
-        )
-        pose_estimation_dlc_side = ndx_pose.pose.PoseEstimation(
-            pose_estimation_series=pose_estimation_series,
-            description="Deeplab cut run on behavior side video.",
-            original_videos=[video_path],
-            source_software="DeepLabCut",
-        )
-
-        return pose_estimation_dlc_side
-
-    @utils.cached_property
-    def _dlc_front(self) -> ndx_pose.pose.PoseEstimation:
-        df_dlc_face = utils.get_dlc_session_model_dataframe_from_h5(
-            self.id, model_name="dlc_front"
-        )
-        video_path = npc_lims.get_face_video_path_from_s3(self.id)
-        video_timestamps = utils.get_video_frame_times(
-            self.sync_path, video_path.parent
-        )[video_path]
-
-        pose_estimation_series = utils.get_pose_series_from_dataframe(
-            self.id, df_dlc_face, video_timestamps
-        )
-        pose_estimation_dlc_face = ndx_pose.pose.PoseEstimation(
-            pose_estimation_series=pose_estimation_series,
-            description="Deeplab cut run on face video.",
-            original_videos=[video_path],
-            source_software="DeepLabCut",
-        )
-
-        return pose_estimation_dlc_face
+    def _dlc(self) -> tuple[ndx_pose.pose.PoseEstimation, ...]:
+        if not self.is_video:
+            return ()
+        camera_to_dlc_model = {
+            "eye": "dlc_eye",
+            "face": "dlc_face",
+            "behavior": "dlc_side",
+        }
+        pose_estimations = []
+        for video_path in self.video_paths:
+            camera_name = utils.get_camera_name(video_path.name)
+            nwb_camera_name = NWB_CAMERA_NAMES[camera_name]
+            try:
+                df = utils.get_dlc_session_model_dataframe_from_h5(
+                    self.id, model_name=camera_to_dlc_model[camera_name],
+                )
+            except FileNotFoundError:
+                logger.warning(f"{camera_name} DLC has not been run for {self.id}")
+                continue
+            timestamps = next(t for t in self._video_frame_times if t.name == nwb_camera_name).timestamps
+            assert len(timestamps) == utils.get_total_frames_in_video(video_path)
+            pose_estimation_series = utils.get_pose_series_from_dataframe(
+                self.id, df, timestamps
+            )
+            pose_estimations.append(
+                ndx_pose.pose.PoseEstimation(
+                    name=f"dlc_{nwb_camera_name}",
+                    pose_estimation_series=pose_estimation_series,
+                    description=f"DeepLabCut analysis of {nwb_camera_name} camera video.",
+                    original_videos=[video_path.as_posix()],
+                    source_software="DeepLabCut",
+                )
+            )
+        return tuple(pose_estimations)
 
     @utils.cached_property
     def _rewards(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:

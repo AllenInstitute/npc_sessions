@@ -132,14 +132,14 @@ def get_pose_series_from_dataframe(
     for keypoint, xy_positions in df.groupby(level="bodyparts", axis=1, sort=False):
         data = xy_positions.to_numpy()
         pose_estimation_series = ndx_pose.pose.PoseEstimationSeries(
-            name=f"{session}_{keypoint}",
-            description=f"Keypoint {keypoint} from session {session}.",
+            name=keypoint,
+            description=f"{keypoint} keypoint position in each frame", # TODO use a lookup table of abbreviation: description
             data=data[:, :2],
             unit="pixels",
-            reference_frame="(0,0) corresponds to the bottom left corner of the video.",
+            reference_frame="(0,0) corresponds to the top left corner of the video frame",
             timestamps=video_timestamps,
             confidence=data[:, 2],
-            confidence_definition="Softmax output of the deep neural network.",
+            confidence_definition="Softmax output of the deep neural network",
         )
         pose_estimations_series.append(pose_estimation_series)
 
