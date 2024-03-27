@@ -435,6 +435,14 @@ class DynamicRoutingSession:
         opto = ", with optogenetic inactivation during task" if self.is_opto else ""
         video = ", with video recording of behavior" if self.is_video else ""
         sync = ", without precise timing information" if not self.is_sync else ""
+        if not self.is_task:
+            description = "session"
+            if self.info and (e := self.info.experiment_day) is not None:
+                description += f" (day {e})"
+            description += opto
+            description += video
+            description += sync
+            return description
         if not self.is_ephys:
             description = "training session with behavioral task data"
             if self.info and (b := self.info.behavior_day) is not None:
@@ -474,6 +482,8 @@ class DynamicRoutingSession:
             desc = v
         elif self.is_templeton:
             desc = "sensory discrimination task experiment with task-irrelevant stimuli"
+        elif self.epoch_tags == ['LuminanceTest']:
+            desc = "experiment with varying luminance levels of visual stimulus display for assessing pupil size"
         else:
             desc = "visual-auditory task-switching behavior experiment"
         assert (
@@ -1646,6 +1656,7 @@ class DynamicRoutingSession:
         metadata = self._subject_aind_metadata
         assert metadata["subject_id"] == self.id.subject
         dob = utils.get_aware_dt(metadata["date_of_birth"])
+        
         return pynwb.file.Subject(
             subject_id=metadata["subject_id"],
             species="Mus musculus",
@@ -1653,7 +1664,7 @@ class DynamicRoutingSession:
             date_of_birth=dob,
             genotype=metadata["genotype"],
             description=None,
-            strain=metadata["background_strain"] or metadata["breeding_group"],
+            strain=metadata["background_strain"] or metadata.get("breeding_group") or metadata.get("breeding_info", {}).get("breeding_group", ""),
             age=f"P{(self.session_start_time - dob).days}D",
         )
 
