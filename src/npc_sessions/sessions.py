@@ -43,9 +43,9 @@ logger = logging.getLogger(__name__)
 
 EXCLUDED_PATH_COMPONENTS = ("DynamicRouting1_670248_20230802_120703",)
 NWB_CAMERA_NAMES = {
-    "eye": "eye",
-    "face": "front",
-    "behavior": "side",
+    "eye": "eye_camera",
+    "face": "front_camera",
+    "behavior": "side_camera",
 }
 
 
@@ -2411,7 +2411,7 @@ class DynamicRoutingSession:
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=f"{NWB_CAMERA_NAMES[utils.get_camera_name(path.stem)]}_camera",
+                name=NWB_CAMERA_NAMES[utils.get_camera_name(path.stem)],
                 description=f"start time of each frame exposure for {path.stem}",
             )
             for path, timestamps in path_to_timestamps.items()
@@ -2483,7 +2483,7 @@ class DynamicRoutingSession:
                     data=face_motion_svd,
                     unit="pixels",
                     timestamps=timestamps,
-                    description=f"Motion SVD for {nwb_camera_name} camera video. Shape is number of frames by number of components ({face_motion_svd.shape[1]})",
+                    description=f"motion SVD for video from {nwb_camera_name}. Shape is number of frames by number of components ({face_motion_svd.shape[1]})",
                 )
             )
         return tuple(facemap_series)
@@ -2520,7 +2520,7 @@ class DynamicRoutingSession:
                 ndx_pose.pose.PoseEstimation(
                     name=f"dlc_{nwb_camera_name}",
                     pose_estimation_series=pose_estimation_series,
-                    description=f"DeepLabCut analysis of {nwb_camera_name} camera video.",
+                    description=f"DeepLabCut analysis of video from {nwb_camera_name}.",
                     original_videos=[video_path.as_posix()],
                     source_software="DeepLabCut",
                 )

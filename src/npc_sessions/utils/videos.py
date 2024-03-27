@@ -139,7 +139,7 @@ def get_pose_series_from_dataframe(
             reference_frame="(0,0) corresponds to the top left corner of the video frame",
             timestamps=video_timestamps,
             confidence=data[:, 2],
-            confidence_definition="Softmax output of the deep neural network",
+            confidence_definition="softmax output of the deep neural network",
         )
         pose_estimations_series.append(pose_estimation_series)
 
