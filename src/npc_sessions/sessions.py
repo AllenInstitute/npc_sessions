@@ -482,7 +482,7 @@ class DynamicRoutingSession:
             desc = v
         elif self.is_templeton:
             desc = "sensory discrimination task experiment with task-irrelevant stimuli"
-        elif self.epoch_tags == ['LuminanceTest']:
+        elif self.epoch_tags == ["LuminanceTest"]:
             desc = "experiment with varying luminance levels of visual stimulus display for assessing pupil size"
         else:
             desc = "visual-auditory task-switching behavior experiment"
@@ -1656,7 +1656,7 @@ class DynamicRoutingSession:
         metadata = self._subject_aind_metadata
         assert metadata["subject_id"] == self.id.subject
         dob = utils.get_aware_dt(metadata["date_of_birth"])
-        
+
         return pynwb.file.Subject(
             subject_id=metadata["subject_id"],
             species="Mus musculus",
@@ -1664,7 +1664,9 @@ class DynamicRoutingSession:
             date_of_birth=dob,
             genotype=metadata["genotype"],
             description=None,
-            strain=metadata["background_strain"] or metadata.get("breeding_group") or metadata.get("breeding_info", {}).get("breeding_group", ""),
+            strain=metadata["background_strain"]
+            or metadata.get("breeding_group")
+            or metadata.get("breeding_info", {}).get("breeding_group", ""),
             age=f"P{(self.session_start_time - dob).days}D",
         )
 
@@ -2288,18 +2290,20 @@ class DynamicRoutingSession:
             licks_on_sync: bool = False
             try:
                 rising = self.sync_data.get_rising_edges("lick_sensor", units="seconds")
-                falling = self.sync_data.get_falling_edges("lick_sensor", units="seconds")
+                falling = self.sync_data.get_falling_edges(
+                    "lick_sensor", units="seconds"
+                )
             except IndexError:
-                logger.debug(f'No licks on sync line for {self.id}')
+                logger.debug(f"No licks on sync line for {self.id}")
             else:
-                licks_on_sync = (rising.size > 0 and falling.size > 0)
+                licks_on_sync = rising.size > 0 and falling.size > 0
             if licks_on_sync:
                 if falling[0] < rising[0]:
                     falling = falling[1:]
                 if rising[-1] > falling[-1]:
                     rising = rising[:-1]
                 assert len(rising) == len(falling)
-                
+
                 rising_falling = np.array([rising, falling]).T
                 lick_duration = np.diff(rising_falling, axis=1).squeeze()
 
@@ -2317,9 +2321,11 @@ class DynamicRoutingSession:
                 #     ):
                 #         filtered_idx[i] = False
                 filtered = rising[filtered_idx]
-                
+
         licks = ndx_events.Events(
-            timestamps=self.sam.lickTimes if not (self.is_sync and licks_on_sync) else filtered,
+            timestamps=(
+                self.sam.lickTimes if not (self.is_sync and licks_on_sync) else filtered
+            ),
             name="licks",
             description="times at which the subject made contact with a water spout"
             + (
