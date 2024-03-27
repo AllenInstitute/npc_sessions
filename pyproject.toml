@@ -37,6 +37,7 @@ dependencies = [
     "tables>=3.9.2",
     "aind-data-schema>=0.31.3",
     "pydantic>=2.6.4",
+    "npc-lims>=0.1.137",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
