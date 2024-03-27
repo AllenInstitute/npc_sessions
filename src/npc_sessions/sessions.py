@@ -589,8 +589,8 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
-        if self.is_sync:
-            modules.extend(self._all_licks[1:])
+        if self.is_sync and self._all_licks:
+            modules.extend(self._all_licks[-2:])
         modules.append(self._rewards)
         if self.is_task:
             modules.append(self._quiescent_violations)
@@ -626,7 +626,8 @@ class DynamicRoutingSession:
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
-        modules.append(self._all_licks[0])
+        if self._all_licks:
+            modules.append(self._all_licks[0])
         modules.append(self._running_speed)
         if self.is_video:
             if self.info and self.info.is_dlc_eye:
@@ -1028,7 +1029,7 @@ class DynamicRoutingSession:
         return tuple(
             pynwb.device.Device(
                 name=row["device"],
-                description=f"Motorized 3-axis micromanipulator for positioning and inserting {probe.name}",
+                description=f"motorized 3-axis micromanipulator for positioning and inserting {probe.name}",
                 manufacturer="NewScale",
             )
             for _, row in self._manipulator_info[:].iterrows()
@@ -2265,6 +2266,8 @@ class DynamicRoutingSession:
         If sync isn't available, we only have start frames of licks, so we can't
         filter by duration very accurately.
         """
+        if not self.is_task:
+            return ()
         if self.is_sync:
             max_contact = (
                 0.5  # must factor-in lick_sensor staying high after end of contact
@@ -2278,7 +2281,8 @@ class DynamicRoutingSession:
             except IndexError:
                 logger.debug(f'No licks on sync line for {self.id}')
             else:
-                licks_on_sync = True
+                licks_on_sync = (rising.size > 0 and falling.size > 0)
+            if licks_on_sync:
                 if falling[0] < rising[0]:
                     falling = falling[1:]
                 if rising[-1] > falling[-1]:
@@ -2301,7 +2305,6 @@ class DynamicRoutingSession:
                 #         (next_start is None or next_start - f > max_interval)
                 #     ):
                 #         filtered_idx[i] = False
-
                 filtered = rising[filtered_idx]
                 
         licks = ndx_events.Events(
