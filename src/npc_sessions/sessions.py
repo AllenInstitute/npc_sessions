@@ -1514,7 +1514,7 @@ class DynamicRoutingSession:
     def is_training(self) -> bool:
         if (v := getattr(self, "_is_training", None)) is not None:
             return v
-        return not self.is_ephys
+        return self.is_task and not self.is_ephys
 
     @utils.cached_property
     def is_sorted(self) -> bool:
