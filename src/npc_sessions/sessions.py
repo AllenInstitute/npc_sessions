@@ -2461,7 +2461,7 @@ class DynamicRoutingSession:
                 width=f"length of semi-major axis of {feature_name} ellipse in pixels",
                 height=f"length of semi-minor axis of {feature_name} ellipse in pixels",
                 phi=f"counterclockwise rotation of major-axis of {feature_name} ellipse, relative to horizontal-axis of video, in radians",
-                average_confidece=f"mean confidence [0-1] for the up-to-12 points from DLC used to fit {feature_name} ellipse",
+                average_confidence=f"mean confidence [0-1] for the up-to-12 points from DLC used to fit {feature_name} ellipse",
                 is_bad_frame=f"[bool] frames which should not be used due to low confidence in {feature_name} ellipse (typically caused by blinking, grooming, poor lighting)",
             ).items():
                 column_descriptions[f"{feature}_{column_suffix}"] = description
