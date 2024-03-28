@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:77e3cd61ecf4e3ae6e3fb070836c51b287f1debca2a61686e5f1bcdce280969d"
+content_hash = "sha256:d45ec2e31cd682a3a7695aabeee8988791a741e2bc00de693ea843d227b036cd"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -25,7 +25,7 @@ files = [
 
 [[package]]
 name = "aind-data-schema"
-version = "0.31.11"
+version = "0.31.16"
 requires_python = ">=3.8"
 summary = "A library that defines AIND data schema and validates JSON files."
 dependencies = [
@@ -36,8 +36,8 @@ dependencies = [
     "semver",
 ]
 files = [
-    {file = "aind-data-schema-0.31.11.tar.gz", hash = "sha256:4716dcbf7c05f316f3b6b3df48e068a778fb867dfd03a9ce40fd4cf2f04b8b2a"},
-    {file = "aind_data_schema-0.31.11-py3-none-any.whl", hash = "sha256:1d2d805e49c7c837cf578fbe7105b7a9aa98970c74130bb0d1de9016b46c9f20"},
+    {file = "aind-data-schema-0.31.16.tar.gz", hash = "sha256:c2712821eeb23a6ceb0e4043e0f43a4be4c58e71a5854dc40c6825a526b8a209"},
+    {file = "aind_data_schema-0.31.16-py3-none-any.whl", hash = "sha256:5efbad7fd07b40af7eae38b5590a5e799e454e0c2f944426b2301281f86694e6"},
 ]
 
 [[package]]
