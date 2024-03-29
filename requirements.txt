@@ -2,7 +2,7 @@
 # Please do not edit it manually.
 
 aind-codeocean-api==0.4.2
-aind-data-schema==0.31.11
+aind-data-schema==0.31.16
 aiobotocore==2.7.0
 aiohttp==3.9.3
 aioitertools==0.11.0
