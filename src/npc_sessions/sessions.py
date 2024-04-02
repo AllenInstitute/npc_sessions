@@ -3028,6 +3028,18 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
             )
         )
 
+    @property
+    def session_description(self) -> str:
+        return "short ephys recording of spontaneous activity using probe channels at brain surface, to aid probe localization"
+    
+    @property
+    def session_start_time(self) -> datetime.datetime:
+        return utils.get_aware_dt(self.ephys_nominal_start_time)
+    
+    @utils.cached_property
+    def stim_paths(self) -> tuple[upath.UPath]:
+        return ()
+    
     class AP(DynamicRoutingSession.AP):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs | {"name": "surface_AP"})
