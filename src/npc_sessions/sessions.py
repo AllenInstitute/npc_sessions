@@ -1938,7 +1938,17 @@ class DynamicRoutingSession:
             if rigName := hdf5.get("rigName", None):
                 rig: str = rigName.asstr()[()]
                 return _format(rig)
-        raise AttributeError(f"Could not find rigName for {self.id} in stim files")
+        if self.is_ephys:
+            return _format(
+                {
+                    'W10DT713842': 'NP0',
+                    'W10DT713843': 'NP1',
+                    'W10DT713844': 'NP2',
+                    'W10DTM714205': 'NP3',
+                    'W10DT05516': 'NP3',
+                    }[self.ephys_settings_xml_data.hostname.upper()]
+            )
+        raise AttributeError(f"Could not find rigName for {self.id} in stim files or ephys files")
 
     @property
     def sam(self) -> DynRoutData:
