@@ -2151,6 +2151,14 @@ class DynamicRoutingSession:
         )
 
     @utils.cached_property
+    def ephys_nominal_start_time(self) -> datetime.datetime:
+        """Start time from sync_messages.txt"""
+        software_time_line = self.ephys_sync_messages_path.read_text().split('\n')[0]
+        timestamp_value = float(software_time_line[software_time_line.index(':')+2:].strip())
+        timestamp = datetime.datetime.fromtimestamp(timestamp_value / 1e3)
+        return timestamp
+    
+    @utils.cached_property
     def ephys_structure_oebin_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
             p
