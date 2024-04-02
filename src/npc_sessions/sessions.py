@@ -2974,7 +2974,7 @@ class DynamicRoutingSession:
             experimenter_full_name=self.experimenter
             or ["NSB trainer"],  # will overwrite NSB at point of upload
             session_start_time=self.session_start_time,
-            session_end_time=self.sync_data.stop_time if self.is_sync else max(self.epochs.stop_time),
+            session_end_time=self.sync_data.stop_time if self.is_sync else (max(self.epochs.stop_time) if self.epochs.stop_time else None),
             session_type=self.session_description.replace(" without CCF-annotated units", ""),
             iacuc_protocol="2104",
             rig_id=self._aind_rig_id,
