@@ -18,6 +18,8 @@ from typing import Any, Literal
 import aind_data_schema.core.session
 import aind_data_schema.models.modalities
 import aind_data_schema.models.stimulus
+import aind_data_schema.models.devices
+import aind_data_schema.models.coordinates
 import cv2
 import h5py
 import hdmf
@@ -2627,7 +2629,28 @@ class DynamicRoutingSession:
             reward_spouts=[
                 aind_data_schema.core.session.RewardSpoutConfig(
                     side="Center",
-                    starting_position=None,
+                    starting_position=aind_data_schema.models.coordinates.RelativePosition(
+                        device_position_transformations=[
+                            aind_data_schema.models.coordinates.Translation3dTransform(
+                                translation=[0.0, 0.0, 0.0],
+                            )
+                            ],
+                        device_origin="Tip positioned in front of subject's mouth",
+                        device_axes=[
+                            aind_data_schema.models.coordinates.Axis(
+                                name="X",
+                                direction="Positive is from the subject's mouth towards its right"
+                            ),
+                            aind_data_schema.models.coordinates.Axis(
+                                name="Y",
+                                direction="Positive is from the subject's mouth towards the sky"
+                            ),
+                            aind_data_schema.models.coordinates.Axis(
+                                name="Z",
+                                direction="Positive is from subject's mouth towards its tail"
+                            ),
+                            ],
+                        ),
                     variable_position=False,
                 )
             ],
@@ -2637,37 +2660,33 @@ class DynamicRoutingSession:
     def _aind_data_streams(self) -> tuple[aind_data_schema.core.session.Stream, ...]:
         data_streams = []
         # sync, mvr cameras, ephys probes
+        modality = aind_data_schema.models.modalities.Modality
         if self.is_sync:
             data_streams += aind_data_schema.core.session.Stream(
                 stream_start_time=self.sync_data.start_time,
                 stream_end_time=self.sync_data.stop_time,
-                daq_names=["sync"],
+                stream_modalities=[modality.BEHAVIOR],
+                daq_names=["Sync"],
             )
         if self.is_video:
             data_streams += aind_data_schema.core.session.Stream(
                 stream_start_time=self.session_start_time
                 + datetime.timedelta(
                     seconds=min(
-                        times.timestamps[0] for times in self._video_frame_times
+                        np.nanmin(times.timestamps) for times in self._video_frame_times
                     )
                 ),
                 stream_end_time=self.session_start_time
                 + datetime.timedelta(
                     seconds=max(
-                        times.timestamps[-1] for times in self._video_frame_times
+                        np.nanmax(times.timestamps) for times in self._video_frame_times
                     )
                 ),
-                camera_names=["front", "side", "eye"],
+                camera_names=["Front camera", "Side camera", "Eye camera"],
+                stream_modalities=[modality.BEHAVIOR_VIDEOS],
             )
         if self.is_ephys:
-            pxi_daq_name = next(
-                (
-                    timing.device.name
-                    for timing in self.ephys_timing_data
-                    if "PXI" in timing.device.name
-                ),
-                None,
-            )
+            
             data_streams += aind_data_schema.core.session.Stream(
                 stream_start_time=self.session_start_time
                 + datetime.timedelta(
@@ -2677,7 +2696,29 @@ class DynamicRoutingSession:
                 + datetime.timedelta(
                     seconds=max(timing.stop_time for timing in self.ephys_timing_data)
                 ),
-                daq_names=["OpenEphys"] + ([pxi_daq_name] if pxi_daq_name else []),
+                ephys_modules= (ephys_modules := [
+                    aind_data_schema.core.session.EphysModule(
+                        assembly_name=probe.name.upper(),
+                        arc_angle=0.0,
+                        module_angle=0.0,
+                        rotation_angle=0.0,
+                        primary_targeted_structure="none",
+                        manipulator_coordinates=aind_data_schema.models.coordinates.Coordinates3d(
+                            x=(row := self._manipulator_info.to_dataframe().query(f"electrode_group == '{probe.name}'"))['x'].item(),
+                            y=row['y'].item(),
+                            z=row['z'].item(),
+                            unit="micrometer",
+                            ),
+                        ephys_probes=[
+                            aind_data_schema.core.session.EphysProbeConfig(
+                                name = probe.name.upper(),
+                            )
+                        ]
+                    )
+                    for probe in self.probe_letters_to_use
+                ]),
+                stick_microscopes=ephys_modules, # cannot create ecephys modality without stick microscopes
+                stream_modalities=[modality.ECEPHYS],
             )
         return tuple(data_streams)
 
@@ -2685,53 +2726,140 @@ class DynamicRoutingSession:
     def _aind_stimulus_epochs(
         self,
     ) -> tuple[aind_data_schema.core.session.StimulusEpoch, ...]:
-        aind_epochs = []
 
-        def get_stimuli(nwb_epoch) -> aind_data_schema.core.session.AindModel:
-            if "OptoTagging" in nwb_epoch.name:
-                return aind_data_schema.core.models.OptoTagging(
-                    name=nwb_epoch.name,
-                    description=nwb_epoch.description,
-                    file_path=nwb_epoch.file_path,
-                )
-            return aind_data_schema.core.models.Stimulus(
-                name=nwb_epoch.name,
-                description=nwb_epoch.description,
-                file_path=nwb_epoch.file_path,
+        def get_modalities(epoch_name: str) -> list[aind_data_schema.core.session.StimulusModality]:
+            stim = aind_data_schema.core.session.StimulusModality
+            modalities = []
+            if any(name in epoch_name for name in ("DynamicRouting", "RFMapping", "LuminanceTest", "Spontaneous")):
+                modalities.append(stim.VISUAL)
+            if any(name in epoch_name for name in ("DynamicRouting", "RFMapping")):
+                modalities.append(stim.AUDITORY)
+            if self.is_opto and any(name in epoch_name for name in ("DynamicRouting",)):
+                modalities.append(stim.OPTOGENETICS)
+            if any(name in epoch_name for name in ("OptoTagging",)):
+                modalities.append(stim.OPTOGENETICS)
+            return modalities
+        
+        def get_num_trials(epoch_name: str) -> int | None:
+            if epoch_name == "RFMapping":
+                return sum(len(trials) for name, trials in self.intervals.items() if "RFMapping" in name)
+            trials = self.intervals.get(epoch_name)
+            if trials is None:
+                return None
+            return len(trials)
+            
+        def get_device_names(epoch_name: str) -> list[str]:
+            stim = aind_data_schema.core.session.StimulusModality
+            modalities = get_modalities(epoch_name)
+            device_names = []
+            if stim.VISUAL in modalities:
+                device_names.append("Stim")
+            if stim.AUDITORY in modalities:
+                device_names.append("Speaker")
+            if stim.OPTOGENETICS in modalities:
+                device_names.append("Laser #0") #TODO detect if second laser used
+            return device_names
+        
+        def get_speaker_config(epoch_name: str) -> aind_data_schema.core.session.SpeakerConfig | None:
+            stim = aind_data_schema.core.session.StimulusModality
+            modalities = get_modalities(epoch_name)
+            if stim.AUDITORY not in modalities:
+                return None
+            return aind_data_schema.core.session.SpeakerConfig(
+                name="Speaker",
+                volume=68.0,
+                volume_unit="decibels",
             )
-
+            
+        def get_parameters(epoch_name: str) -> list | None:
+            if epoch_name == "DynamicRouting1":
+                return None
+        
+        def get_num_trials_rewarded(epoch_name: str) -> int | None:
+            if "DynamicRouting" in epoch_name:
+                return len(self.sam.rewardTimes)
+            return None
+        
+        def get_reward_consumed(epoch_name: str) -> float | None:
+            num_trials_rewarded = get_num_trials_rewarded(epoch_name)
+            if num_trials_rewarded is None:
+                return None
+            return np.nanmean(self.sam.rewardSize) * num_trials_rewarded
+        
+        aind_epochs = []
         for nwb_epoch in self.epochs:
-            aind_epochs += aind_data_schema.core.session.StimulusEpoch(
-                stimulus=get_stimuli(nwb_epoch),
-                stimulus_start_time=datetime.timedelta(seconds=nwb_epoch.start_time)
-                + self.session_start_time,
-                stimulus_end_time=datetime.timedelta(seconds=nwb_epoch.stop_time)
-                + self.session_start_time,
+            epoch_name = nwb_epoch.tags.item()[0]
+            aind_epochs.append(
+                aind_data_schema.core.session.StimulusEpoch(
+                    stimulus_start_time=datetime.timedelta(seconds=nwb_epoch.start_time.item())
+                    + self.session_start_time,
+                    stimulus_end_time=datetime.timedelta(seconds=nwb_epoch.stop_time.item())
+                    + self.session_start_time,
+                    stimulus_name=epoch_name,
+                    software=[
+                        aind_data_schema.models.devices.Software(
+                            name='PsychoPy',
+                            version='2022.1.2',
+                            url='https://www.psychopy.org/',
+                        ),
+                    ],
+                    script=aind_data_schema.models.devices.Software(
+                            name='DynamicRoutingTask',
+                            version=self.source_script.split('DynamicRoutingTask/')[-1],
+                            url=self.source_script,
+                        ),
+                    stimulus_modalities=get_modalities(epoch_name),
+                    stimulus_parameters=get_parameters(epoch_name),
+                    stimulus_device_names=get_device_names(epoch_name),
+                    speaker_config=get_speaker_config(epoch_name),
+                    reward_consumed_during_epoch=get_reward_consumed(epoch_name),
+                    reward_consumed_unit="milliliter",
+                    trials_total=get_num_trials(epoch_name),
+                    trials_finished=get_num_trials(epoch_name),
+                    trials_rewarded=get_num_trials_rewarded(epoch_name),
+                    notes=nwb_epoch.notes.item(),
+                )
             )
         return tuple(aind_epochs)
 
+
     @utils.cached_property
-    def _aind_session_metadata(self) -> aind_data_schema.core.session:
+    def _aind_rig_id(self) -> str:
+        rig = self.rig.strip('.')
+        rig_to_room = {
+            'NP0': '325',
+            'NP1': '325',
+            'NP2': '327',
+            'NP3': '342',
+        }
+        last_updated = '240401'
+        return f"{rig_to_room[rig]}_{rig}_{last_updated}"
+    
+    @utils.cached_property
+    def _aind_session_metadata(self) -> aind_data_schema.core.session.Session:
         return aind_data_schema.core.session.Session(
             experimenter_full_name=self.experimenter
             or ["NSB Trainer"],  # will overwrite NSB at point of upload
             session_start_time=self.session_start_time,
-            session_end_time=self.sync_data.stop_time if self.is_sync else None,
+            session_end_time=self.sync_data.stop_time if self.is_sync else max(self.epochs.stop_time),
             session_type=self.session_description,
-            rig_id=self.rig,
-            subject_id=self.id.subject,
             iacuc_protocol="2104",
+            rig_id=self.rig,
+            subject_id=str(self.id.subject),
             # TODO get, if possible: animal_weight_post=,
             # TODO get, if possible: animal_weight_prior=,
+            data_streams=list(self._aind_data_streams),
+            stimulus_epochs=list(self._aind_stimulus_epochs),
+            mouse_platform_name="Mouse Platform",
+            active_mouse_platform=False,
             reward_delivery=self._aind_reward_delivery if self.is_task else None,
             reward_consumed_total=(
-                (self.sam.rewardSize * len(self.sam.rewardTimes))
+                (np.nanmean(self.sam.rewardSize) * len(self.sam.rewardTimes))
                 if self.is_task
                 else None
             ),
+            reward_consumed_unit='milliliter',
             notes=self.notes,
-            data_streams=list(self._aind_stimulus_epochs),
-            stimulus_epochs=list(self._aind_stimulus_epochs),
         )
 
 
