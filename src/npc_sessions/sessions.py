@@ -1735,7 +1735,7 @@ class DynamicRoutingSession:
             and any(v in p.stem for v in ("log", "motor-locs", "motor_locs"))
         )
         if not p:
-            raise FileNotFoundError("Cannot find .csv")
+            raise FileNotFoundError("Cannot find .csv with motor locs")
         if len(p) > 1:
             raise ValueError(f"Multiple NewScale log files found: {p}")
         return p[0]
@@ -1751,6 +1751,12 @@ class DynamicRoutingSession:
             raise AttributeError(
                 f"{self.id} is an ephys session, but no NewScale log file available"
             ) from None
+            
+        try:
+            _ = self.newscale_log_path
+        except FileNotFoundError as exc:
+            raise AttributeError(f"{self.id} has no log.csv file to get manipulator coordinates") from exc
+            
         df = utils.get_newscale_coordinates(
             self.newscale_log_path,
             f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
@@ -2708,12 +2714,21 @@ class DynamicRoutingSession:
                             module_angle=0.0,
                             rotation_angle=0.0,
                             primary_targeted_structure="none",
-                            manipulator_coordinates=aind_data_schema.models.coordinates.Coordinates3d(
-                                x=(row := self._manipulator_info.to_dataframe().query(f"electrode_group == '{probe.name}'"))['x'].item(),
-                                y=row['y'].item(),
-                                z=row['z'].item(),
-                                unit="micrometer",
-                                ),
+                            manipulator_coordinates=(
+                                aind_data_schema.models.coordinates.Coordinates3d(
+                                    x=(row := self._manipulator_info.to_dataframe().query(f"electrode_group == '{probe.name}'"))['x'].item(),
+                                    y=row['y'].item(),
+                                    z=row['z'].item(),
+                                    unit="micrometer",
+                                ) 
+                                ) # some old sessions didn't have newscale logging enabled: no way to get their coords
+                                if hasattr(self, "_manipulator_info") 
+                                else aind_data_schema.models.coordinates.Coordinates3d(
+                                    x=0.0,
+                                    y=0.0,
+                                    z=0.0,
+                                    unit="micrometer",
+                            ),
                             ephys_probes=[
                                 aind_data_schema.core.session.EphysProbeConfig(
                                     name = probe.name.upper(),
