@@ -363,7 +363,10 @@ class DynamicRoutingSession:
     @property
     def exp_path(self) -> upath.UPath | None:
         """Dir with record of experiment workflow, environment lock file, logs
-        etc. - may not be a dedicated subfolder if contents were moved to behavior root
+        etc. - may not be a dedicated subfolder if contents were moved to behavior
+        root.
+        
+        - does not exist for some sessions (surface channel recordings, sessions recorded before ipynb workflow was implemented)
         """
         behavior_path = next(
             (p.parent for p in self.raw_data_paths if p.parent.name == "behavior"), None
@@ -373,13 +376,11 @@ class DynamicRoutingSession:
         exp_path = next(behavior_path.glob("exp"), None)
         if exp_path:
             return exp_path
-        assert (
-            behavior_path / "pdm.lock"
-        ).exists(), (
-            f"Could not verify that {behavior_path} contains contents of `exp` folder"
-        )
-        return behavior_path
-
+        if (behavior_path / "debug.log").exists():
+            return behavior_path
+        logger.debug(f"exp path not found for {self.id} - likely a session recorded before ipynb workflow was implemented")
+        return None
+    
     @property
     def exp_log_path(self) -> upath.UPath | None:
         """Debug log file from experiment.
@@ -387,9 +388,10 @@ class DynamicRoutingSession:
         - used to be in a subfolder: `behavior/exp/logs/debug.log`
         - directories may be flattened too: `behavior/debug.log`
         """
-        if self.exp_path is None:
+        exp_path = self.exp_path
+        if exp_path is None:
             return None
-        log_path = next(self.exp_path.rglob("debug.log"), None)
+        log_path = next(exp_path.rglob("debug.log"), None)
         return log_path
 
     def get_experimenter_from_experiment_log(self) -> str | None:
