@@ -495,16 +495,16 @@ class DynamicRoutingSession:
         ), "experiment description should contain 'experiment', due to other function which replaces the word"
         return desc
 
-    @property
+    @utils.cached_property
     def source_script(self) -> str:
         """`githubTaskScript` from the task stim file, if available.
         Otherwise, url to Sam's repo on github"""
         if self.is_task and (script := self.task_data.get("githubTaskScript", None)):
             if isinstance(script[()], bytes):
-                return script.asstr()[()]
+                return script.asstr()[()].replace("Task//", "Task/")
             if isinstance(script[()], np.floating) and not np.isnan(script[()]):
-                return str(script[()])
-        return "https://github.com/samgale/DynamicRoutingTask"
+                return str(script[()]).replace("Task//", "Task/")
+        return "https://github.com/samgale/DynamicRoutingTask/blob/main/DynamicRouting1.py"
 
     @property
     def source_script_file_name(self) -> str:
