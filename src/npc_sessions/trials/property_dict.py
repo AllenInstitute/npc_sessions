@@ -26,6 +26,30 @@ the behavior expected from nwb validation. For some columns that are not always
 available (such as `opto_location_name`) we return `np.full(np.nan)`: if those
 columns aren't dropped, then dataframe schemas will become inconsistent (str vs double)"""
 
+EXPLODE_LISTS = True
+"""If True, any with values in the resulting dataframe that are list-like (list, tuple, set, np.ndarray), will be
+expanded into separate rows, , e.g. 
+
+this dataframe:
+   start_time  stop_time  trial_idx opto_bregma_x opto_bregma_y                opto_target
+0        12.3       13.3          3     [-10, 10]       [2, -2]  [upper left, lower right]
+1        15.7       16.7          4       [-5, 5]       [-4, 4]  [lower left, upper right]
+
+becomes:
+   start_time  stop_time  trial_idx opto_bregma_x opto_bregma_y  opto_target
+0        12.3       13.3          3           -10             2   upper left
+1        12.3       13.3          3            10            -2  lower right
+2        15.7       16.7          4            -5            -4   lower left
+3        15.7       16.7          4             5             4  upper right
+
+via `df.explode(['opto_bregma_x', 'opto_bregma_y', 'opto_target'], ignore_index=True)`
+
+The major assumption here is that all list-like values in the dataframe are of the
+same length, and correspond to the same parameter.
+
+This can make it easier to deal with trials with multiple values for a single
+location parameter, such as bilateral opto stimulation targets
+"""
 
 class PropertyDict(collections.abc.Mapping):
     """Dict type, where the keys are the class's properties (regular attributes
@@ -132,6 +156,7 @@ class PropertyDict(collections.abc.Mapping):
             yield dict(trial[1])
 
     def to_dataframe(self) -> pd.DataFrame:
+        """pandas dataframe"""
         def get_dtype(attr: str):
             """Get dtype of attribute"""
             # if any(key in attr for key in ('index', 'idx', 'number')):
@@ -140,12 +165,21 @@ class PropertyDict(collections.abc.Mapping):
             #     return 'Float32'
             return None
 
-        return pd.DataFrame(
+        df = pd.DataFrame(
             data={k: pd.Series(v, dtype=get_dtype(k)) for k, v in self.items()}
         )
-
+        if EXPLODE_LISTS:
+            explode_cols = (
+                col
+                for col in df.columns
+                if isinstance(df[col][0], (list, tuple, set, np.ndarray))
+            )
+            df = df.explode(explode_cols, ignore_index=True)
+        return df
+    
     @property
     def _df(self) -> pl.DataFrame:
+        """polars dataframe"""
         def get_dtype(attr: str, value: Any) -> type[pl.DataType] | None:
             """Get dtype of attribute"""
             if any(key in attr for key in ("index", "idx", "number")):
@@ -157,11 +191,19 @@ class PropertyDict(collections.abc.Mapping):
                 return pl.Utf8
             return None
 
-        return pl.DataFrame(
+        df = pl.DataFrame(
             pl.Series(k, v, dtype=get_dtype(k, v), nan_to_null=True)
             for k, v in self.items()
         )
-
+        if EXPLODE_LISTS:
+            explode_cols = (
+                col
+                for col in df.columns
+                if df[col].dtype in (pl.List, pl.Array)
+            )
+            df = df.explode(explode_cols)
+        return df
+    
     @property
     def _docstrings(self) -> dict[str, str]:
         """Docstrings of property getter methods that have no leading
