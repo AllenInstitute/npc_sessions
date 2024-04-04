@@ -2921,9 +2921,23 @@ class DynamicRoutingSession:
                 return None
             return np.nanmean(self.sam.rewardSize) * num_trials_rewarded
         
+        def get_version() -> str | None:
+            if "blob/main" in self.source_script:
+                return None
+            return self.source_script.split('DynamicRoutingTask/')[-1].split('/DynamicRouting1.py')[0].strip('/')
+        
+        def get_url(epoch_name: str) -> str:
+            return self.source_script.replace('DynamicRouting1', get_taskcontrol_file(epoch_name))
+        
+        def get_taskcontrol_file(epoch_name: str) -> str:
+            if upath.UPath(self.source_script.replace('DynamicRouting1', epoch_name)).exists():
+                return epoch_name
+            return "TaskControl"
+        
         aind_epochs = []
         for nwb_epoch in self.epochs:
             epoch_name = nwb_epoch.tags.item()[0]
+            
             aind_epochs.append(
                 aind_data_schema.core.session.StimulusEpoch(
                     stimulus_start_time=datetime.timedelta(seconds=nwb_epoch.start_time.item())
@@ -2939,9 +2953,9 @@ class DynamicRoutingSession:
                         ),
                     ],
                     script=aind_data_schema.models.devices.Software(
-                            name=epoch_name,
-                            version=self.source_script.split('DynamicRoutingTask/')[-1].split('/DynamicRouting1.py')[0].strip('/'),
-                            url=self.source_script.replace('DynamicRouting1', epoch_name).replace("Task//", "Task/"),
+                            name=get_taskcontrol_file(epoch_name),
+                            version=get_version() or "unknown",
+                            url=get_url(epoch_name),
                         ),
                     stimulus_modalities=get_modalities(epoch_name),
                     stimulus_parameters=get_parameters(epoch_name),
