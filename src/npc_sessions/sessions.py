@@ -3005,8 +3005,6 @@ class DynamicRoutingSession:
             iacuc_protocol="2104",
             rig_id=self._aind_rig_id,
             subject_id=str(self.id.subject),
-            # TODO get, if possible: animal_weight_post=,
-            # TODO get, if possible: animal_weight_prior=,
             data_streams=list(self._aind_data_streams),
             stimulus_epochs=list(self._aind_stimulus_epochs),
             mouse_platform_name="Mouse Platform",
