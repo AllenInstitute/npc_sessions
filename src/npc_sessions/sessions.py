@@ -2837,12 +2837,12 @@ class DynamicRoutingSession:
                         stimulus.AuditoryStimulation(
                             sitmulus_name="target amplitude-modulated noise stimulus",
                             sample_frequency=10_000,
-                            amplitude_modulation_frequency=70_000,
+                            amplitude_modulation_frequency=70,
                         ),
                         stimulus.AuditoryStimulation(
                             sitmulus_name="non-target amplitude-modulated noise stimulus",
                             sample_frequency=10_000,
-                            amplitude_modulation_frequency=12_000,
+                            amplitude_modulation_frequency=12,
                         )
                     ]
                 )
@@ -2853,18 +2853,28 @@ class DynamicRoutingSession:
                             stimulus_name="receptive-field mapping grating stimuli",
                             stimulus_parameters={
                                 "orientations_deg": [0, 45, 90, 135, 180, 225, 270, 315],
-                                "position_xy": (0,0),
+                                "position_x": list(np.unique(self.intervals["VisRFMapping"].grating_x)),
+                                "position_y": list(np.unique(self.intervals["VisRFMapping"].grating_y)),
                                 "size_deg": 20,
                                 "spatial_frequency_cycles_per_deg": 0.08,
                                 "temporal_frequency_cycles_per_sec": 4,
                                 "type": "sqr",
+                                "duration_sec": .25,
                             }
+                        ),
+                        stimulus.VisualStimulation(
+                            stimulus_name="full-field flash stimuli",
+                            stimulus_parameters={
+                                "gray_level": [-1, 0, 1],
+                                "duration_sec": .25,
+                            },
+                            notes="-1.0: black | 0: mid-gray | 1.0: white"
                         ),
                         *[
                             stimulus.AuditoryStimulation(
                                 sitmulus_name=f"receptive-field mapping amplitude-modulated noise stimulus {idx}",
                                 sample_frequency=10_000,
-                                amplitude_modulation_frequency=freq * 1000,
+                                amplitude_modulation_frequency=freq,
                             )
                             for idx, freq in enumerate([12, 20, 40, 80])
                         ],
@@ -2903,7 +2913,7 @@ class DynamicRoutingSession:
                     stimulus.VisualStimulation(
                         stimulus_name="blank screen, constant luminance",
                         stimulus_parameters={
-                            "gray level": -0.95 if self.session_start_time.timestamp() > datetime.datetime(2024, 4, 1).timestamp() else -1.0,
+                            "gray_level": -0.95 if self.session_start_time.timestamp() > datetime.datetime(2024, 4, 1).timestamp() else -1.0,
                         },
                         notes="-1.0: black | 0: mid-gray | 1.0: white"
                     )
