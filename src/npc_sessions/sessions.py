@@ -192,7 +192,7 @@ class DynamicRoutingSession:
     'VGAT-ChR2-YFP/wt'
     >>> 'DynamicRouting1' in s.epoch_tags
     True
-    >>> s.probe_insertions['probeA']['hole']
+    >>> s.probe_insertions['A']
     'A2'
     """
 
@@ -1091,21 +1091,16 @@ class DynamicRoutingSession:
         """The version passed to NWBFile.__init__"""
         if not self.is_ephys:
             raise AttributeError(f"{self.id} is not an ephys session")
-        locations = (
-            {
-                v["letter"]: f"{self.implant} {v['hole']}"
-                for k, v in self.probe_insertions.items()
-                if k.startswith("probe") and "hole" in v and "letter" in v
-            }
-            if self.probe_insertions
-            else {}
-        )  # TODO upload probe insertion records for all sessions
+        locations: dict[str, str | None] = {}
+        if self.probe_insertions and self.implant:
+            for probe_letter in self.probe_insertions:
+                locations[probe_letter] = f"{self.implant} {self.probe_insertions[probe_letter]}"
         return tuple(
             pynwb.ecephys.ElectrodeGroup(
                 name=f"probe{probe_letter}",
                 device=next(p for p in self._probes if p.name == str(serial_number)),
                 description=probe_type,
-                location=locations.get(probe_letter, probe_letter),
+                location=locations.get(probe_letter, "unknown"),
             )
             for serial_number, probe_type, probe_letter in zip(
                 self.ephys_settings_xml_data.probe_serial_numbers,
@@ -2247,7 +2242,42 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def probe_insertions(self) -> dict[str, Any] | None:
-        return npc_lims.get_probe_insertion_metadata(self.id)["probe_insertions"]
+        if self.probe_insertion_info:
+            return self.probe_insertion_info["probes"]
+        return None
+    
+    @utils.cached_property
+    def probe_insertion_info(self) -> dict[str, Any] | None:
+        d = None
+        with contextlib.suppress(ValueError):
+            return npc_lims.get_probe_insertion_metadata(self.id)
+        if d is None:
+            path = next(
+                (path for path in self.raw_data_paths if path.name == "probe_insertions.json"),
+                None,
+            )
+            if path:
+                d = json.loads(path.read_text())["probe_insertions"]
+        if d is not None:
+            key_to_probe = {}
+            for k in d:
+                with contextlib.suppress(ValueError):
+                    key_to_probe[k] = npc_session.ProbeRecord(k)
+            return {
+                    'probes': 
+                        {key_to_probe[k]: d[k]['hole'] for k in key_to_probe},
+                    'notes':
+                        {key_to_probe[k]: d[k].get('notes') for k in key_to_probe},
+                    'implant':
+                        d['implant']
+                }
+        path = next(
+            (path for path in self.raw_data_paths if path.name == "insertions.json"),
+            None,
+        )
+        if path:
+            return json.loads(path.read_text())
+        return None
 
     @utils.cached_property
     def probes_inserted(self) -> tuple[str, ...]:
@@ -2270,8 +2300,7 @@ class DynamicRoutingSession:
             from_insertion_record = tuple(
                 npc_session.ProbeRecord(k)
                 for k, v in self.probe_insertions.items()
-                if npc_session.extract_probe_letter(k) is not None
-                and v["hole"] is not None
+                if v is not None
             )
             from_insertion_record = self.remove_probe_letters_to_skip(
                 from_insertion_record
@@ -2291,13 +2320,12 @@ class DynamicRoutingSession:
         return self.remove_probe_letters_to_skip("ABCDEF")
 
     @property
-    def implant(self) -> str:
-        if self.probe_insertions is None:
+    def implant(self) -> str | None:
+        if self.probe_insertion_info is None:
             # TODO get from sharepoint
-            return "unknown implant"
-        implant: str = self.probe_insertions["implant"]
-        return "2002" if "2002" in implant else implant
-
+            return None
+        return self.probe_insertion_info["shield"]["name"]
+        
     @utils.cached_property
     def _all_licks(self) -> tuple[ndx_events.Events, ...]:
         """First item is always `processing['licks']` - the following items are only if sync
