@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:d45ec2e31cd682a3a7695aabeee8988791a741e2bc00de693ea843d227b036cd"
+content_hash = "sha256:ab7eda2c0affd86db1e5658a67dd3de1ee597df3a5cb1e8e617719d79bd6e36e"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -868,7 +868,7 @@ files = [
 
 [[package]]
 name = "dynamicroutingtask"
-version = "0.1.92"
+version = "0.1.94"
 requires_python = ">=3.9"
 summary = ""
 dependencies = [
@@ -879,8 +879,8 @@ dependencies = [
     "scipy",
 ]
 files = [
-    {file = "DynamicRoutingTask-0.1.92-py3-none-any.whl", hash = "sha256:79e767b6a983f196926dc286d207ee260bb0741581ed3940a8401002828238ef"},
-    {file = "DynamicRoutingTask-0.1.92.tar.gz", hash = "sha256:13ad63e784b7b85b4b2a4ead65eb714af5ace14ba7c0e00fb8eb38e9e6578f6d"},
+    {file = "DynamicRoutingTask-0.1.94-py3-none-any.whl", hash = "sha256:44c210f3257e987c9ab3e37313b64535fffc6862aacb321cdef8b4cafa6f0a46"},
+    {file = "DynamicRoutingTask-0.1.94.tar.gz", hash = "sha256:3ad0cdebdf880fd61290f502e8f291adadde45c207b6765cbfa809a9b7492849"},
 ]
 
 [[package]]
@@ -1980,7 +1980,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.137"
+version = "0.1.139"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -1997,8 +1997,8 @@ dependencies = [
     "types-requests>=2.31.0.6",
 ]
 files = [
-    {file = "npc_lims-0.1.137-py3-none-any.whl", hash = "sha256:842718575da5c92a6801473e6326d3d1f854cc27bcbd668f03056d13ecb232f7"},
-    {file = "npc_lims-0.1.137.tar.gz", hash = "sha256:890e3dc1a254bd933a22d84dc41a17a5f198beab3278cfc8e902343095b65fb3"},
+    {file = "npc_lims-0.1.139-py3-none-any.whl", hash = "sha256:f799fd1512e388da2e949bb8b4cb7128096a120fecc87931cb00a93c68e88a7a"},
+    {file = "npc_lims-0.1.139.tar.gz", hash = "sha256:d053943a6a7e618eabae1083019bddeec4a4e07ceec3de25fb7d553b2f0cb1ea"},
 ]
 
 [[package]]
@@ -2019,7 +2019,7 @@ files = [
 
 [[package]]
 name = "npc-samstim"
-version = "0.1.2"
+version = "0.1.4"
 requires_python = ">=3.9"
 summary = "Tools for processing stim data from Sam's DynamicRoutingTask, compatible with data in the cloud."
 dependencies = [
@@ -2030,8 +2030,8 @@ dependencies = [
     "numba>=0.59.0",
 ]
 files = [
-    {file = "npc-samstim-0.1.2.tar.gz", hash = "sha256:0371d5e324a44ff48e996d886e3aede185ab9bef0af6558517d86e1726d3ecb2"},
-    {file = "npc_samstim-0.1.2-py3-none-any.whl", hash = "sha256:30095428689e097d48ed1091258f1e0c386b184110845af3ba8409dd8ceae185"},
+    {file = "npc-samstim-0.1.4.tar.gz", hash = "sha256:74de6fe149386f0ed857e531b4e0670457f27984267b6820c1ec1f869f77ff86"},
+    {file = "npc_samstim-0.1.4-py3-none-any.whl", hash = "sha256:9c0536bf8bd07e249ca117851074d6b9c2962005044255ed8d1302a0e2ecb9b3"},
 ]
 
 [[package]]
@@ -2083,7 +2083,7 @@ files = [
 
 [[package]]
 name = "npc-utils"
-version = "0.1.12"
+version = "0.1.13"
 requires_python = ">=3.9"
 summary = "Collection of MindScope Neuropixels packages, simplifying installation and keeping versions updated."
 dependencies = [
@@ -2091,14 +2091,14 @@ dependencies = [
     "npc-io>=0.1.26",
     "npc-lims>=0.1.135",
     "npc-mvr>=0.1.3",
-    "npc-samstim>=0.1.2",
+    "npc-samstim>=0.1.4",
     "npc-session>=0.1.34",
     "npc-stim>=0.1.6",
     "npc-sync>=0.1.9",
 ]
 files = [
-    {file = "npc-utils-0.1.12.tar.gz", hash = "sha256:7e00aedbd4569f3ee43f080fc5c2958a4a8aae3028a6f855d0f133d0c249f2ad"},
-    {file = "npc_utils-0.1.12-py3-none-any.whl", hash = "sha256:22180f036c57e9c0f60655e121e98153d2ebf9ef1122957a77c8f50a2f3349fd"},
+    {file = "npc-utils-0.1.13.tar.gz", hash = "sha256:bae3d571c132b92d5263660b6e304f98e7665b792dfe7bb4c930679ac62dffd2"},
+    {file = "npc_utils-0.1.13-py3-none-any.whl", hash = "sha256:728126a7d4fb9a77134632b8c7ece7584f0fb3e5ec4eaafe18a67e9cece9ab0c"},
 ]
 
 [[package]]
