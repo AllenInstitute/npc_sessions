@@ -28,7 +28,7 @@ columns aren't dropped, then dataframe schemas will become inconsistent (str vs 
 
 EXPLODE_LISTS = True
 """If True, any with values in the resulting dataframe that are list-like (list, tuple, set, np.ndarray), will be
-expanded into separate rows, , e.g. 
+expanded into separate rows, e.g. 
 
 this dataframe:
    start_time  stop_time  trial_idx opto_bregma_x opto_bregma_y                opto_target
@@ -157,24 +157,19 @@ class PropertyDict(collections.abc.Mapping):
 
     def to_dataframe(self) -> pd.DataFrame:
         """pandas dataframe"""
-        def get_dtype(attr: str):
-            """Get dtype of attribute"""
-            # if any(key in attr for key in ('index', 'idx', 'number')):
-            #     return 'Int32'
-            # if 'time' in attr:
-            #     return 'Float32'
-            return None
-
         df = pd.DataFrame(
-            data={k: pd.Series(v, dtype=get_dtype(k)) for k, v in self.items()}
+            data={k: pd.Series(list(v) if isinstance(v, np.ndarray) else v) for k, v in self.items()}
         )
         if EXPLODE_LISTS:
-            explode_cols = (
+            explode_cols = list(
                 col
                 for col in df.columns
                 if isinstance(df[col][0], (list, tuple, set, np.ndarray))
             )
-            df = df.explode(explode_cols, ignore_index=True)
+            if explode_cols:
+                # all explode_cols should have values with the same dimensions -
+                # pandas will raise an error if they don't
+                df = df.explode(explode_cols, ignore_index=True)
         return df
     
     @property
@@ -196,7 +191,7 @@ class PropertyDict(collections.abc.Mapping):
             for k, v in self.items()
         )
         if EXPLODE_LISTS:
-            explode_cols = (
+            explode_cols = tuple(
                 col
                 for col in df.columns
                 if df[col].dtype in (pl.List, pl.Array)
