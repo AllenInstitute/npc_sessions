@@ -768,13 +768,15 @@ class DynamicRouting1(TaskControl):
                     if np.isnan(x):
                         continue
                     else:
-                        value = DynamicRoutingTask.TaskUtils.galvoToBregma(
-                            self.bregma_galvo_calibration_data,
-                            x,
-                            self._galvo_voltage_y[trial_idx][location_idx],
-                        )[0]
+                        value = self.bregma_to_galvo(trial_idx, location_idx)[0]
                     result[trial_idx][location_idx] = value
             return tuple(result)
+
+    def bregma_to_galvo(self, trial_idx, location_idx):
+        opto_params = self._hdf5['optoParams']
+        i = opto_params['label'] == self.opto_label[trial_idx][location_idx]
+        x,y = [opto_params[f'bregma{coord}'][i] + opto_params[f'bregma offset {coord}'][i] for coord in 'XY']
+        return x,y
     
     @utils.cached_property
     def _opto_location_bregma_y(self) -> tuple[tuple[np.float64], ...]:
@@ -787,11 +789,7 @@ class DynamicRouting1(TaskControl):
                     if np.isnan(y):
                         continue
                     else:
-                        value = DynamicRoutingTask.TaskUtils.galvoToBregma(
-                            self.bregma_galvo_calibration_data,
-                            self._galvo_voltage_x[trial_idx][location_idx],
-                            y,
-                        )[1]
+                        value = self.bregma_to_galvo(trial_idx, location_idx)[1]
                     result[trial_idx][location_idx] = value
             return tuple(result)
             
