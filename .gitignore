@@ -165,7 +165,7 @@ cython_debug/
 .misc
 .ruff_cache
 
-.sandbox.py
+.sandbox*
 
 dynamic_routing_qc.ipynb 
 # sometimes produced by a test script and not removed automatically
