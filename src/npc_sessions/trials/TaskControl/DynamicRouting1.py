@@ -224,7 +224,7 @@ class DynamicRouting1(TaskControl):
             )[trial]
         self.assert_single_opto_device()
         return (
-            self.get_trial_opto_onset(trial) + self.opto_duration[trial]
+            self.get_trial_opto_onset(trial).item() + self.opto_duration[trial]
         )
 
     # ---------------------------------------------------------------------- #
@@ -888,11 +888,15 @@ class DynamicRouting1(TaskControl):
         return tuple(data)
     
     @utils.cached_property
-    def opto_duration(self) -> npt.NDArray[np.nan] | npt.NDArray[np.str_]:
+    def opto_duration(self) -> npt.NDArray[np.nan] | npt.NDArray[np.float64]:
+        if not self._is_opto:
+            return np.full(self._len, np.nan)
         return self._sam.trialOptoDur[:self._len].squeeze()
     
     @utils.cached_property
-    def opto_label(self) -> npt.NDArray[np.nan] | npt.NDArray[np.str_]:
+    def opto_label(self) -> npt.NDArray[np.nan] | tuple[tuple[Any, ...], ...]:
+        if not self._is_opto:
+            return np.full(self._len, np.nan)
         if all(str(v).upper() in "ABCDEF" for v in self._opto_label):
             result = np.array(
                 [f"probe{str(v).upper()}" for v in self._opto_label], dtype=str
@@ -900,14 +904,6 @@ class DynamicRouting1(TaskControl):
         else:
             result = self._opto_label
         return self._normalize_opto_data(result)
-
-    @utils.cached_property
-    def _opto_location_index(self) -> npt.NDArray[np.int32]:
-        """0-indexed target location for optogenetic inactivation during the trial"""
-        # TODO
-        if not self._is_opto:
-            return np.full(self._len, np.nan)
-        return np.full(self._len, np.nan)
 
     @utils.cached_property
     def _opto_voltage(self) -> npt.NDArray[np.float64]:
@@ -926,7 +922,7 @@ class DynamicRouting1(TaskControl):
         return voltages
 
     @utils.cached_property
-    def opto_power(self) -> npt.NDArray[np.float64]:
+    def opto_power(self) -> npt.NDArray[np.nan] | tuple[tuple[Any, ...], ...]:
         if not self._is_opto:
             return np.full(self._len, np.nan)
         if (voltage := self._hdf5["trialOptoVoltage"]).ndim == 1:
@@ -958,16 +954,17 @@ class DynamicRouting1(TaskControl):
                         voltage,
                     ).item()
                 )
-            return self._normalize_opto_data(np.array(powers))
-
-        return self._normalize_opto_data(np.where(
-            np.isnan(voltages),
-            np.nan,
-            DynamicRoutingTask.TaskUtils.voltsToPower(
-                self._hdf5["optoPowerCalibrationData"],
-                voltages,
-            ),
-        ))
+            result = np.array(powers)
+        else:
+            result = np.where(
+                    np.isnan(voltages),
+                    np.nan,
+                    DynamicRoutingTask.TaskUtils.voltsToPower(
+                        self._hdf5["optoPowerCalibrationData"],
+                        voltages,
+                    )
+                )
+        return self._normalize_opto_data(result)
 
     @utils.cached_property
     def opto_stim_name(self) -> npt.NDArray[np.str_] | npt.NDArray[np.floating]:
