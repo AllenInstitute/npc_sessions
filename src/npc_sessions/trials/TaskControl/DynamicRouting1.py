@@ -307,11 +307,8 @@ class DynamicRouting1(TaskControl):
         - extensions due to quiescent violations are discarded: only the final
           `preStimFramesFixed` before a stim are included
         """
-        return utils.safe_index(
-            self._input_data_times,
-            self._sam.stimStartFrame - self._hdf5["preStimFramesFixed"][()],
-        )
-
+        return self.quiescent_start_time
+    
     @utils.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         """latest time in each trial, after all events have occurred"""
@@ -324,17 +321,17 @@ class DynamicRouting1(TaskControl):
 
         - only the last quiescent interval (which was not violated) is included
         """
-        return utils.safe_index(
-            self._input_data_times,
-            self._sam.stimStartFrame - self._hdf5["quiescentFrames"][()],
-        )
+        return self.quiescent_stop_time - self._hdf5["quiescentFrames"][()]
 
     @utils.cached_property
     def quiescent_stop_time(self) -> npt.NDArray[np.float64]:
         """end of interval in which the subject should not lick, otherwise the
         trial will start over"""
-        return self.stim_start_time
-
+        return utils.safe_index(
+            self._input_data_times,
+            self._sam.stimStartFrame,
+        )
+        
     @utils.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         """onset of visual or auditory stimulus"""
