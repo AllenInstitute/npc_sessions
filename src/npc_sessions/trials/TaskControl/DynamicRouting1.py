@@ -331,7 +331,7 @@ class DynamicRouting1(TaskControl):
         """end of interval in which the subject should not lick, otherwise the
         trial will start over"""
         return utils.safe_index(
-            self._input_data_times,
+            self._flip_times,
             self._sam.stimStartFrame,
         )
         
