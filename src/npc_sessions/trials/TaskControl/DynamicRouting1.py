@@ -321,7 +321,10 @@ class DynamicRouting1(TaskControl):
 
         - only the last quiescent interval (which was not violated) is included
         """
-        return self.quiescent_stop_time - self._hdf5["quiescentFrames"][()]
+        return utils.safe_index(
+            self._flip_times,
+            self._sam.stimStartFrame - self._hdf5["quiescentFrames"][()],
+        )
 
     @utils.cached_property
     def quiescent_stop_time(self) -> npt.NDArray[np.float64]:
