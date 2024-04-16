@@ -196,7 +196,8 @@ class PropertyDict(collections.abc.Mapping):
                 for col in df.columns
                 if df[col].dtype in (pl.List, pl.Array)
             )
-            df = df.explode(explode_cols)
+            if explode_cols:
+                df = df.explode(explode_cols)
         return df
     
     @property
