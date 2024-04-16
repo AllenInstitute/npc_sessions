@@ -547,9 +547,9 @@ class DynamicRoutingSession:
                 self.keywords.append("Templeton")
             # TODO these should be moved to `lab_metadata` when we have an ndx extension:
             if self.info and self.info.experiment_day is not None:
-                self.keywords.append(f"experiment day={self.info.experiment_day}")
+                self.keywords.append(f"experiment day {self.info.experiment_day}")
             if self.info and self.info.behavior_day is not None:
-                self.keywords.append(f"behavior day={self.info.behavior_day}")
+                self.keywords.append(f"behavior day {self.info.behavior_day}")
         return self._keywords
 
     @keywords.setter
