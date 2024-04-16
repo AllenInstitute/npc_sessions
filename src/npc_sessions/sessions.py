@@ -3119,7 +3119,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         return utils.get_aware_dt(self.ephys_nominal_start_time)
     
     @utils.cached_property
-    def stim_paths(self) -> tuple[upath.UPath]:
+    def stim_paths(self) -> tuple[upath.UPath, ...]:
         return ()
     
     class AP(DynamicRoutingSession.AP):
