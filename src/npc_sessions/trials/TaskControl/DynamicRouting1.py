@@ -730,7 +730,7 @@ class DynamicRouting1(TaskControl):
             return tuple([(v[1], ) for v in self._galvo_voltage_xy])
 
     @utils.cached_property
-    def _galvo_voltage_xy(self):
+    def _galvo_voltage_xy(self) -> tuple[[np.float64, ...], ...]:
         """only used to provide separate x and y attrs for old data, pre-2024-03-29"""
         if self._is_galvo_voltage_xy_separate:
             raise AttributeError("This property should not be called when galvo voltage is stored as separate x and y values")
@@ -750,7 +750,7 @@ class DynamicRouting1(TaskControl):
         else:
             self.assert_single_opto_device()
             result = tuple(tuple(v) for v in self._sam.trialGalvoVoltage[:, 0, :])
-        return self.assert_single_opto_device(np.array(result))
+        return self._normalize_opto_data(result)
         # return tuple((np.nan, np.nan) if np.isnan(params_idx) else tuple(self._sam.trialGalvoVoltage[idx, int(params_idx), :]) for idx, params_idx in enumerate(self._opto_params_index))
 
     @utils.cached_property
