@@ -605,7 +605,10 @@ class DynamicRoutingSession:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_sync and self._all_licks:
             modules.extend(self._all_licks[-2:])
-        modules.append(self._rewards)
+        try:
+            modules.append(self._rewards_with_duration)
+        except AttributeError:
+            modules.append(self._rewards)
         if self.is_task:
             modules.append(self._quiescent_violations)
         if self.is_lfp:
@@ -2605,6 +2608,11 @@ class DynamicRoutingSession:
 
     @utils.cached_property
     def _rewards(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
+        """As interpreted from task stim files, with timing corrected with sync if
+        available.
+        
+        - includes manualRewardFrames
+        """
         def get_reward_frames(data: h5py.File) -> list[int]:
             r = []
             for key in ("rewardFrames", "manualRewardFrames"):
@@ -2628,8 +2636,30 @@ class DynamicRoutingSession:
         return ndx_events.Events(
             timestamps=np.sort(np.unique(reward_times)),
             name="rewards",
-            description="individual water rewards delivered to the subject",
+            description="times at which water rewards were triggered to be delivered to the subject",
         )
+        
+    @utils.cached_property
+    def _rewards_with_duration(self) -> pynwb.TimeSeries:
+        """As interpreted from sync, after line was added ~March 2024."""
+        if not self.is_sync:
+            raise AttributeError(f"{self.id} is not a session with sync data")
+        if self.id.date < datetime.date(2024, 4, 1):
+            raise AttributeError(f"{self.id} does not have reward duration data")
+        rising = self.sync_data.get_rising_edges(15, units="seconds")
+        falling = self.sync_data.get_falling_edges(15, units="seconds")
+        if falling[0] < rising[0]:
+            falling = falling[1:]
+        if rising[-1] > falling[-1]:
+            rising = rising[:-1]
+        assert len(rising) == len(falling)
+        return pynwb.TimeSeries(
+                timestamps=rising,
+                data=falling - rising,
+                name="rewards",
+                unit="seconds",
+                description="times at which the solenoid valve that controls water reward delivery to the subject was opened; `data` contains the length of time the solenoid was open for each event",
+            ) 
 
     @utils.cached_property
     def _quiescent_violations(
