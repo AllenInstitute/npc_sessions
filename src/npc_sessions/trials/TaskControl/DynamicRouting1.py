@@ -730,7 +730,7 @@ class DynamicRouting1(TaskControl):
             return tuple([(v[1], ) for v in self._galvo_voltage_xy])
 
     @utils.cached_property
-    def _galvo_voltage_xy(self) -> tuple[tuple[np.float64, ...], ...]:
+    def _galvo_voltage_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         """only used to provide separate x and y attrs for old data, pre-2024-03-29"""
         if self._is_galvo_voltage_xy_separate:
             raise AttributeError("This property should not be called when galvo voltage is stored as separate x and y values")
@@ -760,7 +760,7 @@ class DynamicRouting1(TaskControl):
     @utils.cached_property
     def _opto_location_bregma_x(self) -> tuple[tuple[np.float64], ...]:
         if not self._is_galvo_voltage_xy_separate:
-            return tuple(v[0] for v in self._galvo_voltage_xy)
+            return tuple((v[0], ) for v in self._galvo_voltage_xy)
         else:
             result = copy.deepcopy(self._galvo_voltage_x)
             for trial_idx, x_values in enumerate(self._galvo_voltage_x):
@@ -781,7 +781,7 @@ class DynamicRouting1(TaskControl):
     @utils.cached_property
     def _opto_location_bregma_y(self) -> tuple[tuple[np.float64], ...]:
         if not self._is_galvo_voltage_xy_separate:
-            return tuple(v[1] for v in self._galvo_voltage_xy)
+            return tuple((v[1], ) for v in self._galvo_voltage_xy)
         else:
             result = copy.deepcopy(self._galvo_voltage_y)
             for trial_idx, y_values in enumerate(self._galvo_voltage_y):
