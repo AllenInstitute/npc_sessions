@@ -750,7 +750,7 @@ class DynamicRouting1(TaskControl):
         else:
             self.assert_single_opto_device()
             result = tuple(tuple(v) for v in self._sam.trialGalvoVoltage[:, 0, :])
-        return self._normalize_opto_data(result)
+        return result
         # return tuple((np.nan, np.nan) if np.isnan(params_idx) else tuple(self._sam.trialGalvoVoltage[idx, int(params_idx), :]) for idx, params_idx in enumerate(self._opto_params_index))
 
     @utils.cached_property
