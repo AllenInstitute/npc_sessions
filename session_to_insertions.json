@@ -1,0 +1,2565 @@
+{
+  "686176_2023-12-07_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "F1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "F3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E1"
+      },
+      "implant": "2002"
+    }
+  },
+  "626791_2022-08-16_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "C3"
+      },
+      "implant": "templ"
+    }
+  },
+  "690706_2023-11-27_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "A3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2005"
+    }
+  },
+  "666986_2023-08-17_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "E2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "670180_2023-07-26_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "686176_2023-12-05_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "C4"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "D2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F3"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "B3"
+      },
+      "implant": "2002"
+    }
+  },
+  "644864_2023-01-30_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "C3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "686740_2023-10-23_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "F3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D3"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E3"
+      },
+      "implant": "2002"
+    }
+  },
+  "670248_2023-08-03_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "626791_2022-08-17_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "C3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "668759_2023-07-13_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "636766_2023-01-26_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "E2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "A3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": null
+      },
+      "implant": "2002"
+    }
+  },
+  "702136_2024-03-05_0": null,
+  "667252_2023-09-28_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "2002"
+    }
+  },
+  "668755_2023-08-28_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "A1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "E4"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "676909_2023-12-12_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E3"
+      },
+      "implant": "2002"
+    }
+  },
+  "681532_2023-10-18_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "702131_2024-02-26_0": null,
+  "670248_2023-08-02_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "674562_2023-10-05_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": null
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "B3"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "A2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "2002"
+    }
+  },
+  "676909_2023-12-13_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "D3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "A3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A2"
+      },
+      "implant": "2002"
+    }
+  },
+  "666986_2023-08-15_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C4"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "B1"
+      },
+      "implant": "2002"
+    }
+  },
+  "662892_2023-08-22_0": null,
+  "664851_2023-11-13_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E3"
+      },
+      "implant": "2002"
+    }
+  },
+  "686740_2023-10-25_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2002"
+    }
+  },
+  "636397_2022-09-27_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "C3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "templ"
+    }
+  },
+  "636766_2023-01-25_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A2"
+      },
+      "implant": "2002"
+    }
+  },
+  "681532_2023-10-19_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "686740_2023-10-24_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "F3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E3"
+      },
+      "implant": "2002"
+    }
+  },
+  "690706_2023-11-28_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "A3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E2"
+      },
+      "implant": "2005"
+    }
+  },
+  "670248_2023-08-01_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "644864_2023-01-31_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "644867_2023-02-20_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E4"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2002"
+    }
+  },
+  "644866_2023-02-09_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "636766_2023-01-24_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "D3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "2002"
+    }
+  },
+  "644547_2022-12-05_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "templ"
+    }
+  },
+  "649943_2023-02-15_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2002"
+    }
+  },
+  "670180_2023-07-25_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "686740_2023-10-26_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": null
+      },
+      "implant": "2002"
+    }
+  },
+  "662892_2023-08-21_0": null,
+  "670180_2023-07-27_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "644867_2023-02-21_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E4"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2002"
+    }
+  },
+  "681532_2023-10-17_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "D3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "A3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A2"
+      },
+      "implant": "2002"
+    }
+  },
+  "676909_2023-12-11_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E3"
+      },
+      "implant": "2002"
+    }
+  },
+  "660023_2023-08-08_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "A1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2002"
+    }
+  },
+  "664851_2023-11-15_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "E4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "A3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": null
+      },
+      "implant": "2002"
+    }
+  },
+  "690706_2023-11-30_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A4"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2005"
+    }
+  },
+  "649943_2023-02-16_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2002"
+    }
+  },
+  "674562_2023-10-02_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "C4"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "D2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F3"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "B3"
+      },
+      "implant": "2002"
+    }
+  },
+  "660023_2023-08-09_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B4"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "C2"
+      },
+      "implant": "2002"
+    }
+  },
+  "662983_2023-05-15_0": null,
+  "626791_2022-08-15_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "668759_2023-07-12_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "649943_2023-02-14_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "668755_2023-08-30_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E1"
+      },
+      "implant": "2002"
+    }
+  },
+  "644866_2023-02-10_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "662983_2023-05-16_0": null,
+  "676909_2023-12-14_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "D3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "A3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A2"
+      },
+      "implant": "2002"
+    }
+  },
+  "644866_2023-02-08_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2002"
+    }
+  },
+  "620264_2022-08-02_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "H"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "P"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "K"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A"
+      },
+      "implant": "TS5"
+    }
+  },
+  "649944_2023-02-28_0": null,
+  "636397_2022-09-26_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "666986_2023-08-16_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "E2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "666986_2023-08-14_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C4"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "B1"
+      },
+      "implant": "2002"
+    }
+  },
+  "681532_2023-10-16_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "D3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "A3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A2"
+      },
+      "implant": "2002"
+    }
+  },
+  "686176_2023-12-06_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "F1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "F3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E1"
+      },
+      "implant": "2002"
+    }
+  },
+  "628801_2022-09-19_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "templ"
+    }
+  },
+  "670181_2023-07-20_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": null
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "644864_2023-02-02_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "B2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "674562_2023-10-03_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "C4"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": null
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F3"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "B3"
+      },
+      "implant": "2002"
+    }
+  },
+  "636766_2023-01-23_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "D3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "2002"
+    }
+  },
+  "646318_2023-01-18_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "C3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "templ"
+    }
+  },
+  "690706_2023-11-29_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A4"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2005"
+    }
+  },
+  "646318_2023-01-17_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "667252_2023-09-26_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F3"
+      },
+      "implant": "2002"
+    }
+  },
+  "649943_2023-02-13_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "644864_2023-02-01_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "B2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "702136_2024-03-06_0": null,
+  "667252_2023-09-27_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "2002"
+    }
+  },
+  "644867_2023-02-22_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "668755_2023-08-31_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E1"
+      },
+      "implant": "2002"
+    }
+  },
+  "649944_2023-02-27_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "664851_2023-11-16_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "A2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "A3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": null
+      },
+      "implant": "2002"
+    }
+  },
+  "668759_2023-07-11_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "670181_2023-07-18_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "Templeton/v1/0283-200-001"
+    }
+  },
+  "644866_2023-02-07_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B3"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C4"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2002"
+    }
+  },
+  "644547_2022-12-06_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "templ"
+    }
+  },
+  "686176_2023-12-04_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "C4"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "D2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "E4"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "F3"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "F2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "B3"
+      },
+      "implant": "2002"
+    }
+  },
+  "620263_2022-07-27_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "E"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "P"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "K"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A"
+      },
+      "implant": "TS5"
+    }
+  },
+  "620263_2022-07-26_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": null
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "K"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "N"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "C"
+      },
+      "implant": "TS5"
+    }
+  },
+  "644867_2023-02-23_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "D3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  },
+  "667252_2023-09-25_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "C1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "D2"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E1"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F2"
+      },
+      "implant": "2002"
+    }
+  },
+  "662892_2023-08-23_0": null,
+  "628801_2022-09-20_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "A2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "B1"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B2"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": null
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": null
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "templ"
+    }
+  },
+  "674562_2023-10-04_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "B1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "C3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": null
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "B3"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "A2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "A3"
+      },
+      "implant": "2002"
+    }
+  },
+  "664851_2023-11-14_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F1"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A3"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "B3"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "C1"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "C2"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "E3"
+      },
+      "implant": "2002"
+    }
+  },
+  "702136_2024-03-07_0": null,
+  "662892_2023-08-24_0": null,
+  "668755_2023-08-29_0": {
+    "probe_insertions": {
+      "probeA": {
+        "letter": "A",
+        "hole": "F2"
+      },
+      "probeB": {
+        "letter": "B",
+        "hole": "A2"
+      },
+      "probeC": {
+        "letter": "C",
+        "hole": "A1"
+      },
+      "probeD": {
+        "letter": "D",
+        "hole": "E4"
+      },
+      "probeE": {
+        "letter": "E",
+        "hole": "E3"
+      },
+      "probeF": {
+        "letter": "F",
+        "hole": "F1"
+      },
+      "implant": "2002"
+    }
+  }
+}
