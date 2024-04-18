@@ -16,10 +16,10 @@ from collections.abc import Iterable, Iterator
 from typing import Any, Literal
 
 import aind_data_schema.core.session
+import aind_data_schema.models.coordinates
+import aind_data_schema.models.devices
 import aind_data_schema.models.modalities
 import aind_data_schema.models.stimulus
-import aind_data_schema.models.devices
-import aind_data_schema.models.coordinates
 import cv2
 import h5py
 import hdmf
@@ -365,7 +365,7 @@ class DynamicRoutingSession:
         """Dir with record of experiment workflow, environment lock file, logs
         etc. - may not be a dedicated subfolder if contents were moved to behavior
         root.
-        
+
         - does not exist for some sessions (surface channel recordings, sessions recorded before ipynb workflow was implemented)
         """
         behavior_path = next(
@@ -378,9 +378,11 @@ class DynamicRoutingSession:
             return exp_path
         if (behavior_path / "debug.log").exists():
             return behavior_path
-        logger.debug(f"exp path not found for {self.id} - likely a session recorded before ipynb workflow was implemented")
+        logger.debug(
+            f"exp path not found for {self.id} - likely a session recorded before ipynb workflow was implemented"
+        )
         return None
-    
+
     @property
     def exp_log_path(self) -> upath.UPath | None:
         """Debug log file from experiment.
@@ -504,7 +506,9 @@ class DynamicRoutingSession:
                 return script.asstr()[()].replace("Task//", "Task/")
             if isinstance(script[()], np.floating) and not np.isnan(script[()]):
                 return str(script[()]).replace("Task//", "Task/")
-        return "https://github.com/samgale/DynamicRoutingTask/blob/main/DynamicRouting1.py"
+        return (
+            "https://github.com/samgale/DynamicRoutingTask/blob/main/DynamicRouting1.py"
+        )
 
     @property
     def source_script_file_name(self) -> str:
@@ -1097,7 +1101,9 @@ class DynamicRoutingSession:
         locations: dict[str, str | None] = {}
         if self.probe_insertions and self.implant:
             for probe_letter in self.probe_insertions:
-                locations[probe_letter] = f"{self.implant} {self.probe_insertions[probe_letter]}"
+                locations[probe_letter] = (
+                    f"{self.implant} {self.probe_insertions[probe_letter]}"
+                )
         return tuple(
             pynwb.ecephys.ElectrodeGroup(
                 name=f"probe{probe_letter}",
@@ -1751,12 +1757,14 @@ class DynamicRoutingSession:
             raise AttributeError(
                 f"{self.id} is an ephys session, but no NewScale log file available"
             ) from None
-            
+
         try:
             _ = self.newscale_log_path
         except FileNotFoundError as exc:
-            raise AttributeError(f"{self.id} has no log.csv file to get manipulator coordinates") from exc
-            
+            raise AttributeError(
+                f"{self.id} has no log.csv file to get manipulator coordinates"
+            ) from exc
+
         df = utils.get_newscale_coordinates(
             self.newscale_log_path,
             f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
@@ -1941,14 +1949,16 @@ class DynamicRoutingSession:
         if self.is_ephys:
             return _format(
                 {
-                    'W10DT713842': 'NP0',
-                    'W10DT713843': 'NP1',
-                    'W10DT713844': 'NP2',
-                    'W10DTM714205': 'NP3',
-                    'W10DT05516': 'NP3',
-                    }[self.ephys_settings_xml_data.hostname.upper()]
+                    "W10DT713842": "NP0",
+                    "W10DT713843": "NP1",
+                    "W10DT713844": "NP2",
+                    "W10DTM714205": "NP3",
+                    "W10DT05516": "NP3",
+                }[self.ephys_settings_xml_data.hostname.upper()]
             )
-        raise AttributeError(f"Could not find rigName for {self.id} in stim files or ephys files")
+        raise AttributeError(
+            f"Could not find rigName for {self.id} in stim files or ephys files"
+        )
 
     @property
     def sam(self) -> DynRoutData:
@@ -2153,11 +2163,13 @@ class DynamicRoutingSession:
     @utils.cached_property
     def ephys_nominal_start_time(self) -> datetime.datetime:
         """Start time from sync_messages.txt"""
-        software_time_line = self.ephys_sync_messages_path.read_text().split('\n')[0]
-        timestamp_value = float(software_time_line[software_time_line.index(':')+2:].strip())
+        software_time_line = self.ephys_sync_messages_path.read_text().split("\n")[0]
+        timestamp_value = float(
+            software_time_line[software_time_line.index(":") + 2 :].strip()
+        )
         timestamp = datetime.datetime.fromtimestamp(timestamp_value / 1e3)
         return timestamp
-    
+
     @utils.cached_property
     def ephys_structure_oebin_paths(self) -> tuple[upath.UPath, ...]:
         return tuple(
@@ -2248,7 +2260,7 @@ class DynamicRoutingSession:
         if self.probe_insertion_info:
             return self.probe_insertion_info["probes"]
         return None
-    
+
     @utils.cached_property
     def probe_insertion_info(self) -> dict[str, Any] | None:
         d = None
@@ -2256,7 +2268,11 @@ class DynamicRoutingSession:
             return npc_lims.get_probe_insertion_metadata(self.id)
         if d is None:
             path = next(
-                (path for path in self.raw_data_paths if path.name == "probe_insertions.json"),
+                (
+                    path
+                    for path in self.raw_data_paths
+                    if path.name == "probe_insertions.json"
+                ),
                 None,
             )
             if path:
@@ -2267,13 +2283,10 @@ class DynamicRoutingSession:
                 with contextlib.suppress(ValueError):
                     key_to_probe[k] = npc_session.ProbeRecord(k)
             return {
-                    'probes': 
-                        {key_to_probe[k]: d[k]['hole'] for k in key_to_probe},
-                    'notes':
-                        {key_to_probe[k]: d[k].get('notes') for k in key_to_probe},
-                    'implant':
-                        d['implant']
-                }
+                "probes": {key_to_probe[k]: d[k]["hole"] for k in key_to_probe},
+                "notes": {key_to_probe[k]: d[k].get("notes") for k in key_to_probe},
+                "implant": d["implant"],
+            }
         path = next(
             (path for path in self.raw_data_paths if path.name == "insertions.json"),
             None,
@@ -2328,7 +2341,7 @@ class DynamicRoutingSession:
             # TODO get from sharepoint
             return None
         return self.probe_insertion_info["shield"]["name"]
-        
+
     @utils.cached_property
     def _all_licks(self) -> tuple[ndx_events.Events, ...]:
         """First item is always `processing['licks']` - the following items are only if sync
@@ -2610,9 +2623,10 @@ class DynamicRoutingSession:
     def _rewards(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
         """As interpreted from task stim files, with timing corrected with sync if
         available.
-        
+
         - includes manualRewardFrames
         """
+
         def get_reward_frames(data: h5py.File) -> list[int]:
             r = []
             for key in ("rewardFrames", "manualRewardFrames"):
@@ -2638,7 +2652,7 @@ class DynamicRoutingSession:
             name="rewards",
             description="times at which water rewards were triggered to be delivered to the subject",
         )
-        
+
     @utils.cached_property
     def _rewards_with_duration(self) -> pynwb.TimeSeries:
         """As interpreted from sync, after line was added ~March 2024."""
@@ -2654,12 +2668,12 @@ class DynamicRoutingSession:
             rising = rising[:-1]
         assert len(rising) == len(falling)
         return pynwb.TimeSeries(
-                timestamps=rising,
-                data=falling - rising,
-                name="rewards",
-                unit="seconds",
-                description="times at which the solenoid valve that controls water reward delivery to the subject was opened; `data` contains the length of time the solenoid was open for each event",
-            ) 
+            timestamps=rising,
+            data=falling - rising,
+            name="rewards",
+            unit="seconds",
+            description="times at which the solenoid valve that controls water reward delivery to the subject was opened; `data` contains the length of time the solenoid was open for each event",
+        )
 
     @utils.cached_property
     def _quiescent_violations(
@@ -2718,23 +2732,23 @@ class DynamicRoutingSession:
                             aind_data_schema.models.coordinates.Translation3dTransform(
                                 translation=[0.0, 0.0, 0.0],
                             )
-                            ],
+                        ],
                         device_origin="Located on the tip of the spout (which is also the lick sensor), centered in front of the subject's mouth",
                         device_axes=[
                             aind_data_schema.models.coordinates.Axis(
                                 name="X",
-                                direction="Positive is from the centerline of the subject's mouth towards its right"
+                                direction="Positive is from the centerline of the subject's mouth towards its right",
                             ),
                             aind_data_schema.models.coordinates.Axis(
                                 name="Y",
-                                direction="Positive is from the centerline of the subject's mouth towards the sky"
+                                direction="Positive is from the centerline of the subject's mouth towards the sky",
                             ),
                             aind_data_schema.models.coordinates.Axis(
                                 name="Z",
-                                direction="Positive is from the anterior-most part of the subject's mouth towards its tail"
+                                direction="Positive is from the anterior-most part of the subject's mouth towards its tail",
                             ),
-                            ],
-                        ),
+                        ],
+                    ),
                     variable_position=False,
                 )
             ],
@@ -2760,13 +2774,15 @@ class DynamicRoutingSession:
                     stream_start_time=self.session_start_time
                     + datetime.timedelta(
                         seconds=min(
-                            np.nanmin(times.timestamps) for times in self._video_frame_times
+                            np.nanmin(times.timestamps)
+                            for times in self._video_frame_times
                         )
                     ),
                     stream_end_time=self.session_start_time
                     + datetime.timedelta(
                         seconds=max(
-                            np.nanmax(times.timestamps) for times in self._video_frame_times
+                            np.nanmax(times.timestamps)
+                            for times in self._video_frame_times
                         )
                     ),
                     camera_names=["Front camera", "Side camera", "Eye camera"],
@@ -2774,48 +2790,60 @@ class DynamicRoutingSession:
                 )
             )
         if self.is_ephys:
-            
+
             data_streams.append(
                 aind_data_schema.core.session.Stream(
                     stream_start_time=self.session_start_time
                     + datetime.timedelta(
-                        seconds=min(timing.start_time for timing in self.ephys_timing_data)
+                        seconds=min(
+                            timing.start_time for timing in self.ephys_timing_data
+                        )
                     ),
                     stream_end_time=self.session_start_time
                     + datetime.timedelta(
-                        seconds=max(timing.stop_time for timing in self.ephys_timing_data)
-                    ),
-                    ephys_modules= (ephys_modules := [
-                        aind_data_schema.core.session.EphysModule(
-                            assembly_name=probe.name.upper(),
-                            arc_angle=0.0,
-                            module_angle=0.0,
-                            rotation_angle=0.0,
-                            primary_targeted_structure="none",
-                            manipulator_coordinates=(
-                                aind_data_schema.models.coordinates.Coordinates3d(
-                                    x=(row := self._manipulator_info.to_dataframe().query(f"electrode_group == '{probe.name}'"))['x'].item(),
-                                    y=row['y'].item(),
-                                    z=row['z'].item(),
-                                    unit="micrometer",
-                                ) 
-                                ) # some old sessions didn't have newscale logging enabled: no way to get their coords
-                                if hasattr(self, "_manipulator_info") 
-                                else aind_data_schema.models.coordinates.Coordinates3d(
-                                    x=0.0,
-                                    y=0.0,
-                                    z=0.0,
-                                    unit="micrometer",
-                            ),
-                            ephys_probes=[
-                                aind_data_schema.core.session.EphysProbeConfig(
-                                    name = probe.name.upper(),
-                                )
-                            ]
+                        seconds=max(
+                            timing.stop_time for timing in self.ephys_timing_data
                         )
-                        for probe in self.probe_letters_to_use
-                    ]),
-                    stick_microscopes=ephys_modules, # cannot create ecephys modality without stick microscopes
+                    ),
+                    ephys_modules=(
+                        ephys_modules := [
+                            aind_data_schema.core.session.EphysModule(
+                                assembly_name=probe.name.upper(),
+                                arc_angle=0.0,
+                                module_angle=0.0,
+                                rotation_angle=0.0,
+                                primary_targeted_structure="none",
+                                manipulator_coordinates=(
+                                    (
+                                        aind_data_schema.models.coordinates.Coordinates3d(
+                                            x=(
+                                                row := self._manipulator_info.to_dataframe().query(
+                                                    f"electrode_group == '{probe.name}'"
+                                                )
+                                            )["x"].item(),
+                                            y=row["y"].item(),
+                                            z=row["z"].item(),
+                                            unit="micrometer",
+                                        )
+                                    )  # some old sessions didn't have newscale logging enabled: no way to get their coords
+                                    if hasattr(self, "_manipulator_info")
+                                    else aind_data_schema.models.coordinates.Coordinates3d(
+                                        x=0.0,
+                                        y=0.0,
+                                        z=0.0,
+                                        unit="micrometer",
+                                    )
+                                ),
+                                ephys_probes=[
+                                    aind_data_schema.core.session.EphysProbeConfig(
+                                        name=probe.name.upper(),
+                                    )
+                                ],
+                            )
+                            for probe in self.probe_letters_to_use
+                        ]
+                    ),
+                    stick_microscopes=ephys_modules,  # cannot create ecephys modality without stick microscopes
                     stream_modalities=[modality.ECEPHYS],
                 )
             )
@@ -2826,10 +2854,20 @@ class DynamicRoutingSession:
         self,
     ) -> tuple[aind_data_schema.core.session.StimulusEpoch, ...]:
 
-        def get_modalities(epoch_name: str) -> list[aind_data_schema.core.session.StimulusModality]:
+        def get_modalities(
+            epoch_name: str,
+        ) -> list[aind_data_schema.core.session.StimulusModality]:
             stim = aind_data_schema.core.session.StimulusModality
             modalities = []
-            if any(name in epoch_name for name in ("DynamicRouting", "RFMapping", "LuminanceTest", "Spontaneous")):
+            if any(
+                name in epoch_name
+                for name in (
+                    "DynamicRouting",
+                    "RFMapping",
+                    "LuminanceTest",
+                    "Spontaneous",
+                )
+            ):
                 modalities.append(stim.VISUAL)
             if any(name in epoch_name for name in ("DynamicRouting", "RFMapping")):
                 modalities.append(stim.AUDITORY)
@@ -2838,15 +2876,19 @@ class DynamicRoutingSession:
             if any(name in epoch_name for name in ("OptoTagging",)):
                 modalities.append(stim.OPTOGENETICS)
             return modalities or [stim.NONE]
-        
+
         def get_num_trials(epoch_name: str) -> int | None:
             if epoch_name == "RFMapping":
-                return sum(len(trials) for name, trials in self.intervals.items() if "RFMapping" in name)
+                return sum(
+                    len(trials)
+                    for name, trials in self.intervals.items()
+                    if "RFMapping" in name
+                )
             trials = self.intervals.get(epoch_name)
             if trials is None:
                 return None
             return len(trials)
-            
+
         def get_device_names(epoch_name: str) -> list[str]:
             stim = aind_data_schema.core.session.StimulusModality
             modalities = get_modalities(epoch_name)
@@ -2856,10 +2898,12 @@ class DynamicRoutingSession:
             if stim.AUDITORY in modalities:
                 device_names.append("Speaker")
             if stim.OPTOGENETICS in modalities:
-                device_names.append("Laser #0") #TODO detect if second laser used
+                device_names.append("Laser #0")  # TODO detect if second laser used
             return device_names
-        
-        def get_speaker_config(epoch_name: str) -> aind_data_schema.core.session.SpeakerConfig | None:
+
+        def get_speaker_config(
+            epoch_name: str,
+        ) -> aind_data_schema.core.session.SpeakerConfig | None:
             stim = aind_data_schema.core.session.StimulusModality
             modalities = get_modalities(epoch_name)
             if stim.AUDITORY not in modalities:
@@ -2869,8 +2913,10 @@ class DynamicRoutingSession:
                 volume=68.0,
                 volume_unit="decibels",
             )
-            
-        def get_parameters(epoch_name: str) -> list[Any] | None: # no baseclass for stim param classes
+
+        def get_parameters(
+            epoch_name: str,
+        ) -> list[Any] | None:  # no baseclass for stim param classes
             stim = aind_data_schema.core.session.StimulusModality
             stimulus = aind_data_schema.models.stimulus
             modalities = get_modalities(epoch_name)
@@ -2884,13 +2930,13 @@ class DynamicRoutingSession:
                             stimulus_name="target and non-target visual grating stimuli",
                             stimulus_parameters={
                                 "orientations_deg": [0, 90],
-                                "position_xy": (0,0),
+                                "position_xy": (0, 0),
                                 "size_deg": 50,
                                 "spatial_frequency_cycles_per_deg": 0.04,
                                 "temporal_frequency_cycles_per_sec": 2,
                                 "type": "sqr",
                                 "phase": [0.0, 0.5],
-                            }
+                            },
                         ),
                         stimulus.AuditoryStimulation(
                             sitmulus_name="target amplitude-modulated noise stimulus",
@@ -2901,7 +2947,7 @@ class DynamicRoutingSession:
                             sitmulus_name="non-target amplitude-modulated noise stimulus",
                             sample_frequency=10_000,
                             amplitude_modulation_frequency=12,
-                        )
+                        ),
                     ]
                 )
             if epoch_name == "RFMapping":
@@ -2910,23 +2956,36 @@ class DynamicRoutingSession:
                         stimulus.VisualStimulation(
                             stimulus_name="receptive-field mapping grating stimuli",
                             stimulus_parameters={
-                                "orientations_deg": [0, 45, 90, 135, 180, 225, 270, 315],
-                                "position_x": list(np.unique(self.intervals["VisRFMapping"].grating_x)),
-                                "position_y": list(np.unique(self.intervals["VisRFMapping"].grating_y)),
+                                "orientations_deg": [
+                                    0,
+                                    45,
+                                    90,
+                                    135,
+                                    180,
+                                    225,
+                                    270,
+                                    315,
+                                ],
+                                "position_x": list(
+                                    np.unique(self.intervals["VisRFMapping"].grating_x)
+                                ),
+                                "position_y": list(
+                                    np.unique(self.intervals["VisRFMapping"].grating_y)
+                                ),
                                 "size_deg": 20,
                                 "spatial_frequency_cycles_per_deg": 0.08,
                                 "temporal_frequency_cycles_per_sec": 4,
                                 "type": "sqr",
-                                "duration_sec": .25,
-                            }
+                                "duration_sec": 0.25,
+                            },
                         ),
                         stimulus.VisualStimulation(
                             stimulus_name="full-field flash stimuli",
                             stimulus_parameters={
                                 "gray_level": [-1, 0, 1],
-                                "duration_sec": .25,
+                                "duration_sec": 0.25,
                             },
-                            notes="-1.0: black | 0: mid-gray | 1.0: white"
+                            notes="-1.0: black | 0: mid-gray | 1.0: white",
                         ),
                         *[
                             stimulus.AuditoryStimulation(
@@ -2938,7 +2997,7 @@ class DynamicRoutingSession:
                         ],
                     ]
                 )
-                
+
             if epoch_name == "OptoTagging":
                 # square waves of different lengths
                 parameters.extend(
@@ -2948,21 +3007,21 @@ class DynamicRoutingSession:
                             pulse_shape="Square",
                             pulse_frequency=[100],
                             number_pulse_trains=[1],
-                            pulse_width=[10], #ms
-                            pulse_train_duration=[0.01],#s
+                            pulse_width=[10],  # ms
+                            pulse_train_duration=[0.01],  # s
                             fixed_pulse_train_interval=False,
-                            baseline_duration=0.2, #s
+                            baseline_duration=0.2,  # s
                         ),
                         stimulus.OptoStimulation(
                             stimulus_name="long optotagging stimulus",
                             pulse_shape="Square",
                             pulse_frequency=[5],
                             number_pulse_trains=[1],
-                            pulse_width=[200], #ms
-                            pulse_train_duration=[0.2],#s
+                            pulse_width=[200],  # ms
+                            pulse_train_duration=[0.2],  # s
                             fixed_pulse_train_interval=False,
-                            baseline_duration=0.2, #s
-                        )
+                            baseline_duration=0.2,  # s
+                        ),
                     ]
                 )
             if "Spontaneous" in epoch_name:
@@ -2971,60 +3030,77 @@ class DynamicRoutingSession:
                     stimulus.VisualStimulation(
                         stimulus_name="blank screen, constant luminance",
                         stimulus_parameters={
-                            "gray_level": -0.95 if self.session_start_time.timestamp() > datetime.datetime(2024, 4, 1).timestamp() else -1.0,
+                            "gray_level": (
+                                -0.95
+                                if self.session_start_time.timestamp()
+                                > datetime.datetime(2024, 4, 1).timestamp()
+                                else -1.0
+                            ),
                         },
-                        notes="-1.0: black | 0: mid-gray | 1.0: white"
+                        notes="-1.0: black | 0: mid-gray | 1.0: white",
                     )
                 )
             return parameters
-        
+
         def get_num_trials_rewarded(epoch_name: str) -> int | None:
             if "DynamicRouting" in epoch_name:
                 return len(self.sam.rewardTimes)
             return None
-        
+
         def get_reward_consumed(epoch_name: str) -> float | None:
             num_trials_rewarded = get_num_trials_rewarded(epoch_name)
             if num_trials_rewarded is None:
                 return None
             return np.nanmean(self.sam.rewardSize) * num_trials_rewarded
-        
+
         def get_version() -> str | None:
             if "blob/main" in self.source_script:
                 return None
-            return self.source_script.split('DynamicRoutingTask/')[-1].split('/DynamicRouting1.py')[0].strip('/')
-        
+            return (
+                self.source_script.split("DynamicRoutingTask/")[-1]
+                .split("/DynamicRouting1.py")[0]
+                .strip("/")
+            )
+
         def get_url(epoch_name: str) -> str:
-            return self.source_script.replace('DynamicRouting1', get_taskcontrol_file(epoch_name))
-        
+            return self.source_script.replace(
+                "DynamicRouting1", get_taskcontrol_file(epoch_name)
+            )
+
         def get_taskcontrol_file(epoch_name: str) -> str:
-            if upath.UPath(self.source_script.replace('DynamicRouting1', epoch_name)).exists():
+            if upath.UPath(
+                self.source_script.replace("DynamicRouting1", epoch_name)
+            ).exists():
                 return epoch_name
             return "TaskControl"
-        
+
         aind_epochs = []
         for nwb_epoch in self.epochs:
             epoch_name = nwb_epoch.tags.item()[0]
-            
+
             aind_epochs.append(
                 aind_data_schema.core.session.StimulusEpoch(
-                    stimulus_start_time=datetime.timedelta(seconds=nwb_epoch.start_time.item())
+                    stimulus_start_time=datetime.timedelta(
+                        seconds=nwb_epoch.start_time.item()
+                    )
                     + self.session_start_time,
-                    stimulus_end_time=datetime.timedelta(seconds=nwb_epoch.stop_time.item())
+                    stimulus_end_time=datetime.timedelta(
+                        seconds=nwb_epoch.stop_time.item()
+                    )
                     + self.session_start_time,
                     stimulus_name=epoch_name,
                     software=[
                         aind_data_schema.models.devices.Software(
-                            name='PsychoPy',
-                            version='2022.1.2',
-                            url='https://www.psychopy.org/',
+                            name="PsychoPy",
+                            version="2022.1.2",
+                            url="https://www.psychopy.org/",
                         ),
                     ],
                     script=aind_data_schema.models.devices.Software(
-                            name=get_taskcontrol_file(epoch_name),
-                            version=get_version() or "unknown",
-                            url=get_url(epoch_name),
-                        ),
+                        name=get_taskcontrol_file(epoch_name),
+                        version=get_version() or "unknown",
+                        url=get_url(epoch_name),
+                    ),
                     stimulus_modalities=get_modalities(epoch_name),
                     stimulus_parameters=get_parameters(epoch_name),
                     stimulus_device_names=get_device_names(epoch_name),
@@ -3039,27 +3115,31 @@ class DynamicRoutingSession:
             )
         return tuple(aind_epochs)
 
-
     @utils.cached_property
     def _aind_rig_id(self) -> str:
-        rig = self.rig.strip('.')
+        rig = self.rig.strip(".")
         rig_to_room = {
-            'NP0': '325',
-            'NP1': '325',
-            'NP2': '327',
-            'NP3': '342',
+            "NP0": "325",
+            "NP1": "325",
+            "NP2": "327",
+            "NP3": "342",
         }
-        last_updated = '240401'
+        last_updated = "240401"
         return f"{rig_to_room[rig]}_{rig}_{last_updated}"
-    
+
     @utils.cached_property
     def _aind_session_metadata(self) -> aind_data_schema.core.session.Session:
         return aind_data_schema.core.session.Session(
-            experimenter_full_name=self.experimenter
-            or ["NSB trainer"],
+            experimenter_full_name=self.experimenter or ["NSB trainer"],
             session_start_time=self.session_start_time,
-            session_end_time=self.sync_data.stop_time if self.is_sync else (max(self.epochs.stop_time) if self.epochs.stop_time else None),
-            session_type=self.session_description.replace(" without CCF-annotated units", ""),
+            session_end_time=(
+                self.sync_data.stop_time
+                if self.is_sync
+                else (max(self.epochs.stop_time) if self.epochs.stop_time else None)
+            ),
+            session_type=self.session_description.replace(
+                " without CCF-annotated units", ""
+            ),
             iacuc_protocol="2104",
             rig_id=self._aind_rig_id,
             subject_id=str(self.id.subject),
@@ -3073,7 +3153,7 @@ class DynamicRoutingSession:
                 if self.is_task
                 else None
             ),
-            reward_consumed_unit='milliliter',
+            reward_consumed_unit="milliliter",
             notes=self.notes,
         )
 
@@ -3113,15 +3193,15 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     @property
     def session_description(self) -> str:
         return "short ephys recording of spontaneous activity using probe channels at brain surface, to aid probe localization"
-    
+
     @property
     def session_start_time(self) -> datetime.datetime:
         return utils.get_aware_dt(self.ephys_nominal_start_time)
-    
+
     @utils.cached_property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
         return ()
-    
+
     class AP(DynamicRoutingSession.AP):
         def __init__(self, *args, **kwargs) -> None:
             super().__init__(*args, **kwargs | {"name": "surface_AP"})

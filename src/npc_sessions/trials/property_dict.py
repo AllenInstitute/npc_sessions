@@ -51,6 +51,7 @@ This can make it easier to deal with trials with multiple values for a single
 location parameter, such as bilateral opto stimulation targets
 """
 
+
 class PropertyDict(collections.abc.Mapping):
     """Dict type, where the keys are the class's properties (regular attributes
     and property getters) which don't have a leading underscore, and values are
@@ -158,7 +159,10 @@ class PropertyDict(collections.abc.Mapping):
     def to_dataframe(self) -> pd.DataFrame:
         """pandas dataframe"""
         df = pd.DataFrame(
-            data={k: pd.Series(list(v) if isinstance(v, np.ndarray) else v) for k, v in self.items()}
+            data={
+                k: pd.Series(list(v) if isinstance(v, np.ndarray) else v)
+                for k, v in self.items()
+            }
         )
         if EXPLODE_LISTS:
             explode_cols = list(
@@ -171,10 +175,11 @@ class PropertyDict(collections.abc.Mapping):
                 # pandas will raise an error if they don't
                 df = df.explode(explode_cols, ignore_index=True)
         return df
-    
+
     @property
     def _df(self) -> pl.DataFrame:
         """polars dataframe"""
+
         def get_dtype(attr: str, value: Any) -> type[pl.DataType] | None:
             """Get dtype of attribute"""
             if any(key in attr for key in ("index", "idx", "number")):
@@ -192,14 +197,12 @@ class PropertyDict(collections.abc.Mapping):
         )
         if EXPLODE_LISTS:
             explode_cols = tuple(
-                col
-                for col in df.columns
-                if df[col].dtype in (pl.List, pl.Array)
+                col for col in df.columns if df[col].dtype in (pl.List, pl.Array)
             )
             if explode_cols:
                 df = df.explode(explode_cols)
         return df
-    
+
     @property
     def _docstrings(self) -> dict[str, str]:
         """Docstrings of property getter methods that have no leading

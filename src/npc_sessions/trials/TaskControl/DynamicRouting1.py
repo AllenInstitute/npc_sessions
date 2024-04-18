@@ -14,7 +14,7 @@ import copy
 import datetime
 import logging
 from collections.abc import Iterable
-from typing import Any, Sequence
+from typing import Any
 
 import DynamicRoutingTask.TaskUtils
 import npc_lims
@@ -194,9 +194,7 @@ class DynamicRouting1(TaskControl):
             return self.get_trial_aud_onset(trial) + self._hdf5["trialSoundDur"][trial]
         return utils.safe_index(self._aud_stim_offset_times, trial)
 
-    def get_trial_opto_onset(
-        self
-    ) -> npt.NDArray[np.float64]:
+    def get_trial_opto_onset(self) -> npt.NDArray[np.float64]:
         self.assert_single_opto_device()
         if self._opto_stim_recordings is not None:
             return np.array(
@@ -204,17 +202,17 @@ class DynamicRouting1(TaskControl):
                     np.nan if rec is None else rec.onset_time_on_sync
                     for rec in self._opto_stim_recordings
                 ]
-            )[:self._len]
+            )[: self._len]
         logger.debug("Using script frame times for opto stim onsets")
         if (onset_frames := self._sam.trialOptoOnsetFrame).ndim == 2:
             onset_frames = onset_frames.squeeze()
         # note: this is different to OptoTagging, where onset frame is abs frame idx
         return utils.safe_index(
-            self._flip_times, self._sam.stimStartFrame + onset_frames[:self._len]
+            self._flip_times, self._sam.stimStartFrame + onset_frames[: self._len]
         )
 
     def get_trial_opto_offset(
-        self, 
+        self,
     ) -> npt.NDArray[np.float64]:
         self.assert_single_opto_device()
         if self._opto_stim_recordings is not None:
@@ -223,11 +221,9 @@ class DynamicRouting1(TaskControl):
                     np.nan if rec is None else rec.offset_time_on_sync
                     for rec in self._opto_stim_recordings
                 ]
-            )[:self._len]
+            )[: self._len]
         self.assert_single_opto_device()
-        return (
-            self.get_trial_opto_onset() + self.opto_duration[:self._len]
-        )
+        return self.get_trial_opto_onset() + self.opto_duration[: self._len]
 
     # ---------------------------------------------------------------------- #
     # helper-properties that won't become columns:
@@ -257,7 +253,7 @@ class DynamicRouting1(TaskControl):
     @utils.cached_property
     def _datetime(self) -> datetime.datetime:
         return npc_session.DatetimeRecord(self._sam.startTime).dt
-    
+
     @utils.cached_property
     def _aud_stims(self) -> npt.NDArray[np.str_]:
         return np.unique([stim for stim in self.stim_name if "sound" in stim.lower()])
@@ -308,7 +304,7 @@ class DynamicRouting1(TaskControl):
           `preStimFramesFixed` before a stim are included
         """
         return self.quiescent_start_time
-    
+
     @utils.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         """latest time in each trial, after all events have occurred"""
@@ -334,7 +330,7 @@ class DynamicRouting1(TaskControl):
             self._flip_times,
             self._sam.stimStartFrame,
         )
-        
+
     @utils.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         """onset of visual or auditory stimulus"""
@@ -638,8 +634,10 @@ class DynamicRouting1(TaskControl):
         if not self._is_opto:
             raise ValueError("No opto devices in non-opto session")
         if (devices := self._hdf5.get("trialOptoDevice")) is None or devices.size == 0:
-            assert self._datetime.date() < datetime.date(2023, 8, 1) # older sessions may lack info
-            return ('laser_488', )
+            assert self._datetime.date() < datetime.date(
+                2023, 8, 1
+            )  # older sessions may lack info
+            return ("laser_488",)
         devices = devices.asstr()[trial_idx]
         if devices[0] + devices[-1] != "[]":
             # basic check before we eval code from the web
@@ -654,20 +652,28 @@ class DynamicRouting1(TaskControl):
     def opto_wavelength(self) -> tuple[tuple[Any, ...]] | npt.NDArray[np.floating]:
         if not self._is_opto:
             return np.full(self._len, np.nan)
-        def parse_wavelengths(devices: tuple[str, ...] | str) -> tuple[int | np.floating, ...]:
+
+        def parse_wavelengths(
+            devices: tuple[str, ...] | str
+        ) -> tuple[int | np.floating, ...]:
             if isinstance(devices, str):
                 if not devices:
-                    return (np.nan, ) # type: ignore
+                    return (np.nan,)  # type: ignore
                 try:
-                    return (int(devices.split("_")[-1]), )
+                    return (int(devices.split("_")[-1]),)
                 except ValueError as exc:
-                    raise ValueError(f"Invalid opto devices string (expected 'laser_488' format): {devices}") from exc
+                    raise ValueError(
+                        f"Invalid opto devices string (expected 'laser_488' format): {devices}"
+                    ) from exc
             result: tuple[int | np.floating, ...] = ()
             for device in devices:
                 result = result + parse_wavelengths(device)
             return result
-        return self._normalize_opto_data([parse_wavelengths(v) for v in self._trial_opto_devices])
-    
+
+        return self._normalize_opto_data(
+            [parse_wavelengths(v) for v in self._trial_opto_devices]
+        )
+
     @utils.cached_property
     def _opto_params_index(self) -> npt.NDArray[np.float64] | None:
         if not self._is_opto:
@@ -710,7 +716,7 @@ class DynamicRouting1(TaskControl):
     @utils.cached_property
     def _is_galvo_voltage_xy_separate(self) -> bool:
         """Whether galvo voltage is stored as separate x and y values
-        
+
         - sam separated x and y values for opto in the task on 2024-03-29
         - `trialGalvoVoltage` -> `trialGalvoX` and `trialGalvoY`
         """
@@ -719,26 +725,28 @@ class DynamicRouting1(TaskControl):
         if hasattr(self._sam, "trialGalvoVoltage"):
             return False
         return False
-    
+
     @utils.cached_property
     def _galvo_voltage_x(self):
         if self._is_galvo_voltage_xy_separate:
             return tuple(self._sam.trialGalvoX)
         else:
-            return tuple([(v[0], ) for v in self._galvo_voltage_xy])
-        
+            return tuple([(v[0],) for v in self._galvo_voltage_xy])
+
     @utils.cached_property
     def _galvo_voltage_y(self):
         if self._is_galvo_voltage_xy_separate:
             return tuple(self._sam.trialGalvoY)
         else:
-            return tuple([(v[1], ) for v in self._galvo_voltage_xy])
+            return tuple([(v[1],) for v in self._galvo_voltage_xy])
 
     @utils.cached_property
     def _galvo_voltage_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         """only used to provide separate x and y attrs for old data, pre-2024-03-29"""
         if self._is_galvo_voltage_xy_separate:
-            raise AttributeError("This property should not be called when galvo voltage is stored as separate x and y values")
+            raise AttributeError(
+                "This property should not be called when galvo voltage is stored as separate x and y values"
+            )
         elif len(self._sam.trialGalvoVoltage.shape) < 3:
             if not all(len(v) == 2 for v in self._sam.trialGalvoVoltage):
                 # a set of experiments with 670248 had a bug where galvo
@@ -761,11 +769,11 @@ class DynamicRouting1(TaskControl):
     @utils.cached_property
     def _bregma_galvo_calibration_data(self) -> dict[str, float | list[float]]:
         return self.getBregmaGalvoCalibrationData()
-    
+
     @utils.cached_property
     def _opto_location_bregma_x(self) -> tuple[tuple[np.float64], ...]:
         if not self._is_galvo_voltage_xy_separate:
-            return tuple((v[0], ) for v in self._galvo_voltage_xy)
+            return tuple((v[0],) for v in self._galvo_voltage_xy)
         else:
             result = copy.deepcopy(self._galvo_voltage_x)
             for trial_idx, x_values in enumerate(self._galvo_voltage_x):
@@ -778,15 +786,18 @@ class DynamicRouting1(TaskControl):
             return tuple(result)
 
     def bregma_to_galvo(self, trial_idx, location_idx):
-        opto_params = self._hdf5['optoParams']
-        i = opto_params['label'] == self.opto_label[trial_idx][location_idx]
-        x,y = [opto_params[f'bregma{coord}'][i] + opto_params[f'bregma offset {coord}'][i] for coord in 'XY']
-        return x,y
-    
+        opto_params = self._hdf5["optoParams"]
+        i = opto_params["label"] == self.opto_label[trial_idx][location_idx]
+        x, y = (
+            opto_params[f"bregma{coord}"][i] + opto_params[f"bregma offset {coord}"][i]
+            for coord in "XY"
+        )
+        return x, y
+
     @utils.cached_property
     def _opto_location_bregma_y(self) -> tuple[tuple[np.float64], ...]:
         if not self._is_galvo_voltage_xy_separate:
-            return tuple((v[1], ) for v in self._galvo_voltage_xy)
+            return tuple((v[1],) for v in self._galvo_voltage_xy)
         else:
             result = copy.deepcopy(self._galvo_voltage_y)
             for trial_idx, y_values in enumerate(self._galvo_voltage_y):
@@ -797,11 +808,13 @@ class DynamicRouting1(TaskControl):
                         value = self.bregma_to_galvo(trial_idx, location_idx)[1]
                     result[trial_idx][location_idx] = value
             return tuple(result)
-            
+
     @utils.cached_property
     def _opto_location_bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         if self._is_galvo_voltage_xy_separate:
-            raise AttributeError("This property should not be called when galvo voltage is stored as separate x and y values")
+            raise AttributeError(
+                "This property should not be called when galvo voltage is stored as separate x and y values"
+            )
         # bregma xy may be stored in the hdf5 file directly:
         bregma = self._hdf5.get("optoBregma") or self._hdf5.get("bregmaXY")
         if bregma is not None:
@@ -810,9 +823,9 @@ class DynamicRouting1(TaskControl):
                 tuple(bregma[np.all(galvo == v, axis=1)][0])
                 for v in self._galvo_voltage_xy
             )
-        
+
         # otherwise, we need to calculate it from galvo voltages
-        old_params = ("bregmaXOffset", "bregmaYOffset") # not used after 2024-03-29
+        old_params = ("bregmaXOffset", "bregmaYOffset")  # not used after 2024-03-29
         if (calibration_data := self._hdf5.get("bregmaGalvoCalibrationData")) is None:
             calibration_data = self.getBregmaGalvoCalibrationData()
         else:
@@ -829,20 +842,26 @@ class DynamicRouting1(TaskControl):
         )[: self._len]
         if all(param in calibration_data for param in old_params):
             bregma_coords = tuple(
-                (coords[0] + calibration_data["bregmaXOffset"], coords[1] + calibration_data["bregmaYOffset"])
+                (
+                    coords[0] + calibration_data["bregmaXOffset"],
+                    coords[1] + calibration_data["bregmaYOffset"],
+                )
                 for coords in bregma_coords
             )
         return bregma_coords
-        
 
     @utils.cached_property
-    def opto_location_bregma_x(self) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...]]:
+    def opto_location_bregma_x(
+        self,
+    ) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...]]:
         if not self._is_galvo_opto:
             return np.full(self._len, np.nan)
         return self._normalize_opto_data(self._opto_location_bregma_x)
 
     @utils.cached_property
-    def opto_location_bregma_y(self) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...]]:
+    def opto_location_bregma_y(
+        self,
+    ) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...]]:
         if not self._is_galvo_opto:
             return np.full(self._len, np.nan)
         return self._normalize_opto_data(self._opto_location_bregma_y)
@@ -876,7 +895,7 @@ class DynamicRouting1(TaskControl):
                 [f"unlabeled{u.index(xy)}" for xy in self._galvo_voltage_xy], dtype=str
             )
         return self._normalize_opto_data(result)
-    
+
     def _normalize_opto_data(self, data: Iterable[Any]) -> tuple[tuple[Any, ...]]:
         """After Sam made changes to how opto params are stored in March '24, we
         need to make sure all opto data is stored in the same format"""
@@ -887,20 +906,22 @@ class DynamicRouting1(TaskControl):
                 copy = [trial_data]
             else:
                 copy = list(trial_data)
-            # we need all opto data to have the same length as the galvo Voltage data 
+            # we need all opto data to have the same length as the galvo Voltage data
             # (which may specify multiple locations for a single trial)
             if len(copy) != (L := len(voltage_data)):
-                assert len(copy) == 1, f"Trial {trial_idx} has mismatched opto params - expected all params to have len={L} (to match number of locations specified by galvo voltages) or len=1 (for params that are the same for all locations) - got: {trial_data}"
+                assert (
+                    len(copy) == 1
+                ), f"Trial {trial_idx} has mismatched opto params - expected all params to have len={L} (to match number of locations specified by galvo voltages) or len=1 (for params that are the same for all locations) - got: {trial_data}"
                 copy = copy * len(voltage_data)
             data[trial_idx] = tuple(copy)
         return tuple(data)
-    
+
     @utils.cached_property
     def opto_duration(self) -> npt.NDArray[np.floating]:
         if not self._is_opto:
             return np.full(self._len, np.nan)
-        return self._sam.trialOptoDur[:self._len].squeeze()
-    
+        return self._sam.trialOptoDur[: self._len].squeeze()
+
     @utils.cached_property
     def opto_label(self) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...], ...]:
         if not self._is_opto:
@@ -965,20 +986,20 @@ class DynamicRouting1(TaskControl):
             result = np.array(powers)
         else:
             result = np.where(
-                    np.isnan(voltages),
-                    np.nan,
-                    DynamicRoutingTask.TaskUtils.voltsToPower(
-                        self._hdf5["optoPowerCalibrationData"],
-                        voltages,
-                    )
-                )
+                np.isnan(voltages),
+                np.nan,
+                DynamicRoutingTask.TaskUtils.voltsToPower(
+                    self._hdf5["optoPowerCalibrationData"],
+                    voltages,
+                ),
+            )
         return self._normalize_opto_data(result)
 
     @utils.cached_property
     def opto_stim_name(self) -> npt.NDArray[np.str_] | npt.NDArray[np.floating]:
         """stimulus presented during optogenetic inactivation, corresponding to
         keys in `stimulus` dict.
-        
+
         - not for comparison across sessions: the same stimulus may have different
          names
         """
@@ -1199,15 +1220,16 @@ class DynamicRouting1(TaskControl):
     def is_opto(self) -> npt.NDArray[np.bool_]:
         """optogenetic inactivation was applied during the trial"""
         return ~np.isnan(self.opto_start_time)
-    
+
     @utils.cached_property
     def is_single_opto_location(self) -> npt.NDArray[np.bool_]:
         """only one optogenetic inactivation was applied during the trial"""
         if not self._is_galvo_opto:
             return np.full(self._len, np.nan)
         self.assert_single_opto_device()
-        return np.array([len(locations) > 1 for locations in self._opto_location_bregma_x])
-    
+        return np.array(
+            [len(locations) > 1 for locations in self._opto_location_bregma_x]
+        )
 
     """
     @utils.cached_property
