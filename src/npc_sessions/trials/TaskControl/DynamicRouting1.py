@@ -239,9 +239,6 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def _is_galvo_opto(self) -> bool:
-        if not self._is_galvo_voltage_xy_separate:
-            # Sam said to ignore opto data pre-March 2024
-            return False
         is_galvo_opto = utils.is_galvo_opto(self._hdf5)
         if is_galvo_opto and not self._is_opto:
             raise AssertionError(
