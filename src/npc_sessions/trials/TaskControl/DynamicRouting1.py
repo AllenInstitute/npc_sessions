@@ -11,12 +11,14 @@ getting DR task trials table requires:
 from __future__ import annotations
 
 import copy
+import datetime
 import logging
 from collections.abc import Iterable
 from typing import Any, Sequence
 
 import DynamicRoutingTask.TaskUtils
 import npc_lims
+import npc_session
 import numpy as np
 import numpy.typing as npt
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
@@ -193,7 +195,7 @@ class DynamicRouting1(TaskControl):
         return utils.safe_index(self._aud_stim_offset_times, trial)
 
     def get_trial_opto_onset(
-        self, trial: int | npt.NDArray[np.int32]
+        self
     ) -> npt.NDArray[np.float64]:
         self.assert_single_opto_device()
         if self._opto_stim_recordings is not None:
@@ -202,17 +204,17 @@ class DynamicRouting1(TaskControl):
                     np.nan if rec is None else rec.onset_time_on_sync
                     for rec in self._opto_stim_recordings
                 ]
-            )[trial]
+            )[:self._len]
         logger.debug("Using script frame times for opto stim onsets")
         if (onset_frames := self._sam.trialOptoOnsetFrame).ndim == 2:
             onset_frames = onset_frames.squeeze()
         # note: this is different to OptoTagging, where onset frame is abs frame idx
         return utils.safe_index(
-            self._flip_times, self._sam.stimStartFrame + onset_frames[trial]
+            self._flip_times, self._sam.stimStartFrame + onset_frames[:self._len]
         )
 
     def get_trial_opto_offset(
-        self, trial: int | npt.NDArray[np.int32]
+        self, 
     ) -> npt.NDArray[np.float64]:
         self.assert_single_opto_device()
         if self._opto_stim_recordings is not None:
@@ -221,10 +223,10 @@ class DynamicRouting1(TaskControl):
                     np.nan if rec is None else rec.offset_time_on_sync
                     for rec in self._opto_stim_recordings
                 ]
-            )[trial]
+            )[:self._len]
         self.assert_single_opto_device()
         return (
-            self.get_trial_opto_onset(trial).item() + self.opto_duration[trial]
+            self.get_trial_opto_onset() + self.opto_duration[:self._len]
         )
 
     # ---------------------------------------------------------------------- #
@@ -232,9 +234,6 @@ class DynamicRouting1(TaskControl):
 
     @utils.cached_property
     def _is_opto(self) -> bool:
-        if not self._is_galvo_voltage_xy_separate:
-            # Sam said to ignore opto data pre-March 2024
-            return False
         return utils.is_opto(self._hdf5)
 
     @utils.cached_property
@@ -369,14 +368,14 @@ class DynamicRouting1(TaskControl):
         """Onset of optogenetic inactivation"""
         if not self._is_opto:
             return np.full(self._len, np.nan)
-        return self.get_trial_opto_onset(self.trial_index)
+        return self.get_trial_opto_onset()
 
     @utils.cached_property
     def opto_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of optogenetic inactivation"""
         if not self._is_opto:
             return np.full(self._len, np.nan)
-        return self.get_trial_opto_offset(self.trial_index)
+        return self.get_trial_opto_offset()
 
     @utils.cached_property
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
@@ -636,8 +635,11 @@ class DynamicRouting1(TaskControl):
         )
 
     def get_trial_opto_devices(self, trial_idx: int) -> tuple[str, ...]:
+        if not self._is_opto:
+            raise ValueError("No opto devices in non-opto session")
         if (devices := self._hdf5.get("trialOptoDevice")) is None or devices.size == 0:
-            return ()
+            assert self._datetime.date() < datetime.date(2023, 8, 1) # older sessions may lack info
+            return ('laser_488', )
         devices = devices.asstr()[trial_idx]
         if devices[0] + devices[-1] != "[]":
             # basic check before we eval code from the web
@@ -649,7 +651,9 @@ class DynamicRouting1(TaskControl):
         return tuple(self.get_trial_opto_devices(idx) for idx in range(self._len))
 
     @utils.cached_property
-    def opto_wavelength(self) -> tuple[tuple[Any, ...]]:
+    def opto_wavelength(self) -> tuple[tuple[Any, ...]] | npt.NDArray[np.floating]:
+        if not self._is_opto:
+            return np.full(self._len, np.nan)
         def parse_wavelengths(devices: tuple[str, ...] | str) -> tuple[int | np.floating, ...]:
             if isinstance(devices, str):
                 if not devices:
@@ -755,7 +759,7 @@ class DynamicRouting1(TaskControl):
         # return tuple((np.nan, np.nan) if np.isnan(params_idx) else tuple(self._sam.trialGalvoVoltage[idx, int(params_idx), :]) for idx, params_idx in enumerate(self._opto_params_index))
 
     @utils.cached_property
-    def bregma_galvo_calibration_data(self) -> dict[str, float | list[float]]:
+    def _bregma_galvo_calibration_data(self) -> dict[str, float | list[float]]:
         return self.getBregmaGalvoCalibrationData()
     
     @utils.cached_property
@@ -810,7 +814,7 @@ class DynamicRouting1(TaskControl):
         # otherwise, we need to calculate it from galvo voltages
         old_params = ("bregmaXOffset", "bregmaYOffset") # not used after 2024-03-29
         if (calibration_data := self._hdf5.get("bregmaGalvoCalibrationData")) is None:
-            calibration_data = self.bregma_galvo_calibration_data
+            calibration_data = self.getBregmaGalvoCalibrationData()
         else:
             calibration_data = dict(calibration_data.items())  # prevent writing to hdf5
             for param in old_params:
