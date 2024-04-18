@@ -256,6 +256,10 @@ class DynamicRouting1(TaskControl):
         return len(self.start_time)
 
     @utils.cached_property
+    def _datetime(self) -> datetime.datetime:
+        return npc_session.DatetimeRecord(self._sam.startTime).dt
+    
+    @utils.cached_property
     def _aud_stims(self) -> npt.NDArray[np.str_]:
         return np.unique([stim for stim in self.stim_name if "sound" in stim.lower()])
 
