@@ -15,8 +15,7 @@ from npc_sessions.trials.TaskControl import TaskControl
 from npc_sessions.trials.TaskControl.DynamicRouting1 import DynamicRouting1
 from npc_sessions.trials.TaskControl.LuminanceTest import LuminanceTest
 from npc_sessions.trials.TaskControl.OptoTagging import OptoTagging
-from npc_sessions.trials.TaskControl.RFMapping import (AudRFMapping,
-                                                       VisRFMapping)
+from npc_sessions.trials.TaskControl.RFMapping import AudRFMapping, VisRFMapping
 
 
 def get_trials(

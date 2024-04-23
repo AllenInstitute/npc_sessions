@@ -78,17 +78,23 @@ class DynamicRouting1(TaskControl):
             )
 
     @property
-    def _opto_stim_recordings(self) -> tuple[npc_samstim.StimRecording | None, ...] | None:
-        self._cached_opto_stim_recordings: tuple[npc_samstim.StimRecording | None, ...] | None
+    def _opto_stim_recordings(
+        self,
+    ) -> tuple[npc_samstim.StimRecording | None, ...] | None:
+        self._cached_opto_stim_recordings: (
+            tuple[npc_samstim.StimRecording | None, ...] | None
+        )
         cached = getattr(self, "_cached_opto_stim_recordings", None)
         if cached is not None:
             return cached
         if self._sync:
             try:
-                self._cached_opto_stim_recordings = npc_samstim.get_stim_latencies_from_sync(
-                    self._hdf5,
-                    self._sync,
-                    waveform_type="opto",
+                self._cached_opto_stim_recordings = (
+                    npc_samstim.get_stim_latencies_from_sync(
+                        self._hdf5,
+                        self._sync,
+                        waveform_type="opto",
+                    )
                 )
             except npc_samstim.MissingSyncLineError:
                 if self._ephys_recording_dirs:
@@ -127,8 +133,12 @@ class DynamicRouting1(TaskControl):
         return tuple({w for w in self._opto_stim_waveforms if w is not None})
 
     @property
-    def _aud_stim_recordings(self) -> tuple[npc_samstim.StimRecording | None, ...] | None:
-        self._cached_aud_stim_recordings: tuple[npc_samstim.StimRecording | None, ...] | None
+    def _aud_stim_recordings(
+        self,
+    ) -> tuple[npc_samstim.StimRecording | None, ...] | None:
+        self._cached_aud_stim_recordings: (
+            tuple[npc_samstim.StimRecording | None, ...] | None
+        )
         cached = getattr(self, "_cached_aud_stim_recordings", None)
         if cached is not None:
             return cached
@@ -158,7 +168,9 @@ class DynamicRouting1(TaskControl):
         return self._cached_aud_stim_recordings
 
     @_aud_stim_recordings.setter
-    def _aud_stim_recordings(self, value: Iterable[npc_samstim.StimRecording | None]) -> None:
+    def _aud_stim_recordings(
+        self, value: Iterable[npc_samstim.StimRecording | None]
+    ) -> None:
         """Can be set on init by passing as kwarg"""
         self._set_aud_stim_recordings = tuple(value)
 
@@ -180,7 +192,9 @@ class DynamicRouting1(TaskControl):
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
             logger.debug("Using script frame times for opto stim onsets")
-            return npc_stim.safe_index(self._flip_times, self._sam.stimStartFrame[trial])
+            return npc_stim.safe_index(
+                self._flip_times, self._sam.stimStartFrame[trial]
+            )
         return npc_stim.safe_index(self._aud_stim_onset_times, trial)
 
     def get_trial_aud_offset(

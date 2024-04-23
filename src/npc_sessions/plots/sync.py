@@ -54,7 +54,9 @@ def plot_barcode_intervals(
 
     timing_pxi = npc_ephys.get_ephys_timing_on_pxi(full_exp_recording_dirs)
     timing_sync = tuple(
-        npc_ephys.get_ephys_timing_on_sync(session.sync_path, session.ephys_recording_dirs)
+        npc_ephys.get_ephys_timing_on_sync(
+            session.sync_path, session.ephys_recording_dirs
+        )
     )
     device_barcode_dict = {}
     for info in timing_pxi:

@@ -51,8 +51,12 @@ class RFMapping(TaskControl):
         )
 
     @property
-    def _aud_stim_recordings(self) -> tuple[npc_samstim.StimRecording | None, ...] | None:
-        self._cached_aud_stim_recordings: tuple[npc_samstim.StimRecording | None, ...] | None
+    def _aud_stim_recordings(
+        self,
+    ) -> tuple[npc_samstim.StimRecording | None, ...] | None:
+        self._cached_aud_stim_recordings: (
+            tuple[npc_samstim.StimRecording | None, ...] | None
+        )
         cached = getattr(self, "_cached_aud_stim_recordings", None)
         if cached is not None:
             return cached
@@ -82,7 +86,9 @@ class RFMapping(TaskControl):
         return self._cached_aud_stim_recordings
 
     @_aud_stim_recordings.setter
-    def _aud_stim_recordings(self, value: Iterable[npc_samstim.StimRecording | None]) -> None:
+    def _aud_stim_recordings(
+        self, value: Iterable[npc_samstim.StimRecording | None]
+    ) -> None:
         """Can be set on init by passing as kwarg"""
         self._set_aud_stim_recordings = tuple(value)
 
