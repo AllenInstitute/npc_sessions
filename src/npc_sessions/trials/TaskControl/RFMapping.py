@@ -5,8 +5,8 @@ getting Optotagging trials table requires:
 - latency estimate for each stim presentation, to be added to frame
 display times to get stim onset times
 
->>> stim = utils.get_h5_stim_data('s3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/RFMapping_662892_20230821_124434.hdf5')
->>> sync = utils.get_sync_data('s3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/20230821T124345.h5')
+>>> stim = npc_stim.get_h5_stim_data('s3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/RFMapping_662892_20230821_124434.hdf5')
+>>> sync = npc_sync.get_sync_data('s3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/20230821T124345.h5')
 >>> vis_mapping_trials = VisRFMapping(stim, sync)
 >>> aud_mapping_trials = AudRFMapping(stim, sync)
 >>> assert not vis_mapping_trials._df.is_empty()
@@ -17,10 +17,13 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
+import npc_io
+import npc_samstim
+import npc_stim
+import npc_sync
 import numpy as np
 import numpy.typing as npt
 
-import npc_sessions.utils as utils
 from npc_sessions.trials.TaskControl import TaskControl
 
 
@@ -33,9 +36,9 @@ class RFMapping(TaskControl):
 
     def __init__(
         self,
-        hdf5: utils.StimPathOrDataset,
-        sync: utils.SyncPathOrDataset,
-        ephys_recording_dirs: Iterable[utils.PathLike] | None = None,
+        hdf5: npc_stim.StimPathOrDataset,
+        sync: npc_sync.SyncPathOrDataset,
+        ephys_recording_dirs: Iterable[npc_io.PathLike] | None = None,
         **kwargs,
     ) -> None:
         if sync is None:
@@ -48,16 +51,16 @@ class RFMapping(TaskControl):
         )
 
     @property
-    def _aud_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
-        self._cached_aud_stim_recordings: tuple[utils.StimRecording | None, ...] | None
+    def _aud_stim_recordings(self) -> tuple[npc_samstim.StimRecording | None, ...] | None:
+        self._cached_aud_stim_recordings: tuple[npc_samstim.StimRecording | None, ...] | None
         cached = getattr(self, "_cached_aud_stim_recordings", None)
         if cached is not None:
             return cached
         if (
             self._sync
-            and self._sync.start_time.date() >= utils.FIRST_SOUND_ON_SYNC_DATE
+            and self._sync.start_time.date() >= npc_sync.FIRST_SOUND_ON_SYNC_DATE
         ):
-            self._cached_aud_stim_recordings = utils.get_stim_latencies_from_sync(
+            self._cached_aud_stim_recordings = npc_samstim.get_stim_latencies_from_sync(
                 self._hdf5,
                 self._sync,
                 waveform_type="sound",
@@ -67,7 +70,7 @@ class RFMapping(TaskControl):
         ) is not None:
             assert recording_dirs is not None
             self._cached_aud_stim_recordings = (
-                utils.get_stim_latencies_from_nidaq_recording(
+                npc_samstim.get_stim_latencies_from_nidaq_recording(
                     self._hdf5,
                     sync=self._sync,
                     recording_dirs=recording_dirs,
@@ -79,7 +82,7 @@ class RFMapping(TaskControl):
         return self._cached_aud_stim_recordings
 
     @_aud_stim_recordings.setter
-    def _aud_stim_recordings(self, value: Iterable[utils.StimRecording | None]) -> None:
+    def _aud_stim_recordings(self, value: Iterable[npc_samstim.StimRecording | None]) -> None:
         """Can be set on init by passing as kwarg"""
         self._set_aud_stim_recordings = tuple(value)
 
@@ -94,10 +97,10 @@ class RFMapping(TaskControl):
                 ]
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
-            return utils.safe_index(
+            return npc_stim.safe_index(
                 self._flip_times, self._hdf5["stimStartFrame"][trial]
             )
-        return utils.safe_index(self._aud_stim_onset_times, trial)
+        return npc_stim.safe_index(self._aud_stim_onset_times, trial)
 
     def get_trial_aud_offset(
         self, trial: int | npt.NDArray[np.int32]
@@ -111,9 +114,9 @@ class RFMapping(TaskControl):
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_offset_times", None):
             return self.get_trial_aud_onset(trial) + self._hdf5["stimFrames"][()]
-        return utils.safe_index(self._aud_stim_offset_times, trial)
+        return npc_stim.safe_index(self._aud_stim_offset_times, trial)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _len_all_trials(self) -> int:
         return len(self._hdf5["stimStartFrame"][()])
 
@@ -122,13 +125,13 @@ class RFMapping(TaskControl):
             return ~np.isnan(self._hdf5[key][()])
         return None
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _idx(self) -> npt.NDArray[np.int32]:
         """Used for extracting a subset of inds throughout all properties.
         Must be constructed from private properties directly from the hdf5 file"""
         return np.arange(self._len_all_trials)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _all_aud_freq(self) -> npt.NDArray[np.float64]:
         # don't use self._idx here
         freq = np.full(self._len_all_trials, np.nan)
@@ -149,14 +152,14 @@ class RFMapping(TaskControl):
                     freq[~np.isnan(array)] = array[~np.isnan(array)]
         return freq
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _all_aud_idx(self) -> npt.NDArray[np.float64]:
         # don't use self._idx here
         return np.where(
             ~np.isnan(self._all_aud_freq), np.arange(self._len_all_trials), np.nan
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _all_vis_idx(self) -> npt.NDArray[np.float64]:
         # don't use self._idx here
         flashes = self.find("trialFullFieldContrast")
@@ -167,43 +170,43 @@ class RFMapping(TaskControl):
             gratings = np.full(self._len_all_trials, False)
         return np.where(gratings ^ flashes, np.arange(self._len_all_trials), np.nan)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         """falling edge of first vsync in each trial"""
-        return utils.safe_index(
+        return npc_stim.safe_index(
             self._flip_times, self._hdf5["stimStartFrame"][self._idx]
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         """onset of RF mapping stimulus"""
         return np.where(
             self._is_vis_stim,
-            utils.safe_index(
+            npc_stim.safe_index(
                 self._vis_display_times, self._hdf5["stimStartFrame"][self._idx]
             ),
             self.get_trial_aud_onset(self._idx),
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of RF mapping stimulus"""
         frames_per_stim = self._hdf5["stimFrames"][()]
         return np.where(
             self._is_vis_stim,
-            utils.safe_index(
+            npc_stim.safe_index(
                 self._vis_display_times,
                 self._hdf5["stimStartFrame"][self._idx] + frames_per_stim,
             ),
             self.get_trial_aud_offset(self._idx),
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         """falling edge of vsync after stimulus end + inter-stim frames"""
         return np.max(
             [
-                utils.safe_index(
+                npc_stim.safe_index(
                     self._flip_times,
                     self._hdf5["stimStartFrame"][self._idx]
                     + self._hdf5["stimFrames"][()]
@@ -214,22 +217,22 @@ class RFMapping(TaskControl):
             axis=0,
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
         return np.arange(self._len_all_trials)[self._idx]
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _len(self) -> int:
         return len(self._idx)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _tone_freq(self) -> npt.NDArray[np.float64]:
         for key in ("trialToneFreq", "trialSoundFreq"):
             if key in self._hdf5:
                 return self._hdf5[key][self._idx]
         return np.full(self._len, np.nan)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _AM_noise_freq(self) -> npt.NDArray[np.float64]:
         return (
             self._hdf5["trialAMNoiseFreq"][self._idx]
@@ -237,7 +240,7 @@ class RFMapping(TaskControl):
             else np.full(self._len, np.nan)
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _white_noise_bandpass_freq(self) -> npt.NDArray[np.float64]:
         """2x trials array of low/high freq for bandpass filter"""
         return (
@@ -246,16 +249,16 @@ class RFMapping(TaskControl):
             else np.full(self._len, np.nan)
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _is_aud_stim(self) -> npt.NDArray[np.bool_]:
         """Includes AM noise, bandpass filtered white noise, and pure tones"""
         return np.where(np.isnan(self._all_aud_idx[self._idx]), False, True)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _is_vis_stim(self) -> npt.NDArray[np.bool_]:
         return np.where(np.isnan(self._all_vis_idx[self._idx]), False, True)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _full_field_contrast(self) -> npt.NDArray[np.float64]:
         return (
             self._hdf5["trialFullFieldContrast"][self._idx]
@@ -265,61 +268,61 @@ class RFMapping(TaskControl):
 
 
 class VisRFMapping(RFMapping):
-    @utils.cached_property
+    @npc_io.cached_property
     def _idx(self) -> npt.NDArray[np.int32]:
         """Used for extracting a subset of inds throughout all properties.
         Must be constructed from private properties directly from the hdf5 file"""
         return np.array(self._all_vis_idx[~np.isnan(self._all_vis_idx)], dtype=np.int32)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_small_field_grating(self) -> npt.NDArray[np.bool_]:
         return ~np.isnan(self.grating_orientation)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def grating_orientation(self) -> npt.NDArray[np.float64]:
         return self._hdf5["trialGratingOri"][self._idx]
 
-    @utils.cached_property
+    @npc_io.cached_property
     def grating_x(self) -> npt.NDArray[np.float64]:
         """position of grating patch center, in pixels from screen center"""
         return np.array([xy[0] for xy in self._hdf5["trialVisXY"][self._idx]])
 
-    @utils.cached_property
+    @npc_io.cached_property
     def grating_y(self) -> npt.NDArray[np.float64]:
         """position of grating patch center, in pixels from screen center"""
         return np.array([xy[1] for xy in self._hdf5["trialVisXY"][self._idx]])
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_full_field_flash(self) -> npt.NDArray[np.bool_]:
         return ~np.isnan(self._full_field_contrast)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def flash_contrast(self) -> npt.NDArray[np.float64]:
         return self._full_field_contrast
 
 
 class AudRFMapping(RFMapping):
-    @utils.cached_property
+    @npc_io.cached_property
     def _idx(self) -> npt.NDArray[np.int32]:
         """Used for extracting a subset of inds throughout all properties.
         Must be constructed from private properties directly from the hdf5 file"""
         return np.array(self._all_aud_idx[~np.isnan(self._all_aud_idx)], dtype=np.int32)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_AM_noise(self) -> npt.NDArray[np.bool_]:
         return ~np.isnan(self._AM_noise_freq)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_white_noise(self) -> npt.NDArray[np.bool_]:
         return np.array(
             [~np.isnan(freqs).any() for freqs in self._white_noise_bandpass_freq]
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_pure_tone(self) -> npt.NDArray[np.bool_]:
         return ~np.isnan(self._tone_freq)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def freq(self) -> npt.NDArray[np.float64]:
         """frequency of pure tone or frequency of modulation for AM noise, in Hz"""
         return self._all_aud_freq[self._idx]

@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 import matplotlib.figure
 import matplotlib.pyplot as plt
+import npc_ephys
 import numpy as np
 import rich
 
@@ -9,19 +10,18 @@ if TYPE_CHECKING:
     import npc_sessions
 
 import npc_sessions.plots.plot_utils as plot_utils
-import npc_sessions.utils as utils
 
 
 def plot_barcode_times(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> matplotlib.figure.Figure:
-    timing_info = utils.get_ephys_timing_on_pxi(session.ephys_recording_dirs)
+    timing_info = npc_ephys.get_ephys_timing_on_pxi(session.ephys_recording_dirs)
     fig = plt.figure()
     for info in timing_info:
         (
             ephys_barcode_times,
             ephys_barcode_ids,
-        ) = utils.extract_barcodes_from_times(
+        ) = npc_ephys.extract_barcodes_from_times(
             on_times=info.device.ttl_sample_numbers[info.device.ttl_states > 0]
             / info.sampling_rate,
             off_times=info.device.ttl_sample_numbers[info.device.ttl_states < 0]
@@ -40,21 +40,21 @@ def plot_barcode_intervals(
     correction
     """
     full_exp_recording_dirs = [
-        utils.get_single_oebin_path(directory).parent
+        npc_ephys.get_single_oebin_path(directory).parent
         for directory in session.ephys_record_node_dirs
     ]
 
     barcode_rising = session.sync_data.get_rising_edges(0, "seconds")
     barcode_falling = session.sync_data.get_falling_edges(0, "seconds")
-    barcode_times, barcodes = utils.extract_barcodes_from_times(
+    barcode_times, barcodes = npc_ephys.extract_barcodes_from_times(
         barcode_rising,
         barcode_falling,
         total_time_on_line=session.sync_data.total_seconds,
     )
 
-    timing_pxi = utils.get_ephys_timing_on_pxi(full_exp_recording_dirs)
+    timing_pxi = npc_ephys.get_ephys_timing_on_pxi(full_exp_recording_dirs)
     timing_sync = tuple(
-        utils.get_ephys_timing_on_sync(session.sync_path, session.ephys_recording_dirs)
+        npc_ephys.get_ephys_timing_on_sync(session.sync_path, session.ephys_recording_dirs)
     )
     device_barcode_dict = {}
     for info in timing_pxi:
@@ -66,7 +66,7 @@ def plot_barcode_intervals(
         (
             ephys_barcode_times,
             ephys_barcode_ids,
-        ) = utils.extract_barcodes_from_times(
+        ) = npc_ephys.extract_barcodes_from_times(
             on_times=info.device.ttl_sample_numbers[info.device.ttl_states > 0]
             / info.sampling_rate,
             off_times=info.device.ttl_sample_numbers[info.device.ttl_states < 0]

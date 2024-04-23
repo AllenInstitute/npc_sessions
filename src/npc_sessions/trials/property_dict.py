@@ -7,16 +7,12 @@ import functools
 import logging
 import reprlib
 from collections.abc import Generator, Iterator, Sequence
-from typing import (
-    Any,
-    Literal,
-)
+from typing import Any, Literal
 
+import npc_io
 import numpy as np
 import pandas as pd
 import polars as pl
-
-import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +217,7 @@ class PropertyDict(collections.abc.Mapping):
             for attr in self._properties
             if not isinstance(
                 cls_attr(attr),
-                (property, functools.cached_property, utils.cached_property),
+                (property, functools.cached_property, npc_io.cached_property),
             )
         }
         property_getters = {
@@ -229,7 +225,7 @@ class PropertyDict(collections.abc.Mapping):
             for attr in self._properties
             if isinstance(
                 cls_attr(attr),
-                (property, functools.cached_property, utils.cached_property),
+                (property, functools.cached_property, npc_io.cached_property),
             )
         }
 

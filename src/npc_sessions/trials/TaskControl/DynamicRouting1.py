@@ -17,13 +17,16 @@ from collections.abc import Iterable
 from typing import Any
 
 import DynamicRoutingTask.TaskUtils
+import npc_io
 import npc_lims
+import npc_samstim
 import npc_session
+import npc_stim
+import npc_sync
 import numpy as np
 import numpy.typing as npt
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
-import npc_sessions.utils as utils
 from npc_sessions.trials.TaskControl import TaskControl
 
 logger = logging.getLogger(__name__)
@@ -52,9 +55,9 @@ class DynamicRouting1(TaskControl):
 
     def __init__(
         self,
-        hdf5: utils.StimPathOrDataset,
-        sync: utils.SyncPathOrDataset | None = None,
-        ephys_recording_dirs: Iterable[utils.PathLike] | None = None,
+        hdf5: npc_stim.StimPathOrDataset,
+        sync: npc_sync.SyncPathOrDataset | None = None,
+        ephys_recording_dirs: Iterable[npc_io.PathLike] | None = None,
         **kwargs,
     ) -> None:
         if sync is None and ephys_recording_dirs is not None:
@@ -75,22 +78,22 @@ class DynamicRouting1(TaskControl):
             )
 
     @property
-    def _opto_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
-        self._cached_opto_stim_recordings: tuple[utils.StimRecording | None, ...] | None
+    def _opto_stim_recordings(self) -> tuple[npc_samstim.StimRecording | None, ...] | None:
+        self._cached_opto_stim_recordings: tuple[npc_samstim.StimRecording | None, ...] | None
         cached = getattr(self, "_cached_opto_stim_recordings", None)
         if cached is not None:
             return cached
         if self._sync:
             try:
-                self._cached_opto_stim_recordings = utils.get_stim_latencies_from_sync(
+                self._cached_opto_stim_recordings = npc_samstim.get_stim_latencies_from_sync(
                     self._hdf5,
                     self._sync,
                     waveform_type="opto",
                 )
-            except utils.MissingSyncLineError:
+            except npc_samstim.MissingSyncLineError:
                 if self._ephys_recording_dirs:
                     self._cached_opto_stim_recordings = (
-                        utils.get_stim_latencies_from_nidaq_recording(
+                        npc_samstim.get_stim_latencies_from_nidaq_recording(
                             self._hdf5,
                             sync=self._sync,
                             recording_dirs=self._ephys_recording_dirs,
@@ -99,7 +102,7 @@ class DynamicRouting1(TaskControl):
                     )
                 else:
                     logger.warning(
-                        f"No opto stim sync line found and no ephys data provided: stim {utils.get_stim_start_time(self._hdf5)}"
+                        f"No opto stim sync line found and no ephys data provided: stim {npc_stim.get_stim_start_time(self._hdf5)}"
                     )
                     self._cached_opto_stim_recordings = None
         else:
@@ -108,32 +111,32 @@ class DynamicRouting1(TaskControl):
 
     @_opto_stim_recordings.setter
     def _opto_stim_recordings(
-        self, value: Iterable[utils.StimRecording | None]
+        self, value: Iterable[npc_samstim.StimRecording | None]
     ) -> None:
         """Can be set on init by passing as kwarg"""
         self._cached_opto_stim_recordings = tuple(value)
 
-    @utils.cached_property
-    def _opto_stim_waveforms(self) -> tuple[utils.Waveform | None, ...]:
+    @npc_io.cached_property
+    def _opto_stim_waveforms(self) -> tuple[npc_samstim.Waveform | None, ...]:
         if not self._is_opto:
             return tuple(None for _ in range(self._len))
-        return utils.get_opto_waveforms_from_stim_file(self._hdf5)
+        return npc_samstim.get_opto_waveforms_from_stim_file(self._hdf5)
 
-    @utils.cached_property
-    def _unique_opto_waveforms(self) -> tuple[utils.Waveform, ...]:
+    @npc_io.cached_property
+    def _unique_opto_waveforms(self) -> tuple[npc_samstim.Waveform, ...]:
         return tuple({w for w in self._opto_stim_waveforms if w is not None})
 
     @property
-    def _aud_stim_recordings(self) -> tuple[utils.StimRecording | None, ...] | None:
-        self._cached_aud_stim_recordings: tuple[utils.StimRecording | None, ...] | None
+    def _aud_stim_recordings(self) -> tuple[npc_samstim.StimRecording | None, ...] | None:
+        self._cached_aud_stim_recordings: tuple[npc_samstim.StimRecording | None, ...] | None
         cached = getattr(self, "_cached_aud_stim_recordings", None)
         if cached is not None:
             return cached
         if (
             self._sync
-            and self._sync.start_time.date() >= utils.FIRST_SOUND_ON_SYNC_DATE
+            and self._sync.start_time.date() >= npc_sync.FIRST_SOUND_ON_SYNC_DATE
         ):
-            self._cached_aud_stim_recordings = utils.get_stim_latencies_from_sync(
+            self._cached_aud_stim_recordings = npc_samstim.get_stim_latencies_from_sync(
                 self._hdf5,
                 self._sync,
                 waveform_type="sound",
@@ -143,7 +146,7 @@ class DynamicRouting1(TaskControl):
         ) is not None:
             assert recording_dirs is not None
             self._cached_aud_stim_recordings = (
-                utils.get_stim_latencies_from_nidaq_recording(
+                npc_samstim.get_stim_latencies_from_nidaq_recording(
                     self._hdf5,
                     sync=self._sync,
                     recording_dirs=recording_dirs,
@@ -155,7 +158,7 @@ class DynamicRouting1(TaskControl):
         return self._cached_aud_stim_recordings
 
     @_aud_stim_recordings.setter
-    def _aud_stim_recordings(self, value: Iterable[utils.StimRecording | None]) -> None:
+    def _aud_stim_recordings(self, value: Iterable[npc_samstim.StimRecording | None]) -> None:
         """Can be set on init by passing as kwarg"""
         self._set_aud_stim_recordings = tuple(value)
 
@@ -177,8 +180,8 @@ class DynamicRouting1(TaskControl):
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
             logger.debug("Using script frame times for opto stim onsets")
-            return utils.safe_index(self._flip_times, self._sam.stimStartFrame[trial])
-        return utils.safe_index(self._aud_stim_onset_times, trial)
+            return npc_stim.safe_index(self._flip_times, self._sam.stimStartFrame[trial])
+        return npc_stim.safe_index(self._aud_stim_onset_times, trial)
 
     def get_trial_aud_offset(
         self, trial: int | npt.NDArray[np.int32]
@@ -192,7 +195,7 @@ class DynamicRouting1(TaskControl):
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_offset_times", None):
             return self.get_trial_aud_onset(trial) + self._hdf5["trialSoundDur"][trial]
-        return utils.safe_index(self._aud_stim_offset_times, trial)
+        return npc_stim.safe_index(self._aud_stim_offset_times, trial)
 
     def get_trial_opto_onset(self) -> npt.NDArray[np.float64]:
         self.assert_single_opto_device()
@@ -207,7 +210,7 @@ class DynamicRouting1(TaskControl):
         if (onset_frames := self._sam.trialOptoOnsetFrame).ndim == 2:
             onset_frames = onset_frames.squeeze()
         # note: this is different to OptoTagging, where onset frame is abs frame idx
-        return utils.safe_index(
+        return npc_stim.safe_index(
             self._flip_times, self._sam.stimStartFrame + onset_frames[: self._len]
         )
 
@@ -228,74 +231,74 @@ class DynamicRouting1(TaskControl):
     # ---------------------------------------------------------------------- #
     # helper-properties that won't become columns:
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _is_opto(self) -> bool:
-        return utils.is_opto(self._hdf5)
+        return npc_samstim.is_opto(self._hdf5)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _is_galvo_opto(self) -> bool:
-        is_galvo_opto = utils.is_galvo_opto(self._hdf5)
+        is_galvo_opto = npc_samstim.is_galvo_opto(self._hdf5)
         if is_galvo_opto and not self._is_opto:
             raise AssertionError(
                 f"Conflicting results: {self._is_opto=}, {is_galvo_opto=}"
             )
         return is_galvo_opto
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _sam(self) -> DynRoutData:
-        return utils.get_sam(self._hdf5)
+        return npc_samstim.get_sam(self._hdf5)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _len(self) -> int:
         """Number of trials"""
         return len(self.start_time)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _datetime(self) -> datetime.datetime:
         return npc_session.DatetimeRecord(self._sam.startTime).dt
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _aud_stims(self) -> npt.NDArray[np.str_]:
         return np.unique([stim for stim in self.stim_name if "sound" in stim.lower()])
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _vis_stims(self) -> npt.NDArray[np.str_]:
         return np.unique(
             [stim for stim in self._sam.trialStim if "vis" in stim.lower()]
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _targets(self) -> npt.NDArray[np.str_]:
         return np.unique(list(self._sam.blockStimRewarded))
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _aud_targets(self) -> npt.NDArray[np.str_]:
         return np.unique([stim for stim in self._aud_stims if stim in self._targets])
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _vis_targets(self) -> npt.NDArray[np.str_]:
         return np.unique([stim for stim in self._vis_stims if stim in self._targets])
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _aud_nontargets(self) -> npt.NDArray[np.str_]:
         return np.unique(
             [stim for stim in self._aud_stims if stim not in self._targets]
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _vis_nontargets(self) -> npt.NDArray[np.str_]:
         return np.unique(
             [stim for stim in self._vis_stims if stim not in self._targets]
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _trial_rewarded_stim_name(self) -> npt.NDArray[np.str_]:
         return self._sam.blockStimRewarded[self.block_index]
 
     # ---------------------------------------------------------------------- #
     # times:
 
-    @utils.cached_property
+    @npc_io.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         """earliest time in each trial, before any events occur.
 
@@ -305,52 +308,52 @@ class DynamicRouting1(TaskControl):
         """
         return self.quiescent_start_time
 
-    @utils.cached_property
+    @npc_io.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         """latest time in each trial, after all events have occurred"""
-        return utils.safe_index(self._flip_times, self._sam.trialEndFrame)
+        return npc_stim.safe_index(self._flip_times, self._sam.trialEndFrame)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def quiescent_start_time(self) -> npt.NDArray[np.float64]:
         """start of interval in which the subject should not lick, otherwise the
         trial will start over.
 
         - only the last quiescent interval (which was not violated) is included
         """
-        return utils.safe_index(
+        return npc_stim.safe_index(
             self._flip_times,
             self._sam.stimStartFrame - self._hdf5["quiescentFrames"][()],
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def quiescent_stop_time(self) -> npt.NDArray[np.float64]:
         """end of interval in which the subject should not lick, otherwise the
         trial will start over"""
-        return utils.safe_index(
+        return npc_stim.safe_index(
             self._flip_times,
             self._sam.stimStartFrame,
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         """onset of visual or auditory stimulus"""
         starts = np.full(self._len, np.nan)
         for idx in range(self._len):
             if self.is_vis_stim[idx] or self.is_catch[idx]:
-                starts[idx] = utils.safe_index(
+                starts[idx] = npc_stim.safe_index(
                     self._vis_display_times, self._sam.stimStartFrame[idx]
                 )
             if self.is_aud_stim[idx]:
                 starts[idx] = self.get_trial_aud_onset(idx)
         return starts
 
-    @utils.cached_property
+    @npc_io.cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of visual or auditory stimulus"""
         ends = np.full(self._len, np.nan)
         for idx in range(self._len):
             if self.is_vis_stim[idx] or self.is_catch[idx]:
-                ends[idx] = utils.safe_index(
+                ends[idx] = npc_stim.safe_index(
                     self._vis_display_times,
                     self._sam.stimStartFrame[idx]
                     + self._hdf5["trialVisStimFrames"][idx],
@@ -359,40 +362,40 @@ class DynamicRouting1(TaskControl):
                 ends[idx] = self.get_trial_aud_offset(idx)
         return ends
 
-    @utils.cached_property
+    @npc_io.cached_property
     def opto_start_time(self) -> npt.NDArray[np.float64]:
         """Onset of optogenetic inactivation"""
         if not self._is_opto:
             return np.full(self._len, np.nan)
         return self.get_trial_opto_onset()
 
-    @utils.cached_property
+    @npc_io.cached_property
     def opto_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of optogenetic inactivation"""
         if not self._is_opto:
             return np.full(self._len, np.nan)
         return self.get_trial_opto_offset()
 
-    @utils.cached_property
+    @npc_io.cached_property
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
         """start of interval in which the subject should lick if a GO trial,
         otherwise should not lick"""
-        return utils.safe_index(
+        return npc_stim.safe_index(
             self._input_data_times,
             self._sam.stimStartFrame + self._hdf5["responseWindow"][()][0],
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _response_window_stop_frame(self) -> npt.NDArray[np.float64]:
         return self._sam.stimStartFrame + self._hdf5["responseWindow"][()][1]
 
-    @utils.cached_property
+    @npc_io.cached_property
     def response_window_stop_time(self) -> npt.NDArray[np.float64]:
         """end of interval in which the subject should lick if a GO trial,
         otherwise should not lick"""
-        return utils.safe_index(self._flip_times, self._response_window_stop_frame)
+        return npc_stim.safe_index(self._flip_times, self._response_window_stop_frame)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def task_control_response_time(self) -> npt.NDArray[np.float64]:
         """time of first lick in trial, according to the task control script.
 
@@ -404,12 +407,12 @@ class DynamicRouting1(TaskControl):
         - nan if the task control script did not register a response
         """
         if not self._sync:
-            return utils.safe_index(
+            return npc_stim.safe_index(
                 self._input_data_times, self._sam.trialResponseFrame
             )
-        return utils.safe_index(self._input_data_times, self._sam.trialResponseFrame)
+        return npc_stim.safe_index(self._input_data_times, self._sam.trialResponseFrame)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def response_time(self) -> npt.NDArray[np.float64]:
         """time of first lick within the response window
 
@@ -436,10 +439,10 @@ class DynamicRouting1(TaskControl):
             all_response_times[idx] = trial_response_times[0]
         return all_response_times
 
-    @utils.cached_property
+    @npc_io.cached_property
     def reward_time(self) -> npt.NDArray[np.floating]:
         """delivery time of water reward, for contingent and non-contingent rewards"""
-        all_reward_times = utils.safe_index(self._flip_times, self._sam.rewardFrames)
+        all_reward_times = npc_stim.safe_index(self._flip_times, self._sam.rewardFrames)
         all_reward_times = all_reward_times[all_reward_times <= self.stop_time[-1]]
         all_reward_trials = (
             np.searchsorted(
@@ -467,7 +470,7 @@ class DynamicRouting1(TaskControl):
                 reward_time[trial_idx] = reward_times[0]
         return reward_time
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _timeout_start_frame(self) -> npt.NDArray[np.float64]:
         starts = np.nan * np.ones_like(self.start_time)
         for idx in range(0, self._len - 1):
@@ -479,21 +482,21 @@ class DynamicRouting1(TaskControl):
                 )
         return starts
 
-    @utils.cached_property
+    @npc_io.cached_property
     def timeout_start_time(self) -> npt.NDArray[np.float64]:
         """start of extended inter-trial interval added due to a false alarm"""
-        return utils.safe_index(self._input_data_times, self._timeout_start_frame)
+        return npc_stim.safe_index(self._input_data_times, self._timeout_start_frame)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _timeout_stop_frame(self) -> npt.NDArray[np.float64]:
         return self._timeout_start_frame + self._sam.incorrectTimeoutFrames
 
-    @utils.cached_property
+    @npc_io.cached_property
     def timeout_stop_time(self) -> npt.NDArray[np.float64]:
         """end of extended inter-trial interval"""
-        return utils.safe_index(self._vis_display_times, self._timeout_stop_frame)
+        return npc_stim.safe_index(self._vis_display_times, self._timeout_stop_frame)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _post_response_window_start_frame(self) -> npt.NDArray[np.float64]:
         return np.where(
             np.isnan(self._timeout_stop_frame),
@@ -501,30 +504,30 @@ class DynamicRouting1(TaskControl):
             self._timeout_stop_frame,
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def post_response_window_start_time(self) -> npt.NDArray[np.float64]:
         """start of null interval in which the subject awaits a new trial;
         may receive a non-contingent reward if scheduled"""
-        return utils.safe_index(
+        return npc_stim.safe_index(
             self._vis_display_times, self._post_response_window_start_frame
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _post_response_window_stop_frame(self) -> npt.NDArray[np.float64]:
         return (
             self._post_response_window_start_frame
             + self._hdf5["postResponseWindowFrames"][()]
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def post_response_window_stop_time(self) -> npt.NDArray[np.float64]:
         """end of null interval"""
-        return utils.safe_index(
+        return npc_stim.safe_index(
             self._vis_display_times, self._post_response_window_stop_frame
         )
 
     '''
-    @utils.cached_property
+    @npc_io.cached_property
     def _time(self) -> npt.NDArray[np.float64]:
         """TODO"""
         return np.nan * np.zeros(self._len)
@@ -533,20 +536,20 @@ class DynamicRouting1(TaskControl):
     # ---------------------------------------------------------------------- #
     # parameters:
 
-    @utils.cached_property
+    @npc_io.cached_property
     def stim_name(self) -> npt.NDArray[np.str_]:
         """the stimulus presented; corresponds to a unique stimulus definition,
         randomized over trials
         """
         return self._sam.trialStim
 
-    @utils.cached_property
+    @npc_io.cached_property
     def block_index(self) -> npt.NDArray[np.int32]:
         """0-indexed block number, increments with each block"""
         assert min(self._sam.trialBlock) == 1
         return self._sam.trialBlock - 1
 
-    @utils.cached_property
+    @npc_io.cached_property
     def context_name(self) -> npt.NDArray[np.str_]:
         """indicates the rewarded modality in each block"""
 
@@ -559,12 +562,12 @@ class DynamicRouting1(TaskControl):
 
         return np.array([context(name) for name in self._trial_rewarded_stim_name])
 
-    @utils.cached_property
+    @npc_io.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
         """0-indexed trial number"""
         return np.arange(self._len)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def trial_index_in_block(self) -> npt.NDArray[np.int32]:
         index_in_block = np.full(self._len, np.nan)
         for i in range(self._len):
@@ -578,7 +581,7 @@ class DynamicRouting1(TaskControl):
             index_in_block[i] = count
         return index_in_block
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _regular_trial_index(self) -> npt.NDArray:
         """
         0-indexed trial number for regular trials (with stimuli), increments over
@@ -596,7 +599,7 @@ class DynamicRouting1(TaskControl):
             regular_trial_index[idx] = int(counter)
         return regular_trial_index
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _regular_trial_index_in_block(self) -> npt.NDArray[np.int32]:
         """0-indexed trial number within a block, increments over the block.
 
@@ -617,7 +620,7 @@ class DynamicRouting1(TaskControl):
             index_in_block[i] = count
         return index_in_block
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _scheduled_reward_index_in_block(self) -> npt.NDArray[np.float64]:
         """0-indexed trial number within a block for trials in which a
         non-contingent reward was scheduled.
@@ -644,11 +647,11 @@ class DynamicRouting1(TaskControl):
             raise ValueError(f"Invalid opto devices string: {devices}")
         return tuple(eval(devices))
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _trial_opto_devices(self) -> tuple[tuple[str, ...], ...]:
         return tuple(self.get_trial_opto_devices(idx) for idx in range(self._len))
 
-    @utils.cached_property
+    @npc_io.cached_property
     def opto_wavelength(self) -> tuple[tuple[Any, ...]] | npt.NDArray[np.floating]:
         if not self._is_opto:
             return np.full(self._len, np.nan)
@@ -674,7 +677,7 @@ class DynamicRouting1(TaskControl):
             [parse_wavelengths(v) for v in self._trial_opto_devices]
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _opto_params_index(self) -> npt.NDArray[np.float64] | None:
         if not self._is_opto:
             return np.full(self._len, np.nan)
@@ -713,7 +716,7 @@ class DynamicRouting1(TaskControl):
         d["offsetV"] = min(np.roots(p))
         return d
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _is_galvo_voltage_xy_separate(self) -> bool:
         """Whether galvo voltage is stored as separate x and y values
 
@@ -726,21 +729,21 @@ class DynamicRouting1(TaskControl):
             return False
         return False
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _galvo_voltage_x(self):
         if self._is_galvo_voltage_xy_separate:
             return tuple(self._sam.trialGalvoX)
         else:
             return tuple([(v[0],) for v in self._galvo_voltage_xy])
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _galvo_voltage_y(self):
         if self._is_galvo_voltage_xy_separate:
             return tuple(self._sam.trialGalvoY)
         else:
             return tuple([(v[1],) for v in self._galvo_voltage_xy])
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _galvo_voltage_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         """only used to provide separate x and y attrs for old data, pre-2024-03-29"""
         if self._is_galvo_voltage_xy_separate:
@@ -766,11 +769,11 @@ class DynamicRouting1(TaskControl):
         return result
         # return tuple((np.nan, np.nan) if np.isnan(params_idx) else tuple(self._sam.trialGalvoVoltage[idx, int(params_idx), :]) for idx, params_idx in enumerate(self._opto_params_index))
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _bregma_galvo_calibration_data(self) -> dict[str, float | list[float]]:
         return self.getBregmaGalvoCalibrationData()
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _opto_location_bregma_x(self) -> tuple[tuple[np.float64], ...]:
         if not self._is_galvo_voltage_xy_separate:
             return tuple((v[0],) for v in self._galvo_voltage_xy)
@@ -794,7 +797,7 @@ class DynamicRouting1(TaskControl):
         )
         return x, y
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _opto_location_bregma_y(self) -> tuple[tuple[np.float64], ...]:
         if not self._is_galvo_voltage_xy_separate:
             return tuple((v[1],) for v in self._galvo_voltage_xy)
@@ -809,7 +812,7 @@ class DynamicRouting1(TaskControl):
                     result[trial_idx][location_idx] = value
             return tuple(result)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _opto_location_bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         if self._is_galvo_voltage_xy_separate:
             raise AttributeError(
@@ -850,7 +853,7 @@ class DynamicRouting1(TaskControl):
             )
         return bregma_coords
 
-    @utils.cached_property
+    @npc_io.cached_property
     def opto_location_bregma_x(
         self,
     ) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...]]:
@@ -858,7 +861,7 @@ class DynamicRouting1(TaskControl):
             return np.full(self._len, np.nan)
         return self._normalize_opto_data(self._opto_location_bregma_x)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def opto_location_bregma_y(
         self,
     ) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...]]:
@@ -866,7 +869,7 @@ class DynamicRouting1(TaskControl):
             return np.full(self._len, np.nan)
         return self._normalize_opto_data(self._opto_location_bregma_y)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _opto_label(self) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...]]:
         """target location for optogenetic inactivation during the trial"""
         if not self._is_galvo_opto:
@@ -916,13 +919,13 @@ class DynamicRouting1(TaskControl):
             data[trial_idx] = tuple(copy)
         return tuple(data)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def opto_duration(self) -> npt.NDArray[np.floating]:
         if not self._is_opto:
             return np.full(self._len, np.nan)
         return self._sam.trialOptoDur[: self._len].squeeze()
 
-    @utils.cached_property
+    @npc_io.cached_property
     def opto_label(self) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...], ...]:
         if not self._is_opto:
             return np.full(self._len, np.nan)
@@ -934,7 +937,7 @@ class DynamicRouting1(TaskControl):
         else:
             return self._opto_label
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _opto_voltage(self) -> npt.NDArray[np.float64]:
         voltages = np.full(self._len, np.nan)
         if not self._is_opto:
@@ -945,12 +948,12 @@ class DynamicRouting1(TaskControl):
                 continue
             v = self._hdf5["trialOptoVoltage"][self._opto_params_index][idx]
             if v.shape:
-                voltages[idx] = utils.safe_index(v, self._opto_params_index[idx])
+                voltages[idx] = npc_stim.safe_index(v, self._opto_params_index[idx])
                 continue
             voltages[idx] = v
         return voltages
 
-    @utils.cached_property
+    @npc_io.cached_property
     def opto_power(self) -> npt.NDArray[np.floating] | tuple[tuple[Any, ...], ...]:
         if not self._is_opto:
             return np.full(self._len, np.nan)
@@ -995,7 +998,7 @@ class DynamicRouting1(TaskControl):
             )
         return self._normalize_opto_data(result)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def opto_stim_name(self) -> npt.NDArray[np.str_] | npt.NDArray[np.floating]:
         """stimulus presented during optogenetic inactivation, corresponding to
         keys in `stimulus` dict.
@@ -1017,7 +1020,7 @@ class DynamicRouting1(TaskControl):
             dtype=str,
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def repeat_index(self) -> npt.NDArray[np.float64]:
         """number of times the trial has already been presented in immediately
         preceding trials.
@@ -1040,12 +1043,12 @@ class DynamicRouting1(TaskControl):
     # ---------------------------------------------------------------------- #
     # bools:
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_response(self) -> npt.NDArray[np.bool_]:
         """the subject licked one or more times during the response window"""
         return self._sam.trialResponse
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_correct(self) -> npt.NDArray[np.bool_]:
         """the subject acted correctly in the response window, according to its
         training.
@@ -1056,7 +1059,7 @@ class DynamicRouting1(TaskControl):
             self.is_hit | self.is_correct_reject | (self.is_catch & ~self.is_response)
         )
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_incorrect(self) -> npt.NDArray[np.bool_]:
         """the subject acted incorrectly in the response window, according to its
         training.
@@ -1065,12 +1068,12 @@ class DynamicRouting1(TaskControl):
         """
         return self.is_miss | self.is_false_alarm | (self.is_catch & self.is_response)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_hit(self) -> npt.NDArray[np.bool_]:
         """the subject responded in a GO trial"""
         return self.is_response & self.is_go
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_false_alarm(self) -> npt.NDArray[np.bool_]:
         """the subject responded in a NOGO trial
 
@@ -1078,7 +1081,7 @@ class DynamicRouting1(TaskControl):
         """
         return self.is_response & self.is_nogo
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_correct_reject(self) -> npt.NDArray[np.bool_]:
         """the subject did not respond in a NOGO trial
 
@@ -1086,12 +1089,12 @@ class DynamicRouting1(TaskControl):
         """
         return ~self.is_response & self.is_nogo
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_miss(self) -> npt.NDArray[np.bool_]:
         """the subject did not respond in a GO trial"""
         return ~self.is_response & self.is_go
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_go(self) -> npt.NDArray[np.bool_]:
         """condition in which the subject should respond.
 
@@ -1099,7 +1102,7 @@ class DynamicRouting1(TaskControl):
         """
         return self._sam.trialStim == self._sam.rewardedStim
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_nogo(self) -> npt.NDArray[np.bool_]:
         """condition in which the subject should not respond.
 
@@ -1109,7 +1112,7 @@ class DynamicRouting1(TaskControl):
         """
         return self._sam.nogoTrials
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_rewarded(self) -> npt.NDArray[np.bool_]:
         """the subject received a reward.
 
@@ -1117,17 +1120,17 @@ class DynamicRouting1(TaskControl):
         """
         return self._sam.trialRewarded
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_noncontingent_reward(self) -> npt.NDArray[np.bool_]:
         """the subject received a reward that did not depend on its response"""
         return self._sam.autoRewarded
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_contingent_reward(self) -> npt.NDArray[np.bool_]:
         """the subject received a reward for a correct response"""
         return self._sam.rewardEarned
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_reward_scheduled(self) -> npt.NDArray[np.bool_]:
         """a non-contingent reward was scheduled to occur, regardless of
         whether it was received.
@@ -1137,7 +1140,7 @@ class DynamicRouting1(TaskControl):
         """
         return self._sam.autoRewardScheduled
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_aud_stim(self) -> npt.NDArray[np.bool_]:
         """an auditory stimulus was presented.
 
@@ -1147,7 +1150,7 @@ class DynamicRouting1(TaskControl):
         """
         return np.isin(self._sam.trialStim, self._aud_stims)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_vis_stim(self) -> npt.NDArray[np.bool_]:
         """a visual stimulus was presented.
 
@@ -1157,71 +1160,71 @@ class DynamicRouting1(TaskControl):
         """
         return np.isin(self._sam.trialStim, self._vis_stims)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_catch(self) -> npt.NDArray[np.bool_]:
         """no stimulus was presented"""
         return np.isin(self._sam.trialStim, "catch")
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_target(self) -> npt.NDArray[np.bool_]:
         """a stimulus was presented that the subject should respond
         to only in a specific context"""
         return np.isin(self._sam.trialStim, self._targets)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_aud_target(self) -> npt.NDArray[np.bool_]:
         """an auditory stimulus was presented that the subject should respond
         to only in a specific context"""
         return np.isin(self._sam.trialStim, self._aud_targets)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_vis_target(self) -> npt.NDArray[np.bool_]:
         """a visual stimulus was presented that the subject should respond to
         only in a specific context"""
         return np.isin(self._sam.trialStim, self._vis_targets)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_nontarget(self) -> npt.NDArray[np.bool_]:
         """a stimulus was presented that the subject should never respond to"""
         return self.is_aud_nontarget | self.is_vis_nontarget
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_aud_nontarget(self) -> npt.NDArray[np.bool_]:
         """an auditory stimulus was presented that the subject should never respond to"""
         return np.isin(self._sam.trialStim, self._aud_nontargets)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_vis_nontarget(self) -> npt.NDArray[np.bool_]:
         """a visual stimulus was presented that the subject should never respond to"""
         return np.isin(self._sam.trialStim, self._vis_nontargets)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_vis_context(self) -> npt.NDArray[np.bool_]:
         """visual target stimuli are rewarded"""
         return np.isin(self._trial_rewarded_stim_name, self._vis_stims)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_aud_context(self) -> npt.NDArray[np.bool_]:
         """auditory target stimuli are rewarded"""
         return np.isin(self._trial_rewarded_stim_name, self._aud_stims)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_context_switch(self) -> npt.NDArray[np.bool_]:
         """the first trial with a stimulus after a change in context"""
         return np.isin(self.trial_index_in_block, 0) & ~np.isin(self.block_index, 0)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_repeat(self) -> npt.NDArray[np.bool_]:
         """the trial is a repetition of the previous trial, due to a
         miss"""
         return self._sam.trialRepeat
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_opto(self) -> npt.NDArray[np.bool_]:
         """optogenetic inactivation was applied during the trial"""
         return ~np.isnan(self.opto_start_time)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def is_single_opto_location(self) -> npt.NDArray[np.bool_]:
         """only one optogenetic inactivation was applied during the trial"""
         if not self._is_galvo_opto:
@@ -1232,7 +1235,7 @@ class DynamicRouting1(TaskControl):
         )
 
     """
-    @utils.cached_property
+    @npc_io.cached_property
     def is_(self) -> npt.NDArray[np.bool_]:
         """ """
         return

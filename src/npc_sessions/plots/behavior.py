@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     import pandas as pd
 
     import npc_sessions
+
 import npc_sessions.plots.plot_utils as plot_utils
 
 

@@ -43,6 +43,14 @@ from collections.abc import Iterable
 from typing import Optional, SupportsFloat
 
 import h5py
+import npc_ephys
+import npc_io
+import npc_lims
+import npc_mvr
+import npc_samstim
+import npc_session
+import npc_stim
+import npc_sync
 import numpy as np
 import numpy.typing as npt
 
@@ -51,18 +59,18 @@ import npc_sessions.utils as utils
 
 
 class TaskControl(property_dict.PropertyDict):
-    _sync: utils.SyncDataset | None
+    _sync: npc_sync.SyncDataset | None
     _hdf5: h5py.File
 
     def __init__(
         self,
-        hdf5: utils.StimPathOrDataset,
-        sync: utils.SyncPathOrDataset | None = None,
+        hdf5: npc_stim.StimPathOrDataset,
+        sync: npc_sync.SyncPathOrDataset | None = None,
         **kwargs,
     ) -> None:
         for k, v in kwargs.items():
             setattr(self, f"_{k.strip('_')}", v)
-        self._hdf5 = utils.get_h5_stim_data(hdf5)
+        self._hdf5 = npc_stim.get_h5_stim_data(hdf5)
         if not sync:
             # - all times in nwb are relative to start of first frame in hdf5
             # - there can only be one hdf5 file
@@ -70,21 +78,21 @@ class TaskControl(property_dict.PropertyDict):
         else:
             # - all times in nwb are relative to start of first sample on sync
             # - there can be multiple hdf5 files, all recorded on sync
-            self._sync = utils.get_sync_data(sync)
+            self._sync = npc_sync.get_sync_data(sync)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _input_data_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of `getInputData()` in psychopy event loop, in seconds, from start
         of experiment. Uses preceding frame's vsync time if available."""
-        return utils.get_input_data_times(self._hdf5, self._sync)
+        return npc_stim.get_input_data_times(self._hdf5, self._sync)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _flip_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of `flip()` in psychopy event loop, in seconds, from start
         of experiment. Uses frame's vsync time if available."""
-        return utils.get_flip_times(self._hdf5, self._sync)
+        return npc_stim.get_flip_times(self._hdf5, self._sync)
 
-    @utils.cached_property
+    @npc_io.cached_property
     def _vis_display_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of monitor update. Without sync, this equals frame times."""
-        return utils.get_vis_display_times(self._hdf5, self._sync)
+        return npc_stim.get_vis_display_times(self._hdf5, self._sync)

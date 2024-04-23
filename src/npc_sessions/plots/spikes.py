@@ -6,6 +6,7 @@ import matplotlib.axes
 import matplotlib.colors
 import matplotlib.figure
 import matplotlib.pyplot as plt
+import npc_ephys
 import numpy as np
 import pandas as pd
 
@@ -94,7 +95,7 @@ def plot_unit_spikes_channels(
             (unit_spike_times["peak_channel"] >= lower_channel)
             & (unit_spike_times["peak_channel"] <= upper_channel)
         ]["spike_times"].to_numpy()
-        hist, bins = utils.bin_spike_times(unit_spike_times_channel, bin_interval=1)
+        hist, bins = npc_ephys.bin_spike_times(unit_spike_times_channel, bin_interval=1)
 
         ax.plot(hist)
         ax.set_title(

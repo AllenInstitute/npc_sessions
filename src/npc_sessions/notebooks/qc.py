@@ -4,6 +4,7 @@ import importlib.resources
 import logging
 import os
 
+import npc_io
 import npc_session
 import upath
 
@@ -12,12 +13,12 @@ import npc_sessions.utils as utils
 logger = logging.getLogger(__name__)
 
 MODULE_ROOT = upath.UPath(__file__).parent
-PACKAGE_ROOT = utils.from_pathlike(importlib.resources.files("npc_sessions"))  # type: ignore[arg-type]
+PACKAGE_ROOT = npc_io.from_pathlike(importlib.resources.files("npc_sessions"))  # type: ignore[arg-type]
 
 
 def write_qc_notebook(
     session_path_or_id: str,
-    save_path: utils.PathLike = upath.UPath.cwd(),
+    save_path: npc_io.PathLike = upath.UPath.cwd(),
     **session_kwargs,
 ) -> upath.UPath:
     """Find the given session's appropriate QC notebook in the site-packages

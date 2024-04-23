@@ -1,24 +1,34 @@
 from typing import Optional
 
+import npc_ephys
+import npc_io
+import npc_lims
+import npc_mvr
+import npc_samstim
+import npc_session
+import npc_stim
+import npc_sync
+
 import npc_sessions.utils as utils
 from npc_sessions.trials.property_dict import PropertyDict
 from npc_sessions.trials.TaskControl import TaskControl
 from npc_sessions.trials.TaskControl.DynamicRouting1 import DynamicRouting1
 from npc_sessions.trials.TaskControl.LuminanceTest import LuminanceTest
 from npc_sessions.trials.TaskControl.OptoTagging import OptoTagging
-from npc_sessions.trials.TaskControl.RFMapping import AudRFMapping, VisRFMapping
+from npc_sessions.trials.TaskControl.RFMapping import (AudRFMapping,
+                                                       VisRFMapping)
 
 
 def get_trials(
-    *stim_path: utils.PathLike,
-    sync_path_or_data: Optional[utils.SyncPathOrDataset],
+    *stim_path: npc_io.PathLike,
+    sync_path_or_data: Optional[npc_sync.SyncPathOrDataset],
     **kwargs,
 ) -> tuple[TaskControl, ...]:
     """Get trials for a given stimulus file.
 
     Parameters
     ----------
-    stim_path : utils.PathLike
+    stim_path : npc_io.PathLike
         Path to stimulus file.
 
     Returns
@@ -28,7 +38,7 @@ def get_trials(
     """
     trials: list[TaskControl] = []
     for stim in stim_path:
-        stim_name = utils.from_pathlike(stim).name
+        stim_name = npc_io.from_pathlike(stim).name
         if "DynamicRouting1" in stim_name:
             trials.append(DynamicRouting1(stim, sync_path_or_data, **kwargs))
         elif "OptoTagging" in stim_name:

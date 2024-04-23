@@ -9,27 +9,26 @@ import cv2
 import matplotlib.figure
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
+import npc_mvr
 import numpy as np
 import numpy.typing as npt
 import rich
 import upath
 
-import npc_sessions.utils as utils
-
 if TYPE_CHECKING:
     import npc_sessions
 
 import npc_sessions.plots.plot_utils as plot_utils
-
+import npc_sessions.utils as utils
 
 def plot_video_info(
     session: npc_sessions.DynamicRoutingSession,
 ) -> None:
     "Not a plot: prints info to stdout"
 
-    augmented_camera_info = utils.get_augmented_camera_info(
+    augmented_camera_info = npc_mvr.MVRDataset(
         session.sync_data, *session.video_paths
-    )
+    ).augmented_camera_info
 
     for camera, info in augmented_camera_info.items():
         rich.print(f"[bold]{camera} camera stats[bold]")
@@ -83,7 +82,7 @@ def plot_camera_frame_grabs_simple(
     for idx, video_path in enumerate(paths):
         # get frames to plot
 
-        v = utils.get_video_data(video_path)  # TODO open with upath from cloud
+        v = npc_mvr.get_video_data(video_path)  # TODO open with upath from cloud
 
         frame_delta = np.ceil(v.get(cv2.CAP_PROP_FRAME_COUNT) / num_frames_to_grab + 1)
         frames_of_interest = np.arange(
@@ -150,14 +149,14 @@ def plot_video_frames_with_licks(
     )
     gs.update(wspace=0.0, hspace=0.0)
 
-    video_frame_times = utils.get_video_frame_times(
+    video_frame_times = npc_mvr.get_video_frame_times(
         session.sync_data, *session.video_paths
     )
     for vid_idx, (video_path, frame_times) in enumerate(video_frame_times.items()):
         if "eye" in video_path.stem.lower():
             continue
         for lick_idx, lick_time in enumerate(lick_times):
-            v = utils.get_video_data(video_path)  # TODO open with upath from cloud
+            v = npc_mvr.get_video_data(video_path)  # TODO open with upath from cloud
 
             closest_frame_index = np.nanargmin(np.abs(frame_times - lick_time))  # type: ignore[operator]
             frame_indices = np.arange(

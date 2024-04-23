@@ -3,13 +3,13 @@ from typing import TYPE_CHECKING
 
 import matplotlib.figure
 import matplotlib.pyplot as plt
+import npc_stim
 import numpy as np
 import rich
 
 if TYPE_CHECKING:
     import npc_sessions
 
-import npc_sessions.utils as utils
 
 
 def plot_bad_lick_times(
@@ -50,7 +50,7 @@ def plot_assorted_lick_times(
     session: "npc_sessions.DynamicRoutingSession",
 ) -> tuple[plt.Figure, ...]:
     sync_time = session._trials.response_time
-    script_time = utils.safe_index(
+    script_time = npc_stim.safe_index(
         session._trials._flip_times, session._trials._sam.trialResponseFrame
     )
     intervals = np.abs(sync_time - script_time)
@@ -127,7 +127,7 @@ def plot_trial_lick_timing(
     )
     ax.eventplot(
         [
-            utils.safe_index(
+            npc_stim.safe_index(
                 session._trials._input_data_times,
                 session._trials._sam.trialResponseFrame[trial_idx],
             )
@@ -141,7 +141,7 @@ def plot_trial_lick_timing(
     ax.eventplot(
         [
             (
-                lick_frames := utils.safe_index(
+                lick_frames := npc_stim.safe_index(
                     session._trials._input_data_times, session._trials._sam.lickFrames
                 )
             )[(lick_frames >= start) & (lick_frames <= stop)]
@@ -154,7 +154,7 @@ def plot_trial_lick_timing(
 
     ax.eventplot(
         [
-            utils.safe_index(
+            npc_stim.safe_index(
                 session._trials._flip_times,
                 session._trials._sam.stimStartFrame[trial_idx],
             )
@@ -183,7 +183,7 @@ def plot_lick_times_on_sync_and_script(
     - histogram showing distribution of same intervals
     """
     sync_time = session._trials.response_time
-    script_time = utils.safe_index(
+    script_time = npc_stim.safe_index(
         session._trials._input_data_times, session._trials._sam.trialResponseFrame
     )
     if not sync_time.shape or not script_time.shape:

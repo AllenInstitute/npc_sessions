@@ -5,11 +5,10 @@ import datetime
 import logging
 from collections.abc import Iterable
 
+import npc_io
 import npc_session
 import pandas as pd
 import polars as pl
-
-import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
@@ -69,31 +68,31 @@ NEWSCALE_LOG_COLUMNS = (
 )
 
 
-def get_newscale_data(path: utils.PathLike) -> pl.DataFrame:
+def get_newscale_data(path: npc_io.PathLike) -> pl.DataFrame:
     """
     >>> df = get_newscale_data('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior/log.csv')
     """
     return pl.read_csv(
-        source=utils.from_pathlike(path).as_posix(),
+        source=npc_io.from_pathlike(path).as_posix(),
         new_columns=NEWSCALE_LOG_COLUMNS,
         try_parse_dates=True,
     )
 
 
-def get_newscale_data_lazy(path: utils.PathLike) -> pl.LazyFrame:
+def get_newscale_data_lazy(path: npc_io.PathLike) -> pl.LazyFrame:
     """
     # >>> df = get_newscale_data_lazy('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior/log.csv')
     """
     # TODO not working with s3 paths
     return pl.scan_csv(
-        source=utils.from_pathlike(path).as_posix(),
+        source=npc_io.from_pathlike(path).as_posix(),
         with_column_names=lambda _: list(NEWSCALE_LOG_COLUMNS),
         try_parse_dates=True,
     )
 
 
 def get_newscale_coordinates(
-    newscale_log_path: utils.PathLike,
+    newscale_log_path: npc_io.PathLike,
     recording_start_time: (
         str | datetime.datetime | npc_session.DatetimeRecord | None
     ) = None,
@@ -111,7 +110,7 @@ def get_newscale_coordinates(
     [3920.0, 6427.0, 8500.0, 6893.0, 6962.0, 5875.0]
     """
     if recording_start_time is None:
-        p = utils.from_pathlike(newscale_log_path)
+        p = npc_io.from_pathlike(newscale_log_path)
         try:
             start = npc_session.DatetimeRecord(p.as_posix())
         except ValueError as exc:
