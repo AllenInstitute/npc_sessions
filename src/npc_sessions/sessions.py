@@ -818,7 +818,9 @@ class DynamicRoutingSession:
                 .item()
             )
 
-            block_performance["number_of_rewards"] = trials[trials["block_index"] == block_idx]['is_rewarded'].sum()
+            block_performance["number_of_rewards"] = trials[
+                trials["block_index"] == block_idx
+            ]["is_rewarded"].sum()
             block_performance["rewarded_modality"] = rewarded_modality
             block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[
                 block_idx
@@ -1147,7 +1149,7 @@ class DynamicRoutingSession:
             "reference",
             "imp",
             "raw_location",
-            "raw_structure"
+            "raw_structure",
         )
         if self.is_annotated:
             column_names = ("structure", "x", "y", "z") + column_names
