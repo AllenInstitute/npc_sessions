@@ -100,20 +100,20 @@ def component_exists(
     version: str | None = None,
 ) -> bool:
     extension = npc_lims.get_cache_file_suffix(component_name)
-    if extension == ".zarr":
-        consolidated = True
-    else:
+    cache_session_id: str | None = session_id
+    if extension == ".zarr" and component_name == 'spike_times':
         consolidated = False
+    else:
+        consolidated = True
+        cache_session_id = None
     path = npc_lims.get_cache_path(
         nwb_component=component_name,
-        session_id=session_id,
+        session_id=cache_session_id,
         version=version,
         consolidated=consolidated,
     )
-    if not path.exists():
-        return False
     if not consolidated:
-        return True
+        return path.exists()
     else:
         z = zarr.open(path)
         if npc_session.SessionRecord(session_id) in z:
