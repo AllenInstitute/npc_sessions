@@ -129,7 +129,7 @@ def get_pose_series_from_dataframe(
 ) -> list[ndx_pose.pose.PoseEstimationSeries]:
     # https://github.com/DeepLabCut/DLC2NWB/blob/main/dlc2nwb/utils.py#L189
     pose_estimations_series = []
-    for keypoint, xy_positions in df.groupby(level="bodyparts", axis=1, sort=False):
+    for keypoint, xy_positions in df.T.groupby(level="bodyparts", sort=False):
         data = xy_positions.to_numpy()
         pose_estimation_series = ndx_pose.pose.PoseEstimationSeries(
             name=keypoint,
