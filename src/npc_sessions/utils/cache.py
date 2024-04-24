@@ -101,7 +101,7 @@ def component_exists(
 ) -> bool:
     extension = npc_lims.get_cache_file_suffix(component_name)
     cache_session_id: str | None = session_id
-    if extension == ".zarr" and component_name == 'spike_times':
+    if extension == ".zarr" and component_name == "spike_times":
         consolidated = False
     else:
         consolidated = True
