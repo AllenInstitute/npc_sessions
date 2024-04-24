@@ -19,7 +19,9 @@ def get_tissuecyte_electrodes_table(
 
     >>> df = get_tissuecyte_electrodes_table('626791_2022-08-16')
     >>> df.columns
-    Index(['group_name', 'channel', 'location', 'structure', 'x', 'y', 'z'], dtype='object')
+    Index(['group_name', 'channel', 'location', 'structure', 'x', 'y', 'z',
+           'raw_location', 'raw_structure'],
+          dtype='object')
     """
     electrode_files = npc_lims.get_tissuecyte_annotation_files_from_s3(session)
 
@@ -49,7 +51,7 @@ def get_tissuecyte_electrodes_table(
         session_electrodes[column] = session_electrodes[column].replace(-1, np.nan)
         session_electrodes[column] *= TISSUECYTE_MICRONS_PER_PIXEL
     session_electrodes = session_electrodes[
-        ["group_name", "channel", "location", "structure", "x", "y", "z"]
+        ["group_name", "channel", "location", "structure", "x", "y", "z", "raw_location", "raw_structure"]
     ]
     return session_electrodes
 

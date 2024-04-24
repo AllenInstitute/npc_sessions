@@ -817,6 +817,8 @@ class DynamicRoutingSession:
                 .unique()
                 .item()
             )
+
+            block_performance["number_of_rewards"] = trials[trials["block_index"] == block_idx]['is_rewarded'].sum()
             block_performance["rewarded_modality"] = rewarded_modality
             block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[
                 block_idx
@@ -856,6 +858,7 @@ class DynamicRoutingSession:
         )
         column_name_to_description = {
             "block_index": "presentation order in the task (0-indexed)",
+            "number_of_rewards": "the number of rewards delivered during the block",
             "rewarded_modality": "the modality of the target stimulus that was rewarded in each block: normally `vis` or `aud`",
             "cross_modal_dprime": "dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
             "signed_cross_modal_dprime": "same as cross_modal_dprime, but with sign flipped for auditory blocks",
@@ -1143,12 +1146,16 @@ class DynamicRoutingSession:
             "rel_y",
             "reference",
             "imp",
+            "raw_location",
+            "raw_structure"
         )
         if self.is_annotated:
             column_names = ("structure", "x", "y", "z") + column_names
             ccf_df = utils.get_tissuecyte_electrodes_table(self.id)
         column_description = {
             "structure": "acronym for the Allen CCF structure that the electrode recorded from - less-specific than `location`",
+            "raw_location": "raw non-processed acronym for the Allen CCF strucutre that the electrode recorded from",
+            "raw_structure": "raw non-processed acronym for the Allen CCF strucutre that the electrode recorded from - less specific than location",
             "x": "x coordinate in the Allen CCF, +x is posterior",
             "y": "y coordinate in the Allen CCF, +y is inferior",
             "z": "z coordinate in the Allen CCF, +z is right",
