@@ -1243,7 +1243,7 @@ class DynamicRoutingSession:
         """Whether to include waveform arrays in the units table"""
         if (v := getattr(self, "_is_waveforms", None)) is not None:
             return v
-        return True
+        return False
 
     @npc_io.cached_property
     def _units(self) -> pd.DataFrame:
