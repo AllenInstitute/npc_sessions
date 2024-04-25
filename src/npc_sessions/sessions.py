@@ -293,7 +293,7 @@ class DynamicRoutingSession:
     def nwb(self) -> pynwb.NWBFile:
         # if self._nwb_hdf5_path:
         #     self.nwb = pynwb.NWBHDF5IO(self._nwb_hdf5_path, "r").read()
-        return pynwb.NWBFile(
+        nwb = pynwb.NWBFile(
             session_id=self.session_id,
             session_description=self.session_description,
             experiment_description=self.experiment_description,
@@ -317,14 +317,26 @@ class DynamicRoutingSession:
             ),  # we have one sessions without trials (670248_2023-08-02)
             intervals=self._intervals,
             acquisition=self._acquisition,
-            processing=tuple(self.processing.values()),
             analysis=self._analysis,
             devices=self._devices if self._devices else None,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
             units=self.units if self.is_sorted else None,
         )
-
+        self.add_processing_to_nwb(nwb)
+        return nwb
+    
+    def write_nwb(self, path: str | npc_io.PathLike | None = None) -> None:
+        """Write NWB file to disk"""
+        if path is None:
+            path = npc_lims.get_nwb_path(self.id)
+        else:
+            path = npc_io.from_pathlike(path)
+        nwb = self.nwb
+        with pynwb.NWBHDF5IO(path.as_posix(), "w") as io:
+            nwb.generate_new_id()
+            io.write(nwb)
+            
     # metadata ------------------------------------------------------------------ #
 
     @npc_io.cached_property
@@ -636,7 +648,8 @@ class DynamicRoutingSession:
         """Data after processing and filtering - raw data goes in
         `acquisition`.
 
-        The property as it appears on an NWBFile."""
+        The property as it appears on an NWBFile - but should not be added
+        directly to NWB: use `add_processing_to_nwb()`"""
         # TODO replace with `nwb.add_processing_module`
         processing = pynwb.core.LabelledDict(label="processing", key_attr="name")
         for module_name in ("behavior",) + (("ecephys",) if self.is_ephys else ()):
@@ -647,7 +660,17 @@ class DynamicRoutingSession:
                 data_interfaces=module,
             )
         return processing
-
+    
+    def add_processing_to_nwb(self, nwb: pynwb.NWBFile) -> None:
+        """Processing modules need to be added to the NWBFile in a unique way"""
+        for module in self.processing.values():
+            # `create_processing_module()` creates and adds to nwb!
+            nwb.create_processing_module(
+                name=module.name,
+                description=module.description,
+                data_interfaces=module.data_interfaces,
+            )
+        
     @npc_io.cached_property
     def _behavior(
         self,
