@@ -1150,7 +1150,14 @@ class DynamicRoutingSession:
             "imp",
         )
         if self.is_annotated:
-            column_names = ("structure", "x", "y", "z", "raw_location", "raw_structure") + column_names
+            column_names = (
+                "structure",
+                "x",
+                "y",
+                "z",
+                "raw_location",
+                "raw_structure",
+            ) + column_names
             ccf_df = utils.get_tissuecyte_electrodes_table(self.id)
         column_description = {
             "structure": "acronym for the Allen CCF structure that the electrode recorded from - less-specific than `location`",
