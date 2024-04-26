@@ -294,9 +294,9 @@ class DynamicRoutingSession:
     def nwb(self) -> pynwb.NWBFile:
         if (path := npc_lims.get_nwb_path(self.id)).exists():
             if path.suffix == ".zarr":
-                return hdmf_zarr.NWBZarrIO(path=path, mode="r").read()
+                return hdmf_zarr.NWBZarrIO(path=path.as_posix(), mode="r").read()
             else:
-                return pynwb.NWBHDF5IO(path=path, mode="r").read()
+                return pynwb.NWBHDF5IO(path=path.as_posix(), mode="r").read()
         return pynwb.NWBFile(
             session_id=self.session_id,
             session_description=self.session_description,
