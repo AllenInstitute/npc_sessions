@@ -2611,7 +2611,7 @@ class DynamicRoutingSession:
                     data=face_motion_svd,
                     unit="pixels",
                     timestamps=timestamps,
-                    description=f"motion SVD for video from {nwb_camera_name}. Shape is number of frames by number of components ({face_motion_svd.shape[1]})",
+                    description=f"motion SVD for video from {nwb_camera_name}; shape is number of frames by number of components ({face_motion_svd.shape[1]})",
                 )
             )
         return tuple(facemap_series)
