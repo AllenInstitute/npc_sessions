@@ -78,7 +78,7 @@ def get_available_container_memory() -> int:
 
 def setup(
     nwb: bool = False,
-    ) -> dict[
+) -> dict[
     Literal["session_type", "skip_existing", "version", "parallel", "zarr_nwb"],
     str | bool | None,
 ]:

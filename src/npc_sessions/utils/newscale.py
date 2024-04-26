@@ -173,7 +173,7 @@ def get_newscale_coordinates(
         .to_pandas()
     )
     # nwb doesn't support `Timestamp``
-    df.last_movement = df.last_movement.astype('str') # type: ignore[attr-defined]
+    df.last_movement = df.last_movement.astype("str")  # type: ignore[attr-defined]
     return df
 
 

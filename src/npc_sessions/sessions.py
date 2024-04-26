@@ -328,34 +328,48 @@ class DynamicRoutingSession:
             electrodes=self.electrodes if self.is_ephys else None,
             units=self.units if self.is_sorted else None,
         )
-    
-    def write_nwb_hdf5(self, path: str | npc_io.PathLike | None = None, metadata_only: bool = False) -> upath.UPath:
+
+    def write_nwb_hdf5(
+        self, path: str | npc_io.PathLike | None = None, metadata_only: bool = False
+    ) -> upath.UPath:
         """Write NWB file to disk - file path is normalized and returned"""
         if path is None:
             path = npc_lims.get_nwb_path(self.id)
         else:
             path = npc_io.from_pathlike(path)
-        path = path.with_stem(path.name.replace('.hdf5', '').replace('.nwb', '').replace('.zarr', '')).with_suffix('.nwb')
+        path = path.with_stem(
+            path.name.replace(".hdf5", "").replace(".nwb", "").replace(".zarr", "")
+        ).with_suffix(".nwb")
         nwb = self.nwb if not metadata_only else self.metadata
         with pynwb.NWBHDF5IO(path.as_posix(), "w") as io:
             io.write(nwb)
-        logger.info(f"Saved NWB file to {path}: {npc_io.get_size(path) // 1024 ** 2} MB")
+        logger.info(
+            f"Saved NWB file to {path}: {npc_io.get_size(path) // 1024 ** 2} MB"
+        )
         return path
-    
-    def write_nwb_zarr(self, path: str | npc_io.PathLike | None = None, metadata_only: bool = False) -> upath.UPath:
+
+    def write_nwb_zarr(
+        self, path: str | npc_io.PathLike | None = None, metadata_only: bool = False
+    ) -> upath.UPath:
         """Write NWB file to disk - file path is normalized and returned"""
         if path is None:
             path = npc_lims.get_nwb_path(self.id)
         else:
             path = npc_io.from_pathlike(path)
-        path = path.with_stem(path.name.replace('.hdf5', '').replace('.nwb', '').replace('.zarr', '')).with_suffix('.nwb.zarr')
+        path = path.with_stem(
+            path.name.replace(".hdf5", "").replace(".nwb", "").replace(".zarr", "")
+        ).with_suffix(".nwb.zarr")
         nwb = self.nwb if not metadata_only else self.metadata
         with hdmf_zarr.NWBZarrIO(path.as_posix(), "w") as io:
-            io.write(nwb, link_data=False) # link_data=False so that lazily-opened zarrays are read and copied into nwb (instead of being added as a link, which is currently broken)
+            io.write(
+                nwb, link_data=False
+            )  # link_data=False so that lazily-opened zarrays are read and copied into nwb (instead of being added as a link, which is currently broken)
         # zarr "file" is a directory:
-        logger.info(f"Saved NWB file to {path}: {npc_io.get_size(path) // 1024 ** 2} MB")
+        logger.info(
+            f"Saved NWB file to {path}: {npc_io.get_size(path) // 1024 ** 2} MB"
+        )
         return path
-        
+
     # metadata ------------------------------------------------------------------ #
 
     @npc_io.cached_property
@@ -679,7 +693,7 @@ class DynamicRoutingSession:
                 data_interfaces=module,
             )
         return processing
-    
+
     @npc_io.cached_property
     def _behavior(
         self,

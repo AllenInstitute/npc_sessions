@@ -6,11 +6,12 @@
 
 from __future__ import annotations
 
-import io
 import logging
+import tempfile
 import typing
 from collections.abc import Mapping
 
+import boto3
 import ndx_events
 import npc_io
 import npc_lims
@@ -20,9 +21,7 @@ import pyarrow
 import pyarrow.dataset
 import pyarrow.parquet
 import pynwb
-import tempfile
 import zarr
-import boto3
 
 if typing.TYPE_CHECKING:
     import npc_sessions
@@ -171,7 +170,7 @@ def write_and_upload_session_nwb(
     skip_existing: bool = True,
     version: str | None = None,
     zarr: bool = True,
-    metadata_only: bool = False, # for testing
+    metadata_only: bool = False,  # for testing
 ) -> None:
     """
     >>> import npc_sessions
@@ -183,7 +182,9 @@ def write_and_upload_session_nwb(
     logger.info(f"Writing {session.session_id} NWB")
     path = npc_lims.get_nwb_path(session.session_id, version=version)
     if skip_existing and path.exists():
-        logger.info(f"Skipping {session.session_id} NWB write - already exists and skip_existing=True")
+        logger.info(
+            f"Skipping {session.session_id} NWB write - already exists and skip_existing=True"
+        )
         return
     if zarr:
         path = session.write_nwb_zarr(path=path, metadata_only=metadata_only)
@@ -191,12 +192,15 @@ def write_and_upload_session_nwb(
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpfile = npc_io.from_pathlike(tmpdir) / "temp.nwb"
             tmpfile = session.write_nwb_hdf5(path=tmpfile, metadata_only=metadata_only)
-            bucket = path.fs._parent(path).split('/')[0]
-            path = path.with_name(f"{path.name.replace('.zarr', '').replace('.nwb', '')}.nwb")
+            bucket = path.fs._parent(path).split("/")[0]
+            path = path.with_name(
+                f"{path.name.replace('.zarr', '').replace('.nwb', '')}.nwb"
+            )
             key = path.as_posix().split(f"{bucket}/", 1)[1]
-            boto3.client('s3').upload_file(tmpfile, bucket, key)
+            boto3.client("s3").upload_file(tmpfile, bucket, key)
     logger.info(f"Uploaded {session.session_id} NWB to {path}")
-    
+
+
 def write_all_components_to_cache(
     session: pynwb.NWBFile | npc_sessions.DynamicRoutingSession,
     skip_existing: bool = True,
