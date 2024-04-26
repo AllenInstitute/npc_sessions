@@ -24,6 +24,7 @@ import cv2
 import h5py
 import hdmf
 import hdmf.common
+import hdmf_zarr
 import ndx_events
 import ndx_pose
 import npc_ephys
@@ -291,6 +292,11 @@ class DynamicRoutingSession:
 
     @property
     def nwb(self) -> pynwb.NWBFile:
+        if (path := npc_lims.get_nwb_path(self.id)).exists():
+            if path.suffix == ".zarr":
+                return hdmf_zarr.NWBZarrIO(path=path, mode="r").read()
+            else:
+                return pynwb.NWBHDF5IO(path=path, mode="r").read()
         # if self._nwb_hdf5_path:
         #     self.nwb = pynwb.NWBHDF5IO(self._nwb_hdf5_path, "r").read()
         nwb = pynwb.NWBFile(
