@@ -167,11 +167,14 @@ def get_newscale_coordinates(
             z[idx] = get_z_travel(device) - z[idx]
     df = df.with_columns(z)
 
-    return (
+    df = (
         df.insert_column(index=0, column=probes)
         .sort(pl.col("electrode_group"))
         .to_pandas()
     )
+    # nwb doesn't support `Timestamp``
+    df.last_movement = df.last_movement.astype('str') # type: ignore[attr-defined]
+    return df
 
 
 def get_z_travel(serial_number: str) -> int:
