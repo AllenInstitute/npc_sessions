@@ -1185,10 +1185,13 @@ class DynamicRoutingSession:
                 "x",
                 "y",
                 "z",
-                "raw_location",
-                "raw_structure",
             ) + column_names
             ccf_df = utils.get_tissuecyte_electrodes_table(self.id)
+            if "raw_location" in ccf_df:
+                column_names = column_names + (
+                    "raw_location",
+                    "raw_structure",
+                )
         column_description = {
             "structure": "acronym for the Allen CCF structure that the electrode recorded from - less-specific than `location`",
             "raw_location": "raw non-processed (for white matter areas (lowercase), will be different than location) acronym for the Allen CCF strucutre that the electrode recorded from",
