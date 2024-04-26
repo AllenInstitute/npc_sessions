@@ -188,7 +188,7 @@ def write_and_upload_session_nwb(
     if zarr:
         path = session.write_nwb_zarr(path=path, metadata_only=metadata_only)
     else:
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir: # type: ignore[call-overload]
             tmpfile = npc_io.from_pathlike(tmpdir) / "temp.nwb"
             tmpfile = session.write_nwb_hdf5(path=tmpfile, metadata_only=metadata_only)
             bucket = path.fs._parent(path).split('/')[0]
