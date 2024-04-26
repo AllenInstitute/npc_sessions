@@ -61,10 +61,14 @@ def get_tissuecyte_electrodes_table(
             "z",
         ]
         + 
-        [            
-            "raw_location",
-            "raw_structure",
-        ] if "raw_location" in session_electrodes.columns else []
+        (
+            [            
+                "raw_location",
+                "raw_structure",
+            ] 
+            if "raw_location" in session_electrodes.columns 
+            else []
+        )
     ]
     return session_electrodes
 
