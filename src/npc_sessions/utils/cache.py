@@ -22,6 +22,7 @@ import pyarrow.parquet
 import pynwb
 import tempfile
 import zarr
+import boto3
 
 if typing.TYPE_CHECKING:
     import npc_sessions
@@ -170,7 +171,7 @@ def write_and_upload_session_nwb(
     skip_existing: bool = True,
     version: str | None = None,
     zarr: bool = True,
-    metadata_only: bool = False,
+    metadata_only: bool = False, # for testing
 ) -> None:
     """
     >>> import npc_sessions
@@ -185,15 +186,16 @@ def write_and_upload_session_nwb(
         logger.info(f"Skipping {session.session_id} NWB write - already exists and skip_existing=True")
         return
     if zarr:
-        session.write_nwb_zarr(path=path, metadata_only=metadata_only)
+        path = session.write_nwb_zarr(path=path, metadata_only=metadata_only)
     else:
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
-            tmpfile = tmpdir + "/temp.nwb"
-            session.write_nwb_hdf5(path=tmpfile, metadata_only=metadata_only)
-            path.write_bytes(
-                npc_io.from_pathlike(tmpfile).open("rb")
-            )
-    
+            tmpfile = npc_io.from_pathlike(tmpdir) / "temp.nwb"
+            tmpfile = session.write_nwb_hdf5(path=tmpfile, metadata_only=metadata_only)
+            bucket = path.fs._parent(path).split('/')[0]
+            path = path.with_name(f"{path.name.replace('.zarr', '').replace('.nwb', '')}.nwb")
+            key = path.as_posix().split(f"{bucket}/", 1)[1]
+            boto3.client('s3').upload_file(tmpfile, bucket, key)
+    logger.info(f"Uploaded {session.session_id} NWB to {path}")
     
 def write_all_components_to_cache(
     session: pynwb.NWBFile | npc_sessions.DynamicRoutingSession,
