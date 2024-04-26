@@ -297,9 +297,7 @@ class DynamicRoutingSession:
                 return hdmf_zarr.NWBZarrIO(path=path, mode="r").read()
             else:
                 return pynwb.NWBHDF5IO(path=path, mode="r").read()
-        # if self._nwb_hdf5_path:
-        #     self.nwb = pynwb.NWBHDF5IO(self._nwb_hdf5_path, "r").read()
-        nwb = pynwb.NWBFile(
+        return pynwb.NWBFile(
             session_id=self.session_id,
             session_description=self.session_description,
             experiment_description=self.experiment_description,
@@ -320,17 +318,16 @@ class DynamicRoutingSession:
             invalid_times=self.invalid_times,
             trials=(
                 self.trials if self.is_task else None
-            ),  # we have one sessions without trials (670248_2023-08-02)
+            ),  # we have one session without trials (670248_2023-08-02)
             intervals=self._intervals,
             acquisition=self._acquisition,
+            processing=tuple(self.processing.values()),
             analysis=self._analysis,
             devices=self._devices if self._devices else None,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
             units=self.units if self.is_sorted else None,
         )
-        self.add_processing_to_nwb(nwb)
-        return nwb
     
     def write_nwb(self, path: str | npc_io.PathLike | None = None) -> None:
         """Write NWB file to disk"""
@@ -667,16 +664,6 @@ class DynamicRoutingSession:
             )
         return processing
     
-    def add_processing_to_nwb(self, nwb: pynwb.NWBFile) -> None:
-        """Processing modules need to be added to the NWBFile in a unique way"""
-        for module in self.processing.values():
-            # `create_processing_module()` creates and adds to nwb!
-            nwb.create_processing_module(
-                name=module.name,
-                description=module.description,
-                data_interfaces=module.data_interfaces,
-            )
-        
     @npc_io.cached_property
     def _behavior(
         self,
