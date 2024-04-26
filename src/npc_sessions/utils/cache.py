@@ -191,7 +191,7 @@ def write_and_upload_session_nwb(
             tmpfile = tmpdir + "/temp.nwb"
             session.write_nwb_hdf5(path=tmpfile, metadata_only=metadata_only)
             path.write_bytes(
-                npc_io.from_pathlike(tmpfile).open()
+                npc_io.from_pathlike(tmpfile).open("rb")
             )
     
     
