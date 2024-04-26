@@ -173,6 +173,7 @@ def write_and_upload_session_nwb(
     >>> import npc_sessions
     >>> session = npc_sessions.DynamicRoutingSession("DRpilot_667252_20230926", probe_letters_to_skip="BCDEF")
     >>> write_and_upload_session_nwb(session, version="test", skip_existing=False, zarr=True, metadata_only=True)
+    >>> session = npc_sessions.DynamicRoutingSession("DRpilot_667252_20230926", probe_letters_to_skip="BCDEF") # can't write nwb twice, must re-create
     >>> write_and_upload_session_nwb(session, version="test", skip_existing=False, zarr=False, metadata_only=True)
     """
     logger.info(f"Writing {session.session_id} NWB")
