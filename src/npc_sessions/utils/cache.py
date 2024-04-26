@@ -6,11 +6,13 @@
 
 from __future__ import annotations
 
+import io
 import logging
 import typing
 from collections.abc import Mapping
 
 import ndx_events
+import npc_io
 import npc_lims
 import npc_session
 import pandas as pd
@@ -18,6 +20,7 @@ import pyarrow
 import pyarrow.dataset
 import pyarrow.parquet
 import pynwb
+import tempfile
 import zarr
 
 if typing.TYPE_CHECKING:
@@ -184,7 +187,12 @@ def write_and_upload_session_nwb(
     if zarr:
         session.write_nwb_zarr(path=path, metadata_only=metadata_only)
     else:
-        session.write_nwb_hdf5(path=path, metadata_only=metadata_only)
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+            tmpfile = tmpdir + "/temp.nwb"
+            session.write_nwb_hdf5(path=tmpfile, metadata_only=metadata_only)
+            path.write_bytes(
+                npc_io.from_pathlike(tmpfile).open()
+            )
     
     
 def write_all_components_to_cache(
