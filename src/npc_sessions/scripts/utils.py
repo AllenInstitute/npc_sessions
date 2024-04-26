@@ -76,8 +76,10 @@ def get_available_container_memory() -> int:
     return limit - usage
 
 
-def setup() -> dict[
-    Literal["session_type", "skip_existing", "version", "parallel"],
+def setup(
+    nwb: bool = False,
+    ) -> dict[
+    Literal["session_type", "skip_existing", "version", "parallel", "zarr_nwb"],
     str | bool | None,
 ]:
     args = parse_args()
@@ -88,6 +90,8 @@ def setup() -> dict[
         datefmt="%H:%M:%S",
         stream=sys.stdout,
     )
+    if not nwb:
+        kwargs.pop("zarr_nwb")
     logger.info(f"Using parsed args {args}")
     return kwargs  # type: ignore[return-value]
 
@@ -95,7 +99,7 @@ def setup() -> dict[
 def parse_args() -> argparse.Namespace:
     """
     >>> parse_args()
-    Namespace(session_type='ephys', skip_existing=True, version=None, parallel=False, log_level='INFO', max_workers=None)
+    Namespace(session_type='ephys', skip_existing=True, version=None, parallel=False, log_level='INFO', max_workers=None, zarr_nwb=True)
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -133,6 +137,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         metavar="N",
         help="If --parallel is used, override the number of workers in ProcessPool - default calculates appropriate number based on available memory",
+    )
+    parser.add_argument(
+        "--hdf5-nwb",
+        dest="zarr_nwb",
+        action="store_false",
+        help="Flag to store NWB files in hdf5 format instead of the default zarr",
     )
 
     return parser.parse_args()

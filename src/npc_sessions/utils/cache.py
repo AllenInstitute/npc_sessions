@@ -162,6 +162,30 @@ def write_nwb_component_to_cache(
         )
 
 
+def write_and_upload_session_nwb(
+    session: npc_sessions.DynamicRoutingSession,
+    skip_existing: bool = True,
+    version: str | None = None,
+    zarr: bool = True,
+    metadata_only: bool = False,
+) -> None:
+    """
+    >>> import npc_sessions
+    >>> session = npc_sessions.DynamicRoutingSession("DRpilot_667252_20230926", probe_letters_to_skip="BCDEF")
+    >>> write_and_upload_session_nwb(session, version="test", skip_existing=False, zarr=True, metadata_only=True)
+    >>> write_and_upload_session_nwb(session, version="test", skip_existing=False, zarr=False, metadata_only=True)
+    """
+    logger.info(f"Writing {session.session_id} NWB")
+    path = npc_lims.get_nwb_path(session.session_id, version=version)
+    if skip_existing and path.exists():
+        logger.info(f"Skipping {session.session_id} NWB write - already exists and skip_existing=True")
+        return
+    if zarr:
+        session.write_nwb_zarr(path=path, metadata_only=metadata_only)
+    else:
+        session.write_nwb_hdf5(path=path, metadata_only=metadata_only)
+    
+    
 def write_all_components_to_cache(
     session: pynwb.NWBFile | npc_sessions.DynamicRoutingSession,
     skip_existing: bool = True,
