@@ -87,23 +87,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # main()
+    main()
 
-    import logging
-    import time
-
-    import npc_sessions
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-
-    s = npc_sessions.DynamicRoutingSession(
-        "702136_2024-03-06", probe_letters_to_skip="BCDEF", is_waveforms=False
-    )
-    # s.write_nwb_hdf5(f'test-{round(time.time())}')
-    s.write_nwb_zarr(f"test-{round(time.time())}")
-
-    # import hdmf_zarr
-
-    # p = 'test-1714079259.nwb.zarr'
-    # nwb = hdmf_zarr.NWBZarrIO(p, mode="r").read()
