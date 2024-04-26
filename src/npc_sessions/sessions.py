@@ -329,17 +329,33 @@ class DynamicRoutingSession:
             units=self.units if self.is_sorted else None,
         )
     
-    def write_nwb(self, path: str | npc_io.PathLike | None = None) -> None:
+    def write_nwb_hdf5(self, path: str | npc_io.PathLike | None = None, metadata_only: bool = False) -> None:
         """Write NWB file to disk"""
         if path is None:
             path = npc_lims.get_nwb_path(self.id)
         else:
             path = npc_io.from_pathlike(path)
-        nwb = self.nwb
+        path = path.with_suffix('.nwb')
+        nwb = self.nwb if not metadata_only else self.metadata
         with pynwb.NWBHDF5IO(path.as_posix(), "w") as io:
-            nwb.generate_new_id()
             io.write(nwb)
-            
+        size_mb = path.stat().st_size // 1024 ** 2
+        logger.info(f"Saved NWB file to {path}: {size_mb} MB")
+
+    def write_nwb_zarr(self, path: str | npc_io.PathLike | None = None, metadata_only: bool = False) -> None:
+        """Write NWB file to disk"""
+        if path is None:
+            path = npc_lims.get_nwb_path(self.id)
+        else:
+            path = npc_io.from_pathlike(path)
+        path = path.with_stem(path.stem.replace('.hdf5', '').replace('.nwb', '').replace('.zarr', '')).with_suffix('.nwb.zarr')
+        nwb = self.nwb if not metadata_only else self.metadata
+        with hdmf_zarr.NWBZarrIO(path.as_posix(), "w") as io:
+            io.write(nwb, link_data=False) # link_data=False so that lazily-opened zarrays are read and copied into nwb (instead of being added as a link, which is currently broken)
+        # zarr "file" is a directory:
+        size_mb = sum(f.stat().st_size for f in path.rglob('*') if not f.is_file()) // 1024 ** 2
+        logger.info(f"Saved NWB file to {path}: {size_mb} MB")
+        
     # metadata ------------------------------------------------------------------ #
 
     @npc_io.cached_property
