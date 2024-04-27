@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:7a80c2558b84a3b64cf1f769b44786c01413ec2d01cfd2c275e24895ae6336fb"
+content_hash = "sha256:69d6d4fe6621ae7c96544bd4f787071521b928423e5e882b44989f204347d2a1"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -1941,7 +1941,7 @@ files = [
 
 [[package]]
 name = "npc-ephys"
-version = "0.1.12"
+version = "0.1.13"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing raw ephys data, compatible with data in the cloud."
 dependencies = [
@@ -1954,8 +1954,8 @@ dependencies = [
     "zarr>=2.16.1",
 ]
 files = [
-    {file = "npc-ephys-0.1.12.tar.gz", hash = "sha256:593b0c53451c4b09e0586523b0fd62db16ed0ad76354a204aedf43da0d8e0e81"},
-    {file = "npc_ephys-0.1.12-py3-none-any.whl", hash = "sha256:b20251e37ca34092533e687ef08cbc076a136ac50b02a86de3f4651798bb34c0"},
+    {file = "npc-ephys-0.1.13.tar.gz", hash = "sha256:859cfe105bc10089597e7757935baedf0da7678d13b51b857c8f767b51bcac4e"},
+    {file = "npc_ephys-0.1.13-py3-none-any.whl", hash = "sha256:77b75c7f098210567f530b07b3dc2aad443a383e41b4ea6966cbdeb9d1c451a2"},
 ]
 
 [[package]]
@@ -2001,7 +2001,7 @@ files = [
 
 [[package]]
 name = "npc-mvr"
-version = "0.1.3"
+version = "0.1.4"
 requires_python = ">=3.9"
 summary = "Tools for reading raw video data from MindScope Neuropixels experiments, compatible with data in the cloud."
 dependencies = [
@@ -2011,8 +2011,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc-mvr-0.1.3.tar.gz", hash = "sha256:0b796e4bb05acad36f6a9d8c358dac8e1c9ff97d652be2e316ccd3a8b9326e84"},
-    {file = "npc_mvr-0.1.3-py3-none-any.whl", hash = "sha256:a62d9b04d9fa3ae78198c69bb865784eee789e40d6bf0d08aa72522241de6fd5"},
+    {file = "npc_mvr-0.1.4-py3-none-any.whl", hash = "sha256:b7101df1dbc7e28929d51d32a85492303163f8b599503e63ec9510ac4e9a9a20"},
+    {file = "npc_mvr-0.1.4.tar.gz", hash = "sha256:c0e3e8057324ca52f32fb2d69c7975e6938f32ff1709839b2f48e03a77df1338"},
 ]
 
 [[package]]
@@ -2047,7 +2047,7 @@ files = [
 
 [[package]]
 name = "npc-stim"
-version = "0.1.6"
+version = "0.1.7"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing stim data, compatible with data in the cloud."
 dependencies = [
@@ -2057,13 +2057,13 @@ dependencies = [
     "scipy>=1.12.0",
 ]
 files = [
-    {file = "npc-stim-0.1.6.tar.gz", hash = "sha256:747f1d5feeaecbed4772d28fcfb97cbf90c2793f4b4c8190c6f24ffded7a2d02"},
-    {file = "npc_stim-0.1.6-py3-none-any.whl", hash = "sha256:2cf7e6bdc8ba23ef29c3f920d7da560675e5b317a429f40914c3b59c7da3dd3d"},
+    {file = "npc_stim-0.1.7-py3-none-any.whl", hash = "sha256:835a42976fc44eaf1a82c57ab17e7fbbbf645364e1fa6a667ff39a2db7c54eb9"},
+    {file = "npc_stim-0.1.7.tar.gz", hash = "sha256:f71300bcfb2f822d3d994263b2b4eb2ccdf1bc94a5945ca2db2d5c1e333eee74"},
 ]
 
 [[package]]
 name = "npc-sync"
-version = "0.1.9"
+version = "0.1.12"
 requires_python = ">=3.9"
 summary = "Repackaging of AllenSDK.SyncDataset with extra functionality, compatible with data in the cloud."
 dependencies = [
@@ -2075,28 +2075,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc-sync-0.1.9.tar.gz", hash = "sha256:c45b63aebb1a451f26b87b44eeae64910993ad31c04ca699a28ffae74596f99e"},
-    {file = "npc_sync-0.1.9-py3-none-any.whl", hash = "sha256:8be2d4b7e1ecf88b728509de1cef361e4c5629a4843347af3f30dea4394e79cb"},
-]
-
-[[package]]
-name = "npc-utils"
-version = "0.1.13"
-requires_python = ">=3.9"
-summary = "Collection of MindScope Neuropixels packages, simplifying installation and keeping versions updated."
-dependencies = [
-    "npc-ephys>=0.1.11",
-    "npc-io>=0.1.26",
-    "npc-lims>=0.1.135",
-    "npc-mvr>=0.1.3",
-    "npc-samstim>=0.1.4",
-    "npc-session>=0.1.34",
-    "npc-stim>=0.1.6",
-    "npc-sync>=0.1.9",
-]
-files = [
-    {file = "npc-utils-0.1.13.tar.gz", hash = "sha256:bae3d571c132b92d5263660b6e304f98e7665b792dfe7bb4c930679ac62dffd2"},
-    {file = "npc_utils-0.1.13-py3-none-any.whl", hash = "sha256:728126a7d4fb9a77134632b8c7ece7584f0fb3e5ec4eaafe18a67e9cece9ab0c"},
+    {file = "npc_sync-0.1.12-py3-none-any.whl", hash = "sha256:591bf48e31656dc61bf146a6ec3c97c6fceca89160fb36e1d61bceaaaba177df"},
+    {file = "npc_sync-0.1.12.tar.gz", hash = "sha256:880e17fdb06b6a164359f8996378f1341eaca6e6a9e0c11f8a9563debcf0b065"},
 ]
 
 [[package]]
