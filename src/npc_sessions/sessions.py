@@ -203,10 +203,6 @@ class DynamicRoutingSession:
     'A2'
     """
 
-    suppress_errors = False
-    """If True, just compile as much as possible from available stim files,
-    ignoring non-critical errors."""
-
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
     institution: str | None = (
@@ -289,7 +285,12 @@ class DynamicRoutingSession:
         for attr in (attr for attr in plots.__dict__ if attr.startswith("plot_")):
             if getattr((fn := getattr(plots, attr)), "__call__", None) is not None:
                 setattr(cls, attr, fn)
-
+    @property
+    def suppress_errors(self) -> bool:
+        """If True, just compile as much as possible from available stim files,
+        ignoring non-critical errors."""
+        return getattr(self, "_suppress_errors", False)
+    
     @property
     def nwb(self) -> pynwb.NWBFile:
         if (path := npc_lims.get_nwb_path(self.id)).exists():
