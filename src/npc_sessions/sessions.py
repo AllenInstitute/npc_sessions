@@ -197,7 +197,7 @@ class DynamicRoutingSession:
     'P166D'
     >>> s.subject.genotype
     'VGAT-ChR2-YFP/wt'
-    >>> 'DynamicRouting1' in s.epoch_tags
+    >>> 'task' in s.epoch_tags
     True
     >>> s.probe_insertions['A']
     'A2'
