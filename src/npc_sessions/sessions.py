@@ -2140,6 +2140,8 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def stim_data_without_timing_issues(self) -> dict[str, h5py.File]:
         """Checks stim files against sync (if available) and uses only those that have confirmed matches in number of vsyncs and order within the experiment"""
+        if not self.is_sync:
+            return self.stim_data
         return {
             k:v for k, v in self.stim_data.items()
             if not isinstance(self._stim_frame_times[k], Exception)
