@@ -994,7 +994,7 @@ class DynamicRoutingSession:
             stim_paths = tuple(
                 path
                 for path in self.stim_paths
-                if path.stem in self.stim_frame_times.keys()
+                if path.stem in self.stim_data_without_timing_issues.keys()
             )
         else:
             stim_paths = self.stim_paths
@@ -2051,7 +2051,7 @@ class DynamicRoutingSession:
     def task_data(self) -> h5py.File:
         # don't check if self.is_task here, as this is used to determine that!
         return next(
-            self.stim_data[k] for k in self.stim_data if self.task_stim_name in k
+            self.stim_data[k] for k in self.stim_data_without_timing_issues if self.task_stim_name in k
         )
 
     @property
@@ -2066,6 +2066,14 @@ class DynamicRoutingSession:
         return npc_io.LazyDict(
             (path.stem, (h5_dataset, (path,), {})) for path in self.stim_paths
         )
+        
+    @npc_io.cached_property
+    def stim_data_without_timing_issues(self) -> dict[str, h5py.File]:
+        """Checks stim files against sync (if available) and uses only those that have confirmed matches in number of vsyncs and order within the experiment"""
+        return {
+            k:v for k, v in self.stim_data.items()
+            if not isinstance(self._stim_frame_times[k], Exception)
+        }
 
     @property
     def video_paths(self) -> tuple[upath.UPath, ...]:
@@ -2140,7 +2148,6 @@ class DynamicRoutingSession:
             tags.append("opto")
         if (rewards := h5.get("rewardFrames", None)) is not None and any(rewards[:]):
             tags.append("rewards")
-
         if sync:
             sync = npc_sync.get_sync_data(sync)
         elif self.is_sync:
@@ -2522,7 +2529,7 @@ class DynamicRoutingSession:
         unit = npc_stim.RUNNING_SPEED_UNITS
         # comments = f'Assumes mouse runs at `radius = {npc_stim.RUNNING_DISK_RADIUS} {npc_stim.RUNNING_SPEED_UNITS.split("/")[0]}` on disk.'
         data, timestamps = npc_stim.get_running_speed_from_stim_files(
-            *self.stim_data.values(),
+            *self.stim_data_without_timing_issues.values(),
             sync=self.sync_data if self.is_sync else None,
             filt=npc_stim.lowpass_filter,
         )
@@ -2720,7 +2727,7 @@ class DynamicRoutingSession:
             return r
 
         reward_times: list[npt.NDArray[np.floating]] = []
-        for stim_file, stim_data in self.stim_data.items():
+        for stim_file, stim_data in self.stim_data_without_timing_issues.items():
             if any(name in stim_file.lower() for name in ("mapping", "tagging")):
                 continue
             reward_times.extend(
