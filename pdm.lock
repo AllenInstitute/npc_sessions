@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:d37323efa6183a827c3892acf5cc2dac2898b99ef59bd14a0ee703a428d9f7c1"
+content_hash = "sha256:4e282bfe42c5cf09a97977df0680e76b3ba033dfc3f374622e0de014ed438b79"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -2047,7 +2047,7 @@ files = [
 
 [[package]]
 name = "npc-stim"
-version = "0.1.7"
+version = "0.1.8"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing stim data, compatible with data in the cloud."
 dependencies = [
@@ -2057,8 +2057,8 @@ dependencies = [
     "scipy>=1.12.0",
 ]
 files = [
-    {file = "npc_stim-0.1.7-py3-none-any.whl", hash = "sha256:835a42976fc44eaf1a82c57ab17e7fbbbf645364e1fa6a667ff39a2db7c54eb9"},
-    {file = "npc_stim-0.1.7.tar.gz", hash = "sha256:f71300bcfb2f822d3d994263b2b4eb2ccdf1bc94a5945ca2db2d5c1e333eee74"},
+    {file = "npc_stim-0.1.8-py3-none-any.whl", hash = "sha256:0c46fe0ff5f520ee6d54bf0f2ac31887a305202b328c7bc72cbbc4d4f72fc9d0"},
+    {file = "npc_stim-0.1.8.tar.gz", hash = "sha256:1ffc00bf616e5236e16ed806d9f479eef97f9bfa989b63894d9e757be1b9bf2c"},
 ]
 
 [[package]]
