@@ -155,7 +155,7 @@ def get_pose_series_from_dataframe(
 
 
 def get_facemap_output_from_s3(
-    session: str, camera_name: npc_mvr.CameraName, array_name: Literal['motSVD', 'proc']
+    session: str, camera_name: npc_mvr.CameraName, array_name: Literal["motSVD", "proc"]
 ) -> zarr.Array:  # currently only saving motSVD
     """
     >>> behavior_motion_svd = get_facemap_output_from_s3('646318_2023-01-17', 'Behavior', 'motSVD')
@@ -174,7 +174,8 @@ def get_facemap_output_from_s3(
         file_path = next(
             path
             for path in session_facemap_paths
-            if camera_name in path.stem.lower() and array_name.lower() in path.stem.lower()
+            if camera_name in path.stem.lower()
+            and array_name.lower() in path.stem.lower()
         )
     except StopIteration:
         raise FileNotFoundError(

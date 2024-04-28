@@ -8,8 +8,6 @@ import npc_io
 import npc_session
 import upath
 
-import npc_sessions.utils as utils
-
 logger = logging.getLogger(__name__)
 
 MODULE_ROOT = upath.UPath(__file__).parent

@@ -285,6 +285,7 @@ class DynamicRoutingSession:
         for attr in (attr for attr in plots.__dict__ if attr.startswith("plot_")):
             if getattr((fn := getattr(plots, attr)), "__call__", None) is not None:
                 setattr(cls, attr, fn)
+
     @property
     def suppress_errors(self) -> bool:
         """If True, just compile as much as possible from available stim files,
@@ -2205,15 +2206,16 @@ class DynamicRoutingSession:
             for timing in npc_ephys.get_ephys_timing_on_pxi(
                 self.ephys_recording_dirs,
             )
-            if (p := npc_session.extract_probe_letter(timing.device.name)) is None # nidaq
+            if (p := npc_session.extract_probe_letter(timing.device.name))
+            is None  # nidaq
             or p in self.probe_letters_to_use
         )
         return tuple(
             npc_ephys.get_ephys_timing_on_sync(
-                self.sync_data, devices=pxi_data,
+                self.sync_data,
+                devices=pxi_data,
             )
         )
-
 
     @npc_io.cached_property
     def drift_map_paths(self) -> tuple[upath.UPath, ...]:

@@ -27,8 +27,7 @@ def plot_video_info(
     "Not a plot: prints info to stdout"
 
     augmented_camera_info = npc_mvr.MVRDataset(
-        session_dir=session.sync_path.parent,
-        sync_path=session.sync_path
+        session_dir=session.sync_path.parent, sync_path=session.sync_path
     ).augmented_camera_info
 
     for camera, info in augmented_camera_info.items():
