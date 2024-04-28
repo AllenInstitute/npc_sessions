@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import tempfile
+from typing import Literal
 
 import ndx_pose
 import npc_lims
+import npc_mvr
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -17,7 +19,7 @@ MODEL_FUNCTION_MAPPING = {
     "dlc_face": npc_lims.get_dlc_face_s3_paths,
 }
 
-FACEMAP_VIDEO_OUTPUT_CATEGORIES = ["Behavior", "Face"]
+FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face")
 
 
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
@@ -147,7 +149,7 @@ def get_pose_series_from_dataframe(
 
 
 def get_facemap_output_from_s3(
-    session: str, video_type: str, key: str
+    session: str, camera_name: npc_mvr.CameraName, key: Literal['motSVD', 'proc']
 ) -> zarr.Array:  # currently only saving motSVD
     """
     >>> behavior_motion_svd = get_facemap_output_from_s3('646318_2023-01-17', 'Behavior', 'motSVD')
@@ -155,23 +157,25 @@ def get_facemap_output_from_s3(
     (284190, 500)
     """
     session_facemap_paths = npc_lims.get_facemap_s3_paths(session)
-
-    if video_type not in FACEMAP_VIDEO_OUTPUT_CATEGORIES:
-        raise ValueError(f"{video_type} not part of facemap output")
-
-    facemap_path = tuple(
-        path
-        for path in session_facemap_paths
-        if video_type in path.stem and key in path.stem and "zarr" in path.suffix
-    )
-
-    if not facemap_path:
+    if not session_facemap_paths:
         raise FileNotFoundError(
-            f"No {video_type} proc file found for session {session}. Check codeocean"
+            f"No facemap files found for session {session}. Check codeocean"
         )
-
-    facemap_key_path = facemap_path[0]
-    return zarr.open(facemap_key_path)
+    camera_name = npc_mvr.get_camera_name(camera_name)
+    if camera_name not in FACEMAP_CAMERA_NAMES:
+        raise ValueError(f"{camera_name} not part of facemap output")
+    try:
+        file_path = next(
+            path
+            for path in session_facemap_paths
+            if camera_name in path.stem.lower() and key.lower() in path.stem.lower()
+        )
+    except StopIteration:
+        raise FileNotFoundError(
+            f"No {key} file found for session {session} {camera_name} camera, despite other paths existing. Check codeocean"
+        ) from None
+    else:
+        return zarr.open(file_path) 
 
 
 if __name__ == "__main__":
