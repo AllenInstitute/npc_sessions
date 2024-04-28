@@ -1096,8 +1096,11 @@ class DynamicRoutingSession:
             tags = []
             if self.task_stim_name in stim_file.name:
                 tags.append("task")
-            if npc_samstim.is_opto(h5) or npc_samstim.is_galvo_opto(h5):
-                tags.append("opto")
+                if npc_samstim.is_opto(h5) or npc_samstim.is_galvo_opto(h5):
+                    if self.is_opto:
+                        tags.append("opto")
+                    else: 
+                        tags.append("opto_control")
             if (rewards := h5.get("rewardFrames", None)) is not None and any(rewards[:]):
                 tags.append("rewards")
             if stim_file.stem not in self.stim_data_without_timing_issues:
@@ -1105,9 +1108,14 @@ class DynamicRoutingSession:
             for tag in ("optotagging", "spontaneous", "mapping"):
                 if tag in stim_name.lower():
                     tags.append(tag)
-            
+            if "optotagging" in stim_file.stem.lower():
+                if self.is_wildtype:
+                    tags.append("optotagging_control")
+                else:
+                    tags.append("optotagging")
+                
             interval_names = []
-            if self.task_stim_name in stim_file.name:
+            if self.task_stim_name in stim_file.name and self.is_task:
                 interval_names.extend(["trials", "performance"])
             if "RFMapping" in stim_name:
                 interval_names.extend(["VisRFMapping", "AudRFMapping"])
@@ -1138,7 +1146,7 @@ class DynamicRoutingSession:
                 "stop_time": stop_time,
                 "stim_name": stim_name,
                 "tags": tags,
-                "interval_names": interval_names,
+                "interval_names": interval_names if stim_file.stem in self.stim_data_without_timing_issues else [],
                 "notes": (
                     ""
                     if not invalid_times_notes
@@ -1713,20 +1721,20 @@ class DynamicRoutingSession:
         return self.is_ephys
 
     @npc_io.cached_property
+    def is_wildtype(self) -> bool:
+        if self.subject.genotype is None: # won't exist if subject.json not found
+            logger.warning(
+                f"Could not find genotype for {self.id}: returning is_wildtype = True regardless"
+            )
+            return True
+        return "wt/wt" in self.subject.genotype.lower()
+
+    @npc_io.cached_property
     def is_opto(self) -> bool:
         """Opto during behavior task && not wt/wt (if genotype info available)"""
-        genotype: str | None = (
-            self.subject.genotype
-        )  # won't exist if subject.json not found
         if not self.is_task:
             return False
-        if npc_samstim.is_opto(self.task_data) and (
-            genotype is None or "wt/wt" not in genotype.lower()
-        ):
-            if genotype is None:
-                logger.warning(
-                    f"Could not find genotype for {self.id}: returning is_opto = True regardless"
-                )
+        if npc_samstim.is_opto(self.task_data) and not self.is_wildtype:
             return True
         return False
 
