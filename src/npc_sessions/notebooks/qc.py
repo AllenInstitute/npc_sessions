@@ -41,7 +41,7 @@ def write_qc_notebook(
     logger.info(
         f"running {QC_NOTEBOOK.name} for {npc_session.SessionRecord(session_path_or_id)}"
     )
-    return utils.run_and_save_notebook(
+    return npc_io.run_and_save_notebook(
         notebook_path=QC_NOTEBOOK,
         save_path=save_path,
         env=dict(os.environ) | env,  # merge with current env to reuse credentials etc.
