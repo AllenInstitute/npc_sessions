@@ -130,6 +130,11 @@ def get_pose_series_from_dataframe(
     session: str, df: pd.DataFrame, video_timestamps: npt.NDArray[np.float64]
 ) -> list[ndx_pose.pose.PoseEstimationSeries]:
     # https://github.com/DeepLabCut/DLC2NWB/blob/main/dlc2nwb/utils.py#L189
+    if df.shape[0] != len(video_timestamps):
+        raise ValueError(
+            f"{session} pose dataframe has {df.shape[0]} rows, but {len(video_timestamps)} timestamps were provided."
+            "\nMake sure another data asset wasn't attached to the capsule when run."
+        )
     pose_estimations_series = []
     for keypoint, xy_positions in df.T.groupby(level="bodyparts", sort=False):
         assert xy_positions.shape[0] == 3
