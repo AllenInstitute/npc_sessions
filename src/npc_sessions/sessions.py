@@ -290,7 +290,7 @@ class DynamicRoutingSession:
         """If True, just compile as much as possible from available stim files,
         ignoring non-critical errors."""
         return getattr(self, "_suppress_errors", False)
-    
+
     @property
     def nwb(self) -> pynwb.NWBFile:
         if (path := npc_lims.get_nwb_path(self.id)).exists():
@@ -2624,10 +2624,6 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def _facemap(self) -> tuple[pynwb.TimeSeries, ...]:
-        camera_to_facemap_name = {
-            "face": "Face",
-            "behavior": "Behavior",
-        }
         facemap_series = []
         for video_path in self.video_paths:
             camera_name = npc_mvr.get_camera_name(video_path.name)
@@ -2640,12 +2636,12 @@ class DynamicRoutingSession:
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
             try:
                 face_motion_svd = utils.get_facemap_output_from_s3(
-                    self.id, camera_to_facemap_name[camera_name], "motSVD"
+                    self.id, camera_name=camera_name, array_name="motSVD"
                 )
             except FileNotFoundError:
                 logger.warning(f"{camera_name} Facemap has not been run for {self.id}")
                 continue
-            if face_motion_svd.shape[0] != len(timestamps): 
+            if face_motion_svd.shape[0] != len(timestamps):
                 logger.warning(
                     f"{self.id} {camera_name} Facemap output has wrong shape {face_motion_svd.shape}, expected {len(timestamps)} frames."
                     "\nFacemap capsule was likely run with an additional data asset attached"
