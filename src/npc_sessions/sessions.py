@@ -1070,21 +1070,87 @@ class DynamicRoutingSession:
     def epochs(self) -> pynwb.file.TimeIntervals:
         epochs = pynwb.file.TimeIntervals(
             name="epochs",
-            description="time intervals corresponding to different phases of the session",
+            description="time intervals corresponding to different phases of the session; each epoch corresponds to one TaskControl subclass that controlled stimulus presentation during the epoch, which corresponds to one .hdf5 stimulus file",
         )
         epochs.add_column(
-            "name",
+            "stim_name",
             description="the name of the TaskControl subclass that controlled stimulus presentation during the epoch",
         )
         epochs.add_column(
             "notes",
             description="notes about the experiment or the data collected during the epoch",
         )
+        epochs.add_column(
+            "interval_names",
+            description="names of other intervals tables that contain trial data from the epoch",
+            index=True,
+        )
+        
+        def get_epoch_record(
+            stim_file: npc_io.PathLike
+        ) -> dict[str, Any]:
+            stim_file = npc_io.from_pathlike(stim_file)
+            h5 = self.stim_data[stim_file.stem]
+            stim_name = stim_file.stem.split("_")[0]
+            
+            tags = []
+            if self.task_stim_name in stim_file.name:
+                tags.append("task")
+            if npc_samstim.is_opto(h5) or npc_samstim.is_galvo_opto(h5):
+                tags.append("opto")
+            if (rewards := h5.get("rewardFrames", None)) is not None and any(rewards[:]):
+                tags.append("rewards")
+            if stim_file.stem not in self.stim_data_without_timing_issues:
+                tags.append("timing_issues")
+            for tag in ("optotagging", "spontaneous", "mapping"):
+                if tag in stim_name.lower():
+                    tags.append(tag)
+            
+            interval_names = []
+            if self.task_stim_name in stim_file.name:
+                interval_names.extend(["trials", "performance"])
+            if "RFMapping" in stim_name:
+                interval_names.extend(["VisRFMapping", "AudRFMapping"])
+            else:
+                interval_names.append(stim_name)
+                
+            invalid_times_notes: list[str] = []
+            if self.sync_data is None:
+                start_time = 0.0
+                stop_time = npc_stim.get_stim_duration(h5)
+            else:
+                frame_times = self.stim_frame_times[stim_file.stem]
+                start_time = frame_times[0]
+                stop_time = frame_times[-1]
+            assert start_time != stop_time
+            if self.invalid_times is not None:
+                for _, invalid_interval in self.invalid_times[:].iterrows():
+                    if any(
+                        start_time <= invalid_interval[time] <= stop_time
+                        for time in ("start_time", "stop_time")
+                    ):
+                        invalid_times_notes.append(invalid_interval["reason"])
+                        if "invalid_times" not in tags:
+                            tags.append("invalid_times")
+                            
+            return {
+                "start_time": start_time,
+                "stop_time": stop_time,
+                "stim_name": stim_name,
+                "tags": tags,
+                "interval_names": interval_names,
+                "notes": (
+                    ""
+                    if not invalid_times_notes
+                    else f"includes invalid times: {'; '.join(invalid_times_notes)}"
+                ),
+            }
+            
         records = []
         for stim in self.stim_paths:
             if self.is_sync and stim.stem not in self.stim_frame_times.keys():
                 continue
-            records.append(self.get_epoch_record(stim))
+            records.append(get_epoch_record(stim))
 
         for record in sorted(records, key=lambda _: _["start_time"]):
             epochs.add_interval(**record)
@@ -2140,54 +2206,6 @@ class DynamicRoutingSession:
             isinstance(v, Exception) for v in asserted_stim_frame_times.values()
         )
         return asserted_stim_frame_times
-
-    def get_epoch_record(
-        self, stim_file: npc_io.PathLike, sync: npc_sync.SyncPathOrDataset | None = None
-    ) -> dict[str, Any]:
-        stim_file = npc_io.from_pathlike(stim_file)
-        h5 = self.stim_data[stim_file.stem]
-        name = stim_file.stem.split("_")[0]
-        tags = []
-        if npc_samstim.is_opto(h5):
-            tags.append("opto")
-        if (rewards := h5.get("rewardFrames", None)) is not None and any(rewards[:]):
-            tags.append("rewards")
-        if sync:
-            sync = npc_sync.get_sync_data(sync)
-        elif self.is_sync:
-            sync = self.sync_data
-
-        if sync is None:
-            start_time = 0.0
-            stop_time = npc_stim.get_stim_duration(h5)
-        else:
-            frame_times = self.stim_frame_times[stim_file.stem]
-            start_time = frame_times[0]
-            stop_time = frame_times[-1]
-
-        assert start_time != stop_time
-
-        invalid_times_notes: list[str] = []
-        if self.invalid_times is not None:
-            for _, invalid_interval in self.invalid_times[:].iterrows():
-                if any(
-                    start_time <= invalid_interval[time] <= stop_time
-                    for time in ("start_time", "stop_time")
-                ):
-                    invalid_times_notes.append(invalid_interval["reason"])
-                    if "invalid_times" not in tags:
-                        tags.append("invalid_times")
-        return {
-            "start_time": start_time,
-            "stop_time": stop_time,
-            "name": name,
-            "tags": tags,
-            "notes": (
-                ""
-                if not invalid_times_notes
-                else f"includes invalid times: {'; '.join(invalid_times_notes)}"
-            ),
-        }
 
     @property
     def ephys_record_node_dirs(self) -> tuple[upath.UPath, ...]:
