@@ -2643,7 +2643,13 @@ class DynamicRoutingSession:
                     self.id, camera_to_facemap_name[camera_name], "motSVD"
                 )
             except FileNotFoundError:
-                logger.warning(f"{camera_name} DLC has not been run for {self.id}")
+                logger.warning(f"{camera_name} Facemap has not been run for {self.id}")
+                continue
+            if face_motion_svd.shape[0] != len(timestamps): 
+                logger.warning(
+                    f"{self.id} {camera_name} Facemap output has wrong shape {face_motion_svd.shape}, expected {len(timestamps)} frames."
+                    "\nFacemap capsule was likely run with an additional data asset attached"
+                )
                 continue
             facemap_series.append(
                 pynwb.TimeSeries(
