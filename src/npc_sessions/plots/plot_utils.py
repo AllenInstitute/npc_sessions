@@ -36,7 +36,7 @@ def add_epoch_color_bars(
         "zorder": 1,
     } | text_kwargs
     for _, epoch in epochs.iterrows():
-        epoch_name = next((k for k in epoch.tags if k in epoch_color_map), "")
+        epoch_name = epoch.name if 'name' in epoch else ""
         color = epoch_color_map[epoch_name] if epoch_name else "black"
         ax.axvspan(epoch.start_time, epoch.stop_time, alpha=0.1, color=color, zorder=0)
         ax.text(

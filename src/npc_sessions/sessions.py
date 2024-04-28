@@ -1069,6 +1069,10 @@ class DynamicRoutingSession:
             description="time intervals corresponding to different phases of the session",
         )
         epochs.add_column(
+            "name",
+            description="the name of the TaskControl subclass that controlled stimulus presentation during the epoch",
+        )
+        epochs.add_column(
             "notes",
             description="notes about the experiment or the data collected during the epoch",
         )
@@ -2130,8 +2134,8 @@ class DynamicRoutingSession:
     ) -> dict[str, Any]:
         stim_file = npc_io.from_pathlike(stim_file)
         h5 = self.stim_data[stim_file.stem]
+        name = stim_file.stem.split("_")[0]
         tags = []
-        tags.append(stim_file.stem.split("_")[0])
         if npc_samstim.is_opto(h5):
             tags.append("opto")
         if (rewards := h5.get("rewardFrames", None)) is not None and any(rewards[:]):
@@ -2165,6 +2169,7 @@ class DynamicRoutingSession:
         return {
             "start_time": start_time,
             "stop_time": stop_time,
+            "name": name,
             "tags": tags,
             "notes": (
                 ""
@@ -3156,7 +3161,7 @@ class DynamicRoutingSession:
 
         aind_epochs = []
         for nwb_epoch in self.epochs:
-            epoch_name = nwb_epoch.tags.item()[0]
+            epoch_name = nwb_epoch.name.item()
 
             aind_epochs.append(
                 aind_data_schema.core.session.StimulusEpoch(
