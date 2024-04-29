@@ -26,6 +26,8 @@ import zarr
 if typing.TYPE_CHECKING:
     import npc_sessions
 
+from npc_sessions.utils.misc import get_package_version
+
 logger = logging.getLogger(__name__)
 
 _PARQUET_COMPRESSION = "zstd"
@@ -180,7 +182,7 @@ def write_and_upload_session_nwb(
     >>> write_and_upload_session_nwb(session, version="test", skip_existing=False, zarr=False, metadata_only=True)
     """
     logger.info(f"Writing {session.session_id} NWB")
-    path = npc_lims.get_nwb_path(session.session_id, version=version)
+    path = npc_lims.get_nwb_path(session.session_id, version=get_package_version())
     if skip_existing and path.exists():
         logger.info(
             f"Skipping {session.session_id} NWB write - already exists and skip_existing=True"
@@ -253,11 +255,11 @@ def consolidate_all_caches() -> None:
 
 def consolidate_cache(component_name: npc_lims.NWBComponentStr) -> None:
     logger.info(f"Consolidating {component_name} caches")
-    cache_dir = npc_lims.get_cache_path(component_name, consolidated=False)
+    cache_dir = npc_lims.get_cache_path(component_name, consolidated=False, version=get_package_version())
     if not cache_dir.exists() or not tuple(cache_dir.iterdir()):
         logger.info(f"No cache files found for {component_name}")
         return
-    consolidated_cache_path = npc_lims.get_cache_path(component_name, consolidated=True)
+    consolidated_cache_path = npc_lims.get_cache_path(component_name, consolidated=True, version=get_package_version())
     if consolidated_cache_path.suffix == ".parquet":
         if component_name == "units":
             dataset = pyarrow.dataset.dataset(cache_dir)
@@ -303,7 +305,7 @@ def _write_timeseries_to_cache(
     session_id = npc_session.SessionRecord(session_id)
     cache_path = npc_lims.get_cache_path(
         nwb_component=component_name,
-        version=version,
+        version=version or get_package_version(),
         consolidated=True,
     )
     z = zarr.open(cache_path, mode="a")
@@ -331,7 +333,7 @@ def _write_df_to_cache(
     cache_path = npc_lims.get_cache_path(
         nwb_component=component_name,
         session_id=session_id,
-        version=version,
+        version=version or get_package_version(),
         consolidated=False,
     )
 
@@ -380,7 +382,7 @@ def _write_spike_times_to_zarr_cache(
     version: str | None = None,
 ) -> None:
     zarr_path = npc_lims.get_cache_path(
-        "spike_times", consolidated=True, version=version
+        "spike_times", consolidated=True, version=version or get_package_version()
     )
     z = zarr.open(zarr_path, mode="a")
     z.create_group(session_id, overwrite=True)

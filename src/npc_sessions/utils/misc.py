@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import datetime
+import importlib.metadata
 import zoneinfo
 
 import npc_io
 import npc_lims
 import npc_session
 
+
+def get_package_version() -> str:
+    return importlib.metadata.version('npc_sessions')
 
 def is_stim_file(
     path: npc_io.PathLike,

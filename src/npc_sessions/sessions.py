@@ -4,7 +4,6 @@ import contextlib
 import copy
 import datetime
 import functools
-import importlib.metadata
 import io
 import itertools
 import json
@@ -294,7 +293,7 @@ class DynamicRoutingSession:
 
     @property
     def nwb_from_cache(self) -> pynwb.NWBFile | None:
-        if (path := npc_lims.get_nwb_path(self.id)).exists():
+        if (path := npc_lims.get_nwb_path(self.id, version=get_package_version())).exists():
             if path.suffix == ".zarr":
                 return hdmf_zarr.NWBZarrIO(path=path.as_posix(), mode="r").read()
             else:
@@ -570,7 +569,7 @@ class DynamicRoutingSession:
     @property
     def source_script_file_name(self) -> str:
         """url to tagged version of packaging code repo on github"""
-        return f"https://github.com/AllenInstitute/npc_sessions/releases/tag/v{importlib.metadata.version('npc_sessions')}"
+        return f"https://github.com/AllenInstitute/npc_sessions/releases/tag/v{utils.get_package_version()}"
 
     @property
     def lab(self) -> str | None:
