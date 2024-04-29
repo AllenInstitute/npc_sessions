@@ -10,7 +10,8 @@ import npc_session
 
 
 def get_package_version() -> str:
-    return importlib.metadata.version('npc_sessions')
+    return importlib.metadata.version("npc_sessions")
+
 
 def is_stim_file(
     path: npc_io.PathLike,

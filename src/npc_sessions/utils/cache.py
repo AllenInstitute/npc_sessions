@@ -255,11 +255,15 @@ def consolidate_all_caches() -> None:
 
 def consolidate_cache(component_name: npc_lims.NWBComponentStr) -> None:
     logger.info(f"Consolidating {component_name} caches")
-    cache_dir = npc_lims.get_cache_path(component_name, consolidated=False, version=get_package_version())
+    cache_dir = npc_lims.get_cache_path(
+        component_name, consolidated=False, version=get_package_version()
+    )
     if not cache_dir.exists() or not tuple(cache_dir.iterdir()):
         logger.info(f"No cache files found for {component_name}")
         return
-    consolidated_cache_path = npc_lims.get_cache_path(component_name, consolidated=True, version=get_package_version())
+    consolidated_cache_path = npc_lims.get_cache_path(
+        component_name, consolidated=True, version=get_package_version()
+    )
     if consolidated_cache_path.suffix == ".parquet":
         if component_name == "units":
             dataset = pyarrow.dataset.dataset(cache_dir)
