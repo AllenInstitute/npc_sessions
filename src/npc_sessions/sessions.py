@@ -1122,7 +1122,8 @@ class DynamicRoutingSession:
                 interval_names.append(stim_name)
                 
             invalid_times_notes: list[str] = []
-            if self.sync_data is None:
+            if not self.is_sync:
+                # only one stim, so we use its frame times as recorded on stim computer
                 start_time = 0.0
                 stop_time = npc_stim.get_stim_duration(h5)
             else:
