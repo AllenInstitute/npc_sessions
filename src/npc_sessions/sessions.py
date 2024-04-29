@@ -688,10 +688,7 @@ class DynamicRoutingSession:
     ) -> pynwb.core.LabelledDict[str, pynwb.base.ProcessingModule]:
         """Data after processing and filtering - raw data goes in
         `acquisition`.
-
-        The property as it appears on an NWBFile - but should not be added
-        directly to NWB: use `add_processing_to_nwb()`"""
-        # TODO replace with `nwb.add_processing_module`
+        """
         processing = pynwb.core.LabelledDict(label="processing", key_attr="name")
         for module_name in ("behavior",) + (("ecephys",) if self.is_ephys else ()):
             module = getattr(self, f"_{module_name}")
