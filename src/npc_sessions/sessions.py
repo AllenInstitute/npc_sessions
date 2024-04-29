@@ -293,7 +293,7 @@ class DynamicRoutingSession:
 
     @property
     def nwb_from_cache(self) -> pynwb.NWBFile | None:
-        if (path := npc_lims.get_nwb_path(self.id, version=get_package_version())).exists():
+        if (path := npc_lims.get_nwb_path(self.id, version=utils.get_package_version())).exists():
             if path.suffix == ".zarr":
                 return hdmf_zarr.NWBZarrIO(path=path.as_posix(), mode="r").read()
             else:
