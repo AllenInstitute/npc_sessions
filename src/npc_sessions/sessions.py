@@ -869,9 +869,9 @@ class DynamicRoutingSession:
                 .item()
             )
 
-            block_performance["number_of_rewards"] = trials[
+            block_performance["contingent_rewards"] = trials[
                 trials["block_index"] == block_idx
-            ]["is_rewarded"].sum()
+            ]["is_contingent_reward"].sum()
             block_performance["rewarded_modality"] = rewarded_modality
             block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[
                 block_idx
@@ -911,10 +911,10 @@ class DynamicRoutingSession:
         )
         column_name_to_description = {
             "block_index": "presentation order in the task (0-indexed)",
-            "number_of_rewards": "the number of rewards delivered during the block",
-            "rewarded_modality": "the modality of the target stimulus that was rewarded in each block: normally `vis` or `aud`",
+            "contingent_rewards": "the number of rewards the subject received for a correct response",
+            "rewarded_modality": "the modality of the target stimulus that was rewarded in the block: normally `vis` or `aud`",
             "cross_modal_dprime": "dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
-            "signed_cross_modal_dprime": "same as cross_modal_dprime, but with sign flipped for auditory blocks",
+            "signed_cross_modal_dprime": "same as cross_modal_dprime, but with negative values for auditory blocks",
             "same_modal_dprime": "dprime within rewarded modality; hits=response rate to rewarded target stimulus, false alarms=response rate to same modality non-target stimulus",
             "nonrewarded_modal_dprime": "dprime within non-rewarded modality; hits=response rate to non-rewarded target stimulus, false alarms=response rate to same modality non-target stimulus",
             "vis_intra_dprime": "dprime within visual modality; hits=response rate to visual target stimulus, false alarms=response rate to visual non-target stimulus",
