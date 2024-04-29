@@ -596,14 +596,16 @@ class DynamicRoutingSession:
                 self.keywords.append("video")
             if self.is_ephys:
                 self.keywords.append("ephys")
-                if not self.is_sorted:
-                    self.keywords.append("no units")
-                elif not self.is_annotated:
-                    self.keywords.append("no CCF")
-            elif self.is_training:
+            if self.is_sorted:
+                self.keywords.append("units")
+            if self.is_annotated:
+                self.keywords.append("CCF")
+            if self.is_training:
                 self.keywords.append("training")
             if self.is_opto:
                 self.keywords.append("opto")
+            elif self.is_opto_control:
+                self.keywords.append("opto_control")
             if self.is_templeton:
                 self.keywords.append("Templeton")
             # TODO these should be moved to `lab_metadata` when we have an ndx extension:
@@ -1105,7 +1107,7 @@ class DynamicRoutingSession:
                 tags.append("rewards")
             if stim_file.stem not in self.stim_data_without_timing_issues:
                 tags.append("timing_issues")
-            for tag in ("optotagging", "spontaneous", "mapping"):
+            for tag in ("spontaneous", "mapping"):
                 if tag in stim_name.lower():
                     tags.append(tag)
             if "optotagging" in stim_file.stem.lower():
@@ -1732,9 +1734,14 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def is_opto(self) -> bool:
         """Opto during behavior task && not wt/wt (if genotype info available)"""
-        if not self.is_task:
-            return False
-        if npc_samstim.is_opto(self.task_data) and not self.is_wildtype:
+        if self.is_task and npc_samstim.is_opto(self.task_data) and not self.is_wildtype:
+            return True
+        return False
+    
+    @npc_io.cached_property
+    def is_opto_control(self) -> bool:
+        """Opto during behavior task && wt/wt"""
+        if self.is_task and npc_samstim.is_opto(self.task_data) and self.is_wildtype:
             return True
         return False
 
