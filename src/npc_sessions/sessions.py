@@ -300,7 +300,7 @@ class DynamicRoutingSession:
             else:
                 return pynwb.NWBHDF5IO(path=path.as_posix(), mode="r").read()
         return None
-    
+
     @property
     def nwb(self) -> pynwb.NWBFile:
         return pynwb.NWBFile(
@@ -1084,23 +1084,23 @@ class DynamicRoutingSession:
             description="names of other intervals tables that contain trial data from the epoch",
             index=True,
         )
-        
-        def get_epoch_record(
-            stim_file: npc_io.PathLike
-        ) -> dict[str, Any]:
+
+        def get_epoch_record(stim_file: npc_io.PathLike) -> dict[str, Any]:
             stim_file = npc_io.from_pathlike(stim_file)
             h5 = self.stim_data[stim_file.stem]
             stim_name = stim_file.stem.split("_")[0]
-            
+
             tags = []
             if self.task_stim_name in stim_file.name:
                 tags.append("task")
                 if npc_samstim.is_opto(h5) or npc_samstim.is_galvo_opto(h5):
                     if self.is_opto:
                         tags.append("opto")
-                    else: 
+                    else:
                         tags.append("opto_control")
-            if (rewards := h5.get("rewardFrames", None)) is not None and any(rewards[:]):
+            if (rewards := h5.get("rewardFrames", None)) is not None and any(
+                rewards[:]
+            ):
                 tags.append("rewards")
             if stim_file.stem not in self.stim_data_without_timing_issues:
                 tags.append("timing_issues")
@@ -1112,7 +1112,7 @@ class DynamicRoutingSession:
                     tags.append("optotagging_control")
                 else:
                     tags.append("optotagging")
-                
+
             interval_names = []
             if self.task_stim_name in stim_file.name and self.is_task:
                 interval_names.extend(["trials", "performance"])
@@ -1120,7 +1120,7 @@ class DynamicRoutingSession:
                 interval_names.extend(["VisRFMapping", "AudRFMapping"])
             else:
                 interval_names.append(stim_name)
-                
+
             invalid_times_notes: list[str] = []
             if not self.is_sync:
                 # only one stim, so we use its frame times as recorded on stim computer
@@ -1140,20 +1140,24 @@ class DynamicRoutingSession:
                         invalid_times_notes.append(invalid_interval["reason"])
                         if "invalid_times" not in tags:
                             tags.append("invalid_times")
-                            
+
             return {
                 "start_time": start_time,
                 "stop_time": stop_time,
                 "stim_name": stim_name,
                 "tags": tags,
-                "interval_names": interval_names if stim_file.stem in self.stim_data_without_timing_issues else [],
+                "interval_names": (
+                    interval_names
+                    if stim_file.stem in self.stim_data_without_timing_issues
+                    else []
+                ),
                 "notes": (
                     ""
                     if not invalid_times_notes
                     else f"includes invalid times: {'; '.join(invalid_times_notes)}"
                 ),
             }
-            
+
         records = []
         for stim in self.stim_paths:
             if self.is_sync and stim.stem not in self.stim_frame_times.keys():
@@ -1722,7 +1726,7 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def is_wildtype(self) -> bool:
-        if self.subject.genotype is None: # won't exist if subject.json not found
+        if self.subject.genotype is None:  # won't exist if subject.json not found
             logger.warning(
                 f"Could not find genotype for {self.id}: returning is_wildtype = True regardless"
             )
@@ -1732,10 +1736,14 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def is_opto(self) -> bool:
         """Opto during behavior task && not wt/wt (if genotype info available)"""
-        if self.is_task and npc_samstim.is_opto(self.task_data) and not self.is_wildtype:
+        if (
+            self.is_task
+            and npc_samstim.is_opto(self.task_data)
+            and not self.is_wildtype
+        ):
             return True
         return False
-    
+
     @npc_io.cached_property
     def is_opto_control(self) -> bool:
         """Opto during behavior task && wt/wt"""
@@ -2134,7 +2142,9 @@ class DynamicRoutingSession:
     def task_data(self) -> h5py.File:
         # don't check if self.is_task here, as this is used to determine that!
         return next(
-            self.stim_data[k] for k in self.stim_data_without_timing_issues if self.task_stim_name in k
+            self.stim_data[k]
+            for k in self.stim_data_without_timing_issues
+            if self.task_stim_name in k
         )
 
     @property
@@ -2149,14 +2159,17 @@ class DynamicRoutingSession:
         return npc_io.LazyDict(
             (path.stem, (h5_dataset, (path,), {})) for path in self.stim_paths
         )
-        
+
     @npc_io.cached_property
-    def stim_data_without_timing_issues(self) -> dict[str, h5py.File] | npc_io.LazyDict[str, h5py.File]:
+    def stim_data_without_timing_issues(
+        self,
+    ) -> dict[str, h5py.File] | npc_io.LazyDict[str, h5py.File]:
         """Checks stim files against sync (if available) and uses only those that have confirmed matches in number of vsyncs and order within the experiment"""
         if not self.is_sync:
             return self.stim_data
         return {
-            k:v for k, v in self.stim_data.items()
+            k: v
+            for k, v in self.stim_data.items()
             if not isinstance(self._stim_frame_times[k], Exception)
         }
 
