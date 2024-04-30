@@ -119,13 +119,16 @@ def component_exists(
     )
     if not consolidated:
         return path.exists()
-    else:
+    elif extension == ".parquet":
+        return path.exists()
+    elif extension == ".zarr" :
         z = zarr.open(path)
         if npc_session.SessionRecord(session_id) in z:
             return True
         else:
             return False
-
+    else:
+        raise NotImplementedError(f"No support for {extension=} files yet - update to match cache path provided by npc_lims")
 
 def write_nwb_component_to_cache(
     component: pynwb.core.NWBContainer | pd.DataFrame,
