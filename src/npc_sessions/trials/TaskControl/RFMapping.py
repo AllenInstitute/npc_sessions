@@ -198,6 +198,12 @@ class RFMapping(TaskControl):
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of RF mapping stimulus"""
         frames_per_stim = self._hdf5["stimFrames"][()]
+        if all(self._is_vis_stim):
+            return self._vis_display_times
+        if all(~self._is_vis_stim):
+            return self.get_trial_aud_offset(self._idx)
+        # although we could do the section below without the part above, we can
+        # incur an IndexError below if there are too few _vis_display_times 
         return np.where(
             self._is_vis_stim,
             npc_stim.safe_index(
@@ -209,19 +215,16 @@ class RFMapping(TaskControl):
 
     @npc_io.cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
-        """falling edge of vsync after stimulus end + inter-stim frames"""
-        return np.max(
-            [
-                npc_stim.safe_index(
-                    self._flip_times,
-                    self._hdf5["stimStartFrame"][self._idx]
-                    + self._hdf5["stimFrames"][()]
-                    + self._hdf5["interStimFrames"][()],
-                ),
-                self.stim_stop_time + self._hdf5["interStimFrames"][()],
-            ],
-            axis=0,
-        )
+        """stimulus stop time + inter-stim frames"""
+        try:
+            return npc_stim.safe_index(
+                self._flip_times,
+                self._hdf5["stimStartFrame"][self._idx]
+                + self._hdf5["stimFrames"][()]
+                + self._hdf5["interStimFrames"][()],
+            )
+        except IndexError:
+            return self.stim_stop_time + self._hdf5["interStimFrames"][()] * self._hdf5["frameRate"][()]
 
     @npc_io.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
