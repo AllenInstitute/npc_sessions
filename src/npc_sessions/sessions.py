@@ -49,12 +49,6 @@ import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
 
-EXCLUDED_PATH_COMPONENTS = ("DynamicRouting1_670248_20230802_120703",)
-NWB_CAMERA_NAMES = {
-    "eye": "eye_camera",
-    "face": "front_camera",
-    "behavior": "side_camera",
-}
 
 
 @typing.overload
@@ -213,6 +207,14 @@ class DynamicRoutingSession:
     task_stim_name: str = "DynamicRouting1"
     """Used to distinguish the main behavior task stim file from others"""
 
+    excluded_stim_file_names = ["DynamicRouting1_670248_20230802_120703"]
+    """File names (or substrings) that should never be considered as valid stim
+    files, for example they are known to be corrupt and cannot be opened"""
+    mvr_to_nwb_camera_name = {
+        "eye": "eye_camera",
+        "face": "front_camera",
+        "behavior": "side_camera",
+    }
     def __init__(
         self, session_or_path: str | npc_io.PathLike | npc_lims.SessionInfo, **kwargs
     ) -> None:
@@ -1960,7 +1962,7 @@ class DynamicRoutingSession:
             return tuple(
                 p
                 for p in paths
-                if not any(e in p.as_posix() for e in EXCLUDED_PATH_COMPONENTS)
+                if not any(e in p.as_posix() for e in self.excluded_stim_file_names)
             )
 
         if self.root_path:
@@ -2046,7 +2048,7 @@ class DynamicRoutingSession:
                 p, subject_spec=self.id.subject, date_spec=self.id.date
             ):
                 return False
-            if any(e in p.as_posix() for e in EXCLUDED_PATH_COMPONENTS):
+            if any(e in p.as_posix() for e in self.excluded_stim_file_names):
                 return False
             if not self.is_sync:
                 if self.task_stim_name not in p.stem:
@@ -2644,7 +2646,7 @@ class DynamicRoutingSession:
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=NWB_CAMERA_NAMES[npc_mvr.get_camera_name(path.stem)],
+                name=self.mvr_to_nwb_camera_name[npc_mvr.get_camera_name(path.stem)],
                 description=f"start time of each frame exposure for {path.stem}",
             )
             for path, timestamps in path_to_timestamps.items()
@@ -2694,7 +2696,7 @@ class DynamicRoutingSession:
             camera_name = npc_mvr.get_camera_name(video_path.name)
             if camera_name == "eye":
                 continue
-            nwb_camera_name = NWB_CAMERA_NAMES[camera_name]
+            nwb_camera_name = self.mvr_to_nwb_camera_name[camera_name]
             timestamps = next(
                 t for t in self._video_frame_times if t.name == nwb_camera_name
             ).timestamps
@@ -2735,7 +2737,7 @@ class DynamicRoutingSession:
         pose_estimations = []
         for video_path in self.video_paths:
             camera_name = npc_mvr.get_camera_name(video_path.name)
-            nwb_camera_name = NWB_CAMERA_NAMES[camera_name]
+            nwb_camera_name = self.mvr_to_nwb_camera_name[camera_name]
             try:
                 df = utils.get_dlc_session_model_dataframe_from_h5(
                     self.id,
