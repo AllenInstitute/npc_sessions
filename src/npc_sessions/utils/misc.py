@@ -69,7 +69,35 @@ def get_aware_dt(dt: str | datetime.datetime) -> datetime.datetime:
         tzinfo=zoneinfo.ZoneInfo("America/Los_Angeles")
     )
 
-
+def get_taskcontrol_intervals_table_name(taskcontrol_class_name: str) -> str:
+    """Return the name of the taskcontrol interval.
+    
+    >>> get_taskcontrol_intervals_table_name("DynamicRouting1")
+    'trials'
+    >>> get_taskcontrol_intervals_table_name("SpontaneousRewards")
+    'spontaneous_rewards_trials'
+    >>> get_taskcontrol_intervals_table_name("OptoTagging")
+    'optotagging_trials'
+    >>> get_taskcontrol_intervals_table_name("VisRFMapping")
+    'vis_rf_mapping_trials'
+    """
+    if taskcontrol_class_name == "DynamicRouting1":
+        return "trials"
+    # convert TitleCase to snake_case:
+    snake = "".join(
+        [
+            c if c.islower() else f"_{c.lower()}"
+            for c in taskcontrol_class_name
+            if c.isalnum()
+        ]
+    ).lstrip("_")
+    
+    # acronyms/abbreviations are tricky to deal with - handling them on
+    # case-by-case basis for now:
+    snake = snake.replace("_r_f_mapping", "_rf_mapping")
+    snake = snake.replace("opto_tagging", "optotagging")
+    return snake + "_trials"
+    
 if __name__ == "__main__":
     import doctest
 

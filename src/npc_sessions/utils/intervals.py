@@ -11,6 +11,8 @@ import pandas as pd
 import rich.progress
 from typing_extensions import TypeAlias
 
+from npc_sessions.utils.misc import get_taskcontrol_intervals_table_name
+
 Interval: TypeAlias = Union[
     Sequence[float],
     Mapping[Literal["start_time", "stop_time"], float],
@@ -279,14 +281,14 @@ OPTO_RESP_WINDOW = 0.1
 
 def add_opto_response_metric(session) -> None:
     """Adds `opto_response` metric to `session.units`"""
-    trials = session.intervals.get("OptoTagging")
+    trials = session.intervals.get(get_taskcontrol_intervals_table_name("OptoTagging"))
     if trials is None:
         return
 
 
 def add_vis_response_metric(session) -> None:
     """Adds `vis_response` metric to `session.units`"""
-    trials = session.intervals["VisRFMapping"].to_dataframe()
+    trials = session.intervals[get_taskcontrol_intervals_table_name("VisRFMapping")].to_dataframe()
     if trials is None:
         return
     units = session.units[:]  # slight speed-up by creating df only once

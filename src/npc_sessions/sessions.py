@@ -215,6 +215,7 @@ class DynamicRoutingSession:
         "face": "front_camera",
         "behavior": "side_camera",
     }
+    
     def __init__(
         self, session_or_path: str | npc_io.PathLike | npc_lims.SessionInfo, **kwargs
     ) -> None:
@@ -765,7 +766,7 @@ class DynamicRoutingSession:
             TaskControl.DynamicRouting1: self.experiment_description.replace(
                 "experiment", "trials"
             ),  # name will be "trials" if assigned as main trials table in nwb
-            TaskControl.OptoTagging: "opto-tagging trials",
+            TaskControl.OptoTagging: "optotagging trials",
         }
 
     def is_valid_interval(self, start_time: Any, stop_time: Any) -> bool:
@@ -964,14 +965,15 @@ class DynamicRoutingSession:
             if self.task_stim_name in k and self.is_task:
                 # intervals.append(self.trials)
                 intervals.append(self.performance)
+            intervals_table_name = utils.get_taskcontrol_intervals_table_name(v.__class__.__name__)
             if not any(
-                existing := [i for i in intervals if i.name == v.__class__.__name__]
+                existing := [i for i in intervals if i.name == intervals_table_name]
             ):
                 nwb_intervals = pynwb.epoch.TimeIntervals(
-                    name=v.__class__.__name__,
+                    name=intervals_table_name,
                     description=self.intervals_descriptions.get(
                         v.__class__,
-                        f"trials table for {v.__class__.__name__}",
+                        f"{intervals_table_name.replace('_', ' ')} table",
                     ),
                 )
                 trial_idx_offset = 0
@@ -3023,13 +3025,17 @@ class DynamicRoutingSession:
             return modalities or [stim.NONE]
 
         def get_num_trials(epoch_name: str) -> int | None:
+            intervals_name: str = utils.get_taskcontrol_intervals_table_name(epoch_name)
             if epoch_name == "RFMapping":
                 return sum(
                     len(trials)
                     for name, trials in self.intervals.items()
-                    if "RFMapping" in name
+                    if utils.get_taskcontrol_intervals_table_name("RFMapping") in name
                 )
-            trials = self.intervals.get(epoch_name)
+            if epoch_name == self.task_stim_name:
+                trials = self.trials
+            else:
+                trials = self.intervals.get(intervals_name)
             if trials is None:
                 return None
             return len(trials)
@@ -3112,10 +3118,10 @@ class DynamicRoutingSession:
                                     315,
                                 ],
                                 "position_x": list(
-                                    np.unique(self.intervals["VisRFMapping"].grating_x)
+                                    np.unique(self.intervals[utils.get_taskcontrol_intervals_table_name("VisRFMapping")].grating_x)
                                 ),
                                 "position_y": list(
-                                    np.unique(self.intervals["VisRFMapping"].grating_y)
+                                    np.unique(self.intervals[utils.get_taskcontrol_intervals_table_name("VisRFMapping")].grating_y)
                                 ),
                                 "size_deg": 20,
                                 "spatial_frequency_cycles_per_deg": 0.08,
