@@ -3219,7 +3219,7 @@ class DynamicRoutingSession:
 
         aind_epochs = []
         for nwb_epoch in self.epochs:
-            epoch_name = nwb_epoch.name.item()
+            epoch_name = nwb_epoch.stim_name.item()
 
             aind_epochs.append(
                 aind_data_schema.core.session.StimulusEpoch(
