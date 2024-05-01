@@ -2716,7 +2716,7 @@ class DynamicRoutingSession:
                     data=face_motion_svd,
                     unit="pixels",
                     timestamps=timestamps,
-                    description=f"motion SVD for video from {nwb_camera_name}; shape is number of frames by number of components ({face_motion_svd.shape[1]})",
+                    description=f"motion SVD for video from {nwb_camera_name.replace('_', ' ')}; shape is number of frames by number of components ({face_motion_svd.shape[1]})",
                 )
             )
         return tuple(facemap_series)
@@ -2753,7 +2753,7 @@ class DynamicRoutingSession:
                 ndx_pose.pose.PoseEstimation(
                     name=f"dlc_{nwb_camera_name}",
                     pose_estimation_series=pose_estimation_series,
-                    description=f"DeepLabCut analysis of video from {nwb_camera_name}.",
+                    description=f"DeepLabCut analysis of video from {nwb_camera_name.replace('_', ' ')}",
                     original_videos=[video_path.as_posix()],
                     source_software="DeepLabCut",
                 )
