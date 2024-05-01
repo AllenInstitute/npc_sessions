@@ -57,8 +57,8 @@ SHORT_TRAVEL_SERIAL_NUMBERS = {
 SHORT_TRAVEL_RANGE = 6_000
 LONG_TRAVEL_RANGE = 15_000
 NEWSCALE_LOG_COLUMNS = (
-    "last_movement",
-    "device",
+    "last_movement_dt",
+    "device_name",
     "x",
     "y",
     "z",
@@ -158,7 +158,7 @@ def get_newscale_coordinates(
         df = df.with_columns(df.get_column(column).str.strip_chars().cast(pl.Float64))
     probes = manipulators.replace(
         {k: f"probe{v}" for k, v in SERIAL_NUM_TO_PROBE_LETTER.items()}
-    ).alias("electrode_group")
+    ).alias("electrode_group_name")
 
     # correct z values
     z = df["z"]
@@ -167,12 +167,19 @@ def get_newscale_coordinates(
             z[idx] = get_z_travel(device) - z[idx]
     df = df.with_columns(z)
 
+    # add time of last movement relative to start of recording
+    df = (
+        df.with_columns(
+            (pl.col("last_movement_dt") - start.dt).dt.total_seconds().alias("last_movement_time")
+        )
+    )
+    
     df = (
         df.insert_column(index=0, column=probes)
-        .sort(pl.col("electrode_group"))
+        .sort(pl.col("electrode_group_name"))
         .to_pandas()
     )
-    # nwb doesn't support `Timestamp``
+    # nwb doesn't support `Timestamp`
     df.last_movement = df.last_movement.astype("str")  # type: ignore[attr-defined]
     return df
 

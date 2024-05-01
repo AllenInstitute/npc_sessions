@@ -677,6 +677,8 @@ class DynamicRoutingSession:
         #     modules.append(self._raw_ap)
         if self.is_video:
             modules.extend(self._video_frame_times)
+        with contextlib.suppress(AttributeError):
+            modules.append(self._manipulator_positions)
         return tuple(modules)
 
     @property
@@ -723,8 +725,6 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         # TODO add filtered, sub-sampled LFP
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
-        with contextlib.suppress(AttributeError):
-            modules.append(self._manipulator_info)
         return tuple(modules)
 
     @property
@@ -1204,7 +1204,7 @@ class DynamicRoutingSession:
                 description=f"motorized 3-axis micromanipulator for positioning and inserting {probe.name}",
                 manufacturer="NewScale",
             )
-            for _, row in self._manipulator_info[:].iterrows()
+            for _, row in self._manipulator_positions[:].iterrows()
             if (probe := npc_session.ProbeRecord(row["electrode_group"]))
             in self.probe_letters_to_use
         )
@@ -1919,7 +1919,7 @@ class DynamicRoutingSession:
         return p[0]
 
     @npc_io.cached_property
-    def _manipulator_info(self) -> pynwb.core.DynamicTable:
+    def _manipulator_positions(self) -> pynwb.core.DynamicTable:
         if not self.is_ephys:
             raise AttributeError(
                 f"{self.id} is not an ephys session: no manipulator coords available"
@@ -1942,13 +1942,14 @@ class DynamicRoutingSession:
             f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
         )
         t = pynwb.core.DynamicTable(
-            name="manipulator_info",
-            description="position of the motorized stages on each probe's manipulator at the time of ecephys recording",
+            name="manipulator_positions",
+            description="nominal positions of the motorized stages on each probe's manipulator assembly at the time of ecephys recording",
         )
         colnames = {
-            "electrode_group": "probe device mounted on the manipulator",
-            "device": "serial number of NewScale device",
-            "last_movement": "datetime of last movement of the manipulator",
+            "electrode_group_name": "name of probe mounted on the manipulator",
+            "device_name": "serial number of NewScale device",
+            "last_movement_time": "time of last movement of the manipulator, in seconds, relative to `session_start_time`; should always be negative: manipulators do not move after recording starts; value includes at least 15 min for probe to settle before recording",
+            "last_movement_dt": "datetime of last movement of the manipulator",
             "x": "horizontal position in microns (direction of axis varies)",
             "y": "horizontal position in microns (direction of axis varies)",
             "z": "vertical position in microns (+z is inferior, 0 is fully retracted)",
@@ -2961,7 +2962,7 @@ class DynamicRoutingSession:
                                     (
                                         aind_data_schema.models.coordinates.Coordinates3d(
                                             x=(
-                                                row := self._manipulator_info.to_dataframe().query(
+                                                row := self._manipulator_positions.to_dataframe().query(
                                                     f"electrode_group == '{probe.name}'"
                                                 )
                                             )["x"].item(),
