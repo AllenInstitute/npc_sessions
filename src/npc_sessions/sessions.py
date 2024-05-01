@@ -2648,7 +2648,7 @@ class DynamicRoutingSession:
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=self.mvr_to_nwb_camera_name[npc_mvr.get_camera_name(path.stem)],
+                name=f"{self.mvr_to_nwb_camera_name[npc_mvr.get_camera_name(path.stem)]}_frame_times",
                 description=f"start time of each frame exposure for {path.stem}",
             )
             for path, timestamps in path_to_timestamps.items()
