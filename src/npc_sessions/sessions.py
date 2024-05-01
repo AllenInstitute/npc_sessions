@@ -670,8 +670,8 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
-        if self.is_sync and self._all_licks:
-            modules.extend(self._all_licks[-2:])
+        if self.is_sync and len(self._all_licks) >= 2:
+            modules.append(self._all_licks[1])
         try:
             modules.append(self._rewards_times_with_duration)
         except AttributeError:
@@ -2490,7 +2490,7 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def _all_licks(self) -> tuple[ndx_events.Events, ...]:
         """First item is always `processing['licks']` - the following items are only if sync
-        is available, and are raw rising/falling edges of the lick sensor,
+        is available, and use raw rising/falling edges of the lick sensor to get lick duration
         for `acquisition`.
 
         If sync isn't available, we only have start frames of licks, so we can't
@@ -2537,42 +2537,34 @@ class DynamicRoutingSession:
                 #         (next_start is None or next_start - f > max_interval)
                 #     ):
                 #         filtered_idx[i] = False
-                filtered = rising[filtered_idx]
 
-        licks = ndx_events.Events(
-            timestamps=(
-                self.sam.lickTimes if not (self.is_sync and licks_on_sync) else filtered
-            ),
-            name="licks",
-            description="times at which the subject made contact with a water spout"
-            + (
-                f" - filtered to exclude events with duration >{max_contact} s"
-                if self.is_sync
-                else " - putatively the starts of licks, but may include other events such as grooming"
-            ),
-        )
+        description = "times at which the subject made contact with a combined lick sensor + water spout: putatively the starts of licks, but may include other events such as grooming"
+        duration_description = "`data` contains the duration of each event"
+        if self.is_sync and licks_on_sync:
+            licks = pynwb.TimeSeries(
+                    timestamps=rising[filtered_idx],
+                    data=falling[filtered_idx] - rising[filtered_idx],
+                    name="licks",
+                    description=f"{description}; filtered to exclude events with duration >{max_contact} s; {duration_description}"
+                    ),
+        else:
+            licks = ndx_events.Events(
+                timestamps=self.sam.lickTimes,
+                name="licks",
+                description=description,
+                )
 
         if not (self.is_sync and licks_on_sync):
             return (licks,)
         return (
             licks,
-            ndx_events.Events(
+            pynwb.TimeSeries(
                 timestamps=rising,
-                name="lick_sensor_rising",
-                description=(
-                    "times at which the subject made contact with a water spout - "
-                    "putatively the starts of licks, but may include other events such as grooming"
+                data=falling - rising,
+                name="lick_sensor_events",
+                description=f"{description}; {duration_description}"
                 ),
-            ),
-            ndx_events.Events(
-                timestamps=falling,
-                name="lick_sensor_falling",
-                description=(
-                    "times at which the subject ceased making contact with a water spout - "
-                    "putatively the ends of licks, but may include other events such as grooming"
-                ),
-            ),
-        )
+            )
 
     @npc_io.cached_property
     def _running_speed(self) -> pynwb.TimeSeries:
