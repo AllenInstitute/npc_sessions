@@ -673,9 +673,9 @@ class DynamicRoutingSession:
         if self.is_sync and self._all_licks:
             modules.extend(self._all_licks[-2:])
         try:
-            modules.append(self._rewards_with_duration)
+            modules.append(self._rewards_times_with_duration)
         except AttributeError:
-            modules.append(self._rewards)
+            modules.append(self._reward_frame_times)
         if self.is_task:
             modules.append(self._quiescent_violations)
         # if self.is_lfp:
@@ -2767,7 +2767,7 @@ class DynamicRoutingSession:
         return tuple(pose_estimations)
 
     @npc_io.cached_property
-    def _rewards(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
+    def _reward_frame_times(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
         """As interpreted from task stim files, with timing corrected with sync if
         available.
 
@@ -2796,13 +2796,13 @@ class DynamicRoutingSession:
             )
         return ndx_events.Events(
             timestamps=np.sort(np.unique(reward_times)),
-            name="rewards",
-            description="times at which water rewards were triggered to be delivered to the subject",
+            name="reward_times",
+            description="times at which the stimulus script triggered water rewards to be delivered to the subject",
         )
 
     @npc_io.cached_property
-    def _rewards_with_duration(self) -> pynwb.TimeSeries:
-        """As interpreted from sync, after line was added ~March 2024."""
+    def _rewards_times_with_duration(self) -> pynwb.TimeSeries:
+        """As interpreted from sync, after solenoid line was added ~March 2024."""
         if not self.is_sync:
             raise AttributeError(f"{self.id} is not a session with sync data")
         if self.id.date < datetime.date(2024, 4, 1):
@@ -2817,7 +2817,7 @@ class DynamicRoutingSession:
         return pynwb.TimeSeries(
             timestamps=rising,
             data=falling - rising,
-            name="rewards",
+            name="reward_times",
             unit="seconds",
             description="times at which the solenoid valve that controls water reward delivery to the subject was opened; `data` contains the length of time the solenoid was open for each event",
         )
