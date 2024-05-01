@@ -672,12 +672,6 @@ class DynamicRoutingSession:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_sync and len(self._all_licks) >= 2:
             modules.append(self._all_licks[1])
-        try:
-            modules.append(self._rewards_times_with_duration)
-        except AttributeError:
-            modules.append(self._reward_frame_times)
-        if self.is_task:
-            modules.append(self._quiescent_interval_violation_times)
         # if self.is_lfp:
         #     modules.append(self._raw_lfp)
         # if self.is_ephys:
@@ -708,9 +702,15 @@ class DynamicRoutingSession:
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
+        if self.is_task:
+            modules.append(self._quiescent_interval_violations)
         if self._all_licks:
             modules.append(self._all_licks[0])
         modules.append(self._running_speed)
+        try:
+            modules.append(self._reward_times_with_duration)
+        except AttributeError:
+            modules.append(self._reward_frame_times)
         if self.is_video:
             if self.info and self.info.is_dlc_eye:
                 modules.append(self._eye_tracking)
@@ -2788,12 +2788,12 @@ class DynamicRoutingSession:
             )
         return ndx_events.Events(
             timestamps=np.sort(np.unique(reward_times)),
-            name="reward_times",
+            name="rewards",
             description="times at which the stimulus script triggered water rewards to be delivered to the subject",
         )
 
     @npc_io.cached_property
-    def _rewards_times_with_duration(self) -> pynwb.TimeSeries:
+    def _reward_times_with_duration(self) -> pynwb.TimeSeries:
         """As interpreted from sync, after solenoid line was added ~March 2024."""
         if not self.is_sync:
             raise AttributeError(f"{self.id} is not a session with sync data")
@@ -2809,13 +2809,13 @@ class DynamicRoutingSession:
         return pynwb.TimeSeries(
             timestamps=rising,
             data=falling - rising,
-            name="reward_times",
+            name="rewards",
             unit="seconds",
             description="times at which the solenoid valve that controls water reward delivery to the subject was opened; `data` contains the length of time the solenoid was open for each event",
         )
 
     @npc_io.cached_property
-    def _quiescent_interval_violation_times(
+    def _quiescent_interval_violations(
         self,
     ) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
         frames: npt.NDArray[np.int32] = self.sam.quiescentViolationFrames
@@ -2828,7 +2828,7 @@ class DynamicRoutingSession:
         )
         return ndx_events.Events(
             timestamps=np.sort(np.unique(times)),
-            name="quiescent_interval_violation_times",
+            name="quiescent_interval_violations",
             description="times at which the subject made contact with the lick spout during a quiescent interval, triggering a restart of the trial",
         )
 
