@@ -677,7 +677,7 @@ class DynamicRoutingSession:
         except AttributeError:
             modules.append(self._reward_frame_times)
         if self.is_task:
-            modules.append(self._quiescent_violations)
+            modules.append(self._quiescent_interval_violation_times)
         # if self.is_lfp:
         #     modules.append(self._raw_lfp)
         # if self.is_ephys:
@@ -2823,7 +2823,7 @@ class DynamicRoutingSession:
         )
 
     @npc_io.cached_property
-    def _quiescent_violations(
+    def _quiescent_interval_violation_times(
         self,
     ) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
         frames: npt.NDArray[np.int32] = self.sam.quiescentViolationFrames
@@ -2836,7 +2836,7 @@ class DynamicRoutingSession:
         )
         return ndx_events.Events(
             timestamps=np.sort(np.unique(times)),
-            name="quiescent_violations",
+            name="quiescent_interval_violation_times",
             description="times at which the subject made contact with the lick spout during a quiescent interval, triggering a restart of the trial",
         )
 
