@@ -114,32 +114,30 @@ def component_exists(
     version: str | None = None,
 ) -> bool:
     extension = npc_lims.get_cache_file_suffix(component_name)
-    cache_session_id: str | None = session_id
-    if extension == ".zarr" and component_name == "spike_times":
-        consolidated = False
+    # arrays other than spike times are only stored in consolidated zarr files:
+    # rather than checking whether individual files exist, we check if the session
+    # is in the consolidated zarr file
+    if extension == ".zarr":
+        if component_name == "spike_times":
+            consolidated_zarr = False
+        else:
+            consolidated_zarr = True
     else:
-        consolidated = True
-        cache_session_id = None
+        consolidated_zarr = False
     path = npc_lims.get_cache_path(
         nwb_component=component_name,
-        session_id=cache_session_id,
+        session_id=session_id if not consolidated_zarr else None,
         version=version,
-        consolidated=consolidated,
+        consolidated=consolidated_zarr,
     )
-    if not consolidated:
-        return path.exists()
-    elif extension == ".parquet":
-        return path.exists()
-    elif extension == ".zarr":
+    if consolidated_zarr:
         z = zarr.open(path)
         if npc_session.SessionRecord(session_id) in z:
             return True
         else:
             return False
     else:
-        raise NotImplementedError(
-            f"No support for {extension=} files yet - update to match cache path provided by npc_lims"
-        )
+        return path.exists()
 
 
 def write_nwb_component_to_cache(
