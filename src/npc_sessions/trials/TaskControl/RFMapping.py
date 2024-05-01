@@ -15,6 +15,7 @@ display times to get stim onset times
 
 from __future__ import annotations
 
+from ast import In
 from collections.abc import Iterable
 
 import npc_io
@@ -198,17 +199,25 @@ class RFMapping(TaskControl):
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of RF mapping stimulus"""
         frames_per_stim = self._hdf5["stimFrames"][()]
-        if all(self._is_vis_stim):
-            return self._vis_display_times
         if all(~self._is_vis_stim):
             return self.get_trial_aud_offset(self._idx)
-        # although we could do the section below without the part above, we can
-        # incur an IndexError below if there are too few _vis_display_times 
+        
+        frame_idx = self._hdf5["stimStartFrame"][self._idx] + frames_per_stim
+        if frame_idx[-1] > len(self._vis_display_times):
+            # if we have a mix of vis and aud stim, and the last stim is aud, the
+            # actual end time (as recorded on sync/ephys daq) can occur after the last
+            # frame in the experiment, so `frame_idx[-1]` won't correspond to an actual
+            # frame index. Just to be able to index without raising an error we'll
+            # use real indices, but the stop time for the last aud stim will still come
+            # from the recording
+            vis_frame_idx_before_mod = frame_idx[self._is_vis_stim]
+            frame_idx = np.searchsorted(np.arange(len(self._vis_display_times)), frame_idx, 'right') - 1
+            assert np.all(vis_frame_idx_before_mod == frame_idx[self._is_vis_stim]), "frame_idx should onlu change for non-visual stims"
         return np.where(
             self._is_vis_stim,
             npc_stim.safe_index(
                 self._vis_display_times,
-                self._hdf5["stimStartFrame"][self._idx] + frames_per_stim,
+                frame_idx,
             ),
             self.get_trial_aud_offset(self._idx),
         )
