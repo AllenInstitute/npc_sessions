@@ -164,8 +164,6 @@ all of the above also have a `description`, as well as other type-specific attri
     - performance: `TimeIntervals`
 
 Todo:
-- video feature extraction: pupil size, gaze tracking
-- video processing: facemap
 - filtered LFP
 - stimulus templates (vis, aud, opto)
 - OptogeneticStimulusSite
