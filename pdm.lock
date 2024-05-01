@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:4e282bfe42c5cf09a97977df0680e76b3ba033dfc3f374622e0de014ed438b79"
+content_hash = "sha256:ff0897c740407251a4e9153fbcec0df97d8518eb4a44e53d8f585cde9ba5c07a"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -1978,7 +1978,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.147"
+version = "0.1.150"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 dependencies = [
@@ -1995,13 +1995,13 @@ dependencies = [
     "types-requests>=2.31.0.6",
 ]
 files = [
-    {file = "npc_lims-0.1.147-py3-none-any.whl", hash = "sha256:c2c86be2b81166d342ed3a3e3b411c35e0ccadd44c52ed7fccafad5cedf74474"},
-    {file = "npc_lims-0.1.147.tar.gz", hash = "sha256:0199e031afcdad244c48199e90b46c83aef49522953cb3b0343622b014a8a126"},
+    {file = "npc_lims-0.1.150-py3-none-any.whl", hash = "sha256:08c8f3e44f97f6a21c1bb2fdc143203cb3057183c76a4d21c5b44077f0d2338f"},
+    {file = "npc_lims-0.1.150.tar.gz", hash = "sha256:63d2f5bf4056af02f8dadbda92a931b94d4bc7dc4d301c73675f568c5c4cc21b"},
 ]
 
 [[package]]
 name = "npc-mvr"
-version = "0.1.4"
+version = "0.1.6"
 requires_python = ">=3.9"
 summary = "Tools for reading raw video data from MindScope Neuropixels experiments, compatible with data in the cloud."
 dependencies = [
@@ -2011,8 +2011,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc_mvr-0.1.4-py3-none-any.whl", hash = "sha256:b7101df1dbc7e28929d51d32a85492303163f8b599503e63ec9510ac4e9a9a20"},
-    {file = "npc_mvr-0.1.4.tar.gz", hash = "sha256:c0e3e8057324ca52f32fb2d69c7975e6938f32ff1709839b2f48e03a77df1338"},
+    {file = "npc_mvr-0.1.6-py3-none-any.whl", hash = "sha256:e9c1f62c341011fbec08b08ee95cbb08fd2d8f0f51610571cf9c53dd2a2402b3"},
+    {file = "npc_mvr-0.1.6.tar.gz", hash = "sha256:2ec119b6fbec2799885838138c03eee15e4a52553a5e49b9971bd8df198c0cb4"},
 ]
 
 [[package]]
