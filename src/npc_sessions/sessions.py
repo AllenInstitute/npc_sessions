@@ -2545,7 +2545,8 @@ class DynamicRoutingSession:
                     timestamps=rising[filtered_idx],
                     data=falling[filtered_idx] - rising[filtered_idx],
                     name="licks",
-                    description=f"{description}; filtered to exclude events with duration >{max_contact} s; {duration_description}"
+                    description=f"{description}; filtered to exclude events with duration >{max_contact} s; {duration_description}",
+                    unit="seconds",
                     ),
         else:
             licks = ndx_events.Events(
@@ -2562,7 +2563,8 @@ class DynamicRoutingSession:
                 timestamps=rising,
                 data=falling - rising,
                 name="lick_sensor_events",
-                description=f"{description}; {duration_description}"
+                description=f"{description}; {duration_description}",
+                unit="seconds",
                 ),
             )
 
