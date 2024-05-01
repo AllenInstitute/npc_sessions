@@ -2547,7 +2547,7 @@ class DynamicRoutingSession:
                     name="licks",
                     description=f"{description}; filtered to exclude events with duration >{max_contact} s; {duration_description}",
                     unit="seconds",
-                    ),
+                )
         else:
             licks = ndx_events.Events(
                 timestamps=self.sam.lickTimes,
