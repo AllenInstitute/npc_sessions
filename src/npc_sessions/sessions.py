@@ -2694,7 +2694,7 @@ class DynamicRoutingSession:
                 continue
             nwb_camera_name = self.mvr_to_nwb_camera_name[camera_name]
             timestamps = next(
-                t for t in self._video_frame_times if t.name == nwb_camera_name
+                t for t in self._video_frame_times if nwb_camera_name in t.name
             ).timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
             try:
