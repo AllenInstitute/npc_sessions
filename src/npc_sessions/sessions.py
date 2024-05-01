@@ -2642,8 +2642,8 @@ class DynamicRoutingSession:
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=f"{self.mvr_to_nwb_camera_name[npc_mvr.get_camera_name(path.stem)]}_frame_times",
-                description=f"start time of each frame exposure for {path.stem}",
+                name=f"frametimes_{self.mvr_to_nwb_camera_name[npc_mvr.get_camera_name(path.stem)]}",
+                description=f"start time of each frame exposure in {path.stem}",
             )
             for path, timestamps in path_to_timestamps.items()
         )
@@ -2743,7 +2743,7 @@ class DynamicRoutingSession:
                 logger.warning(f"{camera_name} DLC has not been run for {self.id}")
                 continue
             timestamps = next(
-                t for t in self._video_frame_times if t.name == nwb_camera_name
+                t for t in self._video_frame_times if nwb_camera_name in t.name
             ).timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
             pose_estimation_series = utils.get_pose_series_from_dataframe(
