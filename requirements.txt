@@ -81,8 +81,8 @@ neo==0.13.0
 nest-asyncio==1.6.0
 npc-ephys==0.1.14
 npc-io==0.1.26
-npc-lims==0.1.147
-npc-mvr==0.1.4
+npc-lims==0.1.150
+npc-mvr==0.1.6
 npc-samstim==0.1.4
 npc-session==0.1.34
 npc-stim==0.1.8

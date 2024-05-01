@@ -26,7 +26,10 @@ import zarr
 if typing.TYPE_CHECKING:
     import npc_sessions
 
-from npc_sessions.utils.misc import get_package_version, get_taskcontrol_intervals_table_name
+from npc_sessions.utils.misc import (
+    get_package_version,
+    get_taskcontrol_intervals_table_name,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -73,11 +76,17 @@ def _get_nwb_component(
     elif component_name == "subject":
         return _component_metadata_to_single_row_df(session.subject)
     elif component_name in ("vis_rf_mapping", "VisRFMapping"):
-        return session.intervals.get(get_taskcontrol_intervals_table_name("VisRFMapping"), None)
+        return session.intervals.get(
+            get_taskcontrol_intervals_table_name("VisRFMapping"), None
+        )
     elif component_name in ("aud_rf_mapping", "AudRFMapping"):
-        return session.intervals.get(get_taskcontrol_intervals_table_name("AudRFMapping"), None)
+        return session.intervals.get(
+            get_taskcontrol_intervals_table_name("AudRFMapping"), None
+        )
     elif component_name in ("optotagging", "OptoTagging"):
-        return session.intervals.get(get_taskcontrol_intervals_table_name("OptoTagging"), None)
+        return session.intervals.get(
+            get_taskcontrol_intervals_table_name("OptoTagging"), None
+        )
     elif (
         component_name
         in session.processing["behavior"].fields["data_interfaces"].keys()
@@ -121,14 +130,17 @@ def component_exists(
         return path.exists()
     elif extension == ".parquet":
         return path.exists()
-    elif extension == ".zarr" :
+    elif extension == ".zarr":
         z = zarr.open(path)
         if npc_session.SessionRecord(session_id) in z:
             return True
         else:
             return False
     else:
-        raise NotImplementedError(f"No support for {extension=} files yet - update to match cache path provided by npc_lims")
+        raise NotImplementedError(
+            f"No support for {extension=} files yet - update to match cache path provided by npc_lims"
+        )
+
 
 def write_nwb_component_to_cache(
     component: pynwb.core.NWBContainer | pd.DataFrame,

@@ -50,7 +50,6 @@ import npc_sessions.utils as utils
 logger = logging.getLogger(__name__)
 
 
-
 @typing.overload
 def get_sessions(
     id_or_ids: None = None,
@@ -215,7 +214,7 @@ class DynamicRoutingSession:
         "face": "front_camera",
         "behavior": "side_camera",
     }
-    
+
     def __init__(
         self, session_or_path: str | npc_io.PathLike | npc_lims.SessionInfo, **kwargs
     ) -> None:
@@ -965,7 +964,9 @@ class DynamicRoutingSession:
             if self.task_stim_name in k and self.is_task:
                 # intervals.append(self.trials)
                 intervals.append(self.performance)
-            intervals_table_name = utils.get_taskcontrol_intervals_table_name(v.__class__.__name__)
+            intervals_table_name = utils.get_taskcontrol_intervals_table_name(
+                v.__class__.__name__
+            )
             if not any(
                 existing := [i for i in intervals if i.name == intervals_table_name]
             ):
@@ -2542,18 +2543,18 @@ class DynamicRoutingSession:
         duration_description = "`data` contains the duration of each event"
         if self.is_sync and licks_on_sync:
             licks = pynwb.TimeSeries(
-                    timestamps=rising[filtered_idx],
-                    data=falling[filtered_idx] - rising[filtered_idx],
-                    name="licks",
-                    description=f"{description}; filtered to exclude events with duration >{max_contact} s; {duration_description}",
-                    unit="seconds",
-                )
+                timestamps=rising[filtered_idx],
+                data=falling[filtered_idx] - rising[filtered_idx],
+                name="licks",
+                description=f"{description}; filtered to exclude events with duration >{max_contact} s; {duration_description}",
+                unit="seconds",
+            )
         else:
             licks = ndx_events.Events(
                 timestamps=self.sam.lickTimes,
                 name="licks",
                 description=description,
-                )
+            )
 
         if not (self.is_sync and licks_on_sync):
             return (licks,)
@@ -2565,8 +2566,8 @@ class DynamicRoutingSession:
                 name="lick_sensor_events",
                 description=f"{description}; {duration_description}",
                 unit="seconds",
-                ),
-            )
+            ),
+        )
 
     @npc_io.cached_property
     def _running_speed(self) -> pynwb.TimeSeries:
@@ -2761,7 +2762,9 @@ class DynamicRoutingSession:
         return tuple(pose_estimations)
 
     @npc_io.cached_property
-    def _reward_frame_times(self) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
+    def _reward_frame_times(
+        self,
+    ) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
         """As interpreted from task stim files, with timing corrected with sync if
         available.
 
@@ -3112,10 +3115,22 @@ class DynamicRoutingSession:
                                     315,
                                 ],
                                 "position_x": list(
-                                    np.unique(self.intervals[utils.get_taskcontrol_intervals_table_name("VisRFMapping")].grating_x)
+                                    np.unique(
+                                        self.intervals[
+                                            utils.get_taskcontrol_intervals_table_name(
+                                                "VisRFMapping"
+                                            )
+                                        ].grating_x
+                                    )
                                 ),
                                 "position_y": list(
-                                    np.unique(self.intervals[utils.get_taskcontrol_intervals_table_name("VisRFMapping")].grating_y)
+                                    np.unique(
+                                        self.intervals[
+                                            utils.get_taskcontrol_intervals_table_name(
+                                                "VisRFMapping"
+                                            )
+                                        ].grating_y
+                                    )
                                 ),
                                 "size_deg": 20,
                                 "spatial_frequency_cycles_per_deg": 0.08,

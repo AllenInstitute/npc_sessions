@@ -15,7 +15,6 @@ display times to get stim onset times
 
 from __future__ import annotations
 
-from ast import In
 from collections.abc import Iterable
 
 import npc_io
@@ -201,7 +200,7 @@ class RFMapping(TaskControl):
         frames_per_stim = self._hdf5["stimFrames"][()]
         if all(~self._is_vis_stim):
             return self.get_trial_aud_offset(self._idx)
-        
+
         frame_idx = self._hdf5["stimStartFrame"][self._idx] + frames_per_stim
         if frame_idx[-1] > len(self._vis_display_times):
             # if we have a mix of vis and aud stim, and the last stim is aud, the
@@ -211,8 +210,15 @@ class RFMapping(TaskControl):
             # use real indices, but the stop time for the last aud stim will still come
             # from the recording
             vis_frame_idx_before_mod = frame_idx[self._is_vis_stim]
-            frame_idx = np.searchsorted(np.arange(len(self._vis_display_times)), frame_idx, 'right') - 1
-            assert np.all(vis_frame_idx_before_mod == frame_idx[self._is_vis_stim]), "frame_idx should onlu change for non-visual stims"
+            frame_idx = (
+                np.searchsorted(
+                    np.arange(len(self._vis_display_times)), frame_idx, "right"
+                )
+                - 1
+            )
+            assert np.all(
+                vis_frame_idx_before_mod == frame_idx[self._is_vis_stim]
+            ), "frame_idx should onlu change for non-visual stims"
         return np.where(
             self._is_vis_stim,
             npc_stim.safe_index(
@@ -233,7 +239,10 @@ class RFMapping(TaskControl):
                 + self._hdf5["interStimFrames"][()],
             )
         except IndexError:
-            return self.stim_stop_time + self._hdf5["interStimFrames"][()] * self._hdf5["frameRate"][()]
+            return (
+                self.stim_stop_time
+                + self._hdf5["interStimFrames"][()] * self._hdf5["frameRate"][()]
+            )
 
     @npc_io.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:

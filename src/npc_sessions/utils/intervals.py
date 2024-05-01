@@ -288,7 +288,9 @@ def add_opto_response_metric(session) -> None:
 
 def add_vis_response_metric(session) -> None:
     """Adds `vis_response` metric to `session.units`"""
-    trials = session.intervals[get_taskcontrol_intervals_table_name("VisRFMapping")].to_dataframe()
+    trials = session.intervals[
+        get_taskcontrol_intervals_table_name("VisRFMapping")
+    ].to_dataframe()
     if trials is None:
         return
     units = session.units[:]  # slight speed-up by creating df only once
