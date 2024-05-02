@@ -14,7 +14,7 @@ import copy
 import datetime
 import logging
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, Literal
 
 import DynamicRoutingTask.TaskUtils
 import npc_io
@@ -211,28 +211,55 @@ class DynamicRouting1(TaskControl):
             return self.get_trial_aud_onset(trial) + self._hdf5["trialSoundDur"][trial]
         return npc_stim.safe_index(self._aud_stim_offset_times, trial)
 
-    def get_trial_opto_onset(self) -> npt.NDArray[np.float64]:
+    def get_trial_opto_onset(self, line: Literal['laser_488', 'laser_688', 'galvo'] = 'laser_488') -> npt.NDArray[np.float64]:
         self.assert_single_opto_device()
         if self._opto_stim_recordings is not None:
+            if '488' not in line:
+                logger.warning(f'Interpreting analog waveforms for opto onset times is only implemented for a single 488 laser (early DR/Templeton experiments): arg {line =} will be ignored')
             return np.array(
                 [
                     np.nan if rec is None else rec.onset_time_on_sync
                     for rec in self._opto_stim_recordings
                 ]
             )[: self._len]
-        logger.debug("Using script frame times for opto stim onsets")
-        if (onset_frames := self._sam.trialOptoOnsetFrame).ndim == 2:
-            onset_frames = onset_frames.squeeze()
+            
+        if (script_onset_frames := self._sam.trialOptoOnsetFrame).ndim == 2:
+            script_onset_frames = script_onset_frames.squeeze()
         # note: this is different to OptoTagging, where onset frame is abs frame idx
-        return npc_stim.safe_index(
-            self._flip_times, self._sam.stimStartFrame + onset_frames[: self._len]
+        onset_times_based_on_script = npc_stim.safe_index(
+            self._flip_times, self._sam.stimStartFrame + script_onset_frames[: self._len]
         )
-
+        if not self._sync:
+            logger.debug("Using script frame times for opto stim onsets")
+            return onset_times_based_on_script
+        try:
+            line_number = npc_sync.get_sync_line_for_stim_onset(waveform_type=line, date=self._datetime)
+        except ValueError: # raised if requested sync line not available, based on date line was added
+            logger.debug("Using script frame times for opto stim onsets")
+            return onset_times_based_on_script
+        assert self._sync is not None
+        opto_line_rising_edges = self._sync.get_rising_edges(line_number, units="seconds")
+        onset_times_based_on_sync = opto_line_rising_edges[
+                np.searchsorted(
+                opto_line_rising_edges,
+                onset_times_based_on_script,
+                side="right",
+            ) - 1
+        ]
+        opto_onset_latency = onset_times_based_on_sync - onset_times_based_on_script
+        logger.debug(f"Opto onset latencies (sync line - script flip): {np.median(opto_onset_latency)=} {np.max(opto_onset_latency)=}")
+        assert np.all(opto_onset_latency >= 0), f"Negative opto latencies found (sync line - script flip): {opto_onset_latency = }"
+        assert np.all(onset_times_based_on_sync < 0.1), f"Large opto onset times found: {onset_times_based_on_sync = }"
+        return onset_times_based_on_sync
+    
     def get_trial_opto_offset(
         self,
+        line: Literal['laser_488', 'laser_688', 'galvo'] = 'laser_488'
     ) -> npt.NDArray[np.float64]:
         self.assert_single_opto_device()
         if self._opto_stim_recordings is not None:
+            if '488' not in line:
+                logger.warning(f'Interpreting analog waveforms for opto onset times is only implemented for a single 488 laser (early DR/Templeton experiments): arg {line =} will be ignored')
             return np.array(
                 [
                     np.nan if rec is None else rec.offset_time_on_sync
@@ -240,8 +267,27 @@ class DynamicRouting1(TaskControl):
                 ]
             )[: self._len]
         self.assert_single_opto_device()
-        return self.get_trial_opto_onset() + self.opto_duration[: self._len]
-
+        offset_times_based_on_nominal_duration = self.get_trial_opto_onset() + self.opto_duration[: self._len]
+        if not self._sync:
+            return offset_times_based_on_nominal_duration
+        try:
+            line_number = npc_sync.get_sync_line_for_stim_onset(waveform_type=line, date=self._datetime)
+        except ValueError: # raised if requested sync line not available, based on date line was added
+            logger.debug("Using script frame times for opto stim onsets")
+            return offset_times_based_on_nominal_duration
+        assert self._sync is not None
+        opto_line_falling_edges = self._sync.get_falling_edges(line_number, units="seconds")
+        offset_times_based_on_sync = opto_line_falling_edges[
+                np.searchsorted(
+                opto_line_falling_edges,
+                offset_times_based_on_nominal_duration,
+                side="right",
+            ) - 1
+        ]
+        opto_duration = self.get_trial_opto_onset(line=line) - offset_times_based_on_sync
+        assert np.all(opto_duration >= 0), f"Negative opto durations found (sync offset - onset): {opto_duration = }"
+        return offset_times_based_on_sync
+    
     # ---------------------------------------------------------------------- #
     # helper-properties that won't become columns:
 
