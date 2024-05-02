@@ -118,7 +118,7 @@ def parse_args() -> argparse.Namespace:
         "--version",
         type=str,
         metavar="v?.?.?",
-        help="Subfolder that cached files are written to - default uses the current version of npc_sessions",
+        help="Subfolder that cached files are written to - default uses the installed version of npc_sessions",
     )
     parser.add_argument(
         "--parallel",
