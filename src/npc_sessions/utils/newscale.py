@@ -162,7 +162,7 @@ def get_newscale_coordinates(
 
     # correct z values
     z = df["z"]
-    for idx, device in enumerate(df["device"]):
+    for idx, device in enumerate(df["device_name"]):
         if z_inverted:
             z[idx] = get_z_travel(device) - z[idx]
     df = df.with_columns(z)
