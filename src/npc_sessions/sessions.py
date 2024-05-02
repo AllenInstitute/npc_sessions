@@ -1200,12 +1200,12 @@ class DynamicRoutingSession:
             raise AttributeError(f"{self.id} is not an ephys session")
         return tuple(
             pynwb.device.Device(
-                name=row["device"],
+                name=row["device_name"],
                 description=f"motorized 3-axis micromanipulator for positioning and inserting {probe.name}",
                 manufacturer="NewScale",
             )
             for _, row in self._manipulator_positions[:].iterrows()
-            if (probe := npc_session.ProbeRecord(row["electrode_group"]))
+            if (probe := npc_session.ProbeRecord(row["electrode_group_name"]))
             in self.probe_letters_to_use
         )
 
@@ -1941,6 +1941,7 @@ class DynamicRoutingSession:
             self.newscale_log_path,
             f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
         )
+        df = df.drop('last_movement_dt')
         t = pynwb.core.DynamicTable(
             name="manipulator_positions",
             description="nominal positions of the motorized stages on each probe's manipulator assembly at the time of ecephys recording",
@@ -1949,7 +1950,6 @@ class DynamicRoutingSession:
             "electrode_group_name": "name of probe mounted on the manipulator",
             "device_name": "serial number of NewScale device",
             "last_movement_time": "time of last movement of the manipulator, in seconds, relative to `session_start_time`; should always be negative: manipulators do not move after recording starts; value includes at least 15 min for probe to settle before recording",
-            "last_movement_dt": "datetime of last movement of the manipulator",
             "x": "horizontal position in microns (direction of axis varies)",
             "y": "horizontal position in microns (direction of axis varies)",
             "z": "vertical position in microns (+z is inferior, 0 is fully retracted)",
