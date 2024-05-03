@@ -239,6 +239,9 @@ class DynamicRouting1(TaskControl):
             return onset_times_based_on_script
         assert self._sync is not None
         opto_line_rising_edges = self._sync.get_rising_edges(line_number, units="seconds")
+        if len(opto_line_rising_edges) < onset_times_based_on_script:
+            logger.debug("Using script frame times for opto stim onsets")
+            return onset_times_based_on_script
         onset_times_based_on_sync = opto_line_rising_edges[
                 np.searchsorted(
                 opto_line_rising_edges,
@@ -259,7 +262,7 @@ class DynamicRouting1(TaskControl):
         self.assert_single_opto_device()
         if self._opto_stim_recordings is not None:
             if '488' not in line:
-                logger.warning(f'Interpreting analog waveforms for opto onset times is only implemented for a single 488 laser (early DR/Templeton experiments): arg {line =} will be ignored')
+                logger.warning(f'Interpreting analog waveforms for opto offset times is only implemented for a single 488 laser (early DR/Templeton experiments): arg {line =} will be ignored')
             return np.array(
                 [
                     np.nan if rec is None else rec.offset_time_on_sync
@@ -273,10 +276,13 @@ class DynamicRouting1(TaskControl):
         try:
             line_number = npc_sync.get_sync_line_for_stim_onset(waveform_type=line, date=self._datetime)
         except ValueError: # raised if requested sync line not available, based on date line was added
-            logger.debug("Using script frame times for opto stim onsets")
+            logger.debug("Using script frame times for opto stim offsets")
             return offset_times_based_on_nominal_duration
         assert self._sync is not None
         opto_line_falling_edges = self._sync.get_falling_edges(line_number, units="seconds")
+        if len(opto_line_falling_edges) < offset_times_based_on_nominal_duration:
+            logger.debug("Using script frame times for opto stim offsets")
+            return offset_times_based_on_nominal_duration
         offset_times_based_on_sync = opto_line_falling_edges[
                 np.searchsorted(
                 opto_line_falling_edges,
