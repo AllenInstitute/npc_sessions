@@ -1941,7 +1941,7 @@ class DynamicRoutingSession:
             self.newscale_log_path,
             f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
         )
-        df = df.drop('last_movement_dt')
+        df = df.drop(columns='last_movement_dt')
         t = pynwb.core.DynamicTable(
             name="manipulator_positions",
             description="nominal positions of the motorized stages on each probe's manipulator assembly at the time of ecephys recording",
