@@ -195,7 +195,9 @@ def write_and_upload_session_nwb(
     >>> write_and_upload_session_nwb(session, version="test", skip_existing=False, zarr=False, metadata_only=True)
     """
     logger.info(f"Writing {session.session_id} NWB")
-    path = npc_lims.get_nwb_path(session.session_id, version=version or get_package_version())
+    path = npc_lims.get_nwb_path(
+        session.session_id, version=version or get_package_version()
+    )
     if skip_existing and path.exists():
         logger.info(
             f"Skipping {session.session_id} NWB write - already exists and skip_existing=True"
@@ -266,7 +268,9 @@ def consolidate_all_caches() -> None:
         consolidate_cache(component_name)
 
 
-def consolidate_cache(component_name: npc_lims.NWBComponentStr, version: str | None = None) -> None:
+def consolidate_cache(
+    component_name: npc_lims.NWBComponentStr, version: str | None = None
+) -> None:
     logger.info(f"Consolidating {component_name} caches")
     cache_dir = npc_lims.get_cache_path(
         component_name, consolidated=False, version=version or get_package_version()

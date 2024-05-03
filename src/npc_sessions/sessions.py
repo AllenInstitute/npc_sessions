@@ -296,7 +296,9 @@ class DynamicRoutingSession:
     @property
     def nwb_from_cache(self) -> pynwb.NWBFile | None:
         if (
-            path := npc_lims.get_nwb_path(self.id, version=None) # always return the latest
+            path := npc_lims.get_nwb_path(
+                self.id, version=None
+            )  # always return the latest
         ).exists():
             if path.suffix == ".zarr":
                 return hdmf_zarr.NWBZarrIO(path=path.as_posix(), mode="r").read()
@@ -1941,7 +1943,7 @@ class DynamicRoutingSession:
             self.newscale_log_path,
             f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
         )
-        df = df.drop(columns='last_movement_dt')
+        df = df.drop(columns="last_movement_dt")
         t = pynwb.core.DynamicTable(
             name="manipulator_positions",
             description="nominal positions of the motorized stages on each probe's manipulator assembly at the time of ecephys recording",

@@ -168,12 +168,12 @@ def get_newscale_coordinates(
     df = df.with_columns(z)
 
     # add time of last movement relative to start of recording
-    df = (
-        df.with_columns(
-            (pl.col("last_movement_dt") - start.dt).dt.total_seconds().alias("last_movement_time")
-        )
+    df = df.with_columns(
+        (pl.col("last_movement_dt") - start.dt)
+        .dt.total_seconds()
+        .alias("last_movement_time")
     )
-    
+
     df = (
         df.insert_column(index=0, column=probes)
         .sort(pl.col("electrode_group_name"))
