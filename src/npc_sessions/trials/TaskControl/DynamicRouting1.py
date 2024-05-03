@@ -239,7 +239,7 @@ class DynamicRouting1(TaskControl):
             return onset_times_based_on_script
         assert self._sync is not None
         opto_line_rising_edges = self._sync.get_rising_edges(line_number, units="seconds")
-        if len(opto_line_rising_edges) < onset_times_based_on_script:
+        if len(opto_line_rising_edges) < len(onset_times_based_on_script):
             logger.debug("Using script frame times for opto stim onsets")
             return onset_times_based_on_script
         onset_times_based_on_sync = opto_line_rising_edges[
@@ -280,7 +280,7 @@ class DynamicRouting1(TaskControl):
             return offset_times_based_on_nominal_duration
         assert self._sync is not None
         opto_line_falling_edges = self._sync.get_falling_edges(line_number, units="seconds")
-        if len(opto_line_falling_edges) < offset_times_based_on_nominal_duration:
+        if len(opto_line_falling_edges) < len(offset_times_based_on_nominal_duration):
             logger.debug("Using script frame times for opto stim offsets")
             return offset_times_based_on_nominal_duration
         offset_times_based_on_sync = opto_line_falling_edges[
