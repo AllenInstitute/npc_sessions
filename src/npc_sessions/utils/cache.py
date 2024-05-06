@@ -168,8 +168,7 @@ def write_nwb_component_to_cache(
     else:
         df = _remove_pynwb_containers_from_table(component)
         if df.empty:
-            logger.info(f"Skipping {session_id} {component_name} - empty")
-            return
+            logger.debug(f"{session_id} {component_name} is empty - but we're writing it to cache so we don't have to check again")
         df = add_session_metadata(df, session_id)
         _write_df_to_cache(
             session_id=session_id,
