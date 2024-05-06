@@ -234,6 +234,7 @@ def write_all_components_to_cache(
     >>> write_all_components_to_cache(session, version="test", skip_existing=False)
     """
     logger.info(f"Writing all components to cache for {session.session_id}")
+    version = version or get_package_version()
     for component_name in typing.get_args(npc_lims.NWBComponentStr):
         # skip before we potentially do a lot of processing to get component
         if skip_existing and component_exists(
@@ -271,14 +272,15 @@ def consolidate_cache(
     component_name: npc_lims.NWBComponentStr, version: str | None = None
 ) -> None:
     logger.info(f"Consolidating {component_name} caches")
+    version = version or get_package_version()
     cache_dir = npc_lims.get_cache_path(
-        component_name, consolidated=False, version=version or get_package_version()
+        component_name, consolidated=False, version=version
     )
     if not cache_dir.exists() or not tuple(cache_dir.iterdir()):
         logger.info(f"No cache files found for {component_name}")
         return
     consolidated_cache_path = npc_lims.get_cache_path(
-        component_name, consolidated=True, version=version or get_package_version()
+        component_name, consolidated=True, version=version
     )
     if consolidated_cache_path.suffix == ".parquet":
         if component_name == "units":

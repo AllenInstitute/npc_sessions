@@ -115,12 +115,6 @@ def parse_args() -> argparse.Namespace:
         help="Flag to skip existing files in cache",
     )
     parser.add_argument(
-        "--version",
-        type=str,
-        metavar="v?.?.?",
-        help="Subfolder that cached files are written to - default uses the installed version of npc_sessions",
-    )
-    parser.add_argument(
         "--parallel",
         action="store_true",
         help="Flag to run in parallel",

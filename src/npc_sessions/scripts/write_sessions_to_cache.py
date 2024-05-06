@@ -34,7 +34,6 @@ def helper(
 def write_sessions_to_cache(
     session_type: Literal["training", "ephys", "all"] = "all",
     skip_existing: bool = True,
-    version: str | None = None,
     parallel: bool = True,
     max_workers: int | None = None,
 ) -> None:
@@ -42,7 +41,6 @@ def write_sessions_to_cache(
     session_infos = utils.get_session_infos(session_type=session_type)
 
     helper_opts = {
-        "version": version,
         "skip_existing": skip_existing,
     }
     if len(session_infos) == 1:
