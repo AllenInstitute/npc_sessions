@@ -3280,7 +3280,14 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def _aind_rig_id(self) -> str:
-        rig = self.rig.strip(".")
+        sanitized = self.rig.replace(".", "")
+        cluster_to_room = {
+            "B": "342",
+            "F": "346",
+            "G": "346",
+            "D": "347",
+            "E": "347",
+        }
         rig_to_room = {
             "NP0": "325",
             "NP1": "325",
@@ -3288,7 +3295,14 @@ class DynamicRoutingSession:
             "NP3": "342",
         }
         last_updated = "240401"
-        return f"{rig_to_room[rig]}_{rig}_{last_updated}"
+        if sanitized.startswith("NP"):
+            room = rig_to_room[sanitized]
+        elif sanitized.startswith(("NSB", "SAM", )):
+            room = cluster_to_room[sanitized[3]]
+        else:
+            raise Exception(f"Unsupported rig: {self.rig}")
+
+        return f"{room}_{self.rig}_{last_updated}"
 
     @npc_io.cached_property
     def _aind_session_metadata(self) -> aind_data_schema.core.session.Session:
