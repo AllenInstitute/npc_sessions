@@ -203,11 +203,16 @@ class OptoTagging(TaskControl):
         calibration_data = self._hdf5["optoPowerCalibrationData"]
         trial_voltages = self._hdf5["trialOptoVoltage"][self.trial_index]
         if "poly coefficients" in calibration_data:
-            return DynamicRoutingTask.TaskUtils.voltsToPower(
+            power = DynamicRoutingTask.TaskUtils.voltsToPower(
                 calibration_data,
                 trial_voltages,
             )
-        return np.where(~np.isnan(trial_voltages), self._hdf5["optoPower"], np.nan)
+        else:
+            power = np.where(~np.isnan(trial_voltages), self._hdf5["optoPower"], np.nan)
+        # round power to 3 decimal places, if safe to do so:
+        if np.max(np.abs(np.round(power, 3) - power)) < 1e-3:
+            power = np.round(power, 3)
+        return power
         # return trial_voltages * calibration_data['slope'] + calibration_data['intercept']
 
 
