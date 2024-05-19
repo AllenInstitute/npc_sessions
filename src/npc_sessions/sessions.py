@@ -1394,9 +1394,10 @@ class DynamicRoutingSession:
         """[[start stop], ...] for intervals in which ephys data is available for
         a given probe.
 
-        - effectively start and stop of ephys recording for most sessions
-        - multiple intervals when recording is split into parts # TODO not supported yet
         - times are on sync clock, relative to start
+        - one interval for most sessions: start and stop of ephys recording
+        - multiple intervals when recording is split into parts # TODO not supported yet
+        - if sync stopped before ephys for any reason, stop time is sync stop time
         """
         timing_data = next(
             (
@@ -1409,7 +1410,8 @@ class DynamicRoutingSession:
         )
         if timing_data is None:
             raise ValueError(f"no ephys timing data for {self.id} {probe}")
-        return ((timing_data.start_time, timing_data.stop_time),)
+        stop_time = min(timing_data.stop_time, self.sync_data.total_seconds)
+        return ((timing_data.start_time, stop_time),)
 
     @npc_io.cached_property
     def sorted_channel_indices(self) -> dict[npc_session.ProbeRecord, tuple[int, ...]]:
