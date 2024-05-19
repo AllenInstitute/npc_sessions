@@ -7,6 +7,7 @@ authors = [
     { name = "Arjun Sridhar", email = "arjun.sridhar@alleninstitute.org" },
     { name = "Ethan McBride", email = "ethan.mcbride@alleninstitute.org" },
     { name = "Corbett Bennett", email = "corbettb@alleninstitute.org" },
+    { name = "Sam Gale", email = "samg@alleninstitute.org" },
 ]
 dependencies = [
     "h5py>=3.9.0",
