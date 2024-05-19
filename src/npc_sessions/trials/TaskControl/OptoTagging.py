@@ -141,20 +141,12 @@ class OptoTagging(TaskControl):
 
     @npc_io.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
-        return self.stim_start_time - min(0.2, 0.5 * self._inter_trial_interval)
-
-    @npc_io.cached_property
-    def stop_time(self) -> npt.NDArray[np.float64]:
-        return self.stim_stop_time + min(0.2, 0.5 * self._inter_trial_interval)
-
-    @npc_io.cached_property
-    def stim_start_time(self) -> npt.NDArray[np.float64]:
         return np.array([rec.onset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
         ]
 
     @npc_io.cached_property
-    def stim_stop_time(self) -> npt.NDArray[np.float64]:
+    def stop_time(self) -> npt.NDArray[np.float64]:
         return np.array([rec.offset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
         ]
@@ -205,7 +197,7 @@ class OptoTagging(TaskControl):
                 [label[np.all(xy == v, axis=1)][0] for v in self._bregma_xy], dtype=str
             )[self.trial_index]
         raise ValueError("No known optotagging location data found")
-
+        
     @npc_io.cached_property
     def power(self) -> npt.NDArray[np.float64]:
         calibration_data = self._hdf5["optoPowerCalibrationData"]
