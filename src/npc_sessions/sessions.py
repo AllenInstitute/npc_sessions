@@ -2394,10 +2394,20 @@ class DynamicRoutingSession:
         return self.surface_recording.probe_letters_to_use
 
     @property
+    def probe_letters_with_sorted_data(self) -> tuple[npc_session.ProbeRecord, ...]:
+        return self.sorted_data.probes
+    @property
+    def probe_letters_skipped_by_sorting(self) -> tuple[npc_session.ProbeRecord, ...]:
+        return tuple(npc_session.ProbeRecord(p) for p in 'ABCDEF' if p not in self.sorted_data.probes)
+
+    @property
     def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
+        """Includes probes skipped by sorting"""
         if (v := getattr(self, "_probe_letters_to_skip", None)) is not None:
-            return tuple(npc_session.ProbeRecord(letter) for letter in v)
-        return ()
+            probe_letters_to_skip = tuple(npc_session.ProbeRecord(letter) for letter in v)
+        else:
+            probe_letters_to_skip = ()
+        return probe_letters_to_skip + self.probe_letters_skipped_by_sorting
 
     def remove_probe_letters_to_skip(
         self, letters: Iterable[str | npc_session.ProbeRecord]
