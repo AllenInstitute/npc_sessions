@@ -760,12 +760,17 @@ class DynamicRouting1(TaskControl):
             if isinstance(devices, str):
                 if not devices:
                     return (np.nan,)  # type: ignore
+                if devices in ("led_1", "led_2"):
+                    return (470, ) # behavior box cannulae test experiments
                 try:
-                    return (int(devices.split("_")[-1]),)
+                    value = int(devices.split("_")[-1])
                 except ValueError as exc:
                     raise ValueError(
                         f"Invalid opto devices string (expected 'laser_488' format): {devices}"
                     ) from exc
+                else:
+                    assert 300 < value < 1000, f"Unexpected wavelength parsed from `trialOptoDevice`: {value}"
+                    return (value, )
             result: tuple[int | np.floating, ...] = ()
             for device in devices:
                 result = result + parse_wavelengths(device)
