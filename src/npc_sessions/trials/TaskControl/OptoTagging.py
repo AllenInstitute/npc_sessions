@@ -215,6 +215,20 @@ class OptoTagging(TaskControl):
         return power
         # return trial_voltages * calibration_data['slope'] + calibration_data['intercept']
 
+    @npc_io.cached_property
+    def wavelength(self) -> npt.NDArray[np.int64]:
+        def parse_wavelength(device: str) -> int:
+            try:
+                value = int(device.split("_")[-1])
+            except ValueError as exc:
+                raise ValueError(
+                    f"Invalid opto device string (expected 'laser_488' format): {device}"
+                ) from exc
+            else:
+                assert 300 < value < 1000, f"Unexpected wavelength parsed from `trialOptoDevice`: {value}"
+                return value
+        return np.array([parse_wavelength(device) for device in self._trial_opto_device])
+            
 
 if __name__ == "__main__":
     import doctest
