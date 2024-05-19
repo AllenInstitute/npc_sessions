@@ -1885,6 +1885,8 @@ class DynamicRoutingSession:
         root = root or self.root_path
         if root is None:
             raise ValueError(f"{self.id} does not have a local root_path assigned yet")
+        if root.is_file():
+            return (root,)
         ephys_paths = itertools.chain(
             root.glob("Record Node *"),
             root.glob("*/Record Node *"),
