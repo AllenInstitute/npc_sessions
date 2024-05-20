@@ -1204,6 +1204,12 @@ class DynamicRoutingSession:
     def _manipulators(self) -> tuple[pynwb.device.Device, ...]:
         if not self.is_ephys:
             raise AttributeError(f"{self.id} is not an ephys session")
+        try:
+            _ = self._manipulator_positions
+        except AttributeError as exc:
+            raise AttributeError(
+                f"{self.id} is an ephys session, but no manipulator info available"
+            ) from exc
         return tuple(
             pynwb.device.Device(
                 name=row["device_name"],
@@ -1221,7 +1227,8 @@ class DynamicRoutingSession:
         devices: list[pynwb.device.Device] = []
         if self.is_ephys:
             devices.extend(self._probes)
-            devices.extend(self._manipulators)
+            with contextlib.suppress(AttributeError):
+                devices.extend(self._manipulators)
         return tuple(devices)  # add other devices as we need them
 
     @npc_io.cached_property
