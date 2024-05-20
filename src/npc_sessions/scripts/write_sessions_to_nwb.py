@@ -37,9 +37,10 @@ def write_sessions_to_cache(
     parallel: bool = True,
     max_workers: int | None = None,
     zarr_nwb: bool = True,
+    reversed: bool = False,
 ) -> None:
     t0 = time.time()
-    session_infos = utils.get_session_infos(session_type=session_type)
+    session_infos = utils.get_session_infos(session_type=session_type, reversed=reversed)
 
     helper_opts = {
         "skip_existing": skip_existing,

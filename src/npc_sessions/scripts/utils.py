@@ -99,7 +99,7 @@ def setup(
 def parse_args() -> argparse.Namespace:
     """
     >>> parse_args()
-    Namespace(session_type='ephys', skip_existing=True, version=None, parallel=False, log_level='INFO', max_workers=None, zarr_nwb=True)
+    Namespace(session_type='ephys', skip_existing=True, parallel=False, log_level='INFO', max_workers=None, zarr_nwb=True, reversed=False)
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -138,12 +138,19 @@ def parse_args() -> argparse.Namespace:
         action="store_false",
         help="Flag to store NWB files in hdf5 format instead of the default zarr",
     )
+    parser.add_argument(
+        "--reversed",
+        dest="reversed",
+        action="store_true",
+        help="Flag to run in chronological order, instead of the default of newest to oldest",
+    )
 
     return parser.parse_args()
 
 
 def get_session_infos(
-    session_type: Literal["training", "ephys", "all"]
+    session_type: Literal["training", "ephys", "all"],
+    reversed: bool = False,
 ) -> tuple[npc_lims.SessionInfo, ...]:
     if session_type not in ("training", "ephys", "all"):
         raise ValueError(f"{session_type=} must be one of 'training', 'ephys', 'all'")
@@ -155,7 +162,7 @@ def get_session_infos(
             for s in npc_lims.get_session_info(issues=[])
             if s.is_ephys == is_ephys(session_type=session_type)
         )
-    return session_infos
+    return session_infos if not reversed else session_infos[::-1]
 
 
 def is_ephys(session_type: Literal["training", "ephys", "all"]) -> bool | None:

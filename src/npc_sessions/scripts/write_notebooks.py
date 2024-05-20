@@ -61,9 +61,10 @@ def write_notebooks(
     version: str | None = None,
     parallel: bool = True,
     max_workers: int | None = None,
+    reversed: bool = False,
 ) -> None:
     t0 = time.time()
-    session_infos = utils.get_session_infos(session_type=session_type)
+    session_infos = utils.get_session_infos(session_type=session_type, reversed=reversed)
 
     helper_opts = {
         "version": version,
