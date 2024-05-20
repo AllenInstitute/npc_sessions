@@ -493,6 +493,10 @@ class DynamicRoutingSession:
         if self.id.date.dt < datetime.date(2023, 8, 8):
             # older DR/Templeton sessions, prior to Hannah C becoming 100% DR
             return ["Jackie Kuyat"]
+        elif "NP" in self.rig:
+            # older DR/Templeton sessions, prior to Hannah C becoming 100% DR
+            return ["Sam Gale"]
+            # some sessions Sam ran with no experiment log
         return None
 
     @property
