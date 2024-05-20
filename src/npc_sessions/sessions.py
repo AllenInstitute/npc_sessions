@@ -2399,9 +2399,14 @@ class DynamicRoutingSession:
 
     @property
     def probe_letters_with_sorted_data(self) -> tuple[npc_session.ProbeRecord, ...]:
+        if not self.is_sorted:
+            return ()
         return self.sorted_data.probes
+    
     @property
     def probe_letters_skipped_by_sorting(self) -> tuple[npc_session.ProbeRecord, ...]:
+        if not self.is_sorted:
+            return ()
         return tuple(npc_session.ProbeRecord(p) for p in 'ABCDEF' if p not in self.sorted_data.probes)
 
     @property
