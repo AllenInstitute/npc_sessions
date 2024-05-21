@@ -3280,7 +3280,13 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def _aind_rig_id(self) -> str:
-        sanitized = self.rig.replace(".", "")
+        sanitized = self.rig \
+            .replace(".", "") \
+            .replace("-", "") \
+            .replace("NSB", "") \
+            .replace("SAM", "") \
+            .replace("BEH", "")
+        logger.debug("Sanitized rig id: %s" % sanitized)
         cluster_to_room = {
             "B": "342",
             "F": "346",
@@ -3297,8 +3303,8 @@ class DynamicRoutingSession:
         last_updated = "240401"
         if sanitized.startswith("NP"):
             room = rig_to_room[sanitized]
-        elif sanitized.startswith(("NSB", "SAM", )):
-            room = cluster_to_room[sanitized[3]]
+        elif sanitized.startswith(tuple(cluster_to_room.keys())):
+            room = cluster_to_room[sanitized[0]]
         else:
             raise Exception(f"Unsupported rig: {self.rig}")
 
