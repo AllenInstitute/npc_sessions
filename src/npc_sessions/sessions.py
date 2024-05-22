@@ -209,6 +209,7 @@ class DynamicRoutingSession:
     excluded_stim_file_names = ["DynamicRouting1_670248_20230802_120703"]
     """File names (or substrings) that should never be considered as valid stim
     files, for example they are known to be corrupt and cannot be opened"""
+    
     mvr_to_nwb_camera_name = {
         "eye": "eye_camera",
         "face": "front_camera",
@@ -1126,13 +1127,16 @@ class DynamicRoutingSession:
                     tags.append("optotagging")
 
             interval_names = []
-            if self.task_stim_name in stim_file.name and self.is_task:
-                interval_names.extend(["trials", "performance"])
             if "RFMapping" in stim_name:
-                interval_names.extend(["VisRFMapping", "AudRFMapping"])
+                interval_names.extend(
+                    [utils.get_taskcontrol_intervals_table_name(n) for n in ("VisRFMapping", "AudRFMapping")]
+                )
             else:
-                interval_names.append(stim_name)
-
+                interval_names.append(utils.get_taskcontrol_intervals_table_name(stim_name))
+                if self.task_stim_name in stim_file.name and self.is_task:
+                    interval_names.append("performance")
+            interval_names = list(dict.fromkeys(interval_names).keys())
+            
             invalid_times_notes: list[str] = []
             if not self.is_sync:
                 # only one stim, so we use its frame times as recorded on stim computer
@@ -3311,14 +3315,10 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def _aind_rig_id(self) -> str:
         rig = self.rig.strip(".")
-        rig_to_room = {
-            "NP0": "325",
-            "NP1": "325",
-            "NP2": "327",
-            "NP3": "342",
-        }
+        # - room can't be found out in the cloud, and hard-coded map is not allowed
+        # - last update time could be worked out from document db in future
         last_updated = "240401"
-        return f"{rig_to_room[rig]}_{rig}_{last_updated}"
+        return f"unknown_{rig}_{last_updated}"
 
     @npc_io.cached_property
     def _aind_session_metadata(self) -> aind_data_schema.core.session.Session:
