@@ -64,7 +64,9 @@ def write_notebooks(
     reversed: bool = False,
 ) -> None:
     t0 = time.time()
-    session_infos = utils.get_session_infos(session_type=session_type, reversed=reversed)
+    session_infos = utils.get_session_infos(
+        session_type=session_type, reversed=reversed
+    )
 
     helper_opts = {
         "version": version,

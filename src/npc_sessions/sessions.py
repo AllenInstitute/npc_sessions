@@ -209,7 +209,7 @@ class DynamicRoutingSession:
     excluded_stim_file_names = ["DynamicRouting1_670248_20230802_120703"]
     """File names (or substrings) that should never be considered as valid stim
     files, for example they are known to be corrupt and cannot be opened"""
-    
+
     mvr_to_nwb_camera_name = {
         "eye": "eye_camera",
         "face": "front_camera",
@@ -1129,14 +1129,19 @@ class DynamicRoutingSession:
             interval_names = []
             if "RFMapping" in stim_name:
                 interval_names.extend(
-                    [utils.get_taskcontrol_intervals_table_name(n) for n in ("VisRFMapping", "AudRFMapping")]
+                    [
+                        utils.get_taskcontrol_intervals_table_name(n)
+                        for n in ("VisRFMapping", "AudRFMapping")
+                    ]
                 )
             else:
-                interval_names.append(utils.get_taskcontrol_intervals_table_name(stim_name))
+                interval_names.append(
+                    utils.get_taskcontrol_intervals_table_name(stim_name)
+                )
                 if self.task_stim_name in stim_file.name and self.is_task:
                     interval_names.append("performance")
             interval_names = list(dict.fromkeys(interval_names).keys())
-            
+
             invalid_times_notes: list[str] = []
             if not self.is_sync:
                 # only one stim, so we use its frame times as recorded on stim computer
@@ -2413,18 +2418,24 @@ class DynamicRoutingSession:
         if not self.is_sorted:
             return ()
         return self.sorted_data.probes
-    
+
     @property
     def probe_letters_skipped_by_sorting(self) -> tuple[npc_session.ProbeRecord, ...]:
         if not self.is_sorted:
             return ()
-        return tuple(npc_session.ProbeRecord(p) for p in 'ABCDEF' if p not in self.sorted_data.probes)
+        return tuple(
+            npc_session.ProbeRecord(p)
+            for p in "ABCDEF"
+            if p not in self.sorted_data.probes
+        )
 
     @property
     def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
         """Includes probes skipped by sorting"""
         if (v := getattr(self, "_probe_letters_to_skip", None)) is not None:
-            probe_letters_to_skip = tuple(npc_session.ProbeRecord(letter) for letter in v)
+            probe_letters_to_skip = tuple(
+                npc_session.ProbeRecord(letter) for letter in v
+            )
         else:
             probe_letters_to_skip = ()
         return probe_letters_to_skip + self.probe_letters_skipped_by_sorting

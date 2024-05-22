@@ -8,8 +8,8 @@ display times to get stim onset times
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 import datetime
+from collections.abc import Iterable
 
 import DynamicRoutingTask.TaskUtils
 import npc_io
@@ -46,11 +46,11 @@ class OptoTagging(TaskControl):
         super().__init__(
             hdf5, sync, ephys_recording_dirs=ephys_recording_dirs, **kwargs
         )
-        
+
     @npc_io.cached_property
     def _datetime(self) -> datetime.datetime:
-        return npc_session.DatetimeRecord(self._hdf5['startTime'].asstr()[()]).dt
-    
+        return npc_session.DatetimeRecord(self._hdf5["startTime"].asstr()[()]).dt
+
     @npc_io.cached_property
     def _device(self) -> str:
         """If multiple devices were used, this should be ignored."""
@@ -79,20 +79,27 @@ class OptoTagging(TaskControl):
         return devices[0]
 
     def assert_is_single_device(self) -> None:
-        assert self._hdf5.get("trialOptoDevice") is None, f"Multiple optotagging devices found for {self._datetime} session - update `get_trial_opto_device` method to handle multiple devices"
+        assert (
+            self._hdf5.get("trialOptoDevice") is None
+        ), f"Multiple optotagging devices found for {self._datetime} session - update `get_trial_opto_device` method to handle multiple devices"
 
     @npc_io.cached_property
     def _trial_opto_device(self) -> tuple[str, ...]:
         ## for multiple devices:
-        #return tuple(self.get_trial_opto_device(idx) for idx in range(self._len))
+        # return tuple(self.get_trial_opto_device(idx) for idx in range(self._len))
         self.assert_is_single_device()
         ## for single device:
         return (self._device,) * self._len
-    
-    def get_stim_recordings_from_sync(self, line_label: str = "laser_488") -> tuple[npc_samstim.StimRecording, ...] | None:
+
+    def get_stim_recordings_from_sync(
+        self, line_label: str = "laser_488"
+    ) -> tuple[npc_samstim.StimRecording, ...] | None:
         try:
             recordings = npc_samstim.get_stim_latencies_from_sync(
-                self._hdf5, self._sync, waveform_type="opto", line_index_or_label=npc_sync.get_sync_line_for_stim_onset(line_label)
+                self._hdf5,
+                self._sync,
+                waveform_type="opto",
+                line_index_or_label=npc_sync.get_sync_line_for_stim_onset(line_label),
             )
         except IndexError:
             return None
@@ -101,15 +108,15 @@ class OptoTagging(TaskControl):
         ), f"{recordings.count(None) = } encountered: expected a recording of stim onset for every trial"
         # TODO check this works for all older sessions
         return tuple(_ for _ in recordings if _ is not None)
-        
+
     @npc_io.cached_property
     def _stim_recordings_488(self) -> tuple[npc_samstim.StimRecording, ...] | None:
         return self.get_stim_recordings_from_sync("laser_488")
-    
+
     @npc_io.cached_property
     def _stim_recordings_633(self) -> tuple[npc_samstim.StimRecording, ...] | None:
         return self.get_stim_recordings_from_sync("laser_633")
-    
+
     @npc_io.cached_property
     def _stim_recordings(self) -> tuple[npc_samstim.StimRecording, ...]:
         rec_488 = self._stim_recordings_488 or ()
@@ -124,12 +131,12 @@ class OptoTagging(TaskControl):
             else:
                 raise NotImplementedError(f"Unexpected opto device: {device}")
         return tuple(rec)
-    
+
     @npc_io.cached_property
     def _len(self) -> int:
         """Number of trials"""
         return len(self.trial_index)
-        
+
     @npc_io.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
         """0-indexed"""
@@ -197,7 +204,7 @@ class OptoTagging(TaskControl):
                 [label[np.all(xy == v, axis=1)][0] for v in self._bregma_xy], dtype=str
             )[self.trial_index]
         raise ValueError("No known optotagging location data found")
-        
+
     @npc_io.cached_property
     def power(self) -> npt.NDArray[np.float64]:
         calibration_data = self._hdf5["optoPowerCalibrationData"]
@@ -225,10 +232,15 @@ class OptoTagging(TaskControl):
                     f"Invalid opto device string (expected 'laser_488' format): {device}"
                 ) from exc
             else:
-                assert 300 < value < 1000, f"Unexpected wavelength parsed from `trialOptoDevice`: {value}"
+                assert (
+                    300 < value < 1000
+                ), f"Unexpected wavelength parsed from `trialOptoDevice`: {value}"
                 return value
-        return np.array([parse_wavelength(device) for device in self._trial_opto_device])
-            
+
+        return np.array(
+            [parse_wavelength(device) for device in self._trial_opto_device]
+        )
+
 
 if __name__ == "__main__":
     import doctest

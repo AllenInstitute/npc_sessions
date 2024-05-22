@@ -79,7 +79,7 @@ ndx-events==0.2.0
 ndx-pose==0.1.1
 neo==0.13.0
 nest-asyncio==1.6.0
-npc-ephys==0.1.14
+npc-ephys==0.1.15
 npc-io==0.1.26
 npc-lims==0.1.150
 npc-mvr==0.1.6
