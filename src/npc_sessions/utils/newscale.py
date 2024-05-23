@@ -7,6 +7,7 @@ from collections.abc import Iterable
 
 import npc_io
 import npc_session
+import numpy as np
 import pandas as pd
 import polars as pl
 
@@ -109,10 +110,10 @@ def get_newscale_coordinates(
     >>> list(df['z'])
     [3920.0, 6427.0, 8500.0, 6893.0, 6962.0, 5875.0]
     """
+    newscale_log_path = npc_io.from_pathlike(newscale_log_path)
     if recording_start_time is None:
-        p = npc_io.from_pathlike(newscale_log_path)
         try:
-            start = npc_session.DatetimeRecord(p.as_posix())
+            start = npc_session.DatetimeRecord(newscale_log_path.as_posix())
         except ValueError as exc:
             raise ValueError(
                 f"`recording_start_time` must be provided to indicate start of ephys recording: no time could be parsed from {p.as_posix()}"
@@ -125,14 +126,21 @@ def get_newscale_coordinates(
     df: pl.DataFrame
     try:
         df = get_newscale_data_lazy(newscale_log_path)  # type: ignore [assignment]
-    except (pl.ComputeError, OSError):
+    except Exception:
         df = get_newscale_data(newscale_log_path)
 
-    z_df = df.select(["z"])
+    # if experiment date isn't in df, the log file didn't cover this experiment -
+    # we can't continue
+    if not start.dt.date() in df["last_movement_dt"].dt.date():
+        raise IndexError(
+            f"no movement data found for experiment date {start.dt.date()} in {newscale_log_path.as_posix()}"
+        )
+    
+    recent_df = df.filter(pl.col('last_movement_dt').dt.date() > (start.dt.date() - datetime.timedelta(hours=24)))
     if isinstance(df, pl.LazyFrame):
-        z_df = z_df.collect()
-    z_values = z_df["z"]
-    z_inverted: bool = is_z_inverted(z_values)
+        recent_df = recent_df.collect()
+    recent_z_values = recent_df['z'].str.strip_chars().cast(pl.Float32).to_numpy()
+    z_inverted: bool = is_z_inverted(recent_z_values)
 
     if isinstance(df, pl.LazyFrame):
         df = df.collect()
@@ -215,7 +223,7 @@ def is_z_inverted(z_values: Iterable[float]) -> bool:
     >>> is_z_inverted([15000, 3000, 3000, 15000])
     True
     """
-    c = collections.Counter(z_values)
+    c = collections.Counter(np.round(list(z_values), -2))
     is_long_travel = bool(c[LONG_TRAVEL_RANGE])
     travel_range = LONG_TRAVEL_RANGE if is_long_travel else SHORT_TRAVEL_RANGE
     return c[0] < c[travel_range]
