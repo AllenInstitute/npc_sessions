@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:746b5782e899c7c2e938ff18962a33ff4fa0162a9e35352c44230950d1890e31"
+content_hash = "sha256:0ab4c0f290ee461992e9673612a1eb60da2e9cf01197de105561da22e2d7a13e"
 
 [[package]]
 name = "aind-codeocean-api"
@@ -3707,7 +3707,7 @@ files = [
 
 [[package]]
 name = "zarr"
-version = "2.18.1"
+version = "2.18.0"
 requires_python = ">=3.9"
 summary = "An implementation of chunked, compressed, N-dimensional arrays for Python"
 dependencies = [
@@ -3717,8 +3717,8 @@ dependencies = [
     "numpy>=1.23",
 ]
 files = [
-    {file = "zarr-2.18.1-py3-none-any.whl", hash = "sha256:a1770d194eec4ec0a41a01295a6f724e1c3471d704d3aca906d3b3a7f8830245"},
-    {file = "zarr-2.18.1.tar.gz", hash = "sha256:28c360ed123e606c425a694a83300227a907cb86a995fc9eef620ecafbe5f92d"},
+    {file = "zarr-2.18.0-py3-none-any.whl", hash = "sha256:7f8532b6a3f50f22e809e130e09353637ec8b5bb5e95a5a0bfaae91f63978b5d"},
+    {file = "zarr-2.18.0.tar.gz", hash = "sha256:c3b7d2c85b8a42b0ad0ad268a36fb6886ca852098358c125c6b126a417e0a598"},
 ]
 
 [[package]]
