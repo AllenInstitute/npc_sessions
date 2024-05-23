@@ -116,7 +116,7 @@ def get_newscale_coordinates(
             start = npc_session.DatetimeRecord(newscale_log_path.as_posix())
         except ValueError as exc:
             raise ValueError(
-                f"`recording_start_time` must be provided to indicate start of ephys recording: no time could be parsed from {p.as_posix()}"
+                f"`recording_start_time` must be provided to indicate start of ephys recording: no time could be parsed from {newscale_log_path.as_posix()}"
             ) from exc
     else:
         start = npc_session.DatetimeRecord(recording_start_time)
