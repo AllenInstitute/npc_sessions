@@ -609,22 +609,29 @@ class DynamicRoutingSession:
             if self.is_sorted:
                 self.keywords.append("units")
             if self.is_annotated:
-                self.keywords.append("CCF")
+                self.keywords.append("ccf")
             if self.is_training:
                 self.keywords.append("training")
             if self.is_hab:
                 self.keywords.append("hab")
             if self.is_opto:
-                self.keywords.append("opto")
+                self.keywords.append("opto_perturbation")
             elif self.is_opto_control:
                 self.keywords.append("opto_control")
             if self.is_templeton:
-                self.keywords.append("Templeton")
+                self.keywords.append("templeton")
+            else:
+                self.keywords.append("dynamic_routing")
+            for t in self.epoch_tags:
+                if t not in self.keywords:
+                    self.keywords.append(t)
             # TODO these should be moved to `lab_metadata` when we have an ndx extension:
             if self.info and self.info.experiment_day is not None:
-                self.keywords.append(f"experiment day {self.info.experiment_day}")
+                self.keywords.append(f"experiment_day_{self.info.experiment_day}")
             if self.info and self.info.behavior_day is not None:
-                self.keywords.append(f"behavior day {self.info.behavior_day}")
+                self.keywords.append(f"behavior_day_{self.info.behavior_day}")
+            # TODO
+            # muscimol, perturbation, context_naive
         return self._keywords
 
     @keywords.setter
@@ -1110,7 +1117,7 @@ class DynamicRoutingSession:
                 tags.append("task")
                 if npc_samstim.is_opto(h5) or npc_samstim.is_galvo_opto(h5):
                     if self.is_opto:
-                        tags.append("opto")
+                        tags.append("opto_perturbation")
                     else:
                         tags.append("opto_control")
             if (rewards := h5.get("rewardFrames", None)) is not None and any(
