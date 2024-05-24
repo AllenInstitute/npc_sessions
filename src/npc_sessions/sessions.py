@@ -612,6 +612,8 @@ class DynamicRoutingSession:
                 self.keywords.append("CCF")
             if self.is_training:
                 self.keywords.append("training")
+            if self.is_hab:
+                self.keywords.append("hab")
             if self.is_opto:
                 self.keywords.append("opto")
             elif self.is_opto_control:
@@ -1709,7 +1711,12 @@ class DynamicRoutingSession:
     def is_training(self) -> bool:
         if (v := getattr(self, "_is_training", None)) is not None:
             return v
-        return self.is_task and not self.is_ephys
+    
+    @npc_io.cached_property
+    def is_hab(self) -> bool:
+        if (v := getattr(self, "_is_hab", None)) is not None:
+            return v
+        return self.is_task and not self.is_ephys and 'NP' in self.rig and not (self.is_opto or self.is_opto_control)
 
     @npc_io.cached_property
     def is_sorted(self) -> bool:
