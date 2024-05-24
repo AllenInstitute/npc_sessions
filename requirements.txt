@@ -2,7 +2,7 @@
 # Please do not edit it manually.
 
 aind-codeocean-api==0.4.2
-aind-data-schema==0.33.8
+aind-data-schema==0.33.3
 aiobotocore==2.7.0
 aiohttp==3.9.3
 aioitertools==0.11.0
@@ -31,7 +31,7 @@ debugpy==1.8.1
 decorator==5.1.1
 defusedxml==0.7.1
 dictdiffer==0.9.0
-DynamicRoutingTask==0.1.98
+DynamicRoutingTask==0.1.102
 et-xmlfile==1.1.0
 exceptiongroup==1.2.0; python_version < "3.11"
 executing==2.0.1
@@ -41,8 +41,8 @@ fonttools==4.50.0
 frozenlist==1.4.1
 fsspec==2024.3.0
 h5py==3.11.0
-hdmf==3.13.0
-hdmf-zarr==0.6.0
+hdmf==3.14.0
+hdmf-zarr==0.7.0
 idna==3.6
 importlib-metadata==7.1.0; python_version < "3.10"
 importlib-resources==6.4.0; python_version < "3.10"
@@ -65,14 +65,14 @@ kiwisolver==1.4.5
 llvmlite==0.42.0
 markdown-it-py==3.0.0
 markupsafe==2.1.5
-matplotlib==3.8.4
+matplotlib==3.9.0
 matplotlib-inline==0.1.6
 mdurl==0.1.2
 mistune==3.0.2
 msgpack==1.0.8
 multidict==6.0.5
 nbclient==0.10.0
-nbconvert==7.16.3
+nbconvert==7.16.4
 nbformat==5.10.3
 ndindex==1.8
 ndx-events==0.2.0
@@ -81,12 +81,12 @@ neo==0.13.0
 nest-asyncio==1.6.0
 npc-ephys==0.1.15
 npc-io==0.1.26
-npc-lims==0.1.150
+npc-lims==0.1.154
 npc-mvr==0.1.6
 npc-samstim==0.1.4
 npc-session==0.1.34
 npc-stim==0.1.8
-npc-sync==0.1.12
+npc-sync==0.1.13
 numba==0.59.1
 numcodecs==0.12.1
 numexpr==2.9.0
@@ -100,21 +100,21 @@ parso==0.8.3
 pexpect==4.9.0; sys_platform != "win32"
 pillow==10.2.0
 platformdirs==4.2.0
-polars==0.20.22
+polars==0.20.26
 probeinterface==0.2.21
 prompt-toolkit==3.0.43
 psutil==5.9.8
 ptyprocess==0.7.0; sys_platform != "win32"
 pure-eval==0.2.2
 py-cpuinfo==9.0.0
-pyarrow==16.0.0
+pyarrow==16.1.0
 pycparser==2.21; implementation_name == "pypy" or platform_python_implementation != "PyPy"
 pydantic==2.7.1
 pydantic-core==2.18.2
 pydantic-settings==2.2.1
 pydbhub-bjh==0.0.9
 pygments==2.17.2
-pynwb==2.6.0
+pynwb==2.7.0
 pyopenssl==24.1.0
 pyparsing==3.1.2
 python-dateutil==2.9.0.post0
@@ -135,11 +135,10 @@ s3fs==2024.3.0
 s3transfer==0.6.2
 scipy==1.13.0
 semver==3.0.2
-setuptools==69.2.0
 SimpleITK==2.3.1
 six==1.16.0
 soupsieve==2.5
-spikeinterface==0.100.5
+spikeinterface==0.100.6
 stack-data==0.6.3
 tables==3.9.2
 threadpoolctl==3.4.0
@@ -160,5 +159,5 @@ webencodings==0.5.1
 widgetsnbextension==4.0.10
 wrapt==1.16.0
 yarl==1.9.4
-zarr==2.17.2
+zarr==2.18.0
 zipp==3.18.1; python_version < "3.10"

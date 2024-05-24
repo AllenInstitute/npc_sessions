@@ -131,15 +131,18 @@ def get_newscale_coordinates(
 
     # if experiment date isn't in df, the log file didn't cover this experiment -
     # we can't continue
-    if not start.dt.date() in df["last_movement_dt"].dt.date():
+    if start.dt.date() not in df["last_movement_dt"].dt.date():
         raise IndexError(
             f"no movement data found for experiment date {start.dt.date()} in {newscale_log_path.as_posix()}"
         )
-    
-    recent_df = df.filter(pl.col('last_movement_dt').dt.date() > (start.dt.date() - datetime.timedelta(hours=24)))
+
+    recent_df = df.filter(
+        pl.col("last_movement_dt").dt.date()
+        > (start.dt.date() - datetime.timedelta(hours=24))
+    )
     if isinstance(df, pl.LazyFrame):
         recent_df = recent_df.collect()
-    recent_z_values = recent_df['z'].str.strip_chars().cast(pl.Float32).to_numpy()
+    recent_z_values = recent_df["z"].str.strip_chars().cast(pl.Float32).to_numpy()
     z_inverted: bool = is_z_inverted(recent_z_values)
 
     if isinstance(df, pl.LazyFrame):
