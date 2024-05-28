@@ -3,12 +3,9 @@ import importlib.metadata
 import dotenv
 import numpy as np
 
-from npc_sessions.notebooks import *
-from npc_sessions.plots import *
 from npc_sessions.sessions import *
 from npc_sessions.trials import *
 from npc_sessions.utils import *
-from npc_sessions.widgets import session_widget
 
 __version__ = importlib.metadata.version("npc-sessions")
 

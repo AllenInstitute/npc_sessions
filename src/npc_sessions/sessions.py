@@ -43,7 +43,6 @@ import upath
 import zarr
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
-import npc_sessions.plots as plots
 import npc_sessions.trials as TaskControl
 import npc_sessions.utils as utils
 
@@ -282,8 +281,16 @@ class DynamicRoutingSession:
         """Add plots as methods to session object, so they can be called
         directly, e.g. `session.plot_drift_maps()`.
 
-        Looks in `npc_sessions.plots` for functions starting with `plot_`
+        - requires `npc_sessions_cache` to be installed
+        - looks for functions starting with `plot_`
         """
+        try:
+            import npc_sessions_cache.plots as plots
+        except ImportError:
+            logger.debug(
+                "npc_sessions_cache not installed - plotting functions will not be available"
+            )
+            return
         for attr in (attr for attr in plots.__dict__ if attr.startswith("plot_")):
             if getattr((fn := getattr(plots, attr)), "__call__", None) is not None:
                 setattr(cls, attr, fn)

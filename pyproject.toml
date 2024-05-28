@@ -1,7 +1,7 @@
 [project]
 name = "npc_sessions"
 version = "0.0.224"
-description = "Tools and interfaces for working with behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
+description = "NWB-conversion for behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 authors = [
     { name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org" },
     { name = "Arjun Sridhar", email = "arjun.sridhar@alleninstitute.org" },
@@ -19,18 +19,12 @@ dependencies = [
     "scipy>=1.9.3",
     "DynamicRoutingTask>=0.1.94",
     "numba>=0.57.1",
-    "ipywidgets>=8.1.0",
-    "ipympl>=0.9.3",
     "opencv-python-headless>=4.8.0.76",
     "python-dotenv>=1.0.0",
     "ndx-events>=0.2.0",
-    "SimpleITK>=2.2.1",
     "pyarrow>=14.0",
     "spikeinterface>=0.98.2",
-    "ipykernel>=6.25.2",
-    "nbconvert>=7.9.2",
     "hdmf-zarr>=0.7.0",
-    "traitlets<=5.9.0",
     "hdmf>=3.14.0",
     "ndx-pose>=0.1.1",
     "tables>=3.9.2",
@@ -64,11 +58,6 @@ text = "MIT"
 [project.urls]
 Repository = "https://github.com/AllenInstitute/npc_sessions"
 Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
-
-[project.scripts]
-write_dataframes = "npc_sessions.scripts.write_dataframes:main"
-write_notebooks = "npc_sessions.scripts.write_notebooks:main"
-write_cache = "npc_sessions.scripts.write_sessions_to_cache:main"
 
 [tool.pdm]
 plugins = [
