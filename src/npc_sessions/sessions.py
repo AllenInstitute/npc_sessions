@@ -1323,15 +1323,13 @@ class DynamicRoutingSession:
                 "z",
             ) + column_names
             ccf_df = utils.get_tissuecyte_electrodes_table(self.id)
-            if "raw_location" in ccf_df:
+            if "raw_structure" in ccf_df:
                 column_names = column_names + (
-                    "raw_location",
                     "raw_structure",
                 )
         column_description = {
             "structure": "acronym for the Allen CCF structure that the electrode recorded from - less-specific than `location`",
-            "raw_location": "raw non-processed (for white matter areas (lowercase), will be different than location) acronym for the Allen CCF strucutre that the electrode recorded from",
-            "raw_structure": "raw non-processed (for white matter areas (lowercase), will be different than structure) acronym for the Allen CCF strucutre that the electrode recorded from - less specific than location",
+            "raw_structure": "same as `structure`, except white matter areas (lowercase names) have not been reassigned",
             "x": "x coordinate in the Allen CCF, +x is posterior",
             "y": "y coordinate in the Allen CCF, +y is inferior",
             "z": "z coordinate in the Allen CCF, +z is right",
@@ -1356,7 +1354,7 @@ class DynamicRoutingSession:
             group = self.electrode_groups[f"probe{probe_letter}"]
             for channel_label, (x, y) in channel_pos_xy.items():
                 channel_idx = int(channel_label.strip("CH"))
-                kwargs: dict[str, str | float] = {
+                row_kwargs: dict[str, str | float] = {
                     "group": group,
                     "group_name": group.name,
                     "rel_x": x,
@@ -1373,13 +1371,14 @@ class DynamicRoutingSession:
                         )
                     ).any()
                 ):
-                    kwargs |= (
-                        annotated_probes.query(f"channel == {channel_idx}")
+                    row_kwargs |= (
+                        annotated_probes
+                        .query(f"channel == {channel_idx}")
                         .iloc[0]
                         .to_dict()
                     )
                 electrodes.add_row(
-                    **kwargs,
+                    **row_kwargs,
                 )
 
         return electrodes

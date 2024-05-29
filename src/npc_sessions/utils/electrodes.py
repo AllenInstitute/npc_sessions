@@ -20,7 +20,7 @@ def get_tissuecyte_electrodes_table(
     >>> df = get_tissuecyte_electrodes_table('626791_2022-08-16')
     >>> df.columns
     Index(['group_name', 'channel', 'location', 'structure', 'x', 'y', 'z',
-           'raw_location', 'raw_structure'],
+           'raw_structure'],
           dtype='object')
     """
     electrode_files = npc_lims.get_tissuecyte_annotation_files_from_s3(session)
@@ -62,10 +62,9 @@ def get_tissuecyte_electrodes_table(
         ]
         + (
             [
-                "raw_location",
                 "raw_structure",
             ]
-            if "raw_location" in session_electrodes.columns
+            if "raw_structure" in session_electrodes.columns
             else []
         )
     ]
