@@ -94,22 +94,48 @@ pip install -e .
 
 #### key data types
 
-- `DynamicTable`: for general tabular data. Cells can contain arrays (e.g.
-  `spike_times` in a table of units)
-  - can be accessed as a pandas dataframe
+(the following all have a `description` field, as well as other type-specific attributes)
 
-- `TimeIntervals`: subclass of `DynamicTable` which always has a `start_time` and `stop_time`
-column, plus other user-defined columns
+- `DynamicTable`: for general tabular data
+  - e.g. `nwb.units`
+  - each column in the table is stored as a vector, which can be accessed
+    individually (fast) 
+  - can be accessed as a pandas dataframe with `nwb.units[:]`, but requires
+    reading all data in all columns (slow)
+  - as well as individual values, cells in the table can contain multidimensional
+    arrays. These are represented differently depending on location:
+    - in the pandas dataframe, these are represented as one would expect: 
+      - `nwb.units[:].spike_times.iloc[0]` is a 1-D array
+      - `nwb.units[:].waveform_mean.iloc[0]` is a 2-D array (time x channels)
+    - in the non-dataframe memory representation, there are *sometimes* two
+      components, where the `*_index` is the one that should be used:
+      - `nwb.units.spike_times` is a 1-D array of all spike times for all units,
+        in chronological order (float)
+      - `nwb.units.spike_times_index` is a list (len = num units) of
+        arrays (len = num spikes for each unit)
+    - on disk, these columns separated columns are different again, for example:
+      - `/nwb/units/spike_times` is a 1-D array of all spike times for all units,
+        in chronological order (float)
+      - `/nwb/units/spike_times_index` is a 1-D array of values corresponding to
+        the end of each unit's times in `/nwb/units/spike_times`:
+        - the first unit's spike times are in `spike_times[: spike_times_index[0]]` 
+        - the second unit's are in `spike_times[spike_times_index[0]: spike_times_index[1]]`
 
-- `TimeSeries`: has a vector array of `data`, a `units` string, and either:
-  - `timestamps` (same length as `data`)
-  - or `starting_time` and `rate`
+- `TimeIntervals`: for tabular data where each row is an interval of time
+  - a subclass of `DynamicTable` which must have a `start_time` and `stop_time` column, plus any other user-defined columns
 
-- `ElectricalSeries`: subclass of `TimeSeries` with units fixed as volts
+- `TimeSeries`: for general array data
+  - has an array of `data` (1-D or N-D, with time as first dimension)
+  - has `units` as a string
+  - has either:
+    - `timestamps` (same length as `data`)
+    - `starting_time` and `rate` (assumed to be constant)
 
-- `Events`: (added via an NWB extension) like `TimeSeries` with timestamps only, without values for `data` (think lick times)
+- `ElectricalSeries`: for ephys array data
+  - a subclass of `TimeSeries` with units fixed as volts
 
-all of the above also have a `description`, as well as other type-specific attributes
+- `Events`: an NWB extension for discrete event times
+  - like the `TimeSeries` class, but only has `timestamps`, without values for `data` (think: lick times)
 
 ---
 - *session metadata* (multiple attributes)
