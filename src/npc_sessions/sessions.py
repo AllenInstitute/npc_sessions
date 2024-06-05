@@ -349,7 +349,11 @@ class DynamicRoutingSession:
         )
 
     def write_nwb(
-        self, path: str | npc_io.PathLike | None = None, metadata_only: bool = False, zarr=True, force=False,
+        self,
+        path: str | npc_io.PathLike | None = None,
+        metadata_only: bool = False,
+        zarr=True,
+        force=False,
     ) -> upath.UPath:
         """Write NWB file to disk - file path is normalized and returned"""
         if path is None:
@@ -360,9 +364,13 @@ class DynamicRoutingSession:
             path.name.replace(".hdf5", "").replace(".nwb", "").replace(".zarr", "")
         ).with_suffix(".nwb.zarr" if zarr else ".nwb")
         if not force and path.exists() and (npc_io.get_size(path) // 1024) > 1:
-            raise FileExistsError(f"{path} already exists - use `force=True` to overwrite")
+            raise FileExistsError(
+                f"{path} already exists - use `force=True` to overwrite"
+            )
         elif force and zarr and path.exists():
-            logger.warning(f"Overwriting zarr directories is not advised: remnants of previous data may remain.\nSuggest deleting {path} first.")
+            logger.warning(
+                f"Overwriting zarr directories is not advised: remnants of previous data may remain.\nSuggest deleting {path} first."
+            )
         nwb = self.nwb if not metadata_only else self.metadata
         if zarr:
             with hdmf_zarr.NWBZarrIO(path.as_posix(), "w") as io:
@@ -887,9 +895,9 @@ class DynamicRoutingSession:
                 trials["block_index"] == block_idx
             ]["is_contingent_reward"].sum()
             block_performance["rewarded_modality"] = rewarded_modality
-            block_performance["cross_modal_dprime"] = abs(self.sam.dprimeOtherModalGo[
-                block_idx
-            ])
+            block_performance["cross_modal_dprime"] = abs(
+                self.sam.dprimeOtherModalGo[block_idx]
+            )
             block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
             block_performance["nonrewarded_modal_dprime"] = (
                 self.sam.dprimeNonrewardedModal[block_idx]
@@ -1324,9 +1332,7 @@ class DynamicRoutingSession:
             ) + column_names
             ccf_df = utils.get_tissuecyte_electrodes_table(self.id)
             if "raw_structure" in ccf_df:
-                column_names = column_names + (
-                    "raw_structure",
-                )
+                column_names = column_names + ("raw_structure",)
         column_description = {
             "structure": "acronym for the Allen CCF structure that the electrode recorded from - less-specific than `location`",
             "raw_structure": "same as `structure`, except white matter areas (lowercase names) have not been reassigned",
@@ -1372,8 +1378,7 @@ class DynamicRoutingSession:
                     ).any()
                 ):
                     row_kwargs |= (
-                        annotated_probes
-                        .query(f"channel == {channel_idx}")
+                        annotated_probes.query(f"channel == {channel_idx}")
                         .iloc[0]
                         .to_dict()
                     )
@@ -3355,12 +3360,12 @@ class DynamicRoutingSession:
                 if self.is_sync
                 else (
                     (
-                        self.session_start_time + datetime.timedelta(
-                         seconds=max(self.epochs.stop_time)
-                        )
+                        self.session_start_time
+                        + datetime.timedelta(seconds=max(self.epochs.stop_time))
                     )
-                    if self.epochs.stop_time else None
-                    )
+                    if self.epochs.stop_time
+                    else None
+                )
             ),
             session_type=self.session_description.replace(
                 " without CCF-annotated units", ""
