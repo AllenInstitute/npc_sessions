@@ -3353,7 +3353,14 @@ class DynamicRoutingSession:
             session_end_time=(
                 self.sync_data.stop_time
                 if self.is_sync
-                else (max(self.epochs.stop_time) if self.epochs.stop_time else None)
+                else (
+                    (
+                        self.session_start_time + datetime.timedelta(
+                         seconds=max(self.epochs.stop_time)
+                        )
+                    )
+                    if self.epochs.stop_time else None
+                    )
             ),
             session_type=self.session_description.replace(
                 " without CCF-annotated units", ""
