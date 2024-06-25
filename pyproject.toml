@@ -31,7 +31,7 @@ dependencies = [
     "aind-data-schema==0.33.3",
     "pydantic>=2.6.4",
     "npc-lims>=0.1.150",
-    "npc-sync>=0.1.12",
+    "npc-sync>=0.1.14",
     "npc-ephys>=0.1.15",
     "npc-stim>=0.1.8",
     "npc-samstim>=0.1.4",

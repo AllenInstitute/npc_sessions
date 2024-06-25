@@ -1610,7 +1610,7 @@ files = [
 
 [[package]]
 name = "npc-sync"
-version = "0.1.13"
+version = "0.1.14"
 requires_python = ">=3.9"
 summary = "Repackaging of AllenSDK.SyncDataset with extra functionality, compatible with data in the cloud."
 dependencies = [
@@ -1622,8 +1622,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc_sync-0.1.13-py3-none-any.whl", hash = "sha256:5fa6c49dabf7708f435a685915fc3b1294f28a02c86560e1882c7755f31c0df2"},
-    {file = "npc_sync-0.1.13.tar.gz", hash = "sha256:183a63f2c4d033e41ddc0d7bc7268199a837ea607333cfe6f1517f765edf6288"},
+    {file = "npc_sync-0.1.14-py3-none-any.whl", hash = "sha256:335f8ba4543b003d80bf1ddb50ae27d397ba8750881de1b80c9c052a9d1cef28"},
+    {file = "npc_sync-0.1.14.tar.gz", hash = "sha256:ba3f5ab872f738d93eb738d9c7314c9e45c538d1a02683474b646125ecf67a31"},
 ]
 
 [[package]]
