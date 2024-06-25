@@ -3300,7 +3300,23 @@ class DynamicRoutingSession:
             ).exists():
                 return epoch_name
             return "TaskControl"
-
+ 
+        def get_task_metrics() -> dict[str, dict]:
+            return {
+                str(block_index): dict(
+                    block_index=block_index,
+                    hit_count=hit_count,
+                    dprime_same_modal=dprime_same_modal,
+                    dprime_other_modal_go=dprime_other_modal_go,
+                )
+                for block_index, (hit_count, dprime_same_modal, dprime_other_modal_go)
+                in enumerate(zip(
+                    self.sam.hitCount,
+                    self.sam.dprimeSameModal,
+                    self.sam.dprimeOtherModalGo,
+                ))
+            }
+            
         aind_epochs = []
         for nwb_epoch in self.epochs:
             epoch_name = nwb_epoch.stim_name.item()
@@ -3333,11 +3349,12 @@ class DynamicRoutingSession:
                     stimulus_device_names=get_device_names(epoch_name),
                     speaker_config=get_speaker_config(epoch_name),
                     reward_consumed_during_epoch=get_reward_consumed(epoch_name),
-                    reward_consumed_unit="milliliter",
-                    trials_total=get_num_trials(epoch_name),
                     trials_finished=get_num_trials(epoch_name),
                     trials_rewarded=get_num_trials_rewarded(epoch_name),
+                    reward_consumed_unit="milliliter",
+                    trials_total=get_num_trials(epoch_name),
                     notes=nwb_epoch.notes.item(),
+                    output_parameters=get_task_metrics() if "DynamicRouting" in epoch_name else {},
                 )
             )
         return tuple(aind_epochs)
