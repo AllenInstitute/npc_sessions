@@ -3302,20 +3302,23 @@ class DynamicRoutingSession:
             return "TaskControl"
  
         def get_task_metrics() -> dict[str, dict]:
-            return {
+            blocks =  {
                 str(block_index): dict(
                     block_index=block_index,
+                    block_stim_rewarded=block_stim_rewarded,
                     hit_count=hit_count,
                     dprime_same_modal=dprime_same_modal,
                     dprime_other_modal_go=dprime_other_modal_go,
                 )
-                for block_index, (hit_count, dprime_same_modal, dprime_other_modal_go)
+                for block_index, (hit_count, dprime_same_modal, dprime_other_modal_go, block_stim_rewarded)
                 in enumerate(zip(
-                    self.sam.hitCount,
-                    self.sam.dprimeSameModal,
-                    self.sam.dprimeOtherModalGo,
+                    [int(v) for v in self.sam.hitCount],
+                    [float(v) for v in self.sam.dprimeSameModal],
+                    [float(v) for v in self.sam.dprimeOtherModalGo],
+                    [str(v) for v in self.sam.blockStimRewarded],
                 ))
-            }
+            } 
+            return {"block_metrics": blocks, "task_version": self.sam.taskVersion}
             
         aind_epochs = []
         for nwb_epoch in self.epochs:
