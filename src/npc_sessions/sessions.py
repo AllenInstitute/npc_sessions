@@ -3300,9 +3300,9 @@ class DynamicRoutingSession:
             ).exists():
                 return epoch_name
             return "TaskControl"
- 
+
         def get_task_metrics() -> dict[str, dict]:
-            blocks =  {
+            blocks = {
                 str(block_index): dict(
                     block_index=block_index,
                     block_stim_rewarded=block_stim_rewarded,
@@ -3310,16 +3310,22 @@ class DynamicRoutingSession:
                     dprime_same_modal=dprime_same_modal,
                     dprime_other_modal_go=dprime_other_modal_go,
                 )
-                for block_index, (hit_count, dprime_same_modal, dprime_other_modal_go, block_stim_rewarded)
-                in enumerate(zip(
-                    [int(v) for v in self.sam.hitCount],
-                    [float(v) for v in self.sam.dprimeSameModal],
-                    [float(v) for v in self.sam.dprimeOtherModalGo],
-                    [str(v) for v in self.sam.blockStimRewarded],
-                ))
-            } 
+                for block_index, (
+                    hit_count,
+                    dprime_same_modal,
+                    dprime_other_modal_go,
+                    block_stim_rewarded,
+                ) in enumerate(
+                    zip(
+                        [int(v) for v in self.sam.hitCount],
+                        [float(v) for v in self.sam.dprimeSameModal],
+                        [float(v) for v in self.sam.dprimeOtherModalGo],
+                        [str(v) for v in self.sam.blockStimRewarded],
+                    )
+                )
+            }
             return {"block_metrics": blocks, "task_version": self.sam.taskVersion}
-            
+
         aind_epochs = []
         for nwb_epoch in self.epochs:
             epoch_name = nwb_epoch.stim_name.item()
@@ -3357,7 +3363,9 @@ class DynamicRoutingSession:
                     reward_consumed_unit="milliliter",
                     trials_total=get_num_trials(epoch_name),
                     notes=nwb_epoch.notes.item(),
-                    output_parameters=get_task_metrics() if "DynamicRouting" in epoch_name else {},
+                    output_parameters=(
+                        get_task_metrics() if "DynamicRouting" in epoch_name else {}
+                    ),
                 )
             )
         return tuple(aind_epochs)
