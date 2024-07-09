@@ -21,7 +21,6 @@ MODEL_FUNCTION_MAPPING = {
 
 FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face")
 
-
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
     """
     https://github.com/DeepLabCut/DLC2NWB/blob/main/dlc2nwb/utils.py#L139
@@ -59,6 +58,22 @@ def h5_to_dataframe(h5_path: upath.UPath, key_name: str | None = None) -> pd.Dat
 
     return df_h5
 
+
+def get_LPFaceParts_predictions_dataframe(session: str, camera: Literal['side', 'face']) -> pd.DataFrame:
+    """
+    Gets the result dataframe with the lightning pose prediction for the facial features for the given camera
+    >>> df_predictions = get_LPFaceParts_predictions_dataframe('702136_2024-03-07', 'side')
+    >>> len(df_predictions.columns)
+    34
+    """
+    session_LP_predictions_s3_paths = npc_lims.get_lpfaceparts_camera_predictions_s3_paths(session, camera)
+    session_LP_prediction_csv_s3_path = tuple(path for path in session_LP_predictions_s3_paths if '_predictions.csv' in str(path))
+    if not session_LP_predictions_s3_paths:
+        raise FileNotFoundError(f'{session} has no lightning pose prediction csv in result. Check codeocean')
+    
+    df_predictions = pd.read_csv(session_LP_prediction_csv_s3_path[0], low_memory=False)
+    data_array = df_predictions.to_numpy()
+    return pd.DataFrame(data_array[1:], columns=data_array[0])
 
 def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
     """
