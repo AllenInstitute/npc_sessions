@@ -736,6 +736,8 @@ class DynamicRoutingSession:
                 modules.append(self._eye_tracking)
             modules.extend(self._dlc)
             modules.extend(self._facemap)
+            modules.extend(self._LPFaceParts)
+
         return tuple(modules)
 
     @npc_io.cached_property
