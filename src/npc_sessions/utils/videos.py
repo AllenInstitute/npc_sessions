@@ -22,6 +22,11 @@ MODEL_FUNCTION_MAPPING = {
 FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face")
 LP_CAMERA_NAMES = ("side", "face")
 LP_MAPPING = {"behavior": "side", "face": "face"}
+LP_RESULT_TYPES = ('predictions', 'error', 'temporal_norm')
+LP_RESULT_DESCRIPTIONS = {
+    'error': 'PCA Error. Pose PCA loss is the pixel error between the original pose prediction and the reconstruction of the same pose from a learnt low-dimensional representation of the body parts',
+    'temporal_norm': 'Temporal Norm. Temporal difference loss for each body part is the Euclidean distance between consecutive predictions in pixels'
+}
 LP_VIDEO_FEATURES_MAPPING = {
     "side": (
         "eye_top_l",
@@ -51,7 +56,6 @@ LP_VIDEO_FEATURES_MAPPING = {
         "tongue_base_r",
     ),
 }
-
 
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
     """
@@ -91,11 +95,30 @@ def h5_to_dataframe(h5_path: upath.UPath, key_name: str | None = None) -> pd.Dat
     return df_h5
 
 
-def get_LPFaceParts_predictions_dataframe(session: str, camera: str) -> pd.DataFrame:
+def _get_LPFaceParts_predictions_dataframe(df_predictions: pd.DataFrame) -> pd.DataFrame:
+    data_array = df_predictions.to_numpy()
+    df_predictions_rearranged = pd.DataFrame(data_array[1:], columns=data_array[0])
+    df_predictions_rearranged.drop(columns="bodyparts", inplace=True)
+
+    new_column_labels = []
+    for column in df_predictions_rearranged.columns.unique():
+        df_column = df_predictions_rearranged[column].iloc[0]
+        new_column_labels.append(f"{column}_{df_column.iloc[0]}")
+        new_column_labels.append(f"{column}_{df_column.iloc[1]}")
+        new_column_labels.append(f"{column}_{df_column.iloc[2]}")
+
+    return (
+        pd.DataFrame(data_array[1:, 1:], columns=new_column_labels)
+        .drop(0)
+        .reset_index(drop=True)
+    )
+
+def get_LPFaceParts_result_dataframe(session: str, camera: str, result_name: str) -> pd.DataFrame:
     """
     Gets the result dataframe with the lightning pose prediction for the facial features for the given camera.
-    Modifies the result dataframe for easier use
-    >>> df_predictions = get_LPFaceParts_predictions_dataframe('702136_2024-03-07', 'side')
+    Gets one of predictions, pca singleview, or temporal norm
+    Modifies the result dataframe for easier use depending on result name
+    >>> df_predictions = get_LPFaceParts_result_dataframe('702136_2024-03-07', 'side', 'predictions')
     >>> len(df_predictions.columns)
     33
     >>> df_predictions.columns
@@ -117,36 +140,27 @@ def get_LPFaceParts_predictions_dataframe(session: str, camera: str) -> pd.DataF
             f"Undefined camera name {camera}. Must be one of either side or face"
         )
 
-    session_LP_predictions_s3_paths = (
+    if result_name not in LP_RESULT_TYPES:
+        raise ValueError(f"Undefined output type {result_name}. Must be one of either predictions, error, or norm")
+    
+    session_LP_predictions_camera_s3_paths = (
         npc_lims.get_lpfaceparts_camera_predictions_s3_paths(session, camera)
     )
-    session_LP_prediction_csv_s3_path = tuple(
+    session_LP_result_csv_s3_path = tuple(
         path
-        for path in session_LP_predictions_s3_paths
-        if "_predictions.csv" in str(path)
+        for path in session_LP_predictions_camera_s3_paths
+        if f"_{result_name}.csv" in str(path)
     )
-    if not session_LP_predictions_s3_paths:
+    if not session_LP_result_csv_s3_path:
         raise FileNotFoundError(
-            f"{session} has no lightning pose prediction csv in result. Check codeocean"
+            f"{session} has no lightning pose {result_name} csv in result. Check codeocean"
         )
 
-    df_predictions = pd.read_csv(session_LP_prediction_csv_s3_path[0], low_memory=False)
-    data_array = df_predictions.to_numpy()
-    df_predictions_rearranged = pd.DataFrame(data_array[1:], columns=data_array[0])
-    df_predictions_rearranged.drop(columns="bodyparts", inplace=True)
-
-    new_column_labels = []
-    for column in df_predictions_rearranged.columns.unique():
-        df_column = df_predictions_rearranged[column].iloc[0]
-        new_column_labels.append(f"{column}_{df_column.iloc[0]}")
-        new_column_labels.append(f"{column}_{df_column.iloc[1]}")
-        new_column_labels.append(f"{column}_{df_column.iloc[2]}")
-
-    return (
-        pd.DataFrame(data_array[1:, 1:], columns=new_column_labels)
-        .drop(0)
-        .reset_index(drop=True)
-    )
+    df_result = pd.read_csv(session_LP_result_csv_s3_path[0], low_memory=False)
+    if result_name == 'predictions':
+        return _get_LPFaceParts_predictions_dataframe(df_result)
+    
+    return df_result.drop(columns='Unnamed: 0') # pca error/temporal norm dataframe
 
 
 def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:

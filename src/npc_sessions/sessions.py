@@ -2722,6 +2722,7 @@ class DynamicRoutingSession:
     def _LPFaceParts(self) -> tuple[pynwb.core.DynamicTable, ...]:
         """
         Stores the lightning pose output as a dynamic table for each of the relevant cameras (side, face)
+        For each camera, 3 tables - the predictions, the pca error, and the temporal norm
         """
         LP_face_parts_dynamic_tables = []
         if not self.is_video:
@@ -2737,27 +2738,36 @@ class DynamicRoutingSession:
                 t for t in self._video_frame_times if nwb_camera_name in t.name
             ).timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
-            df = utils.get_LPFaceParts_predictions_dataframe(
-                self.id, utils.LP_MAPPING[camera_name]
-            )
-            if len(timestamps) != len(df):
-                logger.warning(
-                    f"{self.id} {camera_name} lightning pose face parts output has wrong shape {len(df)}, expected {len(timestamps)} frames."
-                    "\nLightning pose face parts capsule was likely run with an additional data asset attached"
-                )
-                continue
 
-            df["timestamps"] = timestamps
-            name = f"Lightning_Pose_FaceParts_{nwb_camera_name}"
-            table_description = (
-                f"Lightning Pose tracking model fit to {len(utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]])} facial features for each frame of {nwb_camera_name} video. "
-                "Output for every frame is x,y coordinates in pixels along with the likelihood of the model for each feature in the frame. "
-                f"Features tracked are {utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]]} "
-            )
-            table = pynwb.core.DynamicTable.from_dataframe(
-                name=name, table_description=table_description, df=df
-            )
-            LP_face_parts_dynamic_tables.append(table)
+            for result_name in utils.LP_RESULT_TYPES:
+                df = utils.get_LPFaceParts_result_dataframe(
+                    self.id, utils.LP_MAPPING[camera_name], result_name
+                )
+                if len(timestamps) != len(df):
+                    logger.warning(
+                        f"{self.id} {camera_name} {result_name} lightning pose face parts output has wrong shape {len(df)}, expected {len(timestamps)} frames."
+                        "\nLightning pose face parts capsule was likely run with an additional data asset attached"
+                    )
+                    continue
+
+                df["timestamps"] = timestamps
+                name = f"Lightning_Pose_FaceParts_{nwb_camera_name}_{result_name}"
+
+                if result_name == 'predictions':
+                    table_description = (
+                        f"Lightning Pose tracking model fit to {len(utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]])} facial features for each frame of {nwb_camera_name} video. "
+                        "Output for every frame is x,y coordinates in pixels along with the likelihood of the model for each feature in the frame. "
+                        f"Features tracked are {utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]]} "
+                    )
+                else:
+                    table_description = (
+                        f"Lightning Pose {nwb_camera_name} {utils.LP_RESULT_DESCRIPTIONS[result_name]}"
+                    )
+
+                table = pynwb.core.DynamicTable.from_dataframe(
+                    name=name, table_description=table_description, df=df
+                )
+                LP_face_parts_dynamic_tables.append(table)
 
         return tuple(LP_face_parts_dynamic_tables)
 
