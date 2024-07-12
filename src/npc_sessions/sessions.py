@@ -2753,16 +2753,14 @@ class DynamicRoutingSession:
                 df["timestamps"] = timestamps
                 name = f"Lightning_Pose_FaceParts_{nwb_camera_name}_{result_name}"
 
-                if result_name == 'predictions':
+                if result_name == "predictions":
                     table_description = (
                         f"Lightning Pose tracking model fit to {len(utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]])} facial features for each frame of {nwb_camera_name} video. "
                         "Output for every frame is x,y coordinates in pixels along with the likelihood of the model for each feature in the frame. "
                         f"Features tracked are {utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]]} "
                     )
                 else:
-                    table_description = (
-                        f"Lightning Pose {nwb_camera_name} {utils.LP_RESULT_DESCRIPTIONS[result_name]}"
-                    )
+                    table_description = f"Lightning Pose {nwb_camera_name} {utils.LP_RESULT_DESCRIPTIONS[result_name]}"
 
                 table = pynwb.core.DynamicTable.from_dataframe(
                     name=name, table_description=table_description, df=df

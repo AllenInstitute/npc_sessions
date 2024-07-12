@@ -22,10 +22,10 @@ MODEL_FUNCTION_MAPPING = {
 FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face")
 LP_CAMERA_NAMES = ("side", "face")
 LP_MAPPING = {"behavior": "side", "face": "face"}
-LP_RESULT_TYPES = ('predictions', 'error', 'temporal_norm')
+LP_RESULT_TYPES = ("predictions", "error", "temporal_norm")
 LP_RESULT_DESCRIPTIONS = {
-    'error': 'PCA Error. Pose PCA loss is the pixel error between the original pose prediction and the reconstruction of the same pose from a learnt low-dimensional representation of the body parts',
-    'temporal_norm': 'Temporal Norm. Temporal difference loss for each body part is the Euclidean distance between consecutive predictions in pixels'
+    "error": "PCA Error. Pose PCA loss is the pixel error between the original pose prediction and the reconstruction of the same pose from a learnt low-dimensional representation of the body parts",
+    "temporal_norm": "Temporal Norm. Temporal difference loss for each body part is the Euclidean distance between consecutive predictions in pixels",
 }
 LP_VIDEO_FEATURES_MAPPING = {
     "side": (
@@ -56,6 +56,7 @@ LP_VIDEO_FEATURES_MAPPING = {
         "tongue_base_r",
     ),
 }
+
 
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
     """
@@ -95,7 +96,9 @@ def h5_to_dataframe(h5_path: upath.UPath, key_name: str | None = None) -> pd.Dat
     return df_h5
 
 
-def _get_LPFaceParts_predictions_dataframe(df_predictions: pd.DataFrame) -> pd.DataFrame:
+def _get_LPFaceParts_predictions_dataframe(
+    df_predictions: pd.DataFrame,
+) -> pd.DataFrame:
     data_array = df_predictions.to_numpy()
     df_predictions_rearranged = pd.DataFrame(data_array[1:], columns=data_array[0])
     df_predictions_rearranged.drop(columns="bodyparts", inplace=True)
@@ -113,7 +116,10 @@ def _get_LPFaceParts_predictions_dataframe(df_predictions: pd.DataFrame) -> pd.D
         .reset_index(drop=True)
     )
 
-def get_LPFaceParts_result_dataframe(session: str, camera: str, result_name: str) -> pd.DataFrame:
+
+def get_LPFaceParts_result_dataframe(
+    session: str, camera: str, result_name: str
+) -> pd.DataFrame:
     """
     Gets the result dataframe with the lightning pose prediction for the facial features for the given camera.
     Gets one of predictions, pca singleview, or temporal norm
@@ -141,8 +147,10 @@ def get_LPFaceParts_result_dataframe(session: str, camera: str, result_name: str
         )
 
     if result_name not in LP_RESULT_TYPES:
-        raise ValueError(f"Undefined output type {result_name}. Must be one of either predictions, error, or norm")
-    
+        raise ValueError(
+            f"Undefined output type {result_name}. Must be one of either predictions, error, or norm"
+        )
+
     session_LP_predictions_camera_s3_paths = (
         npc_lims.get_lpfaceparts_camera_predictions_s3_paths(session, camera)
     )
@@ -157,10 +165,10 @@ def get_LPFaceParts_result_dataframe(session: str, camera: str, result_name: str
         )
 
     df_result = pd.read_csv(session_LP_result_csv_s3_path[0], low_memory=False)
-    if result_name == 'predictions':
+    if result_name == "predictions":
         return _get_LPFaceParts_predictions_dataframe(df_result)
-    
-    return df_result.drop(columns='Unnamed: 0') # pca error/temporal norm dataframe
+
+    return df_result.drop(columns="Unnamed: 0")  # pca error/temporal norm dataframe
 
 
 def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
