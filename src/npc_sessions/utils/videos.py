@@ -20,7 +20,11 @@ MODEL_FUNCTION_MAPPING = {
 }
 
 FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face")
-
+LP_CAMERA_NAMES = ("side", "face")
+LP_MAPPING = {"behavior": "side", "face": "face"}
+LP_VIDEO_FEATURES_MAPPING = {'side': ('eye_top_l', 'eye_bottom_l', 'whisker_pad_l_top', 'whisker_pad_l_side', 'ear_tip_l', 'ear_base_l', 'nostril_l', 'nose_tip', 'jaw', 'tongue_base_l', 'tongue_tip'),
+               'face': ('eye_top_l', 'eye_bottom_l', 'whisker_pad_l_top', 'whisker_pad_l_side', 'ear_tip_l', 'ear_base_l', 'nostril_l', 'nostril_r', 'nose_tip', 'tongue_base_l', 'tongue_tip', 'tongue_base_r')
+            }
 
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
     """
@@ -61,14 +65,31 @@ def h5_to_dataframe(h5_path: upath.UPath, key_name: str | None = None) -> pd.Dat
 
 
 def get_LPFaceParts_predictions_dataframe(
-    session: str, camera: Literal["side", "face"]
+    session: str, camera: str
 ) -> pd.DataFrame:
     """
-    Gets the result dataframe with the lightning pose prediction for the facial features for the given camera
+    Gets the result dataframe with the lightning pose prediction for the facial features for the given camera.
+    Modifies the result dataframe for easier use
     >>> df_predictions = get_LPFaceParts_predictions_dataframe('702136_2024-03-07', 'side')
     >>> len(df_predictions.columns)
-    34
+    33
+    >>> df_predictions.columns
+    Index(['eye_top_l_x', 'eye_top_l_y', 'eye_top_l_likelihood', 'eye_bottom_l_x',
+           'eye_bottom_l_y', 'eye_bottom_l_likelihood', 'whisker_pad_l_top_x',
+           'whisker_pad_l_top_y', 'whisker_pad_l_top_likelihood',
+           'whisker_pad_l_side_x', 'whisker_pad_l_side_y',
+           'whisker_pad_l_side_likelihood', 'ear_tip_l_x', 'ear_tip_l_y',
+           'ear_tip_l_likelihood', 'ear_base_l_x', 'ear_base_l_y',
+           'ear_base_l_likelihood', 'nostril_l_x', 'nostril_l_y',
+           'nostril_l_likelihood', 'nose_tip_x', 'nose_tip_y',
+           'nose_tip_likelihood', 'jaw_x', 'jaw_y', 'jaw_likelihood',
+           'tongue_base_l_x', 'tongue_base_l_y', 'tongue_base_l_likelihood',
+           'tongue_tip_x', 'tongue_tip_y', 'tongue_tip_likelihood'],
+          dtype='object')
     """
+    if camera not in LP_CAMERA_NAMES:
+        raise ValueError(f'Undefined camera name {camera}. Must be one of either side or face')
+    
     session_LP_predictions_s3_paths = (
         npc_lims.get_lpfaceparts_camera_predictions_s3_paths(session, camera)
     )
@@ -84,8 +105,17 @@ def get_LPFaceParts_predictions_dataframe(
 
     df_predictions = pd.read_csv(session_LP_prediction_csv_s3_path[0], low_memory=False)
     data_array = df_predictions.to_numpy()
-    return pd.DataFrame(data_array[1:], columns=data_array[0])
+    df_predictions_rearranged = pd.DataFrame(data_array[1:], columns=data_array[0])
+    df_predictions_rearranged.drop(columns='bodyparts', inplace=True)
 
+    new_column_labels = []
+    for column in df_predictions_rearranged.columns.unique():
+        df_column = df_predictions_rearranged[column].iloc[0]
+        new_column_labels.append(f'{column}_{df_column.iloc[0]}')
+        new_column_labels.append(f'{column}_{df_column.iloc[1]}')
+        new_column_labels.append(f'{column}_{df_column.iloc[2]}')
+    
+    return pd.DataFrame(data_array[1:, 1:], columns=new_column_labels).drop(0).reset_index(drop=True)
 
 def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
     """
