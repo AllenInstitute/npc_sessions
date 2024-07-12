@@ -2724,16 +2724,20 @@ class DynamicRoutingSession:
         LP_face_parts_dynamic_tables = []
         if not self.is_video:
             raise ValueError(f"{self.id} is not a session with video")
-        
+
         for video_path in self.video_paths:
             camera_name = npc_mvr.get_camera_name(video_path.name)
             if camera_name == "eye":
                 continue
 
             nwb_camera_name = self.mvr_to_nwb_camera_name[camera_name]
-            timestamps = next(t for t in self._video_frame_times if nwb_camera_name in t.name).timestamps
+            timestamps = next(
+                t for t in self._video_frame_times if nwb_camera_name in t.name
+            ).timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
-            df = utils.get_LPFaceParts_predictions_dataframe(self.id, utils.LP_MAPPING[camera_name])
+            df = utils.get_LPFaceParts_predictions_dataframe(
+                self.id, utils.LP_MAPPING[camera_name]
+            )
             if len(timestamps) != len(df):
                 logger.warning(
                     f"{self.id} {camera_name} lightning pose face parts output has wrong shape {len(df)}, expected {len(timestamps)} frames."
@@ -2741,7 +2745,7 @@ class DynamicRoutingSession:
                 )
                 continue
 
-            df['timestamps'] = timestamps
+            df["timestamps"] = timestamps
             name = f"Lightning_Pose_FaceParts_{nwb_camera_name}"
             table_description = (
                 f"Lightning Pose tracking model fit to {len(utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]])} facial features for each frame of {nwb_camera_name} video. "
@@ -2749,14 +2753,11 @@ class DynamicRoutingSession:
                 f"Features tracked are {utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]]} "
             )
             table = pynwb.core.DynamicTable.from_dataframe(
-                name=name,
-                table_description=table_description,
-                df=df
+                name=name, table_description=table_description, df=df
             )
             LP_face_parts_dynamic_tables.append(table)
-        
-        return tuple(LP_face_parts_dynamic_tables)
 
+        return tuple(LP_face_parts_dynamic_tables)
 
     @npc_io.cached_property
     def _eye_tracking(self) -> pynwb.core.DynamicTable:

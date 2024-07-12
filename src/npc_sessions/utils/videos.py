@@ -22,9 +22,36 @@ MODEL_FUNCTION_MAPPING = {
 FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face")
 LP_CAMERA_NAMES = ("side", "face")
 LP_MAPPING = {"behavior": "side", "face": "face"}
-LP_VIDEO_FEATURES_MAPPING = {'side': ('eye_top_l', 'eye_bottom_l', 'whisker_pad_l_top', 'whisker_pad_l_side', 'ear_tip_l', 'ear_base_l', 'nostril_l', 'nose_tip', 'jaw', 'tongue_base_l', 'tongue_tip'),
-               'face': ('eye_top_l', 'eye_bottom_l', 'whisker_pad_l_top', 'whisker_pad_l_side', 'ear_tip_l', 'ear_base_l', 'nostril_l', 'nostril_r', 'nose_tip', 'tongue_base_l', 'tongue_tip', 'tongue_base_r')
-            }
+LP_VIDEO_FEATURES_MAPPING = {
+    "side": (
+        "eye_top_l",
+        "eye_bottom_l",
+        "whisker_pad_l_top",
+        "whisker_pad_l_side",
+        "ear_tip_l",
+        "ear_base_l",
+        "nostril_l",
+        "nose_tip",
+        "jaw",
+        "tongue_base_l",
+        "tongue_tip",
+    ),
+    "face": (
+        "eye_top_l",
+        "eye_bottom_l",
+        "whisker_pad_l_top",
+        "whisker_pad_l_side",
+        "ear_tip_l",
+        "ear_base_l",
+        "nostril_l",
+        "nostril_r",
+        "nose_tip",
+        "tongue_base_l",
+        "tongue_tip",
+        "tongue_base_r",
+    ),
+}
+
 
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
     """
@@ -64,9 +91,7 @@ def h5_to_dataframe(h5_path: upath.UPath, key_name: str | None = None) -> pd.Dat
     return df_h5
 
 
-def get_LPFaceParts_predictions_dataframe(
-    session: str, camera: str
-) -> pd.DataFrame:
+def get_LPFaceParts_predictions_dataframe(session: str, camera: str) -> pd.DataFrame:
     """
     Gets the result dataframe with the lightning pose prediction for the facial features for the given camera.
     Modifies the result dataframe for easier use
@@ -88,8 +113,10 @@ def get_LPFaceParts_predictions_dataframe(
           dtype='object')
     """
     if camera not in LP_CAMERA_NAMES:
-        raise ValueError(f'Undefined camera name {camera}. Must be one of either side or face')
-    
+        raise ValueError(
+            f"Undefined camera name {camera}. Must be one of either side or face"
+        )
+
     session_LP_predictions_s3_paths = (
         npc_lims.get_lpfaceparts_camera_predictions_s3_paths(session, camera)
     )
@@ -106,16 +133,21 @@ def get_LPFaceParts_predictions_dataframe(
     df_predictions = pd.read_csv(session_LP_prediction_csv_s3_path[0], low_memory=False)
     data_array = df_predictions.to_numpy()
     df_predictions_rearranged = pd.DataFrame(data_array[1:], columns=data_array[0])
-    df_predictions_rearranged.drop(columns='bodyparts', inplace=True)
+    df_predictions_rearranged.drop(columns="bodyparts", inplace=True)
 
     new_column_labels = []
     for column in df_predictions_rearranged.columns.unique():
         df_column = df_predictions_rearranged[column].iloc[0]
-        new_column_labels.append(f'{column}_{df_column.iloc[0]}')
-        new_column_labels.append(f'{column}_{df_column.iloc[1]}')
-        new_column_labels.append(f'{column}_{df_column.iloc[2]}')
-    
-    return pd.DataFrame(data_array[1:, 1:], columns=new_column_labels).drop(0).reset_index(drop=True)
+        new_column_labels.append(f"{column}_{df_column.iloc[0]}")
+        new_column_labels.append(f"{column}_{df_column.iloc[1]}")
+        new_column_labels.append(f"{column}_{df_column.iloc[2]}")
+
+    return (
+        pd.DataFrame(data_array[1:, 1:], columns=new_column_labels)
+        .drop(0)
+        .reset_index(drop=True)
+    )
+
 
 def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
     """
