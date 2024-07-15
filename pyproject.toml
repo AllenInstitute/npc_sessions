@@ -24,7 +24,6 @@ dependencies = [
     "ndx-events>=0.2.0",
     "pyarrow>=14.0",
     "spikeinterface>=0.98.2",
-    "hdmf-zarr>=0.7.0",
     "hdmf>=3.14.0",
     "ndx-pose>=0.1.1",
     "tables>=3.9.2",
@@ -39,6 +38,7 @@ dependencies = [
     "npc-mvr>=0.1.6",
     "npc-io>=0.1.26",
     "polars<=0.20.26",
+    "hdmf-zarr @ git+https://github.com/bjhardcastle/hdmf-zarr",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
