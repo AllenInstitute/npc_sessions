@@ -31,7 +31,7 @@ frozenlist==1.4.1
 fsspec==2024.3.0
 h5py==3.11.0
 hdmf==3.14.2
-hdmf-zarr==0.8.0
+hdmf-zarr @ git+https://github.com/bjhardcastle/hdmf-zarr
 idna==3.6
 importlib-resources==6.4.0; python_version < "3.10"
 inflection==0.5.1
