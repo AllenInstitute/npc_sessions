@@ -2292,11 +2292,18 @@ class DynamicRoutingSession:
     @property
     def ephys_record_node_dirs(self) -> tuple[upath.UPath, ...]:
         if getattr(self, "_ephys_record_node_dirs", None) is None:
-            self.ephys_record_node_dirs = tuple(
+            all_ = tuple(
                 p
                 for p in self.raw_data_paths
                 if re.match(r"^Record Node [0-9]+$", p.name)
             )
+            # if data has been reuploaded and lives in a modality subfolder as
+            # well as the root, we want to use the modality subfolder
+            modality = tuple(
+                p for p in all_
+                if '/ecephys/ecephys_clipped' in p.as_posix()
+            )
+            self.ephys_record_node_dirs = modality or all_
         return self._ephys_record_node_dirs
 
     @ephys_record_node_dirs.setter
