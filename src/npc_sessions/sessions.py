@@ -1730,7 +1730,12 @@ class DynamicRoutingSession:
     def is_training(self) -> bool:
         if (v := getattr(self, "_is_training", None)) is not None:
             return v
-        return self.is_task and not self.is_ephys and "NP" not in self.rig
+        return (
+            self.is_task 
+            and not self.is_ephys 
+            and not any(name in self.rig for name in ("NP", "OG"))
+        )
+            
 
     @npc_io.cached_property
     def is_hab(self) -> bool:
