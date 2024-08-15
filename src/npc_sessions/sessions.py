@@ -296,10 +296,10 @@ class DynamicRoutingSession:
                 setattr(cls, attr, fn)
 
     @property
-    def suppress_errors(self) -> bool:
+    def ignore_stim_errors(self) -> bool:
         """If True, just compile as much as possible from available stim files,
         ignoring non-critical errors."""
-        return getattr(self, "_suppress_errors", False)
+        return getattr(self, "_suppress_errors", False) or getattr(self, "_ignore_stim_errors", False)
 
     @property
     def nwb_from_cache(self) -> pynwb.NWBFile | None:
