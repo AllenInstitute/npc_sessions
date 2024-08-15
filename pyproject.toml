@@ -1,6 +1,6 @@
 [project]
 name = "npc_sessions"
-version = "0.0.231"
+version = "0.0.230"
 description = "NWB-conversion for behavior and epyhys sessions from the Mindscope Neuropixels team, in the cloud."
 authors = [
     { name = "Ben Hardcastle", email = "ben.hardcastle@alleninstitute.org" },
@@ -30,15 +30,14 @@ dependencies = [
     "aind-data-schema==0.33.3",
     "pydantic>=2.6.4",
     "npc-lims>=0.1.161",
-    "npc-sync>=0.1.14",
-    "npc-ephys>=0.1.15",
+    "npc-sync>=0.1.16",
+    "npc-ephys>=0.1.18",
     "npc-stim>=0.1.8",
     "npc-samstim>=0.1.4",
     "npc-session>=0.1.34",
     "npc-mvr>=0.1.6",
     "npc-io>=0.1.26",
     "polars<=0.20.26",
-    "hdmf-zarr @ git+https://github.com/bjhardcastle/hdmf-zarr",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
