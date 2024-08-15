@@ -2290,7 +2290,7 @@ class DynamicRoutingSession:
     def stim_frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
         """Frame times dict for stims with time arrays, or optionally raising
         exceptions."""
-        if self.suppress_errors:
+        if self.ignore_stim_errors:
             return {
                 path: times
                 for path, times in self._stim_frame_times.items()
