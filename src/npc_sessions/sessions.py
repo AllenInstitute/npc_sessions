@@ -2211,11 +2211,13 @@ class DynamicRoutingSession:
     @property
     def task_data(self) -> h5py.File:
         # don't check if self.is_task here, as this is used to determine that!
-        return next(
-            self.stim_data[k]
-            for k in self.stim_data_without_timing_issues
-            if self.task_stim_name in k
-        )
+        return self.stim_data[
+            next(
+                k
+                for k in self.stim_data_without_timing_issues
+                if self.task_stim_name in k
+            )
+        ]
 
     @property
     def task_version(self) -> str | None:
