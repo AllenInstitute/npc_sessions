@@ -897,9 +897,7 @@ class DynamicRoutingSession:
                 trials["block_index"] == block_idx
             ]["is_contingent_reward"].sum()
             block_performance["rewarded_modality"] = rewarded_modality
-            block_performance["cross_modal_dprime"] = abs(
-                self.sam.dprimeOtherModalGo[block_idx]
-            )
+            block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block_idx]
             block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
             block_performance["nonrewarded_modal_dprime"] = (
                 self.sam.dprimeNonrewardedModal[block_idx]
