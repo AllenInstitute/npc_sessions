@@ -80,18 +80,6 @@ def get_newscale_data(path: npc_io.PathLike) -> pl.DataFrame:
     )
 
 
-def get_newscale_data_lazy(path: npc_io.PathLike) -> pl.LazyFrame:
-    """
-    # >>> df = get_newscale_data_lazy('s3://aind-ephys-data/ecephys_686740_2023-10-23_14-11-05/behavior/log.csv')
-    """
-    # TODO not working with s3 paths
-    return pl.scan_csv(
-        source=npc_io.from_pathlike(path).as_posix(),
-        with_column_names=lambda _: list(NEWSCALE_LOG_COLUMNS),
-        try_parse_dates=True,
-    )
-
-
 def get_newscale_coordinates(
     newscale_log_path: npc_io.PathLike,
     recording_start_time: (
@@ -123,11 +111,7 @@ def get_newscale_coordinates(
 
     movement = pl.col(NEWSCALE_LOG_COLUMNS[0])
     serial_number = pl.col(NEWSCALE_LOG_COLUMNS[1])
-    df: pl.DataFrame
-    try:
-        df = get_newscale_data_lazy(newscale_log_path)  # type: ignore [assignment]
-    except Exception:
-        df = get_newscale_data(newscale_log_path)
+    df = get_newscale_data(newscale_log_path)
 
     # if experiment date isn't in df, the log file didn't cover this experiment -
     # we can't continue
@@ -140,13 +124,8 @@ def get_newscale_coordinates(
         pl.col("last_movement_dt").dt.date()
         > (start.dt.date() - datetime.timedelta(hours=24))
     )
-    if isinstance(df, pl.LazyFrame):
-        recent_df = recent_df.collect()
     recent_z_values = recent_df["z"].str.strip_chars().cast(pl.Float32).to_numpy()
     z_inverted: bool = is_z_inverted(recent_z_values)
-
-    if isinstance(df, pl.LazyFrame):
-        df = df.collect()
 
     df = (
         df.filter(movement < start.dt)
@@ -156,8 +135,6 @@ def get_newscale_coordinates(
         )  # get last-moved for each manipulator
         .top_k(6, by=movement)
     )
-    if isinstance(df, pl.LazyFrame):
-        df = df.collect()
 
     # serial numbers have an extra leading space
     manipulators = df.get_column(NEWSCALE_LOG_COLUMNS[1]).str.strip_chars()
