@@ -885,17 +885,19 @@ class DynamicRoutingSession:
 
         for block_idx in trials.block_index.unique():
             block_performance: dict[str, float | str] = {}
-
+            block_df = trials[trials["block_index"] == block_idx]
+            
             block_performance["block_index"] = block_idx
+            
             rewarded_modality = (
-                trials[trials["block_index"] == block_idx]["context_name"]
+                block_df["context_name"]
                 .unique()
                 .item()
             )
-
-            block_performance["contingent_rewards"] = trials[
-                trials["block_index"] == block_idx
-            ]["is_contingent_reward"].sum()
+                
+            block_performance['n_trials'] = len(block_df)
+            block_performance['n_responses'] = block_df.is_response.sum()
+            block_performance["n_contingent_rewards"] = block_df["is_contingent_reward"].sum()
             block_performance["rewarded_modality"] = rewarded_modality
             block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block_idx]
             block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
@@ -924,6 +926,12 @@ class DynamicRoutingSession:
                 block_performance["vis_intra_dprime"] = self.sam.dprimeNonrewardedModal[
                     block_idx
                 ]
+            
+            for stim, target in zip(('vis', 'aud'), ('target', 'nontarget')):
+                stimulus_trials = block_df.query(f"is_{stim}_{target}")
+                n_stimuli = len(stimulus_trials)
+                n_responses = stimulus_trials.query(f"is_response & ~is_reward_scheduled").is_response.sum()
+                block_performance[f"{stim}_{target}_response_rate"] = n_responses / n_stimuli
 
             task_performance_by_block[block_idx] = block_performance
 
@@ -933,7 +941,9 @@ class DynamicRoutingSession:
         )
         column_name_to_description = {
             "block_index": "presentation order in the task (0-indexed)",
-            "contingent_rewards": "the number of rewards the subject received for a correct response",
+            "n_contingent_rewards": "the number of rewards the subject received for a correct response",
+            "n_responses": "the number of responses the subject made in trials in the block",
+            "n_trials": "the number of trials in the block",
             "rewarded_modality": "the modality of the target stimulus that was rewarded in the block: normally `vis` or `aud`",
             "cross_modal_dprime": "dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
             "signed_cross_modal_dprime": "same as cross_modal_dprime, but with negative values for auditory blocks",
@@ -941,6 +951,9 @@ class DynamicRoutingSession:
             "nonrewarded_modal_dprime": "dprime within non-rewarded modality; hits=response rate to non-rewarded target stimulus, false alarms=response rate to same modality non-target stimulus",
             "vis_intra_dprime": "dprime within visual modality; hits=response rate to visual target stimulus, false alarms=response rate to visual non-target stimulus",
             "aud_intra_dprime": "dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus",
+        } | {
+            f"{stim}_{target}_response_rate": f"number of responses to the {'auditory' if stim == 'aud' else 'visual'} {target} stimulus{' (excluding trials with scheduled reward)' if target else ''} divided by the number of presentations of the stimulus"
+            for stim, target in zip(('vis', 'aud'), ('target', 'nontarget'))
         }
         for name, description in column_name_to_description.items():
             nwb_intervals.add_column(name=name, description=description)
