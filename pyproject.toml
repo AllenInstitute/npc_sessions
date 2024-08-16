@@ -17,7 +17,7 @@ dependencies = [
     "zarr<2.18.1",
     "matplotlib>=3.7.2",
     "scipy>=1.9.3",
-    "DynamicRoutingTask>=0.1.94",
+    "DynamicRoutingTask<0.1.106",
     "numba>=0.57.1",
     "opencv-python-headless>=4.8.0.76",
     "python-dotenv>=1.0.0",

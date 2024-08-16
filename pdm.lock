@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:62eaf2aa573b2f9842ec32e80b83d31ee482afbe445dc9ef51673ea388f6c9e1"
+content_hash = "sha256:296eedd51a631089833b6506769ea3321e23eb95c884c6f0628f1a7d32191de0"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -870,7 +870,7 @@ files = [
 
 [[package]]
 name = "dynamicroutingtask"
-version = "0.1.111"
+version = "0.1.105"
 requires_python = ">=3.9"
 summary = ""
 dependencies = [
@@ -881,8 +881,8 @@ dependencies = [
     "scipy",
 ]
 files = [
-    {file = "DynamicRoutingTask-0.1.111-py3-none-any.whl", hash = "sha256:4148ab6d290fab888d503f2bf0fb42ab979b1d122e83c70cdb3e07f5184dd90d"},
-    {file = "dynamicroutingtask-0.1.111.tar.gz", hash = "sha256:03c8da98c3e32f6cec746d3525e5ef7b27c64c31c18a84d473b61892ece916a0"},
+    {file = "DynamicRoutingTask-0.1.105-py3-none-any.whl", hash = "sha256:3d82aaaebfbabaf3c6ebeb15cb9e27317436eea8fd768fc53f8e5ccdb3594d45"},
+    {file = "dynamicroutingtask-0.1.105.tar.gz", hash = "sha256:47eeb04e62058440c9977bf5013b41867b3f3d73caace93bdb7a81ee5e1b82f5"},
 ]
 
 [[package]]
