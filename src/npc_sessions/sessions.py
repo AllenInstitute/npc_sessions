@@ -299,7 +299,9 @@ class DynamicRoutingSession:
     def ignore_stim_errors(self) -> bool:
         """If True, just compile as much as possible from available stim files,
         ignoring non-critical errors."""
-        return getattr(self, "_suppress_errors", False) or getattr(self, "_ignore_stim_errors", False)
+        return getattr(self, "_suppress_errors", False) or getattr(
+            self, "_ignore_stim_errors", False
+        )
 
     @property
     def nwb_from_cache(self) -> pynwb.NWBFile | None:
@@ -896,17 +898,15 @@ class DynamicRoutingSession:
         for block_idx in trials.block_index.unique():
             block_performance: dict[str, float | str] = {}
             block_df = trials[trials["block_index"] == block_idx]
-            
+
             block_performance["block_index"] = block_idx
-            
-            rewarded_modality = (
-                block_df["context_name"]
-                .unique()
-                .item()
-            )
-                
+
+            rewarded_modality = block_df["context_name"].unique().item()
+
             block_performance["rewarded_modality"] = rewarded_modality
-            block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block_idx]
+            block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[
+                block_idx
+            ]
             block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
             block_performance["nonrewarded_modal_dprime"] = (
                 self.sam.dprimeNonrewardedModal[block_idx]
@@ -933,19 +933,27 @@ class DynamicRoutingSession:
                 block_performance["vis_intra_dprime"] = self.sam.dprimeNonrewardedModal[
                     block_idx
                 ]
-            
-            block_performance['n_trials'] = len(block_df)
-            block_performance['n_responses'] = block_df.is_response.sum()
+
+            block_performance["n_trials"] = len(block_df)
+            block_performance["n_responses"] = block_df.is_response.sum()
             block_performance["n_hits"] = self.sam.hitCount[block_idx]
-            block_performance["n_contingent_rewards"] = block_df["is_contingent_reward"].sum()
+            block_performance["n_contingent_rewards"] = block_df[
+                "is_contingent_reward"
+            ].sum()
             block_performance["hit_rate"] = self.sam.hitRate[block_idx]
             block_performance["false_alarm_rate"] = self.sam.falseAlarmRate[block_idx]
-            block_performance["catch_response_rate"] = self.sam.catchResponseRate[block_idx]
-            for stim, target in zip(('vis', 'aud'), ('target', 'nontarget')):
+            block_performance["catch_response_rate"] = self.sam.catchResponseRate[
+                block_idx
+            ]
+            for stim, target in zip(("vis", "aud"), ("target", "nontarget")):
                 stimulus_trials = block_df.query(f"is_{stim}_{target}")
                 n_stimuli = len(stimulus_trials)
-                n_responses = stimulus_trials.query(f"is_response & ~is_reward_scheduled").is_response.sum()
-                block_performance[f"{stim}_{target}_response_rate"] = n_responses / n_stimuli
+                n_responses = stimulus_trials.query(
+                    "is_response & ~is_reward_scheduled"
+                ).is_response.sum()
+                block_performance[f"{stim}_{target}_response_rate"] = (
+                    n_responses / n_stimuli
+                )
 
             task_performance_by_block[block_idx] = block_performance
 
@@ -971,7 +979,7 @@ class DynamicRoutingSession:
             "aud_intra_dprime": "dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus",
         } | {
             f"{stim}_{target}_response_rate": f"the proportion of responses the subject made to {'auditory' if stim == 'aud' else 'visual'} {target} stimulus trials in the block{' (excluding trials with scheduled reward)' if target else ''}"
-            for stim, target in zip(('vis', 'aud'), ('target', 'nontarget'))
+            for stim, target in zip(("vis", "aud"), ("target", "nontarget"))
         }
         for name, description in column_name_to_description.items():
             nwb_intervals.add_column(name=name, description=description)
@@ -1749,11 +1757,10 @@ class DynamicRoutingSession:
         if (v := getattr(self, "_is_training", None)) is not None:
             return v
         return (
-            self.is_task 
-            and not self.is_ephys 
+            self.is_task
+            and not self.is_ephys
             and not any(name in self.rig for name in ("NP", "OG"))
         )
-            
 
     @npc_io.cached_property
     def is_hab(self) -> bool:
@@ -1835,31 +1842,31 @@ class DynamicRoutingSession:
         if self.is_task and npc_samstim.is_opto(self.task_data) and self.is_wildtype:
             return True
         return False
-    
+
     @property
     def is_production(self) -> bool:
         if (v := getattr(self, "_is_production", None)) is not None:
             return v
         return True
-    
+
     @property
     def is_injection_perturbation(self) -> bool:
         if (v := getattr(self, "_is_injection_perturbation", None)) is not None:
             return v
         return False
-    
+
     @property
     def is_injection_control(self) -> bool:
         if (v := getattr(self, "_is_injection_control", None)) is not None:
             return v
         return False
-    
+
     @property
     def is_context_naive(self) -> bool:
         if (v := getattr(self, "_is_context_naive", None)) is not None:
             return v
         return False
-    
+
     @property
     def is_templeton(self) -> bool:
         if (v := getattr(self, "_is_templeton", None)) is not None:
@@ -2360,8 +2367,7 @@ class DynamicRoutingSession:
             # if data has been reuploaded and lives in a modality subfolder as
             # well as the root, we want to use the modality subfolder
             modality = tuple(
-                p for p in all_
-                if '/ecephys/ecephys_clipped' in p.as_posix()
+                p for p in all_ if "/ecephys/ecephys_clipped" in p.as_posix()
             )
             self.ephys_record_node_dirs = modality or all_
         return self._ephys_record_node_dirs
