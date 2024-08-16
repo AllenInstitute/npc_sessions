@@ -625,6 +625,16 @@ class DynamicRoutingSession:
                 self.keywords.append("templeton")
             else:
                 self.keywords.append("dynamic_routing")
+            if self.is_production:
+                self.keywords.append("production")
+            else:
+                self.keywords.append("development")
+            if self.is_injection_perturbation:
+                self.keywords.append("injection_perturbation")
+            elif self.is_injection_control:
+                self.keywords.append("injection_control")
+            if self.is_context_naive:
+                self.keywords.append("context_naive")
             for t in self.epoch_tags:
                 if t not in self.keywords:
                     self.keywords.append(t)
@@ -1817,7 +1827,31 @@ class DynamicRoutingSession:
         if self.is_task and npc_samstim.is_opto(self.task_data) and self.is_wildtype:
             return True
         return False
-
+    
+    @property
+    def is_production(self) -> bool:
+        if (v := getattr(self, "_is_production", None)) is not None:
+            return v
+        return True
+    
+    @property
+    def is_injection_perturbation(self) -> bool:
+        if (v := getattr(self, "_is_injection_perturbation", None)) is not None:
+            return v
+        return False
+    
+    @property
+    def is_injection_perturbation_control(self) -> bool:
+        if (v := getattr(self, "_is_injection_perturbation_control", None)) is not None:
+            return v
+        return False
+    
+    @property
+    def is_context_naive(self) -> bool:
+        if (v := getattr(self, "_is_context_naive", None)) is not None:
+            return v
+        return False
+    
     @property
     def is_templeton(self) -> bool:
         if (v := getattr(self, "_is_templeton", None)) is not None:
