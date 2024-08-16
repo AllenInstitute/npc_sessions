@@ -46,9 +46,7 @@ class DynamicRouting1(TaskControl):
 
     >>> for trial in obj.to_add_trial(): # doctest: +SKIP
     ...    nwb_file.add_trial(**trial)
-    >>> import upath
-    >>> upath.UPath('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5').exists()
-    False
+
     >>> trials = DynamicRouting1('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
     >>> assert not trials.to_dataframe().empty
     """
