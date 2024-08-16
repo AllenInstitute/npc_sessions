@@ -1841,8 +1841,8 @@ class DynamicRoutingSession:
         return False
     
     @property
-    def is_injection_perturbation_control(self) -> bool:
-        if (v := getattr(self, "_is_injection_perturbation_control", None)) is not None:
+    def is_injection_control(self) -> bool:
+        if (v := getattr(self, "_is_injection_control", None)) is not None:
             return v
         return False
     
