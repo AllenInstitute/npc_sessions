@@ -48,8 +48,6 @@ class DynamicRouting1(TaskControl):
     ...    nwb_file.add_trial(**trial)
 
     >>> trials = DynamicRouting1('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5')
-    >>> import npc_stim
-    >>> npc_stim.get_stim_data('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/DynamicRouting1_670248_20230803_123154.hdf5').keys()
     >>> assert not trials.to_dataframe().empty
     """
 
@@ -891,6 +889,7 @@ class DynamicRouting1(TaskControl):
                     if np.isnan(x):
                         continue
                     else:
+                        print(trial_idx, location_idx, x, x_values)
                         value = self.bregma_to_galvo(trial_idx, location_idx)[0]
                     result[trial_idx][location_idx] = value
             return tuple(result)
