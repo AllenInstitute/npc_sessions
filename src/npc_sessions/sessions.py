@@ -905,9 +905,6 @@ class DynamicRoutingSession:
                 .item()
             )
                 
-            block_performance['n_trials'] = len(block_df)
-            block_performance['n_responses'] = block_df.is_response.sum()
-            block_performance["n_contingent_rewards"] = block_df["is_contingent_reward"].sum()
             block_performance["rewarded_modality"] = rewarded_modality
             block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[block_idx]
             block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
@@ -937,6 +934,13 @@ class DynamicRoutingSession:
                     block_idx
                 ]
             
+            block_performance['n_trials'] = len(block_df)
+            block_performance['n_responses'] = block_df.is_response.sum()
+            block_performance["n_hits"] = self.sam.hitCount[block_idx]
+            block_performance["n_contingent_rewards"] = block_df["is_contingent_reward"].sum()
+            block_performance["hit_rate"] = self.sam.hitRate[block_idx]
+            block_performance["false_alarm_rate"] = self.sam.falseAlarmRate[block_idx]
+            block_performance["catch_response_rate"] = self.sam.catchResponseRate[block_idx]
             for stim, target in zip(('vis', 'aud'), ('target', 'nontarget')):
                 stimulus_trials = block_df.query(f"is_{stim}_{target}")
                 n_stimuli = len(stimulus_trials)
@@ -950,10 +954,14 @@ class DynamicRoutingSession:
             description=f"behavioral performance for each context block in task (refers to `trials` or `intervals[{self.task_stim_name!r}])",
         )
         column_name_to_description = {
-            "block_index": "presentation order in the task (0-indexed)",
-            "n_contingent_rewards": "the number of rewards the subject received for a correct response",
-            "n_responses": "the number of responses the subject made in trials in the block",
+            "block_index": "presentation position of the block in the task (0-indexed)",
             "n_trials": "the number of trials in the block",
+            "n_responses": "the number of responses the subject made in trials in the block",
+            "n_hits": "the number of correct responses the subject made in GO trials in the block (excluding trials with scheduled reward)",
+            "n_contingent_rewards": "the number of rewards the subject received for correct responses in the block",
+            "hit_rate": "the proportion of correct responses the subject made in GO trials in the block (excluding trials with scheduled reward)",
+            "false_alarm_rate": "the proportion of incorrect responses the subject made in NOGO trials in the block",
+            "catch_response_rate": "the proportion of responses the subject made in catch trials in the block",
             "rewarded_modality": "the modality of the target stimulus that was rewarded in the block: normally `vis` or `aud`",
             "cross_modal_dprime": "dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
             "signed_cross_modal_dprime": "same as cross_modal_dprime, but with negative values for auditory blocks",
@@ -962,7 +970,7 @@ class DynamicRoutingSession:
             "vis_intra_dprime": "dprime within visual modality; hits=response rate to visual target stimulus, false alarms=response rate to visual non-target stimulus",
             "aud_intra_dprime": "dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus",
         } | {
-            f"{stim}_{target}_response_rate": f"number of responses to the {'auditory' if stim == 'aud' else 'visual'} {target} stimulus{' (excluding trials with scheduled reward)' if target else ''} divided by the number of presentations of the stimulus"
+            f"{stim}_{target}_response_rate": f"the proportion of responses the subject made to {'auditory' if stim == 'aud' else 'visual'} {target} stimulus trials in the block{' (excluding trials with scheduled reward)' if target else ''}"
             for stim, target in zip(('vis', 'aud'), ('target', 'nontarget'))
         }
         for name, description in column_name_to_description.items():
