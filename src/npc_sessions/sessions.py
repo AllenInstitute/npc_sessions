@@ -949,8 +949,8 @@ class DynamicRoutingSession:
             block_performance["catch_response_rate"] = self.sam.catchResponseRate[
                 block_idx
             ]
-            for stim, target in zip(("vis", "aud"), ("target", "nontarget")):
-                stimulus_trials = block_df.query(f"is_{stim}_{target}")
+            for stim, target in itertools.product(("vis", "aud"), ("target", "nontarget")):
+                stimulus_trials = block_df.query(
                 n_stimuli = len(stimulus_trials)
                 n_responses = stimulus_trials.query(
                     "is_response & ~is_reward_scheduled"
@@ -984,7 +984,7 @@ class DynamicRoutingSession:
             "aud_intra_dprime": "dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus",
         } | {
             f"{stim}_{target}_response_rate": f"the proportion of responses the subject made to {'auditory' if stim == 'aud' else 'visual'} {target} stimulus trials in the block{' (excluding trials with scheduled reward)' if target else ''}"
-            for stim, target in zip(("vis", "aud"), ("target", "nontarget"))
+            for stim, target in itertools.product(("vis", "aud"), ("target", "nontarget"))
         }
         for name, description in column_name_to_description.items():
             nwb_intervals.add_column(name=name, description=description)
