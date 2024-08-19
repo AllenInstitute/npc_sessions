@@ -951,6 +951,7 @@ class DynamicRoutingSession:
             ]
             for stim, target in itertools.product(("vis", "aud"), ("target", "nontarget")):
                 stimulus_trials = block_df.query(
+                    f"is_{stim}_{target} & ~is_reward_scheduled")
                 n_stimuli = len(stimulus_trials)
                 n_responses = stimulus_trials.query(
                     "is_response & ~is_reward_scheduled"
