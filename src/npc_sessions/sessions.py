@@ -895,19 +895,26 @@ class DynamicRoutingSession:
         trials: pd.DataFrame = self.trials[:]
         task_performance_by_block: dict[str, dict[str, float | str]] = {}
 
-        is_first_block_aud = any(v in self.sam.blockStimRewarded[0] for v in ("aud", "sound"))
-        
+        is_first_block_aud = any(
+            v in self.sam.blockStimRewarded[0] for v in ("aud", "sound")
+        )
+
         for block_idx in trials.block_index.unique():
             block_performance: dict[str, float | str] = {}
             block_df = trials[trials["block_index"] == block_idx]
 
             block_performance["block_index"] = block_idx
-            block_performance["is_first_block_aud"] = is_first_block_aud # same for all blocks
+            block_performance["is_first_block_aud"] = (
+                is_first_block_aud  # same for all blocks
+            )
             rewarded_modality = block_df["context_name"].unique().item()
             block_performance["rewarded_modality"] = rewarded_modality
             if block_idx == 0 and is_first_block_aud:
-                assert rewarded_modality in ("aud", "sound"), f"Mismatch: {is_first_block_aud=} {rewarded_modality=}"
-            
+                assert rewarded_modality in (
+                    "aud",
+                    "sound",
+                ), f"Mismatch: {is_first_block_aud=} {rewarded_modality=}"
+
             block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[
                 block_idx
             ]
@@ -949,9 +956,12 @@ class DynamicRoutingSession:
             block_performance["catch_response_rate"] = self.sam.catchResponseRate[
                 block_idx
             ]
-            for stim, target in itertools.product(("vis", "aud"), ("target", "nontarget")):
+            for stim, target in itertools.product(
+                ("vis", "aud"), ("target", "nontarget")
+            ):
                 stimulus_trials = block_df.query(
-                    f"is_{stim}_{target} & ~is_reward_scheduled")
+                    f"is_{stim}_{target} & ~is_reward_scheduled"
+                )
                 n_stimuli = len(stimulus_trials)
                 n_responses = stimulus_trials.query(
                     "is_response & ~is_reward_scheduled"
@@ -985,7 +995,9 @@ class DynamicRoutingSession:
             "aud_intra_dprime": "dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus",
         } | {
             f"{stim}_{target}_response_rate": f"the proportion of responses the subject made to {'auditory' if stim == 'aud' else 'visual'} {target} stimulus trials in the block{' (excluding trials with scheduled reward)' if target else ''}"
-            for stim, target in itertools.product(("vis", "aud"), ("target", "nontarget"))
+            for stim, target in itertools.product(
+                ("vis", "aud"), ("target", "nontarget")
+            )
         }
         for name, description in column_name_to_description.items():
             nwb_intervals.add_column(name=name, description=description)
