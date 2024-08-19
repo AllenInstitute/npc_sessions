@@ -112,6 +112,7 @@ jobs:
     steps:
 
     - name: Launch
+      continue-on-error: true
       env:
         DBHUB_API_KEY: ${{ secrets.DBHUB_API_KEY }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
