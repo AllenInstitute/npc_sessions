@@ -895,15 +895,19 @@ class DynamicRoutingSession:
         trials: pd.DataFrame = self.trials[:]
         task_performance_by_block: dict[str, dict[str, float | str]] = {}
 
+        is_first_block_aud = any(v in self.sam.blockStimRewarded[0] for v in ("aud", "sound"))
+        
         for block_idx in trials.block_index.unique():
             block_performance: dict[str, float | str] = {}
             block_df = trials[trials["block_index"] == block_idx]
 
             block_performance["block_index"] = block_idx
-
+            block_performance["is_first_block_aud"] = is_first_block_aud # same for all blocks
             rewarded_modality = block_df["context_name"].unique().item()
-
             block_performance["rewarded_modality"] = rewarded_modality
+            if block_idx == 0 and is_first_block_aud:
+                assert rewarded_modality in ("aud", "sound"), f"Mismatch: {is_first_block_aud=} {rewarded_modality=}"
+            
             block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[
                 block_idx
             ]
@@ -971,6 +975,7 @@ class DynamicRoutingSession:
             "false_alarm_rate": "the proportion of incorrect responses the subject made in NOGO trials in the block",
             "catch_response_rate": "the proportion of responses the subject made in catch trials in the block",
             "rewarded_modality": "the modality of the target stimulus that was rewarded in the block: normally `vis` or `aud`",
+            "is_first_block_aud": "whether the rewarded modality of the first block in the task was auditory",
             "cross_modal_dprime": "dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
             "signed_cross_modal_dprime": "same as cross_modal_dprime, but with negative values for auditory blocks",
             "same_modal_dprime": "dprime within rewarded modality; hits=response rate to rewarded target stimulus, false alarms=response rate to same modality non-target stimulus",
