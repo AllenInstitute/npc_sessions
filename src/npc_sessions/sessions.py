@@ -637,6 +637,10 @@ class DynamicRoutingSession:
                 self.keywords.append("injection_control")
             if self.is_context_naive:
                 self.keywords.append("context_naive")
+            if self.is_task and self.is_late_autorewards:
+                self.keywords.append("late_autorewards")
+            elif self.is_task:
+                self.keywords.append("early_autorewards")
             for t in self.epoch_tags:
                 if t not in self.keywords:
                     self.keywords.append(t)
@@ -1885,6 +1889,12 @@ class DynamicRoutingSession:
             return v
         return False
 
+    @property
+    def is_late_autorewards(self) -> bool:
+        if not self.is_task:
+            raise AttributeError(f"{self.id} is not a session with behavior task") 
+        return self.sam.autoRewardOnsetFrame == 60
+    
     @property
     def is_templeton(self) -> bool:
         if (v := getattr(self, "_is_templeton", None)) is not None:
