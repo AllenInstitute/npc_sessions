@@ -1892,9 +1892,9 @@ class DynamicRoutingSession:
     @property
     def is_late_autorewards(self) -> bool:
         if not self.is_task:
-            raise AttributeError(f"{self.id} is not a session with behavior task") 
+            raise AttributeError(f"{self.id} is not a session with behavior task")
         return self.sam.autoRewardOnsetFrame == 60
-    
+
     @property
     def is_templeton(self) -> bool:
         if (v := getattr(self, "_is_templeton", None)) is not None:
