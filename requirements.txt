@@ -56,13 +56,13 @@ ndx-events==0.2.0
 ndx-pose==0.1.1
 neo==0.13.2
 npc-ephys==0.1.18
-npc-io==0.1.26
+npc-io==0.1.29
 npc-lims==0.1.170
 npc-mvr==0.1.6
 npc-samstim==0.1.4
 npc-session==0.1.38
 npc-stim==0.1.8
-npc-sync==0.1.16
+npc-sync==0.1.17
 numba==0.60.0
 numcodecs==0.12.1
 numexpr==2.10.1
