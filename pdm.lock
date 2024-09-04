@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:296eedd51a631089833b6506769ea3321e23eb95c884c6f0628f1a7d32191de0"
+content_hash = "sha256:09f04883fa077aaa2274c13a75f790d7990ffae7bddf6054f3091573562ad6a6"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -1710,7 +1710,7 @@ files = [
 
 [[package]]
 name = "npc-io"
-version = "0.1.26"
+version = "0.1.29"
 requires_python = ">=3.9"
 summary = "File IO tools for MindScope Neuropixels projects in the cloud."
 groups = ["default"]
@@ -1723,8 +1723,8 @@ dependencies = [
     "universal-pathlib<0.2.0",
 ]
 files = [
-    {file = "npc-io-0.1.26.tar.gz", hash = "sha256:009b1b870e8a85ac54e379789e2ec1f6ea413d82fabfd7d7908b88f575177402"},
-    {file = "npc_io-0.1.26-py3-none-any.whl", hash = "sha256:c03f506268480997703d31a2790680ec32140f07a5711e669997669c62fe8241"},
+    {file = "npc_io-0.1.29-py3-none-any.whl", hash = "sha256:2f119de10ba3093ab891b5e1bc062a40d7ca885e99ae2cfe9f88a3dd9ead20c4"},
+    {file = "npc_io-0.1.29.tar.gz", hash = "sha256:d0cc19c05f2af18352ac2e7fa0f3387c2d2ca40244f37d8618995ed5ae2c778c"},
 ]
 
 [[package]]
@@ -1819,7 +1819,7 @@ files = [
 
 [[package]]
 name = "npc-sync"
-version = "0.1.16"
+version = "0.1.17"
 requires_python = ">=3.9"
 summary = "Repackaging of AllenSDK.SyncDataset with extra functionality, compatible with data in the cloud."
 groups = ["default"]
@@ -1832,8 +1832,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc_sync-0.1.16-py3-none-any.whl", hash = "sha256:52673c2d57e3b13c9dbdb4a2276598d453ca22ce3c580036913823da536f7e93"},
-    {file = "npc_sync-0.1.16.tar.gz", hash = "sha256:734c8fbe9f6368e24b0eabefcbaee658647faa3199807ab0326d22eb73e488b3"},
+    {file = "npc_sync-0.1.17-py3-none-any.whl", hash = "sha256:49dcf2e15ded2c2c584b481034aec0992535cca8faee226e8793310a74b1eacd"},
+    {file = "npc_sync-0.1.17.tar.gz", hash = "sha256:0cbb36b0a993bf66d4a0f29a5a0db8dcb83aa939c468e6673f93041d14c8b785"},
 ]
 
 [[package]]
