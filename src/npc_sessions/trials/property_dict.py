@@ -12,7 +12,6 @@ from typing import Any, Literal
 import npc_io
 import numpy as np
 import pandas as pd
-import polars as pl
 
 logger = logging.getLogger(__name__)
 
@@ -170,33 +169,6 @@ class PropertyDict(collections.abc.Mapping):
                 # all explode_cols should have values with the same dimensions -
                 # pandas will raise an error if they don't
                 df = df.explode(explode_cols, ignore_index=True)
-        return df
-
-    @property
-    def _df(self) -> pl.DataFrame:
-        """polars dataframe"""
-
-        def get_dtype(attr: str, value: Any) -> type[pl.DataType] | None:
-            """Get dtype of attribute"""
-            if any(key in attr for key in ("index", "idx", "number")):
-                return pl.Int64
-            if "time" in attr:
-                return pl.Float64
-            dtype = getattr(value, "dtype", None)
-            if dtype and dtype in (np.str_, str):
-                return pl.Utf8
-            return None
-
-        df = pl.DataFrame(
-            pl.Series(k, v, dtype=get_dtype(k, v), nan_to_null=True)
-            for k, v in self.items()
-        )
-        if EXPLODE_LISTS:
-            explode_cols = tuple(
-                col for col in df.columns if df[col].dtype in (pl.List, pl.Array)
-            )
-            if explode_cols:
-                df = df.explode(explode_cols)
         return df
 
     @property
