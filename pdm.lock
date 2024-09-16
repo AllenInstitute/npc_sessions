@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:09f04883fa077aaa2274c13a75f790d7990ffae7bddf6054f3091573562ad6a6"
+content_hash = "sha256:b019b036227db1d819239c3702a7a1d553651a9a5fe79c92d320d2cc650c90c9"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -1688,14 +1688,14 @@ files = [
 
 [[package]]
 name = "npc-ephys"
-version = "0.1.18"
+version = "0.1.21"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing raw ephys data, compatible with data in the cloud."
 groups = ["default"]
 dependencies = [
     "hdmf-zarr-bjh==0.8.1",
     "npc-io>=0.1.26",
-    "npc-lims>=0.1.147",
+    "npc-lims>=0.1.73",
     "npc-sync>=0.1.12",
     "pandas>=2.2.0",
     "pynwb>=2.8.0",
@@ -1704,8 +1704,8 @@ dependencies = [
     "zarr<2.18.1",
 ]
 files = [
-    {file = "npc_ephys-0.1.18-py3-none-any.whl", hash = "sha256:fdd7b7b895c5cb675be16d396eeefb98bd74477eddb6ea6f2d3e9a5e6d91c724"},
-    {file = "npc_ephys-0.1.18.tar.gz", hash = "sha256:7ea139161f9709fb3c674feb410402d183ece910254115dbb0617abdb1ce9b70"},
+    {file = "npc_ephys-0.1.21-py3-none-any.whl", hash = "sha256:eaa4c4c2ba17cb6549cbdbad7971c9d0e0dca1135b1d628159ae88f52db4f5bb"},
+    {file = "npc_ephys-0.1.21.tar.gz", hash = "sha256:a47e0ba4adf1c8d43c3426289474864b909dd8cb9a0d045969401ec777579898"},
 ]
 
 [[package]]
@@ -1729,7 +1729,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.170"
+version = "0.1.174"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 groups = ["default"]
@@ -1747,8 +1747,8 @@ dependencies = [
     "types-requests>=2.31.0.6",
 ]
 files = [
-    {file = "npc_lims-0.1.170-py3-none-any.whl", hash = "sha256:c6dddac08578ec4f010da8f87cfaf6bf1afa0b2c5e4156503c1e86244a09e45b"},
-    {file = "npc_lims-0.1.170.tar.gz", hash = "sha256:f2858553ca0fb82f02d0fd482d86afe7801aee91c4b3781fe8acb1e884fdfdb4"},
+    {file = "npc_lims-0.1.174-py3-none-any.whl", hash = "sha256:a3ff502e25a2b2d2c24a590b4dd3c46d4045bcb5e2743089c85fe85aafb21c3c"},
+    {file = "npc_lims-0.1.174.tar.gz", hash = "sha256:d4a1ab96cf9e43e8a69dac9dae204473d75ae74c48f1b091703da8bb79812818"},
 ]
 
 [[package]]
@@ -1819,7 +1819,7 @@ files = [
 
 [[package]]
 name = "npc-sync"
-version = "0.1.17"
+version = "0.1.18"
 requires_python = ">=3.9"
 summary = "Repackaging of AllenSDK.SyncDataset with extra functionality, compatible with data in the cloud."
 groups = ["default"]
@@ -1832,8 +1832,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc_sync-0.1.17-py3-none-any.whl", hash = "sha256:49dcf2e15ded2c2c584b481034aec0992535cca8faee226e8793310a74b1eacd"},
-    {file = "npc_sync-0.1.17.tar.gz", hash = "sha256:0cbb36b0a993bf66d4a0f29a5a0db8dcb83aa939c468e6673f93041d14c8b785"},
+    {file = "npc_sync-0.1.18-py3-none-any.whl", hash = "sha256:435dacb2949749854c876338800e802422dfe61af82d11b627cddaa523dc9040"},
+    {file = "npc_sync-0.1.18.tar.gz", hash = "sha256:c6199b264433740644e28f5a27b3165c07871aef9189432148433cbfba6ad709"},
 ]
 
 [[package]]
