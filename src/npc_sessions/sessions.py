@@ -1475,7 +1475,7 @@ class DynamicRoutingSession:
                 units=units,
                 annotated_electrodes=utils.get_tissuecyte_electrodes_table(self.id),
             )
-        return npc_ephys.good_units(units)
+        return units
 
     def get_obs_intervals(
         self, probe: str | npc_session.ProbeRecord
