@@ -9,8 +9,8 @@ display times to get stim onset times
 >>> sync = npc_sync.get_sync_data('s3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/20230821T124345.h5')
 >>> vis_mapping_trials = VisRFMapping(stim, sync)
 >>> aud_mapping_trials = AudRFMapping(stim, sync)
->>> assert not vis_mapping_trials.df.is_empty()
->>> assert not aud_mapping_trials.df.is_empty()
+>>> assert not vis_mapping_trials.to_dataframe().empty
+>>> assert not aud_mapping_trials.to_dataframe().empty
 """
 
 from __future__ import annotations
