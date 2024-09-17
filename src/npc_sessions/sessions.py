@@ -754,7 +754,7 @@ class DynamicRoutingSession:
                 modules.append(self._eye_tracking)
             modules.extend(self._dlc)
             modules.extend(self._facemap)
-            modules.extend(self._LPFaceParts)
+            modules.extend(self._lp)
 
         return tuple(modules)
 
@@ -2881,7 +2881,7 @@ class DynamicRoutingSession:
         )
 
     @npc_io.cached_property
-    def _LPFaceParts(self) -> tuple[pynwb.core.DynamicTable, ...]:
+    def _lp(self) -> tuple[pynwb.core.DynamicTable, ...]:
         """
         Stores the lightning pose output as a dynamic table for each of the relevant cameras (side, face)
         For each camera, 3 tables - the predictions, the pca error, and the temporal norm
@@ -2901,8 +2901,9 @@ class DynamicRoutingSession:
             ).timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
 
+            df = pd.DataFrame()
             for result_name in utils.LP_RESULT_TYPES:
-                df = utils.get_LPFaceParts_result_dataframe(
+                result_df = utils.get_LPFaceParts_result_dataframe(
                     self.id, utils.LP_MAPPING[camera_name], result_name
                 )
                 if len(timestamps) != len(df):
@@ -2911,24 +2912,27 @@ class DynamicRoutingSession:
                         "\nLightning pose face parts capsule was likely run with an additional data asset attached"
                     )
                     continue
+                if result_name != "predictions":
+                    result_df = result_df.add_suffix(f"_{result_name}")
+                df = pd.concat([df, result_df], axis=1)
+            df = df.sort_index(axis=1)
+            df["timestamps"] = timestamps
 
-                df["timestamps"] = timestamps
-                name = f"Lightning_Pose_FaceParts_{nwb_camera_name}_{result_name}"
-
-                if result_name == "predictions":
-                    table_description = (
-                        f"Lightning Pose tracking model fit to {len(utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]])} facial features for each frame of {nwb_camera_name} video. "
-                        "Output for every frame is x,y coordinates in pixels along with the likelihood of the model for each feature in the frame. "
-                        f"Features tracked are {utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]]} "
-                    )
-                else:
-                    table_description = f"Lightning Pose {nwb_camera_name} {utils.LP_RESULT_DESCRIPTIONS[result_name]}"
-
-                table = pynwb.core.DynamicTable.from_dataframe(
+            name = f"lp_{nwb_camera_name}"
+            table_description = (
+                f"Lightning Pose tracking model fit to {len(utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]])} facial features for each frame of {nwb_camera_name.replace('_', '')} video. "
+                "Output for every frame includes: "
+                "`x` and `y`: coordinates in pixels, with (0, 0) at top-left of frame"
+                " | `likelihood`: likelihood of the model"
+                " | `error`: root mean square error between true and predicted keypoints"
+                " | `temporal_norm`: norm of difference between keypoints on successive time bins"
+                f". Features tracked are {utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]]}"
+            )
+            LP_face_parts_dynamic_tables.append(
+                pynwb.core.DynamicTable.from_dataframe(
                     name=name, table_description=table_description, df=df
                 )
-                LP_face_parts_dynamic_tables.append(table)
-
+            )
         return tuple(LP_face_parts_dynamic_tables)
 
     @npc_io.cached_property
