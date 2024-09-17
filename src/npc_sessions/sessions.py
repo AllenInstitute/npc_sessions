@@ -1984,7 +1984,7 @@ class DynamicRoutingSession:
             breeding_info = metadata.get("breeding_info", None) or {}
             with contextlib.suppress(KeyError):
                 strain = breeding_info.get("breeding_group", None)
-        
+
         return pynwb.file.Subject(
             subject_id=metadata["subject_id"],
             species="Mus musculus",

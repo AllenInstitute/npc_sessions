@@ -54,15 +54,14 @@ mypy-extensions==1.0.0
 ndindex==1.8
 ndx-events==0.2.0
 ndx-pose==0.1.1
-neo==0.13.2
-npc-ephys==0.1.18
+npc-ephys==0.1.23
 npc-io==0.1.29
-npc-lims==0.1.170
+npc-lims==0.1.174
 npc-mvr==0.1.6
 npc-samstim==0.1.4
 npc-session==0.1.38
 npc-stim==0.1.8
-npc-sync==0.1.17
+npc-sync==0.1.18
 numba==0.60.0
 numcodecs==0.12.1
 numexpr==2.10.1
@@ -72,8 +71,7 @@ openpyxl==3.1.5
 packaging==24.1
 pandas==2.2.2
 pillow==10.4.0
-polars==0.20.26
-probeinterface==0.2.23
+polars==1.7.1
 py-cpuinfo==9.0.0
 pyarrow==17.0.0
 pycparser==2.22; platform_python_implementation != "PyPy"
@@ -88,7 +86,6 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.1
 pyyaml==6.0.2
-quantities==0.15.0
 redis==5.0.8
 referencing==0.35.1
 requests==2.32.3
@@ -102,7 +99,6 @@ s3transfer==0.6.2
 scipy==1.13.1
 semver==3.0.2
 six==1.16.0
-spikeinterface==0.101.0
 tables==3.9.2
 threadpoolctl==3.5.0
 tqdm==4.66.5
