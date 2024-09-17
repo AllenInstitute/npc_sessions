@@ -28,7 +28,7 @@ class OptoTagging(TaskControl):
     >>> stim = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/OptoTagging_662892_20230821_125915.hdf5'
     >>> sync = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/20230821T124345.h5'
     >>> trials = OptoTagging(stim, sync)
-    >>> assert not trials._df.is_empty()
+    >>> assert not trials.df.is_empty()
     """
 
     def __init__(
