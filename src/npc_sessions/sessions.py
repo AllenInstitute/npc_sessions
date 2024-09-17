@@ -1977,6 +1977,14 @@ class DynamicRoutingSession:
         assert metadata["subject_id"] == self.id.subject
         dob = utils.get_aware_dt(metadata["date_of_birth"])
 
+        strain = metadata["background_strain"]
+        if strain is None:
+            strain = metadata.get("breeding_group", None)
+        if strain is None:
+            breeding_info = metadata.get("breeding_info", None) or {}
+            with contextlib.suppress(KeyError):
+                strain = breeding_info.get("breeding_group", None)
+        
         return pynwb.file.Subject(
             subject_id=metadata["subject_id"],
             species="Mus musculus",
@@ -1984,9 +1992,7 @@ class DynamicRoutingSession:
             date_of_birth=dob,
             genotype=metadata["genotype"],
             description=None,
-            strain=metadata["background_strain"]
-            or metadata.get("breeding_group")
-            or metadata.get("breeding_info", {}).get("breeding_group", ""),
+            strain=strain,
             age=f"P{(self.session_start_time - dob).days}D",
         )
 
