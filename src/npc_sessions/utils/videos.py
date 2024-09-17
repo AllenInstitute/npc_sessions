@@ -24,8 +24,8 @@ LP_CAMERA_NAMES = ("side", "face")
 LP_MAPPING = {"behavior": "side", "face": "face"}
 LP_RESULT_TYPES = ("predictions", "error", "temporal_norm")
 LP_RESULT_DESCRIPTIONS = {
-    "error": "PCA Error. Pose PCA loss is the pixel error between the original pose prediction and the reconstruction of the same pose from a learnt low-dimensional representation of the body parts",
-    "temporal_norm": "Temporal Norm. Temporal difference loss for each body part is the Euclidean distance between consecutive predictions in pixels",
+    "error": "PCA error. Pose PCA loss is the pixel error between the original pose prediction and the reconstruction of the same pose from a learnt low-dimensional representation of the body parts",
+    "temporal_norm": "temporal norm. Temporal difference loss for each body part is the Euclidean distance between consecutive predictions in pixels",
 }
 LP_VIDEO_FEATURES_MAPPING = {
     "side": (
