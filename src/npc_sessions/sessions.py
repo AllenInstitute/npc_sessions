@@ -425,7 +425,7 @@ class DynamicRoutingSession:
     def notes(self) -> str | None:
         notes = ""
         if self.info:
-            notes += ";".join([self.info.notes] + self.info.issues)
+            notes += "; ".join([self.info.notes] + self.info.issues)
         return notes or None
 
     @property
@@ -603,6 +603,8 @@ class DynamicRoutingSession:
     def keywords(self) -> list[str]:
         if getattr(self, "_keywords", None) is None:
             self._keywords: list[str] = []
+            if self.info and self.info.issues:
+                self.keywords.append("issues")
             if self.is_task:
                 self.keywords.append("task")
             if self.is_sync:
