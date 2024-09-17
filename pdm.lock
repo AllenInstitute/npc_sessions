@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:1c3d81ec6290a8d72305c77a33dbec714092ba8a5cc02913a57209fc3f95075e"
+content_hash = "sha256:87086b7720a1f78a76da5e1b521ea20e04a922fd05963ccd05ecc31bd75fd821"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -1671,24 +1671,8 @@ files = [
 ]
 
 [[package]]
-name = "neo"
-version = "0.13.2"
-requires_python = ">=3.8"
-summary = "Neo is a package for representing electrophysiology data in Python, together with support for reading a wide range of neurophysiology file formats"
-groups = ["default"]
-dependencies = [
-    "numpy>=1.19.5",
-    "packaging",
-    "quantities>=0.14.1",
-]
-files = [
-    {file = "neo-0.13.2-py3-none-any.whl", hash = "sha256:51d908c1c92f58705cdc58bdc2aeb0c6b91dd734d2c83b04d0d6f9461eb255a9"},
-    {file = "neo-0.13.2.tar.gz", hash = "sha256:6980d9542e795d5351fd5b5d9d394104a47f30d0ef7f0511faca6a7b5e2772bc"},
-]
-
-[[package]]
 name = "npc-ephys"
-version = "0.1.22"
+version = "0.1.23"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing raw ephys data, compatible with data in the cloud."
 groups = ["default"]
@@ -1698,14 +1682,16 @@ dependencies = [
     "npc-lims>=0.1.73",
     "npc-sync>=0.1.12",
     "pandas>=2.2.0",
+    "polars>=0.20.26",
+    "pyarrow>=14.0",
     "pynwb>=2.8.0",
     "tqdm>=4.66.1",
-    "wavpack-numcodecs>=0.1.5",
+    "wavpack-numcodecs!=0.2.0,>=0.1.5",
     "zarr<2.18.1",
 ]
 files = [
-    {file = "npc_ephys-0.1.22-py3-none-any.whl", hash = "sha256:1cbd320bced0d7581b4e6e9b662122ef475a2b67c543f0449ebe2d8b9f221c92"},
-    {file = "npc_ephys-0.1.22.tar.gz", hash = "sha256:c5dabdb0acda60b95c810494cd4cc759a299c32f2cc2724f906ebeea2dd1c0fc"},
+    {file = "npc_ephys-0.1.23-py3-none-any.whl", hash = "sha256:3133bee243452ef16eb47d00a49019a6a2de441ef5024e0dad526162190a298c"},
+    {file = "npc_ephys-0.1.23.tar.gz", hash = "sha256:eb48fe84364905e24e53c2b441d6041da9cc3d188551dcb9e5e73502e9e74d04"},
 ]
 
 [[package]]
@@ -2198,31 +2184,17 @@ files = [
 
 [[package]]
 name = "polars"
-version = "0.20.26"
+version = "1.7.1"
 requires_python = ">=3.8"
 summary = "Blazingly fast DataFrame library"
 groups = ["default"]
 files = [
-    {file = "polars-0.20.26-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:97d0e4b6ab6b47fa07798b447189ee9505d2085ec1a64a6aa8a65fdd429cd49f"},
-    {file = "polars-0.20.26-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:c270e366b4d8b672b204e7d48e39d255641d3d2b7bdc3a0ccd968cf53934657f"},
-    {file = "polars-0.20.26-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:db35d6eed508256a797c7f1b8e9dec4aae9c11b891797b2d38fac5627d072d34"},
-    {file = "polars-0.20.26-cp38-abi3-manylinux_2_24_aarch64.whl", hash = "sha256:25b00bd5cf44929722aa6389706559c5e8cedd6db2cfc38b27b706ed37e1b2af"},
-    {file = "polars-0.20.26-cp38-abi3-win_amd64.whl", hash = "sha256:b22063acc815bc5c6d2e24292ff771ca0df306ecf97e8f6899924a1ec6d3f136"},
-    {file = "polars-0.20.26.tar.gz", hash = "sha256:fa83d130562a5180a47f8763a7bb9f408dbbf51eafc1380e8a2951be8ce05a2c"},
-]
-
-[[package]]
-name = "probeinterface"
-version = "0.2.23"
-requires_python = ">=3.8"
-summary = "Python package to handle probe layout, geometry and wiring to device."
-groups = ["default"]
-dependencies = [
-    "numpy",
-]
-files = [
-    {file = "probeinterface-0.2.23-py3-none-any.whl", hash = "sha256:f5226dc550798a39000a25b112966ffa5ad4955f7ec803e3d41f06308af66e1b"},
-    {file = "probeinterface-0.2.23.tar.gz", hash = "sha256:75aa922c52678a0796ac317e6390e54074bbfb5587e3ee735d1def9a5df375e3"},
+    {file = "polars-1.7.1-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:589c1b5a9b5167f3c49713212cbeccc39e3a0e12577e21331c50dbf7178e32ed"},
+    {file = "polars-1.7.1-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:c955cca9d109ed5d79f4498915ec80590aa2e4619bc40bafbbeb5a160fcb166e"},
+    {file = "polars-1.7.1-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5cd675e4a306b2da57a1b688e65382aaa9e992dd7156b485fbd7f39892a3d784"},
+    {file = "polars-1.7.1-cp38-abi3-manylinux_2_24_aarch64.whl", hash = "sha256:45c255749b49bee244d10baeb69057580a0a397125b014bc8854b73ba5bdf45e"},
+    {file = "polars-1.7.1-cp38-abi3-win_amd64.whl", hash = "sha256:a9004a907fc8e923dda27879f7e6eea8e06a753e160d08e606c8b9b5f914f911"},
+    {file = "polars-1.7.1.tar.gz", hash = "sha256:3323bf6b3f1cf55212ddd35f044af8a1aa02033bca17d06f3852325e0da93a80"},
 ]
 
 [[package]]
@@ -2604,20 +2576,6 @@ files = [
 ]
 
 [[package]]
-name = "quantities"
-version = "0.15.0"
-requires_python = ">=3.8"
-summary = "Support for physical quantities with units, based on numpy"
-groups = ["default"]
-dependencies = [
-    "numpy>=1.20",
-]
-files = [
-    {file = "quantities-0.15.0-py3-none-any.whl", hash = "sha256:589bdadcbbdc1c10950120c6d197f7e71ac145512a4b4ac5fd40d4946709d6ec"},
-    {file = "quantities-0.15.0.tar.gz", hash = "sha256:9ea31e2a0d7517cf24d546b14146def9292639993a616cca61b875ef796b4b2b"},
-]
-
-[[package]]
 name = "redis"
 version = "5.0.8"
 requires_python = ">=3.7"
@@ -2965,26 +2923,6 @@ groups = ["default"]
 files = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
-]
-
-[[package]]
-name = "spikeinterface"
-version = "0.101.0"
-requires_python = "<4.0,>=3.8"
-summary = "Python toolkit for analysis, visualization, and comparison of spike sorting output"
-groups = ["default"]
-dependencies = [
-    "neo>=0.13.0",
-    "numpy<2.0,>=1.20",
-    "packaging",
-    "probeinterface>=0.2.23",
-    "threadpoolctl>=3.0.0",
-    "tqdm",
-    "zarr<2.18,>=2.16",
-]
-files = [
-    {file = "spikeinterface-0.101.0-py3-none-any.whl", hash = "sha256:cc475411cdda8cc695b54607bf088c44783c1adccbd82a8e701b6c2a09a1c66d"},
-    {file = "spikeinterface-0.101.0.tar.gz", hash = "sha256:a5a6c3a6c5a62627c5cb341dd364fbed232f4a7a19ed67a274065fd5f3de3ace"},
 ]
 
 [[package]]

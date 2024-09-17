@@ -2085,7 +2085,7 @@ class DynamicRoutingSession:
                 f"{self.id} has no log.csv file to get manipulator coordinates"
             ) from exc
 
-        df = utils.get_newscale_coordinates(
+        df = npc_ephys.get_newscale_coordinates(
             self.newscale_log_path,
             f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
         )
