@@ -35,7 +35,7 @@ frozenlist==1.4.1
 fsspec==2024.6.0
 h5py==3.11.0
 hdmf==3.14.3
-hdmf-zarr-bjh==0.8.1
+hdmf-zarr-bjh==0.8.1.post1
 idna==3.7
 importlib-resources==6.4.2; python_version < "3.10"
 inflection==0.5.1
@@ -54,10 +54,10 @@ mypy-extensions==1.0.0
 ndindex==1.8
 ndx-events==0.2.0
 ndx-pose==0.1.1
-npc-ephys==0.1.23
+npc-ephys==0.1.24
 npc-io==0.1.29
-npc-lims==0.1.174
-npc-mvr==0.1.6
+npc-lims==0.1.175
+npc-mvr==0.1.7
 npc-samstim==0.1.4
 npc-session==0.1.38
 npc-stim==0.1.8

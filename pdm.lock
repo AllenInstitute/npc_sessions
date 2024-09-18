@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:87086b7720a1f78a76da5e1b521ea20e04a922fd05963ccd05ecc31bd75fd821"
+content_hash = "sha256:09a960f56c5c8d3e555785c096d21135e3215adbe3cf0f5cbc1af5c9bf590f77"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -1142,7 +1142,7 @@ files = [
 
 [[package]]
 name = "hdmf-zarr-bjh"
-version = "0.8.1"
+version = "0.8.1.post1"
 requires_python = ">=3.8"
 summary = "A package defining a Zarr I/O backend for HDMF - forked to fix a bug"
 groups = ["default"]
@@ -1152,11 +1152,11 @@ dependencies = [
     "numpy<2.0,>=1.24",
     "pynwb>=2.5.0",
     "threadpoolctl>=3.1.0",
-    "zarr<3.0,>=2.11.0",
+    "zarr==2.17.2",
 ]
 files = [
-    {file = "hdmf_zarr_bjh-0.8.1-py3-none-any.whl", hash = "sha256:68ea3062c20ab80fc9786235866bf517f27d86fdabdcdccd5671dfe8e66cb780"},
-    {file = "hdmf_zarr_bjh-0.8.1.tar.gz", hash = "sha256:9e381014f8d93308381d6c523ced279308c463034f130d1a935613e08d89199c"},
+    {file = "hdmf_zarr_bjh-0.8.1.post1-py3-none-any.whl", hash = "sha256:c5eb74982c2fe322a33ad256a5921df9e598c7866dafc5128afbefc5ad0731ec"},
+    {file = "hdmf_zarr_bjh-0.8.1.post1.tar.gz", hash = "sha256:02c6e060a0eb69d6e50e3d26435938d2fd5ee0bbf28de1ab31de5c3b471c89a8"},
 ]
 
 [[package]]
@@ -1672,12 +1672,12 @@ files = [
 
 [[package]]
 name = "npc-ephys"
-version = "0.1.23"
+version = "0.1.24"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing raw ephys data, compatible with data in the cloud."
 groups = ["default"]
 dependencies = [
-    "hdmf-zarr-bjh==0.8.1",
+    "hdmf-zarr-bjh==0.8.1.post1",
     "npc-io>=0.1.26",
     "npc-lims>=0.1.73",
     "npc-sync>=0.1.12",
@@ -1690,8 +1690,8 @@ dependencies = [
     "zarr<2.18.1",
 ]
 files = [
-    {file = "npc_ephys-0.1.23-py3-none-any.whl", hash = "sha256:3133bee243452ef16eb47d00a49019a6a2de441ef5024e0dad526162190a298c"},
-    {file = "npc_ephys-0.1.23.tar.gz", hash = "sha256:eb48fe84364905e24e53c2b441d6041da9cc3d188551dcb9e5e73502e9e74d04"},
+    {file = "npc_ephys-0.1.24-py3-none-any.whl", hash = "sha256:0017b944640624d43ad04b4ea052eed1cdb32d9c42c6887d1b5136f3d0df092e"},
+    {file = "npc_ephys-0.1.24.tar.gz", hash = "sha256:136f4642a19a28cc4ce847b5bff2cdfd9846a8598d9eb253eea7a824b777c74f"},
 ]
 
 [[package]]
@@ -1715,7 +1715,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.174"
+version = "0.1.175"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 groups = ["default"]
@@ -1733,13 +1733,13 @@ dependencies = [
     "types-requests>=2.31.0.6",
 ]
 files = [
-    {file = "npc_lims-0.1.174-py3-none-any.whl", hash = "sha256:a3ff502e25a2b2d2c24a590b4dd3c46d4045bcb5e2743089c85fe85aafb21c3c"},
-    {file = "npc_lims-0.1.174.tar.gz", hash = "sha256:d4a1ab96cf9e43e8a69dac9dae204473d75ae74c48f1b091703da8bb79812818"},
+    {file = "npc_lims-0.1.175-py3-none-any.whl", hash = "sha256:288dd69fbd59c2ca56e4e0d2610da17e3171831b58097da82892ac1e9c361cab"},
+    {file = "npc_lims-0.1.175.tar.gz", hash = "sha256:340b5097fff67b58bdbc8c8e794ceb4e6f797c925d94021533319e21843db8a3"},
 ]
 
 [[package]]
 name = "npc-mvr"
-version = "0.1.6"
+version = "0.1.7"
 requires_python = ">=3.9"
 summary = "Tools for reading raw video data from MindScope Neuropixels experiments, compatible with data in the cloud."
 groups = ["default"]
@@ -1750,8 +1750,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc_mvr-0.1.6-py3-none-any.whl", hash = "sha256:e9c1f62c341011fbec08b08ee95cbb08fd2d8f0f51610571cf9c53dd2a2402b3"},
-    {file = "npc_mvr-0.1.6.tar.gz", hash = "sha256:2ec119b6fbec2799885838138c03eee15e4a52553a5e49b9971bd8df198c0cb4"},
+    {file = "npc_mvr-0.1.7-py3-none-any.whl", hash = "sha256:eea132c80f63938a2334e7023316aa1cda0c9e336d85c96a0a8a5ca12ca1e434"},
+    {file = "npc_mvr-0.1.7.tar.gz", hash = "sha256:efc40041853ee11a3265e392036d800ab449ceece9705fde509be2e6859554bf"},
 ]
 
 [[package]]
