@@ -764,7 +764,7 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         # TODO add filtered, sub-sampled LFP
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
-        if self.is_ephys:
+        if self.is_ephys and self._subsampled_LFP is not None:
             modules.extend(self._subsampled_LFP)
         return tuple(modules)
 
@@ -1693,7 +1693,7 @@ class DynamicRoutingSession:
         return lfp
 
     @npc_io.cached_property
-    def _subsampled_LFP(self) -> pynwb.ecephys.LFP:
+    def _subsampled_LFP(self) -> pynwb.ecephys.LFP | None:
         LFP = pynwb.ecephys.LFP()
         band: str = "0.5-500 Hz"
 
@@ -1705,7 +1705,7 @@ class DynamicRoutingSession:
             logger.warning(
                 f"{self.id} has no LFP subsampled results. Session either has not been processed or failed in codeocean"
             )
-            return LFP
+            return None
 
         for probe in self.electrode_groups.values():
             probe_subsampled_LFP_result = tuple(
