@@ -34,10 +34,9 @@ fonttools==4.53.1
 frozenlist==1.4.1
 fsspec==2024.6.0
 h5py==3.11.0
-hdmf==3.14.3
+hdmf==3.14.4
 hdmf-zarr-bjh==0.8.1.post1
 idna==3.7
-importlib-resources==6.4.2; python_version < "3.10"
 inflection==0.5.1
 jmespath==1.0.1
 jsonschema==4.23.0
@@ -54,12 +53,12 @@ mypy-extensions==1.0.0
 ndindex==1.8
 ndx-events==0.2.0
 ndx-pose==0.1.1
-npc-ephys==0.1.24
-npc-io==0.1.29
+npc-ephys==0.1.25
+npc-io==0.1.30
 npc-lims==0.1.175
 npc-mvr==0.1.7
 npc-samstim==0.1.4
-npc-session==0.1.38
+npc-session==0.1.39
 npc-stim==0.1.8
 npc-sync==0.1.18
 numba==0.60.0
@@ -75,11 +74,11 @@ polars==1.7.1
 py-cpuinfo==9.0.0
 pyarrow==17.0.0
 pycparser==2.22; platform_python_implementation != "PyPy"
-pydantic==2.8.2
-pydantic-core==2.20.1
+pydantic==2.9.2
+pydantic-core==2.23.4
 pydbhub-bjh==0.0.9
 pygments==2.18.0
-pynwb==2.8.1
+pynwb==2.8.2
 pyopenssl==24.2.1
 pyparsing==3.1.2
 python-dateutil==2.9.0.post0
@@ -90,7 +89,7 @@ redis==5.0.8
 referencing==0.35.1
 requests==2.32.3
 requests-toolbelt==1.0.0
-rich==13.7.1
+rich==13.8.1
 rpds-py==0.20.0
 ruamel-yaml==0.18.6
 ruamel-yaml-clib==0.2.8; platform_python_implementation == "CPython" and python_version < "3.13"
@@ -114,4 +113,3 @@ wavpack-numcodecs==0.1.5
 wrapt==1.16.0
 yarl==1.9.4
 zarr==2.17.2
-zipp==3.20.0; python_version < "3.10"

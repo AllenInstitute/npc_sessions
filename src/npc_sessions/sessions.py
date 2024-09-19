@@ -1691,24 +1691,33 @@ class DynamicRoutingSession:
                 # units=microvolts, # doesn't work - electrical series must be in volts
             )
         return lfp
-    
+
     @npc_io.cached_property
     def _subsampled_LFP(self) -> pynwb.ecephys.LFP:
         LFP = pynwb.ecephys.LFP()
         band: str = "0.5-500 Hz"
 
-        try: # only run on one session so far: '674562_2023-10-03'
-            subsampled_LFP_results = npc_ephys.get_LFP_subsampled_results(self.id, self.ephys_timing_data)
+        try:  # only run on one session so far: '674562_2023-10-03'
+            subsampled_LFP_results = npc_ephys.get_LFP_subsampled_results(
+                self.id, self.ephys_timing_data
+            )
         except FileNotFoundError:
-            logger.warning(f'{self.id} has no LFP subsampled results. Session either has not been processed or failed in codeocean')
+            logger.warning(
+                f"{self.id} has no LFP subsampled results. Session either has not been processed or failed in codeocean"
+            )
             return LFP
-        
+
         for probe in self.electrode_groups.values():
-            probe_subsampled_LFP_result = tuple(subsampled_LFP for subsampled_LFP in subsampled_LFP_results 
-                                         if subsampled_LFP.probe.lower() == probe.name.lower())
-            
+            probe_subsampled_LFP_result = tuple(
+                subsampled_LFP
+                for subsampled_LFP in subsampled_LFP_results
+                if subsampled_LFP.probe.lower() == probe.name.lower()
+            )
+
             if not probe_subsampled_LFP_result:
-                logger.warning(f'{probe.name} has no subsampled LFP result. Possibly no surface channel for {probe.name}. Check codeocean. Skipping')
+                logger.warning(
+                    f"{probe.name} has no subsampled LFP result. Possibly no surface channel for {probe.name}. Check codeocean. Skipping"
+                )
                 continue
 
             probe_subsampled_LFP = probe_subsampled_LFP_result[0]
@@ -1732,7 +1741,7 @@ class DynamicRoutingSession:
                 description=f"temporal and spatial subsampled local field potential-band voltage timeseries ({band}) from electrodes on {probe.name} with sampling rate {probe_subsampled_LFP.sampling_rate} across {len(probe_subsampled_LFP.channel_ids)} channels",
                 # units=microvolts, # doesn't work - electrical series must be in volts
             )
-        
+
         return LFP
 
     # images -------------------------------------------------------------------- #
