@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:4d16cd1f1ef48b63b838be75740b057916d76f0c3110275d8d3a799b4b7ded5d"
+content_hash = "sha256:fec2dfcfce82f016f31cbde76c94614496523f40b94a8fc70f170030189a8e58"
 
 [[package]]
 name = "aind-data-schema"

@@ -184,8 +184,8 @@ class DynamicRoutingSession:
     # access nwb modules individually before compiling a whole nwb file:
     >>> s.session_start_time
     datetime.datetime(2023, 8, 3, 12, 4, 15, tzinfo=zoneinfo.ZoneInfo(key='America/Los_Angeles'))
-    >>> s.subject.subject_id
-    '670248'
+    >>> s.subject.age
+    'P166D'
     >>> s.subject.genotype
     'VGAT-ChR2-YFP/wt'
     >>> 'task' in s.epoch_tags
@@ -2015,6 +2015,7 @@ class DynamicRoutingSession:
         metadata = self._subject_training_sheet_metadata
         assert metadata["mouse_id"] == self.id.subject
         dob = utils.get_aware_dt(metadata["birthdate"])
+
         return pynwb.file.Subject(
             subject_id=metadata["mouse_id"],
             species="Mus musculus",
