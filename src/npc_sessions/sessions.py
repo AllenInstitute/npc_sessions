@@ -184,8 +184,8 @@ class DynamicRoutingSession:
     # access nwb modules individually before compiling a whole nwb file:
     >>> s.session_start_time
     datetime.datetime(2023, 8, 3, 12, 4, 15, tzinfo=zoneinfo.ZoneInfo(key='America/Los_Angeles'))
-    >>> s.subject.age
-    'P166D'
+    >>> s.subject.subject_id
+    '670248'
     >>> s.subject.genotype
     'VGAT-ChR2-YFP/wt'
     >>> 'task' in s.epoch_tags
@@ -765,7 +765,7 @@ class DynamicRoutingSession:
         # TODO add filtered, sub-sampled LFP
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_ephys:
-            modules.extend(self.subsampled_LFP)
+            modules.extend(self._subsampled_LFP)
         return tuple(modules)
 
     @property
@@ -1693,7 +1693,7 @@ class DynamicRoutingSession:
         return lfp
     
     @npc_io.cached_property
-    def subsampled_LFP(self) -> pynwb.ecephys.LFP:
+    def _subsampled_LFP(self) -> pynwb.ecephys.LFP:
         LFP = pynwb.ecephys.LFP()
         band: str = "0.5-500 Hz"
 
@@ -1729,7 +1729,7 @@ class DynamicRoutingSession:
                 conversion=0.195e-6,  # bit/microVolt from open-ephys
                 comments="",
                 resolution=0.195e-6,
-                description=f"subsampled local field potential-band voltage timeseries ({band}) from electrodes on {probe.name} with sampling rate {probe_subsampled_LFP.sampling_rate} and spatially subsampled to {len(probe_subsampled_LFP.channel_ids)} channels",
+                description=f"temporal and spatial subsampled local field potential-band voltage timeseries ({band}) from electrodes on {probe.name} with sampling rate {probe_subsampled_LFP.sampling_rate} across {len(probe_subsampled_LFP.channel_ids)} channels",
                 # units=microvolts, # doesn't work - electrical series must be in volts
             )
         
