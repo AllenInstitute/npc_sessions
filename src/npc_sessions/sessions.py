@@ -762,7 +762,6 @@ class DynamicRoutingSession:
     def _ecephys(
         self,
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        # TODO add filtered, sub-sampled LFP
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_ephys and self._subsampled_LFP is not None:
             modules.extend(self._subsampled_LFP)
@@ -1738,7 +1737,7 @@ class DynamicRoutingSession:
                 conversion=0.195e-6,  # bit/microVolt from open-ephys
                 comments="",
                 resolution=0.195e-6,
-                description=f"temporal and spatial subsampled local field potential-band voltage timeseries ({band}) from electrodes on {probe.name} with sampling rate {probe_subsampled_LFP.sampling_rate} across {len(probe_subsampled_LFP.channel_ids)} channels. See electrodes table for channels selected.",
+                description=f"temporally- and spatially-subsampled local field potential-band voltage timeseries ({band}) from electrodes on {probe.name} with sampling rate {probe_subsampled_LFP.sampling_rate} across {len(probe_subsampled_LFP.channel_ids)} channels. See electrodes table for channels selected.",
                 # units=microvolts, # doesn't work - electrical series must be in volts
             )
 
