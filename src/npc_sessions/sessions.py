@@ -2919,7 +2919,7 @@ class DynamicRoutingSession:
 
             name = f"lp_{nwb_camera_name}"
             table_description = (
-                f"Lightning Pose tracking model fit to {len(utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]])} facial features for each frame of {nwb_camera_name.replace('_', '')} video. "
+                f"Lightning Pose tracking model fit to {len(utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]])} facial features for each frame of {nwb_camera_name.replace('_', ' ')} video. "
                 "Output for every frame includes: "
                 "`x` and `y`: coordinates in pixels, with (0, 0) at top-left of frame"
                 " | `likelihood`: likelihood of the model"
