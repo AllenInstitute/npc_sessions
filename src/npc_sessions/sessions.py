@@ -334,7 +334,6 @@ class DynamicRoutingSession:
             subject=self.subject,
             keywords=self.keywords,
             epochs=self.epochs,
-            epoch_tags=self.epoch_tags,
             stimulus_template=None,  # TODO pass tuple of stimulus templates
             invalid_times=self.invalid_times,
             trials=(
@@ -407,7 +406,6 @@ class DynamicRoutingSession:
             stimulus_notes=self.task_version if self.is_task else None,
             subject=self.subject,
             keywords=self.keywords,
-            epoch_tags=self.epoch_tags,
             invalid_times=self.invalid_times,
         )
 
