@@ -2905,7 +2905,7 @@ class DynamicRoutingSession:
                 result_df = utils.get_LPFaceParts_result_dataframe(
                     self.id, utils.LP_MAPPING[camera_name], result_name
                 )
-                if len(timestamps) != len(df):
+                if len(timestamps) != len(result_df):
                     logger.warning(
                         f"{self.id} {camera_name} {result_name} lightning pose face parts output has wrong shape {len(df)}, expected {len(timestamps)} frames."
                         "\nLightning pose face parts capsule was likely run with an additional data asset attached"
