@@ -11,7 +11,7 @@ authors = [
 ]
 dependencies = [
     "pandas>=2.0",
-    "pynwb>=2.7.0",
+    "pynwb>=2.8.2",
     "rich>=13.5.2",
     "zarr<2.18.1",
     "matplotlib>=3.7.2",
@@ -32,7 +32,7 @@ dependencies = [
     "npc-samstim>=0.1.4",
     "npc-session>=0.1.39",
     "npc-mvr>=0.1.7",
-    "npc-io>=0.1.27",
+    "npc-io>=0.1.30",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
