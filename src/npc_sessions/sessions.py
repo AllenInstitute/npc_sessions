@@ -185,7 +185,7 @@ class DynamicRoutingSession:
     >>> s.session_start_time
     datetime.datetime(2023, 8, 3, 12, 4, 15, tzinfo=zoneinfo.ZoneInfo(key='America/Los_Angeles'))
     >>> s.subject.age
-    'P166D'
+    'P167D'
     >>> s.subject.genotype
     'VGAT-ChR2-YFP/wt'
     >>> 'task' in s.epoch_tags
