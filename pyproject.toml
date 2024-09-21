@@ -25,7 +25,7 @@ dependencies = [
     "tables>=3.9.2",
     "aind-data-schema==0.33.3",
     "pydantic>=2.6.4",
-    "npc-lims>=0.1.175",
+    "npc-lims>=0.1.176",
     "npc-sync>=0.1.18",
     "npc-ephys>=0.1.25",
     "npc-stim>=0.1.8",
