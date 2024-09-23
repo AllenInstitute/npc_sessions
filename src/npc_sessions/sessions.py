@@ -3083,7 +3083,7 @@ class DynamicRoutingSession:
         )
 
     @npc_io.cached_property
-    def _reward_times_with_duration(self) -> pynwb.TimeSeries:
+    def _reward_times_with_duration(self) -> pynwb.TimeSeries | None:
         """As interpreted from sync, after solenoid line was added ~March 2024."""
         if not self.is_sync:
             raise AttributeError(f"{self.id} is not a session with sync data")
@@ -3091,14 +3091,20 @@ class DynamicRoutingSession:
             raise AttributeError(f"{self.id} does not have reward duration data")
         rising = self.sync_data.get_rising_edges(15, units="seconds")
         falling = self.sync_data.get_falling_edges(15, units="seconds")
-        if falling[0] < rising[0]:
-            falling = falling[1:]
-        if rising[-1] > falling[-1]:
-            rising = rising[:-1]
-        assert len(rising) == len(falling)
+        if falling.size == 0 or rising.size == 0:
+            timestamps = np.array([], dtype=np.float64)
+            duration = np.array([], dtype=np.float64)
+        else:
+            if falling[0] < rising[0]:
+                falling = falling[1:]
+            if rising[-1] > falling[-1]:
+                rising = rising[:-1]
+            assert len(rising) == len(falling)
+            timestamps = rising
+            duration = falling - rising
         return pynwb.TimeSeries(
-            timestamps=rising,
-            data=falling - rising,
+            timestamps=timestamps,
+            data=duration,
             name="rewards",
             unit="seconds",
             description="times at which the solenoid valve that controls water reward delivery to the subject was opened; `data` contains the length of time the solenoid was open for each event",
