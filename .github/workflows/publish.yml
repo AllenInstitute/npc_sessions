@@ -15,6 +15,17 @@ on:
       - 'notebooks'
       - '**.md'
       - '**.yml'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.ipynb'
+      - '**.json'
+      - '.vscode'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'notebooks/**'
+      - '**.md'
+      - '**.yml'
   workflow_dispatch:
 
 concurrency:
