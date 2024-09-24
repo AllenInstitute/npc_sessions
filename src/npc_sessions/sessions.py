@@ -762,7 +762,7 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_ephys and self._subsampled_LFP is not None:
-            modules.extend(self._subsampled_LFP)
+            modules.append(self._subsampled_LFP)
         return tuple(modules)
 
     @property
@@ -1720,7 +1720,7 @@ class DynamicRoutingSession:
             probe_subsampled_LFP = probe_subsampled_LFP_result[0]
             electrode_table_region = hdmf.common.DynamicTableRegion(
                 name="electrodes",  # pynwb requires this not be renamed
-                description=f"channels with subsampled LFP data on {probe.name}. Spatially downsampled resulting in f{len(probe_subsampled_LFP.channel_ids)} channels",
+                description=f"channels with subsampled LFP data on {probe.name}. Spatially downsampled resulting in {len(probe_subsampled_LFP.channel_ids)} channels",
                 data=probe_subsampled_LFP.channel_ids,  # channel indices
                 table=self.electrodes,
             )
