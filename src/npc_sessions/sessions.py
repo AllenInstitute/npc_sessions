@@ -1546,21 +1546,20 @@ class DynamicRoutingSession:
         electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
             group_query = f"group_name == {row['electrode_group_name']!r}"
+            peak_electrode = electrodes.query(
+                f"{group_query} & channel == {row['peak_channel']}"
+            ).index.item()
             if self.is_waveforms:
                 row["electrodes"] = electrodes.query(
                     f"{group_query} & channel in {row['channels']}"
                 ).index.to_list()
+                row["peak_waveform_index"] = row["electrodes"].index(peak_electrode)
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
             units.add_unit(
                 **row,  # contains spike_times
                 electrode_group=self.electrode_groups[row["electrode_group_name"]],
-                peak_electrode=(
-                    peak_electrode := electrodes.query(
-                        f"{group_query} & channel == {row['peak_channel']}"
-                    ).index.item()
-                ),
-                peak_waveform_index=row["electrodes"].index(peak_electrode),
+                peak_electrode=peak_electrode,
                 obs_intervals=self.get_obs_intervals(row["electrode_group_name"]),
             )
         if "waveform_mean" in units:
