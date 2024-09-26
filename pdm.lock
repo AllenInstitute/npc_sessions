@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:3c1fe66b19fb3e8fbd418404f64987efb14d90af73fd40816e0ad093159dae1d"
+content_hash = "sha256:f797810c065a294c2f861ae65816a07e3467da880c9ebec9da66ccd24ed235e9"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -1886,7 +1886,7 @@ files = [
 
 [[package]]
 name = "npc-ephys"
-version = "0.1.25"
+version = "0.1.29"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing raw ephys data, compatible with data in the cloud."
 groups = ["default"]
@@ -1904,8 +1904,8 @@ dependencies = [
     "zarr<2.18.1",
 ]
 files = [
-    {file = "npc_ephys-0.1.25-py3-none-any.whl", hash = "sha256:506e1881e907a6b3e1133607cd87f84feee7d4cb924169e700d937e042e559a9"},
-    {file = "npc_ephys-0.1.25.tar.gz", hash = "sha256:e2c3926b7c104dc6202591b0d59f84e20b52d69ab7cc23303d1283674ccdc7e5"},
+    {file = "npc_ephys-0.1.29-py3-none-any.whl", hash = "sha256:599206939822b146b2dbd5c30c3e1ee857394830bc7f950a2e7dd487d0e7f2b4"},
+    {file = "npc_ephys-0.1.29.tar.gz", hash = "sha256:f82f0003ee173397b85d982aaa633eaa79533aebd1478608aea726fee01c1ab9"},
 ]
 
 [[package]]
@@ -1954,7 +1954,7 @@ files = [
 
 [[package]]
 name = "npc-mvr"
-version = "0.1.7"
+version = "0.1.8"
 requires_python = ">=3.9"
 summary = "Tools for reading raw video data from MindScope Neuropixels experiments, compatible with data in the cloud."
 groups = ["default"]
@@ -1965,8 +1965,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc_mvr-0.1.7-py3-none-any.whl", hash = "sha256:eea132c80f63938a2334e7023316aa1cda0c9e336d85c96a0a8a5ca12ca1e434"},
-    {file = "npc_mvr-0.1.7.tar.gz", hash = "sha256:efc40041853ee11a3265e392036d800ab449ceece9705fde509be2e6859554bf"},
+    {file = "npc_mvr-0.1.8-py3-none-any.whl", hash = "sha256:06931722a1328ee0562f9ab996d0c9aa9b93c541b14ff5d3c0f2094584118de2"},
+    {file = "npc_mvr-0.1.8.tar.gz", hash = "sha256:7efa21036193286b779495bbfebbb8b95effbca0f8bbee9238a5bfe3525e42f2"},
 ]
 
 [[package]]
