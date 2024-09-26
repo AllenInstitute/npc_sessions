@@ -1560,8 +1560,7 @@ class DynamicRoutingSession:
                         f"{group_query} & channel == {row['peak_channel']}"
                     ).index.item()
                 ),
-                # TODO incorrect for some units: add back when annotations are correct
-                # peak_waveform_index=row["electrodes"].index(peak_electrode),
+                peak_waveform_index=row["electrodes"].index(peak_electrode),
                 obs_intervals=self.get_obs_intervals(row["electrode_group_name"]),
             )
         if "waveform_mean" in units:
