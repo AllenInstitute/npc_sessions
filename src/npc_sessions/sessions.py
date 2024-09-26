@@ -2829,10 +2829,10 @@ class DynamicRoutingSession:
             .query("default_qc")
             .query("electrode_group_name == @electrode_group_name")
         )
-        units_description = 'all good units'
+        units_description = "all good units"
         if units.empty:
             units = self.units.query("electrode_group_name == @electrode_group_name")
-            units_description = 'all units'
+            units_description = "all units"
         bin_interval = 1  # seconds
         if not units.empty:
             hist, bin_edges = npc_ephys.bin_spike_times(
