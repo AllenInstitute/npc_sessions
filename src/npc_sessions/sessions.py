@@ -1553,7 +1553,7 @@ class DynamicRoutingSession:
                 row["electrodes"] = electrodes.query(
                     f"{group_query} & channel in {row['channels']}"
                 ).index.to_list()
-                row["peak_waveform_index"] = row["electrodes"].index(peak_electrode),
+                row["peak_waveform_index"] = row["electrodes"].index(peak_electrode)
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
             units.add_unit(
