@@ -318,7 +318,7 @@ class DynamicRoutingSession:
 
     @property
     def nwb(self) -> pynwb.NWBFile:
-        return pynwb.NWBFile(
+        nwb = pynwb.NWBFile(
             session_id=self.session_id,
             session_description=self.session_description,
             experiment_description=self.experiment_description,
@@ -341,14 +341,24 @@ class DynamicRoutingSession:
             ),  # we have one session without trials (670248_2023-08-02)
             intervals=self._intervals,
             acquisition=self._acquisition,
-            processing=tuple(self.processing.values()),
+            # processing=tuple(self.processing.values()), # unsupported:
+            # causes recursive references in the hdf5 file on disk
             analysis=self._analysis,
             devices=self._devices if self._devices else None,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
             electrodes=self.electrodes if self.is_ephys else None,
             units=self.units if self.is_sorted else None,
         )
-
+        #! keep the following in-sync with in-memory view at `self.processing`:
+        for module_name in ("behavior",) + (("ecephys",) if self.is_ephys else ()):
+            module = getattr(self, f"_{module_name}")
+            _ = nwb.create_processing_module(
+                name=module_name,
+                description=f"processed {module_name} data",
+                data_interfaces=module,
+            )
+        return nwb
+    
     def write_nwb(
         self,
         path: str | npc_io.PathLike | None = None,
@@ -723,6 +733,9 @@ class DynamicRoutingSession:
         """Data after processing and filtering - raw data goes in
         `acquisition`.
         """
+        #! keep the following in-sync with nwb construction in `self.nwb`
+        # - cannot pass modules to NWBFile.__init__ as it causes recursive
+        #   references in the hdf5 file on disk
         processing = pynwb.core.LabelledDict(label="processing", key_attr="name")
         for module_name in ("behavior",) + (("ecephys",) if self.is_ephys else ()):
             module = getattr(self, f"_{module_name}")
