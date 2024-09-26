@@ -341,7 +341,7 @@ class DynamicRoutingSession:
             ),  # we have one session without trials (670248_2023-08-02)
             intervals=self._intervals,
             acquisition=self._acquisition,
-            processing=tuple(self.processing.values()),
+            # processing=tuple(self.processing.values()),
             analysis=self._analysis,
             devices=self._devices if self._devices else None,
             electrode_groups=self._electrode_groups if self.is_ephys else None,
