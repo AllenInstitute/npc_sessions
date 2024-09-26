@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:f797810c065a294c2f861ae65816a07e3467da880c9ebec9da66ccd24ed235e9"
+content_hash = "sha256:6c4d66f2432651ba38bc5e8c617729de654669fc947feea763a59b753eddce58"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -1886,7 +1886,7 @@ files = [
 
 [[package]]
 name = "npc-ephys"
-version = "0.1.29"
+version = "0.1.30"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing raw ephys data, compatible with data in the cloud."
 groups = ["default"]
@@ -1904,8 +1904,8 @@ dependencies = [
     "zarr<2.18.1",
 ]
 files = [
-    {file = "npc_ephys-0.1.29-py3-none-any.whl", hash = "sha256:599206939822b146b2dbd5c30c3e1ee857394830bc7f950a2e7dd487d0e7f2b4"},
-    {file = "npc_ephys-0.1.29.tar.gz", hash = "sha256:f82f0003ee173397b85d982aaa633eaa79533aebd1478608aea726fee01c1ab9"},
+    {file = "npc_ephys-0.1.30-py3-none-any.whl", hash = "sha256:f3fe5046fc2df94b85d7a5a8e322cc8f6a968f62edfc272609aebcf50c16aafe"},
+    {file = "npc_ephys-0.1.30.tar.gz", hash = "sha256:3c4db7465a2f9f313b0de37ba15ce05762e519887a19c92dd903306d2b6c633f"},
 ]
 
 [[package]]
