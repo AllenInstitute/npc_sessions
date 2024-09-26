@@ -2830,16 +2830,24 @@ class DynamicRoutingSession:
             .query("default_qc")
             .query("electrode_group_name == @electrode_group_name")
         )
+        units_description = 'all good units'
+        if units.empty:
+            units = self.units.query("electrode_group_name == @electrode_group_name")
+            units_description = 'all units'
         bin_interval = 1  # seconds
-        hist, bin_edges = npc_ephys.bin_spike_times(
-            units["spike_times"].to_numpy(), bin_interval=bin_interval
-        )
-
+        if not units.empty:
+            hist, bin_edges = npc_ephys.bin_spike_times(
+                units["spike_times"].to_numpy(), bin_interval=bin_interval
+            )
+            timestamps = (bin_edges[:-1] + bin_edges[1:]) / 2
+        else:
+            hist = np.array([])
+            timestamps = np.array([])
         return pynwb.TimeSeries(
             name=probe.name,
-            description=f"joint spike rate across all good units on {probe.name}, binned at {bin_interval} second intervals",
+            description=f"joint spike rate across {units_description} on {probe.name}, binned at {bin_interval} second intervals",
             data=hist,
-            timestamps=(bin_edges[:-1] + bin_edges[1:]) / 2,
+            timestamps=timestamps,
             unit="spikes/s",
             resolution=1.0,
         )
