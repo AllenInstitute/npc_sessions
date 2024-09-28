@@ -621,6 +621,8 @@ class DynamicRoutingSession:
                 self.keywords.append("video")
             if self.is_ephys:
                 self.keywords.append("ephys")
+                if self.is_surface_channels:
+                    self.keywords.append("deep_insertions")
             if self.is_sorted:
                 self.keywords.append("units")
             if self.is_annotated:
@@ -659,8 +661,6 @@ class DynamicRoutingSession:
                 self.keywords.append(f"experiment_day_{self.info.experiment_day}")
             if self.info and self.info.behavior_day is not None:
                 self.keywords.append(f"behavior_day_{self.info.behavior_day}")
-            # TODO
-            # muscimol, perturbation, context_naive
         return self._keywords
 
     @keywords.setter
