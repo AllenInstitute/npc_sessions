@@ -1951,7 +1951,7 @@ class DynamicRoutingSession:
     def is_context_naive(self) -> bool:
         if (v := getattr(self, "_is_context_naive", None)) is not None:
             return v
-        return False
+        return self.is_templeton
 
     @property
     def is_late_autorewards(self) -> bool:
