@@ -358,7 +358,7 @@ class DynamicRoutingSession:
                 data_interfaces=module,
             )
         return nwb
-    
+
     def write_nwb(
         self,
         path: str | npc_io.PathLike | None = None,
