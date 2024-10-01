@@ -655,7 +655,7 @@ class DynamicRoutingSession:
                 self.keywords.append("late_autorewards")
             elif self.is_task:
                 self.keywords.append("early_autorewards")
-            if self.is_task and not getattr(self, "is_photodiode"):
+            if self.is_task and not self.is_photodiode:
                 self.keywords.append("no_photodiode")
             for t in self.epoch_tags:
                 if t not in self.keywords:
@@ -1956,14 +1956,16 @@ class DynamicRoutingSession:
         if (v := getattr(self, "_is_naive", None)) is not None:
             return v
         if self.is_templeton:
-            logger.warning(f"{self.id} is a Templeton session: returning is_naive = False, but we don't currently track this")
+            logger.warning(
+                f"{self.id} is a Templeton session: returning is_naive = False, but we don't currently track this"
+            )
             return False
         if self.info is None:
             return True
         if not self.info.training_info:
             return True
         return self.info.behavior_day == 1
-    
+
     @property
     def is_context_naive(self) -> bool:
         if (v := getattr(self, "_is_context_naive", None)) is not None:
@@ -1991,15 +1993,19 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def is_photodiode(self) -> bool:
         """Do frame times from sync use photodiode info for the task data?
-        
+
         - in cases where diode signal is unreliable, we use vsync + constant
           monitor lag to estimate frame times
         """
         if not self.is_task:
             raise AttributeError(f"{self.id} is not a session with behavior task")
-        task_frame_times = next(v for k,v in self.stim_frame_times.items() if self.task_stim_name in k)
-        return any(np.array_equal(task_frame_times, array) for array in self.sync_data.constant_lag_frame_display_time_blocks)
-
+        task_frame_times = next(
+            v for k, v in self.stim_frame_times.items() if self.task_stim_name in k
+        )
+        return any(
+            np.array_equal(task_frame_times, array)
+            for array in self.sync_data.constant_lag_frame_display_time_blocks
+        )
 
     # helper properties -------------------------------------------------------- #
 
