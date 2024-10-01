@@ -433,7 +433,7 @@ class DynamicRoutingSession:
     def notes(self) -> str | None:
         notes = ""
         if self.info:
-            notes += "; ".join([self.info.notes] + self.info.issues)
+            notes = "; ".join([notes, self.info.notes] + self.info.issues)
         return notes or None
 
     @property
@@ -649,6 +649,8 @@ class DynamicRoutingSession:
                 self.keywords.append("injection_control")
             if self.is_context_naive:
                 self.keywords.append("context_naive")
+            if self.is_naive:
+                self.keywords.append("naive")
             if self.is_task and self.is_late_autorewards:
                 self.keywords.append("late_autorewards")
             elif self.is_task:
@@ -1947,6 +1949,19 @@ class DynamicRoutingSession:
             return v
         return False
 
+    @property
+    def is_naive(self) -> bool:
+        if (v := getattr(self, "_is_naive", None)) is not None:
+            return v
+        if self.is_templeton:
+            logger.warning(f"{self.id} is a Templeton session: returning is_naive = False, but we don't currently track this")
+            return False
+        if self.info is None:
+            return True
+        if not self.info.training_info:
+            return True
+        return self.info.behavior_day == 1
+    
     @property
     def is_context_naive(self) -> bool:
         if (v := getattr(self, "_is_context_naive", None)) is not None:
