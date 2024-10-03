@@ -3062,6 +3062,7 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def _dlc(self) -> tuple[ndx_pose.pose.PoseEstimation, ...]:
+        as_pose_estimation = True
         if not self.is_video:
             return ()
         camera_to_dlc_model = {
@@ -3085,18 +3086,21 @@ class DynamicRoutingSession:
                 t for t in self._video_frame_times if nwb_camera_name in t.name
             ).timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
-            pose_estimation_series = utils.get_pose_series_from_dataframe(
-                self.id, df, timestamps
-            )
-            pose_estimations.append(
-                ndx_pose.pose.PoseEstimation(
-                    name=f"dlc_{nwb_camera_name}",
-                    pose_estimation_series=pose_estimation_series,
-                    description=f"DeepLabCut analysis of video from {nwb_camera_name.replace('_', ' ')}",
-                    original_videos=[video_path.as_posix()],
-                    source_software="DeepLabCut",
+            if as_pose_estimation:
+                pose_estimation_series = utils.get_pose_series_from_dataframe(
+                    self.id, df, timestamps
                 )
-            )
+                pose_estimations.append(
+                    ndx_pose.pose.PoseEstimation(
+                        name=f"dlc_{nwb_camera_name}",
+                        pose_estimation_series=pose_estimation_series,
+                        description=f"DeepLabCut analysis of video from {nwb_camera_name.replace('_', ' ')}",
+                        original_videos=[video_path.as_posix()],
+                        source_software="DeepLabCut",
+                    )
+                )
+            else:
+                raise NotImplementedError # TODO
         return tuple(pose_estimations)
 
     @npc_io.cached_property
