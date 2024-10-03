@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:6c4d66f2432651ba38bc5e8c617729de654669fc947feea763a59b753eddce58"
+content_hash = "sha256:1bb8ef59d4f2ffa25c8ab4208a7be37f011c60a73be4cb7d8c5c2034952ac2c0"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -2003,24 +2003,24 @@ files = [
 
 [[package]]
 name = "npc-stim"
-version = "0.1.8"
+version = "0.1.9"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing stim data, compatible with data in the cloud."
 groups = ["default"]
 dependencies = [
     "npc-io>=0.1.26",
     "npc-session>=0.1.33",
-    "npc-sync>=0.1.3",
+    "npc-sync>=0.1.19",
     "scipy>=1.12.0",
 ]
 files = [
-    {file = "npc_stim-0.1.8-py3-none-any.whl", hash = "sha256:0c46fe0ff5f520ee6d54bf0f2ac31887a305202b328c7bc72cbbc4d4f72fc9d0"},
-    {file = "npc_stim-0.1.8.tar.gz", hash = "sha256:1ffc00bf616e5236e16ed806d9f479eef97f9bfa989b63894d9e757be1b9bf2c"},
+    {file = "npc_stim-0.1.9-py3-none-any.whl", hash = "sha256:64f0eb63452f600c2ac6f8cde620b10d28d6350cd192e98007e98f33cbcd09ac"},
+    {file = "npc_stim-0.1.9.tar.gz", hash = "sha256:e3cb92d4b8c06e85fba2b8ffd13ff78f2c03fe61c7fa23315e7c92f9357e48aa"},
 ]
 
 [[package]]
 name = "npc-sync"
-version = "0.1.18"
+version = "0.1.19"
 requires_python = ">=3.9"
 summary = "Repackaging of AllenSDK.SyncDataset with extra functionality, compatible with data in the cloud."
 groups = ["default"]
@@ -2033,8 +2033,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc_sync-0.1.18-py3-none-any.whl", hash = "sha256:435dacb2949749854c876338800e802422dfe61af82d11b627cddaa523dc9040"},
-    {file = "npc_sync-0.1.18.tar.gz", hash = "sha256:c6199b264433740644e28f5a27b3165c07871aef9189432148433cbfba6ad709"},
+    {file = "npc_sync-0.1.19-py3-none-any.whl", hash = "sha256:2dd3ad5b4dad8633946d82de897d8b7d37bfb7456ccf5ac794d834149357698d"},
+    {file = "npc_sync-0.1.19.tar.gz", hash = "sha256:e6f3dd2578504fe9959604706387627e4c07a8c21cba3dd852f8c122d3f55b8e"},
 ]
 
 [[package]]
