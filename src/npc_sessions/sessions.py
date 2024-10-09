@@ -623,6 +623,8 @@ class DynamicRoutingSession:
                 self.keywords.append("ephys")
                 if self.is_surface_channels:
                     self.keywords.append("deep_insertions")
+                    deep_probes = set('ABCDEF') - set(self.surface_recording.probe_letters_to_skip)
+                    self.keywords.append(f"deep_insertion_probe_letters={''.join(sorted(deep_probes))}")
             if self.is_sorted:
                 self.keywords.append("units")
             if self.is_annotated:
