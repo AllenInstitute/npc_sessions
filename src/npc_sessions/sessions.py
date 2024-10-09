@@ -2000,7 +2000,7 @@ class DynamicRoutingSession:
         task_frame_times = next(
             v for k, v in self.stim_frame_times.items() if self.task_stim_name in k
         )
-        return any(
+        return not any(
             np.array_equal(task_frame_times, array)
             for array in self.sync_data.constant_lag_frame_display_time_blocks
         )
