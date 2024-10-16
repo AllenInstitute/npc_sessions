@@ -65,8 +65,8 @@ npc-lims==0.1.176
 npc-mvr==0.1.8
 npc-samstim==0.1.4
 npc-session==0.1.39
-npc-stim==0.1.8
-npc-sync==0.1.18
+npc-stim==0.1.9
+npc-sync==0.1.19
 numba==0.60.0
 numcodecs==0.12.1
 numexpr==2.10.1

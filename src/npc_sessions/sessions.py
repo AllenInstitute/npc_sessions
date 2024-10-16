@@ -623,8 +623,12 @@ class DynamicRoutingSession:
                 self.keywords.append("ephys")
                 if self.is_surface_channels:
                     self.keywords.append("deep_insertions")
-                    deep_probes = set('ABCDEF') - set(self.surface_recording.probe_letters_to_skip)
-                    self.keywords.append(f"deep_insertion_probe_letters={''.join(sorted(deep_probes))}")
+                    deep_probes = set("ABCDEF") - set(
+                        self.surface_recording.probe_letters_to_skip
+                    )
+                    self.keywords.append(
+                        f"deep_insertion_probe_letters={''.join(sorted(deep_probes))}"
+                    )
             if self.is_sorted:
                 self.keywords.append("units")
             if self.is_annotated:
@@ -807,7 +811,7 @@ class DynamicRoutingSession:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         # if self.is_sorted:
         #     modules.append(self.all_spike_histograms)
-            # modules.append(self.drift_maps) # TODO no longer in sorted output: generate from scratch
+        # modules.append(self.drift_maps) # TODO no longer in sorted output: generate from scratch
         return tuple(modules)
 
     # intervals ----------------------------------------------------------------- #
@@ -3102,7 +3106,7 @@ class DynamicRoutingSession:
                     )
                 )
             else:
-                raise NotImplementedError # TODO
+                raise NotImplementedError  # TODO
         return tuple(pose_estimations)
 
     @npc_io.cached_property
@@ -3704,7 +3708,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         super().__init__(*args, **kwargs)
         # override session id to allow correct sorted/raw data paths to be found with npc_lims:
         self.id = npc_session.SessionRecord(self.id.with_idx(1))
-        
+
     @npc_io.cached_property
     def ephys_timing_data(self) -> tuple[npc_ephys.EphysTimingInfo, ...]:
         """Sync data not available, so timing info not accurate"""
