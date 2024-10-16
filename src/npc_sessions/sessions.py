@@ -1176,7 +1176,7 @@ class DynamicRoutingSession:
             description="time intervals corresponding to different phases of the session; each epoch corresponds to one TaskControl subclass that controlled stimulus presentation during the epoch, which corresponds to one .hdf5 stimulus file",
         )
         epochs.add_column(
-            "stim_name",
+            "script_name",
             description="the name of the TaskControl subclass that controlled stimulus presentation during the epoch",
         )
         epochs.add_column(
@@ -1256,7 +1256,7 @@ class DynamicRoutingSession:
             return {
                 "start_time": start_time,
                 "stop_time": stop_time,
-                "stim_name": stim_name,
+                "script_name": stim_name,
                 "tags": tags,
                 "interval_names": (
                     interval_names
