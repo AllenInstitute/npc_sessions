@@ -3096,7 +3096,7 @@ class DynamicRoutingSession:
                 t for t in self._video_frame_times if nwb_camera_name in t.name
             ).timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
-            
+
             if as_pose_estimation:
                 pose_estimation_series = utils.get_pose_series_from_dataframe(
                     self.id, df, timestamps
@@ -3115,20 +3115,26 @@ class DynamicRoutingSession:
                 original_df = df
                 df = df.droplevel(level=0, axis=1)
                 # give the index an informative name
-                df.index.name = 'frame_index'
+                df.index.name = "frame_index"
                 # Turn the multi-index column 'bodyparts' into a row value and reset index
                 df = df.stack(level=0, future_stack=True).reset_index()
                 # # Get rid of unnecessary name "coords" from previous multiindex
                 df.columns.name = None
                 # create wide format
-                df = df.pivot(index='frame_index', columns=['bodyparts'])
+                df = df.pivot(index="frame_index", columns=["bodyparts"])
                 # replace multiindex with suffixed column names
-                df.columns = ['_'.join(reversed(col)).strip() for col in df.columns.values]
+                df.columns = [
+                    "_".join(reversed(col)).strip() for col in df.columns.values
+                ]
                 # add
-                timestamps_df = pd.DataFrame({'timestamps': timestamps})
-                timestamps_df.index.name = 'frame_index'
-                df = df.merge(timestamps_df, on='frame_index')
-                df = df.sort_values('frame_index').reset_index().drop('frame_index', axis=1)
+                timestamps_df = pd.DataFrame({"timestamps": timestamps})
+                timestamps_df.index.name = "frame_index"
+                df = df.merge(timestamps_df, on="frame_index")
+                df = (
+                    df.sort_values("frame_index")
+                    .reset_index()
+                    .drop("frame_index", axis=1)
+                )
                 table = pynwb.core.DynamicTable.from_dataframe(
                     name=f"dlc_{nwb_camera_name}",
                     df=df,
@@ -3143,8 +3149,6 @@ class DynamicRoutingSession:
                 pose_estimations.append(table)
         return tuple(pose_estimations)
 
-            
-    
     @npc_io.cached_property
     def _reward_frame_times(
         self,
