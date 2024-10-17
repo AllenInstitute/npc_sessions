@@ -2980,11 +2980,12 @@ class DynamicRoutingSession:
             table_description = (
                 f"Lightning Pose tracking model fit to {len(utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]])} facial features for each frame of {nwb_camera_name.replace('_', ' ')} video. "
                 "Output for every frame includes: "
-                "`x` and `y`: coordinates in pixels, with (0, 0) at top-left of frame"
-                " | `likelihood`: likelihood of the model"
-                " | `error`: root mean square error between true and predicted keypoints"
-                " | `temporal_norm`: norm of difference between keypoints on successive time bins"
-                f". Features tracked are {utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]]}"
+                "`timestamps`: start time of frame exposure, in seconds"
+                " | `<bodypart>_x` and `<bodypart>_y`: coordinates in pixels, with (0, 0) at top-left of frame"
+                " | `<bodypart>_likelihood`: likelihood of the model"
+                " | `<bodypart>_error`: root mean square error between true and predicted keypoints"
+                " | `<bodypart>_temporal_norm`: norm of difference between keypoints on successive time bins"
+                # f". Features tracked are {utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]]}"
             )
             LP_face_parts_dynamic_tables.append(
                 pynwb.core.DynamicTable.from_dataframe(
@@ -3067,8 +3068,8 @@ class DynamicRoutingSession:
         return tuple(facemap_series)
 
     @npc_io.cached_property
-    def _dlc(self) -> tuple[ndx_pose.pose.PoseEstimation, ...]:
-        as_pose_estimation = True
+    def _dlc(self) -> tuple[pynwb.core.DynamicTable, ...]:
+        as_pose_estimation = False
         if not self.is_video:
             return ()
         camera_to_dlc_model = {
@@ -3079,6 +3080,9 @@ class DynamicRoutingSession:
         pose_estimations = []
         for video_path in self.video_paths:
             camera_name = npc_mvr.get_camera_name(video_path.name)
+            #! skip all but eye dlc as results from others are currently unreliable
+            if camera_name != "eye":
+                continue
             nwb_camera_name = self.mvr_to_nwb_camera_name[camera_name]
             try:
                 df = utils.get_dlc_session_model_dataframe_from_h5(
@@ -3092,6 +3096,7 @@ class DynamicRoutingSession:
                 t for t in self._video_frame_times if nwb_camera_name in t.name
             ).timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
+            
             if as_pose_estimation:
                 pose_estimation_series = utils.get_pose_series_from_dataframe(
                     self.id, df, timestamps
@@ -3106,9 +3111,40 @@ class DynamicRoutingSession:
                     )
                 )
             else:
-                raise NotImplementedError  # TODO
+                # Get rid of unecessary column "scorer"
+                original_df = df
+                df = df.droplevel(level=0, axis=1)
+                # give the index an informative name
+                df.index.name = 'frame_index'
+                # Turn the multi-index column 'bodyparts' into a row value and reset index
+                df = df.stack(level=0, future_stack=True).reset_index()
+                # # Get rid of unnecessary name "coords" from previous multiindex
+                df.columns.name = None
+                # create wide format
+                df = df.pivot(index='frame_index', columns=['bodyparts'])
+                # replace multiindex with suffixed column names
+                df.columns = ['_'.join(reversed(col)).strip() for col in df.columns.values]
+                # add
+                timestamps_df = pd.DataFrame({'timestamps': timestamps})
+                timestamps_df.index.name = 'frame_index'
+                df = df.merge(timestamps_df, on='frame_index')
+                df = df.sort_values('frame_index').reset_index().drop('frame_index', axis=1)
+                table = pynwb.core.DynamicTable.from_dataframe(
+                    name=f"dlc_{nwb_camera_name}",
+                    df=df,
+                    table_description=(
+                        f"DeepLabCut tracking model fit to each frame of {nwb_camera_name.replace('_', ' ')} video. "
+                        "Output for every frame includes: "
+                        " `timestamps`: start time of frame exposure, in seconds"
+                        " | `<bodypart>_x` and `<bodypart>_y`: coordinates in pixels, with (0, 0) at top-left of frame"
+                        " | `<bodypart>_likelihood`: likelihood of the model (softmax output of the deep neural network)"
+                    ),
+                )
+                pose_estimations.append(table)
         return tuple(pose_estimations)
 
+            
+    
     @npc_io.cached_property
     def _reward_frame_times(
         self,
