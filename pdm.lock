@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:65a549736c2ec43ab590eed99f99c854cadf7b3e75aae871662728bcc06210d1"
+content_hash = "sha256:276b92425dd04c46f7853025408b6838ac98df9fd8707100c15a6ec661caac62"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -81,7 +81,7 @@ files = [
 
 [[package]]
 name = "aind-session"
-version = "0.2.5"
+version = "0.3.6"
 requires_python = ">=3.9"
 summary = "User-friendly tools for accessing paths, metadata and assets related to AIND sessions."
 groups = ["default"]
@@ -92,8 +92,8 @@ dependencies = [
     "npc-session>=0.1.39",
 ]
 files = [
-    {file = "aind_session-0.2.5-py3-none-any.whl", hash = "sha256:b29d0428b19b49d84d76a8433621e7d06f669833a5d2a62e6a70e1859d4aae96"},
-    {file = "aind_session-0.2.5.tar.gz", hash = "sha256:7635d95fc496201e89ecef75bba658d14145eb345b541e2fd5319e60b7d29314"},
+    {file = "aind_session-0.3.6-py3-none-any.whl", hash = "sha256:89334c4a75ef7029eace46edb0ba8b1f997ec4dba855ddd66248fd5e1c49c5c4"},
+    {file = "aind_session-0.3.6.tar.gz", hash = "sha256:51f91b45d7aae6a986e51208772e35197472edb28f797e07c05711c02f7fd8d3"},
 ]
 
 [[package]]
@@ -1929,12 +1929,12 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.176"
+version = "0.1.180"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 groups = ["default"]
 dependencies = [
-    "aind-session>=0.2.5",
+    "aind-session>=0.3.4",
     "codeocean>=0.1.5",
     "npc-io>=0.1.24",
     "npc-session>=0.1.36",
@@ -1948,8 +1948,8 @@ dependencies = [
     "types-requests>=2.31.0.6",
 ]
 files = [
-    {file = "npc_lims-0.1.176-py3-none-any.whl", hash = "sha256:75a28b5753807e5ff3317f663f97bfd02c139b0668e18d2b8962b845fde2c1a9"},
-    {file = "npc_lims-0.1.176.tar.gz", hash = "sha256:246cf40b8de6e1005060496b61186356b36ba186ab5fa0b676bc809f10041d18"},
+    {file = "npc_lims-0.1.180-py3-none-any.whl", hash = "sha256:01339724de58ad11759578f04a0a095c1f91d933aeade128510263d6cbfa4a48"},
+    {file = "npc_lims-0.1.180.tar.gz", hash = "sha256:3e7673e151b561ba7d35ca2c939877492af1e16ab5d9bf1383b9f9916ef7e7f4"},
 ]
 
 [[package]]

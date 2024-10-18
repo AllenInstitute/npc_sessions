@@ -3744,11 +3744,13 @@ class DynamicRoutingSession:
 
 
 class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        # override session id to allow correct sorted/raw data paths to be found with npc_lims:
-        self.id = npc_session.SessionRecord(self.id.with_idx(1))
 
+    @npc_io.cached_property
+    def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
+        return npc_lims.get_sorted_data_paths_from_s3(
+            self.id.with_idx(1)
+        )
+        
     @npc_io.cached_property
     def ephys_timing_data(self) -> tuple[npc_ephys.EphysTimingInfo, ...]:
         """Sync data not available, so timing info not accurate"""
