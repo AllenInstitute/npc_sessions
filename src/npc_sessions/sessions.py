@@ -2614,10 +2614,13 @@ class DynamicRoutingSession:
             raise ValueError(
                 f"{self.id} is not an ephys session (required for settings.xml)"
             )
-        return tuple(
-            next(record_node.glob("settings*.xml"))
+        paths = [
+            next(record_node.glob("settings*.xml"), None)
             for record_node in self.ephys_record_node_dirs
-        )
+        ]
+        if not any(paths):
+            return tuple(p for p in paths if p is not None)
+        assert 
 
     @npc_io.cached_property
     def ephys_settings_xml_path(self) -> upath.UPath:
