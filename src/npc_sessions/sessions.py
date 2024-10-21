@@ -434,6 +434,8 @@ class DynamicRoutingSession:
         notes = ""
         if self.info:
             notes = "; ".join([notes, self.info.notes] + self.info.issues)
+        if set(notes) == {' ', ';'}: #
+            notes = ""
         return notes or None
 
     @property
