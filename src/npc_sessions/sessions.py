@@ -2733,17 +2733,21 @@ class DynamicRoutingSession:
         return tuple(probe.name for probe in self.probe_letters_to_use)
 
     @npc_io.cached_property
-    def probe_letters_to_use(self) -> tuple[npc_session.ProbeRecord, ...]:
-        """('A', 'B', ...)"""
-        from_annotation = from_insertion_record = None
-        if self.is_annotated:
-            from_annotation = tuple(
+    def probe_letters_annotated(self) -> tuple[npc_session.ProbeRecord, ...]:
+        if not self.is_annotated:
+            return ()
+        return tuple(
                 npc_session.ProbeRecord(probe)
                 for probe in utils.get_tissuecyte_electrodes_table(
                     self.id
                 ).group_name.unique()
             )
-            from_annotation = self.remove_probe_letters_to_skip(from_annotation)
+        
+    @npc_io.cached_property
+    def probe_letters_to_use(self) -> tuple[npc_session.ProbeRecord, ...]:
+        """('A', 'B', ...)"""
+        from_insertion_record = None
+        from_annotation = self.remove_probe_letters_to_skip(self.probe_letters_annotated)
         if self.probe_insertions is not None:
             from_insertion_record = tuple(
                 npc_session.ProbeRecord(k)
