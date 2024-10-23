@@ -541,17 +541,18 @@ class DynamicRouting1(TaskControl):
     def reward_time(self) -> npt.NDArray[np.floating]:
         """delivery time of water reward, for contingent and non-contingent rewards"""
         if (
-            (solenoid_times := getattr(self, "_reward_times_with_duration", None)) is not None
-            and len(solenoid_times) >= len(np.where(self.is_rewarded)[0])
-        ):
-            logger.info(f'Using solenoid opening time on sync for `reward_time`')
+            solenoid_times := getattr(self, "_reward_times_with_duration", None)
+        ) is not None and len(solenoid_times) >= len(np.where(self.is_rewarded)[0]):
+            logger.info("Using solenoid opening time on sync for `reward_time`")
             all_reward_times = solenoid_times
         else:
-            logger.info(f'Using flip time of each TaskControl frame for `reward_time`')
-            all_reward_times = npc_stim.safe_index(self._flip_times, self._sam.rewardFrames)
+            logger.info("Using flip time of each TaskControl frame for `reward_time`")
+            all_reward_times = npc_stim.safe_index(
+                self._flip_times, self._sam.rewardFrames
+            )
         all_reward_times = all_reward_times[
-            (all_reward_times >= self.start_time[0]) &
-            (all_reward_times <= self.stop_time[-1])
+            (all_reward_times >= self.start_time[0])
+            & (all_reward_times <= self.stop_time[-1])
         ]
         trial_idx_from_rewards = (
             np.searchsorted(
@@ -561,7 +562,9 @@ class DynamicRouting1(TaskControl):
             )
             - 1
         )
-        assert len(is_rewarded := np.where(self.is_rewarded)[0]) <= len(trial_idx_from_rewards)
+        assert len(is_rewarded := np.where(self.is_rewarded)[0]) <= len(
+            trial_idx_from_rewards
+        )
         reward_time = np.full(self._len, np.nan)
         if np.all(is_rewarded == trial_idx_from_rewards):
             # expected case: single reward per trial

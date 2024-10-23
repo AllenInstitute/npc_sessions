@@ -434,7 +434,7 @@ class DynamicRoutingSession:
         notes = ""
         if self.info:
             notes = "; ".join([notes, self.info.notes] + self.info.issues)
-        if set(notes) == {' ', ';'}: #
+        if set(notes) == {" ", ";"}:  #
             notes = ""
         return notes or None
 
@@ -1140,7 +1140,9 @@ class DynamicRoutingSession:
                 kwargs |= {"sync": self.sync_data}
             if self.is_ephys and self.is_sync:
                 kwargs |= {"ephys_recording_dirs": self.ephys_recording_dirs}
-            if (reward_times := getattr(self, "_reward_times_with_duration", None)) is not None:
+            if (
+                reward_times := getattr(self, "_reward_times_with_duration", None)
+            ) is not None:
                 kwargs |= {"reward_times_with_duration": reward_times.timestamps}
             # set items in LazyDict for postponed evaluation
             if "RFMapping" in stim_filename:
@@ -2736,17 +2738,19 @@ class DynamicRoutingSession:
         if not self.is_annotated:
             return ()
         return tuple(
-                npc_session.ProbeRecord(probe)
-                for probe in utils.get_tissuecyte_electrodes_table(
-                    self.id
-                ).group_name.unique()
-            )
-        
+            npc_session.ProbeRecord(probe)
+            for probe in utils.get_tissuecyte_electrodes_table(
+                self.id
+            ).group_name.unique()
+        )
+
     @npc_io.cached_property
     def probe_letters_to_use(self) -> tuple[npc_session.ProbeRecord, ...]:
         """('A', 'B', ...)"""
         from_insertion_record = None
-        from_annotation = self.remove_probe_letters_to_skip(self.probe_letters_annotated)
+        from_annotation = self.remove_probe_letters_to_skip(
+            self.probe_letters_annotated
+        )
         if self.probe_insertions is not None:
             from_insertion_record = tuple(
                 npc_session.ProbeRecord(k)
@@ -3752,11 +3756,11 @@ class DynamicRoutingSession:
 
 
 class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
-    
+
     @npc_io.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
         return npc_lims.get_raw_data_paths_from_s3(self.id.with_idx(1))
-        
+
     @npc_io.cached_property
     def sorted_data_paths(self) -> tuple[upath.UPath, ...]:
         return npc_lims.get_sorted_data_paths_from_s3(self.id.with_idx(1))
