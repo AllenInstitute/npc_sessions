@@ -1140,7 +1140,8 @@ class DynamicRoutingSession:
                 kwargs |= {"sync": self.sync_data}
             if self.is_ephys and self.is_sync:
                 kwargs |= {"ephys_recording_dirs": self.ephys_recording_dirs}
-
+            if (reward_times := getattr(self, "_reward_times_with_duration", None)) is not None:
+                kwargs |= {"reward_times_with_duration": reward_times.timestamps}
             # set items in LazyDict for postponed evaluation
             if "RFMapping" in stim_filename:
                 # create two separate trials tables
