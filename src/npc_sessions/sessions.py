@@ -15,10 +15,10 @@ from collections.abc import Iterable, Iterator
 from typing import Any, Literal
 
 import aind_data_schema.core.session
-import aind_data_schema.models.coordinates
-import aind_data_schema.models.devices
-import aind_data_schema.models.modalities
-import aind_data_schema.models.stimulus
+import aind_data_schema.components.coordinates
+import aind_data_schema.components.devices
+import aind_data_schema_models.modalities
+import aind_data_schema.components.stimulus
 import cv2
 import h5py
 import hdmf
@@ -3277,23 +3277,23 @@ class DynamicRoutingSession:
             reward_spouts=[
                 aind_data_schema.core.session.RewardSpoutConfig(
                     side="Center",
-                    starting_position=aind_data_schema.models.coordinates.RelativePosition(
+                    starting_position=aind_data_schema.components.coordinates.RelativePosition(
                         device_position_transformations=[
-                            aind_data_schema.models.coordinates.Translation3dTransform(
+                            aind_data_schema.components.coordinates.Translation3dTransform(
                                 translation=[0.0, 0.0, 0.0],
                             )
                         ],
                         device_origin="Located on the tip of the spout (which is also the lick sensor), centered in front of the subject's mouth",
                         device_axes=[
-                            aind_data_schema.models.coordinates.Axis(
+                            aind_data_schema.components.coordinates.Axis(
                                 name="X",
                                 direction="Positive is from the centerline of the subject's mouth towards its right",
                             ),
-                            aind_data_schema.models.coordinates.Axis(
+                            aind_data_schema.components.coordinates.Axis(
                                 name="Y",
                                 direction="Positive is from the centerline of the subject's mouth towards the sky",
                             ),
-                            aind_data_schema.models.coordinates.Axis(
+                            aind_data_schema.components.coordinates.Axis(
                                 name="Z",
                                 direction="Positive is from the anterior-most part of the subject's mouth towards its tail",
                             ),
@@ -3308,7 +3308,7 @@ class DynamicRoutingSession:
     def _aind_data_streams(self) -> tuple[aind_data_schema.core.session.Stream, ...]:
         data_streams = []
         # sync, mvr cameras, ephys probes
-        modality = aind_data_schema.models.modalities.Modality
+        modality = aind_data_schema_models.modalities.Modality
         if self.is_sync:
             data_streams.append(
                 aind_data_schema.core.session.Stream(
@@ -3365,7 +3365,7 @@ class DynamicRoutingSession:
                                 primary_targeted_structure="none",
                                 manipulator_coordinates=(
                                     (
-                                        aind_data_schema.models.coordinates.Coordinates3d(
+                                        aind_data_schema.components.coordinates.Coordinates3d(
                                             x=(
                                                 row := self._manipulator_positions.to_dataframe().query(
                                                     f"electrode_group == '{probe.name}'"
@@ -3377,7 +3377,7 @@ class DynamicRoutingSession:
                                         )
                                     )  # some old sessions didn't have newscale logging enabled: no way to get their coords
                                     if hasattr(self, "_manipulator_info")
-                                    else aind_data_schema.models.coordinates.Coordinates3d(
+                                    else aind_data_schema.components.coordinates.Coordinates3d(
                                         x=0.0,
                                         y=0.0,
                                         z=0.0,
@@ -3472,7 +3472,7 @@ class DynamicRoutingSession:
             epoch_name: str,
         ) -> list[Any] | None:  # no baseclass for stim param classes
             stim = aind_data_schema.core.session.StimulusModality
-            stimulus = aind_data_schema.models.stimulus
+            stimulus = aind_data_schema.components.stimulus
             modalities = get_modalities(epoch_name)
             if modalities == [stim.NONE]:
                 return None
@@ -3681,13 +3681,13 @@ class DynamicRoutingSession:
                     + self.session_start_time,
                     stimulus_name=epoch_name,
                     software=[
-                        aind_data_schema.models.devices.Software(
+                        aind_data_schema.components.devices.Software(
                             name="PsychoPy",
                             version="2022.1.2",
                             url="https://www.psychopy.org/",
                         ),
                     ],
-                    script=aind_data_schema.models.devices.Software(
+                    script=aind_data_schema.components.devices.Software(
                         name=get_taskcontrol_file(epoch_name),
                         version=get_version() or "unknown",
                         url=get_url(epoch_name),
