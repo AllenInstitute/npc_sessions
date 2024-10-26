@@ -14,11 +14,11 @@ import uuid
 from collections.abc import Iterable, Iterator
 from typing import Any, Literal
 
-import aind_data_schema.core.session
 import aind_data_schema.components.coordinates
 import aind_data_schema.components.devices
-import aind_data_schema_models.modalities
 import aind_data_schema.components.stimulus
+import aind_data_schema.core.session
+import aind_data_schema_models.modalities
 import cv2
 import h5py
 import hdmf
