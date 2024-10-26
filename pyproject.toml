@@ -8,6 +8,7 @@ authors = [
     { name = "Ethan McBride", email = "ethan.mcbride@alleninstitute.org" },
     { name = "Corbett Bennett", email = "corbettb@alleninstitute.org" },
     { name = "Sam Gale", email = "samg@alleninstitute.org" },
+    { name = "Christopher Mochizuki", email = "chrism@alleninstitute.org" },
 ]
 dependencies = [
     "pandas>=2.0",
