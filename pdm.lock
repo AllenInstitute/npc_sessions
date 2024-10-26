@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:276b92425dd04c46f7853025408b6838ac98df9fd8707100c15a6ec661caac62"
+content_hash = "sha256:c3aa92b5cd6decdcc79e4630cb55c1b003d6a8f7ad6754fb5fae9829c3399abc"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -1929,7 +1929,7 @@ files = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.180"
+version = "0.1.183"
 requires_python = ">=3.9"
 summary = "Tools to fetch and update paths, metadata and state for Mindscope Neuropixels sessions, in the cloud."
 groups = ["default"]
@@ -1948,8 +1948,8 @@ dependencies = [
     "types-requests>=2.31.0.6",
 ]
 files = [
-    {file = "npc_lims-0.1.180-py3-none-any.whl", hash = "sha256:01339724de58ad11759578f04a0a095c1f91d933aeade128510263d6cbfa4a48"},
-    {file = "npc_lims-0.1.180.tar.gz", hash = "sha256:3e7673e151b561ba7d35ca2c939877492af1e16ab5d9bf1383b9f9916ef7e7f4"},
+    {file = "npc_lims-0.1.183-py3-none-any.whl", hash = "sha256:3a985c6791e6a4b6ec0294e715911d8195b3a7fdade5400b33e0558982e0e79d"},
+    {file = "npc_lims-0.1.183.tar.gz", hash = "sha256:7c13fc6aa9a5f69323551fe67099567ee87342485ed7e1f584920a5dda03d36f"},
 ]
 
 [[package]]
