@@ -3357,7 +3357,7 @@ class DynamicRoutingSession:
                     ),
                     ephys_modules=(
                         ephys_modules := [
-                            aind_data_schema.core.session.EphysModule(
+                            aind_data_schema.core.session.ManipulatorModule(
                                 assembly_name=probe.name.upper(),
                                 arc_angle=0.0,
                                 module_angle=0.0,
@@ -3384,11 +3384,6 @@ class DynamicRoutingSession:
                                         unit="micrometer",
                                     )
                                 ),
-                                ephys_probes=[
-                                    aind_data_schema.core.session.EphysProbeConfig(
-                                        name=probe.name.upper(),
-                                    )
-                                ],
                             )
                             for probe in self.probe_letters_to_use
                         ]

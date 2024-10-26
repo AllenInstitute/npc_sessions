@@ -24,6 +24,7 @@ dependencies = [
     "hdmf>=3.14.0",
     "ndx-pose>=0.1.1",
     "tables>=3.9.2",
+    "aind-data-schema==1.1.1",
     "pydantic>=2.6.4",
     "npc-lims>=0.1.183",
     "npc-sync>=0.1.19",
@@ -33,7 +34,6 @@ dependencies = [
     "npc-session>=0.1.39",
     "npc-mvr>=0.1.8",
     "npc-io>=0.1.30",
-    "aind-data-schema @ git+https://github.com/AllenNeuralDynamics/aind-data-schema.git@1072-qc-automate-state-properties-in-qualitycontrol-and-evaluation-based-on-metric-states",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

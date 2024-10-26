@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:c3aa92b5cd6decdcc79e4630cb55c1b003d6a8f7ad6754fb5fae9829c3399abc"
+content_hash = "sha256:67f0362b9fe13c3afed89e92ccf726392955594b9a54ea7658196aed3b08540e"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -63,7 +63,7 @@ files = [
 
 [[package]]
 name = "aind-data-schema"
-version = "1.0.0"
+version = "1.1.1"
 requires_python = ">=3.8"
 git = "https://github.com/AllenNeuralDynamics/aind-data-schema.git"
 ref = "1072-qc-automate-state-properties-in-qualitycontrol-and-evaluation-based-on-metric-states"
@@ -75,7 +75,7 @@ dependencies = [
     "dictdiffer",
     "inflection",
     "jsonschema",
-    "pydantic<2.9,>=2.7",
+    "pydantic>=2.7",
     "semver",
 ]
 
@@ -90,8 +90,23 @@ dependencies = [
     "pydantic>=2.7",
 ]
 files = [
-    {file = "aind_data_schema_models-0.5.3-py3-none-any.whl", hash = "sha256:6dfa1d1ac02d0725813e72a3e9e4e0d52036c46fc11d86457fb4004544b0a181"},
-    {file = "aind_data_schema_models-0.5.3.tar.gz", hash = "sha256:d0d6a8d6622dbc21c6e6891b96d6d7c99919e0fcd97558bbc869e4908c7f39b0"},
+    {file = "aind_data_schema-1.1.1-py3-none-any.whl", hash = "sha256:46ada14feffa824dbe16dbbc85353357ec7000a54a217b5245a12fe3f9553dc7"},
+    {file = "aind_data_schema-1.1.1.tar.gz", hash = "sha256:f2692379fb43bb6e1269db56295f417c1ae1aeef374a180c74344580f8b0ad7a"},
+]
+
+[[package]]
+name = "aind-data-schema-models"
+version = "0.5.7"
+requires_python = ">=3.8"
+summary = "Generated from aind-library-template"
+groups = ["default"]
+dependencies = [
+    "importlib-resources",
+    "pydantic>=2.7",
+]
+files = [
+    {file = "aind_data_schema_models-0.5.7-py3-none-any.whl", hash = "sha256:4a9d69a4a4135b8f70e453a7f7165769dac4ed7d51f6033e57a5075044dd0734"},
+    {file = "aind_data_schema_models-0.5.7.tar.gz", hash = "sha256:741cd5c106457e19dd461b456e3ba9a4bc8034d61e60b739ac70fc9053caa214"},
 ]
 
 [[package]]
