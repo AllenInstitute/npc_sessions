@@ -1829,8 +1829,6 @@ class DynamicRoutingSession:
     def is_video(self) -> bool:
         if (v := getattr(self, "_is_video", None)) is not None:
             return v
-        if not self.is_sync:
-            return False
         with contextlib.suppress(
             FileNotFoundError, ValueError, npc_lims.MissingCredentials
         ):
@@ -2438,16 +2436,24 @@ class DynamicRoutingSession:
             if not isinstance(self._stim_frame_times[k], Exception)
         }
 
+    @npc_io.cached_property
+    def mvr(self) -> npc_mvr.MVRDataset:
+        session_dir = self.root_path or self.stim_paths[0].parent
+        sync = self.sync_data if self.is_sync else None
+        task_data = self.task_data if self.is_task else None # only needed for behavor box
+        if not sync and not any(p.suffix == '.mp4' for p in self.raw_data_paths):
+            # behavior session
+            session_dir = upath.UPath(f's3://aind-scratch-data/dynamic-routing/behaviorvideos/{self.id.subject}')
+        return npc_mvr.MVRDataset(session_dir, sync_path=sync, video_name_filter=self.id.date.replace('-', ''), task_data_or_path=task_data)
+        
     @property
     def video_paths(self) -> tuple[upath.UPath, ...]:
-        if not self.is_sync:
-            raise ValueError(
-                f"{self.id} is not a session with sync data (required for video)"
-            )
-        return npc_mvr.get_video_file_paths(*self.raw_data_paths)
+        """Deprecated: use self.mvr instead. Kept for backwards compatibility."""
+        return tuple(self.mvr.video_paths.values())
 
     @npc_io.cached_property
     def video_data(self) -> npc_io.LazyDict[str, cv2.VideoCapture]:
+        """Deprecated: use self.mvr instead. Kept for backwards compatibility."""
         return npc_io.LazyDict(
             (path.stem, (npc_mvr.get_video_data, (path,), {}))
             for path in self.video_paths
@@ -2455,10 +2461,12 @@ class DynamicRoutingSession:
 
     @property
     def video_info_paths(self) -> tuple[upath.UPath, ...]:
+        """Deprecated: use self.mvr instead. Kept for backwards compatibility."""
         return npc_mvr.get_video_info_file_paths(*self.raw_data_paths)
 
     @npc_io.cached_property
     def video_info_data(self) -> npc_io.LazyDict[str, npc_mvr.MVRInfoData]:
+        """Deprecated: use self.mvr instead. Kept for backwards compatibility."""
         return npc_io.LazyDict(
             (
                 npc_mvr.get_camera_name(path.stem),
@@ -2936,18 +2944,15 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def _video_frame_times(
         self,
-    ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
-        path_to_timestamps = npc_mvr.get_video_frame_times(
-            self.sync_data, *self.video_paths
-        )
-
+    ) -> tuple[ndx_events.Events, ...]:
+        cam_to_frametimes = self.mvr.frame_times 
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
-                name=f"frametimes_{self.mvr_to_nwb_camera_name[npc_mvr.get_camera_name(path.stem)]}",
-                description=f"start time of each frame exposure in {path.stem}",
+                name=f"frametimes_{self.mvr_to_nwb_camera_name[camera_name]}",
+                description=f"start time of each frame exposure in {self.mvr.video_paths[camera_name].stem}", # type: ignore[index]
             )
-            for path, timestamps in path_to_timestamps.items()
+            for camera_name, timestamps in cam_to_frametimes.items()
         )
 
     @npc_io.cached_property
