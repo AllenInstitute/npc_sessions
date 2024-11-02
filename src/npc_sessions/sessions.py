@@ -390,7 +390,7 @@ class DynamicRoutingSession:
                 )  # link_data=False so that lazily-opened zarrays are read and copied into nwb (instead of being added as a link, which is currently broken)
         else:
             with pynwb.NWBHDF5IO(path.as_posix(), "w") as io:
-                io.write(nwb)
+                io.write(nwb, link_data=False)
         logger.info(
             f"Saved NWB file to {path}: {npc_io.get_size(path) // 1024 ** 2} MB"
         )
@@ -2965,7 +2965,7 @@ class DynamicRoutingSession:
         """
         LP_face_parts_dynamic_tables = []
         if not self.is_video:
-            raise ValueError(f"{self.id} is not a session with video")
+            return ()
 
         for video_path in self.video_paths:
             camera_name = npc_mvr.get_camera_name(video_path.name)
@@ -3052,6 +3052,8 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def _facemap(self) -> tuple[pynwb.TimeSeries, ...]:
+        if not self.is_video:
+            return ()
         facemap_series = []
         for video_path in self.video_paths:
             camera_name = npc_mvr.get_camera_name(video_path.name)
@@ -3131,7 +3133,6 @@ class DynamicRoutingSession:
                 )
             else:
                 # Get rid of unecessary column "scorer"
-                original_df = df
                 df = df.droplevel(level=0, axis=1)
                 # give the index an informative name
                 df.index.name = "frame_index"
@@ -3157,6 +3158,7 @@ class DynamicRoutingSession:
                 table = pynwb.core.DynamicTable.from_dataframe(
                     name=f"dlc_{nwb_camera_name}",
                     df=df,
+                    columns=None,
                     table_description=(
                         f"DeepLabCut tracking model fit to each frame of {nwb_camera_name.replace('_', ' ')} video. "
                         "Output for every frame includes: "
