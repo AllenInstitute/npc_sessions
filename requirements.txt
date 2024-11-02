@@ -63,7 +63,7 @@ ndx-pose==0.1.1
 npc-ephys==0.1.30
 npc-io==0.1.30
 npc-lims==0.1.183
-npc-mvr==0.1.8
+npc-mvr==0.1.9
 npc-samstim==0.1.4
 npc-session==0.1.39
 npc-stim==0.1.9

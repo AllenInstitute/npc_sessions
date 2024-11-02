@@ -2442,12 +2442,21 @@ class DynamicRoutingSession:
     def mvr(self) -> npc_mvr.MVRDataset:
         session_dir = self.root_path or self.stim_paths[0].parent
         sync = self.sync_data if self.is_sync else None
-        task_data = self.task_data if self.is_task else None # only needed for behavor box
-        if not sync and not any(p.suffix == '.mp4' for p in self.raw_data_paths):
+        task_data = (
+            self.task_data if self.is_task else None
+        )  # only needed for behavor box
+        if not sync and not any(p.suffix == ".mp4" for p in self.raw_data_paths):
             # behavior session
-            session_dir = upath.UPath(f's3://aind-scratch-data/dynamic-routing/behaviorvideos/{self.id.subject}')
-        return npc_mvr.MVRDataset(session_dir, sync_path=sync, video_name_filter=self.id.date.replace('-', ''), task_data_or_path=task_data)
-        
+            session_dir = upath.UPath(
+                f"s3://aind-scratch-data/dynamic-routing/behaviorvideos/{self.id.subject}"
+            )
+        return npc_mvr.MVRDataset(
+            session_dir,
+            sync_path=sync,
+            video_name_filter=self.id.date.replace("-", ""),
+            task_data_or_path=task_data,
+        )
+
     @property
     def video_paths(self) -> tuple[upath.UPath, ...]:
         """Deprecated: use self.mvr instead. Kept for backwards compatibility."""
@@ -2947,7 +2956,7 @@ class DynamicRoutingSession:
     def _video_frame_times(
         self,
     ) -> tuple[ndx_events.Events, ...]:
-        cam_to_frametimes = self.mvr.frame_times 
+        cam_to_frametimes = self.mvr.frame_times
         return tuple(
             ndx_events.Events(
                 timestamps=timestamps,
