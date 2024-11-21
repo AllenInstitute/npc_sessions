@@ -400,9 +400,9 @@ class DynamicRouting1(TaskControl):
     def start_time(self) -> npt.NDArray[np.float64]:
         """earliest time in each trial, before any events occur.
 
-        - currently discards inter-trial period
-        - extensions due to quiescent violations are discarded: only the final
-          `preStimFramesFixed` before a stim are included
+        - does not include inter-trial period
+        - does not include quiescent interval violations
+        - the same as `quiescent_start_time`
         """
         return self.quiescent_start_time
 
@@ -413,9 +413,9 @@ class DynamicRouting1(TaskControl):
 
     @npc_io.cached_property
     def quiescent_start_time(self) -> npt.NDArray[np.float64]:
-        """start of interval in which the subject should not lick, otherwise the
-        trial will start over.
+        """start of pre-stimulus interval in which the subject does not lick.
 
+        - a quiescent interval is enforced before each stimulus presentation
         - only the last quiescent interval (which was not violated) is included
         """
         return npc_stim.safe_index(
@@ -425,8 +425,7 @@ class DynamicRouting1(TaskControl):
 
     @npc_io.cached_property
     def quiescent_stop_time(self) -> npt.NDArray[np.float64]:
-        """end of interval in which the subject should not lick, otherwise the
-        trial will start over"""
+        """end of pre-stimulus interval in which the subject does not lick"""
         return npc_stim.safe_index(
             self._flip_times,
             self._sam.stimStartFrame,
@@ -462,7 +461,7 @@ class DynamicRouting1(TaskControl):
 
     @npc_io.cached_property
     def opto_start_time(self) -> npt.NDArray[np.float64]:
-        """Onset of optogenetic inactivation"""
+        """onset of optogenetic inactivation"""
         if not self._is_opto:
             return np.full(self._len, np.nan)
         return self.get_trial_opto_onset()
