@@ -1921,7 +1921,7 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def is_wildtype(self) -> bool:
-        if self.subject.genotype is None:  # won't exist if subject.json not found
+        if self.subject.genotype is None:
             logger.warning(
                 f"Could not find genotype for {self.id}: returning is_wildtype = True regardless"
             )
