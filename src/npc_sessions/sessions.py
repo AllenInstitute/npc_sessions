@@ -1982,7 +1982,9 @@ class DynamicRoutingSession:
 
     @property
     def is_stage_5_passed(self) -> bool:
-        """Before this session, had the subject passed stage 5 (two sessions meeting crossmodal dprime threshold)?"""
+        """Before this session, had the subject passed stage 5 (two sessions meeting crossmodal
+        dprime threshold)?"""
+        subject_id = str(self.id.subject)
         if self.is_templeton:
             logger.warning(
                 f"{self.id} is a Templeton session: returning is_stage_5_passed = False, but we don't currently track this"
@@ -1990,14 +1992,14 @@ class DynamicRoutingSession:
             return False
         for path in npc_lims.get_training_spreadsheet_paths():
             try:
-                df = pd.read_excel(path, self.id.subject)
+                df = pd.read_excel(path, subject_id)
             except ValueError:  # mouse not in this spreadsheet
                 continue
             else:
                 break
         else:
             logger.warning(
-                f"Could not find {self.subject.id} in training spreadsheets (and not a known Templeton session) - returning is_stage_5_passed = False, but this may be incorrect"
+                f"Could not find {subject_id} in training spreadsheets (and not a known Templeton session) - returning is_stage_5_passed = False, but this may be incorrect"
             )
             return False
 
@@ -2006,7 +2008,7 @@ class DynamicRoutingSession:
             return False
         return np.isnan(
             DynamicRoutingAnalysisUtils.getSessionsToPass(
-                mouseId=int(self.id.subject),
+                mouseId=int(subject_id),
                 df=df,
                 sessions=np.where(
                     [
