@@ -659,6 +659,12 @@ class DynamicRoutingSession:
                 self.keywords.append("context_naive")
             if self.is_naive:
                 self.keywords.append("naive")
+            if self.is_stage_5_passed:
+                self.keywords.append("stage_5_passed")
+            if self.is_task and self.is_first_block_aud:
+                self.keywords.append("first_block_aud")
+            elif self.is_task and self.is_first_block_vis:
+                self.keywords.append("first_block_vis")
             if self.is_task and self.is_late_autorewards:
                 self.keywords.append("late_autorewards")
             elif self.is_task:
@@ -1972,6 +1978,77 @@ class DynamicRoutingSession:
         if not self.info.training_info:
             return True
         return self.info.behavior_day == 1
+
+    @property
+    def is_stage_5_passed(self) -> bool:
+        if self.is_templeton:
+            logger.warning(
+                f"{self.id} is a Templeton session: returning is_stage_5_passed = False, but we don't currently track this"
+            )
+            return False
+        for path in npc_lims.get_training_spreadsheet_paths():
+            try:
+                df = pd.read_excel(path, self.subject.id)
+            except ValueError: # mouse not in this spreadsheet
+                continue
+            else:
+                break
+        else:
+            logger.warning(f"Could not find {self.subject.id} in training spreadsheets (and not a known Templeton session) - returning is_stage_5_passed = False, but this may be incorrect")
+            return False
+        
+        df = df[df['task version'].str.startswith("stage 5")]
+        if df.empty:
+            return False
+        
+        # from https://github.com/samgale/DynamicRoutingTask/blob/aa781757b3e14895b50851d71583257e8fc39fb9/Analysis/DynamicRoutingAnalysisUtils.py#L282
+        def getPerformanceStats(df,sessions):
+            hits = []
+            dprimeSame = []
+            dprimeOther = []
+            for i in sessions:
+                if isinstance(df.loc[i,'hits'],str):
+                    hits.append([int(s) for s in re.findall('[0-9]+',df.loc[i,'hits'])])
+                    dprimeSame.append([float(s) for s in re.findall('-*[0-9].[0-9]*|nan',df.loc[i,'d\' same modality'])])
+                    dprimeOther.append([float(s) for s in re.findall('-*[0-9].[0-9]*|nan',df.loc[i,'d\' other modality go stim'])])
+                else:
+                    hits.append(df.loc[i,'hits'])
+                    dprimeSame.append(df.loc[i,'d\' same modality'])
+                    dprimeOther.append(df.loc[i,'d\' other modality go stim'])
+            return hits,dprimeSame,dprimeOther
+        def getSessionsToPass(mouseId,df,sessions,stage,hitThresh=100,dprimeThresh=1.5):
+            sessionsToPass = np.nan
+            for sessionInd in sessions:
+                if sessionInd > sessions[0]:
+                    hits,dprimeSame,dprimeOther = getPerformanceStats(df,(sessionInd-1,sessionInd))
+                    if ((stage in (1,2) and all(h[0] >= hitThresh for h in hits) and all(d[0] >= dprimeThresh for d in dprimeSame)) or
+                        (stage==5 and np.all(np.sum((np.array(dprimeSame) >= dprimeThresh) & (np.array(dprimeOther) >= dprimeThresh),axis=1) > 3))):
+                        sessionsToPass = np.where(sessions==sessionInd)[0][0] + 1
+                        break
+            if np.isnan(sessionsToPass):
+                if stage in (1,2) and mouseId in (614910,684071,682893):
+                    sessionsToPass = len(sessions)
+            return sessionsToPass
+        return np.isnan(
+            getSessionsToPass(
+                mouseId=int(self.subject.id),
+                df=df,
+                sessions=np.where([str(d).split(' ')[0] <= self.session_start_time.strftime("%Y-%m-%d") for d in df['start time'].values])[0],
+                stage=5,
+            )
+        )
+
+    @property
+    def is_first_block_aud(self) -> bool:
+        if not self.is_task:
+            raise AttributeError(f"{self.id} is not a session with behavior task")
+        return "sound" in self.sam.blockStimRewarded[0]
+
+    @property
+    def is_first_block_vis(self) -> bool:
+        if not self.is_task:
+            raise AttributeError(f"{self.id} is not a session with behavior task")
+        return "vis" in self.sam.blockStimRewarded[0]
 
     @property
     def is_context_naive(self) -> bool:
