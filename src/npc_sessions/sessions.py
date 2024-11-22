@@ -1990,7 +1990,7 @@ class DynamicRoutingSession:
             return False
         for path in npc_lims.get_training_spreadsheet_paths():
             try:
-                df = pd.read_excel(path, self.subject.id)
+                df = pd.read_excel(path, self.id.subject)
             except ValueError:  # mouse not in this spreadsheet
                 continue
             else:
@@ -2006,7 +2006,7 @@ class DynamicRoutingSession:
             return False
         return np.isnan(
             DynamicRoutingAnalysisUtils.getSessionsToPass(
-                mouseId=int(self.subject.id),
+                mouseId=int(self.id.subject),
                 df=df,
                 sessions=np.where(
                     [
