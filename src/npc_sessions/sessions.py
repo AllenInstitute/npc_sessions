@@ -2010,9 +2010,14 @@ class DynamicRoutingSession:
                 df=df,
                 sessions=np.where(
                     [
-                        (str(start_time).split(" ")[0] < self.session_start_time.strftime("%Y-%m-%d"))
+                        (
+                            str(start_time).split(" ")[0]
+                            < self.session_start_time.strftime("%Y-%m-%d")
+                        )
                         and str(task_version).startswith("stage 5")
-                        for start_time, task_version in df[["start time", "task version"]].values
+                        for start_time, task_version in df[
+                            ["start time", "task version"]
+                        ].values
                     ]
                 )[0],
                 stage=5,
