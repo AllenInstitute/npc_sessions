@@ -169,6 +169,9 @@ class PropertyDict(collections.abc.Mapping):
                 # all explode_cols should have values with the same dimensions -
                 # pandas will raise an error if they don't
                 df = df.explode(explode_cols, ignore_index=True)
+        for col in df.columns:
+            if df[col].dtype == object:
+                df[col] = df[col].fillna('')
         return df
 
     @property
