@@ -2002,8 +2002,6 @@ class DynamicRoutingSession:
                 f"Could not find {subject_id} in training spreadsheets (and not a known Templeton session) - returning is_stage_5_passed = False, but this may be incorrect"
             )
             return False
-
-        df = df[df["task version"].str.startswith("stage 5")]
         if df.empty:
             return False
         return np.isnan(
@@ -2012,9 +2010,9 @@ class DynamicRoutingSession:
                 df=df,
                 sessions=np.where(
                     [
-                        str(d).split(" ")[0]
-                        < self.session_start_time.strftime("%Y-%m-%d")
-                        for d in df["start time"].values
+                        (str(start_time).split(" ")[0] < self.session_start_time.strftime("%Y-%m-%d"))
+                        and str(task_version).startswith("stage 5")
+                        for start_time, task_version in df[["start time", "task version"]].values
                     ]
                 )[0],
                 stage=5,
