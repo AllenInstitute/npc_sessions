@@ -3052,9 +3052,13 @@ class DynamicRoutingSession:
 
             df = pd.DataFrame()
             for result_name in utils.LP_RESULT_TYPES:
-                result_df = utils.get_LPFaceParts_result_dataframe(
-                    self.id, utils.LP_MAPPING[camera_name], result_name
-                )
+                try:
+                    result_df = utils.get_LPFaceParts_result_dataframe(
+                        self.id, utils.LP_MAPPING[camera_name], result_name
+                    )
+                except FileNotFoundError as exc:
+                    logging.info(repr(exc))
+                    return ()
                 if len(timestamps) != len(result_df):
                     logger.warning(
                         f"{self.id} {camera_name} {result_name} lightning pose face parts output has wrong shape {len(df)}, expected {len(timestamps)} frames."
