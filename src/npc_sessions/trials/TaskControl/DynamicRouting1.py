@@ -903,7 +903,6 @@ class DynamicRouting1(TaskControl):
                     if np.isnan(x):
                         continue
                     else:
-                        print(trial_idx, location_idx, x, x_values)
                         value = self.bregma_to_galvo(trial_idx, location_idx)[0]
                     result[trial_idx][location_idx] = value
             return tuple(result)
