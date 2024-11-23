@@ -171,7 +171,7 @@ class PropertyDict(collections.abc.Mapping):
                 df = df.explode(explode_cols, ignore_index=True)
         for col in df.columns:
             if df[col].dtype == object:
-                df[col] = df[col].fillna('')
+                df[col] = df[col].fillna("")
         return df
 
     @property
