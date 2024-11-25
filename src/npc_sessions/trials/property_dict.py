@@ -171,7 +171,13 @@ class PropertyDict(collections.abc.Mapping):
                 df = df.explode(explode_cols, ignore_index=True)
         for col in df.columns:
             if df[col].dtype == object:
-                df[col] = df[col].fillna("")
+                if any(isinstance(v, str) for v in df[col].values):
+                    df[col] = df[col].fillna("")
+                elif all(isinstance(v, int) for v in df[col].values if not np.isnan(v)):
+                    # cast to float
+                    df[col] = df[col].apply(
+                        lambda x: x if isinstance(x, int) else np.nan
+                    )
         return df
 
     @property
