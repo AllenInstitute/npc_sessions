@@ -176,7 +176,7 @@ class PropertyDict(collections.abc.Mapping):
                 elif all(isinstance(v, int) for v in df[col].values if not np.isnan(v)):
                     # cast to float
                     df[col] = df[col].apply(
-                        lambda x: x if isinstance(x, int) else np.nan
+                        lambda x: np.float64(x) if isinstance(x, int) else np.nan
                     )
         return df
 
