@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:827106265ab75181893194910ed5f2133e319a7e9d28b85c7f278dcd97b9528d"
+content_hash = "sha256:215585818b8297ae3c739eaba3418db90e0e3013af41dc3ac5200df3643cee92"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -1910,7 +1910,7 @@ files = [
 
 [[package]]
 name = "npc-ephys"
-version = "0.1.30"
+version = "0.1.31"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing raw ephys data, compatible with data in the cloud."
 groups = ["default"]
@@ -1928,8 +1928,8 @@ dependencies = [
     "zarr<2.18.1",
 ]
 files = [
-    {file = "npc_ephys-0.1.30-py3-none-any.whl", hash = "sha256:f3fe5046fc2df94b85d7a5a8e322cc8f6a968f62edfc272609aebcf50c16aafe"},
-    {file = "npc_ephys-0.1.30.tar.gz", hash = "sha256:3c4db7465a2f9f313b0de37ba15ce05762e519887a19c92dd903306d2b6c633f"},
+    {file = "npc_ephys-0.1.31-py3-none-any.whl", hash = "sha256:31876b56451374126514edcbbd025a221a094d6c282a104f0fc4b11993a250f0"},
+    {file = "npc_ephys-0.1.31.tar.gz", hash = "sha256:541d72df9e75e1477b12091ae2e6585390a4c05fedefb82d0d6a230a6e4b3c3e"},
 ]
 
 [[package]]
@@ -1995,7 +1995,7 @@ files = [
 
 [[package]]
 name = "npc-samstim"
-version = "0.1.4"
+version = "0.1.10"
 requires_python = ">=3.9"
 summary = "Tools for processing stim data from Sam's DynamicRoutingTask, compatible with data in the cloud."
 groups = ["default"]
@@ -2007,13 +2007,13 @@ dependencies = [
     "numba>=0.59.0",
 ]
 files = [
-    {file = "npc-samstim-0.1.4.tar.gz", hash = "sha256:74de6fe149386f0ed857e531b4e0670457f27984267b6820c1ec1f869f77ff86"},
-    {file = "npc_samstim-0.1.4-py3-none-any.whl", hash = "sha256:9c0536bf8bd07e249ca117851074d6b9c2962005044255ed8d1302a0e2ecb9b3"},
+    {file = "npc_samstim-0.1.10-py3-none-any.whl", hash = "sha256:fb08bdaeab58af3a4cd4181456377870f7af72c4333c2b5c677d65ab5a8b8383"},
+    {file = "npc_samstim-0.1.10.tar.gz", hash = "sha256:cec01c2cdb9c23b05e2c67e1b30a912f82856c46aab06c195eafc3a97d0b5356"},
 ]
 
 [[package]]
 name = "npc-session"
-version = "0.1.39"
+version = "0.1.40"
 requires_python = ">=3.9"
 summary = "Basic tools for parsing subject, session, date and time associated with data from the Mindscope Neuropixels team, in the cloud."
 groups = ["default"]
@@ -2021,13 +2021,13 @@ dependencies = [
     "typing-extensions>=4.7.1",
 ]
 files = [
-    {file = "npc_session-0.1.39-py3-none-any.whl", hash = "sha256:b369ff7c71d9c2119fb18a4aa0f2a8bbab01c7a73ec3e67a0a0f94e594e5cbc3"},
-    {file = "npc_session-0.1.39.tar.gz", hash = "sha256:b32243cb6beb58802bae63208937bca6795726c483bef3354465c06f2ee11526"},
+    {file = "npc_session-0.1.40-py3-none-any.whl", hash = "sha256:4f123a2feac68f2a5f6f5c586f7c397d042f31d97a21cfcf21e264598e439c58"},
+    {file = "npc_session-0.1.40.tar.gz", hash = "sha256:6199827c598edcf7e7d9dbb372946f971a0b056c6afc9eee2372b85435206ea2"},
 ]
 
 [[package]]
 name = "npc-stim"
-version = "0.1.9"
+version = "0.1.10"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing stim data, compatible with data in the cloud."
 groups = ["default"]
@@ -2038,13 +2038,13 @@ dependencies = [
     "scipy>=1.12.0",
 ]
 files = [
-    {file = "npc_stim-0.1.9-py3-none-any.whl", hash = "sha256:64f0eb63452f600c2ac6f8cde620b10d28d6350cd192e98007e98f33cbcd09ac"},
-    {file = "npc_stim-0.1.9.tar.gz", hash = "sha256:e3cb92d4b8c06e85fba2b8ffd13ff78f2c03fe61c7fa23315e7c92f9357e48aa"},
+    {file = "npc_stim-0.1.10-py3-none-any.whl", hash = "sha256:ef7e270164ed85a12fa584f56c81053052e8318485190784895aed9bf795b3a5"},
+    {file = "npc_stim-0.1.10.tar.gz", hash = "sha256:5ad1b5f9ae35a7857168c9fbb0a8c8c3e3ab11c2cb8d1798050f1ff10eab5549"},
 ]
 
 [[package]]
 name = "npc-sync"
-version = "0.1.19"
+version = "0.1.23"
 requires_python = ">=3.9"
 summary = "Repackaging of AllenSDK.SyncDataset with extra functionality, compatible with data in the cloud."
 groups = ["default"]
@@ -2057,8 +2057,8 @@ dependencies = [
     "typing-extensions>=4.9.0",
 ]
 files = [
-    {file = "npc_sync-0.1.19-py3-none-any.whl", hash = "sha256:2dd3ad5b4dad8633946d82de897d8b7d37bfb7456ccf5ac794d834149357698d"},
-    {file = "npc_sync-0.1.19.tar.gz", hash = "sha256:e6f3dd2578504fe9959604706387627e4c07a8c21cba3dd852f8c122d3f55b8e"},
+    {file = "npc_sync-0.1.23-py3-none-any.whl", hash = "sha256:6393b652f127d50d552343c237f03aa3389635170a3e3d20f7c399862e2e6a20"},
+    {file = "npc_sync-0.1.23.tar.gz", hash = "sha256:9ac78304cb54f584c2b4243e398ddf9e542cfb90e888f12f75cee7f7ea7415d6"},
 ]
 
 [[package]]
