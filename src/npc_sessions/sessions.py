@@ -364,7 +364,7 @@ class DynamicRoutingSession:
         self,
         path: str | npc_io.PathLike | None = None,
         metadata_only: bool = False,
-        zarr=True,
+        zarr=False,
         force=False,
     ) -> upath.UPath:
         """Write NWB file to disk - file path is normalized and returned"""
