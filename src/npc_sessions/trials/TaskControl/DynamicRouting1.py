@@ -565,7 +565,7 @@ class DynamicRouting1(TaskControl):
             trial_idx_from_rewards
         )
         reward_time = np.full(self._len, np.nan)
-        if np.all(is_rewarded == trial_idx_from_rewards):
+        if len(is_rewarded) == len(trial_idx_from_rewards) and np.all(is_rewarded == trial_idx_from_rewards):
             # expected case: single reward per trial
             reward_time[trial_idx_from_rewards] = all_reward_times
         else:
