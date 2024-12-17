@@ -2255,11 +2255,15 @@ class DynamicRoutingSession:
             raise AttributeError(
                 f"{self.id} has no log.csv file to get manipulator coordinates"
             ) from exc
-
-        df = npc_ephys.get_newscale_coordinates(
-            self.newscale_log_path,
-            f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
-        )
+        try:
+            df = npc_ephys.get_newscale_coordinates(
+                self.newscale_log_path,
+                f"{self.id.date}_{self.ephys_settings_xml_data.start_time.isoformat()}",
+            )
+        except IndexError as exc:
+            raise AttributeError(
+                f"{self.id} has a log.csv file, but does not contain info for the session date (file may be empty)"
+            ) from exc
         df = df.drop(columns="last_movement_dt")
         t = pynwb.core.DynamicTable(
             name="manipulator_positions",
