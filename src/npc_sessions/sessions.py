@@ -1571,11 +1571,11 @@ class DynamicRoutingSession:
             name="peak_electrode",
             description="index in `electrodes` table of channel with largest amplitude waveform",
         )
-        # TODO add back when annotations are correct
-        # units.add_column(
-        #     name="peak_waveform_index",
-        #     description="index in `waveform_mean` and `waveform_sd` arrays for channel with largest amplitude waveform",
-        # )
+        if self.is_waveforms:
+            units.add_column(
+                name="peak_waveform_index",
+                description="index in `waveform_mean` and `waveform_sd` arrays for channel with largest amplitude waveform",
+            )
         electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
             group_query = f"group_name == {row['electrode_group_name']!r}"
