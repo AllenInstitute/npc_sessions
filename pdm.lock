@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:367ba97e3597eaddbfca9966110dad8d8111be7ad7154741b76c4a627f5b7cb5"
+content_hash = "sha256:682600bd3aa05f60f9e917cb66fe1c70b195fec800c1cfcbad1bca3fe23c63a6"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -25,6 +25,22 @@ dependencies = [
 files = [
     {file = "aind_codeocean_api-0.5.0-py3-none-any.whl", hash = "sha256:0ab46cd51553c7b7dc51dd9ff961863ff58231dab102bdaa59571432a110e66d"},
     {file = "aind_codeocean_api-0.5.0.tar.gz", hash = "sha256:02425b1f49c588467050b007f45c727ea6f0fcc30b09a30d231e9b85b7bac5c0"},
+]
+
+[[package]]
+name = "aind-codeocean-pipeline-monitor"
+version = "0.5.2"
+requires_python = ">=3.9"
+summary = "Package to define and run a Code Ocean Pipeline Monitor Job"
+groups = ["default"]
+dependencies = [
+    "codeocean>=0.1.7",
+    "pydantic-settings>=2.0",
+    "pydantic>=2.0",
+]
+files = [
+    {file = "aind_codeocean_pipeline_monitor-0.5.2-py3-none-any.whl", hash = "sha256:c2acbc86e50600947a0978ba6248322c835731314d5886b234ec2ced37c10597"},
+    {file = "aind_codeocean_pipeline_monitor-0.5.2.tar.gz", hash = "sha256:b7262d9a4c169f7fc60e50fd59e048dab3aeac17a209ec0a25f183293989a09d"},
 ]
 
 [[package]]
@@ -97,19 +113,21 @@ files = [
 
 [[package]]
 name = "aind-session"
-version = "0.3.6"
+version = "0.3.15"
 requires_python = ">=3.9"
 summary = "User-friendly tools for accessing paths, metadata and assets related to AIND sessions."
 groups = ["default"]
 dependencies = [
+    "aind-codeocean-pipeline-monitor>=0.5.2",
     "aind-data-access-api[docdb]>=0.14.0",
-    "codeocean>=0.1.5",
+    "codeocean>=0.3.0",
     "npc-io>=0.1.30",
     "npc-session>=0.1.39",
+    "tzdata>=2024.2",
 ]
 files = [
-    {file = "aind_session-0.3.6-py3-none-any.whl", hash = "sha256:89334c4a75ef7029eace46edb0ba8b1f997ec4dba855ddd66248fd5e1c49c5c4"},
-    {file = "aind_session-0.3.6.tar.gz", hash = "sha256:51f91b45d7aae6a986e51208772e35197472edb28f797e07c05711c02f7fd8d3"},
+    {file = "aind_session-0.3.15-py3-none-any.whl", hash = "sha256:f37f8b591f14fb2b19a8de536476bd81b51990f6ed0d818f774b0cfa883588da"},
+    {file = "aind_session-0.3.15.tar.gz", hash = "sha256:656681c6b279e6f46b3e1875c564eb012c895bf44eac6ce2fab4ba84a15463c7"},
 ]
 
 [[package]]
@@ -645,20 +663,19 @@ files = [
 
 [[package]]
 name = "codeocean"
-version = "0.1.5"
+version = "0.3.0"
 requires_python = ">=3.9"
 summary = "Code Ocean Python SDK"
 groups = ["default"]
 dependencies = [
     "backports-strenum>=1.3.1; python_version < \"3.11\"",
-    "dataclasses",
     "dataclasses-json",
     "requests",
     "requests-toolbelt",
 ]
 files = [
-    {file = "codeocean-0.1.5-py3-none-any.whl", hash = "sha256:aed41cac85b0dbf8df145b781b86cc2b3d269d824961b805996dec3963919037"},
-    {file = "codeocean-0.1.5.tar.gz", hash = "sha256:4b314aeca2d0b13c4fde75751935d546e88b644b0068cb60936ba654485472ea"},
+    {file = "codeocean-0.3.0-py3-none-any.whl", hash = "sha256:42531c94aa03d5460fd4d6a1307747207bd165dacbe32f79625d3cebf157e5b1"},
+    {file = "codeocean-0.3.0.tar.gz", hash = "sha256:09b0c305d2e18abf86c775811e64b31a63489be9edd41f57d242f0a8b479fc3d"},
 ]
 
 [[package]]
@@ -1031,16 +1048,6 @@ groups = ["default"]
 files = [
     {file = "cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30"},
     {file = "cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c"},
-]
-
-[[package]]
-name = "dataclasses"
-version = "0.6"
-summary = "A backport of the dataclasses module for Python 3.6"
-groups = ["default"]
-files = [
-    {file = "dataclasses-0.6-py3-none-any.whl", hash = "sha256:454a69d788c7fda44efd71e259be79577822f5e3f53f029a22d08004e951dc9f"},
-    {file = "dataclasses-0.6.tar.gz", hash = "sha256:6988bd2b895eef432d562370bb707d540f32f7360ab13da45340101bc2307d84"},
 ]
 
 [[package]]
@@ -3414,13 +3421,13 @@ files = [
 
 [[package]]
 name = "tzdata"
-version = "2024.1"
+version = "2025.1"
 requires_python = ">=2"
 summary = "Provider of IANA time zone data"
 groups = ["default"]
 files = [
-    {file = "tzdata-2024.1-py2.py3-none-any.whl", hash = "sha256:9068bc196136463f5245e51efda838afa15aaeca9903f49050dfa2679db4d252"},
-    {file = "tzdata-2024.1.tar.gz", hash = "sha256:2674120f8d891909751c38abcdfd386ac0a5a1127954fbc332af6b5ceae07efd"},
+    {file = "tzdata-2025.1-py2.py3-none-any.whl", hash = "sha256:7e127113816800496f027041c570f50bcd464a020098a3b6b199517772303639"},
+    {file = "tzdata-2025.1.tar.gz", hash = "sha256:24894909e88cdb28bd1636c6887801df64cb485bd593f2fd83ef29075a81d694"},
 ]
 
 [[package]]
