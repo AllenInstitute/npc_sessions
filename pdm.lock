@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:215585818b8297ae3c739eaba3418db90e0e3013af41dc3ac5200df3643cee92"
+content_hash = "sha256:367ba97e3597eaddbfca9966110dad8d8111be7ad7154741b76c4a627f5b7cb5"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -1308,7 +1308,7 @@ files = [
 
 [[package]]
 name = "hdmf"
-version = "3.14.5"
+version = "3.14.6"
 requires_python = ">=3.8"
 summary = "A hierarchical data modeling framework for modern science data standards"
 groups = ["default"]
@@ -1322,8 +1322,8 @@ dependencies = [
     "scipy>=1.4",
 ]
 files = [
-    {file = "hdmf-3.14.5-py3-none-any.whl", hash = "sha256:b85835aed69b25fbe110b8bea03ad8f3e2126cc75c46cc4f064a1338373e6ff1"},
-    {file = "hdmf-3.14.5.tar.gz", hash = "sha256:e25223f382c0471d492ce0ef92c0a72cf8143ec188d55a7a9931b6ffecf80d1c"},
+    {file = "hdmf-3.14.6-py3-none-any.whl", hash = "sha256:c763132d480493c3178f50e80763787f1f0ee860c4b5a7c4ae372a60b71d3e3e"},
+    {file = "hdmf-3.14.6.tar.gz", hash = "sha256:eaaabc4cd118f3f68936898270b9487ee8543ed632a4d82c3e5f02a0ec2f3065"},
 ]
 
 [[package]]
