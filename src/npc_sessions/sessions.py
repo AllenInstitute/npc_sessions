@@ -1566,7 +1566,7 @@ class DynamicRoutingSession:
                 "electrode_group",
             ):
                 continue
-            units.add_column(name=column, description="")  # TODO add descriptions
+            units.add_column(name=column, description="", index=column=="spike_amplitudes")  # TODO add descriptions
         units.add_column(
             name="peak_electrode",
             description="index in `electrodes` table of channel with largest amplitude waveform",
