@@ -2,10 +2,11 @@
 # Please do not edit it manually.
 
 aind-codeocean-api==0.5.0
+aind-codeocean-pipeline-monitor==0.5.2
 aind-data-access-api[docdb]==0.15.0
 aind-data-schema==1.1.1
 aind-data-schema-models==0.5.7
-aind-session==0.3.6
+aind-session==0.3.15
 aiobotocore==2.7.0
 aiohappyeyeballs==2.4.0
 aiohttp==3.10.5
@@ -23,13 +24,12 @@ botocore==1.31.64
 certifi==2024.8.30
 cffi==1.17.1
 charset-normalizer==3.3.2
-codeocean==0.1.5
+codeocean==0.3.0
 colorama==0.4.6; sys_platform == "win32" or platform_system == "Windows"
 contourpy==1.3.0
 crc32c==2.7.post1
 cryptography==43.0.1
 cycler==0.12.1
-dataclasses==0.6
 dataclasses-json==0.6.7
 dictdiffer==0.9.0
 dnspython==2.6.1
@@ -40,7 +40,7 @@ fonttools==4.53.1
 frozenlist==1.4.1
 fsspec==2024.6.1
 h5py==3.12.1
-hdmf==3.14.5
+hdmf==3.14.6
 hdmf-zarr-bjh==0.8.1.post1
 idna==3.10
 importlib-resources==6.4.5
@@ -52,22 +52,22 @@ kiwisolver==1.4.7
 llvmlite==0.43.0
 markdown-it-py==3.0.0
 marshmallow==3.22.0
-matplotlib==3.9.2
+matplotlib==3.9.4
 mdurl==0.1.2
 msgpack==1.1.0
 multidict==6.1.0
 mypy-extensions==1.0.0
 ndindex==1.8
-ndx-events==0.2.0
-ndx-pose==0.1.1
-npc-ephys==0.1.31
-npc-io==0.1.30
-npc-lims==0.1.185
-npc-mvr==0.1.9
-npc-samstim==0.1.10
+ndx-events==0.2.1
+ndx-pose==0.2.1
+npc-ephys==0.1.35
+npc-io==0.1.32
+npc-lims==0.1.186
+npc-mvr==0.1.11
+npc-samstim==0.1.11
 npc-session==0.1.40
 npc-stim==0.1.10
-npc-sync==0.1.23
+npc-sync==0.1.24
 numba==0.60.0
 numcodecs==0.12.1
 numexpr==2.10.1
@@ -75,21 +75,21 @@ numpy==1.26.4
 opencv-python-headless==4.10.0.84
 openpyxl==3.1.5
 packaging==24.1
-pandas==2.2.2
+pandas==2.2.3
 paramiko==3.5.0
 pillow==10.4.0
-polars==1.7.1
+polars[pyarrow]==1.24.0
 py-cpuinfo==9.0.0
 pyarrow==17.0.0
 pycparser==2.22
-pydantic==2.9.2
-pydantic-core==2.23.4
+pydantic==2.10.6
+pydantic-core==2.27.2
 pydantic-settings==2.5.2
 pydbhub-bjh==0.0.9
 pygments==2.18.0
 pymongo==4.3.3
 pynacl==1.5.0
-pynwb==2.8.2
+pynwb==2.8.3
 pyopenssl==24.2.1
 pyparsing==3.1.4
 python-dateutil==2.9.0.post0
@@ -100,7 +100,7 @@ redis==5.0.8
 referencing==0.35.1
 requests==2.32.3
 requests-toolbelt==1.0.0
-rich==13.8.1
+rich==13.9.4
 rpds-py==0.20.0
 ruamel-yaml==0.18.6
 ruamel-yaml-clib==0.2.8; platform_python_implementation == "CPython" and python_version < "3.13"
@@ -118,7 +118,7 @@ types-requests==2.31.0.6
 types-urllib3==1.26.25.14
 typing-extensions==4.12.2
 typing-inspect==0.9.0
-tzdata==2024.1
+tzdata==2025.1
 universal-pathlib==0.1.4
 urllib3==1.26.20
 wavpack-numcodecs==0.1.5

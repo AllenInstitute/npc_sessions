@@ -1505,9 +1505,13 @@ class DynamicRoutingSession:
         # remove units from probes that weren't inserted
         units = units[units["electrode_group_name"].isin(self.probes_inserted)]
         group_to_obs_intervals = {}
-        for electrode_group_name in units['electrode_group_name'].unique():
-            group_to_obs_intervals[electrode_group_name] = self.get_obs_intervals(electrode_group_name)
-        units['obs_intervals'] = units['electrode_group_name'].map(group_to_obs_intervals)
+        for electrode_group_name in units["electrode_group_name"].unique():
+            group_to_obs_intervals[electrode_group_name] = self.get_obs_intervals(
+                electrode_group_name
+            )
+        units["obs_intervals"] = units["electrode_group_name"].map(
+            group_to_obs_intervals
+        )
         if self.is_annotated:
             units = npc_ephys.add_electrode_annotations_to_units(
                 units=units,
@@ -1515,22 +1519,22 @@ class DynamicRoutingSession:
             )
         units.drop(
             columns=[
-                'sync_spike_2',
-                'sync_spike_4',
-                'sync_spike_8',
-            ], 
-            inplace=True, 
-            errors='ignore',
+                "sync_spike_2",
+                "sync_spike_4",
+                "sync_spike_8",
+            ],
+            inplace=True,
+            errors="ignore",
         )
         if self.is_task:
             # obs_intervals are needed to for calculating spike-counts correctly
             units = utils.add_activity_drift_metric(
                 units_df=units,
                 trials_df=self.trials[:],
-                col_name='activity_drift',
+                col_name="activity_drift",
             )
         else:
-            units['activity_drift'] = np.nan
+            units["activity_drift"] = np.nan
         return units
 
     def get_obs_intervals(
@@ -1586,7 +1590,7 @@ class DynamicRoutingSession:
                 "`scipy.stats.anderson_ksamp()` is used to test whether spike counts within the interval [-1: 2] s around the stimulus start time "
                 "in each block (grouped by context and stimulus) are drawn from the same distribution; "
                 "the test statistic is normalized by dividing by 100 and clipping values to [0, 1], with 0 being the lowest activity drift; "
-                f"it is recommended to filter for units with a value below {utils.ACTIVITY_DRIFT_THRESHOLD} for analyses that depend on stationary activity across the behvior task; " 
+                f"it is recommended to filter for units with a value below {utils.ACTIVITY_DRIFT_THRESHOLD} for analyses that depend on stationary activity across the behvior task; "
                 "for a manually-annotated subset of unit activity rasters, thresholding at 0.1 resulted in a true-positive rate of 99% and false-positive rate of ~30%; "
             ),
             "is_not_drift": f"whether the unit has low activity drift (activity_drift < {utils.ACTIVITY_DRIFT_THRESHOLD})",
@@ -1604,8 +1608,12 @@ class DynamicRoutingSession:
                 continue
             if column == "peak_waveform_index" and not self.is_waveforms:
                 continue
-            units.add_column(name=column, description=description_map.get(column, ""), index=column=="spike_amplitudes")  
-        
+            units.add_column(
+                name=column,
+                description=description_map.get(column, ""),
+                index=column == "spike_amplitudes",
+            )
+
         electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
             group_query = f"group_name == {row['electrode_group_name']!r}"

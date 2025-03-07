@@ -771,7 +771,7 @@ class DynamicRouting1(TaskControl):
             return np.full(self._len, np.nan)
 
         def parse_wavelengths(
-            devices: tuple[str, ...] | str
+            devices: tuple[str, ...] | str,
         ) -> tuple[int | np.floating, ...]:
             if isinstance(devices, str):
                 if not devices:

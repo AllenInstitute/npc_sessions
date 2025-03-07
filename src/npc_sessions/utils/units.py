@@ -3,8 +3,9 @@ from __future__ import annotations
 import gc
 import logging
 import math
-from typing import Generator, Iterable, Literal
 import warnings
+from collections.abc import Iterable
+from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -17,6 +18,7 @@ import tqdm
 logger = logging.getLogger(__name__)
 
 ACTIVITY_DRIFT_THRESHOLD = 0.1
+
 
 def insert_is_observed(
     intervals_frame: polars._typing.FrameType,
@@ -96,6 +98,7 @@ def insert_is_observed(
         return intervals_lf
     return intervals_lf.collect()
 
+
 def get_per_trial_spike_times(
     units_df: pl.DataFrame,
     trials_df: pl.DataFrame,
@@ -112,7 +115,7 @@ def get_per_trial_spike_times(
         ends = (ends,)
     if isinstance(col_names, str):
         col_names = (col_names,)
-    assert isinstance(col_names, tuple) # for mypy
+    assert isinstance(col_names, tuple)  # for mypy
     assert isinstance(starts, tuple)
     assert isinstance(ends, tuple)
     if len(set(col_names)) != len(col_names):
@@ -133,14 +136,14 @@ def get_per_trial_spike_times(
     }
     for col_name in col_names:
         results[col_name] = []
-    for row in units_df.select('unit_id', 'spike_times').iter_rows(named=True):
+    for row in units_df.select("unit_id", "spike_times").iter_rows(named=True):
         if row["unit_id"] is None:
             raise ValueError(f"Missing unit_id in {row=}")
         results["unit_id"].extend([row["unit_id"]] * len(trials_df))
 
         for start, end, col_name in zip(starts, ends, col_names):
             # get spike times with start:end interval for each row of the trials table
-            spike_times = row['spike_times']
+            spike_times = row["spike_times"]
             spikes_in_all_intervals: list[list[float | int] | float | int] = []
             for a, b in np.searchsorted(
                 spike_times,
@@ -164,25 +167,24 @@ def get_per_trial_spike_times(
         results_df = pl.DataFrame(results)
 
     if apply_obs_intervals:
-        results_df = (
-            insert_is_observed(
-                intervals_frame=results_df,
-                units_frame=units_df,
-            )
-            .with_columns(
-                *[
-                    pl.when(pl.col("is_observed").not_())
-                    .then(pl.lit(None))
-                    .otherwise(pl.col(col_name))
-                    .alias(col_name)
-                    for col_name in col_names
-                ]
-            )
+        results_df = insert_is_observed(
+            intervals_frame=results_df,
+            units_frame=units_df,
+        ).with_columns(
+            *[
+                pl.when(pl.col("is_observed").not_())
+                .then(pl.lit(None))
+                .otherwise(pl.col(col_name))
+                .alias(col_name)
+                for col_name in col_names
+            ]
         )
     return results_df
 
 
-def get_test_samples(unit_df: pl.DataFrame, interval: Literal['baseline', 'response', 'trial']) -> list[list[int]] | None:
+def get_test_samples(
+    unit_df: pl.DataFrame, interval: Literal["baseline", "response", "trial"]
+) -> list[list[int]] | None:
     if interval == "trial" and "trial" not in unit_df.columns:
         unit_df = unit_df.with_columns(trial=pl.col("baseline") + pl.col("response"))
     if unit_df[interval].sum() == 0:
@@ -196,7 +198,12 @@ def get_test_samples(unit_df: pl.DataFrame, interval: Literal['baseline', 'respo
                 math.ceil(len(unit_df) / 3)
             )
         ]
-    return unit_df.group_by("block_index").agg(pl.col(interval)).get_column(interval).to_list()
+    return (
+        unit_df.group_by("block_index")
+        .agg(pl.col(interval))
+        .get_column(interval)
+        .to_list()
+    )
 
 
 def add_activity_drift_metric(
@@ -207,15 +214,22 @@ def add_activity_drift_metric(
 
     units_pl = pl.from_pandas(units_df[["unit_id", "spike_times", "obs_intervals"]])
     trials_pl = pl.from_pandas(trials_df[:])
-    trials_with_counts = (
-        get_per_trial_spike_times(
-            units_df=units_pl,
-            trials_df=trials_pl,
-            starts=(pl.col('stim_start_time') - 1.5, pl.col('stim_start_time'), ),
-            ends=(pl.col('stim_start_time'), pl.col('stim_start_time') + 2, ),
-            col_names=('baseline', 'response', ),
-            as_counts=True,
-        )
+    trials_with_counts = get_per_trial_spike_times(
+        units_df=units_pl,
+        trials_df=trials_pl,
+        starts=(
+            pl.col("stim_start_time") - 1.5,
+            pl.col("stim_start_time"),
+        ),
+        ends=(
+            pl.col("stim_start_time"),
+            pl.col("stim_start_time") + 2,
+        ),
+        col_names=(
+            "baseline",
+            "response",
+        ),
+        as_counts=True,
     )
     del units_pl
     del trials_pl
@@ -233,12 +247,11 @@ def add_activity_drift_metric(
 
         for (unit_id, context_name, stim_name, *_), unit_df in tqdm.tqdm(
             iterable=(
-                trials_with_counts
-                .drop_nulls(["baseline", "response"])
+                trials_with_counts.drop_nulls(["baseline", "response"])
                 .filter(pl.col("stim_name") != "catch")
                 .group_by("unit_id", "context_name", "stim_name", maintain_order=True)
             ),
-            total=trials_with_counts.n_unique('unit_id'),
+            total=trials_with_counts.n_unique("unit_id"),
             unit="unit",
             desc="calculating activity drift",
             ncols=80,
@@ -248,20 +261,26 @@ def add_activity_drift_metric(
                 context_name=context_name,
                 stim_name=stim_name,
             )
-            for interval in ("trial", ): # previous intervals we explored were "baseline" and "response"
+            for interval in (
+                "trial",
+            ):  # previous intervals we explored were "baseline" and "response"
                 samples = get_test_samples(unit_df, interval)
                 if samples is None:
                     stats = null_result
                 else:
                     try:
                         stats = scipy.stats.anderson_ksamp(
-                            samples, midrank=False, method=None,
+                            samples,
+                            midrank=False,
+                            method=None,
                             # even with 10k permutations, majorit of p-values are clipped at 0.0001, which is useless
                             # so use default lookup table method, which is fast, then discard p-value
                         )
                     except RuntimeWarning as e:
                         print(f"Warning for {unit_id}, {interval}: {e!r}")
-                        logger.warning(f"Warning encountered calculating AD test for {unit_id}, {interval}: {e!r}")
+                        logger.warning(
+                            f"Warning encountered calculating AD test for {unit_id}, {interval}: {e!r}"
+                        )
                         stats = null_result
                 result[f"ad_stat_{interval}"] = stats.statistic
             test_results.append(result)
@@ -269,7 +288,12 @@ def add_activity_drift_metric(
         pl.DataFrame(test_results)
         .select(
             "unit_id",
-            pl.col("ad_stat_trial").max().over("unit_id").truediv(100).clip(0, 1).alias(col_name),
+            pl.col("ad_stat_trial")
+            .max()
+            .over("unit_id")
+            .truediv(100)
+            .clip(0, 1)
+            .alias(col_name),
             # very few units have slightly negative scores, so we clip them to 0
         )
         .with_columns(
