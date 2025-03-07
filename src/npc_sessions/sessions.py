@@ -1535,6 +1535,7 @@ class DynamicRoutingSession:
             )
         else:
             units["activity_drift"] = np.nan
+            units["is_not_drift"] = False
         return units
 
     def get_obs_intervals(
@@ -1592,8 +1593,9 @@ class DynamicRoutingSession:
                 "the test statistic is normalized by dividing by 100 and clipping values to [0, 1], with 0 being the lowest activity drift; "
                 f"it is recommended to filter for units with a value below {utils.ACTIVITY_DRIFT_THRESHOLD} for analyses that depend on stationary activity across the behvior task; "
                 "for a manually-annotated subset of unit activity rasters, thresholding at 0.1 resulted in a true-positive rate of 99% and false-positive rate of ~30%; "
+                "nan values indicate either that the unit had too few spikes to calculate the metric, or that the session had no behavior task trials"
             ),
-            "is_not_drift": f"whether the unit has low activity drift (activity_drift < {utils.ACTIVITY_DRIFT_THRESHOLD})",
+            "is_not_drift": f"whether the unit has low activity drift (`activity_drift < {utils.ACTIVITY_DRIFT_THRESHOLD}`); false wherever `activity_drift` is nan",
             "peak_electrode": "index in `electrodes` table of channel with largest amplitude waveform",
             "peak_waveform_index": "index in `waveform_mean` and `waveform_sd` arrays for channel with largest amplitude waveform",
             # TODO add descriptions for other columns

@@ -173,7 +173,7 @@ def get_per_trial_spike_times(
         ).with_columns(
             *[
                 pl.when(pl.col("is_observed").not_())
-                .then(pl.lit(None))
+                .then(pl.lit(float("nan")))
                 .otherwise(pl.col(col_name))
                 .alias(col_name)
                 for col_name in col_names
@@ -236,8 +236,8 @@ def add_activity_drift_metric(
     gc.collect()
 
     class NullResult:
-        statistic = None
-        pvalue = None
+        statistic = np.nan
+        pvalue = np.nan
 
     null_result = NullResult()
 
