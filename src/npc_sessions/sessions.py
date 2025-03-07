@@ -1585,7 +1585,7 @@ class DynamicRoutingSession:
             "peak_waveform_index": "index in `waveform_mean` and `waveform_sd` arrays for channel with largest amplitude waveform",
             # TODO add descriptions for other columns
         }
-        for column in sorted(set(self._units.columns) & set(description_map.keys())):
+        for column in sorted(set(self._units.columns) | set(description_map.keys())):
             if column in (
                 "spike_times",
                 "waveform_mean",
