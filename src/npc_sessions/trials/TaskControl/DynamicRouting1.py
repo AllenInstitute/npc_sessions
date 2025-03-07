@@ -99,13 +99,12 @@ class DynamicRouting1(TaskControl):
                 raise AssertionError(
                     f"Multiple opto devices found in session: {devices}"
                 )
-            device = devices[0]
             try:
                 self._cached_opto_stim_recordings = (
                     npc_samstim.get_stim_latencies_from_sync(
                         self._hdf5,
                         self._sync,
-                        waveform_type=devices[0],
+                        waveform_type="opto",
                     )
                 )
             except npc_samstim.MissingSyncLineError:
