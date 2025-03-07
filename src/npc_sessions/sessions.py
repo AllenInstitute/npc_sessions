@@ -1513,6 +1513,15 @@ class DynamicRoutingSession:
                 units=units,
                 annotated_electrodes=utils.get_tissuecyte_electrodes_table(self.id),
             )
+        units.drop(
+            columns=[
+                'sync_spike_2',
+                'sync_spike_4',
+                'sync_spike_8',
+            ], 
+            inplace=True, 
+            errors='ignore',
+        )
         if self.is_task:
             # obs_intervals are needed to for calculating spike-counts correctly
             units = utils.add_activity_drift_metric(
