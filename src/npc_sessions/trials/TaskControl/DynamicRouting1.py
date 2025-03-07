@@ -88,17 +88,6 @@ class DynamicRouting1(TaskControl):
         if cached is not None:
             return cached
         if self._sync:
-            devices = [
-                device.removeprefix("['").removesuffix("']")
-                for device in 
-                np.unique(self._hdf5.get("trialOptoDevice").asstr()[:])
-            ]
-            if '' in devices:
-                devices.remove('')
-            if len(devices) > 1:
-                raise AssertionError(
-                    f"Multiple opto devices found in session: {devices}"
-                )
             try:
                 self._cached_opto_stim_recordings = (
                     npc_samstim.get_stim_latencies_from_sync(
