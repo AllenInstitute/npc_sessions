@@ -2,6 +2,7 @@ import gc
 import logging
 import math
 from typing import Generator, Iterable, Literal
+import warnings
 
 import numpy as np
 import numpy.typing as npt
@@ -225,7 +226,9 @@ def add_activity_drift_metric(
     null_result = NullResult()
 
     test_results = []
-    with np.errstate(over="ignore"):
+    with np.errstate(over="ignore"), warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+
         for (unit_id, context_name, stim_name, *_), unit_df in tqdm.tqdm(
             iterable=(
                 trials_with_counts
