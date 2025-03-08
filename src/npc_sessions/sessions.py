@@ -1598,52 +1598,61 @@ class DynamicRoutingSession:
             "is_not_drift": f"whether the unit has low activity drift (`activity_drift < {utils.ACTIVITY_DRIFT_THRESHOLD}`); false wherever `activity_drift` is nan",
             "peak_electrode": "index in `electrodes` table of channel with largest amplitude waveform",
             "peak_waveform_index": "index in `waveform_mean` and `waveform_sd` arrays for channel with largest amplitude waveform",
+            "electrodes": "indices in `electrodes` table of channels on the probe that the unit was recorded on",
+            "channels": "1-indexed channel numbers on the probe that the unit was recorded on (1 is the tip of the probe)",
             # TODO add descriptions for other columns
         }
         for column in sorted(set(self._units.columns) | set(description_map.keys())):
             if column in (
                 "spike_times",
+                "electrodes",
+                "electrode_group",
+                "obs_intervals",
                 "waveform_mean",
                 "waveform_sd",
-                "electrode_group",
             ):
                 continue
             if column == "peak_waveform_index" and not self.is_waveforms:
                 continue
+            elif column in (
+                "spike_amplitudes",
+                "channels",
+            ):
+                index = True
+            else:
+                index = False
             units.add_column(
                 name=column,
                 description=description_map.get(column, ""),
-                index=column == "spike_amplitudes",
+                index=index,
             )
 
         electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
             group_query = f"group_name == {row['electrode_group_name']!r}"
-            peak_electrode = electrodes.query(
+            row['peak_electrode'] = electrodes.query(
                 f"{group_query} & channel == {row['peak_channel']}"
             ).index.item()
+            row['electrode_group'] = self.electrode_groups[row["electrode_group_name"]]
             if self.is_waveforms:
                 row["electrodes"] = electrodes.query(
                     f"{group_query} & channel in {row['channels']}"
                 ).index.to_list()
-                row["peak_waveform_index"] = row["electrodes"].index(peak_electrode)
+                row["peak_waveform_index"] = row["electrodes"].index( row['peak_electrode'])
+                # ragged arrays aren't supported in waveform_mean/sd:
+                sparse_waveforms = False
+                for col in ("waveform_mean", "waveform_sd"):
+                    d = np.array(row[col]) # time, electrodes
+                    a = np.zeros((d.shape[0], 384), dtype=np.float64)
+                    a[:, row['channels']] = d
+                    row[col] = a
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
-            units.add_unit(
-                **row,  # contains spike_times
-                electrode_group=self.electrode_groups[row["electrode_group_name"]],
-                peak_electrode=peak_electrode,
-            )
-        if "waveform_mean" in units:
-            assert all(
-                len(unit.electrodes) == unit.waveform_mean.shape[1]
-                for _, unit in units[:].iterrows()
-            )
-        if "waveform_sd" in units:
-            assert all(
-                len(unit.electrodes) == unit.waveform_sd.shape[1]
-                for _, unit in units[:].iterrows()
-            )
+            units.add_unit(**row)
+        if self.is_waveforms and sparse_waveforms:
+            for _, unit in units[:].iterrows():
+                for col in ("waveform_mean", "waveform_sd"):
+                    assert len(unit.electrodes) == np.array(unit[col]).shape[1], f"{unit.electrodes = } != {unit[col].shape = }"
         return units
 
     class AP(pynwb.core.MultiContainerInterface):
