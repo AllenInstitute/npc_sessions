@@ -433,10 +433,10 @@ class DynamicRoutingSession:
     @property
     def notes(self) -> str | None:
         notes = ""
-        if self.info:
-            notes = "; ".join([notes, self.info.notes] + self.info.issues)
-        if set(notes) == {" ", ";"}:  #
-            notes = ""
+        if self.info and self.info.notes:
+            notes = "; ".join([notes, self.info.notes])
+        if self.info and self.info.issues:
+            notes = "; ".join([notes, *self.info.issues])
         return notes or None
 
     @property
