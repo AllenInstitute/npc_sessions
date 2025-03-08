@@ -1630,21 +1630,23 @@ class DynamicRoutingSession:
         electrodes = self.electrodes[:]
         for _, row in self._units.iterrows():
             group_query = f"group_name == {row['electrode_group_name']!r}"
-            row['peak_electrode'] = electrodes.query(
+            row["peak_electrode"] = electrodes.query(
                 f"{group_query} & channel == {row['peak_channel']}"
             ).index.item()
-            row['electrode_group'] = self.electrode_groups[row["electrode_group_name"]]
+            row["electrode_group"] = self.electrode_groups[row["electrode_group_name"]]
             if self.is_waveforms:
                 row["electrodes"] = electrodes.query(
                     f"{group_query} & channel in {row['channels']}"
                 ).index.to_list()
-                row["peak_waveform_index"] = row["electrodes"].index( row['peak_electrode'])
+                row["peak_waveform_index"] = row["electrodes"].index(
+                    row["peak_electrode"]
+                )
                 # ragged arrays aren't supported in waveform_mean/sd:
                 sparse_waveforms = False
                 for col in ("waveform_mean", "waveform_sd"):
-                    d = np.array(row[col]) # time, electrodes
+                    d = np.array(row[col])  # time, electrodes
                     a = np.zeros((d.shape[0], 384), dtype=np.float64)
-                    a[:, row['channels']] = d
+                    a[:, row["channels"]] = d
                     row[col] = a
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
@@ -1652,7 +1654,9 @@ class DynamicRoutingSession:
         if self.is_waveforms and sparse_waveforms:
             for _, unit in units[:].iterrows():
                 for col in ("waveform_mean", "waveform_sd"):
-                    assert len(unit.electrodes) == np.array(unit[col]).shape[1], f"{unit.electrodes = } != {unit[col].shape = }"
+                    assert (
+                        len(unit.electrodes) == np.array(unit[col]).shape[1]
+                    ), f"{unit.electrodes = } != {unit[col].shape = }"
         return units
 
     class AP(pynwb.core.MultiContainerInterface):
