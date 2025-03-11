@@ -1600,6 +1600,7 @@ class DynamicRoutingSession:
             "peak_waveform_index": "index in `waveform_mean` and `waveform_sd` arrays for channel with largest amplitude waveform",
             "electrodes": "indices in `electrodes` table of channels on the probe that the unit was recorded on",
             "channels": "1-indexed channel numbers on the probe that the unit was recorded on (1 is the tip of the probe)",
+            "device_name": "name in `devices` table of the probe that the unit was recorded on",
             # TODO add descriptions for other columns
         }
         for column in sorted(set(self._units.columns) | set(description_map.keys())):
@@ -1634,6 +1635,7 @@ class DynamicRoutingSession:
                 f"{group_query} & channel == {row['peak_channel']}"
             ).index.item()
             row["electrode_group"] = self.electrode_groups[row["electrode_group_name"]]
+            row["device_name"] = self.electrode_groups[row["electrode_group_name"]].device.name
             if self.is_waveforms:
                 row["electrodes"] = electrodes.query(
                     f"{group_query} & channel in {row['channels']}"
