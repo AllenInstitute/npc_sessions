@@ -187,8 +187,9 @@ def get_test_samples(
 ) -> list[list[int]] | None:
     if interval == "trial" and "trial" not in unit_df.columns:
         unit_df = unit_df.with_columns(trial=pl.col("baseline") + pl.col("response"))
-    if unit_df[interval].sum() == 0:
-        # cannot perform test if all samples are the same (zero spikes is a common case)
+    if unit_df[interval].drop_nans().sum() == 0:
+        # cannot perform test if all samples are the same (zero spikes is a common case, or all nans
+        # when no trials observed)
         return None
     if unit_df.n_unique("block_index") < 2:
         # for Templeton we chunk spike counts into 3 segments of time
@@ -273,15 +274,22 @@ def add_activity_drift_metric(
                             samples,
                             midrank=False,
                             method=None,
-                            # even with 10k permutations, majorit of p-values are clipped at 0.0001, which is useless
+                            # even with 10k permutations, majority of p-values are clipped at 0.0001, which is useless
                             # so use default lookup table method, which is fast, then discard p-value
                         )
-                    except RuntimeWarning as e:
-                        print(f"Warning for {unit_id}, {interval}: {e!r}")
+                    except RuntimeWarning:
                         logger.warning(
-                            f"Warning encountered calculating AD test for {unit_id}, {interval}: {e!r}"
+                            f"Warning encountered calculating AD test for {unit_id}, {interval=}: activity_drift will be set to NaN"
                         )
                         stats = null_result
+                    except ValueError as e:
+                        if 'distinct' in e.args[0]:
+                            logger.warning(
+                                f"Distinct sample error encountered calculating AD test for {unit_id}, {interval=}: activity_drift will be set to NaN"
+                            )
+                            stats = null_result
+                        else:
+                            raise
                 result[f"ad_stat_{interval}"] = stats.statistic
             test_results.append(result)
     max_min_df = (
