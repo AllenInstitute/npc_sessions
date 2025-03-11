@@ -1612,7 +1612,7 @@ class DynamicRoutingSession:
                 "waveform_sd",
             ):
                 continue
-            if column == "peak_waveform_index" and not self.is_waveforms:
+            if column in ("peak_waveform_index", "channels",) and not self.is_waveforms:
                 continue
             elif column in (
                 "spike_amplitudes",
