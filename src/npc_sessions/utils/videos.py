@@ -99,22 +99,16 @@ def h5_to_dataframe(h5_path: upath.UPath, key_name: str | None = None) -> pd.Dat
 def _get_LPFaceParts_predictions_dataframe(
     df_predictions: pd.DataFrame,
 ) -> pd.DataFrame:
+    df_predictions.columns = df_predictions.columns.droplevel(0)
     data_array = df_predictions.to_numpy()
-    df_predictions_rearranged = pd.DataFrame(data_array[1:], columns=data_array[0])
-    df_predictions_rearranged.drop(columns="bodyparts", inplace=True)
+    data_array
+    col_names = []
+    for col_prefix, col_suffix in df_predictions.columns:
+        col_name = f"{col_prefix}_{col_suffix}"
+        col_names.append(col_name)    
+    col_names
+    return pd.DataFrame(data_array, columns=col_names).drop(columns='bodyparts_coords')
 
-    new_column_labels = []
-    for column in df_predictions_rearranged.columns.unique():
-        df_column = df_predictions_rearranged[column].iloc[0]
-        new_column_labels.append(f"{column}_{df_column.iloc[0]}")
-        new_column_labels.append(f"{column}_{df_column.iloc[1]}")
-        new_column_labels.append(f"{column}_{df_column.iloc[2]}")
-
-    return (
-        pd.DataFrame(data_array[1:, 1:], columns=new_column_labels)
-        .drop(0)
-        .reset_index(drop=True)
-    )
 
 
 def get_LPFaceParts_result_dataframe(
@@ -164,7 +158,7 @@ def get_LPFaceParts_result_dataframe(
             f"{session} has no lightning pose {result_name} csv in result. Check codeocean"
         )
 
-    df_result = pd.read_csv(session_LP_result_csv_s3_path[0], low_memory=False)
+    df_result = pd.read_csv(session_LP_result_csv_s3_path[0], low_memory=False, header=[0, 1])
     if result_name == "predictions":
         return _get_LPFaceParts_predictions_dataframe(df_result)
 
