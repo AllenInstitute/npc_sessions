@@ -3123,8 +3123,13 @@ class DynamicRoutingSession:
                         "\nLightning pose face parts capsule was likely run with an additional data asset attached"
                     )
                     continue
-                if result_name != "predictions":
-                    result_df = result_df.add_suffix(f"_{result_name}")
+                result_df = result_df.add_suffix(
+                    {
+                        'predictions': '',
+                        'error': '_pca_error',
+                        'temporal_norm': '_temporal_norm',
+                    }
+                )
                 df = pd.concat([df, result_df], axis=1)
             df = df.sort_index(axis=1)
             df["timestamps"] = timestamps
@@ -3135,10 +3140,10 @@ class DynamicRoutingSession:
                 "Output for every frame includes: "
                 "`timestamps`: start time of frame exposure, in seconds"
                 " | `<bodypart>_x` and `<bodypart>_y`: coordinates in pixels, with (0, 0) at top-left of frame"
-                " | `<bodypart>_likelihood`: likelihood of the model"
-                " | `<bodypart>_error`: root mean square error between true and predicted keypoints"
-                " | `<bodypart>_temporal_norm`: norm of difference between keypoints on successive time bins"
-                # f". Features tracked are {utils.LP_VIDEO_FEATURES_MAPPING[utils.LP_MAPPING[camera_name]]}"
+                " | `<bodypart>_likelihood`: keypoint prediction likelihood between 0 and 1, with higher values representing greater confidence of the model"
+                " | `<bodypart>_pca_error`: Euclidean distance in pixels between the original keypoint prediction and its prediction after projection to and from PCA space"
+                " | `<bodypart>_temporal_norm`: Euclidean distance in pixels between keypoint predictions on successive time bins"
+                ". See original publication for further details: https://doi.org/10.1038/s41592-024-02319-1"
             )
             LP_face_parts_dynamic_tables.append(
                 pynwb.core.DynamicTable.from_dataframe(
