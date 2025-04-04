@@ -1265,6 +1265,12 @@ class DynamicRouting1(TaskControl):
         return self._sam.autoRewardScheduled
 
     @npc_io.cached_property
+    def is_instruction(self) -> npt.NDArray[np.bool_]:
+        """the stimulus presented was not random, but specifically chosen to inform the subject of a change in
+        the rewarded stimulus modality (context)."""
+        return self.trial_index_in_block < sum([self._sam.newBlockGoTrials, self._sam.newBlockNogoTrials, self._sam.newBlockCatchTrials])
+
+    @npc_io.cached_property
     def is_aud_stim(self) -> npt.NDArray[np.bool_]:
         """an auditory stimulus was presented.
 
