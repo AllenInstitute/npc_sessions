@@ -37,6 +37,7 @@ import npc_sync
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+import polars as pl
 import PIL.Image
 import pynwb
 import upath
@@ -927,80 +928,90 @@ class DynamicRoutingSession:
             raise AttributeError(
                 f"No performance table available for {self.id}: {self.is_task=}"
             )
-        trials: pd.DataFrame = self.trials[:]
         task_performance_by_block: dict[str, dict[str, float | str]] = {}
-
+        all_trials = pl.DataFrame(self.trials[:]) # this is easier in polars
+        # we can't defer to self._sam at this point, because extra cutting of invalid times
+        # has been done to create self.trials, and we want to calculate performance using the reported
+        # trials table for self-consistency
+        
+        # same for all blocks:
         is_first_block_aud = any(
             v in self.sam.blockStimRewarded[0] for v in ("aud", "sound")
-        )
+        ) # for the first block aud, we do want to know what the original first block was, from self._sam
 
-        for block_idx in trials.block_index.unique():
+        for block_idx in all_trials['block_index'].unique().sort():
+            block_trials = all_trials.filter(pl.col("block_index") == block_idx)
+            
             block_performance: dict[str, float | str] = {}
-            block_df = trials[trials["block_index"] == block_idx]
-
             block_performance["block_index"] = block_idx
-            block_performance["is_first_block_aud"] = (
-                is_first_block_aud  # same for all blocks
-            )
-            rewarded_modality = block_df["context_name"].unique().item()
+            block_performance["is_first_block_aud"] = is_first_block_aud
+            
+            rewarded_modality = block_trials["context_name"][0]
             block_performance["rewarded_modality"] = rewarded_modality
             if block_idx == 0 and is_first_block_aud:
                 assert rewarded_modality in (
                     "aud",
                     "sound",
                 ), f"Mismatch: {is_first_block_aud=} {rewarded_modality=}"
-
-            block_performance["cross_modal_dprime"] = self.sam.dprimeOtherModalGo[
-                block_idx
-            ]
-            block_performance["same_modal_dprime"] = self.sam.dprimeSameModal[block_idx]
-            block_performance["nonrewarded_modal_dprime"] = (
-                self.sam.dprimeNonrewardedModal[block_idx]
+            
+            same_modality = (pl.col('is_vis_stim') & pl.col('is_vis_context')) | (pl.col('is_aud_stim') & pl.col('is_aud_context'))
+            other_modality = (pl.col('is_vis_stim') & pl.col('is_aud_context')) | (pl.col('is_aud_stim') & pl.col('is_vis_context'))
+            block_performance["cross_modal_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
+                hitRate=block_trials['is_hit'].sum() / block_trials['is_go'].sum(),
+                falseAlarmRate=(a := block_trials.filter(other_modality & pl.col('is_target')))['is_false_alarm'].sum() / a.height,
+                goTrials=block_trials['is_go'].sum(),
+                nogoTrials=a.height,
+            )
+            block_performance["same_modal_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
+                hitRate=block_trials['is_hit'].sum() / block_trials['is_go'].sum(),
+                falseAlarmRate=(a := block_trials.filter(same_modality))['is_false_alarm'].sum() / a.height,
+                goTrials=block_trials['is_go'].sum(),
+                nogoTrials=a.height,
+            )
+            block_performance["nonrewarded_modal_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
+                hitRate=(a := block_trials.filter(other_modality & pl.col('is_target')))['is_false_alarm'].sum() / a.height,
+                falseAlarmRate=(b := block_trials.filter(other_modality & ~pl.col('is_target') & pl.col('is_nogo')))['is_false_alarm'].sum() / b.height,
+                goTrials=a.height,
+                nogoTrials=b.height,
             )
 
             if rewarded_modality == "vis":
-                block_performance["signed_cross_modal_dprime"] = (
-                    self.sam.dprimeOtherModalGo[block_idx]
-                )
-                block_performance["vis_intra_dprime"] = self.sam.dprimeSameModal[
-                    block_idx
-                ]
-                block_performance["aud_intra_dprime"] = self.sam.dprimeNonrewardedModal[
-                    block_idx
-                ]
+                block_performance["signed_cross_modal_dprime"] = block_performance["cross_modal_dprime"]
+                block_performance["vis_intra_dprime"] = block_performance["same_modal_dprime"]
+                block_performance["aud_intra_dprime"] = block_performance["nonrewarded_modal_dprime"]
 
             elif rewarded_modality in ("aud", "sound"):
-                block_performance["signed_cross_modal_dprime"] = (
-                    -self.sam.dprimeOtherModalGo[block_idx]
-                )
-                block_performance["aud_intra_dprime"] = self.sam.dprimeSameModal[
-                    block_idx
-                ]
-                block_performance["vis_intra_dprime"] = self.sam.dprimeNonrewardedModal[
-                    block_idx
-                ]
+                block_performance["signed_cross_modal_dprime"] = -block_performance["cross_modal_dprime"] # type: ignore[operator]
+                block_performance["aud_intra_dprime"] = block_performance["same_modal_dprime"]
+                block_performance["vis_intra_dprime"] = block_performance["nonrewarded_modal_dprime"]
 
-            block_performance["n_trials"] = len(block_df)
-            block_performance["n_responses"] = block_df.is_response.sum()
-            block_performance["n_hits"] = self.sam.hitCount[block_idx]
-            block_performance["n_contingent_rewards"] = block_df[
+            block_performance["n_trials"] = block_trials.height
+            block_performance["n_responses"] = block_trials['is_response'].sum()
+            block_performance["n_hits"] = block_trials['is_hit'].sum()
+            block_performance["n_contingent_rewards"] = block_trials[
                 "is_contingent_reward"
             ].sum()
-            block_performance["hit_rate"] = self.sam.hitRate[block_idx]
-            block_performance["false_alarm_rate"] = self.sam.falseAlarmRate[block_idx]
-            block_performance["catch_response_rate"] = self.sam.catchResponseRate[
-                block_idx
-            ]
+            block_performance["hit_rate"] = block_trials['is_hit'].sum() / block_trials['is_go'].sum()
+            block_performance["false_alarm_rate"] = block_trials['is_false_alarm'].sum() / block_trials['is_nogo'].sum()
+            block_performance["catch_response_rate"] = block_trials['is_response'].sum() / block_trials['is_catch'].sum()
             for stim, target in itertools.product(
                 ("vis", "aud"), ("target", "nontarget")
             ):
-                stimulus_trials = block_df.query(
-                    f"is_{stim}_{target} & ~is_reward_scheduled"
+                stimulus_trials = (
+                    block_trials
+                    .filter(
+                        pl.col(f"is_{stim}_{target}"),
+                        ~pl.col("is_reward_scheduled"),
+                    )
                 )
-                n_stimuli = len(stimulus_trials)
-                n_responses = stimulus_trials.query(
-                    "is_response & ~is_reward_scheduled"
-                ).is_response.sum()
+                n_stimuli = stimulus_trials.height
+                n_responses = (
+                    stimulus_trials
+                    .filter(
+                        pl.col("is_response"),
+                        ~pl.col("is_reward_scheduled"),
+                    )
+                ).height
                 block_performance[f"{stim}_{target}_response_rate"] = (
                     n_responses / n_stimuli
                 )
@@ -1037,10 +1048,10 @@ class DynamicRoutingSession:
         for name, description in column_name_to_description.items():
             nwb_intervals.add_column(name=name, description=description)
         for block_index in task_performance_by_block:
-            start_time = trials[trials["block_index"] == block_index][
+            start_time = all_trials[all_trials["block_index"] == block_index][
                 "start_time"
             ].min()
-            stop_time = trials[trials["block_index"] == block_index]["stop_time"].max()
+            stop_time = all_trials[all_trials["block_index"] == block_index]["stop_time"].max()
             items: dict[str, str | float] = dict.fromkeys(
                 column_name_to_description, np.nan
             )
