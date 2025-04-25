@@ -667,8 +667,11 @@ class DynamicRouting1(TaskControl):
         return self._sam.trialBlock - 1
 
     @npc_io.cached_property
-    def context_name(self) -> npt.NDArray[np.str_]:
-        """indicates the rewarded modality in each block"""
+    def rewarded_modality(self) -> npt.NDArray[np.str_]:
+        """indicates the name of the rewarded modality in each block.
+        
+        - not an exact correspondence with the values in `stim_name`
+        """
 
         def context(stim: str) -> str:
             if "vis" in stim:
@@ -1222,7 +1225,7 @@ class DynamicRouting1(TaskControl):
     def is_go(self) -> npt.NDArray[np.bool_]:
         """condition in which the subject should respond.
 
-        - target stim presented in rewarded context block
+        - target stim presented in rewarded block
         """
         return self._sam.trialStim == self._sam.rewardedStim
 
@@ -1230,8 +1233,8 @@ class DynamicRouting1(TaskControl):
     def is_nogo(self) -> npt.NDArray[np.bool_]:
         """condition in which the subject should not respond.
 
-        - non-target stim presented in any context block
-        - target stim presented in non-rewarded context block
+        - non-target stim presented in any block
+        - target stim presented in non-rewarded block
         - excludes catch trials
         """
         return self._sam.nogoTrials
@@ -1275,7 +1278,7 @@ class DynamicRouting1(TaskControl):
         """an auditory stimulus was presented.
 
         - includes target and non-target stimuli
-        - includes rewarded and non-rewarded contexts
+        - includes rewarded and non-rewarded trials
         - excludes catch trials (no stimulus)
         """
         return np.isin(self._sam.trialStim, self._aud_stims)
@@ -1285,7 +1288,7 @@ class DynamicRouting1(TaskControl):
         """a visual stimulus was presented.
 
         - includes target and non-target stimuli
-        - includes rewarded and non-rewarded contexts
+        - includes rewarded and non-rewarded trials
         - excludes catch trials (no stimulus)
         """
         return np.isin(self._sam.trialStim, self._vis_stims)
@@ -1298,19 +1301,19 @@ class DynamicRouting1(TaskControl):
     @npc_io.cached_property
     def is_target(self) -> npt.NDArray[np.bool_]:
         """a stimulus was presented that the subject should respond
-        to only in a specific context"""
+        to only in a specific block (context)"""
         return np.isin(self._sam.trialStim, self._targets)
 
     @npc_io.cached_property
     def is_aud_target(self) -> npt.NDArray[np.bool_]:
         """an auditory stimulus was presented that the subject should respond
-        to only in a specific context"""
+        to only in a specific block (context)"""
         return np.isin(self._sam.trialStim, self._aud_targets)
 
     @npc_io.cached_property
     def is_vis_target(self) -> npt.NDArray[np.bool_]:
         """a visual stimulus was presented that the subject should respond to
-        only in a specific context"""
+        only in a specific block (context)"""
         return np.isin(self._sam.trialStim, self._vis_targets)
 
     @npc_io.cached_property
@@ -1329,18 +1332,18 @@ class DynamicRouting1(TaskControl):
         return np.isin(self._sam.trialStim, self._vis_nontargets)
 
     @npc_io.cached_property
-    def is_vis_context(self) -> npt.NDArray[np.bool_]:
+    def is_vis_rewarded(self) -> npt.NDArray[np.bool_]:
         """visual target stimuli are rewarded"""
         return np.isin(self._trial_rewarded_stim_name, self._vis_stims)
 
     @npc_io.cached_property
-    def is_aud_context(self) -> npt.NDArray[np.bool_]:
+    def is_aud_rewarded(self) -> npt.NDArray[np.bool_]:
         """auditory target stimuli are rewarded"""
         return np.isin(self._trial_rewarded_stim_name, self._aud_stims)
 
     @npc_io.cached_property
-    def is_context_switch(self) -> npt.NDArray[np.bool_]:
-        """the first trial with a stimulus after a change in context"""
+    def is_block_switch(self) -> npt.NDArray[np.bool_]:
+        """the first trial with a stimulus after a change in rewarded modality (context)"""
         return np.isin(self.trial_index_in_block, 0) & ~np.isin(self.block_index, 0)
 
     @npc_io.cached_property

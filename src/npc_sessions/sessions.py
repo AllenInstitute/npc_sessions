@@ -946,7 +946,7 @@ class DynamicRoutingSession:
             block_performance["block_index"] = block_idx
             block_performance["is_first_block_aud"] = is_first_block_aud
             
-            rewarded_modality = block_trials["context_name"][0]
+            rewarded_modality = block_trials["rewarded_modality"][0]
             block_performance["rewarded_modality"] = rewarded_modality
             if block_idx == 0 and is_first_block_aud:
                 assert rewarded_modality in (
@@ -954,37 +954,34 @@ class DynamicRoutingSession:
                     "sound",
                 ), f"Mismatch: {is_first_block_aud=} {rewarded_modality=}"
             
-            same_modality = (pl.col('is_vis_stim') & pl.col('is_vis_context')) | (pl.col('is_aud_stim') & pl.col('is_aud_context'))
-            other_modality = (pl.col('is_vis_stim') & pl.col('is_aud_context')) | (pl.col('is_aud_stim') & pl.col('is_vis_context'))
-            block_performance["cross_modal_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
+            nonrewarded_modality = (pl.col('is_vis_stim') & pl.col('is_aud_rewarded')) | (pl.col('is_aud_stim') & pl.col('is_vis_rewarded'))
+            block_performance["cross_modality_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
                 hitRate=block_trials['is_hit'].sum() / block_trials['is_go'].sum(),
-                falseAlarmRate=(a := block_trials.filter(other_modality & pl.col('is_target')))['is_false_alarm'].sum() / a.height,
+                falseAlarmRate=(a := block_trials.filter(nonrewarded_modality & pl.col('is_target')))['is_false_alarm'].sum() / a.height,
                 goTrials=block_trials['is_go'].sum(),
                 nogoTrials=a.height,
-            )
-            block_performance["same_modal_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
-                hitRate=block_trials['is_hit'].sum() / block_trials['is_go'].sum(),
-                falseAlarmRate=(a := block_trials.filter(same_modality))['is_false_alarm'].sum() / a.height,
-                goTrials=block_trials['is_go'].sum(),
-                nogoTrials=a.height,
-            )
-            block_performance["nonrewarded_modal_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
-                hitRate=(a := block_trials.filter(other_modality & pl.col('is_target')))['is_false_alarm'].sum() / a.height,
-                falseAlarmRate=(b := block_trials.filter(other_modality & ~pl.col('is_target') & pl.col('is_nogo')))['is_false_alarm'].sum() / b.height,
-                goTrials=a.height,
-                nogoTrials=b.height,
             )
 
             if rewarded_modality == "vis":
-                block_performance["signed_cross_modal_dprime"] = block_performance["cross_modal_dprime"]
-                block_performance["vis_intra_dprime"] = block_performance["same_modal_dprime"]
-                block_performance["aud_intra_dprime"] = block_performance["nonrewarded_modal_dprime"]
-
+                block_performance["signed_cross_modality_dprime"] = block_performance["cross_modality_dprime"]
             elif rewarded_modality in ("aud", "sound"):
-                block_performance["signed_cross_modal_dprime"] = -block_performance["cross_modal_dprime"] # type: ignore[operator]
-                block_performance["aud_intra_dprime"] = block_performance["same_modal_dprime"]
-                block_performance["vis_intra_dprime"] = block_performance["nonrewarded_modal_dprime"]
-
+                block_performance["signed_cross_modality_dprime"] = -block_performance["cross_modality_dprime"] # type: ignore[operator]
+            else:
+                raise NotImplementedError(f"Unknown rewarded modality: {rewarded_modality}")
+            
+            block_performance["vis_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
+                hitRate=(a := block_trials.filter(pl.col('is_vis_target')))['is_hit'].sum() / a.height,
+                falseAlarmRate=(b := block_trials.filter(pl.col('is_vis_nontarget')))['is_false_alarm'].sum() / b.height,
+                goTrials=a.height,
+                nogoTrials=b.height,
+            )
+            block_performance["aud_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
+                hitRate=(a := block_trials.filter(pl.col('is_aud_target')))['is_hit'].sum() / a.height,
+                falseAlarmRate=(b := block_trials.filter(pl.col('is_aud_nontarget')))['is_false_alarm'].sum() / b.height,
+                goTrials=a.height,
+                nogoTrials=b.height,
+            )
+            
             block_performance["n_trials"] = block_trials.height
             block_performance["n_responses"] = block_trials['is_response'].sum()
             block_performance["n_hits"] = block_trials['is_hit'].sum()
@@ -1001,7 +998,7 @@ class DynamicRoutingSession:
                     block_trials
                     .filter(
                         pl.col(f"is_{stim}_{target}"),
-                        ~pl.col("is_reward_scheduled"),
+                        ~pl.col("is_instruction"),
                     )
                 )
                 n_stimuli = stimulus_trials.height
@@ -1033,12 +1030,10 @@ class DynamicRoutingSession:
             "catch_response_rate": "the proportion of responses the subject made in catch trials in the block",
             "rewarded_modality": "the modality of the target stimulus that was rewarded in the block: normally `vis` or `aud`",
             "is_first_block_aud": "whether the rewarded modality of the first block in the task was auditory",
-            "cross_modal_dprime": "dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
-            "signed_cross_modal_dprime": "same as cross_modal_dprime, but with negative values for auditory blocks",
-            "same_modal_dprime": "dprime within rewarded modality; hits=response rate to rewarded target stimulus, false alarms=response rate to same modality non-target stimulus",
-            "nonrewarded_modal_dprime": "dprime within non-rewarded modality; hits=response rate to non-rewarded target stimulus, false alarms=response rate to same modality non-target stimulus",
-            "vis_intra_dprime": "dprime within visual modality; hits=response rate to visual target stimulus, false alarms=response rate to visual non-target stimulus",
-            "aud_intra_dprime": "dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus",
+            "cross_modality_dprime": "dprime across modalities; hits=response rate to rewarded target stimulus, false alarms=response rate to non-rewarded target stimulus",
+            "signed_cross_modality_dprime": "same as cross_modality_dprime, but with negative values for auditory blocks",
+            "vis_dprime": "dprime within visual modality; hits=response rate to visual target stimulus, false alarms=response rate to visual non-target stimulus",
+            "aud_dprime": "dprime within auditory modality; hits=response rate to auditory target stimulus, false alarms=response rate to auditory non-target stimulus",
         } | {
             f"{stim}_{target}_response_rate": f"the proportion of responses the subject made to {'auditory' if stim == 'aud' else 'visual'} {target} stimulus trials in the block{' (excluding trials with scheduled reward)' if target else ''}"
             for stim, target in itertools.product(

@@ -246,11 +246,11 @@ def add_activity_drift_metric(
     with np.errstate(over="ignore"), warnings.catch_warnings():
         warnings.simplefilter("ignore")
 
-        for (unit_id, context_name, stim_name, *_), unit_df in tqdm.tqdm(
+        for (unit_id, rewarded_modality, stim_name, *_), unit_df in tqdm.tqdm(
             iterable=(
                 trials_with_counts.drop_nulls(["baseline", "response"])
                 .filter(pl.col("stim_name") != "catch")
-                .group_by("unit_id", "context_name", "stim_name", maintain_order=True)
+                .group_by("unit_id", "rewarded_modality", "stim_name", maintain_order=True)
             ),
             total=trials_with_counts.n_unique("unit_id"),
             unit="unit",
@@ -259,7 +259,7 @@ def add_activity_drift_metric(
         ):
             result = dict(
                 unit_id=unit_id,
-                context_name=context_name,
+                rewarded_modality=rewarded_modality,
                 stim_name=stim_name,
             )
             for interval in (

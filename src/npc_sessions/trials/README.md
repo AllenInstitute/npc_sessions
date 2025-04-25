@@ -41,5 +41,5 @@ each session, for RF mapping, optotagging, and the main behavior task
     - intended as a positive mask for filtering trials:
 
         ```python
-        trials.query('is_hit').query('is_vis_context')
+        trials.query('is_hit').query('is_vis_rewarded')
         ```
