@@ -163,7 +163,7 @@ def get_LPFaceParts_result_dataframe(
     if result_name == "predictions":
         return _get_LPFaceParts_predictions_dataframe(df_result)
 
-    return df_result.drop(columns="Unnamed: 0")  # pca error/temporal norm dataframe
+    return df_result.drop(columns="Unnamed: 0", errors='ignore')  # pca error/temporal norm dataframe
 
 
 def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
