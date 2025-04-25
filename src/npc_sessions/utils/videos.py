@@ -101,14 +101,11 @@ def _get_LPFaceParts_predictions_dataframe(
 ) -> pd.DataFrame:
     df_predictions.columns = df_predictions.columns.droplevel(0)
     data_array = df_predictions.to_numpy()
-    data_array
     col_names = []
     for col_prefix, col_suffix in df_predictions.columns:
         col_name = f"{col_prefix}_{col_suffix}"
-        col_names.append(col_name)    
-    col_names
-    return pd.DataFrame(data_array, columns=col_names).drop(columns='bodyparts_coords')
-
+        col_names.append(col_name)
+    return pd.DataFrame(data_array, columns=col_names).drop(columns='bodyparts_coords', errors='ignore')
 
 
 def get_LPFaceParts_result_dataframe(
@@ -158,7 +155,7 @@ def get_LPFaceParts_result_dataframe(
             f"{session} has no lightning pose {result_name} csv in result. Check codeocean"
         )
 
-    df_result = pd.read_csv(session_LP_result_csv_s3_path[0], low_memory=False, header=[0, 1])
+    df_result = pd.read_csv(session_LP_result_csv_s3_path[0], low_memory=False, header=[0, 1, 2])
     if result_name == "predictions":
         return _get_LPFaceParts_predictions_dataframe(df_result)
 
