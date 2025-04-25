@@ -1047,7 +1047,7 @@ class DynamicRoutingSession:
                 "start_time"
             ].min()
             stop_time = all_trials.filter(pl.col("block_index") == block_index)["stop_time"].max()
-            items: dict[str, str | float | np.nan] = dict.fromkeys(
+            items: dict[str, str | float] = dict.fromkeys(
                 column_name_to_description, np.nan
             )
             assert self.is_valid_interval(start_time, stop_time), f"Invalid interval found in {self.id} performance table, when non expected (trials table should be filtered already): {block_index=} ({start_time=}, {stop_time=})"
