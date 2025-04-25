@@ -37,8 +37,8 @@ import npc_sync
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import polars as pl
 import PIL.Image
+import polars as pl
 import pynwb
 import upath
 import zarr
@@ -929,23 +929,23 @@ class DynamicRoutingSession:
                 f"No performance table available for {self.id}: {self.is_task=}"
             )
         task_performance_by_block: dict[str, dict[str, float | str]] = {}
-        all_trials = pl.DataFrame(self.trials[:]) # this is easier in polars
+        all_trials = pl.DataFrame(self.trials[:])  # this is easier in polars
         # we can't defer to self._sam at this point, because extra cutting of invalid times
         # has been done to create self.trials, and we want to calculate performance using the reported
         # trials table for self-consistency
-        
+
         # same for all blocks:
         is_first_block_aud = any(
             v in self.sam.blockStimRewarded[0] for v in ("aud", "sound")
-        ) # for the first block aud, we do want to know what the original first block was, from self._sam
+        )  # for the first block aud, we do want to know what the original first block was, from self._sam
 
-        for block_idx in all_trials['block_index'].unique().sort():
+        for block_idx in all_trials["block_index"].unique().sort():
             block_trials = all_trials.filter(pl.col("block_index") == block_idx)
-            
+
             block_performance: dict[str, float | str] = {}
             block_performance["block_index"] = block_idx
             block_performance["is_first_block_aud"] = is_first_block_aud
-            
+
             rewarded_modality = block_trials["rewarded_modality"][0]
             block_performance["rewarded_modality"] = rewarded_modality
             if block_idx == 0 and is_first_block_aud:
@@ -953,58 +953,85 @@ class DynamicRoutingSession:
                     "aud",
                     "sound",
                 ), f"Mismatch: {is_first_block_aud=} {rewarded_modality=}"
-            
-            nonrewarded_modality = (pl.col('is_vis_stim') & pl.col('is_aud_rewarded')) | (pl.col('is_aud_stim') & pl.col('is_vis_rewarded'))
-            block_performance["cross_modality_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
-                hitRate=block_trials['is_hit'].sum() / block_trials['is_go'].sum(),
-                falseAlarmRate=(a := block_trials.filter(nonrewarded_modality & pl.col('is_target')))['is_false_alarm'].sum() / a.height,
-                goTrials=block_trials['is_go'].sum(),
-                nogoTrials=a.height,
+
+            nonrewarded_modality = (
+                pl.col("is_vis_stim") & pl.col("is_aud_rewarded")
+            ) | (pl.col("is_aud_stim") & pl.col("is_vis_rewarded"))
+            block_performance["cross_modality_dprime"] = (
+                DynamicRoutingAnalysisUtils.calcDprime(
+                    hitRate=block_trials["is_hit"].sum() / block_trials["is_go"].sum(),
+                    falseAlarmRate=(
+                        a := block_trials.filter(
+                            nonrewarded_modality & pl.col("is_target")
+                        )
+                    )["is_false_alarm"].sum()
+                    / a.height,
+                    goTrials=block_trials["is_go"].sum(),
+                    nogoTrials=a.height,
+                )
             )
 
             if rewarded_modality == "vis":
-                block_performance["signed_cross_modality_dprime"] = block_performance["cross_modality_dprime"]
+                block_performance["signed_cross_modality_dprime"] = block_performance[
+                    "cross_modality_dprime"
+                ]
             elif rewarded_modality in ("aud", "sound"):
-                block_performance["signed_cross_modality_dprime"] = -block_performance["cross_modality_dprime"] # type: ignore[operator]
+                block_performance["signed_cross_modality_dprime"] = -block_performance["cross_modality_dprime"]  # type: ignore[operator]
             else:
-                raise NotImplementedError(f"Unknown rewarded modality: {rewarded_modality}")
-            
+                raise NotImplementedError(
+                    f"Unknown rewarded modality: {rewarded_modality}"
+                )
+
             block_performance["vis_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
-                hitRate=(a := block_trials.filter(pl.col('is_vis_target')))['is_hit'].sum() / a.height,
-                falseAlarmRate=(b := block_trials.filter(pl.col('is_vis_nontarget')))['is_false_alarm'].sum() / b.height,
+                hitRate=(a := block_trials.filter(pl.col("is_vis_target")))[
+                    "is_hit"
+                ].sum()
+                / a.height,
+                falseAlarmRate=(b := block_trials.filter(pl.col("is_vis_nontarget")))[
+                    "is_false_alarm"
+                ].sum()
+                / b.height,
                 goTrials=a.height,
                 nogoTrials=b.height,
             )
             block_performance["aud_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
-                hitRate=(a := block_trials.filter(pl.col('is_aud_target')))['is_hit'].sum() / a.height,
-                falseAlarmRate=(b := block_trials.filter(pl.col('is_aud_nontarget')))['is_false_alarm'].sum() / b.height,
+                hitRate=(a := block_trials.filter(pl.col("is_aud_target")))[
+                    "is_hit"
+                ].sum()
+                / a.height,
+                falseAlarmRate=(b := block_trials.filter(pl.col("is_aud_nontarget")))[
+                    "is_false_alarm"
+                ].sum()
+                / b.height,
                 goTrials=a.height,
                 nogoTrials=b.height,
             )
-            
+
             block_performance["n_trials"] = block_trials.height
-            block_performance["n_responses"] = block_trials['is_response'].sum()
-            block_performance["n_hits"] = block_trials['is_hit'].sum()
+            block_performance["n_responses"] = block_trials["is_response"].sum()
+            block_performance["n_hits"] = block_trials["is_hit"].sum()
             block_performance["n_contingent_rewards"] = block_trials[
                 "is_contingent_reward"
             ].sum()
-            block_performance["hit_rate"] = block_trials['is_hit'].sum() / block_trials['is_go'].sum()
-            block_performance["false_alarm_rate"] = block_trials['is_false_alarm'].sum() / block_trials['is_nogo'].sum()
-            block_performance["catch_response_rate"] = block_trials['is_response'].sum() / block_trials['is_catch'].sum()
+            block_performance["hit_rate"] = (
+                block_trials["is_hit"].sum() / block_trials["is_go"].sum()
+            )
+            block_performance["false_alarm_rate"] = (
+                block_trials["is_false_alarm"].sum() / block_trials["is_nogo"].sum()
+            )
+            block_performance["catch_response_rate"] = (
+                block_trials["is_response"].sum() / block_trials["is_catch"].sum()
+            )
             for stim, target in itertools.product(
                 ("vis", "aud"), ("target", "nontarget")
             ):
-                stimulus_trials = (
-                    block_trials
-                    .filter(
-                        pl.col(f"is_{stim}_{target}"),
-                        ~pl.col("is_instruction"),
-                    )
+                stimulus_trials = block_trials.filter(
+                    pl.col(f"is_{stim}_{target}"),
+                    ~pl.col("is_instruction"),
                 )
                 n_stimuli = stimulus_trials.height
                 n_responses = (
-                    stimulus_trials
-                    .filter(
+                    stimulus_trials.filter(
                         pl.col("is_response"),
                         ~pl.col("is_reward_scheduled"),
                     )
@@ -1046,11 +1073,15 @@ class DynamicRoutingSession:
             start_time = all_trials.filter(pl.col("block_index") == block_index)[
                 "start_time"
             ].min()
-            stop_time = all_trials.filter(pl.col("block_index") == block_index)["stop_time"].max()
+            stop_time = all_trials.filter(pl.col("block_index") == block_index)[
+                "stop_time"
+            ].max()
             items: dict[str, str | float] = dict.fromkeys(
                 column_name_to_description, np.nan
             )
-            assert self.is_valid_interval(start_time, stop_time), f"Invalid interval found in {self.id} performance table, when non expected (trials table should be filtered already): {block_index=} ({start_time=}, {stop_time=})"
+            assert self.is_valid_interval(
+                start_time, stop_time
+            ), f"Invalid interval found in {self.id} performance table, when non expected (trials table should be filtered already): {block_index=} ({start_time=}, {stop_time=})"
             nwb_intervals.add_interval(
                 start_time=start_time,
                 stop_time=stop_time,
@@ -1618,7 +1649,14 @@ class DynamicRoutingSession:
                 "waveform_sd",
             ):
                 continue
-            if column in ("peak_waveform_index", "channels",) and not self.is_waveforms:
+            if (
+                column
+                in (
+                    "peak_waveform_index",
+                    "channels",
+                )
+                and not self.is_waveforms
+            ):
                 continue
             elif column in (
                 "spike_amplitudes",
@@ -1640,7 +1678,9 @@ class DynamicRoutingSession:
                 f"{group_query} & channel == {row['peak_channel']}"
             ).index.item()
             row["electrode_group"] = self.electrode_groups[row["electrode_group_name"]]
-            row["device_name"] = self.electrode_groups[row["electrode_group_name"]].device.name
+            row["device_name"] = self.electrode_groups[
+                row["electrode_group_name"]
+            ].device.name
             if self.is_waveforms:
                 row["electrodes"] = electrodes.query(
                     f"{group_query} & channel in {row['channels']}"
@@ -3130,9 +3170,9 @@ class DynamicRoutingSession:
                     continue
                 result_df = result_df.add_suffix(
                     {
-                        'predictions': '',
-                        'error': '_pca_error',
-                        'temporal_norm': '_temporal_norm',
+                        "predictions": "",
+                        "error": "_pca_error",
+                        "temporal_norm": "_temporal_norm",
                     }
                 )
                 df = pd.concat([df, result_df], axis=1)

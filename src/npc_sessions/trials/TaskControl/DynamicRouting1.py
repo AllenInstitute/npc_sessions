@@ -426,7 +426,7 @@ class DynamicRouting1(TaskControl):
     @npc_io.cached_property
     def quiescent_stop_time(self) -> npt.NDArray[np.float64]:
         """end of pre-stimulus interval in which the subject does not lick
-        
+
         - not equal to `stim_start_time`, which factors in processing and stimulus device latency
         """
         return npc_stim.safe_index(
@@ -669,7 +669,7 @@ class DynamicRouting1(TaskControl):
     @npc_io.cached_property
     def rewarded_modality(self) -> npt.NDArray[np.str_]:
         """indicates the name of the rewarded modality in each block.
-        
+
         - not an exact correspondence with the values in `stim_name`
         """
 
@@ -1271,7 +1271,13 @@ class DynamicRouting1(TaskControl):
     def is_instruction(self) -> npt.NDArray[np.bool_]:
         """the stimulus presented was not random, but specifically chosen to inform the subject of a change in
         the rewarded stimulus modality (context)."""
-        return self.trial_index_in_block < sum([self._sam.newBlockGoTrials, self._sam.newBlockNogoTrials, self._sam.newBlockCatchTrials])
+        return self.trial_index_in_block < sum(
+            [
+                self._sam.newBlockGoTrials,
+                self._sam.newBlockNogoTrials,
+                self._sam.newBlockCatchTrials,
+            ]
+        )
 
     @npc_io.cached_property
     def is_aud_stim(self) -> npt.NDArray[np.bool_]:

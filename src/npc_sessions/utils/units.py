@@ -250,7 +250,9 @@ def add_activity_drift_metric(
             iterable=(
                 trials_with_counts.drop_nulls(["baseline", "response"])
                 .filter(pl.col("stim_name") != "catch")
-                .group_by("unit_id", "rewarded_modality", "stim_name", maintain_order=True)
+                .group_by(
+                    "unit_id", "rewarded_modality", "stim_name", maintain_order=True
+                )
             ),
             total=trials_with_counts.n_unique("unit_id"),
             unit="unit",
@@ -283,7 +285,7 @@ def add_activity_drift_metric(
                         )
                         stats = null_result
                     except ValueError as e:
-                        if 'distinct' in e.args[0]:
+                        if "distinct" in e.args[0]:
                             logger.warning(
                                 f"Distinct sample error encountered calculating AD test for {unit_id}, {interval=}: activity_drift will be set to NaN"
                             )
