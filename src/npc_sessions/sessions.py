@@ -1050,12 +1050,11 @@ class DynamicRoutingSession:
             items: dict[str, str | float | np.nan] = dict.fromkeys(
                 column_name_to_description, np.nan
             )
-            if self.is_valid_interval(start_time, stop_time):
-                items |= task_performance_by_block[block_index]
+            assert self.is_valid_interval(start_time, stop_time), f"Invalid interval found in {self.id} performance table, when non expected (trials table should be filtered already): {block_index=} ({start_time=}, {stop_time=})"
             nwb_intervals.add_interval(
                 start_time=start_time,
                 stop_time=stop_time,
-                **items,
+                **items | task_performance_by_block[block_index],
             )
         return nwb_intervals
 
