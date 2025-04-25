@@ -1043,11 +1043,11 @@ class DynamicRoutingSession:
         for name, description in column_name_to_description.items():
             nwb_intervals.add_column(name=name, description=description)
         for block_index in task_performance_by_block:
-            start_time = all_trials[all_trials["block_index"] == block_index][
+            start_time = all_trials.filter(pl.col("block_index") == block_index)[
                 "start_time"
             ].min()
-            stop_time = all_trials[all_trials["block_index"] == block_index]["stop_time"].max()
-            items: dict[str, str | float] = dict.fromkeys(
+            stop_time = all_trials.filter(pl.col("block_index") == block_index)["stop_time"].max()
+            items: dict[str, str | float | np.nan] = dict.fromkeys(
                 column_name_to_description, np.nan
             )
             if self.is_valid_interval(start_time, stop_time):
