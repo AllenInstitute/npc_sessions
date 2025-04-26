@@ -148,22 +148,25 @@ def get_LPFaceParts_result_dataframe(
         npc_lims.get_lpfaceparts_camera_predictions_s3_paths(session, camera)
     )
     session_LP_result_csv_s3_path = next(
-        (path
-        for path in session_LP_predictions_camera_s3_paths
-        if f"_{result_name}.csv" in str(path)), None
+        (
+            path
+            for path in session_LP_predictions_camera_s3_paths
+            if f"_{result_name}.csv" in str(path)
+        ),
+        None,
     )
     if not session_LP_result_csv_s3_path:
         raise FileNotFoundError(
             f"{session} has no lightning pose {result_name} csv in result. Check codeocean"
         )
     headers = {"predictions": [0, 1, 2], "error": [0], "temporal_norm": [0]}
-    df = pd.read_csv(
-        session_LP_result_csv_s3_path, header=headers[result_name]
-    )
+    df = pd.read_csv(session_LP_result_csv_s3_path, header=headers[result_name])
     if result_name == "predictions":
-        return _get_LPFaceParts_predictions_dataframe(df).drop(columns="Unnamed: 0", errors='ignore')
+        return _get_LPFaceParts_predictions_dataframe(df).drop(
+            columns="Unnamed: 0", errors="ignore"
+        )
     else:
-        return df.drop(columns="Unnamed: 0", errors='ignore')
+        return df.drop(columns="Unnamed: 0", errors="ignore")
 
 
 def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:
