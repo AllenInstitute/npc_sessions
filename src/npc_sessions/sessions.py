@@ -959,13 +959,13 @@ class DynamicRoutingSession:
             ) | (pl.col("is_aud_stim") & pl.col("is_vis_rewarded"))
             block_performance["cross_modality_dprime"] = (
                 DynamicRoutingAnalysisUtils.calcDprime(
-                    hitRate=block_trials["is_hit"].sum() / block_trials["is_go"].sum(),
+                    hitRate=block_trials["is_hit"].sum() / (block_trials["is_go"].sum() or float("nan")),
                     falseAlarmRate=(
                         a := block_trials.filter(
                             nonrewarded_modality & pl.col("is_target")
                         )
                     )["is_false_alarm"].sum()
-                    / a.height,
+                    / (a.height or float("nan")),
                     goTrials=block_trials["is_go"].sum(),
                     nogoTrials=a.height,
                 )
@@ -986,11 +986,11 @@ class DynamicRoutingSession:
                 hitRate=(a := block_trials.filter(pl.col("is_vis_target")))[
                     "is_hit"
                 ].sum()
-                / a.height,
+                / (a.height or float("nan")),
                 falseAlarmRate=(b := block_trials.filter(pl.col("is_vis_nontarget")))[
                     "is_false_alarm"
                 ].sum()
-                / b.height,
+                / (b.height or float("nan")),
                 goTrials=a.height,
                 nogoTrials=b.height,
             )
@@ -998,11 +998,11 @@ class DynamicRoutingSession:
                 hitRate=(a := block_trials.filter(pl.col("is_aud_target")))[
                     "is_hit"
                 ].sum()
-                / a.height,
+                / (a.height or float("nan")),
                 falseAlarmRate=(b := block_trials.filter(pl.col("is_aud_nontarget")))[
                     "is_false_alarm"
                 ].sum()
-                / b.height,
+                / (b.height or float("nan")),
                 goTrials=a.height,
                 nogoTrials=b.height,
             )
@@ -1014,13 +1014,13 @@ class DynamicRoutingSession:
                 "is_contingent_reward"
             ].sum()
             block_performance["hit_rate"] = (
-                block_trials["is_hit"].sum() / block_trials["is_go"].sum()
+                block_trials["is_hit"].sum() / (block_trials["is_go"].sum() or float("nan"))
             )
             block_performance["false_alarm_rate"] = (
-                block_trials["is_false_alarm"].sum() / block_trials["is_nogo"].sum()
+                block_trials["is_false_alarm"].sum() / (block_trials["is_nogo"].sum() or float("nan"))
             )
             block_performance["catch_response_rate"] = (
-                block_trials["is_response"].sum() / block_trials["is_catch"].sum()
+                block_trials["is_response"].sum() / (block_trials["is_catch"].sum() or float("nan"))
             )
             for stim, target in itertools.product(
                 ("vis", "aud"), ("target", "nontarget")
@@ -1037,7 +1037,7 @@ class DynamicRoutingSession:
                     )
                 ).height
                 block_performance[f"{stim}_{target}_response_rate"] = (
-                    n_responses / n_stimuli
+                    n_responses / (n_stimuli or float("nan"))
                 )
 
             task_performance_by_block[block_idx] = block_performance
