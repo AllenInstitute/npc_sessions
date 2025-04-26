@@ -111,7 +111,7 @@ def _get_LPFaceParts_predictions_dataframe(
 
 
 def get_LPFaceParts_result_dataframe(
-    session: str, camera: str, result_name: str | LP_RESULT_TYPES
+    session: str, camera: str, result_name: str
 ) -> pd.DataFrame:
     """
     Gets the result dataframe with the lightning pose prediction for the facial features for the given camera.
