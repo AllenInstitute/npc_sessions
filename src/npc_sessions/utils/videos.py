@@ -111,7 +111,7 @@ def _get_LPFaceParts_predictions_dataframe(
 
 
 def get_LPFaceParts_result_dataframe(
-    session: str, camera: str, result_name: str
+    session: str, camera: str, result_name: str | LP_RESULT_TYPES
 ) -> pd.DataFrame:
     """
     Gets the result dataframe with the lightning pose prediction for the facial features for the given camera.
@@ -147,25 +147,23 @@ def get_LPFaceParts_result_dataframe(
     session_LP_predictions_camera_s3_paths = (
         npc_lims.get_lpfaceparts_camera_predictions_s3_paths(session, camera)
     )
-    session_LP_result_csv_s3_path = tuple(
-        path
+    session_LP_result_csv_s3_path = next(
+        (path
         for path in session_LP_predictions_camera_s3_paths
-        if f"_{result_name}.csv" in str(path)
+        if f"_{result_name}.csv" in str(path)), None
     )
     if not session_LP_result_csv_s3_path:
         raise FileNotFoundError(
             f"{session} has no lightning pose {result_name} csv in result. Check codeocean"
         )
-
-    df_result = pd.read_csv(
-        session_LP_result_csv_s3_path[0], low_memory=False, header=[0, 1, 2]
+    headers = {"predictions": [0, 1, 2], "error": [0], "temporal_norm": [0]}
+    df = pd.read_csv(
+        session_LP_result_csv_s3_path, header=headers[result_name]
     )
     if result_name == "predictions":
-        return _get_LPFaceParts_predictions_dataframe(df_result)
-
-    return df_result.drop(
-        columns="Unnamed: 0", errors="ignore"
-    )  # pca error/temporal norm dataframe
+        return _get_LPFaceParts_predictions_dataframe(df).drop(columns="Unnamed: 0", errors='ignore')
+    else:
+        return df.drop(columns="Unnamed: 0", errors='ignore')
 
 
 def get_ellipse_session_dataframe_from_h5(session: str) -> pd.DataFrame:

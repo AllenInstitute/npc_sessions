@@ -3173,7 +3173,7 @@ class DynamicRoutingSession:
                         "predictions": "",
                         "error": "_pca_error",
                         "temporal_norm": "_temporal_norm",
-                    }
+                    }[result_name]
                 )
                 df = pd.concat([df, result_df], axis=1)
             df = df.sort_index(axis=1)
