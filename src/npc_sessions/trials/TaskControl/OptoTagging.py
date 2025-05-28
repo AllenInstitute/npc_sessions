@@ -93,7 +93,7 @@ class OptoTagging(TaskControl):
 
     def get_stim_recordings_from_sync(
         self, line_label: str = "laser_488"
-    ) -> tuple[npc_samstim.StimRecording, ...] | None:
+    ) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
         try:
             recordings = npc_samstim.get_stim_latencies_from_sync(
                 self._hdf5,
@@ -110,15 +110,15 @@ class OptoTagging(TaskControl):
         return tuple(_ for _ in recordings if _ is not None)
 
     @npc_io.cached_property
-    def _stim_recordings_488(self) -> tuple[npc_samstim.StimRecording, ...] | None:
+    def _stim_recordings_488(self) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
         return self.get_stim_recordings_from_sync("laser_488")
 
     @npc_io.cached_property
-    def _stim_recordings_633(self) -> tuple[npc_samstim.StimRecording, ...] | None:
+    def _stim_recordings_633(self) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
         return self.get_stim_recordings_from_sync("laser_633")
 
     @npc_io.cached_property
-    def _stim_recordings(self) -> tuple[npc_samstim.StimRecording, ...]:
+    def _stim_recordings(self) -> tuple[npc_samstim.FlexStimRecording, ...]:
         rec_488 = self._stim_recordings_488 or ()
         rec_633 = self._stim_recordings_633 or ()
         rec = []
