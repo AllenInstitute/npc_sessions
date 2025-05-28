@@ -274,7 +274,7 @@ def add_activity_drift_metric(
                     try:
                         stats = scipy.stats.anderson_ksamp(
                             samples,
-                            midrank=False,
+                            midrank=True, # appropriate for binned spike counts with possible repeated values
                             method=None,
                             # even with 10k permutations, majority of p-values are clipped at 0.0001, which is useless
                             # so use default lookup table method, which is fast, then discard p-value
