@@ -2497,18 +2497,13 @@ class DynamicRoutingSession:
                 f"Could not find stim files for {self.id} in raw data paths or {self.stim_path_root}"
             )
         if (
-            len(
-                tasks := sorted(
-                    [p for p in stim_paths if self.task_stim_name in p.stem]
-                )
-            )
-            > 1
+            len(tasks := [p for p in stim_paths if self.task_stim_name in p.stem]) > 1
         ):
             # ensure only one task file (e.g. 676909_2023-11-09 has two)
             logger.warning(
-                f"{self.id} has multiple {self.task_stim_name} stim files. Only the first will be used."
+                f"{self.id} has multiple {self.task_stim_name} stim files. Only the largest will be used."
             )
-            for extra_task in tasks[1:]:
+            for extra_task in sorted(tasks,  key=lambda p: p.stat()['size'], reverse=True)[1:]:
                 stim_paths.remove(extra_task)
         return tuple(stim_paths)
 
