@@ -1260,9 +1260,9 @@ class DynamicRouting1(TaskControl):
     @npc_io.cached_property
     def is_reward_scheduled(self) -> npt.NDArray[np.bool_]:
         """a non-contingent reward was scheduled to occur, regardless of
-        whether it was received.
+        whether it was delivered.
 
-        - subject may have responded correctly and received contingent reward
+        - the subject may have responded correctly and received a contingent reward
           instead
         """
         return self._sam.autoRewardScheduled
@@ -1372,6 +1372,17 @@ class DynamicRouting1(TaskControl):
         return np.array(
             [len(locations) > 1 for locations in self._opto_location_bregma_x]
         )
+
+    #! needs testing
+    @npc_io.cached_property
+    def is_task_control_correct(self) -> npt.NDArray[np.bool_]:
+        """the task control script interpreted the subject's response correctly
+        
+        - where `False`, other columns describing such as `is_hit` or `is_miss` reflect 
+        - may be incorrect due to latencies incurred by hardware or processing
+        - may be incorrect due to bugs in the task control script
+        """
+        return np.isnan(self.response_time) != np.isnan(self.task_control_response_time)
 
     """
     @npc_io.cached_property
