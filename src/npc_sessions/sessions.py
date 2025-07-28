@@ -2642,15 +2642,11 @@ class DynamicRoutingSession:
     def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
         """Frame times dict for all stims, containing time arrays or Exceptions."""
         frame_times = npc_stim.get_stim_frame_times(
-            *self.stim_data.values(),  # use cached data
+            *self.stim_paths,  # no longer using cached data
             sync=self.sync_data,
             frame_time_type="display_time",
         )
-
-        def reverse_lookup(d, value) -> str:
-            return next(str(k) for k, v in d.items() if v is value)
-
-        return {reverse_lookup(self.stim_data, k): frame_times[k] for k in frame_times}
+        return {str(k): v for k, v in frame_times.items()}
 
     @property
     def stim_frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
