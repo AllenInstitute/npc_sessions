@@ -96,7 +96,7 @@ class OptoTagging(TaskControl):
     ) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
         try:
             recordings = npc_samstim.get_stim_latencies_from_sync(
-                self._hdf5_data,
+                self._hdf5_path,
                 self._sync,
                 waveform_type="opto",
                 line_index_or_label=npc_sync.get_sync_line_for_stim_onset(line_label),

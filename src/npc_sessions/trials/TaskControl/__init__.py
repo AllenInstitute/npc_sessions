@@ -87,15 +87,15 @@ class TaskControl(property_dict.PropertyDict):
     def _input_data_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of `getInputData()` in psychopy event loop, in seconds, from start
         of experiment. Uses preceding frame's vsync time if available."""
-        return npc_stim.get_input_data_times(self._hdf5_data, self._sync)
+        return npc_stim.get_input_data_times(self._hdf5_path, self._sync)
 
     @npc_io.cached_property
     def _flip_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of `flip()` in psychopy event loop, in seconds, from start
         of experiment. Uses frame's vsync time if available."""
-        return npc_stim.get_flip_times(self._hdf5_data, self._sync)
+        return npc_stim.get_flip_times(self._hdf5_path, self._sync)
 
     @npc_io.cached_property
     def _vis_display_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of monitor update. Without sync, this equals frame times."""
-        return npc_stim.get_vis_display_times(self._hdf5_data, self._sync)
+        return npc_stim.get_vis_display_times(self._hdf5_path, self._sync)
