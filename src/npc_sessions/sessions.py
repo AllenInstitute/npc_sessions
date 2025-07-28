@@ -2646,7 +2646,7 @@ class DynamicRoutingSession:
             sync=self.sync_data,
             frame_time_type="display_time",
         )
-        return {str(k): v for k, v in frame_times.items()}
+        return {npc_io.from_pathlike(k).stem: v for k, v in frame_times.items()}
 
     @property
     def stim_frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
