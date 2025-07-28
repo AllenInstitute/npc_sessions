@@ -64,7 +64,7 @@ class TaskControl(property_dict.PropertyDict):
 
     def __init__(
         self,
-        hdf5: npc_stim.StimPathOrDataset,
+        hdf5: npc_io.PathLike,
         sync: npc_sync.SyncPathOrDataset | None = None,
         **kwargs,
     ) -> None:

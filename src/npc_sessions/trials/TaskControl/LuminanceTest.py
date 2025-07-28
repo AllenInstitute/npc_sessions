@@ -28,7 +28,7 @@ class LuminanceTest(TaskControl):
 
     def __init__(
         self,
-        hdf5: npc_stim.StimPathOrDataset,
+        hdf5: npc_io.PathLike,
         sync: npc_sync.SyncPathOrDataset,
         ephys_recording_dirs: Iterable[npc_io.PathLike] | None = None,
         **kwargs,

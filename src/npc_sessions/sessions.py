@@ -1156,10 +1156,11 @@ class DynamicRoutingSession:
             stim_paths = self.stim_paths
 
         def get_intervals(
-            cls: type[TaskControl.TaskControl], stim_filename: str, **kwargs
+            cls: type[TaskControl.TaskControl], stim_path: upath.UPath, **kwargs
         ) -> TaskControl.TaskControl:
             logger.info(f"Generating intervals: {cls.__name__}({stim_filename!r})")
-            return cls(self.stim_data[stim_filename], **kwargs)
+            stim_path = next(path for path in stim_paths if path.stem == stim_filename)
+            return cls(stim_path, **kwargs)
 
         lazy_dict_items: dict[str, tuple] = {}  # tuple of (func, args, kwargs)
 
