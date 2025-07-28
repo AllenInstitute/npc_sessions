@@ -43,13 +43,13 @@ class LuminanceTest(TaskControl):
         )
 
     def find(self, key: str) -> npt.NDArray[np.bool_] | None:
-        if key in self._hdf5:
-            return ~np.isnan(self._hdf5[key][()])
+        if key in self._hdf5_data:
+            return ~np.isnan(self._hdf5_data[key][()])
         return None
 
     @npc_io.cached_property
     def _len_all_trials(self) -> int:
-        return len(self._hdf5["trialStartFrame"][()])
+        return len(self._hdf5_data["trialStartFrame"][()])
 
     @npc_io.cached_property
     def _idx(self) -> npt.NDArray[np.int32]:
@@ -61,7 +61,7 @@ class LuminanceTest(TaskControl):
     def start_time(self) -> npt.NDArray[np.float64]:
         """falling edge of first vsync in each trial"""
         return npc_stim.safe_index(
-            self._flip_times, self._hdf5["trialStartFrame"][self._idx]
+            self._flip_times, self._hdf5_data["trialStartFrame"][self._idx]
         )
 
     @npc_io.cached_property
@@ -69,7 +69,7 @@ class LuminanceTest(TaskControl):
         """falling edge of vsync after stimulus end + inter-stim frames"""
         return npc_stim.safe_index(
             self._flip_times,
-            self._hdf5["trialStartFrame"][self._idx] + self._hdf5["framesPerLevel"][()],
+            self._hdf5_data["trialStartFrame"][self._idx] + self._hdf5_data["framesPerLevel"][()],
         )
 
     @npc_io.cached_property
@@ -79,7 +79,7 @@ class LuminanceTest(TaskControl):
     @npc_io.cached_property
     def level(self) -> npt.NDArray[np.int32]:
         # round because some values end up as -0.40000000000000013
-        return np.round(self._hdf5["trialLevel"][self._idx], 3)
+        return np.round(self._hdf5_data["trialLevel"][self._idx], 3)
 
     @npc_io.cached_property
     def _len(self) -> int:

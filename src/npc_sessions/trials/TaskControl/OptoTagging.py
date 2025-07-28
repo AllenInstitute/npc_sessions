@@ -49,12 +49,12 @@ class OptoTagging(TaskControl):
 
     @npc_io.cached_property
     def _datetime(self) -> datetime.datetime:
-        return npc_session.DatetimeRecord(self._hdf5["startTime"].asstr()[()]).dt
+        return npc_session.DatetimeRecord(self._hdf5_data["startTime"].asstr()[()]).dt
 
     @npc_io.cached_property
     def _device(self) -> str:
         """If multiple devices were used, this should be ignored."""
-        if (device := self._hdf5.get("optoDev")) is None:
+        if (device := self._hdf5_data.get("optoDev")) is None:
             # older sessions may lack info:
             assert self._datetime.date() < datetime.date(
                 2024, 5, 13
@@ -65,7 +65,7 @@ class OptoTagging(TaskControl):
 
     def get_trial_opto_device(self, trial_idx: int) -> str:
         """Currently only one device used, but this method is prepared for multiple devices in the future."""
-        if (devices := self._hdf5.get("trialOptoDevice")) is None or devices.size == 0:
+        if (devices := self._hdf5_data.get("trialOptoDevice")) is None or devices.size == 0:
             assert self._datetime.date() < datetime.date(
                 2023, 8, 1
             )  # older sessions may lack info
@@ -80,7 +80,7 @@ class OptoTagging(TaskControl):
 
     def assert_is_single_device(self) -> None:
         assert (
-            self._hdf5.get("trialOptoDevice") is None
+            self._hdf5_data.get("trialOptoDevice") is None
         ), f"Multiple optotagging devices found for {self._datetime} session - update `get_trial_opto_device` method to handle multiple devices"
 
     @npc_io.cached_property
@@ -96,7 +96,7 @@ class OptoTagging(TaskControl):
     ) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
         try:
             recordings = npc_samstim.get_stim_latencies_from_sync(
-                self._hdf5,
+                self._hdf5_data,
                 self._sync,
                 waveform_type="opto",
                 line_index_or_label=npc_sync.get_sync_line_for_stim_onset(line_label),
@@ -140,11 +140,11 @@ class OptoTagging(TaskControl):
     @npc_io.cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
         """0-indexed"""
-        return np.arange(len(self._hdf5["trialOptoOnsetFrame"]))
+        return np.arange(len(self._hdf5_data["trialOptoOnsetFrame"]))
 
     @npc_io.cached_property
     def _inter_trial_interval(self) -> float:
-        return self._hdf5["optoInterval"][()] / self._hdf5["frameRate"][()]
+        return self._hdf5_data["optoInterval"][()] / self._hdf5_data["frameRate"][()]
 
     @npc_io.cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
@@ -166,7 +166,7 @@ class OptoTagging(TaskControl):
 
     @npc_io.cached_property
     def duration(self) -> npt.NDArray[np.float64]:
-        return self._hdf5["trialOptoDur"][self.trial_index]
+        return self._hdf5_data["trialOptoDur"][self.trial_index]
 
     @npc_io.cached_property
     def location(self) -> npt.NDArray[np.str_]:
@@ -178,9 +178,9 @@ class OptoTagging(TaskControl):
 
     @npc_io.cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
-        bregma = self._hdf5.get("optoBregma", None) or self._hdf5.get("bregmaXY", None)
-        galvo = self._hdf5["galvoVoltage"][()]
-        trial_voltages = self._hdf5["trialGalvoVoltage"]
+        bregma = self._hdf5_data.get("optoBregma", None) or self._hdf5_data.get("bregmaXY", None)
+        galvo = self._hdf5_data["galvoVoltage"][()]
+        trial_voltages = self._hdf5_data["trialGalvoVoltage"]
         return tuple(
             tuple(bregma[np.all(galvo == v, axis=1)][0]) for v in trial_voltages
         )
@@ -195,9 +195,9 @@ class OptoTagging(TaskControl):
 
     @npc_io.cached_property
     def _location(self) -> npt.NDArray[np.str_]:
-        if trialOptoLabel := self._hdf5.get("trialOptoLabel", None):
+        if trialOptoLabel := self._hdf5_data.get("trialOptoLabel", None):
             return np.array(trialOptoLabel.asstr()[self.trial_index], dtype=str)
-        if optoTaggingLocs := self._hdf5.get("optoTaggingLocs"):
+        if optoTaggingLocs := self._hdf5_data.get("optoTaggingLocs"):
             label = optoTaggingLocs["label"].asstr()[()]
             xy = np.array(list(zip(optoTaggingLocs["X"], optoTaggingLocs["Y"])))
             return np.array(
@@ -207,15 +207,15 @@ class OptoTagging(TaskControl):
 
     @npc_io.cached_property
     def power(self) -> npt.NDArray[np.float64]:
-        calibration_data = self._hdf5["optoPowerCalibrationData"]
-        trial_voltages = self._hdf5["trialOptoVoltage"][self.trial_index]
+        calibration_data = self._hdf5_data["optoPowerCalibrationData"]
+        trial_voltages = self._hdf5_data["trialOptoVoltage"][self.trial_index]
         if "poly coefficients" in calibration_data:
             power = DynamicRoutingTask.TaskUtils.voltsToPower(
                 calibration_data,
                 trial_voltages,
             )
         else:
-            power = np.where(~np.isnan(trial_voltages), self._hdf5["optoPower"], np.nan)
+            power = np.where(~np.isnan(trial_voltages), self._hdf5_data["optoPower"], np.nan)
         # round power to 3 decimal places, if safe to do so:
         if np.max(np.abs(np.round(power, 3) - power)) < 1e-3:
             power = np.round(power, 3)

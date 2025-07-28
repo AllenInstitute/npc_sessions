@@ -65,7 +65,7 @@ class RFMapping(TaskControl):
             and self._sync.start_time.date() >= npc_sync.FIRST_SOUND_ON_SYNC_DATE
         ):
             self._cached_aud_stim_recordings = npc_samstim.get_stim_latencies_from_sync(
-                self._hdf5,
+                self._hdf5_data,
                 self._sync,
                 waveform_type="sound",
             )
@@ -75,7 +75,7 @@ class RFMapping(TaskControl):
             assert recording_dirs is not None
             self._cached_aud_stim_recordings = (
                 npc_samstim.get_stim_latencies_from_nidaq_recording(
-                    self._hdf5,
+                    self._hdf5_data,
                     sync=self._sync,
                     recording_dirs=recording_dirs,
                     waveform_type="sound",
@@ -104,7 +104,7 @@ class RFMapping(TaskControl):
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_onset_times", None):
             return npc_stim.safe_index(
-                self._flip_times, self._hdf5["stimStartFrame"][trial]
+                self._flip_times, self._hdf5_data["stimStartFrame"][trial]
             )
         return npc_stim.safe_index(self._aud_stim_onset_times, trial)
 
@@ -119,16 +119,16 @@ class RFMapping(TaskControl):
                 ]
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_offset_times", None):
-            return self.get_trial_aud_onset(trial) + self._hdf5["stimFrames"][()]
+            return self.get_trial_aud_onset(trial) + self._hdf5_data["stimFrames"][()]
         return npc_stim.safe_index(self._aud_stim_offset_times, trial)
 
     @npc_io.cached_property
     def _len_all_trials(self) -> int:
-        return len(self._hdf5["stimStartFrame"][()])
+        return len(self._hdf5_data["stimStartFrame"][()])
 
     def find(self, key: str) -> npt.NDArray[np.bool_] | None:
-        if key in self._hdf5:
-            return ~np.isnan(self._hdf5[key][()])
+        if key in self._hdf5_data:
+            return ~np.isnan(self._hdf5_data[key][()])
         return None
 
     @npc_io.cached_property
@@ -147,8 +147,8 @@ class RFMapping(TaskControl):
             "trialAMNoiseFreq",
             "trialNoiseFreq",
         ):
-            if key in self._hdf5:
-                array = self._hdf5[key][()]
+            if key in self._hdf5_data:
+                array = self._hdf5_data[key][()]
                 if key == "trialNoiseFreq":
                     idx = ~np.isnan(array).all(axis=1)
                     freq[idx] = np.nanmean(
@@ -180,7 +180,7 @@ class RFMapping(TaskControl):
     def start_time(self) -> npt.NDArray[np.float64]:
         """falling edge of first vsync in each trial"""
         return npc_stim.safe_index(
-            self._flip_times, self._hdf5["stimStartFrame"][self._idx]
+            self._flip_times, self._hdf5_data["stimStartFrame"][self._idx]
         )
 
     @npc_io.cached_property
@@ -189,7 +189,7 @@ class RFMapping(TaskControl):
         return np.where(
             self._is_vis_stim,
             npc_stim.safe_index(
-                self._vis_display_times, self._hdf5["stimStartFrame"][self._idx]
+                self._vis_display_times, self._hdf5_data["stimStartFrame"][self._idx]
             ),
             self.get_trial_aud_onset(self._idx),
         )
@@ -197,11 +197,11 @@ class RFMapping(TaskControl):
     @npc_io.cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
         """offset of RF mapping stimulus"""
-        frames_per_stim = self._hdf5["stimFrames"][()]
+        frames_per_stim = self._hdf5_data["stimFrames"][()]
         if all(~self._is_vis_stim):
             return self.get_trial_aud_offset(self._idx)
 
-        frame_idx = self._hdf5["stimStartFrame"][self._idx] + frames_per_stim
+        frame_idx = self._hdf5_data["stimStartFrame"][self._idx] + frames_per_stim
         if frame_idx[-1] > len(self._vis_display_times):
             # if we have a mix of vis and aud stim, and the last stim is aud, the
             # actual end time (as recorded on sync/ephys daq) can occur after the last
@@ -234,14 +234,14 @@ class RFMapping(TaskControl):
         try:
             return npc_stim.safe_index(
                 self._flip_times,
-                self._hdf5["stimStartFrame"][self._idx]
-                + self._hdf5["stimFrames"][()]
-                + self._hdf5["interStimFrames"][()],
+                self._hdf5_data["stimStartFrame"][self._idx]
+                + self._hdf5_data["stimFrames"][()]
+                + self._hdf5_data["interStimFrames"][()],
             )
         except IndexError:
             return (
                 self.stim_stop_time
-                + self._hdf5["interStimFrames"][()] * self._hdf5["frameRate"][()]
+                + self._hdf5_data["interStimFrames"][()] * self._hdf5_data["frameRate"][()]
             )
 
     @npc_io.cached_property
@@ -255,15 +255,15 @@ class RFMapping(TaskControl):
     @npc_io.cached_property
     def _tone_freq(self) -> npt.NDArray[np.float64]:
         for key in ("trialToneFreq", "trialSoundFreq"):
-            if key in self._hdf5:
-                return self._hdf5[key][self._idx]
+            if key in self._hdf5_data:
+                return self._hdf5_data[key][self._idx]
         return np.full(self._len, np.nan)
 
     @npc_io.cached_property
     def _AM_noise_freq(self) -> npt.NDArray[np.float64]:
         return (
-            self._hdf5["trialAMNoiseFreq"][self._idx]
-            if "trialAMNoiseFreq" in self._hdf5
+            self._hdf5_data["trialAMNoiseFreq"][self._idx]
+            if "trialAMNoiseFreq" in self._hdf5_data
             else np.full(self._len, np.nan)
         )
 
@@ -271,8 +271,8 @@ class RFMapping(TaskControl):
     def _white_noise_bandpass_freq(self) -> npt.NDArray[np.float64]:
         """2x trials array of low/high freq for bandpass filter"""
         return (
-            self._hdf5["trialNoiseFreq"][self._idx]
-            if "trialNoiseFreq" in self._hdf5
+            self._hdf5_data["trialNoiseFreq"][self._idx]
+            if "trialNoiseFreq" in self._hdf5_data
             else np.full(self._len, np.nan)
         )
 
@@ -288,8 +288,8 @@ class RFMapping(TaskControl):
     @npc_io.cached_property
     def _full_field_contrast(self) -> npt.NDArray[np.float64]:
         return (
-            self._hdf5["trialFullFieldContrast"][self._idx]
-            if "trialFullFieldContrast" in self._hdf5
+            self._hdf5_data["trialFullFieldContrast"][self._idx]
+            if "trialFullFieldContrast" in self._hdf5_data
             else np.full(self._len, np.nan)
         )
 
@@ -307,17 +307,17 @@ class VisRFMapping(RFMapping):
 
     @npc_io.cached_property
     def grating_orientation(self) -> npt.NDArray[np.float64]:
-        return self._hdf5["trialGratingOri"][self._idx]
+        return self._hdf5_data["trialGratingOri"][self._idx]
 
     @npc_io.cached_property
     def grating_x(self) -> npt.NDArray[np.float64]:
         """position of grating patch center, in pixels from screen center"""
-        return np.array([xy[0] for xy in self._hdf5["trialVisXY"][self._idx]])
+        return np.array([xy[0] for xy in self._hdf5_data["trialVisXY"][self._idx]])
 
     @npc_io.cached_property
     def grating_y(self) -> npt.NDArray[np.float64]:
         """position of grating patch center, in pixels from screen center"""
-        return np.array([xy[1] for xy in self._hdf5["trialVisXY"][self._idx]])
+        return np.array([xy[1] for xy in self._hdf5_data["trialVisXY"][self._idx]])
 
     @npc_io.cached_property
     def is_full_field_flash(self) -> npt.NDArray[np.bool_]:
