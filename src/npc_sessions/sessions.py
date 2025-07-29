@@ -3358,10 +3358,11 @@ class DynamicRoutingSession:
         for stim_file, stim_data in self.stim_data_without_timing_issues.items():
             if any(name in stim_file.lower() for name in ("mapping", "tagging")):
                 continue
+            stim_path = next(p for p in self.stim_paths if p.stem == stim_file)
             reward_times.extend(
                 npc_stim.safe_index(
                     npc_stim.get_flip_times(
-                        stim=stim_data,
+                        stim=stim_path,
                         sync=self.sync_data if self.is_sync else None,
                     ),
                     get_reward_frames(stim_data),
