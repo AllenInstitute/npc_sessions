@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:248c326d0661645f72350477897897110e5af56589244679c43df71bbe732ed7"
+content_hash = "sha256:506885d1f4e21585a700efb34849a3d602310f684408940bb403527cde51ebf2"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -2033,7 +2033,7 @@ files = [
 
 [[package]]
 name = "npc-stim"
-version = "0.1.13"
+version = "0.1.14"
 requires_python = ">=3.9"
 summary = "Tools for accessing and processing stim data, compatible with data in the cloud."
 groups = ["default"]
@@ -2044,8 +2044,8 @@ dependencies = [
     "scipy>=1.12.0",
 ]
 files = [
-    {file = "npc_stim-0.1.13-py3-none-any.whl", hash = "sha256:9893681437c3dce27c0acaa4d6ffc6463d8ff999fab40b1faeeb5a6aeeae2226"},
-    {file = "npc_stim-0.1.13.tar.gz", hash = "sha256:c102aedf9ae77f6f650fbfb713ddbcf9bac44b7a8c77339ef8b894a0b838fce7"},
+    {file = "npc_stim-0.1.14-py3-none-any.whl", hash = "sha256:5c4029e93f27fba3aad2efb7d5ed4f80317cc0e594897953174473572a308c87"},
+    {file = "npc_stim-0.1.14.tar.gz", hash = "sha256:15c02506733df44d0276eaaf44f3a74674b2d38170567f69c56c64519cc05d66"},
 ]
 
 [[package]]
