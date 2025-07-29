@@ -65,7 +65,7 @@ class RFMapping(TaskControl):
             and self._sync.start_time.date() >= npc_sync.FIRST_SOUND_ON_SYNC_DATE
         ):
             self._cached_aud_stim_recordings = npc_samstim.get_stim_latencies_from_sync(
-                self._hdf5_data,
+                self._hdf5_path,
                 self._sync,
                 waveform_type="sound",
             )
@@ -75,7 +75,7 @@ class RFMapping(TaskControl):
             assert recording_dirs is not None
             self._cached_aud_stim_recordings = (
                 npc_samstim.get_stim_latencies_from_nidaq_recording(
-                    self._hdf5_data,
+                    self._hdf5_path,
                     sync=self._sync,
                     recording_dirs=recording_dirs,
                     waveform_type="sound",
