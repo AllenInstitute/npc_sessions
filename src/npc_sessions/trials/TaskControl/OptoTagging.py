@@ -107,7 +107,10 @@ class OptoTagging(TaskControl):
             None not in recordings
         ), f"{recordings.count(None) = } encountered: expected a recording of stim onset for every trial"
         # TODO check this works for all older sessions
-        return tuple(_ for _ in recordings if _ is not None)
+        assert all(isinstance(r, npc_samstim.FlexStimRecording) for r in recordings), (
+            f"Expected all stim recordings to be of type `npc_samstim.FlexStimRecording`, got: {recordings}"
+        )
+        return tuple(_ for _ in recordings if _ is not None) # type: ignore[misc]
 
     @npc_io.cached_property
     def _stim_recordings_488(self) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
