@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:2e67c9d91587906335b35f7bdf2d2d118597ac3dd4e23b7e9d87cdf4feb9031e"
+content_hash = "sha256:248c326d0661645f72350477897897110e5af56589244679c43df71bbe732ed7"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -2001,7 +2001,7 @@ files = [
 
 [[package]]
 name = "npc-samstim"
-version = "0.1.12"
+version = "0.1.13"
 requires_python = ">=3.9"
 summary = "Tools for processing stim data from Sam's DynamicRoutingTask, compatible with data in the cloud."
 groups = ["default"]
@@ -2013,8 +2013,8 @@ dependencies = [
     "numba>=0.59.0",
 ]
 files = [
-    {file = "npc_samstim-0.1.12-py3-none-any.whl", hash = "sha256:fa5f95fbcc874ccf33dba55e7b27bd559387fea48aae56efa1dfbf075c5db0b3"},
-    {file = "npc_samstim-0.1.12.tar.gz", hash = "sha256:ac6b0f2960aad9f09e09302a28501948e2a3e7e6fc3a84b98585e3121b389e0c"},
+    {file = "npc_samstim-0.1.13-py3-none-any.whl", hash = "sha256:657d7dd0d978103338ab09e1e055f86f44c564545174a9f72d847c3928a6b0f8"},
+    {file = "npc_samstim-0.1.13.tar.gz", hash = "sha256:4cc1dc6dcb44e4757d7214b27e4808ba78e03f8e830b62241ecf8070e5253c3d"},
 ]
 
 [[package]]
