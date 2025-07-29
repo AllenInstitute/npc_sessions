@@ -58,59 +58,47 @@ text = "MIT"
 Repository = "https://github.com/AllenInstitute/npc_sessions"
 Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 
-[tool.pdm]
-plugins = [
-    "pdm-bump",
+
+[dependency-groups]
+task_runner = ["poethepoet>=0.33.1"]
+linting = ["black>=25.1.0", "isort>=6.0.1", "ruff>=0.11.2"]
+testing = ["pytest>=7.4.0", "mypy>=1.4.1", "pytest-cov>=4.1.0"]
+bump = [
+    "bump-my-version>=1.1.1",
+    "git-changelog>=2.5.3",
 ]
 
-[tool.pdm.dev-dependencies]
-dev = [
-    "pytest>=7.4.0",
-    "ruff>=0.0.282",
-    "mypy>=1.4.1",
-    "pytest-cov>=4.1.0",
-    "black>=23.7.0",
-    "pytest-xdist>=3.3.1",
+[tool.uv]
+package = true
+default-groups = "all"
+
+[tool.bumpversion]
+tag = true
+allow_dirty = true
+commit = true
+commit_args = "-a"
+message = "Bump version: {current_version} → {new_version} [skip actions]"
+pre_commit_hooks = [
+    "uv lock --upgrade-package npc_sessions",
+    "git-changelog -o CHANGELOG.md",
+    "uv build",
+    "uv publish",
+]
+post_commit_hooks = [
+    "git push origin main",
+    "git push --tags",
 ]
 
-[tool.pdm.scripts]
+[tool.poe.tasks]
+mypy = "mypy src --install-types --non-interactive"
+pytest = "pytest --cov-report term-missing:skip-covered --cov-report=html"
+test = ["pytest"]
 ruff = "ruff check src --fix-only"
 black = "black src"
-test = "pytest --cov --cov-report=xml"
-mypy = "mypy src --install-types --non-interactive"
+format = ["ruff", "black"]
+bump_pub_tag = "bump-my-version bump patch"
+release = ["format", "bump_pub_tag"]
 
-[tool.pdm.scripts.prebuild]
-composite = [
-    "mypy",
-    "test",
-    "black",
-    "ruff",
-]
-
-[tool.pdm.scripts.dryrun]
-composite = [
-    "prebuild",
-    "pdm publish --repository testpypi",
-]
-
-[tool.pdm.scripts.bumpver]
-composite = [
-    "pdm self add pdm-bump",
-    "pdm bump micro",
-]
-
-[tool.pdm.scripts.tag]
-composite = [
-    "pdm self add pdm-bump",
-    "pdm bump tag",
-]
-
-[tool.pdm.scripts.pub]
-composite = [
-    "prebuild",
-    "bumpver",
-    "pdm publish",
-]
 
 [tool.setuptools.packages.find]
 where = [

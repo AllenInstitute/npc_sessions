@@ -5,16 +5,18 @@ name: Publish Python package
 
 on:
   push:
-    branches: [ "main" ]
-    paths-ignore:
-      - '**.ipynb'
-      - '**.json'
-      - '.vscode'
-      - 'scripts'
-      - 'tests'
-      - 'notebooks'
-      - '**.md'
-      - '**.yml'
+    branches: [ "main" ] 
+    paths: # pushing any files/folders marked ! will not trigger the workflow (exceptions can be added)
+      - '**'
+      - '!**.ipynb'
+      - '!**.json'
+      - '!.vscode'
+      - '!scripts/**'
+      - '!tests/**'
+      - '!notebooks/**'
+      - '!**.md'
+      - '!**.yml'
+      - '.github/workflows/publish.yml'
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -26,11 +28,11 @@ on:
       - 'notebooks/**'
       - '**.md'
       - '**.yml'
-  workflow_dispatch:
+  workflow_dispatch:  # adds a 'Run Workflow' button for manual launching
 
-concurrency:
+concurrency: # jobs currently running on main will be cancelled when this workflow starts
   group: ${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+  cancel-in-progress: ${{ github.ref == 'refs/heads/main' }}
       
 jobs:
   test:
@@ -40,25 +42,23 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.9"]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
     permissions: write-all
 
     steps:
-    
     - uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.PAT }}
-        fetch-depth: 0
-        fetch-tags: true
-
-    - uses: pdm-project/setup-pdm@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+        # use PAT, or push comes from `github-actions` bot, which can't trigger
+        # other workflows   
+    
+    - uses: astral-sh/setup-uv@v5.4.1
       with:
         python-version: ${{ matrix.python-version }}
-        update-python: true
-        cache: true
-          
+        
     - name: Install dependencies
       run: |
-        pdm install -G dev
+        uv sync
         
     - name: Test, format, lint
       env:
@@ -69,110 +69,37 @@ jobs:
         CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
         CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
       run: |
-        mkdir .mypy_cache
-        pdm run prebuild
-
+        mkdir .mypy_cache   
+        uv run task test
+    
   publish:
     needs: test
-    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: ["3.9"]
+    runs-on: ubuntu-latest
     permissions: write-all
 
     steps:
-    
     - uses: actions/checkout@v4
       with:
-        token: ${{ secrets.PAT }}
-        fetch-depth: 0
-        fetch-tags: true
+        fetch-depth: 0    # get all commits (on default branch)
+        fetch-tags: true  
 
-    - uses: pdm-project/setup-pdm@v3
+    - uses: astral-sh/setup-uv@v5.4.1
       with:
-        python-version: ${{ matrix.python-version }}
-        update-python: true
-        cache: true
-          
-    - name: Install dependencies
+        python-version: '3.11'
+
+    - name: Publish with bump & tag
+      # actions/checkout 
       run: |
-        pdm install -G dev
-        
-    - name: Test, format, lint
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        uv run task release
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        DBHUB_API_KEY: ${{ secrets.DBHUB_API_KEY }}
-        CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
-        CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
-      run: |
-        mkdir .mypy_cache
-        pdm run ruff
-        pdm run black
-        
-    - name: Bump project version
-      run: |
-        pdm run bumpver
-      
-    - name: Add requirements.txt
-      run: |
-        pdm export --without-hashes --prod -o requirements.txt
-    
-    - name: Pull
-      # pull in case non-packaged files were changed since job started (packaged
-      # files would trigger a new job and cancel this one)
-      run: |
-        git stash
-        git pull --rebase
-        git stash pop
-        
-    - name: Commit changes
-      uses: EndBug/add-and-commit@v9
-      with:
-        message: "Bump [skip actions]"
-        # author_name: Ben Hardcastle
-        # author_email: ben.hardcastle@alleninstitute.org
-        # if the default github actions bot is used, we can't trigger other
-        # workflows
-        
-    - name: Tag commit
-      run: |
-        pdm run tag
-        git push --tags 
-
-    - name: Publish
-      run: |
-        pdm publish
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+        # use PAT, or push comes from `github-actions` bot, which can't trigger
+        # other workflows   
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-  update_cache:
-    needs: publish
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: ["3.9"]
-    permissions: write-all
-
-    steps:
-
-    - name: Launch
-      continue-on-error: true
-      env:
-        DBHUB_API_KEY: ${{ secrets.DBHUB_API_KEY }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
-        CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
-      run: |
-        pip install npc_lims
-        run_session_cache_capsule
