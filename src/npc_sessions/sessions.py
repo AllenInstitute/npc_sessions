@@ -2454,7 +2454,7 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def sync_data(self) -> npc_sync.SyncDataset:
-        return npc_sync.SyncDataset(io.BytesIO(self.sync_path.read_bytes()))
+        return npc_sync.SyncDataset(self.sync_path)
 
     @property
     def stim_path_root(self) -> upath.UPath:
