@@ -241,7 +241,8 @@ class RFMapping(TaskControl):
         except IndexError:
             return (
                 self.stim_stop_time
-                + self._hdf5_data["interStimFrames"][()] * self._hdf5_data["frameRate"][()]
+                + self._hdf5_data["interStimFrames"][()]
+                * self._hdf5_data["frameRate"][()]
             )
 
     @npc_io.cached_property

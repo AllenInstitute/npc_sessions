@@ -959,7 +959,8 @@ class DynamicRoutingSession:
             ) | (pl.col("is_aud_stim") & pl.col("is_vis_rewarded"))
             block_performance["cross_modality_dprime"] = (
                 DynamicRoutingAnalysisUtils.calcDprime(
-                    hitRate=block_trials["is_hit"].sum() / (block_trials["is_go"].sum() or float("nan")),
+                    hitRate=block_trials["is_hit"].sum()
+                    / (block_trials["is_go"].sum() or float("nan")),
                     falseAlarmRate=(
                         a := block_trials.filter(
                             nonrewarded_modality & pl.col("is_target")
@@ -1013,15 +1014,15 @@ class DynamicRoutingSession:
             block_performance["n_contingent_rewards"] = block_trials[
                 "is_contingent_reward"
             ].sum()
-            block_performance["hit_rate"] = (
-                block_trials["is_hit"].sum() / (block_trials["is_go"].sum() or float("nan"))
+            block_performance["hit_rate"] = block_trials["is_hit"].sum() / (
+                block_trials["is_go"].sum() or float("nan")
             )
-            block_performance["false_alarm_rate"] = (
-                block_trials["is_false_alarm"].sum() / (block_trials["is_nogo"].sum() or float("nan"))
-            )
-            block_performance["catch_response_rate"] = (
-                block_trials["is_response"].sum() / (block_trials["is_catch"].sum() or float("nan"))
-            )
+            block_performance["false_alarm_rate"] = block_trials[
+                "is_false_alarm"
+            ].sum() / (block_trials["is_nogo"].sum() or float("nan"))
+            block_performance["catch_response_rate"] = block_trials[
+                "is_response"
+            ].sum() / (block_trials["is_catch"].sum() or float("nan"))
             for stim, target in itertools.product(
                 ("vis", "aud"), ("target", "nontarget")
             ):
@@ -1036,8 +1037,8 @@ class DynamicRoutingSession:
                         ~pl.col("is_reward_scheduled"),
                     )
                 ).height
-                block_performance[f"{stim}_{target}_response_rate"] = (
-                    n_responses / (n_stimuli or float("nan"))
+                block_performance[f"{stim}_{target}_response_rate"] = n_responses / (
+                    n_stimuli or float("nan")
                 )
 
             task_performance_by_block[block_idx] = block_performance
@@ -2497,14 +2498,14 @@ class DynamicRoutingSession:
             raise FileNotFoundError(
                 f"Could not find stim files for {self.id} in raw data paths or {self.stim_path_root}"
             )
-        if (
-            len(tasks := [p for p in stim_paths if self.task_stim_name in p.stem]) > 1
-        ):
+        if len(tasks := [p for p in stim_paths if self.task_stim_name in p.stem]) > 1:
             # ensure only one task file (e.g. 676909_2023-11-09 has two)
             logger.warning(
                 f"{self.id} has multiple {self.task_stim_name} stim files. Only the largest will be used."
             )
-            for extra_task in sorted(tasks,  key=lambda p: p.stat()['size'], reverse=True)[1:]:
+            for extra_task in sorted(
+                tasks, key=lambda p: p.stat()["size"], reverse=True
+            )[1:]:
                 stim_paths.remove(extra_task)
         return tuple(stim_paths)
 

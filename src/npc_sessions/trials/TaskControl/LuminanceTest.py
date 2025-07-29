@@ -69,7 +69,8 @@ class LuminanceTest(TaskControl):
         """falling edge of vsync after stimulus end + inter-stim frames"""
         return npc_stim.safe_index(
             self._flip_times,
-            self._hdf5_data["trialStartFrame"][self._idx] + self._hdf5_data["framesPerLevel"][()],
+            self._hdf5_data["trialStartFrame"][self._idx]
+            + self._hdf5_data["framesPerLevel"][()],
         )
 
     @npc_io.cached_property

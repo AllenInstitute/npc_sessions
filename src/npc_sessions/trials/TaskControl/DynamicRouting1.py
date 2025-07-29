@@ -208,7 +208,10 @@ class DynamicRouting1(TaskControl):
                 ]
             )[trial]
         if not self._sync or not getattr(self, "_aud_stim_offset_times", None):
-            return self.get_trial_aud_onset(trial) + self._hdf5_data["trialSoundDur"][trial]
+            return (
+                self.get_trial_aud_onset(trial)
+                + self._hdf5_data["trialSoundDur"][trial]
+            )
         return npc_stim.safe_index(self._aud_stim_offset_times, trial)
 
     def get_trial_opto_onset(
@@ -756,7 +759,9 @@ class DynamicRouting1(TaskControl):
     def get_trial_opto_devices(self, trial_idx: int) -> tuple[str, ...]:
         if not self._is_opto:
             raise ValueError("No opto devices in non-opto session")
-        if (devices := self._hdf5_data.get("trialOptoDevice")) is None or devices.size == 0:
+        if (
+            devices := self._hdf5_data.get("trialOptoDevice")
+        ) is None or devices.size == 0:
             assert self._datetime.date() < datetime.date(
                 2023, 8, 1
             )  # older sessions may lack info
@@ -956,7 +961,9 @@ class DynamicRouting1(TaskControl):
 
         # otherwise, we need to calculate it from galvo voltages
         old_params = ("bregmaXOffset", "bregmaYOffset")  # not used after 2024-03-29
-        if (calibration_data := self._hdf5_data.get("bregmaGalvoCalibrationData")) is None:
+        if (
+            calibration_data := self._hdf5_data.get("bregmaGalvoCalibrationData")
+        ) is None:
             calibration_data = self.getBregmaGalvoCalibrationData()
         else:
             calibration_data = dict(calibration_data.items())  # prevent writing to hdf5
@@ -1377,8 +1384,8 @@ class DynamicRouting1(TaskControl):
     @npc_io.cached_property
     def is_task_control_correct(self) -> npt.NDArray[np.bool_]:
         """the task control script interpreted the subject's response correctly
-        
-        - where `False`, other columns describing such as `is_hit` or `is_miss` reflect 
+
+        - where `False`, other columns describing such as `is_hit` or `is_miss` reflect
         - may be incorrect due to latencies incurred by hardware or processing
         - may be incorrect due to bugs in the task control script
         """

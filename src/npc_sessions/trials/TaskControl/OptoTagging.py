@@ -15,7 +15,6 @@ import DynamicRoutingTask.TaskUtils
 import npc_io
 import npc_samstim
 import npc_session
-import npc_stim
 import npc_sync
 import numpy as np
 import numpy.typing as npt
@@ -65,7 +64,9 @@ class OptoTagging(TaskControl):
 
     def get_trial_opto_device(self, trial_idx: int) -> str:
         """Currently only one device used, but this method is prepared for multiple devices in the future."""
-        if (devices := self._hdf5_data.get("trialOptoDevice")) is None or devices.size == 0:
+        if (
+            devices := self._hdf5_data.get("trialOptoDevice")
+        ) is None or devices.size == 0:
             assert self._datetime.date() < datetime.date(
                 2023, 8, 1
             )  # older sessions may lack info
@@ -107,10 +108,10 @@ class OptoTagging(TaskControl):
             None not in recordings
         ), f"{recordings.count(None) = } encountered: expected a recording of stim onset for every trial"
         # TODO check this works for all older sessions
-        assert all(isinstance(r, npc_samstim.FlexStimRecording) for r in recordings), (
-            f"Expected all stim recordings to be of type `npc_samstim.FlexStimRecording`, got: {recordings}"
-        )
-        return tuple(_ for _ in recordings if _ is not None) # type: ignore[misc]
+        assert all(
+            isinstance(r, npc_samstim.FlexStimRecording) for r in recordings
+        ), f"Expected all stim recordings to be of type `npc_samstim.FlexStimRecording`, got: {recordings}"
+        return tuple(_ for _ in recordings if _ is not None)  # type: ignore[misc]
 
     @npc_io.cached_property
     def _stim_recordings_488(self) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
@@ -181,7 +182,9 @@ class OptoTagging(TaskControl):
 
     @npc_io.cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
-        bregma = self._hdf5_data.get("optoBregma", None) or self._hdf5_data.get("bregmaXY", None)
+        bregma = self._hdf5_data.get("optoBregma", None) or self._hdf5_data.get(
+            "bregmaXY", None
+        )
         galvo = self._hdf5_data["galvoVoltage"][()]
         trial_voltages = self._hdf5_data["trialGalvoVoltage"]
         return tuple(
@@ -218,7 +221,9 @@ class OptoTagging(TaskControl):
                 trial_voltages,
             )
         else:
-            power = np.where(~np.isnan(trial_voltages), self._hdf5_data["optoPower"], np.nan)
+            power = np.where(
+                ~np.isnan(trial_voltages), self._hdf5_data["optoPower"], np.nan
+            )
         # round power to 3 decimal places, if safe to do so:
         if np.max(np.abs(np.round(power, 3) - power)) < 1e-3:
             power = np.round(power, 3)
