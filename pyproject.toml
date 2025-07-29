@@ -62,7 +62,7 @@ Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 [dependency-groups]
 task_runner = ["poethepoet>=0.33.1"]
 linting = ["black>=25.1.0", "isort>=6.0.1", "ruff>=0.11.2"]
-testing = ["pytest>=7.4.0", "mypy>=1.4.1", "pytest-cov>=4.1.0"]
+testing = ["pytest>=7.4.0", "mypy>=1.4.1", "pytest-cov>=4.1.0", "pytest-xdist>=3.3.1"]
 bump = [
     "bump-my-version>=1.1.1",
     "git-changelog>=2.5.3",
