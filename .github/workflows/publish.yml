@@ -103,3 +103,28 @@ jobs:
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  update_cache:
+    needs: publish
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.9"]
+    permissions: write-all
+
+    steps:
+
+    - name: Launch
+      continue-on-error: true
+      env:
+        DBHUB_API_KEY: ${{ secrets.DBHUB_API_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
+        CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
+      run: |
+        pip install npc_lims
+        run_session_cache_capsule
