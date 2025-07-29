@@ -5,7 +5,7 @@ getting Optotagging trials table requires:
 - latency estimate for each stim presentation, to be added to frame
 display times to get stim onset times
 
->>> stim = npc_stim.get_h5_stim_data('s3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/RFMapping_662892_20230821_124434.hdf5')
+>>> stim = 's3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/RFMapping_662892_20230821_124434.hdf5'
 >>> sync = npc_sync.get_sync_data('s3://aind-ephys-data/ecephys_662892_2023-08-21_12-43-45/behavior/20230821T124345.h5')
 >>> vis_mapping_trials = VisRFMapping(stim, sync)
 >>> aud_mapping_trials = AudRFMapping(stim, sync)

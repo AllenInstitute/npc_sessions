@@ -5,7 +5,7 @@ getting LuminanceTest trials table (for testing pupil size) requires:
 - latency estimate for each stim presentation, to be added to frame
 display times to get stim onset times
 
-# >>> stim = npc_stim.get_h5_stim_data("//allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_708019_20240322/LuminanceTest_708019_20240322_153324.hdf5")
+# >>> stim = "//allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_708019_20240322/LuminanceTest_708019_20240322_153324.hdf5"
 # >>> sync = npc_sync.get_sync_data('//allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_708019_20240322/20240322T153301.h5')
 # >>> lum_trials = LuminanceTest(stim, sync)
 # >>> assert not lum_trials.to_dataframe().empty
