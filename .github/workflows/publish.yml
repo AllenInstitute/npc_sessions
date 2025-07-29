@@ -52,7 +52,7 @@ jobs:
         # use PAT, or push comes from `github-actions` bot, which can't trigger
         # other workflows   
     
-    - uses: astral-sh/setup-uv@v5.4.1
+    - uses: astral-sh/setup-uv@v6
       with:
         python-version: ${{ matrix.python-version }}
         
