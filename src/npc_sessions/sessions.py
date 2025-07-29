@@ -1167,12 +1167,12 @@ class DynamicRoutingSession:
         def set_lazy_eval(
             key: str,
             cls: type[TaskControl.TaskControl],
-            stim_filename: str,
+            stim_path: upath.UPath,
             taskcontrol_kwargs: dict[str, Any],
         ) -> None:
             lazy_dict_items[key] = (
                 get_intervals,
-                (cls, stim_filename),
+                (cls, stim_path),
                 taskcontrol_kwargs,
             )
 
@@ -1194,13 +1194,13 @@ class DynamicRoutingSession:
                 set_lazy_eval(
                     key=f"Aud{stim_filename}",
                     cls=TaskControl.AudRFMapping,
-                    stim_filename=stim_filename,
+                    stim_path=stim_path,
                     taskcontrol_kwargs=kwargs,
                 )
                 set_lazy_eval(
                     key=f"Vis{stim_filename}",
                     cls=TaskControl.VisRFMapping,
-                    stim_filename=stim_filename,
+                    stim_path=stim_path,
                     taskcontrol_kwargs={
                         k: v for k, v in kwargs.items() if k != "ephys_recording_dirs"
                     },
@@ -1217,7 +1217,7 @@ class DynamicRoutingSession:
                 set_lazy_eval(
                     key=stim_filename,
                     cls=cls,
-                    stim_filename=stim_filename,
+                    stim_path=stim_path,
                     taskcontrol_kwargs=kwargs,
                 )
         return npc_io.LazyDict((k, v) for k, v in lazy_dict_items.items())
