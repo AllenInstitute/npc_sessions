@@ -3410,7 +3410,7 @@ class DynamicRoutingSession:
         frames: npt.NDArray[np.int32] = self.sam.quiescentViolationFrames
         times: npt.NDArray[np.floating] = npc_stim.safe_index(
             npc_stim.get_input_data_times(
-                stim=self.task_data,
+                stim=self.task_path,
                 sync=self.sync_data if self.is_sync else None,
             ),
             frames,
