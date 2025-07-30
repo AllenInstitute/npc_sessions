@@ -115,7 +115,11 @@ jobs:
     permissions: write-all
 
     steps:
-
+  
+    - uses: astral-sh/setup-uv@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+  
     - name: Launch
       continue-on-error: true
       env:
@@ -126,5 +130,5 @@ jobs:
         CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
         CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
       run: |
-        pip install npc_lims
+        uv tool install npc_lims -p 3.9
         run_session_cache_capsule
