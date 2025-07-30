@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.9"
 resolution-markers = [
     "python_full_version >= '3.12' and sys_platform == 'darwin'",
@@ -2600,7 +2600,7 @@ wheels = [
 
 [[package]]
 name = "npc-sessions"
-version = "0.0.270"
+version = "0.0.271"
 source = { editable = "." }
 dependencies = [
     { name = "aind-data-access-api", extra = ["docdb"] },
