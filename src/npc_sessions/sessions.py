@@ -1565,12 +1565,16 @@ class DynamicRoutingSession:
         else:
             units["activity_drift"] = np.nan
             units["is_not_drift"] = False
-        
+
         # customize default_qc:
         units = units.assign(
-            default_qc=lambda df: (df['activity_drift'] <= 0.2) & (df['isi_violations_ratio'] <= 0.5) & (df['amplitude_cutoff'] <= 0.1) & (df['presence_ratio'] >= 0.7) & (df['decoder_label'] != 'noise')
+            default_qc=lambda df: (df["activity_drift"] <= 0.2)
+            & (df["isi_violations_ratio"] <= 0.5)
+            & (df["amplitude_cutoff"] <= 0.1)
+            & (df["presence_ratio"] >= 0.7)
+            & (df["decoder_label"] != "noise")
         )
-        
+
         return units
 
     def get_obs_intervals(
