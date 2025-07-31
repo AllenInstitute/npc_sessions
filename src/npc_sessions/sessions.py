@@ -3039,9 +3039,13 @@ class DynamicRoutingSession:
             f"at {npc_stim.RUNNING_LOWPASS_FILTER_HZ} Hz with a 3rd order Butterworth filter"
         )
         unit = npc_stim.RUNNING_SPEED_UNITS
-        # comments = f'Assumes mouse runs at `radius = {npc_stim.RUNNING_DISK_RADIUS} {npc_stim.RUNNING_SPEED_UNITS.split("/")[0]}` on disk.'
+        # comments = f'Assumes mouse runs at `radius = {npc_stim.RUNNING_DISK_RADIUS}
+        # {npc_stim.RUNNING_SPEED_UNITS.split("/")[0]}` on disk.'
+        stim_paths = []
+        for stim_name in self.stim_data_without_timing_issues:
+            stim_paths.append(next(p for p in self.stim_paths if p.stem == stim_name))
         data, timestamps = npc_stim.get_running_speed_from_stim_files(
-            *self.stim_data_without_timing_issues.values(),
+            *stim_paths,
             sync=self.sync_data if self.is_sync else None,
             filt=npc_stim.lowpass_filter,
         )
