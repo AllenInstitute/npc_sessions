@@ -215,6 +215,7 @@ class DynamicRoutingSession:
         "eye": "eye_camera",
         "face": "front_camera",
         "behavior": "side_camera",
+        "nose": "zoomed_side_camera",
     }
 
     def __init__(
