@@ -3944,9 +3944,38 @@ class DynamicRoutingSession:
 
 
 class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
+    is_sync = False
+    is_task = False
+    
+    @npc_io.cached_property
+    def _aind_session_metadata(self) -> aind_data_schema.core.session.Session:
+        return aind_data_schema.core.session.Session(
+            experimenter_full_name=self.main_recording.experimenter or ["NSB trainer"],
+            session_start_time=self.session_start_time,
+            session_end_time=self.session_start_time + datetime.timedelta(seconds=self.ephys_timing_data[0].stop_time),
+            session_type=self.session_description,
+            iacuc_protocol="2104",
+            rig_id=self.main_recording._aind_rig_id,
+            subject_id=str(self.id.subject),
+            data_streams=list(self._aind_data_streams),
+            stimulus_epochs=list(self._aind_stimulus_epochs),
+            mouse_platform_name="Mouse Platform",
+            active_mouse_platform=False,
+            reward_delivery=None,
+            reward_consumed_total=None,
+        )
+        
+    @npc_io.cached_property
+    def main_recording(self) -> DynamicRoutingSession:
+        main_id = self.id
+        if self.root_path and self.root_path.protocol in ('', 'file'):
+            return DynamicRoutingSession(self.root_path.parent / self.root_path.name.removesuffix('_surface_channels'))
+        return DynamicRoutingSession(self.id)
 
     @npc_io.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
+        if self.root_path and self.root_path.protocol in ('', 'file'):
+            return self.get_raw_data_paths_from_root()
         return npc_lims.get_raw_data_paths_from_s3(self.id.with_idx(1))
 
     @npc_io.cached_property
@@ -3954,7 +3983,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         return npc_lims.get_sorted_data_paths_from_s3(self.id.with_idx(1))
 
     @npc_io.cached_property
-    def ephys_timing_data(self) -> tuple[npc_ephys.EphysTimingInfo, ...]:
+    def ephys_timing_data(self) -> tuple[npc_ephys.EphysTimingInfoOnPXI, ...]:
         """Sync data not available, so timing info is not accurate"""
         return tuple(
             timing
@@ -3977,9 +4006,14 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
             npc_session.ProbeRecord(letter)
             for letter in getattr(self, "_surface_recording_probe_letters_to_skip", "")
         }
+        try:
+            main_rec_probes_to_skip = set(self.main_recording.probe_letters_to_skip)
+        except Exception as exc:
+            logger.warning(f"Could not get probes to skip from main recording, likely has not been sorted yet: {exc!r}")
+            main_rec_probes_to_skip = set()
         return tuple(
             sorted(
-                (set(super().probe_letters_to_skip) | probes_with_tip_channel_bank)
+                (main_rec_probes_to_skip | probes_with_tip_channel_bank)
                 - manual_skip
             )
         )
