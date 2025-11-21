@@ -17,7 +17,7 @@ from typing import Any, Literal
 import aind_data_schema.components.coordinates
 import aind_data_schema.components.devices
 import aind_data_schema.components.stimulus
-import aind_data_schema.core.session
+import aind_data_schema.core.acquisition
 import aind_data_schema_models.modalities
 import cv2
 import h5py
@@ -1350,7 +1350,7 @@ class DynamicRoutingSession:
             for serial_number, probe_type, probe_letter in zip(
                 self.ephys_settings_xml_data.probe_serial_numbers,
                 self.ephys_settings_xml_data.probe_types,
-                self.ephys_settings_xml_data.probe_letters,
+                self.ephys_settings_xml_data.probe_letters, strict=False,
             )
             if probe_letter in self.probe_letters_to_use
         )
@@ -1433,7 +1433,7 @@ class DynamicRoutingSession:
             for serial_number, probe_type, probe_letter in zip(
                 self.ephys_settings_xml_data.probe_serial_numbers,
                 self.ephys_settings_xml_data.probe_types,
-                self.ephys_settings_xml_data.probe_letters,
+                self.ephys_settings_xml_data.probe_letters, strict=False,
             )
             if probe_letter in self.probe_letters_to_use
         )
@@ -1487,7 +1487,7 @@ class DynamicRoutingSession:
 
         for probe_letter, channel_pos_xy in zip(
             self.ephys_settings_xml_data.probe_letters,
-            self.ephys_settings_xml_data.channel_pos_xy,
+            self.ephys_settings_xml_data.channel_pos_xy, strict=False,
         ):
             if probe_letter not in self.probe_letters_to_use:
                 continue
@@ -3498,22 +3498,23 @@ class DynamicRoutingSession:
         )
 
     @npc_io.cached_property
-    def _aind_data_streams(self) -> tuple[aind_data_schema.core.session.Stream, ...]:
+    def _aind_data_streams(self) -> tuple[aind_data_schema.core.acquisition.DataStream, ...]:
         data_streams = []
         # sync, mvr cameras, ephys probes
         modality = aind_data_schema_models.modalities.Modality
         if self.is_sync:
             data_streams.append(
-                aind_data_schema.core.session.Stream(
+                aind_data_schema.core.acquisition.DataStream(
                     stream_start_time=self.sync_data.start_time,
                     stream_end_time=self.sync_data.stop_time,
-                    stream_modalities=[modality.BEHAVIOR],
-                    daq_names=["Sync"],
+                    modalities=[modality.BEHAVIOR],
+                    active_devices=["Sync"],
+                    configurations=[],
                 )
             )
         if self.is_video:
             data_streams.append(
-                aind_data_schema.core.session.Stream(
+                aind_data_schema.core.acquisition.DataStream(
                     stream_start_time=self.session_start_time
                     + datetime.timedelta(
                         seconds=min(
@@ -3528,14 +3529,59 @@ class DynamicRoutingSession:
                             for times in self._video_frame_times
                         )
                     ),
-                    camera_names=["Front camera", "Side camera", "Eye camera"],
-                    stream_modalities=[modality.BEHAVIOR_VIDEOS],
+                    modalities=[modality.BEHAVIOR_VIDEOS],
+                    active_devices=["Front camera", "Side camera", "Eye camera"],
+                    configurations=[],
                 )
             )
         if self.is_ephys:
+            # Build manipulator configurations for each probe
+            ephys_configs = []
+            for probe in self.probe_letters_to_use:
+                translation = [0.0, 0.0, 0.0]
+                # some old sessions didn't have newscale logging enabled: no way to get their coords
+                if hasattr(self, "_manipulator_info"):
+                    with contextlib.suppress(Exception):
+                        row = self._manipulator_positions.to_dataframe().query(
+                            f"electrode_group == '{probe.name}'"
+                        )
+                        if not row.empty:
+                            translation = [
+                                row["x"].item(),
+                                row["y"].item(),
+                                row["z"].item(),
+                            ]
+
+                ephys_configs.append(
+                    aind_data_schema.components.configs.ManipulatorConfig(
+                        device_name=probe.name.upper(),
+                        coordinate_system=aind_data_schema.components.coordinates.CoordinateSystem(
+                            name="Manipulator",
+                            origin=aind_data_schema.components.coordinates.Origin.ORIGIN,
+                            axes=[
+                                aind_data_schema.components.coordinates.Axis(
+                                    name=aind_data_schema.components.coordinates.AxisName.X,
+                                    direction=aind_data_schema.components.coordinates.Direction.LR,
+                                ),
+                                aind_data_schema.components.coordinates.Axis(
+                                    name=aind_data_schema.components.coordinates.AxisName.Y,
+                                    direction=aind_data_schema.components.coordinates.Direction.AP,
+                                ),
+                                aind_data_schema.components.coordinates.Axis(
+                                    name=aind_data_schema.components.coordinates.AxisName.Z,
+                                    direction=aind_data_schema.components.coordinates.Direction.IS,
+                                ),
+                            ],
+                            axis_unit=aind_data_schema.components.coordinates.SizeUnit.UM,
+                        ),
+                        local_axis_positions=aind_data_schema.components.coordinates.Translation(
+                            translation=translation,
+                        ),
+                    )
+                )
 
             data_streams.append(
-                aind_data_schema.core.session.Stream(
+                aind_data_schema.core.acquisition.DataStream(
                     stream_start_time=self.session_start_time
                     + datetime.timedelta(
                         seconds=min(
@@ -3548,41 +3594,9 @@ class DynamicRoutingSession:
                             timing.stop_time for timing in self.ephys_timing_data
                         )
                     ),
-                    ephys_modules=(
-                        ephys_modules := [
-                            aind_data_schema.core.session.ManipulatorModule(
-                                assembly_name=probe.name.upper(),
-                                arc_angle=0.0,
-                                module_angle=0.0,
-                                rotation_angle=0.0,
-                                primary_targeted_structure="none",
-                                manipulator_coordinates=(
-                                    (
-                                        aind_data_schema.components.coordinates.Coordinates3d(
-                                            x=(
-                                                row := self._manipulator_positions.to_dataframe().query(
-                                                    f"electrode_group == '{probe.name}'"
-                                                )
-                                            )["x"].item(),
-                                            y=row["y"].item(),
-                                            z=row["z"].item(),
-                                            unit="micrometer",
-                                        )
-                                    )  # some old sessions didn't have newscale logging enabled: no way to get their coords
-                                    if hasattr(self, "_manipulator_info")
-                                    else aind_data_schema.components.coordinates.Coordinates3d(
-                                        x=0.0,
-                                        y=0.0,
-                                        z=0.0,
-                                        unit="micrometer",
-                                    )
-                                ),
-                            )
-                            for probe in self.probe_letters_to_use
-                        ]
-                    ),
-                    stick_microscopes=ephys_modules,  # cannot create ecephys modality without stick microscopes
-                    stream_modalities=[modality.ECEPHYS],
+                    modalities=[modality.ECEPHYS],
+                    active_devices=[f"Probe{probe}" for probe in self.probe_letters_to_use],
+                    configurations=ephys_configs,
                 )
             )
         return tuple(data_streams)
@@ -3590,12 +3604,12 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def _aind_stimulus_epochs(
         self,
-    ) -> tuple[aind_data_schema.core.session.StimulusEpoch, ...]:
+    ) -> tuple[aind_data_schema.core.acquisition.StimulusEpoch, ...]:
 
         def get_modalities(
             epoch_name: str,
-        ) -> list[aind_data_schema.core.session.StimulusModality]:
-            stim = aind_data_schema.core.session.StimulusModality
+        ) -> list[aind_data_schema_models.stimulus_modality.StimulusModality]:
+            stim = aind_data_schema_models.stimulus_modality.StimulusModality
             modalities = []
             if any(
                 name in epoch_name
@@ -3613,26 +3627,10 @@ class DynamicRoutingSession:
                 modalities.append(stim.OPTOGENETICS)
             if any(name in epoch_name for name in ("OptoTagging",)):
                 modalities.append(stim.OPTOGENETICS)
-            return modalities or [stim.NONE]
-
-        def get_num_trials(epoch_name: str) -> int | None:
-            intervals_name: str = utils.get_taskcontrol_intervals_table_name(epoch_name)
-            if epoch_name == "RFMapping":
-                return sum(
-                    len(trials)
-                    for name, trials in self.intervals.items()
-                    if utils.get_taskcontrol_intervals_table_name("RFMapping") in name
-                )
-            if epoch_name == self.task_stim_name:
-                trials = self.trials
-            else:
-                trials = self.intervals.get(intervals_name)
-            if trials is None:
-                return None
-            return len(trials)
+            return modalities or [stim.NO_STIMULUS]
 
         def get_device_names(epoch_name: str) -> list[str]:
-            stim = aind_data_schema.core.session.StimulusModality
+            stim = aind_data_schema_models.stimulus_modality.StimulusModality
             modalities = get_modalities(epoch_name)
             device_names = []
             if stim.VISUAL in modalities:
@@ -3645,220 +3643,24 @@ class DynamicRoutingSession:
 
         def get_speaker_config(
             epoch_name: str,
-        ) -> aind_data_schema.core.session.SpeakerConfig | None:
-            stim = aind_data_schema.core.session.StimulusModality
+        ) -> aind_data_schema.components.configs.SpeakerConfig | None:
+            stim = aind_data_schema_models.stimulus_modality.StimulusModality
             modalities = get_modalities(epoch_name)
             if stim.AUDITORY not in modalities:
                 return None
-            return aind_data_schema.core.session.SpeakerConfig(
-                name="Speaker",
+            return aind_data_schema.components.configs.SpeakerConfig(
+                device_name="Speaker",
                 volume=68.0,
                 volume_unit="decibels",
             )
 
-        def get_parameters(
-            epoch_name: str,
-        ) -> list[Any] | None:  # no baseclass for stim param classes
-            stim = aind_data_schema.core.session.StimulusModality
-            stimulus = aind_data_schema.components.stimulus
-            modalities = get_modalities(epoch_name)
-            if modalities == [stim.NONE]:
-                return None
-            parameters = []
-            if epoch_name == "DynamicRouting1":
-                parameters.extend(
-                    [
-                        stimulus.VisualStimulation(
-                            stimulus_name="target and non-target visual grating stimuli",
-                            stimulus_parameters={
-                                "orientations_deg": [0, 90],
-                                "position_xy": (0, 0),
-                                "size_deg": 50,
-                                "spatial_frequency_cycles_per_deg": 0.04,
-                                "temporal_frequency_cycles_per_sec": 2,
-                                "type": "sqr",
-                                "phase": [0.0, 0.5],
-                            },
-                        ),
-                        stimulus.AuditoryStimulation(
-                            sitmulus_name="target amplitude-modulated noise stimulus",
-                            sample_frequency=10_000,
-                            amplitude_modulation_frequency=70,
-                        ),
-                        stimulus.AuditoryStimulation(
-                            sitmulus_name="non-target amplitude-modulated noise stimulus",
-                            sample_frequency=10_000,
-                            amplitude_modulation_frequency=12,
-                        ),
-                    ]
-                )
-            if epoch_name == "RFMapping":
-                parameters.extend(
-                    [
-                        stimulus.VisualStimulation(
-                            stimulus_name="receptive-field mapping grating stimuli",
-                            stimulus_parameters={
-                                "orientations_deg": [
-                                    0,
-                                    45,
-                                    90,
-                                    135,
-                                    180,
-                                    225,
-                                    270,
-                                    315,
-                                ],
-                                "position_x": list(
-                                    np.unique(
-                                        self.intervals[
-                                            utils.get_taskcontrol_intervals_table_name(
-                                                "VisRFMapping"
-                                            )
-                                        ].grating_x
-                                    )
-                                ),
-                                "position_y": list(
-                                    np.unique(
-                                        self.intervals[
-                                            utils.get_taskcontrol_intervals_table_name(
-                                                "VisRFMapping"
-                                            )
-                                        ].grating_y
-                                    )
-                                ),
-                                "size_deg": 20,
-                                "spatial_frequency_cycles_per_deg": 0.08,
-                                "temporal_frequency_cycles_per_sec": 4,
-                                "type": "sqr",
-                                "duration_sec": 0.25,
-                            },
-                        ),
-                        stimulus.VisualStimulation(
-                            stimulus_name="full-field flash stimuli",
-                            stimulus_parameters={
-                                "gray_level": [-1, 0, 1],
-                                "duration_sec": 0.25,
-                            },
-                            notes="-1.0: black | 0: mid-gray | 1.0: white",
-                        ),
-                        *[
-                            stimulus.AuditoryStimulation(
-                                sitmulus_name=f"receptive-field mapping amplitude-modulated noise stimulus {idx}",
-                                sample_frequency=10_000,
-                                amplitude_modulation_frequency=freq,
-                            )
-                            for idx, freq in enumerate([12, 20, 40, 80])
-                        ],
-                    ]
-                )
-
-            if epoch_name == "OptoTagging":
-                # square waves of different lengths
-                parameters.extend(
-                    [
-                        stimulus.OptoStimulation(
-                            stimulus_name="short optotagging stimulus",
-                            pulse_shape="Square",
-                            pulse_frequency=[100],
-                            number_pulse_trains=[1],
-                            pulse_width=[10],  # ms
-                            pulse_train_duration=[0.01],  # s
-                            fixed_pulse_train_interval=False,
-                            baseline_duration=0.2,  # s
-                        ),
-                        stimulus.OptoStimulation(
-                            stimulus_name="long optotagging stimulus",
-                            pulse_shape="Square",
-                            pulse_frequency=[5],
-                            number_pulse_trains=[1],
-                            pulse_width=[200],  # ms
-                            pulse_train_duration=[0.2],  # s
-                            fixed_pulse_train_interval=False,
-                            baseline_duration=0.2,  # s
-                        ),
-                    ]
-                )
-            if "Spontaneous" in epoch_name:
-                # blank screen constant lum
-                parameters.append(
-                    stimulus.VisualStimulation(
-                        stimulus_name="blank screen, constant luminance",
-                        stimulus_parameters={
-                            "gray_level": (
-                                -0.95
-                                if self.session_start_time.timestamp()
-                                > datetime.datetime(2024, 4, 1).timestamp()
-                                else -1.0
-                            ),
-                        },
-                        notes="-1.0: black | 0: mid-gray | 1.0: white",
-                    )
-                )
-            return parameters
-
-        def get_num_trials_rewarded(epoch_name: str) -> int | None:
-            if "DynamicRouting" in epoch_name:
-                return len(self.sam.rewardTimes)
-            return None
-
-        def get_reward_consumed(epoch_name: str) -> float | None:
-            num_trials_rewarded = get_num_trials_rewarded(epoch_name)
-            if num_trials_rewarded is None:
-                return None
-            return np.nanmean(self.sam.rewardSize) * num_trials_rewarded
-
-        def get_version() -> str | None:
-            if "blob/main" in self.source_script:
-                return None
-            return (
-                self.source_script.split("DynamicRoutingTask/")[-1]
-                .split("/DynamicRouting1.py")[0]
-                .strip("/")
-            )
-
-        def get_url(epoch_name: str) -> str:
-            return self.source_script.replace(
-                "DynamicRouting1", get_taskcontrol_file(epoch_name)
-            )
-
-        def get_taskcontrol_file(epoch_name: str) -> str:
-            if upath.UPath(
-                self.source_script.replace("DynamicRouting1", epoch_name)
-            ).exists():
-                return epoch_name
-            return "TaskControl"
-
-        def get_task_metrics() -> dict[str, dict]:
-            blocks = {
-                str(block_index): dict(
-                    block_index=block_index,
-                    block_stim_rewarded=block_stim_rewarded,
-                    hit_count=hit_count,
-                    dprime_same_modal=dprime_same_modal,
-                    dprime_other_modal_go=dprime_other_modal_go,
-                )
-                for block_index, (
-                    hit_count,
-                    dprime_same_modal,
-                    dprime_other_modal_go,
-                    block_stim_rewarded,
-                ) in enumerate(
-                    zip(
-                        [int(v) for v in self.sam.hitCount],
-                        [float(v) for v in self.sam.dprimeSameModal],
-                        [float(v) for v in self.sam.dprimeOtherModalGo],
-                        [str(v) for v in self.sam.blockStimRewarded],
-                    )
-                )
-            }
-            return {"block_metrics": blocks, "task_version": self.sam.taskVersion}
-
         aind_epochs = []
         for nwb_epoch in self.epochs:
             epoch_name = nwb_epoch.script_name.item()
+            speaker_config = get_speaker_config(epoch_name)
 
             aind_epochs.append(
-                aind_data_schema.core.session.StimulusEpoch(
+                aind_data_schema.core.acquisition.StimulusEpoch(
                     stimulus_start_time=datetime.timedelta(
                         seconds=nwb_epoch.start_time.item()
                     )
@@ -3868,49 +3670,24 @@ class DynamicRoutingSession:
                     )
                     + self.session_start_time,
                     stimulus_name=epoch_name,
-                    software=[
-                        aind_data_schema.components.devices.Software(
-                            name="PsychoPy",
-                            version="2022.1.2",
-                            url="https://www.psychopy.org/",
-                        ),
-                    ],
-                    script=aind_data_schema.components.devices.Software(
-                        name=get_taskcontrol_file(epoch_name),
-                        version=get_version() or "unknown",
-                        url=get_url(epoch_name),
-                    ),
                     stimulus_modalities=get_modalities(epoch_name),
-                    stimulus_parameters=get_parameters(epoch_name),
-                    stimulus_device_names=get_device_names(epoch_name),
-                    speaker_config=get_speaker_config(epoch_name),
-                    reward_consumed_during_epoch=get_reward_consumed(epoch_name),
-                    trials_finished=get_num_trials(epoch_name),
-                    trials_rewarded=get_num_trials_rewarded(epoch_name),
-                    reward_consumed_unit="milliliter",
-                    trials_total=get_num_trials(epoch_name),
+                    active_devices=get_device_names(epoch_name),
+                    configurations=[speaker_config] if speaker_config else [],
                     notes=nwb_epoch.notes.item(),
-                    output_parameters=(
-                        get_task_metrics() if "DynamicRouting" in epoch_name else {}
-                    ),
                 )
             )
         return tuple(aind_epochs)
 
     @npc_io.cached_property
     def _aind_rig_id(self) -> str:
-        rig = self.rig.strip(".")
-        # - room can't be found out in the cloud, and hard-coded map is not allowed
-        # - last update time could be worked out from document db in future
-        last_updated = "240401"
-        return f"unknown_{rig}_{last_updated}"
+        return self.rig.strip(".")
 
     @npc_io.cached_property
-    def _aind_session_metadata(self) -> aind_data_schema.core.session.Session:
-        return aind_data_schema.core.session.Session(
-            experimenter_full_name=self.experimenter or ["NSB trainer"],
-            session_start_time=self.session_start_time,
-            session_end_time=(
+    def _aind_session_metadata(self) -> aind_data_schema.core.acquisition.Acquisition:
+        return aind_data_schema.core.acquisition.Acquisition(
+            experimenters=self.experimenter or ["NSB trainer"],
+            acquisition_start_time=self.session_start_time,
+            acquisition_end_time=(
                 self.sync_data.stop_time
                 if self.is_sync
                 else (
@@ -3922,23 +3699,14 @@ class DynamicRoutingSession:
                     else None
                 )
             ),
-            session_type=self.session_description.replace(
+            acquisition_type=self.session_description.replace(
                 " without CCF-annotated units", ""
             ),
-            iacuc_protocol="2104",
-            rig_id=self._aind_rig_id,
+            protocol_id=["2104"],
+            instrument_id=self._aind_rig_id,
             subject_id=str(self.id.subject),
             data_streams=list(self._aind_data_streams),
             stimulus_epochs=list(self._aind_stimulus_epochs),
-            mouse_platform_name="Mouse Platform",
-            active_mouse_platform=False,
-            reward_delivery=self._aind_reward_delivery if self.is_task else None,
-            reward_consumed_total=(
-                (np.nanmean(self.sam.rewardSize) * len(self.sam.rewardTimes))
-                if self.is_task
-                else None
-            ),
-            reward_consumed_unit="milliliter",
             notes=self.notes,
         )
 
@@ -3946,25 +3714,21 @@ class DynamicRoutingSession:
 class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     is_sync = False
     is_task = False
-    
+
     @npc_io.cached_property
-    def _aind_session_metadata(self) -> aind_data_schema.core.session.Session:
-        return aind_data_schema.core.session.Session(
-            experimenter_full_name=self.main_recording.experimenter or ["NSB trainer"],
-            session_start_time=self.session_start_time,
-            session_end_time=self.session_start_time + datetime.timedelta(seconds=self.ephys_timing_data[0].stop_time),
-            session_type=self.session_description,
-            iacuc_protocol="2104",
-            rig_id=self.main_recording._aind_rig_id,
+    def _aind_session_metadata(self) -> aind_data_schema.core.acquisition.Acquisition:
+        return aind_data_schema.core.acquisition.Acquisition(
+            experimenters=self.main_recording.experimenter or ["NSB trainer"],
+            acquisition_start_time=self.session_start_time,
+            acquisition_end_time=self.session_start_time + datetime.timedelta(seconds=self.ephys_timing_data[0].stop_time),
+            acquisition_type=self.session_description,
+            protocol_id=["2104"],
+            instrument_id=self.main_recording._aind_rig_id,
             subject_id=str(self.id.subject),
             data_streams=list(self._aind_data_streams),
             stimulus_epochs=list(self._aind_stimulus_epochs),
-            mouse_platform_name="Mouse Platform",
-            active_mouse_platform=False,
-            reward_delivery=None,
-            reward_consumed_total=None,
         )
-        
+
     @npc_io.cached_property
     def main_recording(self) -> DynamicRoutingSession:
         main_id = self.id
@@ -3998,7 +3762,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
             npc_session.ProbeRecord(letter)
             for letter, is_tip_channel_bank in zip(
                 self.ephys_settings_xml_data.probe_letters,
-                self.ephys_settings_xml_data.is_tip_channel_bank,
+                self.ephys_settings_xml_data.is_tip_channel_bank, strict=False,
             )
             if is_tip_channel_bank
         }
