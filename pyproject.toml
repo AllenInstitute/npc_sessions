@@ -23,7 +23,7 @@ dependencies = [
     "hdmf==3.14.6",
     "ndx-pose>=0.1.1",
     "tables>=3.9.2",
-    "aind-data-schema==1.1.1",
+    "aind-data-schema>=2.0",
     "pydantic<=2.7.4",
     "npc-lims>=0.1.186",
     "npc-sync>=0.1.25",
@@ -36,14 +36,13 @@ dependencies = [
     "aind-session>=0.3.15",
     "polars[pyarrow]>=1.24.0",
     "aind-data-access-api[docdb]>=1.2.2",
-    "aind-data-schema-models==0.5.7",
+    "aind-data-schema-models>=4.2.7",
     "numcodecs<=0.16",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: MIT License",
@@ -62,11 +61,13 @@ Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 [dependency-groups]
 task_runner = ["poethepoet>=0.33.1"]
 linting = ["black>=25.1.0", "isort>=6.0.1", "ruff>=0.11.2"]
-testing = ["pytest>=7.4.0", "mypy>=1.4.1", "pytest-cov>=4.1.0", "pytest-xdist>=3.3.1"]
-bump = [
-    "bump-my-version>=1.1.1",
-    "git-changelog>=2.5.3",
+testing = [
+    "pytest>=7.4.0",
+    "mypy>=1.4.1",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.3.1",
 ]
+bump = ["bump-my-version>=1.1.1", "git-changelog>=2.5.3"]
 
 [project.scripts]
 task = "poethepoet:main"
@@ -87,10 +88,7 @@ pre_commit_hooks = [
     "uv build",
     "uv publish",
 ]
-post_commit_hooks = [
-    "git push origin main",
-    "git push --tags",
-]
+post_commit_hooks = ["git push origin main", "git push --tags"]
 
 [tool.poe.tasks]
 mypy = "mypy src --install-types --non-interactive"
@@ -104,59 +102,31 @@ release = ["format", "bump_pub_tag"]
 
 
 [tool.setuptools.packages.find]
-where = [
-    "src",
-]
+where = ["src"]
 
 [tool.setuptools.package-data]
-npc_sessions = [
-    "py.typed",
-    "notebooks/*.ipynb",
-]
+npc_sessions = ["py.typed", "notebooks/*.ipynb"]
 
 [tool.ruff]
 fix = true
 ignore-init-module-imports = true
-select = [
-    "ANN",
-    "B",
-    "C",
-    "E",
-    "F",
-    "I",
-    "RUF100",
-    "N",
-    "UP",
-    "W",
-    "YTT",
-]
-extend-exclude = [
-    "tests",
-]
-src = [
-    "src",
-    "tests",
-]
-target-version = "py39"
+select = ["ANN", "B", "C", "E", "F", "I", "RUF100", "N", "UP", "W", "YTT"]
+extend-exclude = ["tests"]
+src = ["src", "tests"]
+target-version = "py310"
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
 
 [tool.black]
-target-version = [
-    "py39",
-]
+target-version = ["py310"]
 
 [tool.coverage.paths]
-source = [
-    "src",
-]
+source = ["src"]
 
 [tool.coverage.run]
 branch = true
-source = [
-    "src",
-]
+source = ["src"]
 
 [tool.coverage.report]
 skip_covered = true
@@ -187,10 +157,7 @@ doctest_optionflags = [
     "IGNORE_EXCEPTION_DETAIL",
     "ELLIPSIS",
 ]
-testpaths = [
-    "src",
-    "tests",
-]
+testpaths = ["src", "tests"]
 
 [tool.mypy]
 check_untyped_defs = false
@@ -204,14 +171,8 @@ no_implicit_optional = true
 show_error_codes = true
 ignore_missing_imports = true
 implicit_reexport = false
-exclude = [
-    "src/npc_sessions/plots",
-    "src/npc_sessions/scripts",
-]
+exclude = ["src/npc_sessions/plots", "src/npc_sessions/scripts"]
 
 [build-system]
-requires = [
-    "setuptools>=61",
-    "wheel",
-]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
