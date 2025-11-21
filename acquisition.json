@@ -1,0 +1,461 @@
+{
+   "object_type": "Acquisition",
+   "describedBy": "https://raw.githubusercontent.com/AllenNeuralDynamics/aind-data-schema/main/src/aind_data_schema/core/acquisition.py",
+   "schema_version": "2.1.0",
+   "subject_id": "676909",
+   "specimen_id": null,
+   "acquisition_start_time": "2023-12-13T13:43:40-08:00",
+   "acquisition_end_time": "2023-12-13T15:43:11.648966-08:00",
+   "experimenters": [
+      "Ethan Mcbride"
+   ],
+   "protocol_id": [
+      "2104"
+   ],
+   "ethics_review_id": null,
+   "instrument_id": "unknown_NP3_240401",
+   "acquisition_type": "ecephys session (day 3) with behavioral task data (day 35) and video recording of behavior",
+   "notes": null,
+   "coordinate_system": null,
+   "calibrations": [],
+   "maintenance": [],
+   "data_streams": [
+      {
+         "object_type": "Data stream",
+         "stream_start_time": "2023-12-13T13:43:40.148966-08:00",
+         "stream_end_time": "2023-12-13T15:43:11.648966-08:00",
+         "modalities": [
+            {
+               "name": "Behavior",
+               "abbreviation": "behavior"
+            }
+         ],
+         "code": null,
+         "notes": null,
+         "active_devices": [
+            "Sync"
+         ],
+         "configurations": [],
+         "connections": []
+      },
+      {
+         "object_type": "Data stream",
+         "stream_start_time": "2023-12-13T13:43:54.110910-08:00",
+         "stream_end_time": "2023-12-13T15:43:11.496570-08:00",
+         "modalities": [
+            {
+               "name": "Behavior videos",
+               "abbreviation": "behavior-videos"
+            }
+         ],
+         "code": null,
+         "notes": null,
+         "active_devices": [
+            "Front camera",
+            "Side camera",
+            "Eye camera"
+         ],
+         "configurations": [],
+         "connections": []
+      },
+      {
+         "object_type": "Data stream",
+         "stream_start_time": "2023-12-13T13:44:00.186958-08:00",
+         "stream_end_time": "2023-12-13T15:43:11.508251-08:00",
+         "modalities": [
+            {
+               "name": "Extracellular electrophysiology",
+               "abbreviation": "ecephys"
+            }
+         ],
+         "code": null,
+         "notes": null,
+         "active_devices": [
+            "ProbeA",
+            "ProbeB",
+            "ProbeC",
+            "ProbeD",
+            "ProbeE",
+            "ProbeF"
+         ],
+         "configurations": [
+            {
+               "object_type": "Manipulator config",
+               "device_name": "PROBEA",
+               "coordinate_system": {
+                  "object_type": "Coordinate system",
+                  "name": "Manipulator",
+                  "origin": "Origin",
+                  "axes": [
+                     {
+                        "object_type": "Axis",
+                        "name": "X",
+                        "direction": "Left_to_right"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Y",
+                        "direction": "Anterior_to_posterior"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Z",
+                        "direction": "Inferior_to_superior"
+                     }
+                  ],
+                  "axis_unit": "micrometer"
+               },
+               "local_axis_positions": {
+                  "object_type": "Translation",
+                  "translation": [
+                     0.0,
+                     0.0,
+                     0.0
+                  ]
+               }
+            },
+            {
+               "object_type": "Manipulator config",
+               "device_name": "PROBEB",
+               "coordinate_system": {
+                  "object_type": "Coordinate system",
+                  "name": "Manipulator",
+                  "origin": "Origin",
+                  "axes": [
+                     {
+                        "object_type": "Axis",
+                        "name": "X",
+                        "direction": "Left_to_right"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Y",
+                        "direction": "Anterior_to_posterior"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Z",
+                        "direction": "Inferior_to_superior"
+                     }
+                  ],
+                  "axis_unit": "micrometer"
+               },
+               "local_axis_positions": {
+                  "object_type": "Translation",
+                  "translation": [
+                     0.0,
+                     0.0,
+                     0.0
+                  ]
+               }
+            },
+            {
+               "object_type": "Manipulator config",
+               "device_name": "PROBEC",
+               "coordinate_system": {
+                  "object_type": "Coordinate system",
+                  "name": "Manipulator",
+                  "origin": "Origin",
+                  "axes": [
+                     {
+                        "object_type": "Axis",
+                        "name": "X",
+                        "direction": "Left_to_right"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Y",
+                        "direction": "Anterior_to_posterior"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Z",
+                        "direction": "Inferior_to_superior"
+                     }
+                  ],
+                  "axis_unit": "micrometer"
+               },
+               "local_axis_positions": {
+                  "object_type": "Translation",
+                  "translation": [
+                     0.0,
+                     0.0,
+                     0.0
+                  ]
+               }
+            },
+            {
+               "object_type": "Manipulator config",
+               "device_name": "PROBED",
+               "coordinate_system": {
+                  "object_type": "Coordinate system",
+                  "name": "Manipulator",
+                  "origin": "Origin",
+                  "axes": [
+                     {
+                        "object_type": "Axis",
+                        "name": "X",
+                        "direction": "Left_to_right"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Y",
+                        "direction": "Anterior_to_posterior"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Z",
+                        "direction": "Inferior_to_superior"
+                     }
+                  ],
+                  "axis_unit": "micrometer"
+               },
+               "local_axis_positions": {
+                  "object_type": "Translation",
+                  "translation": [
+                     0.0,
+                     0.0,
+                     0.0
+                  ]
+               }
+            },
+            {
+               "object_type": "Manipulator config",
+               "device_name": "PROBEE",
+               "coordinate_system": {
+                  "object_type": "Coordinate system",
+                  "name": "Manipulator",
+                  "origin": "Origin",
+                  "axes": [
+                     {
+                        "object_type": "Axis",
+                        "name": "X",
+                        "direction": "Left_to_right"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Y",
+                        "direction": "Anterior_to_posterior"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Z",
+                        "direction": "Inferior_to_superior"
+                     }
+                  ],
+                  "axis_unit": "micrometer"
+               },
+               "local_axis_positions": {
+                  "object_type": "Translation",
+                  "translation": [
+                     0.0,
+                     0.0,
+                     0.0
+                  ]
+               }
+            },
+            {
+               "object_type": "Manipulator config",
+               "device_name": "PROBEF",
+               "coordinate_system": {
+                  "object_type": "Coordinate system",
+                  "name": "Manipulator",
+                  "origin": "Origin",
+                  "axes": [
+                     {
+                        "object_type": "Axis",
+                        "name": "X",
+                        "direction": "Left_to_right"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Y",
+                        "direction": "Anterior_to_posterior"
+                     },
+                     {
+                        "object_type": "Axis",
+                        "name": "Z",
+                        "direction": "Inferior_to_superior"
+                     }
+                  ],
+                  "axis_unit": "micrometer"
+               },
+               "local_axis_positions": {
+                  "object_type": "Translation",
+                  "translation": [
+                     0.0,
+                     0.0,
+                     0.0
+                  ]
+               }
+            }
+         ],
+         "connections": []
+      }
+   ],
+   "stimulus_epochs": [
+      {
+         "object_type": "Stimulus epoch",
+         "stimulus_start_time": "2023-12-13T13:44:34.742500-08:00",
+         "stimulus_end_time": "2023-12-13T13:59:05.472360-08:00",
+         "stimulus_name": "RFMapping",
+         "code": null,
+         "stimulus_modalities": [
+            "Visual",
+            "Auditory"
+         ],
+         "performance_metrics": null,
+         "notes": "",
+         "active_devices": [
+            "Stim",
+            "Speaker"
+         ],
+         "configurations": [
+            {
+               "object_type": "Speaker config",
+               "device_name": "Speaker",
+               "volume": 68.0,
+               "volume_unit": "decibels"
+            }
+         ],
+         "training_protocol_name": null,
+         "curriculum_status": null
+      },
+      {
+         "object_type": "Stimulus epoch",
+         "stimulus_start_time": "2023-12-13T13:59:16.715310-08:00",
+         "stimulus_end_time": "2023-12-13T14:00:16.231771-08:00",
+         "stimulus_name": "OptoTagging",
+         "code": null,
+         "stimulus_modalities": [
+            "Optogenetics"
+         ],
+         "performance_metrics": null,
+         "notes": "",
+         "active_devices": [
+            "Laser #0"
+         ],
+         "configurations": [],
+         "training_protocol_name": null,
+         "curriculum_status": null
+      },
+      {
+         "object_type": "Stimulus epoch",
+         "stimulus_start_time": "2023-12-13T14:00:26.106800-08:00",
+         "stimulus_end_time": "2023-12-13T14:10:28.628638-08:00",
+         "stimulus_name": "Spontaneous",
+         "code": null,
+         "stimulus_modalities": [
+            "Visual"
+         ],
+         "performance_metrics": null,
+         "notes": "",
+         "active_devices": [
+            "Stim"
+         ],
+         "configurations": [],
+         "training_protocol_name": null,
+         "curriculum_status": null
+      },
+      {
+         "object_type": "Stimulus epoch",
+         "stimulus_start_time": "2023-12-13T14:10:39.337650-08:00",
+         "stimulus_end_time": "2023-12-13T14:20:42.309862-08:00",
+         "stimulus_name": "SpontaneousRewards",
+         "code": null,
+         "stimulus_modalities": [
+            "Visual"
+         ],
+         "performance_metrics": null,
+         "notes": "",
+         "active_devices": [
+            "Stim"
+         ],
+         "configurations": [],
+         "training_protocol_name": null,
+         "curriculum_status": null
+      },
+      {
+         "object_type": "Stimulus epoch",
+         "stimulus_start_time": "2023-12-13T14:20:53.602610-08:00",
+         "stimulus_end_time": "2023-12-13T15:21:31.185933-08:00",
+         "stimulus_name": "DynamicRouting1",
+         "code": null,
+         "stimulus_modalities": [
+            "Visual",
+            "Auditory"
+         ],
+         "performance_metrics": null,
+         "notes": "",
+         "active_devices": [
+            "Stim",
+            "Speaker"
+         ],
+         "configurations": [
+            {
+               "object_type": "Speaker config",
+               "device_name": "Speaker",
+               "volume": 68.0,
+               "volume_unit": "decibels"
+            }
+         ],
+         "training_protocol_name": null,
+         "curriculum_status": null
+      },
+      {
+         "object_type": "Stimulus epoch",
+         "stimulus_start_time": "2023-12-13T15:21:42.962560-08:00",
+         "stimulus_end_time": "2023-12-13T15:31:46.068208-08:00",
+         "stimulus_name": "SpontaneousRewards",
+         "code": null,
+         "stimulus_modalities": [
+            "Visual"
+         ],
+         "performance_metrics": null,
+         "notes": "",
+         "active_devices": [
+            "Stim"
+         ],
+         "configurations": [],
+         "training_protocol_name": null,
+         "curriculum_status": null
+      },
+      {
+         "object_type": "Stimulus epoch",
+         "stimulus_start_time": "2023-12-13T15:31:57.594640-08:00",
+         "stimulus_end_time": "2023-12-13T15:42:00.183188-08:00",
+         "stimulus_name": "Spontaneous",
+         "code": null,
+         "stimulus_modalities": [
+            "Visual"
+         ],
+         "performance_metrics": null,
+         "notes": "",
+         "active_devices": [
+            "Stim"
+         ],
+         "configurations": [],
+         "training_protocol_name": null,
+         "curriculum_status": null
+      },
+      {
+         "object_type": "Stimulus epoch",
+         "stimulus_start_time": "2023-12-13T15:42:10.758720-08:00",
+         "stimulus_end_time": "2023-12-13T15:43:10.525496-08:00",
+         "stimulus_name": "OptoTagging",
+         "code": null,
+         "stimulus_modalities": [
+            "Optogenetics"
+         ],
+         "performance_metrics": null,
+         "notes": "",
+         "active_devices": [
+            "Laser #0"
+         ],
+         "configurations": [],
+         "training_protocol_name": null,
+         "curriculum_status": null
+      }
+   ],
+   "subject_details": null
+}
