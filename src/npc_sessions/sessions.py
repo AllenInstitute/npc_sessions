@@ -1350,7 +1350,7 @@ class DynamicRoutingSession:
             for serial_number, probe_type, probe_letter in zip(
                 self.ephys_settings_xml_data.probe_serial_numbers,
                 self.ephys_settings_xml_data.probe_types,
-                self.ephys_settings_xml_data.probe_letters, strict=False,
+                self.ephys_settings_xml_data.probe_letters, strict=True,
             )
             if probe_letter in self.probe_letters_to_use
         )
@@ -1433,7 +1433,7 @@ class DynamicRoutingSession:
             for serial_number, probe_type, probe_letter in zip(
                 self.ephys_settings_xml_data.probe_serial_numbers,
                 self.ephys_settings_xml_data.probe_types,
-                self.ephys_settings_xml_data.probe_letters, strict=False,
+                self.ephys_settings_xml_data.probe_letters, strict=True,
             )
             if probe_letter in self.probe_letters_to_use
         )
@@ -1487,7 +1487,7 @@ class DynamicRoutingSession:
 
         for probe_letter, channel_pos_xy in zip(
             self.ephys_settings_xml_data.probe_letters,
-            self.ephys_settings_xml_data.channel_pos_xy, strict=False,
+            self.ephys_settings_xml_data.channel_pos_xy, strict=True,
         ):
             if probe_letter not in self.probe_letters_to_use:
                 continue
@@ -3762,7 +3762,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
             npc_session.ProbeRecord(letter)
             for letter, is_tip_channel_bank in zip(
                 self.ephys_settings_xml_data.probe_letters,
-                self.ephys_settings_xml_data.is_tip_channel_bank, strict=False,
+                self.ephys_settings_xml_data.is_tip_channel_bank, strict=True,
             )
             if is_tip_channel_bank
         }
