@@ -3983,7 +3983,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         return npc_lims.get_sorted_data_paths_from_s3(self.id.with_idx(1))
 
     @npc_io.cached_property
-    def ephys_timing_data(self) -> tuple[npc_ephys.EphysTimingInfoOnPXI, ...]:
+    def ephys_timing_data(self) -> tuple[npc_ephys.EphysTimingInfo, ...]:
         """Sync data not available, so timing info is not accurate"""
         return tuple(
             timing
