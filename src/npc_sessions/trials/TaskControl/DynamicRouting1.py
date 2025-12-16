@@ -664,6 +664,14 @@ class DynamicRouting1(TaskControl):
         return self._sam.trialStim
 
     @npc_io.cached_property
+    def grating_phase(self) -> npt.NDArray[np.float64l]:
+        """the phase of the visual grating shown in units of cycles; randomized over trials
+        - for visual stimuli, this will be 0 or 0.5
+        - for auditory stimuli, this will be nan.
+        """
+        return self._sam.trialGratingPhase
+        
+    @npc_io.cached_property
     def block_index(self) -> npt.NDArray[np.int32]:
         """0-indexed block number, increments with each block"""
         assert min(self._sam.trialBlock) == 1
