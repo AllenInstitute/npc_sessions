@@ -669,7 +669,16 @@ class DynamicRouting1(TaskControl):
         - for visual stimuli, this will be 0 or 0.5
         - for auditory stimuli, this will be nan.
         """
-        return self._sam.trialGratingPhase
+        trialGratingPhase = self._hdf5_data.get('trialGratingPhase', None)
+        if trialGratingPhase is None:
+            grating_phase = np.full(self._len, 0.0)
+        if len(trialGratingPhase.shape) == 1:
+            grating_phase = trialGratingPhase[:]
+        else:
+            assert np.array_equal(trialGratingPhase[:, 1], trialGratingPhase[:, 0])
+            grating_phase = trialGratingPhase[:, 0]
+        grating_phase[~self.is_vis_stim] = np.nan
+        return grating_phase
         
     @npc_io.cached_property
     def block_index(self) -> npt.NDArray[np.int32]:
