@@ -1947,7 +1947,7 @@ wheels = [
 
 [[package]]
 name = "npc-mvr"
-version = "0.1.14"
+version = "0.1.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "npc-io" },
@@ -1955,9 +1955,9 @@ dependencies = [
     { name = "opencv-python-headless" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/51/a3/b4f0f0befea2f8871e6745147cd387232e29bec1752a0e3d6c2453fc9d9a/npc_mvr-0.1.14.tar.gz", hash = "sha256:dd3ea0a8ea25d80600bd4988351f033a5262a2fe34aa1e1b99de6391d6199b30", size = 18916, upload-time = "2025-10-20T20:36:55.585Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0f/1f/9d8791b6a2cb14c4464082765989f0d1c648f84fcb74f037d65321e20d83/npc_mvr-0.1.15.tar.gz", hash = "sha256:cb84c2dc351b581a668bdbeb83d9f5c25352e1a28e24ed11ca68875aaab54d8f", size = 18949, upload-time = "2025-12-18T08:16:04.122Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d2/c8/3424c9a16d3a2e15ca1ecfca5915bb7274ab508acfa68f9d7a4940a5bcf5/npc_mvr-0.1.14-py3-none-any.whl", hash = "sha256:6cfe7ed5d95b29fd18a0e5311626b81b5bbc3fb83ea54a63a1e64182980c22b3", size = 16663, upload-time = "2025-10-20T20:36:54.718Z" },
+    { url = "https://files.pythonhosted.org/packages/13/d3/3d0c452d9f46595963dc91cca999566dafacd1acc50e913c2fb0d2ae40c3/npc_mvr-0.1.15-py3-none-any.whl", hash = "sha256:544a1cc114ddfdc2dceded16f34e14dc6a123bf8fac521d2bac0ab9266e31621", size = 16701, upload-time = "2025-12-18T08:16:02.863Z" },
 ]
 
 [[package]]
@@ -1993,9 +1993,6 @@ name = "npc-sessions"
 version = "0.0.273"
 source = { editable = "." }
 dependencies = [
-    { name = "aind-data-access-api", extra = ["docdb"] },
-    { name = "aind-data-schema" },
-    { name = "aind-data-schema-models" },
     { name = "aind-session" },
     { name = "dynamicroutingtask" },
     { name = "hdmf" },
@@ -2034,6 +2031,11 @@ linting = [
     { name = "isort" },
     { name = "ruff" },
 ]
+metadata = [
+    { name = "aind-data-access-api", extra = ["docdb"] },
+    { name = "aind-data-schema" },
+    { name = "aind-data-schema-models" },
+]
 task-runner = [
     { name = "poethepoet" },
 ]
@@ -2046,9 +2048,6 @@ testing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aind-data-access-api", extras = ["docdb"], specifier = ">=1.2.2" },
-    { name = "aind-data-schema", specifier = ">=2.0" },
-    { name = "aind-data-schema-models", specifier = ">=4.2.7" },
     { name = "aind-session", specifier = ">=0.3.15" },
     { name = "dynamicroutingtask", specifier = "<0.1.106" },
     { name = "hdmf", specifier = "==3.14.6" },
@@ -2058,7 +2057,7 @@ requires-dist = [
     { name = "npc-ephys", specifier = ">=0.1.35" },
     { name = "npc-io", specifier = ">=0.1.32" },
     { name = "npc-lims", specifier = ">=0.1.186" },
-    { name = "npc-mvr", specifier = ">=0.1.14" },
+    { name = "npc-mvr", specifier = ">=0.1.15" },
     { name = "npc-samstim", specifier = ">=0.1.13" },
     { name = "npc-session", specifier = ">=0.1.40" },
     { name = "npc-stim", specifier = ">=0.1.15" },
@@ -2084,6 +2083,11 @@ linting = [
     { name = "black", specifier = ">=25.1.0" },
     { name = "isort", specifier = ">=6.0.1" },
     { name = "ruff", specifier = ">=0.11.2" },
+]
+metadata = [
+    { name = "aind-data-access-api", extras = ["docdb"], specifier = ">=1.2.2" },
+    { name = "aind-data-schema", specifier = ">=2.0" },
+    { name = "aind-data-schema-models", specifier = ">=4.2.7" },
 ]
 task-runner = [{ name = "poethepoet", specifier = ">=0.33.1" }]
 testing = [
