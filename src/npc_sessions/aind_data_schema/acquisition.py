@@ -73,7 +73,7 @@ def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.co
         subject_details = None
     else:
         subject_details = aind_data_schema.core.acquisition.AcquisitionSubjectDetails(
-            mouse_platform_name="Brain Observatory wheel",
+            mouse_platform_name="Brain Observatory Mouse Platform",
             reward_consumed_total=(
                 (np.nanmean(session.sam.rewardSize) * len(session.sam.rewardTimes))
                 if session.is_task
