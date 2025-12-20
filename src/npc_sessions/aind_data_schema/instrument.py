@@ -1,22 +1,20 @@
 
+import contextlib
 import logging
-from typing import TypeGuard
+import re
+from typing import Literal
 
-import aind_data_schema.base
-import aind_data_schema.components.configs
 import aind_data_schema.components.coordinates
 import aind_data_schema.components.devices
 import aind_data_schema.components.identifiers
-import aind_data_schema.core.acquisition
 import aind_data_schema.core.instrument
-import aind_data_schema_models.modalities
-import aind_data_schema_models.devices
 import aind_data_schema_models.coordinates
-import aind_data_schema_models.units
+import aind_data_schema_models.devices
+import aind_data_schema_models.modalities
 import aind_data_schema_models.organizations
+import aind_data_schema_models.units
 
-
-from npc_sessions.sessions import DynamicRoutingSession, DynamicRoutingSurfaceRecording
+from npc_sessions.sessions import DynamicRoutingSession
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +22,25 @@ COPA_NOTES = (
     "The rotation matrix is represented as: a,b,c,d,e,f,g,h,i. Wherein a, b, "
     "c correspond to the first row of the matrix. The translation matrix is "
     "represented as: x,y,z."
+)
+RIG_COORDINATE_SYSTEM = aind_data_schema.components.coordinates.CoordinateSystem(
+    name="rig-based XYZ",
+    origin=aind_data_schema.components.coordinates.Origin.BREGMA,
+    axes=[
+        aind_data_schema.components.coordinates.Axis(
+            name=aind_data_schema.components.coordinates.AxisName.X,
+            direction=aind_data_schema.components.coordinates.Direction.LR,
+        ),
+        aind_data_schema.components.coordinates.Axis(
+            name=aind_data_schema.components.coordinates.AxisName.Y,
+            direction=aind_data_schema.components.coordinates.Direction.FB,
+        ),
+        aind_data_schema.components.coordinates.Axis(
+            name=aind_data_schema.components.coordinates.AxisName.Z,
+            direction=aind_data_schema.components.coordinates.Direction.SI,
+        ),
+    ],
+    axis_unit=aind_data_schema.components.coordinates.SizeUnit.UM,
 )
 
 def _normalize_rig_name(rig_name: str) -> str:
@@ -56,7 +73,7 @@ def get_location(rig_name: str) -> str:
         return '342' # behavior B
 
 DISC = aind_data_schema.components.devices.Disc(
-    name="Brain Observatory Mouse Platform",
+    name="Brain Observatory running disc",
     radius="4.69",
     radius_unit="centimeter",
     output=aind_data_schema_models.devices.DaqChannelType.DO,
@@ -65,7 +82,7 @@ DISC = aind_data_schema.components.devices.Disc(
 )
 
 MONITOR = aind_data_schema.components.devices.Monitor(
-    name="Monitor",
+    name="Stimulus monitor",
     manufacturer=aind_data_schema_models.organizations.Organization.ASUS,
     model="PA248",
     refresh_rate=60,
@@ -98,12 +115,430 @@ MONITOR = aind_data_schema.components.devices.Monitor(
             angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
         ),
         aind_data_schema.components.coordinates.Translation(
-            distances=[0.08751, -0.12079, 0.02298],
-            distances_unit=aind_data_schema_models.units.SizeUnit.M,
+            translation=[0.08751, -0.12079, 0.02298],
         ),
     ],
     notes=COPA_NOTES,
 )
+
+
+SPEAKER = aind_data_schema.components.devices.Speaker(
+    name="Stimulus speaker",
+    manufacturer=aind_data_schema_models.organizations.Organization.ISL,
+    model="SPK-I-81345",
+    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_SPEAKER_LTF,
+    relative_position=[
+        aind_data_schema_models.coordinates.AnatomicalRelative.RIGHT,
+        aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
+        aind_data_schema_models.coordinates.AnatomicalRelative.SUPERIOR,
+    ],
+    transform=[
+        aind_data_schema.components.coordinates.Rotation(
+            angles=[
+                -0.82783,
+                -0.4837,
+                -0.28412,
+                -0.55894,
+                0.75426,
+                0.34449,
+                0.04767,
+                0.44399,
+                -0.89476,
+            ],
+            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
+        ),
+        aind_data_schema.components.coordinates.Translation(
+            translation=[-0.00838, -0.09787, 0.18228],
+        ),
+    ],
+    notes=COPA_NOTES,
+)
+
+LICK_SPOUT_ASSEMBLY = aind_data_schema.components.devices.LickSpoutAssembly(
+    name="Reward delivery assembly",
+    lick_spouts=[
+        aind_data_schema.components.devices.LickSpout(
+            name="Reward spout",
+            manufacturer=aind_data_schema_models.organizations.Organization.HAMILTON,
+            model="8649-01",
+            spout_diameter=0.672,
+            spout_diameter_unit=aind_data_schema_models.units.SizeUnit.MM,
+            notes="Spout diameter is inner. Outer diameter is 1.575 mm.",
+            solenoid_valve=aind_data_schema.components.devices.Device(
+                name="Solenoid valve",
+                manufacturer=aind_data_schema_models.organizations.Organization.NRESEARCH_INC,
+                model="161K011",
+            ),
+            lick_sensor=aind_data_schema.components.devices.Device(
+                name="Lick sensor",
+                model="1007079-1",
+                manufacturer=aind_data_schema_models.organizations.Organization.OTHER,
+                notes="Manufacturer: TE Connectivity",
+            ),
+            lick_sensor_type=aind_data_schema_models.devices.LickSensorType.PIEZOELECTIC,
+        ),
+    ],
+)
+
+SYNC_DAQ = aind_data_schema.components.devices.DAQDevice(
+    name="Sync DAQ",
+    manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
+    model="NI-6612",
+    data_interface=aind_data_schema_models.devices.DataInterface.PCIE,
+)
+TASKCONTROL_DAQ = aind_data_schema.components.devices.DAQDevice(
+    name="TaskControl DAQ",
+    manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
+    model="NI-6001",
+    data_interface=aind_data_schema_models.devices.DataInterface.USB,
+)
+CAMSTIM_DAQ = aind_data_schema.components.devices.DAQDevice(
+    name="Camstim DAQ",
+    manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
+    model="NI-6323",
+    data_interface=aind_data_schema_models.devices.DataInterface.PCIE,
+)
+OPTO_DAQ = aind_data_schema.components.devices.DAQDevice(
+    manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
+    name="Opto DAQ",
+    model="NI-9264",
+    data_interface=aind_data_schema_models.devices.DataInterface.ETH,
+)
+
+PHOTODIODE = aind_data_schema.components.devices.Detector(
+    name="Stimulus photodiode",
+    manufacturer=aind_data_schema_models.organizations.Organization.THORLABS,
+    model="PDA25K",
+    data_interface=aind_data_schema_models.devices.DataInterface.COAX,
+    detector_type=aind_data_schema_models.devices.DetectorType.OTHER,
+    cooling=aind_data_schema_models.devices.Cooling.NO_COOLING,
+    notes="Photodiode used to measure stimulus monitor frame updates",
+)
+MICROPHONE = aind_data_schema.components.devices.Detector(
+    name="Stimulus microphone",
+    manufacturer=aind_data_schema_models.organizations.Organization.DODOTRONIC,
+    model="momimic",
+    data_interface=aind_data_schema_models.devices.DataInterface.COAX,
+    detector_type=aind_data_schema_models.devices.DetectorType.OTHER,
+    cooling=aind_data_schema_models.devices.Cooling.NO_COOLING,
+    notes="Microphone used to record stimulus speaker output",
+)
+
+LASER_488 = aind_data_schema.components.devices.Laser(
+    name="Opto laser #1",
+    manufacturer=aind_data_schema_models.organizations.Organization.VORTRAN,
+    model="Stradus 488-50",
+    wavelength=488,
+    wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
+)
+LASER_633 = LASER_488.model_copy(update={
+    "name": "Opto laser #2",
+    "model": "Stradus 633-50",
+    "wavelength": 633,
+})
+
+LASER_GALVO_X = aind_data_schema.components.devices.AdditionalImagingDevice(
+    name="Opto laser galvo X",
+    manufacturer=aind_data_schema_models.organizations.Organization.THORLABS,
+    model="GVS012",
+    imaging_device_type=aind_data_schema.components.devices.ImagingDeviceType.GALVO,
+)
+LASER_GALVO_Y = LASER_GALVO_X.model_copy(update={"name": LASER_GALVO_X.name.replace("X", "Y")})
+
+ALLIED_CAMERA = aind_data_schema.components.devices.Camera(
+    name="Generic camera",
+    manufacturer=aind_data_schema_models.organizations.Organization.ALLIED,
+    model="G-032",
+    data_interface=aind_data_schema_models.devices.DataInterface.ETH,
+    cooling=aind_data_schema_models.devices.Cooling.NO_COOLING,
+    frame_rate=60,
+    frame_rate_unit=aind_data_schema_models.units.FrequencyUnit.HZ,
+    sensor_width=636,
+    sensor_height=508,
+    size_unit=aind_data_schema_models.units.SizeUnit.PX,
+    chroma=aind_data_schema_models.devices.CameraChroma.BW,
+    recording_software=aind_data_schema.components.identifiers.Software(
+        name="MultiVideoRecorder",
+        version="1.1.7",
+    ),
+)
+FRONT_CAMERA = ALLIED_CAMERA.model_copy(update={"name": "Front camera"})
+FRONT_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
+    name="Front camera assembly",
+    target=aind_data_schema.components.devices.CameraTarget.FACE,
+    camera=FRONT_CAMERA,
+    lens=aind_data_schema.components.devices.Lens(
+        name="Front camera lens",
+        manufacturer=aind_data_schema_models.organizations.Organization.EDMUND_OPTICS,
+        model="86604",
+        additional_settings=dict(
+            focal_length=8.5,
+            focal_length_unit=aind_data_schema_models.units.SizeUnit.MM,
+        ),
+    ),
+    filter=aind_data_schema.components.devices.Filter(
+        name="Front camera filter",
+        manufacturer=aind_data_schema_models.organizations.Organization.SEMROCK,
+        model="FF01-715",
+        filter_type=aind_data_schema_models.devices.FilterType.LONGPASS,
+        cut_on_wavelength=715,
+        wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
+    ),
+    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_CAMERA_RBF,
+    relative_position=[
+        aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
+        aind_data_schema_models.coordinates.AnatomicalRelative.SUPERIOR,
+    ],
+    transform=[
+        aind_data_schema.components.coordinates.Rotation(
+            angles=[
+                -0.17365,
+                0.98481,
+                0,
+                0.44709,
+                0.07883,
+                -0.89101,
+                -0.87747,
+                -0.15472,
+                -0.45399,
+            ],
+            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
+        ),
+        aind_data_schema.components.coordinates.Translation(
+            translation=[0.154, 0.03078, 0.06346],
+        ),
+    ],
+)
+
+SIDE_CAMERA = ALLIED_CAMERA.model_copy(update={"name": "Side camera"})
+SIDE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
+    name="Side camera assembly",
+    target=aind_data_schema.components.devices.CameraTarget.BODY,
+    camera=SIDE_CAMERA,
+    filter=aind_data_schema.components.devices.Filter(
+        name="Side camera filter",
+        manufacturer=aind_data_schema_models.organizations.Organization.SEMROCK,
+        model="FF01-747",
+        filter_type=aind_data_schema_models.devices.FilterType.BANDPASS,
+        cut_on_wavelength=730,
+        cut_off_wavelength=764,
+        wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
+    ),
+    lens=aind_data_schema.components.devices.Lens(
+        name="Side camera lens",
+        manufacturer=aind_data_schema_models.organizations.Organization.NAVITAR,
+        additional_settings=dict(
+            focal_length=6.0,
+            focal_length_unit=aind_data_schema_models.units.SizeUnit.MM,
+        ),
+    ),
+    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_CAMERA_RBF,
+    relative_position=[
+        aind_data_schema_models.coordinates.AnatomicalRelative.LEFT,
+        aind_data_schema_models.coordinates.AnatomicalRelative.INFERIOR,
+    ],
+    transform=[
+        aind_data_schema.components.coordinates.Rotation(
+            angles=[-1, 0, 0, 0, 0, -1, 0, -1, 0],
+            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
+        ),
+        aind_data_schema.components.coordinates.Translation(
+            translation=[-0.03617, 0.23887, -0.02535],
+        ),
+    ],
+)
+
+EYE_CAMERA = ALLIED_CAMERA.model_copy(update={"name": "Eye camera"})
+EYE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
+    name="Eye camera assembly",
+    target=aind_data_schema.components.devices.CameraTarget.EYE,
+    camera=EYE_CAMERA,
+    filter=aind_data_schema.components.devices.Filter(
+        name="Eye camera filter",
+        manufacturer=aind_data_schema_models.organizations.Organization.SEMROCK,
+        model="FF01-850",
+        filter_type=aind_data_schema_models.devices.FilterType.BANDPASS,
+        cut_on_wavelength=845,
+        cut_off_wavelength=855,
+        wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
+    ),
+    lens=aind_data_schema.components.devices.Lens(
+        name="Eye camera lens",
+        manufacturer=aind_data_schema_models.organizations.Organization.INFINITY_PHOTO_OPTICAL,
+        model="213073",
+        additional_settings=dict(
+            focal_length=6.0,
+            focal_length_unit=aind_data_schema_models.units.SizeUnit.MM,
+        ),
+    ),
+    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_CAMERA_RBF,
+    relative_position=[
+        aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
+        aind_data_schema_models.coordinates.AnatomicalRelative.RIGHT,
+        aind_data_schema_models.coordinates.AnatomicalRelative.SUPERIOR,
+    ],
+    transform=[
+        aind_data_schema.components.coordinates.Rotation(
+            angles=[
+                -0.5,
+                -0.86603,
+                0,
+                -0.366,
+                0.21131,
+                -0.90631,
+                0.78489,
+                -0.45315,
+                -0.42262,
+            ],
+            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
+        ),
+        aind_data_schema.components.coordinates.Translation(
+            translation=[0.14259, 0.06209, 0.09576],
+        ),
+    ],
+)
+
+NOSE_CAMERA = ALLIED_CAMERA.model_copy(update={"name": "Nose camera"})
+NOSE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
+    name="Nose camera assembly",
+    target=aind_data_schema.components.devices.CameraTarget.FACE,
+    camera=NOSE_CAMERA,
+    filter=aind_data_schema.components.devices.Filter(
+        name="Nose camera filter",
+        manufacturer=aind_data_schema_models.organizations.Organization.SEMROCK,
+        model="FF01-715",
+        filter_type=aind_data_schema_models.devices.FilterType.LONGPASS,
+        cut_on_wavelength=715,
+        wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
+    ),
+    lens=aind_data_schema.components.devices.Lens(
+        name="Nose camera lens",
+        manufacturer=aind_data_schema_models.organizations.Organization.EDMUND_OPTICS,
+        model="85360",
+        additional_settings=dict(
+            focal_length=25,
+            focal_length_unit=aind_data_schema_models.units.SizeUnit.MM,
+        ),
+    ),
+    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_CAMERA_RBF,
+    relative_position=[
+        aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
+        aind_data_schema_models.coordinates.AnatomicalRelative.INFERIOR,
+        aind_data_schema_models.coordinates.AnatomicalRelative.LEFT,
+    ],
+    transform=[
+        aind_data_schema.components.coordinates.Rotation(
+            angles=[
+                -0.5,
+                -0.86603,
+                0,
+                -0.366,
+                0.21131,
+                -0.90631,
+                0.78489,
+                -0.45315,
+                -0.42262,
+            ],
+            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
+        ),
+        aind_data_schema.components.coordinates.Translation(
+            translation=[-0.14259, 0.06209, -0.02535],
+        ),
+    ],
+)
+FRONT_LED = aind_data_schema.components.devices.LightEmittingDiode(
+    manufacturer=aind_data_schema_models.organizations.Organization.AMS_OSRAM,
+    name="Front camera illumination LED",
+    model="LZ4-40R308-0000",
+    wavelength=740,
+    wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
+)
+SIDE_LED = FRONT_LED.model_copy(update={"name": FRONT_LED.name.replace("Front", "Side")})
+NOSE_LED = FRONT_LED.model_copy(update={"name": FRONT_LED.name.replace("Front", "Nose")})
+
+EYE_LED = aind_data_schema.components.devices.LightEmittingDiode(
+    manufacturer=aind_data_schema_models.organizations.Organization.AMS_OSRAM,
+    name="Eye camera illumination LED",
+    model="LZ4-40R608-0000",
+    wavelength=850,
+    wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
+)
+
+def get_basestation(slot: Literal[2, 3], session: DynamicRoutingSession | None = None) -> aind_data_schema.components.devices.NeuropixelsBasestation:
+    probe_letters = "ABC" if slot == 2 else "DEF"
+    basestation_firmware_version = "240.1120"
+    bsc_firmware_version="1.0.144"
+    if session is not None and session.is_ephys:
+        with contextlib.suppress(ValueError, FileNotFoundError, AttributeError, IndexError):
+            settings_xml_path = session.ephys_settings_xml_path
+            text = settings_xml_path.read_text()
+            basestation_firmware_version = re.search(r'bs_firmware_version="([\d.]+)"', text).group(1) # type: ignore [union-attr]
+            bsc_firmware_version = re.search(r'bsc_firmware_version="([\d.]+)"', text).group(1) # type: ignore [union-attr]
+    return aind_data_schema.components.devices.NeuropixelsBasestation(
+        name=f"probes {probe_letters}",
+        manufacturer=aind_data_schema_models.organizations.Organization.IMEC,
+        model="PXIe",
+        basestation_firmware_version=basestation_firmware_version,
+        bsc_firmware_version=bsc_firmware_version,
+        slot=slot,
+        ports=[
+            aind_data_schema.components.devices.ProbePort(index=i, probes=[f'probe{letter}'])
+            for i, letter in zip(range(3), probe_letters, strict=False)
+        ],
+    )
+
+def get_computers(session: DynamicRoutingSession) -> list[aind_data_schema.components.devices.Computer]:
+    rig_name = _normalize_rig_name(session.rig)
+    computer_names = []
+    if rig_name.startswith('og') or rig_name.startswith('np'):
+        computer_names.extend(['STIM', 'SYNC', 'MON'])
+    else:
+        computer_names.append('BEH')
+    if rig_name.startswith('np'):
+        computer_names.append('ACQ')
+    return [
+        aind_data_schema.components.devices.Computer(name=name, operating_system='Windows 10')
+        for name in computer_names
+    ]
+
+def get_components(session: DynamicRoutingSession) -> list[aind_data_schema.components.devices.Device]:
+    components = [
+        DISC,
+        MONITOR,
+        SPEAKER,
+        LICK_SPOUT_ASSEMBLY,
+        *get_computers(session),
+    ]
+    if is_behavior_box(session.rig):
+        components.extend([
+            SIDE_CAMERA_ASSEMBLY,
+            SIDE_LED,
+        ])
+    if is_og_rig(session.rig) or is_np_rig(session.rig):
+        components.extend([
+            SYNC_DAQ,
+            MICROPHONE,
+            PHOTODIODE,
+            FRONT_CAMERA_ASSEMBLY,
+            FRONT_LED,
+            SIDE_CAMERA_ASSEMBLY,
+            SIDE_LED,
+            EYE_CAMERA_ASSEMBLY,
+            EYE_LED,
+            NOSE_CAMERA_ASSEMBLY,
+            NOSE_LED,
+            LASER_488,
+            LASER_633,
+            LASER_GALVO_X,
+            LASER_GALVO_Y,
+        ])
+    if is_np_rig(session.rig):
+        components.extend([
+            *get_ephys_assemblies(session),
+            get_basestation(slot=2, session=session),
+            get_basestation(slot=3, session=session),
+        ])
+    return components
 
 def get_modalities(session: DynamicRoutingSession) -> list[aind_data_schema_models.modalities.Modality]:
     modality = aind_data_schema_models.modalities.Modality
@@ -112,74 +547,30 @@ def get_modalities(session: DynamicRoutingSession) -> list[aind_data_schema_mode
         modalities.append(modality.ECEPHYS)
     return modalities
 
-def get_components(session: DynamicRoutingSession) -> list[aind_data_schema.components.devices.Device]:
-    devices = aind_data_schema.components.devices
-    components = [
-        DISC,
-        MONITOR,
-        devices.Speaker,
-        devices.LickSpoutAssembly,
-    ]
-    if is_behavior_box(session.rig):
-        components.extend([
-            devices.CameraAssembly,
-            devices.Computer,
-        ])
-    if is_og_rig(session.rig) or is_np_rig(session.rig):
-        components.extend([
-            devices.DAQDevice, # sync
-            devices.Laser,
-            devices.CameraAssembly,
-            devices.CameraAssembly,
-            devices.CameraAssembly,
-            devices.CameraAssembly,
-            devices.Computer,
-            devices.Computer,
-            devices.Computer,
-        ])
-    if is_np_rig(session.rig):
-        components.extend([
-            devices.EphysAssembly,
-            devices.EphysAssembly,
-            devices.EphysAssembly,
-            devices.EphysAssembly,
-            devices.EphysAssembly,
-            devices.EphysAssembly,
-            devices.NeuropixelsBasestation,
-            devices.Computer,
-        ])
-    return components
-
-coordinate_system = aind_data_schema.components.coordinates.CoordinateSystem(
-    name="rig-based XYZ",
-    origin=aind_data_schema.components.coordinates.Origin.TIP,
-    axes=[
-        aind_data_schema.components.coordinates.Axis(
-            name=aind_data_schema.components.coordinates.AxisName.X,
-            direction=aind_data_schema.components.coordinates.Direction.LR,
-        ),
-        aind_data_schema.components.coordinates.Axis(
-            name=aind_data_schema.components.coordinates.AxisName.Y,
-            direction=aind_data_schema.components.coordinates.Direction.BF,
-        ),
-        aind_data_schema.components.coordinates.Axis(
-            name=aind_data_schema.components.coordinates.AxisName.Z,
-            direction=aind_data_schema.components.coordinates.Direction.SI,
-        ),
-    ],
-    axis_unit=aind_data_schema.components.coordinates.SizeUnit.UM,
-)
-
-shared_camera_props = {
-    "detector_type": "Camera",
-    "model": "G-032",
-    "max_frame_rate": 102,
-    "sensor_width": 7400,
-    "sensor_height": 7400,
-    "size_unit": devices.SizeUnit.NM,
-    "notes": "Max frame rate is at maximum resolution.",
-    "cooling": devices.Cooling.NONE,
-}
+def get_ephys_assemblies(session: DynamicRoutingSession) -> list[aind_data_schema.components.devices.EphysAssembly]:
+    """Get ephys assemblies for the session."""
+    if not session.is_ephys:
+        return []
+    assemblies = []
+    for probe_letter in ["A", "B", "C", "D", "E", "F"]:
+        assemblies.append(
+            aind_data_schema.components.devices.EphysAssembly(
+                name=probe_letter,
+                manipulator=aind_data_schema.components.devices.Manipulator(
+                    name=f"Manipulator {probe_letter}",
+                    manufacturer=aind_data_schema_models.organizations.Organization.NEW_SCALE_TECHNOLOGIES,
+                    model="M3-LS-3.4-15",
+                ),
+                probes=[
+                    aind_data_schema.components.devices.EphysProbe(
+                        name=f"probe{probe_letter}",
+                        manufacturer=aind_data_schema_models.organizations.Organization.IMEC,
+                        probe_model=aind_data_schema.components.devices.ProbeModel.NP1,
+                    )
+                ],
+            )
+        )
+    return assemblies
 
 def get_instrument_model(session: DynamicRoutingSession) -> aind_data_schema.core.instrument.Instrument:
     """Get the Pydantic model corresponding to the 'instrument.json' for a given session."""
@@ -190,7 +581,7 @@ def get_instrument_model(session: DynamicRoutingSession) -> aind_data_schema.cor
         modification_date=session.session_start_time.date(),
         modalities=get_modalities(session),
         calibrations=[],
-        coordinate_system=coordinate_system,
+        coordinate_system=RIG_COORDINATE_SYSTEM,
         temperature_control=None,
         notes=None,
         connections=[],
