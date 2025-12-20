@@ -13,6 +13,7 @@ import aind_data_schema.core.acquisition
 import aind_data_schema_models.brain_atlas
 import aind_data_schema_models.modalities
 import aind_data_schema_models.stimulus_modality
+import aind_data_schema_models.units
 import numpy as np
 import upath
 
@@ -80,7 +81,7 @@ def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.co
                 if session.is_task
                 else None
             ),
-            reward_consumed_unit="milliliter",
+            reward_consumed_unit=aind_data_schema_models.units.VolumeUnit.ML,
         )
     return aind_data_schema.core.acquisition.Acquisition(
         subject_id=subject_id,
@@ -190,7 +191,7 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
         return aind_data_schema.core.acquisition.PerformanceMetrics(
             output_parameters={"block_metrics": block_metrics, "task_version": session.sam.taskVersion},
             reward_consumed_during_epoch=np.nanmean(session.sam.rewardSize) * sum(session.trials[:].is_rewarded),
-            reward_consumed_unit="milliliter",
+            reward_consumed_unit=aind_data_schema_models.units.VolumeUnit.ML,
             trials_total=len(session.trials[:]),
             trials_rewarded=sum(session.trials[:].is_contingent_reward),
         )
