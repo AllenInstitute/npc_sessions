@@ -16,6 +16,7 @@ import aind_data_schema_models.stimulus_modality
 import numpy as np
 import upath
 
+from npc_sessions.aind_data_schema import instrument
 from npc_sessions.sessions import DynamicRoutingSession, DynamicRoutingSurfaceRecording
 
 logger = logging.getLogger(__name__)
@@ -73,7 +74,7 @@ def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.co
         subject_details = None
     else:
         subject_details = aind_data_schema.core.acquisition.AcquisitionSubjectDetails(
-            mouse_platform_name="Brain Observatory Mouse Platform",
+            mouse_platform_name="Brain Observatory running disc",
             reward_consumed_total=(
                 (np.nanmean(session.sam.rewardSize) * len(session.sam.rewardTimes))
                 if session.is_task
@@ -97,16 +98,29 @@ def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.co
         subject_details=subject_details,
     )
 
-def get_active_devices(script_name: str) -> list[str]:
+def get_active_devices(script_name: str, session: DynamicRoutingSession) -> list[str]:
     stim = aind_data_schema_models.stimulus_modality.StimulusModality
     modalities = get_modalities(script_name)
-    device_names = []
+    device_names = [instrument.TASKCONTROL_DAQ.name, instrument.CAMSTIM_DAQ.name]
     if stim.VISUAL in modalities:
-        device_names.append("Monitor")
+        device_names.append(instrument.MONITOR.name)
+        if session.is_sync:
+            device_names.extend([instrument.PHOTODIODE.name])
     if stim.AUDITORY in modalities:
-        device_names.append("Speaker")
+        device_names.append(instrument.SPEAKER.name)
+        if session.is_sync:
+            device_names.extend([instrument.MICROPHONE.name])
     if stim.OPTOGENETICS in modalities:
-        device_names.append("Laser #0")  # TODO detect if second laser used
+        device_names.extend([
+            instrument.LASER_488.name, 
+            instrument.LASER_633.name, 
+            instrument.LASER_GALVO_X.name, 
+            instrument.LASER_GALVO_Y.name, 
+            instrument.OPTO_DAQ.name,
+        ])
+    if session.is_sync:
+        device_names.append(instrument.SYNC_DAQ.name)
+        
     return sorted(set(device_names))
 
 
@@ -236,7 +250,7 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
                 stimulus_modalities=get_modalities(script_name),
                 performance_metrics=get_performance_metrics(script_name),
                 notes=nwb_epoch.notes.item(),
-                active_devices=get_active_devices(script_name),
+                active_devices=get_active_devices(script_name, session),
                 configurations=[speaker_config] if speaker_config else [],
                 curriculum_status=session.sam.taskVersion if session.is_task else None,
             )
@@ -310,7 +324,7 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
                 stream_end_time=session.sync_data.stop_time,
                 modalities=[modality.BEHAVIOR, modality.BEHAVIOR_VIDEOS],
                 code=get_np_services_code("Sync"),
-                active_devices=["Sync"],
+                active_devices=[instrument.SYNC_DAQ.name],
                 configurations=[],
             )
         )
@@ -321,12 +335,16 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
                 stream_end_time=session.session_start_time
                 + datetime.timedelta(seconds=max(session.epochs.stop_time)),
                 modalities=[modality.BEHAVIOR],
-                active_devices=sorted(set(itertools.chain.from_iterable(get_active_devices(s) for s in session.epochs.script_name))),
+                active_devices=sorted(set(itertools.chain.from_iterable(get_active_devices(s, session) for s in session.epochs.script_name))),
                 code=get_np_services_code("Camstim"),
                 configurations=[],
             )
         )
     if session.is_video:
+        if session.is_sync:
+            active_cameras = [instrument.EYE_CAMERA, instrument.FRONT_CAMERA, instrument.SIDE_CAMERA, instrument.NOSE_CAMERA]
+        else:
+            active_cameras = [instrument.SIDE_CAMERA]
         data_streams.append(
             aind_data_schema.core.acquisition.DataStream(
                 stream_start_time=session.session_start_time
@@ -344,7 +362,7 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
                     ) # max frame time across all vids
                 ),
                 modalities=[modality.BEHAVIOR_VIDEOS],
-                active_devices=["Front camera", "Side camera", "Eye camera", "Nose camera"],
+                active_devices=[cam.name for cam in active_cameras],
                 code=get_np_services_code("MVR"),
                 configurations=[],
             )
@@ -433,7 +451,7 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
                 stream_end_time=session.session_start_time
                 + datetime.timedelta(seconds=max(timing.stop_time for timing in session.ephys_timing_data)),
                 modalities=[modality.ECEPHYS],
-                active_devices=[probe.name for probe in session.probe_letters_to_use],
+                active_devices=[probe.name for probe in session.probe_letters_to_use], # keep names synced with 'instrument.py'
                 configurations=ephys_configs,
                 code=get_np_services_code("Ephys"),
             )
