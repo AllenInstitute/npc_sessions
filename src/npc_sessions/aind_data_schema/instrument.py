@@ -13,34 +13,42 @@ import aind_data_schema_models.devices
 import aind_data_schema_models.modalities
 import aind_data_schema_models.organizations
 import aind_data_schema_models.units
+from aind_data_schema.components.coordinates import Axis, AxisName, Direction
 
 from npc_sessions.sessions import DynamicRoutingSession
 
 logger = logging.getLogger(__name__)
 
-COPA_NOTES = (
-    "The rotation matrix is represented as: a,b,c,d,e,f,g,h,i. Wherein a, b, "
-    "c correspond to the first row of the matrix. The translation matrix is "
-    "represented as: x,y,z."
-)
+
 RIG_COORDINATE_SYSTEM = aind_data_schema.components.coordinates.CoordinateSystem(
-    name="rig-based XYZ",
+    name="BREGMA_PRU",
     origin=aind_data_schema.components.coordinates.Origin.BREGMA,
     axes=[
-        aind_data_schema.components.coordinates.Axis(
-            name=aind_data_schema.components.coordinates.AxisName.X,
-            direction=aind_data_schema.components.coordinates.Direction.LR,
-        ),
-        aind_data_schema.components.coordinates.Axis(
-            name=aind_data_schema.components.coordinates.AxisName.Y,
-            direction=aind_data_schema.components.coordinates.Direction.FB,
-        ),
-        aind_data_schema.components.coordinates.Axis(
-            name=aind_data_schema.components.coordinates.AxisName.Z,
-            direction=aind_data_schema.components.coordinates.Direction.SI,
-        ),
+        Axis(name=AxisName.X, direction=Direction.PA),
+        Axis(name=AxisName.Y, direction=Direction.RL),
+        Axis(name=AxisName.Z, direction=Direction.DU),
     ],
-    axis_unit=aind_data_schema.components.coordinates.SizeUnit.UM,
+    axis_unit=aind_data_schema.components.coordinates.SizeUnit.M,
+)
+MONITOR_COORDINATE_SYSTEM = aind_data_schema.components.coordinates.CoordinateSystem(
+    name="MINDSCOPE_COPA_MONITOR_RDB",
+    origin=aind_data_schema.components.coordinates.Origin.FRONT_CENTER,
+    axes=[
+        Axis(name=AxisName.X, direction=Direction.RL),
+        Axis(name=AxisName.Y, direction=Direction.DU),
+        Axis(name=AxisName.Z, direction=Direction.BF),
+    ],
+    axis_unit=aind_data_schema.components.coordinates.SizeUnit.M,
+)
+CAMERA_COORDINATE_SYSTEM = aind_data_schema.components.coordinates.CoordinateSystem(
+    name="MINDSCOPE_COPA_CAMERA_LUB",
+    origin=aind_data_schema.components.coordinates.Origin.FRONT_CENTER,
+    axes=[
+        Axis(name=AxisName.X, direction=Direction.LR),
+        Axis(name=AxisName.Y, direction=Direction.UD),
+        Axis(name=AxisName.Z, direction=Direction.BF),
+    ],
+    axis_unit=aind_data_schema.components.coordinates.SizeUnit.M,
 )
 
 def _normalize_rig_name(rig_name: str) -> str:
@@ -93,32 +101,22 @@ MONITOR = aind_data_schema.components.devices.Monitor(
     viewing_distance_unit=aind_data_schema_models.units.SizeUnit.CM,
     brightness=43,
     contrast=50,
-    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_MONITOR_RTF,
+    coordinate_system=MONITOR_COORDINATE_SYSTEM,
     relative_position=[
         aind_data_schema_models.coordinates.AnatomicalRelative.RIGHT,
         aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
         aind_data_schema_models.coordinates.AnatomicalRelative.SUPERIOR,
     ],
     transform=[
-        aind_data_schema.components.coordinates.Rotation(
-            angles=[
-                -0.80914,
-                -0.58761,
-                0,
-                -0.12391,
-                0.17063,
-                0.97751,
-                0.08751,
-                -0.12079,
-                0.02298,
-            ],
-            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
-        ),
-        aind_data_schema.components.coordinates.Translation(
-            translation=[0.08751, -0.12079, 0.02298],
+        aind_data_schema.components.coordinates.Affine(
+            affine_transform=[
+                [-0.80914, -0.58761, 0],
+                [-0.12391, 0.17063, 0.97751],
+                [-0.5744, 0.79095, -0.21087],
+                [0.08751, -0.12079, 0.02298],
+            ]
         ),
     ],
-    notes=COPA_NOTES,
 )
 
 
@@ -126,32 +124,22 @@ SPEAKER = aind_data_schema.components.devices.Speaker(
     name="Stimulus speaker",
     manufacturer=aind_data_schema_models.organizations.Organization.ISL,
     model="SPK-I-81345",
-    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_SPEAKER_LTF,
+    coordinate_system=MONITOR_COORDINATE_SYSTEM, # same system as monitor
     relative_position=[
         aind_data_schema_models.coordinates.AnatomicalRelative.RIGHT,
         aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
         aind_data_schema_models.coordinates.AnatomicalRelative.SUPERIOR,
     ],
     transform=[
-        aind_data_schema.components.coordinates.Rotation(
-            angles=[
-                -0.82783,
-                -0.4837,
-                -0.28412,
-                -0.55894,
-                0.75426,
-                0.34449,
-                0.04767,
-                0.44399,
-                -0.89476,
-            ],
-            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
-        ),
-        aind_data_schema.components.coordinates.Translation(
-            translation=[-0.00838, -0.09787, 0.18228],
+        aind_data_schema.components.coordinates.Affine(
+            affine_transform=[
+                [-0.82783, -0.4837, -0.28412],
+                [-0.55894, 0.75426, 0.34449],
+                [0.04767, 0.44399, -0.89476],
+                [-0.00838, -0.09787, 0.18228],
+            ]
         ),
     ],
-    notes=COPA_NOTES,
 )
 
 LICK_SPOUT_ASSEMBLY = aind_data_schema.components.devices.LickSpoutAssembly(
@@ -284,28 +272,19 @@ FRONT_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
         cut_on_wavelength=715,
         wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
     ),
-    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_CAMERA_RBF,
+    coordinate_system=CAMERA_COORDINATE_SYSTEM,
     relative_position=[
         aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
         aind_data_schema_models.coordinates.AnatomicalRelative.SUPERIOR,
     ],
     transform=[
-        aind_data_schema.components.coordinates.Rotation(
-            angles=[
-                -0.17365,
-                0.98481,
-                0,
-                0.44709,
-                0.07883,
-                -0.89101,
-                -0.87747,
-                -0.15472,
-                -0.45399,
+        aind_data_schema.components.coordinates.Affine(
+            affine_transform=[
+                [-0.17365, 0.98481, 0], 
+                [0.44709, 0.07883, -0.89101],
+                [-0.87747, -0.15472, -0.45399],
+                [0.154, 0.03078, 0.06346],
             ],
-            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
-        ),
-        aind_data_schema.components.coordinates.Translation(
-            translation=[0.154, 0.03078, 0.06346],
         ),
     ],
 )
@@ -332,23 +311,28 @@ SIDE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
             focal_length_unit=aind_data_schema_models.units.SizeUnit.MM,
         ),
     ),
-    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_CAMERA_RBF,
+    coordinate_system=CAMERA_COORDINATE_SYSTEM,
     relative_position=[
         aind_data_schema_models.coordinates.AnatomicalRelative.LEFT,
-        aind_data_schema_models.coordinates.AnatomicalRelative.INFERIOR,
     ],
     transform=[
-        aind_data_schema.components.coordinates.Rotation(
-            angles=[-1, 0, 0, 0, 0, -1, 0, -1, 0],
-            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
-        ),
-        aind_data_schema.components.coordinates.Translation(
-            translation=[-0.03617, 0.23887, -0.02535],
+        aind_data_schema.components.coordinates.Affine(
+            affine_transform=[
+                [-1, 0, 0], 
+                [0, -1, 0], 
+                [-1, 0, -0.03617], 
+                [0.23887, -0.02535],
+            ],
         ),
     ],
 )
 
-EYE_CAMERA = ALLIED_CAMERA.model_copy(update={"name": "Eye camera"})
+EYE_CAMERA = ALLIED_CAMERA.model_copy(
+    update={
+        "name": "Eye camera",
+        "notes": "There is a mirror in the light path between the eye and the camera."
+    }
+)
 EYE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
     name="Eye camera assembly",
     target=aind_data_schema.components.devices.CameraTarget.EYE,
@@ -371,29 +355,18 @@ EYE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
             focal_length_unit=aind_data_schema_models.units.SizeUnit.MM,
         ),
     ),
-    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_CAMERA_RBF,
+    coordinate_system=CAMERA_COORDINATE_SYSTEM,
     relative_position=[
-        aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
         aind_data_schema_models.coordinates.AnatomicalRelative.RIGHT,
-        aind_data_schema_models.coordinates.AnatomicalRelative.SUPERIOR,
     ],
     transform=[
-        aind_data_schema.components.coordinates.Rotation(
-            angles=[
-                -0.5,
-                -0.86603,
-                0,
-                -0.366,
-                0.21131,
-                -0.90631,
-                0.78489,
-                -0.45315,
-                -0.42262,
+        aind_data_schema.components.coordinates.Affine(
+            affine_transform=[
+                [-0.5, -0.86603, 0],
+                [-0.366, 0.21131, -0.90631], [0.78489, -0.45315, -0.42262], [-0.14259, 0.06209, 0.09576],
+                [0.78489, -0.45315, -0.42262],
+                [-0.14259, 0.06209, 0.09576],
             ],
-            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
-        ),
-        aind_data_schema.components.coordinates.Translation(
-            translation=[0.14259, 0.06209, 0.09576],
         ),
     ],
 )
@@ -420,31 +393,17 @@ NOSE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
             focal_length_unit=aind_data_schema_models.units.SizeUnit.MM,
         ),
     ),
-    coordinate_system=aind_data_schema.components.coordinates.CoordinateSystemLibrary.SIPE_CAMERA_RBF,
     relative_position=[
         aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
-        aind_data_schema_models.coordinates.AnatomicalRelative.INFERIOR,
         aind_data_schema_models.coordinates.AnatomicalRelative.LEFT,
     ],
-    transform=[
-        aind_data_schema.components.coordinates.Rotation(
-            angles=[
-                -0.5,
-                -0.86603,
-                0,
-                -0.366,
-                0.21131,
-                -0.90631,
-                0.78489,
-                -0.45315,
-                -0.42262,
-            ],
-            angles_unit=aind_data_schema_models.units.AngleUnit.RAD,
-        ),
-        aind_data_schema.components.coordinates.Translation(
-            translation=[-0.14259, 0.06209, -0.02535],
-        ),
-    ],
+    # !pending:
+    # coordinate_system=CAMERA_COORDINATE_SYSTEM,
+    # transform=[
+    #     aind_data_schema.components.coordinates.Affine(
+    #         affine_transform=[[], [], [], []]
+    #     ),
+    # ],
 )
 FRONT_LED = aind_data_schema.components.devices.LightEmittingDiode(
     manufacturer=aind_data_schema_models.organizations.Organization.AMS_OSRAM,
