@@ -14,7 +14,7 @@ def get_data_description_model(session: DynamicRoutingSession) -> aind_data_sche
     """Get the Pydantic model corresponding to the 'data_description.json' for a given session."""
     subject_id = str(session.id.subject)
     creation_time = session.session_start_time
-    platform = 'ephys' if session.is_ephys else 'behavior'
+    platform = 'ecephys' if session.is_ephys else 'behavior'
     name = f"{platform}_{subject_id}_{creation_time.strftime('%Y-%m-%d_%H-%M-%S')}"
 
     investigators = [
