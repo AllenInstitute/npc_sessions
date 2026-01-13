@@ -101,7 +101,7 @@ def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.co
 
 def get_active_devices(script_name: str, session: DynamicRoutingSession) -> list[str]:
     stim = aind_data_schema_models.stimulus_modality.StimulusModality
-    modalities = get_modalities(script_name)
+    modalities = get_modalities(script_name, session)
     device_names = [instrument.TASKCONTROL_DAQ.name, instrument.CAMSTIM_DAQ.name]
     if stim.VISUAL in modalities:
         device_names.append(instrument.MONITOR.name)
@@ -127,6 +127,7 @@ def get_active_devices(script_name: str, session: DynamicRoutingSession) -> list
 
 def get_modalities(
     script_name: str,
+    session: DynamicRoutingSession,
 ) -> list[aind_data_schema_models.stimulus_modality.StimulusModality]:
     stim = aind_data_schema_models.stimulus_modality.StimulusModality
     modalities = []
@@ -156,7 +157,7 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
         script_name: str,
     ) -> aind_data_schema.components.configs.SpeakerConfig | None:
         stim = aind_data_schema_models.stimulus_modality.StimulusModality
-        if stim.AUDITORY not in get_modalities(script_name):
+        if stim.AUDITORY not in get_modalities(script_name, session):
             return None
         return aind_data_schema.components.configs.SpeakerConfig(
             device_name="Speaker",
@@ -248,7 +249,7 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
                 + session.session_start_time,
                 stimulus_name=script_name,
                 code=get_code(script_name),
-                stimulus_modalities=get_modalities(script_name),
+                stimulus_modalities=get_modalities(script_name, session),
                 performance_metrics=get_performance_metrics(script_name),
                 notes=nwb_epoch.notes.item(),
                 active_devices=get_active_devices(script_name, session),
