@@ -1,0 +1,1362 @@
+{
+   "object_type": "Instrument",
+   "describedBy": "https://raw.githubusercontent.com/AllenNeuralDynamics/aind-data-schema/main/src/aind_data_schema/core/instrument.py",
+   "schema_version": "2.0.41",
+   "location": "342",
+   "instrument_id": "NP3",
+   "modification_date": "2023-12-13",
+   "modalities": [
+      {
+         "name": "Behavior",
+         "abbreviation": "behavior"
+      },
+      {
+         "name": "Behavior videos",
+         "abbreviation": "behavior-videos"
+      },
+      {
+         "name": "Extracellular electrophysiology",
+         "abbreviation": "ecephys"
+      }
+   ],
+   "calibrations": [],
+   "coordinate_system": {
+      "object_type": "Coordinate system",
+      "name": "BREGMA_PRU",
+      "origin": "Bregma",
+      "axes": [
+         {
+            "object_type": "Axis",
+            "name": "X",
+            "direction": "Posterior_to_anterior"
+         },
+         {
+            "object_type": "Axis",
+            "name": "Y",
+            "direction": "Right_to_left"
+         },
+         {
+            "object_type": "Axis",
+            "name": "Z",
+            "direction": "Down_to_up"
+         }
+      ],
+      "axis_unit": "meter"
+   },
+   "temperature_control": null,
+   "notes": null,
+   "connections": [],
+   "components": [
+      {
+         "object_type": "Disc",
+         "name": "Brain Observatory running disc",
+         "serial_number": null,
+         "manufacturer": null,
+         "model": null,
+         "additional_settings": null,
+         "notes": "Radius is distance from center to subject",
+         "radius": "4.69",
+         "radius_unit": "centimeter",
+         "output": "Digital Output",
+         "encoder": null,
+         "decoder": null,
+         "encoder_firmware": null,
+         "surface_material": "rubber"
+      },
+      {
+         "object_type": "Monitor",
+         "relative_position": [
+            "Right",
+            "Anterior",
+            "Superior"
+         ],
+         "coordinate_system": {
+            "object_type": "Coordinate system",
+            "name": "MINDSCOPE_COPA_MONITOR_RDB",
+            "origin": "Front_center",
+            "axes": [
+               {
+                  "object_type": "Axis",
+                  "name": "X",
+                  "direction": "Right_to_left"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Y",
+                  "direction": "Down_to_up"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Z",
+                  "direction": "Back_to_front"
+               }
+            ],
+            "axis_unit": "meter"
+         },
+         "transform": [
+            {
+               "object_type": "Affine",
+               "affine_transform": [
+                  [
+                     -0.80914,
+                     -0.58761,
+                     0.0
+                  ],
+                  [
+                     -0.12391,
+                     0.17063,
+                     0.97751
+                  ],
+                  [
+                     -0.5744,
+                     0.79095,
+                     -0.21087
+                  ],
+                  [
+                     0.08751,
+                     -0.12079,
+                     0.02298
+                  ]
+               ]
+            }
+         ],
+         "name": "Stimulus monitor",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "ASUS",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "00bxkz165"
+         },
+         "model": "PA248",
+         "additional_settings": null,
+         "notes": null,
+         "refresh_rate": 60,
+         "width": 1920,
+         "height": 1200,
+         "size_unit": "pixel",
+         "viewing_distance": "15.3",
+         "viewing_distance_unit": "centimeter",
+         "contrast": 50,
+         "brightness": 43
+      },
+      {
+         "object_type": "Speaker",
+         "relative_position": [
+            "Right",
+            "Anterior",
+            "Superior"
+         ],
+         "coordinate_system": {
+            "object_type": "Coordinate system",
+            "name": "MINDSCOPE_COPA_MONITOR_RDB",
+            "origin": "Front_center",
+            "axes": [
+               {
+                  "object_type": "Axis",
+                  "name": "X",
+                  "direction": "Right_to_left"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Y",
+                  "direction": "Down_to_up"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Z",
+                  "direction": "Back_to_front"
+               }
+            ],
+            "axis_unit": "meter"
+         },
+         "transform": [
+            {
+               "object_type": "Affine",
+               "affine_transform": [
+                  [
+                     -0.82783,
+                     -0.4837,
+                     -0.28412
+                  ],
+                  [
+                     -0.55894,
+                     0.75426,
+                     0.34449
+                  ],
+                  [
+                     0.04767,
+                     0.44399,
+                     -0.89476
+                  ],
+                  [
+                     -0.00838,
+                     -0.09787,
+                     0.18228
+                  ]
+               ]
+            }
+         ],
+         "name": "Stimulus speaker",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "ISL Products International",
+            "abbreviation": "ISL",
+            "registry": null,
+            "registry_identifier": null
+         },
+         "model": "SPK-I-81345",
+         "additional_settings": null,
+         "notes": null
+      },
+      {
+         "object_type": "Lick spout assembly",
+         "name": "Reward delivery assembly",
+         "lick_spouts": [
+            {
+               "object_type": "Lick spout",
+               "name": "Reward spout",
+               "serial_number": null,
+               "manufacturer": {
+                  "name": "Hamilton",
+                  "abbreviation": null,
+                  "registry": null,
+                  "registry_identifier": null
+               },
+               "model": "8649-01",
+               "additional_settings": null,
+               "notes": "Spout diameter is inner. Outer diameter is 1.575 mm.",
+               "spout_diameter": "0.672",
+               "spout_diameter_unit": "millimeter",
+               "solenoid_valve": {
+                  "object_type": "Device",
+                  "name": "Solenoid valve",
+                  "serial_number": null,
+                  "manufacturer": {
+                     "name": "NResearch Inc",
+                     "abbreviation": null,
+                     "registry": null,
+                     "registry_identifier": null
+                  },
+                  "model": "161K011",
+                  "additional_settings": null,
+                  "notes": null
+               },
+               "lick_sensor": {
+                  "object_type": "Device",
+                  "name": "Lick sensor",
+                  "serial_number": null,
+                  "manufacturer": {
+                     "name": "Other",
+                     "abbreviation": null,
+                     "registry": null,
+                     "registry_identifier": null
+                  },
+                  "model": "1007079-1",
+                  "additional_settings": null,
+                  "notes": "Manufacturer: TE Connectivity"
+               },
+               "lick_sensor_type": "Piezoelectric"
+            }
+         ],
+         "motorized_stage": null
+      },
+      {
+         "object_type": "Computer",
+         "name": "STIM",
+         "serial_number": null,
+         "manufacturer": null,
+         "model": null,
+         "additional_settings": null,
+         "notes": null,
+         "operating_system": "Windows 10"
+      },
+      {
+         "object_type": "Computer",
+         "name": "SYNC",
+         "serial_number": null,
+         "manufacturer": null,
+         "model": null,
+         "additional_settings": null,
+         "notes": null,
+         "operating_system": "Windows 10"
+      },
+      {
+         "object_type": "Computer",
+         "name": "MON",
+         "serial_number": null,
+         "manufacturer": null,
+         "model": null,
+         "additional_settings": null,
+         "notes": null,
+         "operating_system": "Windows 10"
+      },
+      {
+         "object_type": "Computer",
+         "name": "ACQ",
+         "serial_number": null,
+         "manufacturer": null,
+         "model": null,
+         "additional_settings": null,
+         "notes": null,
+         "operating_system": "Windows 10"
+      },
+      {
+         "object_type": "DAQ device",
+         "name": "Sync DAQ",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "National Instruments",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "026exqw73"
+         },
+         "model": "NI-6612",
+         "additional_settings": null,
+         "notes": null,
+         "data_interface": "PCIe",
+         "channels": [],
+         "firmware_version": null,
+         "hardware_version": null
+      },
+      {
+         "object_type": "Detector",
+         "name": "Stimulus microphone",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "Dodotronic",
+            "abbreviation": null,
+            "registry": null,
+            "registry_identifier": null
+         },
+         "model": "momimic",
+         "additional_settings": null,
+         "notes": "Microphone used to record stimulus speaker output",
+         "detector_type": "Other",
+         "data_interface": "Coax",
+         "cooling": "No cooling",
+         "frame_rate": null,
+         "frame_rate_unit": null,
+         "immersion": null,
+         "chroma": null,
+         "sensor_width": null,
+         "sensor_height": null,
+         "size_unit": "pixel",
+         "sensor_format": null,
+         "sensor_format_unit": null,
+         "bit_depth": null,
+         "bin_mode": "No binning",
+         "bin_width": null,
+         "bin_height": null,
+         "bin_unit": "pixel",
+         "gain": null,
+         "crop_offset_x": null,
+         "crop_offset_y": null,
+         "crop_width": null,
+         "crop_height": null,
+         "crop_unit": "pixel",
+         "recording_software": null,
+         "driver": null,
+         "driver_version": null
+      },
+      {
+         "object_type": "Detector",
+         "name": "Stimulus photodiode",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "Thorlabs",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "04gsnvb07"
+         },
+         "model": "PDA25K",
+         "additional_settings": null,
+         "notes": "Photodiode used to measure stimulus monitor frame updates",
+         "detector_type": "Other",
+         "data_interface": "Coax",
+         "cooling": "No cooling",
+         "frame_rate": null,
+         "frame_rate_unit": null,
+         "immersion": null,
+         "chroma": null,
+         "sensor_width": null,
+         "sensor_height": null,
+         "size_unit": "pixel",
+         "sensor_format": null,
+         "sensor_format_unit": null,
+         "bit_depth": null,
+         "bin_mode": "No binning",
+         "bin_width": null,
+         "bin_height": null,
+         "bin_unit": "pixel",
+         "gain": null,
+         "crop_offset_x": null,
+         "crop_offset_y": null,
+         "crop_width": null,
+         "crop_height": null,
+         "crop_unit": "pixel",
+         "recording_software": null,
+         "driver": null,
+         "driver_version": null
+      },
+      {
+         "object_type": "Camera assembly",
+         "relative_position": [
+            "Anterior",
+            "Superior"
+         ],
+         "coordinate_system": {
+            "object_type": "Coordinate system",
+            "name": "MINDSCOPE_COPA_CAMERA_LUB",
+            "origin": "Front_center",
+            "axes": [
+               {
+                  "object_type": "Axis",
+                  "name": "X",
+                  "direction": "Left_to_right"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Y",
+                  "direction": "Up_to_down"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Z",
+                  "direction": "Back_to_front"
+               }
+            ],
+            "axis_unit": "meter"
+         },
+         "transform": [
+            {
+               "object_type": "Affine",
+               "affine_transform": [
+                  [
+                     -0.17365,
+                     0.98481,
+                     0.0
+                  ],
+                  [
+                     0.44709,
+                     0.07883,
+                     -0.89101
+                  ],
+                  [
+                     -0.87747,
+                     -0.15472,
+                     -0.45399
+                  ],
+                  [
+                     0.154,
+                     0.03078,
+                     0.06346
+                  ]
+               ]
+            }
+         ],
+         "name": "Front camera assembly",
+         "target": "Face",
+         "camera": {
+            "object_type": "Camera",
+            "name": "Front camera",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Allied",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "G-032",
+            "additional_settings": null,
+            "notes": null,
+            "detector_type": "Camera",
+            "data_interface": "Ethernet",
+            "cooling": "No cooling",
+            "frame_rate": "60",
+            "frame_rate_unit": "hertz",
+            "immersion": null,
+            "chroma": "Monochrome",
+            "sensor_width": 636,
+            "sensor_height": 508,
+            "size_unit": "pixel",
+            "sensor_format": null,
+            "sensor_format_unit": null,
+            "bit_depth": null,
+            "bin_mode": "No binning",
+            "bin_width": null,
+            "bin_height": null,
+            "bin_unit": "pixel",
+            "gain": null,
+            "crop_offset_x": null,
+            "crop_offset_y": null,
+            "crop_width": null,
+            "crop_height": null,
+            "crop_unit": "pixel",
+            "recording_software": {
+               "object_type": "Software",
+               "name": "MultiVideoRecorder",
+               "version": "1.1.7"
+            },
+            "driver": null,
+            "driver_version": null
+         },
+         "lens": {
+            "object_type": "Lens",
+            "name": "Front camera lens",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Edmund Optics",
+               "abbreviation": null,
+               "registry": "Research Organization Registry (ROR)",
+               "registry_identifier": "01j1gwp17"
+            },
+            "model": "86604",
+            "additional_settings": {
+               "focal_length": 8.5,
+               "focal_length_unit": "millimeter"
+            },
+            "notes": null
+         },
+         "filter": {
+            "object_type": "Filter",
+            "name": "Front camera filter",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Semrock",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "FF01-715",
+            "additional_settings": null,
+            "notes": null,
+            "filter_type": "Long pass",
+            "cut_off_wavelength": null,
+            "cut_on_wavelength": 715,
+            "center_wavelength": null,
+            "wavelength_unit": "nanometer"
+         }
+      },
+      {
+         "object_type": "Light emitting diode",
+         "name": "Front camera illumination LED",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "ams OSRAM",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "045d0h266"
+         },
+         "model": "LZ4-40R308-0000",
+         "additional_settings": null,
+         "notes": null,
+         "wavelength": 740,
+         "wavelength_unit": "nanometer",
+         "bandwidth": null,
+         "bandwidth_unit": null
+      },
+      {
+         "object_type": "Camera assembly",
+         "relative_position": [
+            "Left"
+         ],
+         "coordinate_system": {
+            "object_type": "Coordinate system",
+            "name": "MINDSCOPE_COPA_CAMERA_LUB",
+            "origin": "Front_center",
+            "axes": [
+               {
+                  "object_type": "Axis",
+                  "name": "X",
+                  "direction": "Left_to_right"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Y",
+                  "direction": "Up_to_down"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Z",
+                  "direction": "Back_to_front"
+               }
+            ],
+            "axis_unit": "meter"
+         },
+         "transform": [
+            {
+               "object_type": "Affine",
+               "affine_transform": [
+                  [
+                     -1.0,
+                     0.0,
+                     0.0
+                  ],
+                  [
+                     0.0,
+                     -1.0,
+                     0.0
+                  ],
+                  [
+                     -1.0,
+                     0.0,
+                     -0.03617
+                  ],
+                  [
+                     0.23887,
+                     -0.02535
+                  ]
+               ]
+            }
+         ],
+         "name": "Side camera assembly",
+         "target": "Body",
+         "camera": {
+            "object_type": "Camera",
+            "name": "Side camera",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Allied",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "G-032",
+            "additional_settings": null,
+            "notes": null,
+            "detector_type": "Camera",
+            "data_interface": "Ethernet",
+            "cooling": "No cooling",
+            "frame_rate": "60",
+            "frame_rate_unit": "hertz",
+            "immersion": null,
+            "chroma": "Monochrome",
+            "sensor_width": 636,
+            "sensor_height": 508,
+            "size_unit": "pixel",
+            "sensor_format": null,
+            "sensor_format_unit": null,
+            "bit_depth": null,
+            "bin_mode": "No binning",
+            "bin_width": null,
+            "bin_height": null,
+            "bin_unit": "pixel",
+            "gain": null,
+            "crop_offset_x": null,
+            "crop_offset_y": null,
+            "crop_width": null,
+            "crop_height": null,
+            "crop_unit": "pixel",
+            "recording_software": {
+               "object_type": "Software",
+               "name": "MultiVideoRecorder",
+               "version": "1.1.7"
+            },
+            "driver": null,
+            "driver_version": null
+         },
+         "lens": {
+            "object_type": "Lens",
+            "name": "Side camera lens",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Navitar",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": null,
+            "additional_settings": {
+               "focal_length": 6.0,
+               "focal_length_unit": "millimeter"
+            },
+            "notes": null
+         },
+         "filter": {
+            "object_type": "Filter",
+            "name": "Side camera filter",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Semrock",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "FF01-747",
+            "additional_settings": null,
+            "notes": null,
+            "filter_type": "Band pass",
+            "cut_off_wavelength": 764,
+            "cut_on_wavelength": 730,
+            "center_wavelength": null,
+            "wavelength_unit": "nanometer"
+         }
+      },
+      {
+         "object_type": "Light emitting diode",
+         "name": "Side camera illumination LED",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "ams OSRAM",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "045d0h266"
+         },
+         "model": "LZ4-40R308-0000",
+         "additional_settings": null,
+         "notes": null,
+         "wavelength": 740,
+         "wavelength_unit": "nanometer",
+         "bandwidth": null,
+         "bandwidth_unit": null
+      },
+      {
+         "object_type": "Camera assembly",
+         "relative_position": [
+            "Right"
+         ],
+         "coordinate_system": {
+            "object_type": "Coordinate system",
+            "name": "MINDSCOPE_COPA_CAMERA_LUB",
+            "origin": "Front_center",
+            "axes": [
+               {
+                  "object_type": "Axis",
+                  "name": "X",
+                  "direction": "Left_to_right"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Y",
+                  "direction": "Up_to_down"
+               },
+               {
+                  "object_type": "Axis",
+                  "name": "Z",
+                  "direction": "Back_to_front"
+               }
+            ],
+            "axis_unit": "meter"
+         },
+         "transform": [
+            {
+               "object_type": "Affine",
+               "affine_transform": [
+                  [
+                     -0.5,
+                     -0.86603,
+                     0.0
+                  ],
+                  [
+                     -0.366,
+                     0.21131,
+                     -0.90631
+                  ],
+                  [
+                     0.78489,
+                     -0.45315,
+                     -0.42262
+                  ],
+                  [
+                     -0.14259,
+                     0.06209,
+                     0.09576
+                  ],
+                  [
+                     0.78489,
+                     -0.45315,
+                     -0.42262
+                  ],
+                  [
+                     -0.14259,
+                     0.06209,
+                     0.09576
+                  ]
+               ]
+            }
+         ],
+         "name": "Eye camera assembly",
+         "target": "Eye",
+         "camera": {
+            "object_type": "Camera",
+            "name": "Eye camera",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Allied",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "G-032",
+            "additional_settings": null,
+            "notes": "There is a mirror in the light path between the eye and the camera.",
+            "detector_type": "Camera",
+            "data_interface": "Ethernet",
+            "cooling": "No cooling",
+            "frame_rate": "60",
+            "frame_rate_unit": "hertz",
+            "immersion": null,
+            "chroma": "Monochrome",
+            "sensor_width": 636,
+            "sensor_height": 508,
+            "size_unit": "pixel",
+            "sensor_format": null,
+            "sensor_format_unit": null,
+            "bit_depth": null,
+            "bin_mode": "No binning",
+            "bin_width": null,
+            "bin_height": null,
+            "bin_unit": "pixel",
+            "gain": null,
+            "crop_offset_x": null,
+            "crop_offset_y": null,
+            "crop_width": null,
+            "crop_height": null,
+            "crop_unit": "pixel",
+            "recording_software": {
+               "object_type": "Software",
+               "name": "MultiVideoRecorder",
+               "version": "1.1.7"
+            },
+            "driver": null,
+            "driver_version": null
+         },
+         "lens": {
+            "object_type": "Lens",
+            "name": "Eye camera lens",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Infinity Photo-Optical",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "213073",
+            "additional_settings": {
+               "focal_length": 6.0,
+               "focal_length_unit": "millimeter"
+            },
+            "notes": null
+         },
+         "filter": {
+            "object_type": "Filter",
+            "name": "Eye camera filter",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Semrock",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "FF01-850",
+            "additional_settings": null,
+            "notes": null,
+            "filter_type": "Band pass",
+            "cut_off_wavelength": 855,
+            "cut_on_wavelength": 845,
+            "center_wavelength": null,
+            "wavelength_unit": "nanometer"
+         }
+      },
+      {
+         "object_type": "Light emitting diode",
+         "name": "Eye camera illumination LED",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "ams OSRAM",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "045d0h266"
+         },
+         "model": "LZ4-40R608-0000",
+         "additional_settings": null,
+         "notes": null,
+         "wavelength": 850,
+         "wavelength_unit": "nanometer",
+         "bandwidth": null,
+         "bandwidth_unit": null
+      },
+      {
+         "object_type": "Camera assembly",
+         "relative_position": [
+            "Anterior",
+            "Left"
+         ],
+         "coordinate_system": null,
+         "transform": null,
+         "name": "Nose camera assembly",
+         "target": "Face",
+         "camera": {
+            "object_type": "Camera",
+            "name": "Nose camera",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Allied",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "G-032",
+            "additional_settings": null,
+            "notes": null,
+            "detector_type": "Camera",
+            "data_interface": "Ethernet",
+            "cooling": "No cooling",
+            "frame_rate": "60",
+            "frame_rate_unit": "hertz",
+            "immersion": null,
+            "chroma": "Monochrome",
+            "sensor_width": 636,
+            "sensor_height": 508,
+            "size_unit": "pixel",
+            "sensor_format": null,
+            "sensor_format_unit": null,
+            "bit_depth": null,
+            "bin_mode": "No binning",
+            "bin_width": null,
+            "bin_height": null,
+            "bin_unit": "pixel",
+            "gain": null,
+            "crop_offset_x": null,
+            "crop_offset_y": null,
+            "crop_width": null,
+            "crop_height": null,
+            "crop_unit": "pixel",
+            "recording_software": {
+               "object_type": "Software",
+               "name": "MultiVideoRecorder",
+               "version": "1.1.7"
+            },
+            "driver": null,
+            "driver_version": null
+         },
+         "lens": {
+            "object_type": "Lens",
+            "name": "Nose camera lens",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Edmund Optics",
+               "abbreviation": null,
+               "registry": "Research Organization Registry (ROR)",
+               "registry_identifier": "01j1gwp17"
+            },
+            "model": "85360",
+            "additional_settings": {
+               "focal_length": 25,
+               "focal_length_unit": "millimeter"
+            },
+            "notes": null
+         },
+         "filter": {
+            "object_type": "Filter",
+            "name": "Nose camera filter",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "Semrock",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "FF01-715",
+            "additional_settings": null,
+            "notes": null,
+            "filter_type": "Long pass",
+            "cut_off_wavelength": null,
+            "cut_on_wavelength": 715,
+            "center_wavelength": null,
+            "wavelength_unit": "nanometer"
+         }
+      },
+      {
+         "object_type": "Light emitting diode",
+         "name": "Nose camera illumination LED",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "ams OSRAM",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "045d0h266"
+         },
+         "model": "LZ4-40R308-0000",
+         "additional_settings": null,
+         "notes": null,
+         "wavelength": 740,
+         "wavelength_unit": "nanometer",
+         "bandwidth": null,
+         "bandwidth_unit": null
+      },
+      {
+         "object_type": "Laser",
+         "name": "Opto laser #1",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "Vortran",
+            "abbreviation": null,
+            "registry": null,
+            "registry_identifier": null
+         },
+         "model": "Stradus 488-50",
+         "additional_settings": null,
+         "notes": null,
+         "wavelength": 488,
+         "wavelength_unit": "nanometer",
+         "coupling": null,
+         "coupling_efficiency": null,
+         "coupling_efficiency_unit": "percent"
+      },
+      {
+         "object_type": "Laser",
+         "name": "Opto laser #2",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "Vortran",
+            "abbreviation": null,
+            "registry": null,
+            "registry_identifier": null
+         },
+         "model": "Stradus 633-50",
+         "additional_settings": null,
+         "notes": null,
+         "wavelength": 633,
+         "wavelength_unit": "nanometer",
+         "coupling": null,
+         "coupling_efficiency": null,
+         "coupling_efficiency_unit": "percent"
+      },
+      {
+         "object_type": "Additional imaging device",
+         "name": "Opto laser galvo X",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "Thorlabs",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "04gsnvb07"
+         },
+         "model": "GVS012",
+         "additional_settings": null,
+         "notes": null,
+         "imaging_device_type": "Galvo"
+      },
+      {
+         "object_type": "Additional imaging device",
+         "name": "Opto laser galvo Y",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "Thorlabs",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "04gsnvb07"
+         },
+         "model": "GVS012",
+         "additional_settings": null,
+         "notes": null,
+         "imaging_device_type": "Galvo"
+      },
+      {
+         "object_type": "Ephys assembly",
+         "name": "A",
+         "manipulator": {
+            "object_type": "Manipulator",
+            "name": "Manipulator A",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "New Scale Technologies",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "M3-LS-3.4-15",
+            "additional_settings": null,
+            "notes": null
+         },
+         "probes": [
+            {
+               "object_type": "Ephys probe",
+               "name": "probeA",
+               "serial_number": null,
+               "manufacturer": {
+                  "name": "Interuniversity Microelectronics Center",
+                  "abbreviation": "IMEC",
+                  "registry": "Research Organization Registry (ROR)",
+                  "registry_identifier": "02kcbn207"
+               },
+               "model": null,
+               "additional_settings": null,
+               "notes": null,
+               "probe_model": "Neuropixels 1.0",
+               "headstage": null
+            }
+         ]
+      },
+      {
+         "object_type": "Ephys assembly",
+         "name": "B",
+         "manipulator": {
+            "object_type": "Manipulator",
+            "name": "Manipulator B",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "New Scale Technologies",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "M3-LS-3.4-15",
+            "additional_settings": null,
+            "notes": null
+         },
+         "probes": [
+            {
+               "object_type": "Ephys probe",
+               "name": "probeB",
+               "serial_number": null,
+               "manufacturer": {
+                  "name": "Interuniversity Microelectronics Center",
+                  "abbreviation": "IMEC",
+                  "registry": "Research Organization Registry (ROR)",
+                  "registry_identifier": "02kcbn207"
+               },
+               "model": null,
+               "additional_settings": null,
+               "notes": null,
+               "probe_model": "Neuropixels 1.0",
+               "headstage": null
+            }
+         ]
+      },
+      {
+         "object_type": "Ephys assembly",
+         "name": "C",
+         "manipulator": {
+            "object_type": "Manipulator",
+            "name": "Manipulator C",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "New Scale Technologies",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "M3-LS-3.4-15",
+            "additional_settings": null,
+            "notes": null
+         },
+         "probes": [
+            {
+               "object_type": "Ephys probe",
+               "name": "probeC",
+               "serial_number": null,
+               "manufacturer": {
+                  "name": "Interuniversity Microelectronics Center",
+                  "abbreviation": "IMEC",
+                  "registry": "Research Organization Registry (ROR)",
+                  "registry_identifier": "02kcbn207"
+               },
+               "model": null,
+               "additional_settings": null,
+               "notes": null,
+               "probe_model": "Neuropixels 1.0",
+               "headstage": null
+            }
+         ]
+      },
+      {
+         "object_type": "Ephys assembly",
+         "name": "D",
+         "manipulator": {
+            "object_type": "Manipulator",
+            "name": "Manipulator D",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "New Scale Technologies",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "M3-LS-3.4-15",
+            "additional_settings": null,
+            "notes": null
+         },
+         "probes": [
+            {
+               "object_type": "Ephys probe",
+               "name": "probeD",
+               "serial_number": null,
+               "manufacturer": {
+                  "name": "Interuniversity Microelectronics Center",
+                  "abbreviation": "IMEC",
+                  "registry": "Research Organization Registry (ROR)",
+                  "registry_identifier": "02kcbn207"
+               },
+               "model": null,
+               "additional_settings": null,
+               "notes": null,
+               "probe_model": "Neuropixels 1.0",
+               "headstage": null
+            }
+         ]
+      },
+      {
+         "object_type": "Ephys assembly",
+         "name": "E",
+         "manipulator": {
+            "object_type": "Manipulator",
+            "name": "Manipulator E",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "New Scale Technologies",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "M3-LS-3.4-15",
+            "additional_settings": null,
+            "notes": null
+         },
+         "probes": [
+            {
+               "object_type": "Ephys probe",
+               "name": "probeE",
+               "serial_number": null,
+               "manufacturer": {
+                  "name": "Interuniversity Microelectronics Center",
+                  "abbreviation": "IMEC",
+                  "registry": "Research Organization Registry (ROR)",
+                  "registry_identifier": "02kcbn207"
+               },
+               "model": null,
+               "additional_settings": null,
+               "notes": null,
+               "probe_model": "Neuropixels 1.0",
+               "headstage": null
+            }
+         ]
+      },
+      {
+         "object_type": "Ephys assembly",
+         "name": "F",
+         "manipulator": {
+            "object_type": "Manipulator",
+            "name": "Manipulator F",
+            "serial_number": null,
+            "manufacturer": {
+               "name": "New Scale Technologies",
+               "abbreviation": null,
+               "registry": null,
+               "registry_identifier": null
+            },
+            "model": "M3-LS-3.4-15",
+            "additional_settings": null,
+            "notes": null
+         },
+         "probes": [
+            {
+               "object_type": "Ephys probe",
+               "name": "probeF",
+               "serial_number": null,
+               "manufacturer": {
+                  "name": "Interuniversity Microelectronics Center",
+                  "abbreviation": "IMEC",
+                  "registry": "Research Organization Registry (ROR)",
+                  "registry_identifier": "02kcbn207"
+               },
+               "model": null,
+               "additional_settings": null,
+               "notes": null,
+               "probe_model": "Neuropixels 1.0",
+               "headstage": null
+            }
+         ]
+      },
+      {
+         "object_type": "Neuropixels basestation",
+         "name": "probes ABC",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "Interuniversity Microelectronics Center",
+            "abbreviation": "IMEC",
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "02kcbn207"
+         },
+         "model": "PXIe",
+         "additional_settings": null,
+         "notes": null,
+         "data_interface": "PXI",
+         "channels": [],
+         "firmware_version": null,
+         "hardware_version": null,
+         "basestation_firmware_version": "64.1760",
+         "bsc_firmware_version": "1.0.144",
+         "slot": 2,
+         "ports": [
+            {
+               "object_type": "Probe port",
+               "index": 0,
+               "probes": [
+                  "probeA"
+               ]
+            },
+            {
+               "object_type": "Probe port",
+               "index": 1,
+               "probes": [
+                  "probeB"
+               ]
+            },
+            {
+               "object_type": "Probe port",
+               "index": 2,
+               "probes": [
+                  "probeC"
+               ]
+            }
+         ]
+      },
+      {
+         "object_type": "Neuropixels basestation",
+         "name": "probes DEF",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "Interuniversity Microelectronics Center",
+            "abbreviation": "IMEC",
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "02kcbn207"
+         },
+         "model": "PXIe",
+         "additional_settings": null,
+         "notes": null,
+         "data_interface": "PXI",
+         "channels": [],
+         "firmware_version": null,
+         "hardware_version": null,
+         "basestation_firmware_version": "64.1760",
+         "bsc_firmware_version": "1.0.144",
+         "slot": 3,
+         "ports": [
+            {
+               "object_type": "Probe port",
+               "index": 0,
+               "probes": [
+                  "probeD"
+               ]
+            },
+            {
+               "object_type": "Probe port",
+               "index": 1,
+               "probes": [
+                  "probeE"
+               ]
+            },
+            {
+               "object_type": "Probe port",
+               "index": 2,
+               "probes": [
+                  "probeF"
+               ]
+            }
+         ]
+      }
+   ]
+}
