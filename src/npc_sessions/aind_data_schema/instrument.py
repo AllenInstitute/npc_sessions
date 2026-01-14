@@ -201,14 +201,11 @@ PHOTODIODE = aind_data_schema.components.devices.Detector(
     cooling=aind_data_schema_models.devices.Cooling.NO_COOLING,
     notes="Photodiode used to measure stimulus monitor frame updates",
 )
-MICROPHONE = aind_data_schema.components.devices.Detector(
+MICROPHONE = aind_data_schema.components.devices.Device(
     name="Stimulus microphone",
     manufacturer=aind_data_schema_models.organizations.Organization.DODOTRONIC,
     model="momimic",
-    data_interface=aind_data_schema_models.devices.DataInterface.COAX,
-    detector_type=aind_data_schema_models.devices.DetectorType.OTHER,
-    cooling=aind_data_schema_models.devices.Cooling.NO_COOLING,
-    notes="Microphone used to record stimulus speaker output",
+    notes="Microphone used to record stimulus speaker output from approximately 50 mm",
 )
 
 LASER_488 = aind_data_schema.components.devices.Laser(
