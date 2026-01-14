@@ -64,16 +64,16 @@ wheels = [
 
 [[package]]
 name = "aind-data-schema-models"
-version = "4.6.0"
+version = "5.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "importlib-resources" },
     { name = "pydantic" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/06/1b/40bab07a353154c41bcdbea8875d61f307f2aee3a93b5b441fd4248cd5ff/aind_data_schema_models-4.6.0.tar.gz", hash = "sha256:9a060f90871c6ab61d2d4b6d4cf0ad86b1bf9715e4f3408697587c585d2ff543", size = 337971, upload-time = "2025-11-17T17:44:46.329Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/49/16f0ab33ad39e476ec1b6b2bbb0308003f6ba2dc2bb82b93e5c812a7d328/aind_data_schema_models-5.1.1.tar.gz", hash = "sha256:8470875575dbf910707a43af0d1b7c3f79b2779b0a17ea89ce6cac5fec1b4300", size = 338612, upload-time = "2026-01-14T21:59:44.688Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1a/96/4fa5673f98975b9bf7bb61c3a8a2ff195cabddef9623b9d4d9c6cb8ce090/aind_data_schema_models-4.6.0-py3-none-any.whl", hash = "sha256:650c3791c59171aa95aba0930ac7448ea17d90c01603d832cb1a1d0fa3d028e7", size = 307102, upload-time = "2025-11-17T17:44:45.021Z" },
+    { url = "https://files.pythonhosted.org/packages/1d/4f/9bb3f089659fb5e55165296c10e8c6c99bfce94f7dd21afa05b070a317d2/aind_data_schema_models-5.1.1-py3-none-any.whl", hash = "sha256:2fcc7a0bbb13e959c2c9e0490e0652aa6b136ca88f541839b182e7233c789698", size = 307401, upload-time = "2026-01-14T21:59:43.566Z" },
 ]
 
 [[package]]
@@ -2087,7 +2087,7 @@ linting = [
 metadata = [
     { name = "aind-data-access-api", extras = ["docdb"], specifier = ">=1.2.2" },
     { name = "aind-data-schema", specifier = ">=2.0" },
-    { name = "aind-data-schema-models", specifier = ">=4.2.7" },
+    { name = "aind-data-schema-models", specifier = ">=5.1.1" },
 ]
 task-runner = [{ name = "poethepoet", specifier = ">=0.33.1" }]
 testing = [
