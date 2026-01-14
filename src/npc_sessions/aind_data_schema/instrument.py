@@ -160,8 +160,7 @@ LICK_SPOUT_ASSEMBLY = aind_data_schema.components.devices.LickSpoutAssembly(
             lick_sensor=aind_data_schema.components.devices.Device(
                 name="Lick sensor",
                 model="1007079-1",
-                manufacturer=aind_data_schema_models.organizations.Organization.OTHER,
-                notes="Manufacturer: TE Connectivity",
+                manufacturer=aind_data_schema_models.organizations.Organization.TE_CONNECTIVITY,
             ),
             lick_sensor_type=aind_data_schema_models.devices.LickSensorType.PIEZOELECTIC,
         ),
