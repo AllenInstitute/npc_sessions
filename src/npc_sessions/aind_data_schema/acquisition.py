@@ -4,7 +4,7 @@ import datetime
 import itertools
 import json
 import logging
-from typing import TypeGuard
+from typing import Iterable, TypeGuard
 
 import aind_data_schema.components.configs
 import aind_data_schema.components.coordinates
@@ -25,6 +25,27 @@ logger = logging.getLogger(__name__)
 def is_surface_recording(session: DynamicRoutingSession) -> TypeGuard[DynamicRoutingSurfaceRecording]:
     return isinstance(session, DynamicRoutingSurfaceRecording)
 
+def _merge_data_streams(data_streams: Iterable[aind_data_schema.core.acquisition.DataStream]) -> aind_data_schema.core.acquisition.DataStream:
+    data_streams = tuple(data_streams)
+    return aind_data_schema.core.acquisition.DataStream(
+        stream_start_time=min(ds.stream_start_time for ds in data_streams),
+        stream_end_time=max(ds.stream_end_time for ds in data_streams),
+        modalities=sorted({mod for ds in data_streams for mod in ds.modalities}, key=lambda m: m.name),
+        code=sorted(
+            itertools.chain.from_iterable(ds.code for ds in data_streams if ds.code),
+            key=lambda c: c.url,
+        ) or None,
+        active_devices=sorted(
+            itertools.chain.from_iterable(
+                ds.active_devices for ds in data_streams
+            ),
+        ),
+        configurations=list(
+            itertools.chain.from_iterable(
+                ds.configurations for ds in data_streams
+            )
+        ) or None,
+    )
 
 def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.core.acquisition.Acquisition:
     """Get the Pydantic model corresponding to the 'acquisition.json' for a given session."""
@@ -94,7 +115,7 @@ def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.co
         acquisition_type=acquisition_type,
         notes=session.notes,
         coordinate_system=coordinate_system,
-        data_streams=data_streams,
+        data_streams=[_merge_data_streams(data_streams)],
         stimulus_epochs=stimulus_epochs,
         subject_details=subject_details,
     )
