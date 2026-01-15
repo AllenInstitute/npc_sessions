@@ -176,20 +176,26 @@ SYNC_DAQ = aind_data_schema.components.devices.DAQDevice(
 TASKCONTROL_DAQ = aind_data_schema.components.devices.DAQDevice(
     name="TaskControl DAQ",
     manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
-    model="NI-6001",
+    model="6001",
     data_interface=aind_data_schema_models.devices.DataInterface.USB,
 )
 CAMSTIM_DAQ = aind_data_schema.components.devices.DAQDevice(
     name="Camstim DAQ",
     manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
-    model="NI-6323",
+    model="6323",
     data_interface=aind_data_schema_models.devices.DataInterface.PCIE,
 )
 OPTO_DAQ = aind_data_schema.components.devices.DAQDevice(
     manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
     name="Opto DAQ",
-    model="NI-9264",
+    model="9264",
     data_interface=aind_data_schema_models.devices.DataInterface.ETH,
+)
+EPHYS_DAQ = aind_data_schema.components.devices.DAQDevice(
+    manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
+    name="Ephys DAQ",
+    model="6133",
+    data_interface=aind_data_schema_models.devices.DataInterface.PXI,
 )
 
 PHOTODIODE = aind_data_schema.components.devices.Detector(
