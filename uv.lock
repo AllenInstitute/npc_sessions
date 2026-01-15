@@ -50,16 +50,15 @@ docdb = [
 
 [[package]]
 name = "aind-data-schema"
-version = "2.1.0"
+version = "2.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aind-data-schema-models" },
     { name = "pydantic" },
-    { name = "semver" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9a/93/a283d16a6ffb59f9cd558edcb0fcea5b1099d81921c3ac167a43cc3c4f3d/aind_data_schema-2.1.0.tar.gz", hash = "sha256:899d1a209211c742ece04c9506500983f0a8ffc7e0911f0e82e4d9501f50134e", size = 750414, upload-time = "2025-10-20T18:30:42.133Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1f/cc/71f38df69f02e942d098f9310982082aac334de5c496bd3fc605bcd3b431/aind_data_schema-2.4.0.tar.gz", hash = "sha256:a239e38591113f445ca316bc4386c466718e8715a92d8bdbca891a82b9d7ff16", size = 873259, upload-time = "2026-01-06T18:00:34.875Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/86/1c/40593876feb8cb106ca45b9d25a708abf68db544358286abfd950074a109/aind_data_schema-2.1.0-py3-none-any.whl", hash = "sha256:0b59880cc3c22f703b2f8f99249d178cd177b2ab6fd2cb115e37251606404957", size = 86103, upload-time = "2025-10-20T18:30:40.413Z" },
+    { url = "https://files.pythonhosted.org/packages/00/b0/9632026c77aa8c512e8e15ddec8c9fbfcf6ae272c0c28997e5f12f7a9433/aind_data_schema-2.4.0-py3-none-any.whl", hash = "sha256:1e8284b1e88928e77598ecae70025a2a5ca62b2cded594f62abf8a0aa17d8b34", size = 89429, upload-time = "2026-01-06T18:00:32.616Z" },
 ]
 
 [[package]]
