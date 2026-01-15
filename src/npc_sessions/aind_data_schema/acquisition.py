@@ -4,6 +4,7 @@ import datetime
 import itertools
 import json
 import logging
+import re
 from typing import Iterable, TypeGuard
 
 import aind_data_schema.components.configs
@@ -288,6 +289,31 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
             configurations.extend(laser_configs)
         return configurations
 
+    def get_training_protocol_name(
+        script_name: str,
+        session: DynamicRoutingSession,
+    ) -> str | None:
+        if "DynamicRouting" not in script_name or not session.is_task:
+            return None
+        protocol = "dynamic_routing"
+        if session.is_context_naive:
+            protocol += "_context_naive"
+        if session.is_naive:
+            protocol += "_naive"
+        return protocol
+
+    def get_curriculum_status(
+        script_name: str,
+        session: DynamicRoutingSession,
+    ) -> str | None:
+        if "DynamicRouting" not in script_name or not session.is_task:
+            return None
+        # extract 'stage X'
+        stages = re.findall(r'stage\s?(\d+)', session.sam.taskVersion.lower(), )
+        if not stages: 
+            return None
+        return f"stage {stages[0]}"
+    
     aind_epochs = []
     for nwb_epoch in session.epochs:
         script_name = nwb_epoch.script_name.item()
@@ -308,7 +334,8 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
                 notes=nwb_epoch.notes.item(),
                 active_devices=get_active_devices(script_name, session),
                 configurations=get_configurations(script_name),
-                curriculum_status=session.sam.taskVersion if session.is_task else None,
+                training_protocol_name=get_training_protocol_name(script_name, session),
+                curriculum_status=get_curriculum_status(script_name, session),
             )
         )
     return aind_epochs
