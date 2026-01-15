@@ -1,29 +1,16 @@
 {
    "object_type": "Data description",
    "describedBy": "https://raw.githubusercontent.com/AllenNeuralDynamics/aind-data-schema/main/src/aind_data_schema/core/data_description.py",
-   "schema_version": "2.2.0",
+   "schema_version": "2.3.0",
    "license": "CC-BY-4.0",
    "subject_id": "676909",
    "creation_time": "2023-12-13T13:43:40-08:00",
    "tags": [
-      "task",
-      "sync",
-      "video",
-      "ephys",
-      "units",
-      "ccf",
-      "dynamic_routing",
       "development",
       "context_naive",
       "stage_5_passed",
       "first_block_aud",
-      "late_autorewards",
-      "optotagging",
-      "spontaneous",
-      "mapping",
-      "rewards",
-      "experiment_day_3",
-      "behavior_day_35"
+      "late_autorewards"
    ],
    "name": "ecephys_676909_2023-12-13_13-43-40",
    "institution": {
