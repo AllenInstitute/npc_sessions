@@ -218,6 +218,32 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
             trials_rewarded=sum(session.trials[:].is_contingent_reward),
         )
 
+    def get_laser_configs(script_name: str) -> list[aind_data_schema.components.configs.LaserConfig] | None:
+        configs = []
+        for laser in [instrument.LASER_488, instrument.LASER_633]:
+            if laser.name not in get_active_devices(script_name, session):
+                continue
+            if script_name == 'OptoTagging':
+                column_name = 'power'
+            elif script_name == 'DynamicRouting1':
+                column_name = "opto_power"
+            else:
+                raise NotImplementedError(f"Unknown script name {script_name}: unsure how to get laser power from intervals table")
+            max_power = np.nanmax(getattr(session._all_trials[script_name], column_name))
+            if np.isnan(max_power): # control session
+                max_power = 0.0
+            configs.append(
+                aind_data_schema.components.configs.LaserConfig(
+                    device_name=laser.name,
+                    wavelength=laser.wavelength,
+                    wavelength_unit=laser.wavelength_unit,
+                    power=max_power,
+                    power_unit=aind_data_schema_models.units.PowerUnit.MW,
+                    power_measured_at="Brain surface",
+                )
+            )
+        return configs or None
+
     def get_version() -> str | None:
         if "blob/main" in session.source_script:
             return None
@@ -252,12 +278,19 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
             ),
         )
 
+    def get_configurations(script_name: str) -> list[aind_data_schema.components.configs.DeviceConfig]:
+        configurations = []
+        speaker_config = get_speaker_config(script_name)
+        if speaker_config:
+            configurations.append(speaker_config)
+        laser_configs = get_laser_configs(script_name)
+        if laser_configs:
+            configurations.extend(laser_configs)
+        return configurations
 
     aind_epochs = []
     for nwb_epoch in session.epochs:
         script_name = nwb_epoch.script_name.item()
-        speaker_config = get_speaker_config(script_name)
-
         aind_epochs.append(
             aind_data_schema.core.acquisition.StimulusEpoch(
                 stimulus_start_time=datetime.timedelta(
@@ -274,7 +307,7 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
                 performance_metrics=get_performance_metrics(script_name),
                 notes=nwb_epoch.notes.item(),
                 active_devices=get_active_devices(script_name, session),
-                configurations=[speaker_config] if speaker_config else [],
+                configurations=get_configurations(script_name),
                 curriculum_status=session.sam.taskVersion if session.is_task else None,
             )
         )
