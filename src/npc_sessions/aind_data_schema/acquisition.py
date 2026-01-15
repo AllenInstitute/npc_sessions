@@ -230,7 +230,8 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
                 column_name = "opto_power"
             else:
                 raise NotImplementedError(f"Unknown script name {script_name}: unsure how to get laser power from intervals table")
-            max_power = np.nanmax(getattr(session._all_trials[script_name], column_name))
+            trials = next(v for k, v in session._all_trials.items() if script_name in k)
+            max_power = np.nanmax(getattr(trials, column_name))
             if np.isnan(max_power): # control session
                 max_power = 0.0
             configs.append(
