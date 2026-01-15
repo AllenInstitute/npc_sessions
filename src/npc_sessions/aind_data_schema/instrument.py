@@ -5,6 +5,7 @@ import re
 from typing import Literal
 
 import aind_data_schema.components.coordinates
+import aind_data_schema.components.connections
 import aind_data_schema.components.devices
 import aind_data_schema.components.identifiers
 import aind_data_schema.core.instrument
@@ -160,8 +161,7 @@ LICK_SPOUT_ASSEMBLY = aind_data_schema.components.devices.LickSpoutAssembly(
             lick_sensor=aind_data_schema.components.devices.Device(
                 name="Lick sensor",
                 model="1007079-1",
-                manufacturer=aind_data_schema_models.organizations.Organization.OTHER,
-                notes="Manufacturer: TE Connectivity",
+                manufacturer=aind_data_schema_models.organizations.Organization.TE_CONNECTIVITY,
             ),
             lick_sensor_type=aind_data_schema_models.devices.LickSensorType.PIEZOELECTIC,
         ),
@@ -177,20 +177,26 @@ SYNC_DAQ = aind_data_schema.components.devices.DAQDevice(
 TASKCONTROL_DAQ = aind_data_schema.components.devices.DAQDevice(
     name="TaskControl DAQ",
     manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
-    model="NI-6001",
+    model="6001",
     data_interface=aind_data_schema_models.devices.DataInterface.USB,
 )
 CAMSTIM_DAQ = aind_data_schema.components.devices.DAQDevice(
     name="Camstim DAQ",
     manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
-    model="NI-6323",
+    model="6323",
     data_interface=aind_data_schema_models.devices.DataInterface.PCIE,
 )
 OPTO_DAQ = aind_data_schema.components.devices.DAQDevice(
     manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
     name="Opto DAQ",
-    model="NI-9264",
+    model="9264",
     data_interface=aind_data_schema_models.devices.DataInterface.ETH,
+)
+EPHYS_DAQ = aind_data_schema.components.devices.DAQDevice(
+    manufacturer=aind_data_schema_models.organizations.Organization.NATIONAL_INSTRUMENTS,
+    name="Ephys DAQ",
+    model="6133",
+    data_interface=aind_data_schema_models.devices.DataInterface.PXI,
 )
 
 PHOTODIODE = aind_data_schema.components.devices.Detector(
@@ -202,14 +208,11 @@ PHOTODIODE = aind_data_schema.components.devices.Detector(
     cooling=aind_data_schema_models.devices.Cooling.NO_COOLING,
     notes="Photodiode used to measure stimulus monitor frame updates",
 )
-MICROPHONE = aind_data_schema.components.devices.Detector(
+MICROPHONE = aind_data_schema.components.devices.Device(
     name="Stimulus microphone",
     manufacturer=aind_data_schema_models.organizations.Organization.DODOTRONIC,
     model="momimic",
-    data_interface=aind_data_schema_models.devices.DataInterface.COAX,
-    detector_type=aind_data_schema_models.devices.DetectorType.OTHER,
-    cooling=aind_data_schema_models.devices.Cooling.NO_COOLING,
-    notes="Microphone used to record stimulus speaker output",
+    notes="Microphone used to record stimulus speaker output from approximately 50 mm",
 )
 
 LASER_488 = aind_data_schema.components.devices.Laser(
@@ -460,13 +463,30 @@ def get_computers(session: DynamicRoutingSession) -> list[aind_data_schema.compo
         for name in computer_names
     ]
 
-def get_components(session: DynamicRoutingSession) -> list[aind_data_schema.components.devices.Device]:
+def get_components_and_connections(session: DynamicRoutingSession) -> tuple[list[aind_data_schema.components.devices.Device], list[aind_data_schema.components.connections.Connection]]:
     components = [
         DISC,
         MONITOR,
         SPEAKER,
         LICK_SPOUT_ASSEMBLY,
+        CAMSTIM_DAQ,
+        TASKCONTROL_DAQ,
         *get_computers(session),
+    ]
+    connections = [
+        aind_data_schema.components.connections.Connection(
+            source_device=LICK_SPOUT_ASSEMBLY.name,
+            target_device=CAMSTIM_DAQ.name,
+            send_and_receive=True,
+        ),
+        aind_data_schema.components.connections.Connection(
+            source_device=DISC.name,
+            target_device=CAMSTIM_DAQ.name,
+        ),
+        aind_data_schema.components.connections.Connection(
+            target_device=TASKCONTROL_DAQ.name,
+            source_device=SPEAKER.name,
+        )
     ]
     if is_behavior_box(session.rig):
         components.extend([
@@ -486,18 +506,56 @@ def get_components(session: DynamicRoutingSession) -> list[aind_data_schema.comp
             EYE_LED,
             NOSE_CAMERA_ASSEMBLY,
             NOSE_LED,
+            OPTO_DAQ,
             LASER_488,
             LASER_633,
             LASER_GALVO_X,
             LASER_GALVO_Y,
+        ])
+        connections.extend([
+            aind_data_schema.components.connections.Connection(
+                source_device=source_device.name,
+                target_device=SYNC_DAQ.name,
+            ) for source_device in (
+                PHOTODIODE,
+                FRONT_CAMERA_ASSEMBLY.camera,
+                SIDE_CAMERA_ASSEMBLY.camera,
+                EYE_CAMERA_ASSEMBLY.camera,
+                NOSE_CAMERA_ASSEMBLY.camera,
+                LICK_SPOUT_ASSEMBLY.lick_spouts[0],
+                LASER_488,
+                LASER_633,
+            )
+        ])
+        connections.extend([
+            aind_data_schema.components.connections.Connection(
+                source_device=OPTO_DAQ.name,
+                target_device=target_device.name,
+            ) for target_device in (
+                LASER_488,
+                LASER_633,
+                LASER_GALVO_X,
+                LASER_GALVO_Y,
+            )
         ])
     if is_np_rig(session.rig):
         components.extend([
             *get_ephys_assemblies(session),
             get_basestation(slot=2, session=session),
             get_basestation(slot=3, session=session),
+            EPHYS_DAQ,
         ])
-    return components
+        connections.extend([
+            aind_data_schema.components.connections.Connection(
+                source_device=source_device.name,
+                target_device=EPHYS_DAQ.name,
+            ) for source_device in (
+                SPEAKER,
+                MICROPHONE,
+                PHOTODIODE,
+            )
+        ])
+    return components, connections
 
 def get_modalities(session: DynamicRoutingSession) -> list[aind_data_schema_models.modalities.Modality]:
     modality = aind_data_schema_models.modalities.Modality
@@ -543,8 +601,8 @@ def get_instrument_model(session: DynamicRoutingSession) -> aind_data_schema.cor
         coordinate_system=RIG_COORDINATE_SYSTEM,
         temperature_control=None,
         notes=None,
-        connections=[],
-        components=get_components(session),
+        connections=(components_and_connections := get_components_and_connections(session))[1],
+        components=components_and_connections[0],
     )
 
 if __name__ == "__main__":

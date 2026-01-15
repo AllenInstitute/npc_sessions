@@ -59,6 +59,38 @@ def get_data_description_model(session: DynamicRoutingSession) -> aind_data_sche
     if session.is_video:
         modalities.append(aind_data_schema_models.modalities.Modality.BEHAVIOR_VIDEOS)
 
+    tags: list[str] = []
+    if session.is_surface_channels:
+        tags.append("surface_recording")
+    if session.is_hab:
+        tags.append("hab")
+    if session.is_opto:
+        tags.append("opto_perturbation")
+    elif session.is_opto_control:
+        tags.append("opto_control")
+    if session.is_production:
+        tags.append("production")
+    else:
+        tags.append("development")
+    if session.is_injection_perturbation:
+        tags.append("injection_perturbation")
+    elif session.is_injection_control:
+        tags.append("injection_control")
+    if session.is_context_naive:
+        tags.append("context_naive")
+    if session.is_naive:
+        tags.append("naive")
+    if session.is_stage_5_passed:
+        tags.append("stage_5_passed")
+    if session.is_task and session.is_first_block_aud:
+        tags.append("first_block_aud")
+    elif session.is_task and session.is_first_block_vis:
+        tags.append("first_block_vis")
+    if session.is_task and session.is_late_autorewards:
+        tags.append("late_autorewards")
+    elif session.is_task:
+        tags.append("early_autorewards")
+        
     return aind_data_schema.core.data_description.DataDescription(
         name=name,
         institution=aind_data_schema_models.organizations.Organization.AIND,
@@ -71,7 +103,7 @@ def get_data_description_model(session: DynamicRoutingSession) -> aind_data_sche
         project_name=project_name,
         restrictions=None,
         modalities=modalities,
-        tags=session.keywords,
+        tags=tags,
         data_summary=session.experiment_description,
     )
 

@@ -59,7 +59,7 @@ Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 metadata = [
     "aind-data-schema>=2.0",
     "aind-data-access-api[docdb]>=1.2.2",
-    "aind-data-schema-models>=4.2.7",
+    "aind-data-schema-models>=5.1.1",
 ]
 task_runner = ["poethepoet>=0.33.1"]
 linting = ["black>=25.1.0", "isort>=6.0.1", "ruff>=0.11.2"]

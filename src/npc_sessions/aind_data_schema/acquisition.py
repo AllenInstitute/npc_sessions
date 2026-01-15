@@ -4,7 +4,8 @@ import datetime
 import itertools
 import json
 import logging
-from typing import TypeGuard
+import re
+from typing import Iterable, TypeGuard
 
 import aind_data_schema.components.configs
 import aind_data_schema.components.coordinates
@@ -25,6 +26,27 @@ logger = logging.getLogger(__name__)
 def is_surface_recording(session: DynamicRoutingSession) -> TypeGuard[DynamicRoutingSurfaceRecording]:
     return isinstance(session, DynamicRoutingSurfaceRecording)
 
+def _merge_data_streams(data_streams: Iterable[aind_data_schema.core.acquisition.DataStream]) -> aind_data_schema.core.acquisition.DataStream:
+    data_streams = tuple(data_streams)
+    return aind_data_schema.core.acquisition.DataStream(
+        stream_start_time=min(ds.stream_start_time for ds in data_streams),
+        stream_end_time=max(ds.stream_end_time for ds in data_streams),
+        modalities=sorted({mod for ds in data_streams for mod in ds.modalities}, key=lambda m: m.name),
+        code=sorted(
+            itertools.chain.from_iterable(ds.code for ds in data_streams if ds.code),
+            key=lambda c: c.url,
+        ) or None,
+        active_devices=sorted(
+            itertools.chain.from_iterable(
+                ds.active_devices for ds in data_streams
+            ),
+        ),
+        configurations=list(
+            itertools.chain.from_iterable(
+                ds.configurations for ds in data_streams
+            )
+        ) or None,
+    )
 
 def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.core.acquisition.Acquisition:
     """Get the Pydantic model corresponding to the 'acquisition.json' for a given session."""
@@ -88,13 +110,13 @@ def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.co
         acquisition_start_time=acquisition_start_time,
         acquisition_end_time=acquisition_end_time,
         experimenters=experimenters,
-        protocol_id=["2104"],
-        ethics_review_id=None,
+        protocol_id=None,
+        ethics_review_id=["2104"],
         instrument_id=instrument_id,
         acquisition_type=acquisition_type,
         notes=session.notes,
         coordinate_system=coordinate_system,
-        data_streams=data_streams,
+        data_streams=[_merge_data_streams(data_streams)],
         stimulus_epochs=stimulus_epochs,
         subject_details=subject_details,
     )
@@ -197,6 +219,33 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
             trials_rewarded=sum(session.trials[:].is_contingent_reward),
         )
 
+    def get_laser_configs(script_name: str) -> list[aind_data_schema.components.configs.LaserConfig] | None:
+        configs = []
+        for laser in [instrument.LASER_488, instrument.LASER_633]:
+            if laser.name not in get_active_devices(script_name, session):
+                continue
+            if script_name == 'OptoTagging':
+                column_name = 'power'
+            elif script_name == 'DynamicRouting1':
+                column_name = "opto_power"
+            else:
+                raise NotImplementedError(f"Unknown script name {script_name}: unsure how to get laser power from intervals table")
+            trials = next(v for k, v in session._all_trials.items() if script_name in k)
+            max_power = np.nanmax(getattr(trials, column_name))
+            if np.isnan(max_power): # control session
+                max_power = 0.0
+            configs.append(
+                aind_data_schema.components.configs.LaserConfig(
+                    device_name=laser.name,
+                    wavelength=laser.wavelength,
+                    wavelength_unit=laser.wavelength_unit,
+                    power=max_power,
+                    power_unit=aind_data_schema_models.units.PowerUnit.MW,
+                    power_measured_at="Brain surface",
+                )
+            )
+        return configs or None
+
     def get_version() -> str | None:
         if "blob/main" in session.source_script:
             return None
@@ -231,12 +280,44 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
             ),
         )
 
+    def get_configurations(script_name: str) -> list[aind_data_schema.components.configs.DeviceConfig]:
+        configurations = []
+        speaker_config = get_speaker_config(script_name)
+        if speaker_config:
+            configurations.append(speaker_config)
+        laser_configs = get_laser_configs(script_name)
+        if laser_configs:
+            configurations.extend(laser_configs)
+        return configurations
 
+    def get_training_protocol_name(
+        script_name: str,
+        session: DynamicRoutingSession,
+    ) -> str | None:
+        if "DynamicRouting" not in script_name or not session.is_task:
+            return None
+        protocol = "dynamic_routing"
+        if session.is_context_naive:
+            protocol += "_context_naive"
+        if session.is_naive:
+            protocol += "_naive"
+        return protocol
+
+    def get_curriculum_status(
+        script_name: str,
+        session: DynamicRoutingSession,
+    ) -> str | None:
+        if "DynamicRouting" not in script_name or not session.is_task:
+            return None
+        # extract 'stage X'
+        stages = re.findall(r'stage\s?(\d+)', session.sam.taskVersion.lower(), )
+        if not stages: 
+            return None
+        return f"stage {stages[0]}"
+    
     aind_epochs = []
     for nwb_epoch in session.epochs:
         script_name = nwb_epoch.script_name.item()
-        speaker_config = get_speaker_config(script_name)
-
         aind_epochs.append(
             aind_data_schema.core.acquisition.StimulusEpoch(
                 stimulus_start_time=datetime.timedelta(
@@ -253,8 +334,9 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
                 performance_metrics=get_performance_metrics(script_name),
                 notes=nwb_epoch.notes.item(),
                 active_devices=get_active_devices(script_name, session),
-                configurations=[speaker_config] if speaker_config else [],
-                curriculum_status=session.sam.taskVersion if session.is_task else None,
+                configurations=get_configurations(script_name),
+                training_protocol_name=get_training_protocol_name(script_name, session),
+                curriculum_status=get_curriculum_status(script_name, session),
             )
         )
     return aind_epochs
