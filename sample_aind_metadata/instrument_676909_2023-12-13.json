@@ -1,7 +1,7 @@
 {
    "object_type": "Instrument",
    "describedBy": "https://raw.githubusercontent.com/AllenNeuralDynamics/aind-data-schema/main/src/aind_data_schema/core/instrument.py",
-   "schema_version": "2.0.41",
+   "schema_version": "2.2.0",
    "location": "342",
    "instrument_id": "NP3",
    "modification_date": "2023-12-13",
@@ -45,7 +45,152 @@
    },
    "temperature_control": null,
    "notes": null,
-   "connections": [],
+   "connections": [
+      {
+         "object_type": "Connection",
+         "source_device": "Reward delivery assembly",
+         "source_port": null,
+         "target_device": "Camstim DAQ",
+         "target_port": null,
+         "send_and_receive": true
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Brain Observatory running disc",
+         "source_port": null,
+         "target_device": "Camstim DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Stimulus speaker",
+         "source_port": null,
+         "target_device": "TaskControl DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Stimulus photodiode",
+         "source_port": null,
+         "target_device": "Sync DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Front camera",
+         "source_port": null,
+         "target_device": "Sync DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Side camera",
+         "source_port": null,
+         "target_device": "Sync DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Eye camera",
+         "source_port": null,
+         "target_device": "Sync DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Nose camera",
+         "source_port": null,
+         "target_device": "Sync DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Reward spout",
+         "source_port": null,
+         "target_device": "Sync DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Opto laser #1",
+         "source_port": null,
+         "target_device": "Sync DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Opto laser #2",
+         "source_port": null,
+         "target_device": "Sync DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Opto DAQ",
+         "source_port": null,
+         "target_device": "Opto laser #1",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Opto DAQ",
+         "source_port": null,
+         "target_device": "Opto laser #2",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Opto DAQ",
+         "source_port": null,
+         "target_device": "Opto laser galvo X",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Opto DAQ",
+         "source_port": null,
+         "target_device": "Opto laser galvo Y",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Stimulus speaker",
+         "source_port": null,
+         "target_device": "Ephys DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Stimulus microphone",
+         "source_port": null,
+         "target_device": "Ephys DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      },
+      {
+         "object_type": "Connection",
+         "source_device": "Stimulus photodiode",
+         "source_port": null,
+         "target_device": "Ephys DAQ",
+         "target_port": null,
+         "send_and_receive": false
+      }
+   ],
    "components": [
       {
          "object_type": "Disc",
@@ -138,7 +283,9 @@
          "viewing_distance": "15.3",
          "viewing_distance_unit": "centimeter",
          "contrast": 50,
-         "brightness": 43
+         "contrast_unit": "percent",
+         "brightness": 43,
+         "brightness_unit": "percent"
       },
       {
          "object_type": "Speaker",
@@ -247,19 +394,55 @@
                   "name": "Lick sensor",
                   "serial_number": null,
                   "manufacturer": {
-                     "name": "Other",
+                     "name": "TE Connectivity",
                      "abbreviation": null,
-                     "registry": null,
-                     "registry_identifier": null
+                     "registry": "Research Organization Registry (ROR)",
+                     "registry_identifier": "034frgp20"
                   },
                   "model": "1007079-1",
                   "additional_settings": null,
-                  "notes": "Manufacturer: TE Connectivity"
+                  "notes": null
                },
                "lick_sensor_type": "Piezoelectric"
             }
          ],
          "motorized_stage": null
+      },
+      {
+         "object_type": "DAQ device",
+         "name": "TaskControl DAQ",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "National Instruments",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "026exqw73"
+         },
+         "model": "6001",
+         "additional_settings": null,
+         "notes": null,
+         "data_interface": "USB",
+         "channels": [],
+         "firmware_version": null,
+         "hardware_version": null
+      },
+      {
+         "object_type": "DAQ device",
+         "name": "Camstim DAQ",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "National Instruments",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "026exqw73"
+         },
+         "model": "6323",
+         "additional_settings": null,
+         "notes": null,
+         "data_interface": "PCIe",
+         "channels": [],
+         "firmware_version": null,
+         "hardware_version": null
       },
       {
          "object_type": "Computer",
@@ -320,7 +503,7 @@
          "hardware_version": null
       },
       {
-         "object_type": "Detector",
+         "object_type": "Device",
          "name": "Stimulus microphone",
          "serial_number": null,
          "manufacturer": {
@@ -331,33 +514,7 @@
          },
          "model": "momimic",
          "additional_settings": null,
-         "notes": "Microphone used to record stimulus speaker output",
-         "detector_type": "Other",
-         "data_interface": "Coax",
-         "cooling": "No cooling",
-         "frame_rate": null,
-         "frame_rate_unit": null,
-         "immersion": null,
-         "chroma": null,
-         "sensor_width": null,
-         "sensor_height": null,
-         "size_unit": "pixel",
-         "sensor_format": null,
-         "sensor_format_unit": null,
-         "bit_depth": null,
-         "bin_mode": "No binning",
-         "bin_width": null,
-         "bin_height": null,
-         "bin_unit": "pixel",
-         "gain": null,
-         "crop_offset_x": null,
-         "crop_offset_y": null,
-         "crop_width": null,
-         "crop_height": null,
-         "crop_unit": "pixel",
-         "recording_software": null,
-         "driver": null,
-         "driver_version": null
+         "notes": "Microphone used to record stimulus speaker output from approximately 50 mm"
       },
       {
          "object_type": "Detector",
@@ -987,6 +1144,24 @@
          "bandwidth_unit": null
       },
       {
+         "object_type": "DAQ device",
+         "name": "Opto DAQ",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "National Instruments",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "026exqw73"
+         },
+         "model": "9264",
+         "additional_settings": null,
+         "notes": null,
+         "data_interface": "Ethernet",
+         "channels": [],
+         "firmware_version": null,
+         "hardware_version": null
+      },
+      {
          "object_type": "Laser",
          "name": "Opto laser #1",
          "serial_number": null,
@@ -1357,6 +1532,24 @@
                ]
             }
          ]
+      },
+      {
+         "object_type": "DAQ device",
+         "name": "Ephys DAQ",
+         "serial_number": null,
+         "manufacturer": {
+            "name": "National Instruments",
+            "abbreviation": null,
+            "registry": "Research Organization Registry (ROR)",
+            "registry_identifier": "026exqw73"
+         },
+         "model": "6133",
+         "additional_settings": null,
+         "notes": null,
+         "data_interface": "PXI",
+         "channels": [],
+         "firmware_version": null,
+         "hardware_version": null
       }
    ]
 }

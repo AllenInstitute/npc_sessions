@@ -1,7 +1,7 @@
 {
    "object_type": "Acquisition",
    "describedBy": "https://raw.githubusercontent.com/AllenNeuralDynamics/aind-data-schema/main/src/aind_data_schema/core/acquisition.py",
-   "schema_version": "2.1.0",
+   "schema_version": "2.2.3",
    "subject_id": "676909",
    "specimen_id": null,
    "acquisition_start_time": "2023-12-13T13:43:40-08:00",
@@ -9,10 +9,10 @@
    "experimenters": [
       "Ethan Mcbride"
    ],
-   "protocol_id": [
+   "protocol_id": null,
+   "ethics_review_id": [
       "2104"
    ],
-   "ethics_review_id": null,
    "instrument_id": "NP3",
    "acquisition_type": "ecephys behavior",
    "notes": null,
@@ -32,125 +32,7 @@
             {
                "name": "Behavior videos",
                "abbreviation": "behavior-videos"
-            }
-         ],
-         "code": [
-            {
-               "object_type": "Code",
-               "url": "https://github.com/AllenInstitute/np_services/blob/main/src/np_services/proxies.py",
-               "name": null,
-               "version": null,
-               "container": null,
-               "run_script": null,
-               "language": "Python",
-               "language_version": "3.9",
-               "input_data": null,
-               "parameters": null,
-               "core_dependency": {
-                  "object_type": "Software",
-                  "name": "nidaqmx",
-                  "version": "0.6.2"
-               }
-            }
-         ],
-         "notes": null,
-         "active_devices": [
-            "Sync DAQ"
-         ],
-         "configurations": [],
-         "connections": []
-      },
-      {
-         "object_type": "Data stream",
-         "stream_start_time": "2023-12-13T13:59:05.472360-08:00",
-         "stream_end_time": "2023-12-13T15:43:10.525496-08:00",
-         "modalities": [
-            {
-               "name": "Behavior",
-               "abbreviation": "behavior"
-            }
-         ],
-         "code": [
-            {
-               "object_type": "Code",
-               "url": "https://github.com/AllenInstitute/np_services/blob/main/src/np_services/proxies.py",
-               "name": null,
-               "version": null,
-               "container": null,
-               "run_script": null,
-               "language": "Python",
-               "language_version": "3.9",
-               "input_data": null,
-               "parameters": null,
-               "core_dependency": {
-                  "object_type": "Software",
-                  "name": "PsychoPy",
-                  "version": "2022.1.2"
-               }
-            }
-         ],
-         "notes": null,
-         "active_devices": [
-            "Camstim DAQ",
-            "Opto DAQ",
-            "Opto laser #1",
-            "Opto laser #2",
-            "Opto laser galvo X",
-            "Opto laser galvo Y",
-            "Stimulus microphone",
-            "Stimulus monitor",
-            "Stimulus photodiode",
-            "Stimulus speaker",
-            "Sync DAQ",
-            "TaskControl DAQ"
-         ],
-         "configurations": [],
-         "connections": []
-      },
-      {
-         "object_type": "Data stream",
-         "stream_start_time": "2023-12-13T13:43:54.110910-08:00",
-         "stream_end_time": "2023-12-13T15:43:11.496570-08:00",
-         "modalities": [
-            {
-               "name": "Behavior videos",
-               "abbreviation": "behavior-videos"
-            }
-         ],
-         "code": [
-            {
-               "object_type": "Code",
-               "url": "https://github.com/AllenInstitute/np_services/blob/main/src/np_services/proxies.py",
-               "name": null,
-               "version": null,
-               "container": null,
-               "run_script": null,
-               "language": "Python",
-               "language_version": "3.9",
-               "input_data": null,
-               "parameters": null,
-               "core_dependency": {
-                  "object_type": "Software",
-                  "name": "MultiVideoRecorder",
-                  "version": "1.1.7"
-               }
-            }
-         ],
-         "notes": null,
-         "active_devices": [
-            "Eye camera",
-            "Front camera",
-            "Side camera",
-            "Nose camera"
-         ],
-         "configurations": [],
-         "connections": []
-      },
-      {
-         "object_type": "Data stream",
-         "stream_start_time": "2023-12-13T13:44:00.186958-08:00",
-         "stream_end_time": "2023-12-13T15:43:11.508251-08:00",
-         "modalities": [
+            },
             {
                "name": "Extracellular electrophysiology",
                "abbreviation": "ecephys"
@@ -173,10 +55,78 @@
                   "name": "Open Ephys GUI",
                   "version": "0.6.6"
                }
+            },
+            {
+               "object_type": "Code",
+               "url": "https://github.com/AllenInstitute/np_services/blob/main/src/np_services/proxies.py",
+               "name": null,
+               "version": null,
+               "container": null,
+               "run_script": null,
+               "language": "Python",
+               "language_version": "3.9",
+               "input_data": null,
+               "parameters": null,
+               "core_dependency": {
+                  "object_type": "Software",
+                  "name": "nidaqmx",
+                  "version": "0.6.2"
+               }
+            },
+            {
+               "object_type": "Code",
+               "url": "https://github.com/AllenInstitute/np_services/blob/main/src/np_services/proxies.py",
+               "name": null,
+               "version": null,
+               "container": null,
+               "run_script": null,
+               "language": "Python",
+               "language_version": "3.9",
+               "input_data": null,
+               "parameters": null,
+               "core_dependency": {
+                  "object_type": "Software",
+                  "name": "PsychoPy",
+                  "version": "2022.1.2"
+               }
+            },
+            {
+               "object_type": "Code",
+               "url": "https://github.com/AllenInstitute/np_services/blob/main/src/np_services/proxies.py",
+               "name": null,
+               "version": null,
+               "container": null,
+               "run_script": null,
+               "language": "Python",
+               "language_version": "3.9",
+               "input_data": null,
+               "parameters": null,
+               "core_dependency": {
+                  "object_type": "Software",
+                  "name": "MultiVideoRecorder",
+                  "version": "1.1.7"
+               }
             }
          ],
          "notes": null,
          "active_devices": [
+            "Camstim DAQ",
+            "Eye camera",
+            "Front camera",
+            "Nose camera",
+            "Opto DAQ",
+            "Opto laser #1",
+            "Opto laser #2",
+            "Opto laser galvo X",
+            "Opto laser galvo Y",
+            "Side camera",
+            "Stimulus microphone",
+            "Stimulus monitor",
+            "Stimulus photodiode",
+            "Stimulus speaker",
+            "Sync DAQ",
+            "Sync DAQ",
+            "TaskControl DAQ",
             "probeA",
             "probeB",
             "probeC",
@@ -770,7 +720,7 @@
             }
          ],
          "training_protocol_name": null,
-         "curriculum_status": "stage 5 AMN ori moving"
+         "curriculum_status": null
       },
       {
          "object_type": "Stimulus epoch",
@@ -809,9 +759,28 @@
             "Sync DAQ",
             "TaskControl DAQ"
          ],
-         "configurations": [],
+         "configurations": [
+            {
+               "object_type": "Laser config",
+               "device_name": "Opto laser #1",
+               "wavelength": 488,
+               "wavelength_unit": "nanometer",
+               "power": 5.0,
+               "power_unit": "milliwatt",
+               "power_measured_at": "Brain surface"
+            },
+            {
+               "object_type": "Laser config",
+               "device_name": "Opto laser #2",
+               "wavelength": 633,
+               "wavelength_unit": "nanometer",
+               "power": 5.0,
+               "power_unit": "milliwatt",
+               "power_measured_at": "Brain surface"
+            }
+         ],
          "training_protocol_name": null,
-         "curriculum_status": "stage 5 AMN ori moving"
+         "curriculum_status": null
       },
       {
          "object_type": "Stimulus epoch",
@@ -849,7 +818,7 @@
          ],
          "configurations": [],
          "training_protocol_name": null,
-         "curriculum_status": "stage 5 AMN ori moving"
+         "curriculum_status": null
       },
       {
          "object_type": "Stimulus epoch",
@@ -887,7 +856,7 @@
          ],
          "configurations": [],
          "training_protocol_name": null,
-         "curriculum_status": "stage 5 AMN ori moving"
+         "curriculum_status": null
       },
       {
          "object_type": "Stimulus epoch",
@@ -988,8 +957,8 @@
                "volume_unit": "decibels"
             }
          ],
-         "training_protocol_name": null,
-         "curriculum_status": "stage 5 AMN ori moving"
+         "training_protocol_name": "dynamic_routing_context_naive",
+         "curriculum_status": "stage 5"
       },
       {
          "object_type": "Stimulus epoch",
@@ -1027,7 +996,7 @@
          ],
          "configurations": [],
          "training_protocol_name": null,
-         "curriculum_status": "stage 5 AMN ori moving"
+         "curriculum_status": null
       },
       {
          "object_type": "Stimulus epoch",
@@ -1065,7 +1034,7 @@
          ],
          "configurations": [],
          "training_protocol_name": null,
-         "curriculum_status": "stage 5 AMN ori moving"
+         "curriculum_status": null
       },
       {
          "object_type": "Stimulus epoch",
@@ -1104,11 +1073,31 @@
             "Sync DAQ",
             "TaskControl DAQ"
          ],
-         "configurations": [],
+         "configurations": [
+            {
+               "object_type": "Laser config",
+               "device_name": "Opto laser #1",
+               "wavelength": 488,
+               "wavelength_unit": "nanometer",
+               "power": 5.0,
+               "power_unit": "milliwatt",
+               "power_measured_at": "Brain surface"
+            },
+            {
+               "object_type": "Laser config",
+               "device_name": "Opto laser #2",
+               "wavelength": 633,
+               "wavelength_unit": "nanometer",
+               "power": 5.0,
+               "power_unit": "milliwatt",
+               "power_measured_at": "Brain surface"
+            }
+         ],
          "training_protocol_name": null,
-         "curriculum_status": "stage 5 AMN ori moving"
+         "curriculum_status": null
       }
    ],
+   "manipulations": [],
    "subject_details": {
       "object_type": "Acquisition subject details",
       "animal_weight_prior": null,
