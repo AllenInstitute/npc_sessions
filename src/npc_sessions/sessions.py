@@ -3101,13 +3101,14 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def _video_frame_times(
         self,
-    ) -> tuple[ndx_events.Events, ...]:
+    ) -> tuple[pynwb.core.DynamicTable, ...]:
         cam_to_frametimes = self.mvr.frame_times
         return tuple(
-            ndx_events.Events(
-                timestamps=timestamps,
+            pynwb.core.DynamicTable.from_dataframe(
+                df=pd.DataFrame(dict(timestamps=timestamps)),
                 name=f"frametimes_{self.mvr_to_nwb_camera_name[camera_name]}",
-                description=f"start time of each frame exposure in {self.mvr.video_paths[camera_name].stem}",
+                table_description=f"start time of each frame exposure in {self.mvr.video_paths[camera_name].stem}",
+                column_descriptions={ "timestamps": f"start time of each frame exposure for {camera_name}, relative to session start time" },
             )
             for camera_name, timestamps in cam_to_frametimes.items()
         )
