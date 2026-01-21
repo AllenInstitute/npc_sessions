@@ -731,8 +731,6 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable, ...]:
         """The version passed to NWBFile.__init__"""
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
-        if self.is_sync and len(self._all_licks) >= 2:
-            modules.append(self._all_licks[1])
         # if self.is_lfp:
         #     modules.append(self._raw_lfp)
         # if self.is_ephys:
@@ -770,8 +768,8 @@ class DynamicRoutingSession:
         modules: list[pynwb.core.NWBDataInterface | pynwb.core.DynamicTable] = []
         if self.is_task:
             modules.append(self._quiescent_interval_violations)
-        if self._all_licks:
-            modules.append(self._all_licks[0])
+        if self._licks is not None:
+            modules.append(self._licks)
         modules.append(self._running_speed)
         try:
             modules.append(self._reward_times_with_duration)
@@ -2958,16 +2956,16 @@ class DynamicRoutingSession:
         return self.probe_insertion_info["shield"]["name"]
 
     @npc_io.cached_property
-    def _all_licks(self) -> tuple[ndx_events.Events, ...]:
-        """First item is always `processing['licks']` - the following items are only if sync
-        is available, and use raw rising/falling edges of the lick sensor to get lick duration
-        for `acquisition`.
+    def _licks(self) -> pynwb.core.DynamicTable | None:
+        """Table with at minimum a `timestamps` columns. If sync is available,
+        raw rising/falling edges of the lick sensor are used to get lick duration, 
+        and we can add an indicator of likely licks below a certain duration threshold.
 
         If sync isn't available, we only have start frames of licks, so we can't
         filter by duration very accurately.
         """
         if not self.is_task:
-            return ()
+            return None
         if self.is_sync:
             max_contact = (
                 0.5  # must factor-in lick_sensor staying high after end of contact
@@ -2994,7 +2992,7 @@ class DynamicRoutingSession:
                 rising_falling = np.array([rising, falling]).T
                 lick_duration = np.diff(rising_falling, axis=1).squeeze()
 
-                filtered_idx = lick_duration <= max_contact
+                is_likely_lick = lick_duration <= max_contact
 
                 # # remove licks that aren't part of a sequence of licks at at least ~3 Hz
                 # max_interval = 0.5
@@ -3006,37 +3004,24 @@ class DynamicRoutingSession:
                 #         and
                 #         (next_start is None or next_start - f > max_interval)
                 #     ):
-                #         filtered_idx[i] = False
-
-        description = "times at which the subject made contact with a combined lick sensor + water spout: putatively the starts of licks, but may include other events such as grooming"
-        duration_description = "`data` contains the duration of each event"
-        if self.is_sync and licks_on_sync:
-            licks = pynwb.TimeSeries(
-                timestamps=rising[filtered_idx],
-                data=falling[filtered_idx] - rising[filtered_idx],
-                name="licks",
-                description=f"{description}; filtered to exclude events with duration >{max_contact} s; {duration_description}",
-                unit="seconds",
-            )
+                #         is_likely_lick[i] = False
+        has_precise_timing = self.is_sync and licks_on_sync
+        column_descriptions = {
+            "timestamps": "time of lick sensor event onset, in seconds relative to session start time",
+        }
+        if has_precise_timing:
+            column_descriptions["is_likely_lick"] = f"boolean flag indicating whether lick sensor event duration is <={max_contact}, making it likely to be a true lick"
+            column_descriptions["duration"] = "duration of each lick sensor event, in seconds"
+            df = pd.DataFrame(dict(timestamps=rising, duration=falling - rising, is_likely_lick=is_likely_lick))
         else:
-            licks = ndx_events.Events(
-                timestamps=self.sam.lickTimes,
-                name="licks",
-                description=description,
-            )
-
-        if not (self.is_sync and licks_on_sync):
-            return (licks,)
-        return (
-            licks,
-            pynwb.TimeSeries(
-                timestamps=rising,
-                data=falling - rising,
-                name="lick_sensor_events",
-                description=f"{description}; {duration_description}",
-                unit="seconds",
-            ),
+            df = pd.DataFrame(dict(timestamps=self.sam.lickTimes))
+        licks = pynwb.core.DynamicTable.from_dataframe(
+            name="licks",
+            table_description="times at which the subject made contact with a combined lick sensor + water spout: putatively the starts of licks, but may include other events such as grooming",
+            df=df,
+            column_descriptions=column_descriptions,
         )
+        return licks
 
     @npc_io.cached_property
     def _running_speed(self) -> pynwb.TimeSeries:
