@@ -3449,22 +3449,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     is_task = False
 
     @npc_io.cached_property
-    def _aind_session_metadata(self) -> aind_data_schema.core.acquisition.Acquisition:
-        return aind_data_schema.core.acquisition.Acquisition(
-            experimenters=self.main_recording.experimenter or ["NSB trainer"],
-            acquisition_start_time=self.session_start_time,
-            acquisition_end_time=self.session_start_time + datetime.timedelta(seconds=self.ephys_timing_data[0].stop_time),
-            acquisition_type=self.session_description,
-            protocol_id=["2104"],
-            instrument_id=self.main_recording._aind_rig_id,
-            subject_id=str(self.id.subject),
-            data_streams=list(self._aind_data_streams),
-            stimulus_epochs=list(self._aind_stimulus_epochs),
-        )
-
-    @npc_io.cached_property
     def main_recording(self) -> DynamicRoutingSession:
-        main_id = self.id
         if self.root_path and self.root_path.protocol in ('', 'file'):
             return DynamicRoutingSession(self.root_path.parent / self.root_path.name.removesuffix('_surface_channels'))
         return DynamicRoutingSession(self.id)
