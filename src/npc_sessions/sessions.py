@@ -3345,53 +3345,56 @@ class DynamicRoutingSession:
         - includes manualRewardFrames
         """
 
-        def get_reward_frames(data: h5py.File) -> list[int]:
-            r = []
+        def get_reward_frames(data: h5py.File) -> tuple[list[int], list[bool]]:
+            frame_idx = []
+            is_manual = []
             for key in ("rewardFrames", "manualRewardFrames"):
                 if (v := data.get(key, None)) is not None:
-                    r.extend(v[:])
-            return r
+                    frame_idx.extend(v[:])
+                    is_manual.extend([key == "manualRewardFrames"] * len(v))
+            return frame_idx, is_manual
 
         reward_times: list[npt.NDArray[np.floating]] = []
+        is_manual_reward: list[npt.NDArray[np.bool_]] = []
         for stim_file, stim_data in self.stim_data_without_timing_issues.items():
             if any(name in stim_file.lower() for name in ("mapping", "tagging")):
                 continue
             stim_path = next(p for p in self.stim_paths if p.stem == stim_file)
+            frame_idx, manual_flags = get_reward_frames(stim_data)
+            is_manual_reward.extend(manual_flags)
             reward_times.extend(
                 npc_stim.safe_index(
                     npc_stim.get_flip_times(
                         stim=stim_path,
                         sync=self.sync_data if self.is_sync else None,
                     ),
-                    get_reward_frames(stim_data),
+                    frame_idx,
                 )
             )
-        return ndx_events.Events(
-            timestamps=np.sort(np.unique(reward_times)),
+        if self.is_sync and self.id.date >= datetime.date(2024, 4, 1):
+            rising = self.sync_data.get_rising_edges(15, units="seconds")
+            falling = self.sync_data.get_falling_edges(15, units="seconds")
+            if falling.size != 0 and rising.size != 0:
+                if falling[0] < rising[0]:
+                    falling = falling[1:]
+                if rising[-1] > falling[-1]:
+                    rising = rising[:-1]
+                assert len(rising) == len(falling)
+                timestamps = rising
+                duration = falling - rising
+        return pynwb.core.DynamicTable.from_dataframe(
+            df=pd.DataFrame(dict(timestamps=np.sort(np.unique(reward_times)))),
             name="rewards",
-            description="times at which the stimulus script triggered water rewards to be delivered to the subject",
+            table_description="water reward events triggered by the stimulus script, to be delivered to the subject",
+            column_descriptions={
+                "timestamps": "time at which the stimulus script triggered water rewards to be delivered to the subject",
+                "is_manual_delivery": "boolean flag indicating whether reward was manually triggered by the experimenter",    
+            },
         )
 
     @npc_io.cached_property
     def _reward_times_with_duration(self) -> pynwb.TimeSeries | None:
         """As interpreted from sync, after solenoid line was added ~March 2024."""
-        if not self.is_sync:
-            raise AttributeError(f"{self.id} is not a session with sync data")
-        if self.id.date < datetime.date(2024, 4, 1):
-            raise AttributeError(f"{self.id} does not have reward duration data")
-        rising = self.sync_data.get_rising_edges(15, units="seconds")
-        falling = self.sync_data.get_falling_edges(15, units="seconds")
-        if falling.size == 0 or rising.size == 0:
-            timestamps = np.array([], dtype=np.float64)
-            duration = np.array([], dtype=np.float64)
-        else:
-            if falling[0] < rising[0]:
-                falling = falling[1:]
-            if rising[-1] > falling[-1]:
-                rising = rising[:-1]
-            assert len(rising) == len(falling)
-            timestamps = rising
-            duration = falling - rising
         return pynwb.TimeSeries(
             timestamps=timestamps,
             data=duration,
@@ -3412,10 +3415,11 @@ class DynamicRoutingSession:
             ),
             frames,
         )
-        return ndx_events.Events(
-            timestamps=np.sort(np.unique(times)),
+        return pynwb.core.DynamicTable.from_dataframe(
+            df=pd.DataFrame(dict(timestamps=np.sort(np.unique(times)))),
             name="quiescent_interval_violations",
-            description="times at which the subject made contact with the lick spout during a quiescent interval, triggering a restart of the trial",
+            table_description="times at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial",
+            column_descriptions={"timestamps": "time at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial"},
         )
 
     @npc_io.cached_property
