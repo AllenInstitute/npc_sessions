@@ -771,10 +771,7 @@ class DynamicRoutingSession:
         if self._licks is not None:
             modules.append(self._licks)
         modules.append(self._running_speed)
-        try:
-            modules.append(self._reward_times_with_duration)
-        except AttributeError:
-            modules.append(self._reward_frame_times)
+        modules.append(self._reward_frame_times)
         if self.is_video:
             if self.info and self.info.is_dlc_eye:
                 modules.append(self._eye_tracking)
