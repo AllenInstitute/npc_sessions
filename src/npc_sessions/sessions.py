@@ -3338,7 +3338,7 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def _reward_frame_times(
         self,
-    ) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
+    ) -> pynwb.core.DynamicTable:
         """As interpreted from task stim files, with timing corrected with sync if
         available.
 
@@ -3353,25 +3353,11 @@ class DynamicRoutingSession:
                     frame_idx.extend(v[:])
                     is_manual.extend([key == "manualRewardFrames"] * len(v))
             return frame_idx, is_manual
-
-        reward_times: list[npt.NDArray[np.floating]] = []
-        is_manual_reward: list[npt.NDArray[np.bool_]] = []
-        for stim_file, stim_data in self.stim_data_without_timing_issues.items():
-            if any(name in stim_file.lower() for name in ("mapping", "tagging")):
-                continue
-            stim_path = next(p for p in self.stim_paths if p.stem == stim_file)
-            frame_idx, manual_flags = get_reward_frames(stim_data)
-            is_manual_reward.extend(manual_flags)
-            reward_times.extend(
-                npc_stim.safe_index(
-                    npc_stim.get_flip_times(
-                        stim=stim_path,
-                        sync=self.sync_data if self.is_sync else None,
-                    ),
-                    frame_idx,
-                )
-            )
-        if self.is_sync and self.id.date >= datetime.date(2024, 4, 1):
+        column_descriptions = {
+            "timestamps": "time at which the stimulus script triggered water rewards to be delivered to the subject",
+            "is_solenoid_time": "boolean flag indicating that `timestamps` reflect solenoid opening times, rather than stimulus script trigger times (which do not account for all latencies in the reward delivery system)",
+        }
+        if self.is_sync and self.id.date.dt >= datetime.date(2024, 4, 1):
             rising = self.sync_data.get_rising_edges(15, units="seconds")
             falling = self.sync_data.get_falling_edges(15, units="seconds")
             if falling.size != 0 and rising.size != 0:
@@ -3380,33 +3366,36 @@ class DynamicRoutingSession:
                 if rising[-1] > falling[-1]:
                     rising = rising[:-1]
                 assert len(rising) == len(falling)
-                timestamps = rising
-                duration = falling - rising
+                df = pd.DataFrame(dict(timestamps=rising, duration=falling - rising, is_solenoid_time=True))
+                column_descriptions["duration"] = "length of time the solenoid valve controlling water reward delivery to the subject was opened, in seconds"
+        else:
+            timestamps: list[npt.NDArray[np.floating]] = []
+            for stim_file, stim_data in self.stim_data_without_timing_issues.items():
+                if any(name in stim_file.lower() for name in ("mapping", "tagging")):
+                    continue
+                stim_path = next(p for p in self.stim_paths if p.stem == stim_file)
+                frame_idx, manual_flags = get_reward_frames(stim_data)
+                timestamps.extend(
+                    npc_stim.safe_index(
+                        npc_stim.get_flip_times(
+                            stim=stim_path,
+                            sync=self.sync_data if self.is_sync else None,
+                        ),
+                        frame_idx,
+                    )
+                )
+            df = pd.DataFrame(dict(timestamps=timestamps, is_solenoid_time=False))
         return pynwb.core.DynamicTable.from_dataframe(
-            df=pd.DataFrame(dict(timestamps=np.sort(np.unique(reward_times)))),
+            df=df,
             name="rewards",
-            table_description="water reward events triggered by the stimulus script, to be delivered to the subject",
-            column_descriptions={
-                "timestamps": "time at which the stimulus script triggered water rewards to be delivered to the subject",
-                "is_manual_delivery": "boolean flag indicating whether reward was manually triggered by the experimenter",    
-            },
-        )
-
-    @npc_io.cached_property
-    def _reward_times_with_duration(self) -> pynwb.TimeSeries | None:
-        """As interpreted from sync, after solenoid line was added ~March 2024."""
-        return pynwb.TimeSeries(
-            timestamps=timestamps,
-            data=duration,
-            name="rewards",
-            unit="seconds",
-            description="times at which the solenoid valve that controls water reward delivery to the subject was opened; `data` contains the length of time the solenoid was open for each event",
+            table_description="water rewards delivered to the subject",
+            column_descriptions=column_descriptions,
         )
 
     @npc_io.cached_property
     def _quiescent_interval_violations(
         self,
-    ) -> pynwb.core.NWBDataInterface | pynwb.core.DynamicTable:
+    ) -> pynwb.core.DynamicTable:
         frames: npt.NDArray[np.int32] = self.sam.quiescentViolationFrames
         times: npt.NDArray[np.floating] = npc_stim.safe_index(
             npc_stim.get_input_data_times(
