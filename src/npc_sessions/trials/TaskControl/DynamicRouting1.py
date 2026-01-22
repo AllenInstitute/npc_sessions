@@ -669,7 +669,7 @@ class DynamicRouting1(TaskControl):
         - for visual stimuli, this will be 0 or 0.5
         - for auditory stimuli, this will be nan.
         """
-        trial_grating_phase = self._hdf5_data.get('trialGratingPhase', None)
+        trial_grating_phase = self._hdf5_data.get("trialGratingPhase", None)
         if trial_grating_phase is None:
             grating_phase = np.full(self._len, 0.0)
         if len(trial_grating_phase.shape) == 1:
@@ -679,7 +679,7 @@ class DynamicRouting1(TaskControl):
             grating_phase = trial_grating_phase[: self._len, 0]
         grating_phase[~self.is_vis_stim] = np.nan
         return grating_phase
-        
+
     @npc_io.cached_property
     def block_index(self) -> npt.NDArray[np.int32]:
         """0-indexed block number, increments with each block"""
@@ -841,7 +841,9 @@ class DynamicRouting1(TaskControl):
     @staticmethod
     def txtToDict(txt: str) -> dict[str, list[float]]:
         """From Sam's code, modified to use text directly rather than a file"""
-        cols = zip(*[line.strip("\n").split("\t") for line in txt.split("\n")])
+        cols = zip(
+            *[line.strip("\n").split("\t") for line in txt.split("\n")], strict=False
+        )
         return {d[0]: [float(s) for s in d[1:]] for d in cols}
 
     def getBregmaGalvoCalibrationData(self) -> dict[str, float | list[float]]:
@@ -1034,7 +1036,7 @@ class DynamicRouting1(TaskControl):
             )[: self._len]
         elif optoLocs := self._hdf5_data.get("optoLocs"):
             label = optoLocs["label"].asstr()[()]
-            xy = np.array(list(zip(optoLocs["X"], optoLocs["Y"])))
+            xy = np.array(list(zip(optoLocs["X"], optoLocs["Y"], strict=False)))
             result = np.array(
                 [
                     label[np.all(xy == v, axis=1)][0]
@@ -1118,7 +1120,9 @@ class DynamicRouting1(TaskControl):
             data := self._hdf5_data.get("optoPowerCalibrationData")
         ) is None or "poly coefficients" not in data:
             powers = []
-            for voltage, devices in zip(voltages, self._trial_opto_devices):
+            for voltage, devices in zip(
+                voltages, self._trial_opto_devices, strict=False
+            ):
                 if not devices:
                     powers.append(np.nan)
                     continue
@@ -1166,7 +1170,9 @@ class DynamicRouting1(TaskControl):
                     if w is not None
                     else ""
                 )
-                for w, loc in zip(self._opto_stim_waveforms, self.opto_label)
+                for w, loc in zip(
+                    self._opto_stim_waveforms, self.opto_label, strict=False
+                )
             ],
             dtype=str,
         )

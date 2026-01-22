@@ -20,7 +20,7 @@ from npc_sessions.trials.TaskControl.RFMapping import AudRFMapping, VisRFMapping
 
 def get_trials(
     *stim_path: npc_io.PathLike,
-    sync_path_or_data: Optional[npc_sync.SyncPathOrDataset],
+    sync_path_or_data: npc_sync.SyncPathOrDataset | None,
     **kwargs,
 ) -> tuple[TaskControl, ...]:
     """Get trials for a given stimulus file.

@@ -10,11 +10,14 @@ from npc_sessions.sessions import DynamicRoutingSession
 
 logger = logging.getLogger(__name__)
 
-def get_data_description_model(session: DynamicRoutingSession) -> aind_data_schema.core.data_description.DataDescription:
+
+def get_data_description_model(
+    session: DynamicRoutingSession,
+) -> aind_data_schema.core.data_description.DataDescription:
     """Get the Pydantic model corresponding to the 'data_description.json' for a given session."""
     subject_id = str(session.id.subject)
     creation_time = session.session_start_time
-    platform = 'ecephys' if session.is_ephys else 'behavior'
+    platform = "ecephys" if session.is_ephys else "behavior"
     name = f"{platform}_{subject_id}_{creation_time.strftime('%Y-%m-%d_%H-%M-%S')}"
 
     investigators = [
@@ -90,7 +93,7 @@ def get_data_description_model(session: DynamicRoutingSession) -> aind_data_sche
         tags.append("late_autorewards")
     elif session.is_task:
         tags.append("early_autorewards")
-        
+
     return aind_data_schema.core.data_description.DataDescription(
         name=name,
         institution=aind_data_schema_models.organizations.Organization.AIND,
@@ -110,9 +113,9 @@ def get_data_description_model(session: DynamicRoutingSession) -> aind_data_sche
 
 if __name__ == "__main__":
     # Example usage
-    session = DynamicRoutingSession('814666_20251107')
+    session = DynamicRoutingSession("814666_20251107")
     data_description = get_data_description_model(session)
     print(data_description.model_dump_json(indent=2))
-    session = DynamicRoutingSession('628801_2022-09-20')
+    session = DynamicRoutingSession("628801_2022-09-20")
     data_description = get_data_description_model(session)
     print(data_description.model_dump_json(indent=2))

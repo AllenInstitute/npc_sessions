@@ -123,7 +123,7 @@ class PropertyDict(collections.abc.Mapping):
             logger.warning(
                 f"These properties do not have descriptions (add docstrings to their property getters): {missing}"
             )
-        descriptions.update(dict(zip(missing, ("" for _ in missing))))
+        descriptions.update(dict(zip(missing, ("" for _ in missing), strict=False)))
         descriptions.pop("start_time", None)
         descriptions.pop("stop_time", None)
         return (

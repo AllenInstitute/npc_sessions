@@ -14,13 +14,11 @@ import uuid
 from collections.abc import Iterable, Iterator
 from typing import Any, Literal
 
-
 import cv2
 import h5py
 import hdmf
 import hdmf.common
 import hdmf_zarr
-import ndx_events
 import ndx_pose
 import npc_ephys
 import npc_io
@@ -1341,7 +1339,8 @@ class DynamicRoutingSession:
             for serial_number, probe_type, probe_letter in zip(
                 self.ephys_settings_xml_data.probe_serial_numbers,
                 self.ephys_settings_xml_data.probe_types,
-                self.ephys_settings_xml_data.probe_letters, strict=True,
+                self.ephys_settings_xml_data.probe_letters,
+                strict=True,
             )
             if probe_letter in self.probe_letters_to_use
         )
@@ -1424,7 +1423,8 @@ class DynamicRoutingSession:
             for serial_number, probe_type, probe_letter in zip(
                 self.ephys_settings_xml_data.probe_serial_numbers,
                 self.ephys_settings_xml_data.probe_types,
-                self.ephys_settings_xml_data.probe_letters, strict=True,
+                self.ephys_settings_xml_data.probe_letters,
+                strict=True,
             )
             if probe_letter in self.probe_letters_to_use
         )
@@ -1478,7 +1478,8 @@ class DynamicRoutingSession:
 
         for probe_letter, channel_pos_xy in zip(
             self.ephys_settings_xml_data.probe_letters,
-            self.ephys_settings_xml_data.channel_pos_xy, strict=True,
+            self.ephys_settings_xml_data.channel_pos_xy,
+            strict=True,
         ):
             if probe_letter not in self.probe_letters_to_use:
                 continue
@@ -2955,7 +2956,7 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def _licks(self) -> pynwb.core.DynamicTable | None:
         """Table with at minimum a `timestamps` columns. If sync is available,
-        raw rising/falling edges of the lick sensor are used to get lick duration, 
+        raw rising/falling edges of the lick sensor are used to get lick duration,
         and we can add an indicator of likely licks below a certain duration threshold.
 
         If sync isn't available, we only have start frames of licks, so we can't
@@ -3007,9 +3008,19 @@ class DynamicRoutingSession:
             "timestamps": "time of lick sensor event onset, in seconds relative to session start time",
         }
         if has_precise_timing:
-            column_descriptions["is_likely_lick"] = f"boolean flag indicating whether lick sensor event duration is <={max_contact}, making it likely to be a true lick"
-            column_descriptions["duration"] = "duration of each lick sensor event, in seconds"
-            df = pd.DataFrame(dict(timestamps=rising, duration=falling - rising, is_likely_lick=is_likely_lick))
+            column_descriptions["is_likely_lick"] = (
+                f"boolean flag indicating whether lick sensor event duration is <={max_contact}, making it likely to be a true lick"
+            )
+            column_descriptions["duration"] = (
+                "duration of each lick sensor event, in seconds"
+            )
+            df = pd.DataFrame(
+                dict(
+                    timestamps=rising,
+                    duration=falling - rising,
+                    is_likely_lick=is_likely_lick,
+                )
+            )
         else:
             df = pd.DataFrame(dict(timestamps=self.sam.lickTimes))
         licks = pynwb.core.DynamicTable.from_dataframe(
@@ -3105,7 +3116,9 @@ class DynamicRoutingSession:
                 df=pd.DataFrame(dict(timestamps=timestamps)),
                 name=f"frametimes_{self.mvr_to_nwb_camera_name[camera_name]}",
                 table_description=f"start time of each frame exposure in {self.mvr.video_paths[camera_name].stem}",
-                column_descriptions={ "timestamps": f"start time of each frame exposure for {camera_name}, relative to session start time" },
+                column_descriptions={
+                    "timestamps": f"start time of each frame exposure for {camera_name}, relative to session start time"
+                },
             )
             for camera_name, timestamps in cam_to_frametimes.items()
         )
@@ -3350,6 +3363,7 @@ class DynamicRoutingSession:
                     frame_idx.extend(v[:])
                     is_manual.extend([key == "manualRewardFrames"] * len(v))
             return frame_idx, is_manual
+
         column_descriptions = {
             "timestamps": "time at which the stimulus script triggered water rewards to be delivered to the subject",
             "is_solenoid_time": "boolean flag indicating that `timestamps` reflect solenoid opening times, rather than stimulus script trigger times (which do not account for all latencies in the reward delivery system)",
@@ -3363,8 +3377,16 @@ class DynamicRoutingSession:
                 if rising[-1] > falling[-1]:
                     rising = rising[:-1]
                 assert len(rising) == len(falling)
-                df = pd.DataFrame(dict(timestamps=rising, duration=falling - rising, is_solenoid_time=True))
-                column_descriptions["duration"] = "length of time the solenoid valve controlling water reward delivery to the subject was opened, in seconds"
+                df = pd.DataFrame(
+                    dict(
+                        timestamps=rising,
+                        duration=falling - rising,
+                        is_solenoid_time=True,
+                    )
+                )
+                column_descriptions["duration"] = (
+                    "length of time the solenoid valve controlling water reward delivery to the subject was opened, in seconds"
+                )
         else:
             timestamps: list[npt.NDArray[np.floating]] = []
             for stim_file, stim_data in self.stim_data_without_timing_issues.items():
@@ -3405,7 +3427,9 @@ class DynamicRoutingSession:
             df=pd.DataFrame(dict(timestamps=np.sort(np.unique(times)))),
             name="quiescent_interval_violations",
             table_description="times at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial",
-            column_descriptions={"timestamps": "time at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial"},
+            column_descriptions={
+                "timestamps": "time at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial"
+            },
         )
 
     @npc_io.cached_property
@@ -3440,13 +3464,16 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
 
     @npc_io.cached_property
     def main_recording(self) -> DynamicRoutingSession:
-        if self.root_path and self.root_path.protocol in ('', 'file'):
-            return DynamicRoutingSession(self.root_path.parent / self.root_path.name.removesuffix('_surface_channels'))
+        if self.root_path and self.root_path.protocol in ("", "file"):
+            return DynamicRoutingSession(
+                self.root_path.parent
+                / self.root_path.name.removesuffix("_surface_channels")
+            )
         return DynamicRoutingSession(self.id)
 
     @npc_io.cached_property
     def raw_data_paths(self) -> tuple[upath.UPath, ...]:
-        if self.root_path and self.root_path.protocol in ('', 'file'):
+        if self.root_path and self.root_path.protocol in ("", "file"):
             return self.get_raw_data_paths_from_root()
         return npc_lims.get_raw_data_paths_from_s3(self.id.with_idx(1))
 
@@ -3470,7 +3497,8 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
             npc_session.ProbeRecord(letter)
             for letter, is_tip_channel_bank in zip(
                 self.ephys_settings_xml_data.probe_letters,
-                self.ephys_settings_xml_data.is_tip_channel_bank, strict=True,
+                self.ephys_settings_xml_data.is_tip_channel_bank,
+                strict=True,
             )
             if is_tip_channel_bank
         }
@@ -3481,12 +3509,13 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         try:
             main_rec_probes_to_skip = set(self.main_recording.probe_letters_to_skip)
         except Exception as exc:
-            logger.warning(f"Could not get probes to skip from main recording, likely has not been sorted yet: {exc!r}")
+            logger.warning(
+                f"Could not get probes to skip from main recording, likely has not been sorted yet: {exc!r}"
+            )
             main_rec_probes_to_skip = set()
         return tuple(
             sorted(
-                (main_rec_probes_to_skip | probes_with_tip_channel_bank)
-                - manual_skip
+                (main_rec_probes_to_skip | probes_with_tip_channel_bank) - manual_skip
             )
         )
 

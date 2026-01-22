@@ -1,11 +1,11 @@
-
 import contextlib
 import datetime
 import itertools
 import json
 import logging
 import re
-from typing import Iterable, TypeGuard
+from collections.abc import Iterable
+from typing import TypeGuard
 
 import aind_data_schema.components.configs
 import aind_data_schema.components.coordinates
@@ -23,46 +23,52 @@ from npc_sessions.sessions import DynamicRoutingSession, DynamicRoutingSurfaceRe
 
 logger = logging.getLogger(__name__)
 
-def is_surface_recording(session: DynamicRoutingSession) -> TypeGuard[DynamicRoutingSurfaceRecording]:
+
+def is_surface_recording(
+    session: DynamicRoutingSession,
+) -> TypeGuard[DynamicRoutingSurfaceRecording]:
     return isinstance(session, DynamicRoutingSurfaceRecording)
 
-def _merge_data_streams(data_streams: Iterable[aind_data_schema.core.acquisition.DataStream]) -> aind_data_schema.core.acquisition.DataStream:
+
+def _merge_data_streams(
+    data_streams: Iterable[aind_data_schema.core.acquisition.DataStream],
+) -> aind_data_schema.core.acquisition.DataStream:
     data_streams = tuple(data_streams)
     return aind_data_schema.core.acquisition.DataStream(
         stream_start_time=min(ds.stream_start_time for ds in data_streams),
         stream_end_time=max(ds.stream_end_time for ds in data_streams),
-        modalities=sorted({mod for ds in data_streams for mod in ds.modalities}, key=lambda m: m.name),
+        modalities=sorted(
+            {mod for ds in data_streams for mod in ds.modalities}, key=lambda m: m.name
+        ),
         code=sorted(
             itertools.chain.from_iterable(ds.code for ds in data_streams if ds.code),
             key=lambda c: c.url,
-        ) or None,
+        )
+        or None,
         active_devices=sorted(
-            itertools.chain.from_iterable(
-                ds.active_devices for ds in data_streams
-            ),
+            itertools.chain.from_iterable(ds.active_devices for ds in data_streams),
         ),
         configurations=list(
-            itertools.chain.from_iterable(
-                ds.configurations for ds in data_streams
-            )
+            itertools.chain.from_iterable(ds.configurations for ds in data_streams)
         ),
     )
 
-def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.core.acquisition.Acquisition:
+
+def get_acquisition_model(
+    session: DynamicRoutingSession,
+) -> aind_data_schema.core.acquisition.Acquisition:
     """Get the Pydantic model corresponding to the 'acquisition.json' for a given session."""
-    subject_id=str(session.id.subject)
-    acquisition_start_time=session.session_start_time
+    subject_id = str(session.id.subject)
+    acquisition_start_time = session.session_start_time
     if session.is_sync:
         acquisition_end_time = session.sync_data.stop_time
     elif session.epochs.stop_time:
-        acquisition_end_time = (
-            session.session_start_time
-            + datetime.timedelta(seconds=max(session.epochs.stop_time))
+        acquisition_end_time = session.session_start_time + datetime.timedelta(
+            seconds=max(session.epochs.stop_time)
         )
-    elif session.ephys_timing_data: # eg surface channel recording
-        acquisition_end_time = (
-            session.session_start_time
-            + datetime.timedelta(seconds=session.ephys_timing_data[0].stop_time)
+    elif session.ephys_timing_data:  # eg surface channel recording
+        acquisition_end_time = session.session_start_time + datetime.timedelta(
+            seconds=session.ephys_timing_data[0].stop_time
         )
     else:
         raise ValueError(f"Unable to determine acquisition end time for {session}")
@@ -72,20 +78,20 @@ def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.co
         experimenters = session.experimenter or ["NSB trainer"]
     if is_surface_recording(session):
         instrument_id = session.main_recording.rig
-        acquisition_type = 'ecephys surface recording'
+        acquisition_type = "ecephys surface recording"
     else:
         instrument_id = session.rig
         keywords: list[str] = []
         if session.is_ephys:
-            keywords.append('ecephys')
+            keywords.append("ecephys")
         if session.is_task:
-            keywords.append('behavior')
+            keywords.append("behavior")
         for k in [
-            'naive',
-            'injection_perturbation',
-            'injection_control',
-            'opto_perturbation',
-            'opto_control',
+            "naive",
+            "injection_perturbation",
+            "injection_control",
+            "opto_perturbation",
+            "opto_control",
         ]:
             if k in session.keywords:
                 keywords.append(k)
@@ -121,6 +127,7 @@ def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.co
         subject_details=subject_details,
     )
 
+
 def get_active_devices(script_name: str, session: DynamicRoutingSession) -> list[str]:
     stim = aind_data_schema_models.stimulus_modality.StimulusModality
     modalities = get_modalities(script_name, session)
@@ -134,16 +141,18 @@ def get_active_devices(script_name: str, session: DynamicRoutingSession) -> list
         if session.is_sync:
             device_names.extend([instrument.MICROPHONE.name])
     if stim.OPTOGENETICS in modalities:
-        device_names.extend([
-            instrument.LASER_488.name, 
-            instrument.LASER_633.name, 
-            instrument.LASER_GALVO_X.name, 
-            instrument.LASER_GALVO_Y.name, 
-            instrument.OPTO_DAQ.name,
-        ])
+        device_names.extend(
+            [
+                instrument.LASER_488.name,
+                instrument.LASER_633.name,
+                instrument.LASER_GALVO_X.name,
+                instrument.LASER_GALVO_Y.name,
+                instrument.OPTO_DAQ.name,
+            ]
+        )
     if session.is_sync:
         device_names.append(instrument.SYNC_DAQ.name)
-        
+
     return sorted(set(device_names))
 
 
@@ -171,7 +180,10 @@ def get_modalities(
         modalities.append(stim.OPTOGENETICS)
     return modalities or [stim.NO_STIMULUS]
 
-def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schema.core.acquisition.StimulusEpoch]:
+
+def _get_stimulus_epochs(
+    session: DynamicRoutingSession,
+) -> list[aind_data_schema.core.acquisition.StimulusEpoch]:
     if is_surface_recording(session):
         return []
 
@@ -187,7 +199,9 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
             volume_unit="decibels",
         )
 
-    def get_performance_metrics(script_name: str) -> aind_data_schema.core.acquisition.PerformanceMetrics | None:
+    def get_performance_metrics(
+        script_name: str,
+    ) -> aind_data_schema.core.acquisition.PerformanceMetrics | None:
         if "DynamicRouting" not in script_name or not session.is_task:
             return None
         block_metrics = {}
@@ -201,7 +215,8 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
                 [int(v) for v in session.sam.hitCount],
                 [float(v) for v in session.sam.dprimeSameModal],
                 [float(v) for v in session.sam.dprimeOtherModalGo],
-                [str(v) for v in session.sam.blockStimRewarded], strict=False,
+                [str(v) for v in session.sam.blockStimRewarded],
+                strict=False,
             )
         ):
             block_metrics[str(block_index)] = dict(
@@ -212,27 +227,35 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
                 dprime_other_modal_go=dprime_other_modal_go,
             )
         return aind_data_schema.core.acquisition.PerformanceMetrics(
-            output_parameters={"block_metrics": block_metrics, "task_version": session.sam.taskVersion},
-            reward_consumed_during_epoch=np.nanmean(session.sam.rewardSize) * sum(session.trials[:].is_rewarded),
+            output_parameters={
+                "block_metrics": block_metrics,
+                "task_version": session.sam.taskVersion,
+            },
+            reward_consumed_during_epoch=np.nanmean(session.sam.rewardSize)
+            * sum(session.trials[:].is_rewarded),
             reward_consumed_unit=aind_data_schema_models.units.VolumeUnit.ML,
             trials_total=len(session.trials[:]),
             trials_rewarded=sum(session.trials[:].is_contingent_reward),
         )
 
-    def get_laser_configs(script_name: str) -> list[aind_data_schema.components.configs.LaserConfig] | None:
+    def get_laser_configs(
+        script_name: str,
+    ) -> list[aind_data_schema.components.configs.LaserConfig] | None:
         configs = []
         for laser in [instrument.LASER_488, instrument.LASER_633]:
             if laser.name not in get_active_devices(script_name, session):
                 continue
-            if script_name == 'OptoTagging':
-                column_name = 'power'
-            elif script_name == 'DynamicRouting1':
+            if script_name == "OptoTagging":
+                column_name = "power"
+            elif script_name == "DynamicRouting1":
                 column_name = "opto_power"
             else:
-                raise NotImplementedError(f"Unknown script name {script_name}: unsure how to get laser power from intervals table")
+                raise NotImplementedError(
+                    f"Unknown script name {script_name}: unsure how to get laser power from intervals table"
+                )
             trials = next(v for k, v in session._all_trials.items() if script_name in k)
             max_power = np.nanmax(getattr(trials, column_name))
-            if np.isnan(max_power): # control session
+            if np.isnan(max_power):  # control session
                 max_power = 0.0
             configs.append(
                 aind_data_schema.components.configs.LaserConfig(
@@ -280,7 +303,9 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
             ),
         )
 
-    def get_configurations(script_name: str) -> list[aind_data_schema.components.configs.DeviceConfig]:
+    def get_configurations(
+        script_name: str,
+    ) -> list[aind_data_schema.components.configs.DeviceConfig]:
         configurations = []
         speaker_config = get_speaker_config(script_name)
         if speaker_config:
@@ -310,11 +335,14 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
         if "DynamicRouting" not in script_name or not session.is_task:
             return None
         # extract 'stage X'
-        stages = re.findall(r'stage\s?(\d+)', session.sam.taskVersion.lower(), )
-        if not stages: 
+        stages = re.findall(
+            r"stage\s?(\d+)",
+            session.sam.taskVersion.lower(),
+        )
+        if not stages:
             return None
         return f"stage {stages[0]}"
-    
+
     aind_epochs = []
     for nwb_epoch in session.epochs:
         script_name = nwb_epoch.script_name.item()
@@ -324,9 +352,7 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
                     seconds=nwb_epoch.start_time.item()
                 )
                 + session.session_start_time,
-                stimulus_end_time=datetime.timedelta(
-                    seconds=nwb_epoch.stop_time.item()
-                )
+                stimulus_end_time=datetime.timedelta(seconds=nwb_epoch.stop_time.item())
                 + session.session_start_time,
                 stimulus_name=script_name,
                 code=get_code(script_name),
@@ -341,36 +367,45 @@ def _get_stimulus_epochs(session: DynamicRoutingSession) -> list[aind_data_schem
         )
     return aind_epochs
 
-def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.core.acquisition.DataStream]:
-    def get_core_dependency(stream_name: str) -> aind_data_schema.core.acquisition.Code | None:
+
+def _get_data_streams(
+    session: DynamicRoutingSession,
+) -> list[aind_data_schema.core.acquisition.DataStream]:
+    def get_core_dependency(
+        stream_name: str,
+    ) -> aind_data_schema.core.acquisition.Code | None:
         match stream_name:
-            case 'Ephys':
-                assert session.is_ephys, "Ephys dependency info requested for non-ephys session - should not be possible"
+            case "Ephys":
+                assert (
+                    session.is_ephys
+                ), "Ephys dependency info requested for non-ephys session - should not be possible"
                 try:
                     version = session.ephys_settings_xml_data.open_ephys_version
                 except (AttributeError, FileNotFoundError):
-                    version = "0.6.6" # most-commonly used version
+                    version = "0.6.6"  # most-commonly used version
                 return aind_data_schema.components.identifiers.Software(
                     name="Open Ephys GUI",
                     version=version,
                 )
-            case 'Camstim':
+            case "Camstim":
                 return aind_data_schema.components.identifiers.Software(
                     name="PsychoPy",
                     version="2022.1.2",
                 )
 
-            case 'MVR':
-                assert session.is_video, "MVR dependency info requested for non-video session - should not be possible"
+            case "MVR":
+                assert (
+                    session.is_video
+                ), "MVR dependency info requested for non-video session - should not be possible"
                 try:
                     version = next(iter(session.mvr.info_data.values()))["MVR Version"]
                 except (StopIteration, AttributeError, KeyError, FileNotFoundError):
-                    version = "1.1.7" # most-commonly used version
+                    version = "1.1.7"  # most-commonly used version
                 return aind_data_schema.components.identifiers.Software(
                     name="MultiVideoRecorder",
                     version=version,
                 )
-            case 'Sync':
+            case "Sync":
                 return aind_data_schema.components.identifiers.Software(
                     name="nidaqmx",
                     version="0.6.2",
@@ -378,14 +413,16 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
             case _:
                 return None
 
-    def get_np_services_code(stream_name: str) -> list[aind_data_schema.core.acquisition.Code] | None:
-        if stream_name not in ('MVR', 'Sync', 'Camstim', 'Ephys'):
+    def get_np_services_code(
+        stream_name: str,
+    ) -> list[aind_data_schema.core.acquisition.Code] | None:
+        if stream_name not in ("MVR", "Sync", "Camstim", "Ephys"):
             raise ValueError(f"Unknown stream name {stream_name} for NP services code")
         script_name = {
-            'MVR': 'proxies',
-            'Sync': 'proxies',
-            'Camstim': 'proxies',
-            'Ephys': 'open_ephys',
+            "MVR": "proxies",
+            "Sync": "proxies",
+            "Camstim": "proxies",
+            "Ephys": "open_ephys",
         }
         url = f"https://github.com/AllenInstitute/np_services/blob/main/src/np_services/{script_name[stream_name]}.py"
         return [
@@ -415,18 +452,31 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
     if session.stim_paths and len(session.epochs.script_name):
         data_streams.append(
             aind_data_schema.core.acquisition.DataStream(
-                stream_start_time=session.session_start_time + datetime.timedelta(seconds=min(session.epochs.stop_time)),
+                stream_start_time=session.session_start_time
+                + datetime.timedelta(seconds=min(session.epochs.stop_time)),
                 stream_end_time=session.session_start_time
                 + datetime.timedelta(seconds=max(session.epochs.stop_time)),
                 modalities=[modality.BEHAVIOR],
-                active_devices=sorted(set(itertools.chain.from_iterable(get_active_devices(s, session) for s in session.epochs.script_name))),
+                active_devices=sorted(
+                    set(
+                        itertools.chain.from_iterable(
+                            get_active_devices(s, session)
+                            for s in session.epochs.script_name
+                        )
+                    )
+                ),
                 code=get_np_services_code("Camstim"),
                 configurations=[],
             )
         )
     if session.is_video:
         if session.is_sync:
-            active_cameras = [instrument.EYE_CAMERA, instrument.FRONT_CAMERA, instrument.SIDE_CAMERA, instrument.NOSE_CAMERA]
+            active_cameras = [
+                instrument.EYE_CAMERA,
+                instrument.FRONT_CAMERA,
+                instrument.SIDE_CAMERA,
+                instrument.NOSE_CAMERA,
+            ]
         else:
             active_cameras = [instrument.SIDE_CAMERA]
         data_streams.append(
@@ -436,14 +486,14 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
                     seconds=min(
                         np.nanmin(times.timestamps)
                         for times in session._video_frame_times
-                    ) # min frame time across all vids
+                    )  # min frame time across all vids
                 ),
                 stream_end_time=session.session_start_time
                 + datetime.timedelta(
                     seconds=max(
                         np.nanmax(times.timestamps)
                         for times in session._video_frame_times
-                    ) # max frame time across all vids
+                    )  # max frame time across all vids
                 ),
                 modalities=[modality.BEHAVIOR_VIDEOS],
                 active_devices=[cam.name for cam in active_cameras],
@@ -459,8 +509,12 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
         else:
             rec = session
 
-        if (path := next((p for p in rec.raw_data_paths if p.name.endswith('_dye.json')), None)) is not None:
-            dye = json.loads(path.read_text())['dye']
+        if (
+            path := next(
+                (p for p in rec.raw_data_paths if p.name.endswith("_dye.json")), None
+            )
+        ) is not None:
+            dye = json.loads(path.read_text())["dye"]
         else:
             dye = "unknown"
 
@@ -502,17 +556,29 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
             )
             match probe:
                 case "A":
-                    primary_targeted_structure = aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    primary_targeted_structure = (
+                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    )
                 case "B":
-                    primary_targeted_structure = aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    primary_targeted_structure = (
+                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    )
                 case "C":
-                    primary_targeted_structure = aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    primary_targeted_structure = (
+                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    )
                 case "D":
-                    primary_targeted_structure = aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    primary_targeted_structure = (
+                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    )
                 case "E":
-                    primary_targeted_structure = aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    primary_targeted_structure = (
+                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    )
                 case "F":
-                    primary_targeted_structure = aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    primary_targeted_structure = (
+                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
+                    )
 
             probe_config = aind_data_schema.components.configs.ProbeConfig(
                 device_name=probe.name,
@@ -531,22 +597,33 @@ def _get_data_streams(session: DynamicRoutingSession) -> list[aind_data_schema.c
         data_streams.append(
             aind_data_schema.core.acquisition.DataStream(
                 stream_start_time=session.session_start_time
-                + datetime.timedelta(seconds=min(timing.start_time for timing in session.ephys_timing_data)),
+                + datetime.timedelta(
+                    seconds=min(
+                        timing.start_time for timing in session.ephys_timing_data
+                    )
+                ),
                 stream_end_time=session.session_start_time
-                + datetime.timedelta(seconds=max(timing.stop_time for timing in session.ephys_timing_data)),
+                + datetime.timedelta(
+                    seconds=max(
+                        timing.stop_time for timing in session.ephys_timing_data
+                    )
+                ),
                 modalities=[modality.ECEPHYS],
-                active_devices=[probe.name for probe in session.probe_letters_to_use], # keep names synced with 'instrument.py'
+                active_devices=[
+                    probe.name for probe in session.probe_letters_to_use
+                ],  # keep names synced with 'instrument.py'
                 configurations=ephys_configs,
                 code=get_np_services_code("Ephys"),
             )
         )
     return data_streams
 
+
 if __name__ == "__main__":
-    session = DynamicRoutingSession('814666_20251107')
+    session = DynamicRoutingSession("814666_20251107")
     metadata = get_acquisition_model(session)
     print(metadata.model_dump_json(indent=2))
-    with open('acquisition_814666_2025-11-07.json', 'w') as f:
+    with open("acquisition_814666_2025-11-07.json", "w") as f:
         f.write(metadata.model_dump_json(indent=2))
     # session = DynamicRoutingSession('628801_2022-09-20')
     # metadata = get_acquisition_model(session)

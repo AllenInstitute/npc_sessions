@@ -1,11 +1,10 @@
-
 import contextlib
 import logging
 import re
 from typing import Literal
 
-import aind_data_schema.components.coordinates
 import aind_data_schema.components.connections
+import aind_data_schema.components.coordinates
 import aind_data_schema.components.devices
 import aind_data_schema.components.identifiers
 import aind_data_schema.core.instrument
@@ -52,34 +51,40 @@ CAMERA_COORDINATE_SYSTEM = aind_data_schema.components.coordinates.CoordinateSys
     axis_unit=aind_data_schema.components.coordinates.SizeUnit.M,
 )
 
+
 def _normalize_rig_name(rig_name: str) -> str:
-    return rig_name.replace('.', '').replace('-', '').lower()
+    return rig_name.replace(".", "").replace("-", "").lower()
+
 
 def is_np_rig(rig_name: str) -> bool:
-    return _normalize_rig_name(rig_name).startswith('np')
+    return _normalize_rig_name(rig_name).startswith("np")
+
 
 def is_behavior_box(rig_name: str) -> bool:
-    return _normalize_rig_name(rig_name).startswith('b')
+    return _normalize_rig_name(rig_name).startswith("b")
+
 
 def is_og_rig(rig_name: str) -> bool:
-    return _normalize_rig_name(rig_name).startswith('og')
+    return _normalize_rig_name(rig_name).startswith("og")
+
 
 def get_location(rig_name: str) -> str:
     """Get a Location object for a given rig name."""
     rig_name = _normalize_rig_name(rig_name)
-    if rig_name.startswith('np'):
+    if rig_name.startswith("np"):
         return {
-            'np0': '325',
-            'np1': '325',
-            'np2': '327',
-            'np3': '342',
+            "np0": "325",
+            "np1": "325",
+            "np2": "327",
+            "np3": "342",
         }[rig_name]
-    if rig_name == 'og1':
-        return '342'
-    if rig_name.startswith('beh'):
-        return 'NSB'
+    if rig_name == "og1":
+        return "342"
+    if rig_name.startswith("beh"):
+        return "NSB"
     else:
-        return '342' # behavior B
+        return "342"  # behavior B
+
 
 DISC = aind_data_schema.components.devices.Disc(
     name="Brain Observatory running disc",
@@ -125,7 +130,7 @@ SPEAKER = aind_data_schema.components.devices.Speaker(
     name="Stimulus speaker",
     manufacturer=aind_data_schema_models.organizations.Organization.ISL,
     model="SPK-I-81345",
-    coordinate_system=MONITOR_COORDINATE_SYSTEM, # same system as monitor
+    coordinate_system=MONITOR_COORDINATE_SYSTEM,  # same system as monitor
     relative_position=[
         aind_data_schema_models.coordinates.AnatomicalRelative.RIGHT,
         aind_data_schema_models.coordinates.AnatomicalRelative.ANTERIOR,
@@ -222,11 +227,13 @@ LASER_488 = aind_data_schema.components.devices.Laser(
     wavelength=488,
     wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
 )
-LASER_633 = LASER_488.model_copy(update={
-    "name": "Opto laser #2",
-    "model": "Stradus 633-50",
-    "wavelength": 633,
-})
+LASER_633 = LASER_488.model_copy(
+    update={
+        "name": "Opto laser #2",
+        "model": "Stradus 633-50",
+        "wavelength": 633,
+    }
+)
 
 LASER_GALVO_X = aind_data_schema.components.devices.AdditionalImagingDevice(
     name="Opto laser galvo X",
@@ -234,7 +241,9 @@ LASER_GALVO_X = aind_data_schema.components.devices.AdditionalImagingDevice(
     model="GVS012",
     imaging_device_type=aind_data_schema.components.devices.ImagingDeviceType.GALVO,
 )
-LASER_GALVO_Y = LASER_GALVO_X.model_copy(update={"name": LASER_GALVO_X.name.replace("X", "Y")})
+LASER_GALVO_Y = LASER_GALVO_X.model_copy(
+    update={"name": LASER_GALVO_X.name.replace("X", "Y")}
+)
 
 ALLIED_CAMERA = aind_data_schema.components.devices.Camera(
     name="Generic camera",
@@ -283,7 +292,7 @@ FRONT_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
     transform=[
         aind_data_schema.components.coordinates.Affine(
             affine_transform=[
-                [-0.17365, 0.98481, 0], 
+                [-0.17365, 0.98481, 0],
                 [0.44709, 0.07883, -0.89101],
                 [-0.87747, -0.15472, -0.45399],
                 [0.154, 0.03078, 0.06346],
@@ -321,9 +330,9 @@ SIDE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
     transform=[
         aind_data_schema.components.coordinates.Affine(
             affine_transform=[
-                [-1, 0, 0], 
-                [0, -1, 0], 
-                [-1, 0, -0.03617], 
+                [-1, 0, 0],
+                [0, -1, 0],
+                [-1, 0, -0.03617],
                 [0.23887, -0.02535],
             ],
         ),
@@ -333,7 +342,7 @@ SIDE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
 EYE_CAMERA = ALLIED_CAMERA.model_copy(
     update={
         "name": "Eye camera",
-        "notes": "There is a mirror in the light path between the eye and the camera."
+        "notes": "There is a mirror in the light path between the eye and the camera.",
     }
 )
 EYE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
@@ -366,7 +375,9 @@ EYE_CAMERA_ASSEMBLY = aind_data_schema.components.devices.CameraAssembly(
         aind_data_schema.components.coordinates.Affine(
             affine_transform=[
                 [-0.5, -0.86603, 0],
-                [-0.366, 0.21131, -0.90631], [0.78489, -0.45315, -0.42262], [-0.14259, 0.06209, 0.09576],
+                [-0.366, 0.21131, -0.90631],
+                [0.78489, -0.45315, -0.42262],
+                [-0.14259, 0.06209, 0.09576],
                 [0.78489, -0.45315, -0.42262],
                 [-0.14259, 0.06209, 0.09576],
             ],
@@ -415,8 +426,12 @@ FRONT_LED = aind_data_schema.components.devices.LightEmittingDiode(
     wavelength=740,
     wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
 )
-SIDE_LED = FRONT_LED.model_copy(update={"name": FRONT_LED.name.replace("Front", "Side")})
-NOSE_LED = FRONT_LED.model_copy(update={"name": FRONT_LED.name.replace("Front", "Nose")})
+SIDE_LED = FRONT_LED.model_copy(
+    update={"name": FRONT_LED.name.replace("Front", "Side")}
+)
+NOSE_LED = FRONT_LED.model_copy(
+    update={"name": FRONT_LED.name.replace("Front", "Nose")}
+)
 
 EYE_LED = aind_data_schema.components.devices.LightEmittingDiode(
     manufacturer=aind_data_schema_models.organizations.Organization.AMS_OSRAM,
@@ -426,16 +441,21 @@ EYE_LED = aind_data_schema.components.devices.LightEmittingDiode(
     wavelength_unit=aind_data_schema_models.units.SizeUnit.NM,
 )
 
-def get_basestation(slot: Literal[2, 3], session: DynamicRoutingSession | None = None) -> aind_data_schema.components.devices.NeuropixelsBasestation:
+
+def get_basestation(
+    slot: Literal[2, 3], session: DynamicRoutingSession | None = None
+) -> aind_data_schema.components.devices.NeuropixelsBasestation:
     probe_letters = "ABC" if slot == 2 else "DEF"
     basestation_firmware_version = "240.1120"
-    bsc_firmware_version="1.0.144"
+    bsc_firmware_version = "1.0.144"
     if session is not None and session.is_ephys:
-        with contextlib.suppress(ValueError, FileNotFoundError, AttributeError, IndexError):
+        with contextlib.suppress(
+            ValueError, FileNotFoundError, AttributeError, IndexError
+        ):
             settings_xml_path = session.ephys_settings_xml_path
             text = settings_xml_path.read_text()
-            basestation_firmware_version = re.search(r'bs_firmware_version="([\d.]+)"', text).group(1) # type: ignore [union-attr]
-            bsc_firmware_version = re.search(r'bsc_firmware_version="([\d.]+)"', text).group(1) # type: ignore [union-attr]
+            basestation_firmware_version = re.search(r'bs_firmware_version="([\d.]+)"', text).group(1)  # type: ignore [union-attr]
+            bsc_firmware_version = re.search(r'bsc_firmware_version="([\d.]+)"', text).group(1)  # type: ignore [union-attr]
     return aind_data_schema.components.devices.NeuropixelsBasestation(
         name=f"probes {probe_letters}",
         manufacturer=aind_data_schema_models.organizations.Organization.IMEC,
@@ -444,26 +464,39 @@ def get_basestation(slot: Literal[2, 3], session: DynamicRoutingSession | None =
         bsc_firmware_version=bsc_firmware_version,
         slot=slot,
         ports=[
-            aind_data_schema.components.devices.ProbePort(index=i, probes=[f'probe{letter}'])
+            aind_data_schema.components.devices.ProbePort(
+                index=i, probes=[f"probe{letter}"]
+            )
             for i, letter in zip(range(3), probe_letters, strict=False)
         ],
     )
 
-def get_computers(session: DynamicRoutingSession) -> list[aind_data_schema.components.devices.Computer]:
+
+def get_computers(
+    session: DynamicRoutingSession,
+) -> list[aind_data_schema.components.devices.Computer]:
     rig_name = _normalize_rig_name(session.rig)
     computer_names = []
-    if rig_name.startswith('og') or rig_name.startswith('np'):
-        computer_names.extend(['STIM', 'SYNC', 'MON'])
+    if rig_name.startswith("og") or rig_name.startswith("np"):
+        computer_names.extend(["STIM", "SYNC", "MON"])
     else:
-        computer_names.append('BEH')
-    if rig_name.startswith('np'):
-        computer_names.append('ACQ')
+        computer_names.append("BEH")
+    if rig_name.startswith("np"):
+        computer_names.append("ACQ")
     return [
-        aind_data_schema.components.devices.Computer(name=name, operating_system='Windows 10')
+        aind_data_schema.components.devices.Computer(
+            name=name, operating_system="Windows 10"
+        )
         for name in computer_names
     ]
 
-def get_components_and_connections(session: DynamicRoutingSession) -> tuple[list[aind_data_schema.components.devices.Device], list[aind_data_schema.components.connections.Connection]]:
+
+def get_components_and_connections(
+    session: DynamicRoutingSession,
+) -> tuple[
+    list[aind_data_schema.components.devices.Device],
+    list[aind_data_schema.components.connections.Connection],
+]:
     components = [
         DISC,
         MONITOR,
@@ -486,85 +519,106 @@ def get_components_and_connections(session: DynamicRoutingSession) -> tuple[list
         aind_data_schema.components.connections.Connection(
             target_device=TASKCONTROL_DAQ.name,
             source_device=SPEAKER.name,
-        )
+        ),
     ]
     if is_behavior_box(session.rig):
-        components.extend([
-            SIDE_CAMERA_ASSEMBLY,
-            SIDE_LED,
-        ])
+        components.extend(
+            [
+                SIDE_CAMERA_ASSEMBLY,
+                SIDE_LED,
+            ]
+        )
     if is_og_rig(session.rig) or is_np_rig(session.rig):
-        components.extend([
-            SYNC_DAQ,
-            MICROPHONE,
-            PHOTODIODE,
-            FRONT_CAMERA_ASSEMBLY,
-            FRONT_LED,
-            SIDE_CAMERA_ASSEMBLY,
-            SIDE_LED,
-            EYE_CAMERA_ASSEMBLY,
-            EYE_LED,
-            NOSE_CAMERA_ASSEMBLY,
-            NOSE_LED,
-            OPTO_DAQ,
-            LASER_488,
-            LASER_633,
-            LASER_GALVO_X,
-            LASER_GALVO_Y,
-        ])
-        connections.extend([
-            aind_data_schema.components.connections.Connection(
-                source_device=source_device.name,
-                target_device=SYNC_DAQ.name,
-            ) for source_device in (
+        components.extend(
+            [
+                SYNC_DAQ,
+                MICROPHONE,
                 PHOTODIODE,
-                FRONT_CAMERA_ASSEMBLY.camera,
-                SIDE_CAMERA_ASSEMBLY.camera,
-                EYE_CAMERA_ASSEMBLY.camera,
-                NOSE_CAMERA_ASSEMBLY.camera,
-                LICK_SPOUT_ASSEMBLY.lick_spouts[0],
-                LASER_488,
-                LASER_633,
-            )
-        ])
-        connections.extend([
-            aind_data_schema.components.connections.Connection(
-                source_device=OPTO_DAQ.name,
-                target_device=target_device.name,
-            ) for target_device in (
+                FRONT_CAMERA_ASSEMBLY,
+                FRONT_LED,
+                SIDE_CAMERA_ASSEMBLY,
+                SIDE_LED,
+                EYE_CAMERA_ASSEMBLY,
+                EYE_LED,
+                NOSE_CAMERA_ASSEMBLY,
+                NOSE_LED,
+                OPTO_DAQ,
                 LASER_488,
                 LASER_633,
                 LASER_GALVO_X,
                 LASER_GALVO_Y,
-            )
-        ])
+            ]
+        )
+        connections.extend(
+            [
+                aind_data_schema.components.connections.Connection(
+                    source_device=source_device.name,
+                    target_device=SYNC_DAQ.name,
+                )
+                for source_device in (
+                    PHOTODIODE,
+                    FRONT_CAMERA_ASSEMBLY.camera,
+                    SIDE_CAMERA_ASSEMBLY.camera,
+                    EYE_CAMERA_ASSEMBLY.camera,
+                    NOSE_CAMERA_ASSEMBLY.camera,
+                    LICK_SPOUT_ASSEMBLY.lick_spouts[0],
+                    LASER_488,
+                    LASER_633,
+                )
+            ]
+        )
+        connections.extend(
+            [
+                aind_data_schema.components.connections.Connection(
+                    source_device=OPTO_DAQ.name,
+                    target_device=target_device.name,
+                )
+                for target_device in (
+                    LASER_488,
+                    LASER_633,
+                    LASER_GALVO_X,
+                    LASER_GALVO_Y,
+                )
+            ]
+        )
     if is_np_rig(session.rig):
-        components.extend([
-            *get_ephys_assemblies(session),
-            get_basestation(slot=2, session=session),
-            get_basestation(slot=3, session=session),
-            EPHYS_DAQ,
-        ])
-        connections.extend([
-            aind_data_schema.components.connections.Connection(
-                source_device=source_device.name,
-                target_device=EPHYS_DAQ.name,
-            ) for source_device in (
-                SPEAKER,
-                MICROPHONE,
-                PHOTODIODE,
-            )
-        ])
+        components.extend(
+            [
+                *get_ephys_assemblies(session),
+                get_basestation(slot=2, session=session),
+                get_basestation(slot=3, session=session),
+                EPHYS_DAQ,
+            ]
+        )
+        connections.extend(
+            [
+                aind_data_schema.components.connections.Connection(
+                    source_device=source_device.name,
+                    target_device=EPHYS_DAQ.name,
+                )
+                for source_device in (
+                    SPEAKER,
+                    MICROPHONE,
+                    PHOTODIODE,
+                )
+            ]
+        )
     return components, connections
 
-def get_modalities(session: DynamicRoutingSession) -> list[aind_data_schema_models.modalities.Modality]:
+
+def get_modalities(
+    session: DynamicRoutingSession,
+) -> list[aind_data_schema_models.modalities.Modality]:
     modality = aind_data_schema_models.modalities.Modality
     modalities = [modality.BEHAVIOR, modality.BEHAVIOR_VIDEOS]
     if is_np_rig(session.rig):
         modalities.append(modality.ECEPHYS)
     return modalities
 
-def get_ephys_assemblies(session: DynamicRoutingSession) -> list[aind_data_schema.components.devices.EphysAssembly]:
+
+def get_ephys_assemblies(
+    session: DynamicRoutingSession,
+) -> list[aind_data_schema.components.devices.EphysAssembly]:
     """Get ephys assemblies for the session."""
     if not session.is_ephys:
         return []
@@ -589,7 +643,10 @@ def get_ephys_assemblies(session: DynamicRoutingSession) -> list[aind_data_schem
         )
     return assemblies
 
-def get_instrument_model(session: DynamicRoutingSession) -> aind_data_schema.core.instrument.Instrument:
+
+def get_instrument_model(
+    session: DynamicRoutingSession,
+) -> aind_data_schema.core.instrument.Instrument:
     """Get the Pydantic model corresponding to the 'instrument.json' for a given session."""
 
     return aind_data_schema.core.instrument.Instrument(
@@ -601,13 +658,16 @@ def get_instrument_model(session: DynamicRoutingSession) -> aind_data_schema.cor
         coordinate_system=RIG_COORDINATE_SYSTEM,
         temperature_control=None,
         notes=None,
-        connections=(components_and_connections := get_components_and_connections(session))[1],
+        connections=(
+            components_and_connections := get_components_and_connections(session)
+        )[1],
         components=components_and_connections[0],
     )
 
+
 if __name__ == "__main__":
-    session = DynamicRoutingSession('814666_20251107')
+    session = DynamicRoutingSession("814666_20251107")
     metadata = get_instrument_model(session)
     print(metadata.model_dump_json(indent=2))
-    with open('instrument_814666_2025-11-07.json', 'w') as f:
+    with open("instrument_814666_2025-11-07.json", "w") as f:
         f.write(metadata.model_dump_json(indent=2))

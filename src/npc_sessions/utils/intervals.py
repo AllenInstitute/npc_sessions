@@ -2,24 +2,23 @@ from __future__ import annotations
 
 import typing
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Literal, Union
+from typing import Literal, TypeAlias
 
 import hdmf.common
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import rich.progress
-from typing_extensions import TypeAlias
 
 from npc_sessions.utils.misc import get_taskcontrol_intervals_table_name
 
-Interval: TypeAlias = Union[
-    Sequence[float],
-    Mapping[Literal["start_time", "stop_time"], float],
-    pd.Series,
-    pd.DataFrame,
-]
-UnitSelection: TypeAlias = Union[int, str, Iterable[int], pd.DataFrame, pd.Series]
+Interval: TypeAlias = (
+    Sequence[float]
+    | Mapping[Literal["start_time", "stop_time"], float]
+    | pd.Series
+    | pd.DataFrame
+)
+UnitSelection: TypeAlias = int | str | Iterable[int] | pd.DataFrame | pd.Series
 
 
 def parse_intervals(
@@ -43,7 +42,7 @@ def parse_intervals(
             times = (t[0].data, t[1].data)
         if all(isinstance(t, Iterable) for t in times):
             t = typing.cast(tuple[Iterable[float], Iterable[float]], times)
-            _intervals.extend(parse_intervals(zip(*t)))
+            _intervals.extend(parse_intervals(zip(*t, strict=False)))
             continue
         if None in times or len(times) != 2 or sorted(times) != list(times):
             raise ValueError(
@@ -299,8 +298,11 @@ def add_vis_response_metric(session) -> None:
         response_intervals=zip(
             (start := trials.stim_start_time[:] + VIS_MIN_RESP_LATENCY),
             start + VIS_RESP_WINDOW,
+            strict=False,
         ),
-        baseline_intervals=zip(trials.start_time[:], trials.stim_start_time[:]),
+        baseline_intervals=zip(
+            trials.start_time[:], trials.stim_start_time[:], strict=False
+        ),
         as_spikes_per_second=True,
         as_normalized_ratio=False,
         unit_selection=units,
@@ -320,8 +322,11 @@ def add_vis_response_metric(session) -> None:
                         response_intervals=zip(
                             (start := t.stim_start_time[:] + VIS_MIN_RESP_LATENCY),
                             start + VIS_RESP_WINDOW,
+                            strict=False,
                         ),
-                        baseline_intervals=zip(t.start_time[:], t.stim_start_time[:]),
+                        baseline_intervals=zip(
+                            t.start_time[:], t.stim_start_time[:], strict=False
+                        ),
                         as_spikes_per_second=True,
                         as_normalized_ratio=False,
                         unit_selection=session.units[

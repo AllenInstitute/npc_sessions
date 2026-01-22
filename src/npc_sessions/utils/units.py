@@ -125,7 +125,7 @@ def get_per_trial_spike_times(
 
     # temp add columns for each interval with type list[float] (start, end)
     temp_col_prefix = "__temp_interval"
-    for start, end, col_name in zip(starts, ends, col_names):
+    for start, end, col_name in zip(starts, ends, col_names, strict=False):
         trials_df = trials_df.with_columns(
             pl.concat_list(start, end).alias(f"{temp_col_prefix}_{col_name}"),
         )
@@ -141,7 +141,7 @@ def get_per_trial_spike_times(
             raise ValueError(f"Missing unit_id in {row=}")
         results["unit_id"].extend([row["unit_id"]] * len(trials_df))
 
-        for start, end, col_name in zip(starts, ends, col_names):
+        for start, end, col_name in zip(starts, ends, col_names, strict=False):
             # get spike times with start:end interval for each row of the trials table
             spike_times = row["spike_times"]
             spikes_in_all_intervals: list[list[float | int] | float | int] = []
