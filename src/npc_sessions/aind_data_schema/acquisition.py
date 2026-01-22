@@ -45,7 +45,7 @@ def _merge_data_streams(data_streams: Iterable[aind_data_schema.core.acquisition
             itertools.chain.from_iterable(
                 ds.configurations for ds in data_streams
             )
-        ) or None,
+        ),
     )
 
 def get_acquisition_model(session: DynamicRoutingSession) -> aind_data_schema.core.acquisition.Acquisition:
