@@ -19,11 +19,8 @@ dependencies = [
     "DynamicRoutingTask<0.1.106",
     "numba>=0.57.1",
     "python-dotenv>=1.0.0",
-    "ndx-events>=0.2.0",
     "hdmf==3.14.6",
-    "ndx-pose>=0.1.1",
     "tables>=3.9.2",
-    "pydantic<=2.7.4",
     "npc-lims>=0.1.186",
     "npc-sync>=0.1.25",
     "npc-ephys>=0.1.35",
@@ -57,9 +54,9 @@ Issues = "https://github.com/AllenInstitute/npc_sessions/issues"
 
 [dependency-groups]
 metadata = [
-    "aind-data-schema>=2.0",
+    "aind-data-schema==2.4.0",
     "aind-data-access-api[docdb]>=1.2.2",
-    "aind-data-schema-models>=5.1.1",
+    "aind-data-schema-models==5.1.1",
 ]
 task_runner = ["poethepoet>=0.33.1"]
 linting = ["black>=25.1.0", "isort>=6.0.1", "ruff>=0.11.2"]
@@ -70,6 +67,7 @@ testing = [
     "pytest-xdist>=3.3.1",
 ]
 bump = ["bump-my-version>=1.1.1", "git-changelog>=2.5.3"]
+ndx_pose = ["ndx-pose==0.1.1"]
 
 [project.scripts]
 task = "poethepoet:main"

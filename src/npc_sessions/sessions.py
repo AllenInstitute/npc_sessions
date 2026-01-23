@@ -19,7 +19,6 @@ import h5py
 import hdmf
 import hdmf.common
 import hdmf_zarr
-import ndx_pose
 import npc_ephys
 import npc_io
 import npc_lims
@@ -3294,6 +3293,12 @@ class DynamicRoutingSession:
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
 
             if as_pose_estimation:
+                try:
+                    import ndx_pose
+                except ImportError:
+                    raise ImportError(
+                        "Optional dependencies are required to use pose estimation extension: install `npc_sessions[ndx_pose]`"
+                    )
                 pose_estimation_series = utils.get_pose_series_from_dataframe(
                     self.id, df, timestamps
                 )
