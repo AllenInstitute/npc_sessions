@@ -3,7 +3,6 @@ from __future__ import annotations
 import tempfile
 from typing import Literal
 
-import ndx_pose
 import npc_lims
 import npc_mvr
 import numpy as np
@@ -237,8 +236,14 @@ def get_dlc_session_model_dataframe_from_h5(
 
 def get_pose_series_from_dataframe(
     session: str, df: pd.DataFrame, video_timestamps: npt.NDArray[np.float64]
-) -> list[ndx_pose.pose.PoseEstimationSeries]:
+) -> list:
     # https://github.com/DeepLabCut/DLC2NWB/blob/main/dlc2nwb/utils.py#L189
+    try:
+        import ndx_pose
+    except ImportError:
+        raise ImportError(
+            "Optional dependencies are required to use pose estimation extension: install `npc_sessions[ndx_pose]`"
+        )
     if df.shape[0] != len(video_timestamps):
         raise ValueError(
             f"{session} pose dataframe has {df.shape[0]} rows, but {len(video_timestamps)} timestamps were provided."
