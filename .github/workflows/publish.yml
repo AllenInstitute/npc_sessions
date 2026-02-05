@@ -58,7 +58,7 @@ jobs:
         
     - name: Install dependencies
       run: |
-        uv sync
+        uv sync --extra metadata
         
     - name: Test, format, lint
       env:
