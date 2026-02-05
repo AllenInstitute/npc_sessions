@@ -72,17 +72,15 @@ def get_data_description_model(
     elif session.is_opto_control:
         tags.append("opto_control")
     if session.is_production:
-        tags.append("production")
+        tags.append("prod")
     else:
-        tags.append("development")
+        tags.append("dev")
     if session.is_injection_perturbation:
         tags.append("injection_perturbation")
     elif session.is_injection_control:
         tags.append("injection_control")
     if session.is_context_naive:
         tags.append("context_naive")
-    if session.is_naive:
-        tags.append("naive")
     if session.is_stage_5_passed:
         tags.append("stage_5_passed")
     if session.is_task and session.is_first_block_aud:

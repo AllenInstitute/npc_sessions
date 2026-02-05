@@ -644,9 +644,9 @@ class DynamicRoutingSession:
             else:
                 self.keywords.append("dynamic_routing")
             if self.is_production:
-                self.keywords.append("production")
+                self.keywords.append("prod")
             else:
-                self.keywords.append("development")
+                self.keywords.append("dev")
             if self.is_injection_perturbation:
                 self.keywords.append("injection_perturbation")
             elif self.is_injection_control:
