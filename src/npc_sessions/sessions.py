@@ -697,7 +697,7 @@ class DynamicRoutingSession:
     @property
     def epoch_tags(self) -> list[str]:
         if getattr(self, "_epoch_tags", None) is None:
-            self._epoch_tags: list[str] = list(set(self.epochs.tags))
+            self._epoch_tags: list[str] = list(set(self.epochs.tags or []))
         return self._epoch_tags
 
     @epoch_tags.setter
