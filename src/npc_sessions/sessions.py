@@ -2539,6 +2539,7 @@ class DynamicRoutingSession:
                     "W10DT713844": "NP2",
                     "W10DTM714205": "NP3",
                     "W10DT05516": "NP3",
+                    "DT703654": "NP2",
                 }[self.ephys_settings_xml_data.hostname.upper()]
             )
         raise AttributeError(
