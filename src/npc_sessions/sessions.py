@@ -3233,9 +3233,13 @@ class DynamicRoutingSession:
             if camera_name == "eye":
                 continue
             nwb_camera_name = self.mvr_to_nwb_camera_name[camera_name]
-            timestamps = next(
-                t for t in self._video_frame_times if nwb_camera_name in t.name
-            ).timestamps
+            try:
+                timestamps = next(
+                    t for t in self._video_frame_times if nwb_camera_name in t.name
+                ).timestamps
+            except StopIteration:
+                logger.info(f"Could not compute frametimes for {camera_name}")
+                continue # some sessions have face videos with no line events on sync
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
             try:
                 face_motion_svd = utils.get_facemap_output_from_s3(
@@ -3286,9 +3290,13 @@ class DynamicRoutingSession:
             except FileNotFoundError:
                 logger.warning(f"{camera_name} DLC has not been run for {self.id}")
                 continue
-            timestamps = next(
-                t for t in self._video_frame_times if nwb_camera_name in t.name
-            ).timestamps
+            try:
+                timestamps = next(
+                    t for t in self._video_frame_times if nwb_camera_name in t.name
+                ).timestamps
+            except StopIteration:
+                logger.info(f"Could not compute frametimes for {camera_name}")
+                continue # some sessions have face videos with no line events on sync
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
 
             if as_pose_estimation:
