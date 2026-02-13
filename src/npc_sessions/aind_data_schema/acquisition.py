@@ -117,7 +117,7 @@ def get_acquisition_model(
         acquisition_end_time=acquisition_end_time,
         experimenters=experimenters,
         protocol_id=None,
-        ethics_review_id=["2104"],
+        ethics_review_id=["2403"],
         instrument_id=instrument_id,
         acquisition_type=acquisition_type,
         notes=session.notes,
