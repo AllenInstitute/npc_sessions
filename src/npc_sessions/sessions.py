@@ -1724,13 +1724,15 @@ class DynamicRoutingSession:
         # but `pynwb.ecephys.FilteredEphys()` would work if otherwise unused
         band: str = "0.3-10 kHz"
         for probe in self.electrode_groups.values():
-            timing_info = next(
+            timing_info = next((
                 d
                 for d in self.ephys_timing_data
                 if d.device.name.endswith("AP")
                 and probe.name.lower() in d.device.name.lower()
-            )
-
+            ), None)
+            if timing_info is None: # this may happen when accessing raw adatap for surface channels
+                logger.debug(f'No timing info available for {probe} - will not be added to raw data NWB container')
+                continue
             electrode_table_region = hdmf.common.DynamicTableRegion(
                 name="electrodes",  # pynwb requires this not be renamed
                 description=f"channels with AP data on {probe.name}",
@@ -1771,12 +1773,15 @@ class DynamicRoutingSession:
         band: str = "0.5-500 Hz"
 
         for probe in self.electrode_groups.values():
-            timing_info = next(
+            timing_info = next((
                 d
                 for d in self.ephys_timing_data
                 if d.device.name.endswith("LFP")
                 and probe.name.lower() in d.device.name.lower()
-            )
+            ), None)
+            if timing_info is None: # this may happen when accessing raw data for surface channels
+                logger.debug(f'No timing info available for {probe} - will not be added to raw data NWB container')
+                continue
 
             electrode_table_region = hdmf.common.DynamicTableRegion(
                 name="electrodes",  # pynwb requires this not be renamed
