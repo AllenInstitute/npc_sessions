@@ -1872,24 +1872,29 @@ wheels = [
 
 [[package]]
 name = "npc-ephys"
-version = "0.1.35"
+version = "0.1.41"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "hdmf-zarr-bjh" },
     { name = "npc-io" },
     { name = "npc-lims" },
     { name = "npc-sync" },
     { name = "pandas" },
     { name = "polars" },
     { name = "pyarrow" },
-    { name = "pynwb" },
     { name = "tqdm" },
     { name = "wavpack-numcodecs" },
     { name = "zarr" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b7/d9/8885758f52a4cd46f75b0122ce0fd372a00b9babae1d4599bc4bdb58b150/npc_ephys-0.1.35.tar.gz", hash = "sha256:9074cb7b1aed187eb47f3ce955162593928f7b3aede4302d5c466d4824a4ae21", size = 32914 }
+sdist = { url = "https://files.pythonhosted.org/packages/33/32/102b771d5aa00724cdbdb2fb333164ea5d0ca762cbbbd1a3c50b82d1fbd6/npc_ephys-0.1.41.tar.gz", hash = "sha256:5a72ea9a666a7886a62da629c24c9a1d3193553fb3a5659c5bb81e02d6e28932", size = 33810 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/39/542c79fbe1784bf0fef4cac0fadab77dfd123e639bf6c67121b7270e3e50/npc_ephys-0.1.35-py3-none-any.whl", hash = "sha256:b3f3e8f84129858f90af086062451fc2ab6a40650be8731e706b6884c8b47346", size = 33489 },
+    { url = "https://files.pythonhosted.org/packages/4c/16/748170846f24a9573eb8724e4276eefe0e402e2e4dba772b7d0070e388ba/npc_ephys-0.1.41-py3-none-any.whl", hash = "sha256:d8090ad2b9e3ce7568f1fc4418cbcbe155108ed79ab1221ade5eb20e089a3b17", size = 34459 },
+]
+
+[package.optional-dependencies]
+nwb = [
+    { name = "hdmf-zarr-bjh" },
+    { name = "pynwb" },
+    { name = "zarr" },
 ]
 
 [[package]]
@@ -1984,7 +1989,7 @@ dependencies = [
     { name = "dynamicroutingtask" },
     { name = "hdmf" },
     { name = "matplotlib" },
-    { name = "npc-ephys" },
+    { name = "npc-ephys", extra = ["nwb"] },
     { name = "npc-io" },
     { name = "npc-lims" },
     { name = "npc-mvr" },
@@ -2045,7 +2050,7 @@ requires-dist = [
     { name = "hdmf", specifier = "==3.14.6" },
     { name = "matplotlib", specifier = ">=3.7.2" },
     { name = "ndx-pose", marker = "extra == 'ndx-pose'", specifier = "==0.1.1" },
-    { name = "npc-ephys", specifier = ">=0.1.35" },
+    { name = "npc-ephys", extras = ["nwb"], specifier = ">=0.1.41" },
     { name = "npc-io", specifier = ">=0.1.32" },
     { name = "npc-lims", specifier = ">=0.1.186" },
     { name = "npc-mvr", specifier = ">=0.1.15" },
