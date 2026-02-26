@@ -11,16 +11,15 @@ import pandas as pd
 import upath
 import zarr
 
-# nice little trick from carter peene
 MODEL_FUNCTION_MAPPING = {
     "dlc_eye": npc_lims.get_dlc_eye_s3_paths,
     "dlc_side": npc_lims.get_dlc_side_s3_paths,
     "dlc_face": npc_lims.get_dlc_face_s3_paths,
 }
 
-FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face")
-LP_CAMERA_NAMES = ("side", "face")
-LP_MAPPING = {"behavior": "side", "face": "face"}
+FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face", "nose")
+LP_CAMERA_NAMES = ("side", "face", "nose")
+LP_MAPPING = {"behavior": "side", "face": "face", "nose": "nose"}
 LP_RESULT_TYPES = ("predictions", "error", "temporal_norm")
 LP_RESULT_DESCRIPTIONS = {
     "error": "PCA error. Pose PCA loss is the pixel error between the original pose prediction and the reconstruction of the same pose from a learnt low-dimensional representation of the body parts",
@@ -28,6 +27,19 @@ LP_RESULT_DESCRIPTIONS = {
 }
 LP_VIDEO_FEATURES_MAPPING = {
     "side": (
+        "eye_top_l",
+        "eye_bottom_l",
+        "whisker_pad_l_top",
+        "whisker_pad_l_side",
+        "ear_tip_l",
+        "ear_base_l",
+        "nostril_l",
+        "nose_tip",
+        "jaw",
+        "tongue_base_l",
+        "tongue_tip",
+    ),
+    "nose": (
         "eye_top_l",
         "eye_bottom_l",
         "whisker_pad_l_top",
