@@ -1724,14 +1724,21 @@ class DynamicRoutingSession:
         # but `pynwb.ecephys.FilteredEphys()` would work if otherwise unused
         band: str = "0.3-10 kHz"
         for probe in self.electrode_groups.values():
-            timing_info = next((
-                d
-                for d in self.ephys_timing_data
-                if d.device.name.endswith("AP")
-                and probe.name.lower() in d.device.name.lower()
-            ), None)
-            if timing_info is None: # this may happen when accessing raw adatap for surface channels
-                logger.debug(f'No timing info available for {probe} - will not be added to raw data NWB container')
+            timing_info = next(
+                (
+                    d
+                    for d in self.ephys_timing_data
+                    if d.device.name.endswith("AP")
+                    and probe.name.lower() in d.device.name.lower()
+                ),
+                None,
+            )
+            if (
+                timing_info is None
+            ):  # this may happen when accessing raw adatap for surface channels
+                logger.debug(
+                    f"No timing info available for {probe} - will not be added to raw data NWB container"
+                )
                 continue
             electrode_table_region = hdmf.common.DynamicTableRegion(
                 name="electrodes",  # pynwb requires this not be renamed
@@ -1773,14 +1780,21 @@ class DynamicRoutingSession:
         band: str = "0.5-500 Hz"
 
         for probe in self.electrode_groups.values():
-            timing_info = next((
-                d
-                for d in self.ephys_timing_data
-                if d.device.name.endswith("LFP")
-                and probe.name.lower() in d.device.name.lower()
-            ), None)
-            if timing_info is None: # this may happen when accessing raw data for surface channels
-                logger.debug(f'No timing info available for {probe} - will not be added to raw data NWB container')
+            timing_info = next(
+                (
+                    d
+                    for d in self.ephys_timing_data
+                    if d.device.name.endswith("LFP")
+                    and probe.name.lower() in d.device.name.lower()
+                ),
+                None,
+            )
+            if (
+                timing_info is None
+            ):  # this may happen when accessing raw data for surface channels
+                logger.debug(
+                    f"No timing info available for {probe} - will not be added to raw data NWB container"
+                )
                 continue
 
             electrode_table_region = hdmf.common.DynamicTableRegion(
@@ -3244,7 +3258,7 @@ class DynamicRoutingSession:
                 ).timestamps
             except StopIteration:
                 logger.info(f"Could not compute frametimes for {camera_name}")
-                continue # some sessions have face videos with no line events on sync
+                continue  # some sessions have face videos with no line events on sync
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
             try:
                 face_motion_svd = utils.get_facemap_output_from_s3(
@@ -3301,7 +3315,7 @@ class DynamicRoutingSession:
                 ).timestamps
             except StopIteration:
                 logger.info(f"Could not compute frametimes for {camera_name}")
-                continue # some sessions have face videos with no line events on sync
+                continue  # some sessions have face videos with no line events on sync
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
 
             if as_pose_estimation:
