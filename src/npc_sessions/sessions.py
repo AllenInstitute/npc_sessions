@@ -2527,8 +2527,12 @@ class DynamicRoutingSession:
             logger.warning(
                 f"{self.id} has multiple {self.task_stim_name} stim files. Only the largest will be used."
             )
+            if stim_paths[0].protocol == 's3':
+                _size = lambda p: p.stat()['size']
+            else:
+                _size = lambda p: p.stat().st_size
             for extra_task in sorted(
-                tasks, key=lambda p: p.stat()["size"], reverse=True
+                tasks, key=_size, reverse=True
             )[1:]:
                 stim_paths.remove(extra_task)
         return tuple(stim_paths)
