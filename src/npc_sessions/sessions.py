@@ -1564,6 +1564,8 @@ class DynamicRoutingSession:
             & (df["presence_ratio"] >= 0.7)
             & (df["decoder_label"] != "noise")
         )
+        # make a copy of default_qc with a more-intuitive name, keeping default_qc for legacy compat:
+        units["is_qc_pass"] = units["default_qc"]
 
         return units
 
