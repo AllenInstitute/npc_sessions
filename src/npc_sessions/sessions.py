@@ -3263,7 +3263,8 @@ class DynamicRoutingSession:
                 ).timestamps
             except StopIteration:
                 logger.info(f"Could not compute frametimes for {camera_name}")
-                continue  # some sessions have face videos with no line events on sync
+                continue # some sessions have face videos with no line events on sync
+            timestamps = np.asarray(timestamps)
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
             try:
                 face_motion_svd = utils.get_facemap_output_from_s3(
@@ -3320,7 +3321,8 @@ class DynamicRoutingSession:
                 ).timestamps
             except StopIteration:
                 logger.info(f"Could not compute frametimes for {camera_name}")
-                continue  # some sessions have face videos with no line events on sync
+                continue # some sessions have face videos with no line events on sync
+            timestamps = np.asarray(timestamps)
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
 
             if as_pose_estimation:
@@ -3423,6 +3425,10 @@ class DynamicRoutingSession:
                 column_descriptions["duration"] = (
                     "length of time the solenoid valve controlling water reward delivery to the subject was opened, in seconds"
                 )
+            else:
+                df = pd.DataFrame(
+                    dict(timestamps=[], duration=[], is_solenoid_time=[])
+                )
         else:
             timestamps: list[npt.NDArray[np.floating]] = []
             for stim_file, stim_data in self.stim_data_without_timing_issues.items():
@@ -3440,6 +3446,11 @@ class DynamicRoutingSession:
                     )
                 )
             df = pd.DataFrame(dict(timestamps=timestamps, is_solenoid_time=False))
+        if df.empty:
+            return pynwb.core.DynamicTable(
+                name="rewards",
+                description="water rewards delivered to the subject",
+            )
         return pynwb.core.DynamicTable.from_dataframe(
             df=df,
             name="rewards",
