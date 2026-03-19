@@ -2450,7 +2450,10 @@ class DynamicRoutingSession:
             raise ValueError(f"{self.id} is not a session with sync data")
         paths = self.get_sync_paths()
         if not len(paths) == 1:
-            raise ValueError(f"Expected 1 sync file, found {paths = }")
+            logger.warning(
+                f"Expected 1 sync file, found {len(paths)}. Using the largest: {paths}"
+            )
+            paths = (sorted(paths, key=lambda p: p.stat().st_size, reverse=True)[0],)
         self._sync_path = paths[0]
         return self._sync_path
 
