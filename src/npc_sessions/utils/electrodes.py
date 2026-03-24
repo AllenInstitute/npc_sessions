@@ -46,6 +46,14 @@ def get_tissuecyte_electrodes_table(
         },
         inplace=True,
     )
+    # an upstream bug leaves ECT structure with layers: they need to be stripped
+    session_electrodes["structure"] = session_electrodes["structure"].where(
+        ~session_electrodes["structure"].str.startswith("ECT"), other="ECT"
+    )
+    if "raw_structure" in session_electrodes.columns:
+        session_electrodes["raw_structure"] = session_electrodes["raw_structure"].where(
+            ~session_electrodes["raw_structure"].str.startswith("ECT"), other="ECT"
+        )
     for column in ("x", "y", "z"):
         # -1 is code for "not inserted": make this NaN
         session_electrodes[column] = session_electrodes[column].replace(-1, np.nan)
