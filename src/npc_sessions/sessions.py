@@ -1452,7 +1452,7 @@ class DynamicRoutingSession:
                 "y",
                 "z",
             ) + column_names
-            ccf_df = utils.get_tissuecyte_electrodes_table(self.id)
+            ccf_df = utils.get_electrodes_table(self.id)
             if "raw_structure" in ccf_df:
                 column_names = column_names + ("raw_structure",)
         column_description = {
@@ -1543,7 +1543,7 @@ class DynamicRoutingSession:
         if self.is_annotated:
             units = npc_ephys.add_electrode_annotations_to_units(
                 units=units,
-                annotated_electrodes=utils.get_tissuecyte_electrodes_table(self.id),
+                annotated_electrodes=utils.get_electrodes_table(self.id),
             )
         if self.is_task:
             # obs_intervals are needed for calculating spike-counts correctly
@@ -2016,6 +2016,11 @@ class DynamicRoutingSession:
             FileNotFoundError, ValueError, npc_lims.MissingCredentials
         ):
             if npc_lims.get_tissuecyte_annotation_files_from_s3(self.id):
+                return True
+        with contextlib.suppress(
+            FileNotFoundError, ValueError, npc_lims.MissingCredentials
+        ):
+            if npc_lims.get_ibl_annotation_files_from_s3(self.id):
                 return True
         return False
 
@@ -2937,7 +2942,7 @@ class DynamicRoutingSession:
             return ()
         return tuple(
             npc_session.ProbeRecord(probe)
-            for probe in utils.get_tissuecyte_electrodes_table(
+            for probe in utils.get_electrodes_table(
                 self.id
             ).group_name.unique()
         )
