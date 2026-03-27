@@ -19,7 +19,7 @@ MODEL_FUNCTION_MAPPING = {
 
 FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face", "nose")
 LP_CAMERA_NAMES = ("side", "face", "nose")
-LP_MAPPING = {"behavior": "side", "face": "face", "nose": "nose"}
+LP_MAPPING = {"behavior": "side", "face": "face"}#, "nose": "nose"}
 LP_RESULT_TYPES = ("predictions", "error", "temporal_norm")
 LP_RESULT_DESCRIPTIONS = {
     "error": "PCA error. Pose PCA loss is the pixel error between the original pose prediction and the reconstruction of the same pose from a learnt low-dimensional representation of the body parts",
