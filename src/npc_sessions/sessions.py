@@ -3167,9 +3167,16 @@ class DynamicRoutingSession:
                 continue
 
             nwb_camera_name = self.mvr_to_nwb_camera_name[camera_name]
-            timestamps = next(
-                t for t in self._video_frame_times if nwb_camera_name in t.name
-            ).timestamps
+            if camera_name not in utils.LP_MAPPING:
+                logger.info(f"{self.id} camera {camera_name!r} not in LP_MAPPING, skipping LP")
+                continue
+            _matching_ts = next(
+                (t for t in self._video_frame_times if nwb_camera_name in t.name), None
+            )
+            if _matching_ts is None:
+                logger.warning(f"{self.id} no video frame times found for {nwb_camera_name}, skipping LP")
+                continue
+            timestamps = _matching_ts.timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
 
             df = pd.DataFrame()
@@ -3178,7 +3185,7 @@ class DynamicRoutingSession:
                     result_df = utils.get_LPFaceParts_result_dataframe(
                         self.id, utils.LP_MAPPING[camera_name], result_name
                     )
-                except FileNotFoundError as exc:
+                except (FileNotFoundError, ValueError) as exc:
                     logging.info(repr(exc))
                     return ()
                 if len(timestamps) != len(result_df):
