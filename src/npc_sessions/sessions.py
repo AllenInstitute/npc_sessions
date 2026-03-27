@@ -2013,15 +2013,9 @@ class DynamicRoutingSession:
         if self.info:
             return self.info.is_annotated
         with contextlib.suppress(
-            FileNotFoundError, ValueError, npc_lims.MissingCredentials
+            FileNotFoundError, ValueError,
         ):
-            if npc_lims.get_tissuecyte_annotation_files_from_s3(self.id):
-                return True
-        with contextlib.suppress(
-            FileNotFoundError, ValueError, npc_lims.MissingCredentials
-        ):
-            if npc_lims.get_ibl_annotation_files_from_s3(self.id):
-                return True
+            utils.electrodes.get_electrodes_table(self.id)
         return False
 
     @npc_io.cached_property
