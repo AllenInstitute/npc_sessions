@@ -1847,6 +1847,9 @@ class DynamicRoutingSession:
                 f"{self.id} has no LFP subsampled results. Session either has not been processed or failed in codeocean"
             )
             return None
+        except (ValueError, IndexError) as exc:
+            logger.warning(f"{self.id} failed to load LFP: {exc!r}")
+            return None
 
         for probe in self.electrode_groups.values():
             probe_subsampled_LFP_result = tuple(
