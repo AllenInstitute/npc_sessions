@@ -3473,8 +3473,12 @@ class DynamicRoutingSession:
             ),
             frames,
         )
+        sorted_unique_times = np.sort(np.unique(times))
+        df = pd.DataFrame(dict(timestamps=sorted_unique_times))
+        if df.empty:
+            df = pd.DataFrame({"timestamps": pd.Series(dtype=float)})
         return pynwb.core.DynamicTable.from_dataframe(
-            df=pd.DataFrame(dict(timestamps=np.sort(np.unique(times)))),
+            df=df,
             name="quiescent_interval_violations",
             table_description="times at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial",
             column_descriptions={
