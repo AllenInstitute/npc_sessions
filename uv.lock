@@ -1982,7 +1982,7 @@ wheels = [
 
 [[package]]
 name = "npc-sessions"
-version = "0.0.277"
+version = "0.0.278"
 source = { editable = "." }
 dependencies = [
     { name = "aind-session" },

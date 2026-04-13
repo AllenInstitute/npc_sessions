@@ -2016,7 +2016,8 @@ class DynamicRoutingSession:
         if self.info:
             return self.info.is_annotated
         with contextlib.suppress(
-            FileNotFoundError, ValueError,
+            FileNotFoundError,
+            ValueError,
         ):
             utils.electrodes.get_electrodes_table(self.id)
         return False
@@ -2529,13 +2530,11 @@ class DynamicRoutingSession:
             logger.warning(
                 f"{self.id} has multiple {self.task_stim_name} stim files. Only the largest will be used."
             )
-            if stim_paths[0].protocol == 's3':
-                _size = lambda p: p.stat()['size']
+            if stim_paths[0].protocol == "s3":
+                _size = lambda p: p.stat()["size"]
             else:
                 _size = lambda p: p.stat().st_size
-            for extra_task in sorted(
-                tasks, key=_size, reverse=True
-            )[1:]:
+            for extra_task in sorted(tasks, key=_size, reverse=True)[1:]:
                 stim_paths.remove(extra_task)
         return tuple(stim_paths)
 
@@ -2939,9 +2938,7 @@ class DynamicRoutingSession:
             return ()
         return tuple(
             npc_session.ProbeRecord(probe)
-            for probe in utils.get_electrodes_table(
-                self.id
-            ).group_name.unique()
+            for probe in utils.get_electrodes_table(self.id).group_name.unique()
         )
 
     @npc_io.cached_property
@@ -3168,13 +3165,17 @@ class DynamicRoutingSession:
 
             nwb_camera_name = self.mvr_to_nwb_camera_name[camera_name]
             if camera_name not in utils.LP_MAPPING:
-                logger.info(f"{self.id} camera {camera_name!r} not in LP_MAPPING, skipping LP")
+                logger.info(
+                    f"{self.id} camera {camera_name!r} not in LP_MAPPING, skipping LP"
+                )
                 continue
             _matching_ts = next(
                 (t for t in self._video_frame_times if nwb_camera_name in t.name), None
             )
             if _matching_ts is None:
-                logger.warning(f"{self.id} no video frame times found for {nwb_camera_name}, skipping LP")
+                logger.warning(
+                    f"{self.id} no video frame times found for {nwb_camera_name}, skipping LP"
+                )
                 continue
             timestamps = _matching_ts.timestamps
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
@@ -3276,7 +3277,7 @@ class DynamicRoutingSession:
                 ).timestamps
             except StopIteration:
                 logger.info(f"Could not compute frametimes for {camera_name}")
-                continue # some sessions have face videos with no line events on sync
+                continue  # some sessions have face videos with no line events on sync
             timestamps = np.asarray(timestamps)
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
             try:
@@ -3334,7 +3335,7 @@ class DynamicRoutingSession:
                 ).timestamps
             except StopIteration:
                 logger.info(f"Could not compute frametimes for {camera_name}")
-                continue # some sessions have face videos with no line events on sync
+                continue  # some sessions have face videos with no line events on sync
             timestamps = np.asarray(timestamps)
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
 
@@ -3439,9 +3440,7 @@ class DynamicRoutingSession:
                     "length of time the solenoid valve controlling water reward delivery to the subject was opened, in seconds"
                 )
             else:
-                df = pd.DataFrame(
-                    dict(timestamps=[], duration=[], is_solenoid_time=[])
-                )
+                df = pd.DataFrame(dict(timestamps=[], duration=[], is_solenoid_time=[]))
         else:
             timestamps: list[npt.NDArray[np.floating]] = []
             for stim_file, stim_data in self.stim_data_without_timing_issues.items():

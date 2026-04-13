@@ -1,10 +1,10 @@
 from __future__ import annotations
-import contextlib
 
+import contextlib
 import functools
 import json
 import logging
-    
+
 import npc_lims
 import npc_session
 import numpy as np
@@ -16,9 +16,12 @@ TISSUECYTE_MICRONS_PER_PIXEL = 25
 
 logger = logging.getLogger(__name__)
 
+
 class NoElectrodeDataError(ValueError):
     """Raised when no electrode annotation data can be found for a session."""
+
     pass
+
 
 @functools.cache
 def get_electrodes_table(session: str | npc_session.SessionRecord) -> pd.DataFrame:
@@ -32,33 +35,40 @@ def get_electrodes_table(session: str | npc_session.SessionRecord) -> pd.DataFra
         return get_tissuecyte_electrodes_table(session)
     with contextlib.suppress(NoElectrodeDataError):
         return get_ibl_electrodes_table(session)
-    raise NoElectrodeDataError(f"No TissueCyte or IBL electrode annotation data found for session {session}")
+    raise NoElectrodeDataError(
+        f"No TissueCyte or IBL electrode annotation data found for session {session}"
+    )
+
 
 @functools.cache
 def get_structure_tree_df() -> pd.DataFrame:
-    return pd.read_csv("https://raw.githubusercontent.com/cortex-lab/allenCCF/refs/heads/master/structure_tree_safe_2017.csv")
+    return pd.read_csv(
+        "https://raw.githubusercontent.com/cortex-lab/allenCCF/refs/heads/master/structure_tree_safe_2017.csv"
+    )
+
 
 def strip_layer_from_area(areastr: str) -> str:
-    areastr = areastr.split('-')[0]
-    #remove layer stuff
+    areastr = areastr.split("-")[0]
+    # remove layer stuff
     structure_tree_df = get_structure_tree_df()
-    areaname = structure_tree_df[structure_tree_df['acronym']==areastr]['name'].values
-    if len(areaname)==0:
+    areaname = structure_tree_df[structure_tree_df["acronym"] == areastr]["name"].values
+    if len(areaname) == 0:
         return areastr
     else:
         areaname = areaname[0]
 
-    if 'layer' in areaname:
-        layer = areaname.split('layer')[-1].split(' ')[-1]
-        areastr = areastr.replace(layer, '')
+    if "layer" in areaname:
+        layer = areaname.split("layer")[-1].split(" ")[-1]
+        areastr = areastr.replace(layer, "")
 
     # the above logic fails for some areas
-    for prefix in ['ACAd', 'ACAv', 'MOp', 'ECT']:
+    for prefix in ["ACAd", "ACAv", "MOp", "ECT"]:
         if areastr.startswith(prefix):
             areastr = prefix
             break
 
     return areastr
+
 
 def get_tissuecyte_electrodes_table(
     session: str | npc_session.SessionRecord,
@@ -75,7 +85,9 @@ def get_tissuecyte_electrodes_table(
     try:
         electrode_files = npc_lims.get_tissuecyte_annotation_files_from_s3(session)
     except FileNotFoundError:
-        raise NoElectrodeDataError(f"No TissueCyte electrode annotation files found for session {session}") from None
+        raise NoElectrodeDataError(
+            f"No TissueCyte electrode annotation files found for session {session}"
+        ) from None
 
     session_electrodes = pd.DataFrame()
 
@@ -130,8 +142,9 @@ def get_tissuecyte_electrodes_table(
     ]
     return session_electrodes
 
+
 def get_ibl_electrodes_table(
-    session: str | npc_session.SessionRecord,    
+    session: str | npc_session.SessionRecord,
 ) -> pd.DataFrame:
     """Get annotation data for each electrode (channel) on each probe inserted in
     a session. Column names are ready for insertion into nwb ElectrodeTable.
@@ -144,16 +157,17 @@ def get_ibl_electrodes_table(
     try:
         ccf_df = get_ibl_ccf_channel_locations_df(session)
     except FileNotFoundError:
-        raise NoElectrodeDataError(f"No IBL electrode annotation files found for session {session}") from None
+        raise NoElectrodeDataError(
+            f"No IBL electrode annotation files found for session {session}"
+        ) from None
     return (
-        ccf_df
-        .join(
+        ccf_df.join(
             pl.DataFrame(get_structure_tree_df()[["acronym", "name", "id"]]),
             left_on="brain_region_id",
             right_on="id",
             how="left",
         )
-        .drop('x', 'y', 'z') # original IBL coordinate values
+        .drop("x", "y", "z")  # original IBL coordinate values
         .rename(
             {
                 "probe": "group_name",
@@ -164,17 +178,20 @@ def get_ibl_electrodes_table(
             }
         )
         .with_columns(
-            pl.col('structure').map_elements(strip_layer_from_area, return_dtype=pl.String).alias('location')
+            pl.col("structure")
+            .map_elements(strip_layer_from_area, return_dtype=pl.String)
+            .alias("location")
         )
         .with_columns(
-            pl.col('structure').fill_null(pl.lit('out of brain')),
-            pl.col('location').fill_null(pl.lit('out of brain')),
-            pl.col('x').fill_null(pl.lit(float('nan'))),
-            pl.col('y').fill_null(pl.lit(float('nan'))),
-            pl.col('z').fill_null(pl.lit(float('nan'))),
+            pl.col("structure").fill_null(pl.lit("out of brain")),
+            pl.col("location").fill_null(pl.lit("out of brain")),
+            pl.col("x").fill_null(pl.lit(float("nan"))),
+            pl.col("y").fill_null(pl.lit(float("nan"))),
+            pl.col("z").fill_null(pl.lit(float("nan"))),
         )
         .select("group_name", "channel", "location", "structure", "x", "y", "z")
     ).to_pandas()
+
 
 def get_ibl_ccf_channel_locations_df(
     session: str | npc_session.SessionRecord,
@@ -184,7 +201,7 @@ def get_ibl_ccf_channel_locations_df(
 
     Columns: probe, channel, x, y, z, axial, lateral, brain_region_id, brain_region,
     ccf_ap, ccf_dv, ccf_ml (all CCF values in µm).
-    
+
     Examples:
         >>> df = get_ibl_ccf_channel_locations_df('752311_2025-01-22')
         >>> assert len(df) > 0
@@ -194,16 +211,16 @@ def get_ibl_ccf_channel_locations_df(
     ccf_dv = (pl.col("z") * -1000).alias("ccf_dv")
     ccf_ml = (pl.col("x") * -1000).alias("ccf_ml")
 
-    get_ibl_annotation_files_from_s3 = getattr(npc_lims, "get_ibl_annotation_files_from_s3", None)
+    get_ibl_annotation_files_from_s3 = getattr(
+        npc_lims, "get_ibl_annotation_files_from_s3", None
+    )
     if get_ibl_annotation_files_from_s3 is not None:
         annotation_files = get_ibl_annotation_files_from_s3(session)
     else:
         session = npc_session.SessionRecord(session)
         # dir is organized as <root>/<subject_id>/<session_id>/<probe_name>/<file_name>.json
         annotation_files = tuple(
-            upath.UPath(
-                "s3://aind-scratch-data/dynamic-routing/ibl-gui-output"
-            ).glob(
+            upath.UPath("s3://aind-scratch-data/dynamic-routing/ibl-gui-output").glob(
                 f"{session.subject}/*{session}*/*/*.json"
             )
         )
@@ -214,7 +231,7 @@ def get_ibl_ccf_channel_locations_df(
         data: dict[str, dict] = json.loads(path.read_text())
         rows = [
             {
-                "channel": int(key.split("_")[1]), 
+                "channel": int(key.split("_")[1]),
                 **values,
             }
             for key, values in data.items()
