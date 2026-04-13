@@ -194,9 +194,10 @@ def get_ibl_ccf_channel_locations_df(
     ccf_dv = (pl.col("z") * -1000).alias("ccf_dv")
     ccf_ml = (pl.col("x") * -1000).alias("ccf_ml")
 
-    try:
-        annotation_files = npc_lims.get_ibl_annotation_files_from_s3(session)
-    except AttributeError:
+    get_ibl_annotation_files_from_s3 = getattr(npc_lims, "get_ibl_annotation_files_from_s3", None)
+    if get_ibl_annotation_files_from_s3 is not None:
+        annotation_files = get_ibl_annotation_files_from_s3(session)
+    else:
         session = npc_session.SessionRecord(session)
         # dir is organized as <root>/<subject_id>/<session_id>/<probe_name>/<file_name>.json
         annotation_files = tuple(
@@ -230,7 +231,8 @@ def get_ibl_ccf_channel_locations_df(
             )
         )
         for col in ("ccf_ap", "ccf_dv", "ccf_ml"):
-            if df[col].mean() < 0: # type: ignore[unsupported-operator]
+            mean_val = df[col].mean()
+            if mean_val is not None and mean_val < 0:
                 logger.warning(
                     f"Mean of {col} coordinates in {probe_name} IBL GUI annotations for {session} have likely been updated and no longer need negating. Negation will be reverted automatically."
                 )
