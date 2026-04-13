@@ -232,7 +232,7 @@ def get_ibl_ccf_channel_locations_df(
         )
         for col in ("ccf_ap", "ccf_dv", "ccf_ml"):
             mean_val = df[col].mean()
-            if mean_val is not None and mean_val < 0:
+            if isinstance(mean_val, (int, float)) and mean_val < 0:
                 logger.warning(
                     f"Mean of {col} coordinates in {probe_name} IBL GUI annotations for {session} have likely been updated and no longer need negating. Negation will be reverted automatically."
                 )
