@@ -2681,7 +2681,7 @@ class DynamicRoutingSession:
         """Frame times dict for all stims, containing time arrays or Exceptions."""
         frame_times = npc_stim.get_stim_frame_times(
             *self.stim_paths,  # no longer using cached data
-            sync=self.sync_data,
+            sync=self.sync_path,
             frame_time_type="display_time",
         )
         return {npc_io.from_pathlike(k).stem: v for k, v in frame_times.items()}
@@ -2750,7 +2750,7 @@ class DynamicRoutingSession:
         )
         return tuple(
             npc_ephys.get_ephys_timing_on_sync(
-                self.sync_data,
+                self.sync_path,
                 devices=pxi_data,
             )
         )
@@ -3458,7 +3458,7 @@ class DynamicRoutingSession:
                     npc_stim.safe_index(
                         npc_stim.get_flip_times(
                             stim=stim_path,
-                            sync=self.sync_data if self.is_sync else None,
+                            sync=self.sync_path if self.is_sync else None,
                         ),
                         frame_idx,
                     )
@@ -3484,7 +3484,7 @@ class DynamicRoutingSession:
         times: npt.NDArray[np.floating] = npc_stim.safe_index(
             npc_stim.get_input_data_times(
                 stim=self.task_path,
-                sync=self.sync_data if self.is_sync else None,
+                sync=self.sync_path if self.is_sync else None,
             ),
             frames,
         )
