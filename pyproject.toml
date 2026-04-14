@@ -22,7 +22,7 @@ dependencies = [
     "hdmf==3.14.6",
     "tables>=3.9.2",
     "npc-lims>=0.1.193",
-    "npc-sync>=0.2.3",
+    "npc-sync>=0.2.4",
     "npc-ephys[nwb]>=0.1.45",
     "npc-stim>=0.1.20",
     "npc-samstim>=0.1.13",
