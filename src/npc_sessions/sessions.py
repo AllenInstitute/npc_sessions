@@ -1004,18 +1004,18 @@ class DynamicRoutingSession:
             block_performance["n_trials"] = block_trials.height
             block_performance["n_responses"] = float(block_trials["is_response"].sum())
             block_performance["n_hits"] = float(block_trials["is_hit"].sum())
-            block_performance["n_contingent_rewards"] = float(block_trials[
-                "is_contingent_reward"
-            ].sum())
+            block_performance["n_contingent_rewards"] = float(
+                block_trials["is_contingent_reward"].sum()
+            )
             block_performance["hit_rate"] = float(block_trials["is_hit"].sum()) / (
                 float(block_trials["is_go"].sum()) or float("nan")
             )
-            block_performance["false_alarm_rate"] = float(block_trials[
-                "is_false_alarm"
-            ].sum()) / (float(block_trials["is_nogo"].sum()) or float("nan"))
-            block_performance["catch_response_rate"] = float(block_trials[
-                "is_response"
-            ].sum()) / (float(block_trials["is_catch"].sum()) or float("nan"))
+            block_performance["false_alarm_rate"] = float(
+                block_trials["is_false_alarm"].sum()
+            ) / (float(block_trials["is_nogo"].sum()) or float("nan"))
+            block_performance["catch_response_rate"] = float(
+                block_trials["is_response"].sum()
+            ) / (float(block_trials["is_catch"].sum()) or float("nan"))
             for stim, target in itertools.product(
                 ("vis", "aud"), ("target", "nontarget")
             ):
