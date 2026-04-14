@@ -946,13 +946,15 @@ class DynamicRoutingSession:
             ) | (pl.col("is_aud_stim") & pl.col("is_vis_rewarded"))
             block_performance["cross_modality_dprime"] = (
                 DynamicRoutingAnalysisUtils.calcDprime(
-                    hitRate=block_trials["is_hit"].sum()
-                    / (block_trials["is_go"].sum() or float("nan")),
-                    falseAlarmRate=(
-                        a := block_trials.filter(
-                            nonrewarded_modality & pl.col("is_target")
-                        )
-                    )["is_false_alarm"].sum()
+                    hitRate=float(block_trials["is_hit"].sum())
+                    / (float(block_trials["is_go"].sum()) or float("nan")),
+                    falseAlarmRate=float(
+                        (
+                            a := block_trials.filter(
+                                nonrewarded_modality & pl.col("is_target")
+                            )
+                        )["is_false_alarm"].sum()
+                    )
                     / (a.height or float("nan")),
                     goTrials=block_trials["is_go"].sum(),
                     nogoTrials=a.height,
@@ -971,45 +973,49 @@ class DynamicRoutingSession:
                 )
 
             block_performance["vis_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
-                hitRate=(a := block_trials.filter(pl.col("is_vis_target")))[
-                    "is_hit"
-                ].sum()
+                hitRate=float(
+                    (a := block_trials.filter(pl.col("is_vis_target")))["is_hit"].sum()
+                )
                 / (a.height or float("nan")),
-                falseAlarmRate=(b := block_trials.filter(pl.col("is_vis_nontarget")))[
-                    "is_false_alarm"
-                ].sum()
+                falseAlarmRate=float(
+                    (b := block_trials.filter(pl.col("is_vis_nontarget")))[
+                        "is_false_alarm"
+                    ].sum()
+                )
                 / (b.height or float("nan")),
                 goTrials=a.height,
                 nogoTrials=b.height,
             )
             block_performance["aud_dprime"] = DynamicRoutingAnalysisUtils.calcDprime(
-                hitRate=(a := block_trials.filter(pl.col("is_aud_target")))[
-                    "is_hit"
-                ].sum()
+                hitRate=float(
+                    (a := block_trials.filter(pl.col("is_aud_target")))["is_hit"].sum()
+                )
                 / (a.height or float("nan")),
-                falseAlarmRate=(b := block_trials.filter(pl.col("is_aud_nontarget")))[
-                    "is_false_alarm"
-                ].sum()
+                falseAlarmRate=float(
+                    (b := block_trials.filter(pl.col("is_aud_nontarget")))[
+                        "is_false_alarm"
+                    ].sum()
+                )
                 / (b.height or float("nan")),
                 goTrials=a.height,
                 nogoTrials=b.height,
             )
 
             block_performance["n_trials"] = block_trials.height
-            block_performance["n_responses"] = block_trials["is_response"].sum()
-            block_performance["n_hits"] = block_trials["is_hit"].sum()
-            block_performance["n_contingent_rewards"] = block_trials[
+            block_performance["n_responses"] = float(block_trials["is_response"].sum())
+            block_performance["n_hits"] = float(block_trials["is_hit"].sum())
+            block_performance["n_contingent_rewards"] = float(block_trials[
                 "is_contingent_reward"
-            ].sum()
-            block_performance["hit_rate"] = block_trials["is_hit"].sum() / (
-                block_trials["is_go"].sum() or float("nan")
+            ].sum())
+            block_performance["hit_rate"] = float(block_trials["is_hit"].sum()) / (
+                float(block_trials["is_go"].sum()) or float("nan")
             )
-            block_performance["false_alarm_rate"] = block_trials[
+            block_performance["false_alarm_rate"] = float(block_trials[
                 "is_false_alarm"
-            ].sum() / (block_trials["is_nogo"].sum() or float("nan"))
-            block_performance["catch_response_rate"] = block_trials[
+            ].sum()) / (float(block_trials["is_nogo"].sum()) or float("nan"))
+            block_performance["catch_response_rate"] = float(block_trials[
                 "is_response"
-            ].sum() / (block_trials["is_catch"].sum() or float("nan"))
+            ].sum()) / (float(block_trials["is_catch"].sum()) or float("nan"))
             for stim, target in itertools.product(
                 ("vis", "aud"), ("target", "nontarget")
             ):
