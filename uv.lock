@@ -2690,8 +2690,8 @@ requires-dist = [
     { name = "npc-mvr", specifier = ">=0.1.17" },
     { name = "npc-samstim", specifier = ">=0.1.13" },
     { name = "npc-session", specifier = ">=0.1.41" },
-    { name = "npc-stim", specifier = ">=0.1.18" },
-    { name = "npc-sync", specifier = ">=0.2.2" },
+    { name = "npc-stim", specifier = ">=0.1.20" },
+    { name = "npc-sync", specifier = ">=0.2.3" },
     { name = "numba", specifier = ">=0.57.1" },
     { name = "numcodecs", specifier = "<=0.16" },
     { name = "pandas", specifier = ">=2.0" },
@@ -2724,7 +2724,7 @@ testing = [
 
 [[package]]
 name = "npc-stim"
-version = "0.1.18"
+version = "0.1.20"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "npc-io" },
@@ -2733,14 +2733,14 @@ dependencies = [
     { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/df/339266297c56b7cf9138abdeecde9e886d8f0c267c68f3876abf678108c6/npc_stim-0.1.18.tar.gz", hash = "sha256:1b6b2a02661a3ff5919008d476e5634f41d06c6ef369b839683d1757eff49089", size = 12390, upload-time = "2026-04-02T02:29:01.965Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/92/f0/f1c57726c0e6dcf1ab037901c68a1efe25518b49e7db85b93fb3e56eac3b/npc_stim-0.1.20.tar.gz", hash = "sha256:5e8bbb9de1ea29b3fafe855de0b3e3ffd1ce6442d88c94220722796b4f590acc", size = 12381, upload-time = "2026-04-14T01:37:25.451Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/89/a5ecf8b5ff11a38254d897668ca6abe862b30c8fe419f78ddd9cd5d34645/npc_stim-0.1.18-py3-none-any.whl", hash = "sha256:527add3a459d716edc688252a11f02a8ad39409282cb24bdf946f6b3111d65f3", size = 11929, upload-time = "2026-04-02T02:29:01.155Z" },
+    { url = "https://files.pythonhosted.org/packages/e1/a7/3e41e81e363ff1772a4308e031084ac3c3c135620ec988d05dc5087fc715/npc_stim-0.1.20-py3-none-any.whl", hash = "sha256:cf972968f2290fbd582012d106ce00de73c643558b6cdcbe7c2667802ddcbb84", size = 11928, upload-time = "2026-04-14T01:37:24.579Z" },
 ]
 
 [[package]]
 name = "npc-sync"
-version = "0.2.2"
+version = "0.2.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "h5py" },
@@ -2753,9 +2753,9 @@ dependencies = [
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dc/cd/3edf0bdddd878838e07aa24a597ad9a774bb4520b83989d137a0b8807aac/npc_sync-0.2.2.tar.gz", hash = "sha256:6af88db70862f865bff6fb922b5affff176a642d2bb6748b28378061ce7dd00f", size = 30902, upload-time = "2026-02-24T19:49:51.673Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c4/34/ce06ad53186a96340c3ffe63f92ddc0c1f76c9913d57c6c9279c168e78b6/npc_sync-0.2.3.tar.gz", hash = "sha256:1ccfde39ac9869a4c47eda46cda5b4a7f5db2d0e80221982495db4b7aa4b0ffe", size = 30951, upload-time = "2026-04-14T01:36:50.516Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/08/73/f532d55dfe723bfdea269d935646a123595e8cabccc00e7c0b254d3b9e5f/npc_sync-0.2.2-py3-none-any.whl", hash = "sha256:08c644a68bab9f7cf988d21e6a92a183c5dc8d112910ce6628a573d1b1efed81", size = 27249, upload-time = "2026-02-24T19:49:50.576Z" },
+    { url = "https://files.pythonhosted.org/packages/67/a4/bb7803d83b43f585ca5de251aae032dc8dc375cb221222659db6473d235f/npc_sync-0.2.3-py3-none-any.whl", hash = "sha256:67d52eb47cd3730163494f4e6abf09284618e8b56929dcd7e44e4a7837a8596d", size = 27265, upload-time = "2026-04-14T01:36:51.351Z" },
 ]
 
 [[package]]
