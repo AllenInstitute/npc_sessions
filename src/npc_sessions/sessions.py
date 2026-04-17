@@ -1565,7 +1565,7 @@ class DynamicRoutingSession:
 
         # customize default_qc:
         units = units.assign(
-            default_qc=lambda df: (df["activity_drift"] <= 0.2)
+            default_qc=lambda df: (df["activity_drift"] < utils.units.ACTIVITY_DRIFT_THRESHOLD)
             & (df["isi_violations_ratio"] <= 0.5)
             & (df["amplitude_cutoff"] <= 0.1)
             & (df["presence_ratio"] >= 0.7)
