@@ -14,6 +14,7 @@ import uuid
 from collections.abc import Iterable, Iterator
 from typing import Any, Literal
 
+import botocore.exceptions
 import cv2
 import h5py
 import hdmf
@@ -1926,7 +1927,7 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def info(self) -> npc_lims.SessionInfo | None:
-        with contextlib.suppress(ValueError):
+        with contextlib.suppress(ValueError, KeyError, botocore.exceptions.BotoCoreError):
             return npc_lims.get_session_info(self.id)
         return None
 
