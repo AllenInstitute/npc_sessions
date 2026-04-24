@@ -76,26 +76,27 @@ def get_acquisition_model(
         experimenters = session.main_recording.experimenter or ["unknown"]
     else:
         experimenters = session.experimenter or ["NSB trainer"]
+    variants = [
+        "naive",
+        "injection_perturbation",
+        "injection_control",
+        "opto_perturbation",
+        "opto_control",
+    ]
+    instrument_id = session.rig
     if is_surface_recording(session):
         instrument_id = session.main_recording.rig
-        acquisition_type = "ecephys surface recording"
+        acquisition_type = "deep-insertion surface channels recording"
+    elif any(k in session.keywords for k in variants):
+        acquisition_type = " ".join(
+            k.replace("_", " ") for k in variants if k in session.keywords
+        )
+    elif session.is_hab:
+        acquisition_type = "habituation"
+    elif session.is_training:
+        acquisition_type = "training"
     else:
-        instrument_id = session.rig
-        keywords: list[str] = []
-        if session.is_ephys:
-            keywords.append("ecephys")
-        if session.is_task:
-            keywords.append("behavior")
-        for k in [
-            "naive",
-            "injection_perturbation",
-            "injection_control",
-            "opto_perturbation",
-            "opto_control",
-        ]:
-            if k in session.keywords:
-                keywords.append(k)
-        acquisition_type = " ".join(k.replace("_", " ") for k in keywords)
+        acquisition_type = "brain-wide survey"
     coordinate_system = None
     data_streams = _get_data_streams(session)
     stimulus_epochs = _get_stimulus_epochs(session)
