@@ -555,32 +555,15 @@ def _get_data_streams(
                     translation=translation,
                 ),
             )
-            match probe:
-                case "A":
-                    primary_targeted_structure = (
-                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
-                    )
-                case "B":
-                    primary_targeted_structure = (
-                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
-                    )
-                case "C":
-                    primary_targeted_structure = (
-                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
-                    )
-                case "D":
-                    primary_targeted_structure = (
-                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
-                    )
-                case "E":
-                    primary_targeted_structure = (
-                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
-                    )
-                case "F":
-                    primary_targeted_structure = (
-                        aind_data_schema_models.brain_atlas.CCFv3.ROOT
-                    )
-
+            primary_targeted_structure = aind_data_schema_models.brain_atlas.CCFv3.ROOT
+            if not is_surface_recording(session):
+                try:
+                    units = session.units[:].query(f"electrode_group_name == '{probe.name}'")
+                except AttributeError:
+                    pass
+                else:
+                    most_common_structure = units["structure"].value_counts().idxmax()
+                    primary_targeted_structure = aind_data_schema_models.brain_atlas.CCFv3.by_acronym(most_common_structure)
             probe_config = aind_data_schema.components.configs.ProbeConfig(
                 device_name=probe.name,
                 primary_targeted_structure=primary_targeted_structure,
