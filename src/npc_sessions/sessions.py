@@ -1537,18 +1537,26 @@ class DynamicRoutingSession:
                     "reference": "tip",
                     "location": "unannotated",
                 }
-                if self.is_annotated and any(
-                    (
-                        annotated_probes := ccf_df.query(
-                            f"group_name == {group.name!r}"
+                if self.is_annotated:
+                    # provide defaults for annotation columns in case no CCF data is
+                    # found for this channel (e.g. surface recording channels)
+                    row_kwargs.update({
+                        "structure": "unannotated",
+                        "x": np.nan,
+                        "y": np.nan,
+                        "z": np.nan,
+                    })
+                    if "raw_structure" in column_names:
+                        row_kwargs["raw_structure"] = "unannotated"
+                    annotated_probes = ccf_df.query(f"group_name == {group.name!r}")
+                    if not annotated_probes.empty:
+                        local_channel_idx = channel_idx - self.electrode_channel_idx_offset
+                        channel_row = annotated_probes.query(
+                            f"channel == {local_channel_idx}"
                         )
-                    ).any()
-                ):
-                    channel_row = annotated_probes.query(
-                        f"channel == {channel_idx}"
-                    )
-                    if not channel_row.empty:
-                        row_kwargs |= channel_row.iloc[0].to_dict()
+                        if not channel_row.empty:
+                            row_kwargs |= channel_row.iloc[0].to_dict()
+                            row_kwargs["channel"] = channel_idx  # restore offset channel
                 electrodes.add_row(
                     **row_kwargs,
                 )
