@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import copy
 import datetime
+import enum
 import functools
 import io
 import itertools
@@ -189,6 +190,19 @@ class DynamicRoutingSession:
     >>> s.probe_insertions['A']
     'A2'
     """
+
+    class _SessionType(enum.Enum):
+        SURVEY = "brainwide survey"
+        SURFACE = "deep-insertion surface channels recording"
+        TEMPLETON = "templeton"
+        NAIVE = "context naive"
+        OPTO = "opto perturbation"
+        OPTO_CONTROL = "opto control"
+        MUSCIMOL = "muscimol perturbation"
+        MUSCIMOL_CONTROL = "muscimol control"
+        HAB = "habituation"
+        TRAINING = "training"
+
 
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
@@ -606,6 +620,29 @@ class DynamicRoutingSession:
             self._identifier = str(uuid.uuid4())
         return self._identifier
 
+    @npc_io.cached_property
+    def session_type(self) -> _SessionType:
+        """Primary session variant used in NWB/AIND metadata."""
+        if self.is_templeton:
+            return self._SessionType.TEMPLETON
+        elif self.is_naive:
+            return self._SessionType.NAIVE
+        if self.is_injection_perturbation:
+            return self._SessionType.MUSCIMOL
+        if self.is_injection_control:
+            return self._SessionType.MUSCIMOL_CONTROL
+        if self.is_opto:
+            return self._SessionType.OPTO
+        if self.is_opto_control:
+            return self._SessionType.OPTO_CONTROL
+        if self.is_hab:
+            return self._SessionType.HAB
+        if self.is_training:
+            return self._SessionType.TRAINING
+        if not self.is_ephys:
+            raise LookupError(f'Cannot determine type for non-ephys session {self.id}')
+        return self._SessionType.SURVEY
+
     @property
     def keywords(self) -> list[str]:
         if getattr(self, "_keywords", None) is None:
@@ -636,26 +673,17 @@ class DynamicRoutingSession:
                 self.keywords.append("training")
             if self.is_hab:
                 self.keywords.append("hab")
-            if self.is_opto:
-                self.keywords.append("opto_perturbation")
-            elif self.is_opto_control:
-                self.keywords.append("opto_control")
-            if self.is_templeton:
-                self.keywords.append("templeton")
+            if self.session_type is self._SessionType.TEMPLETON:
+                self.keywords.append(self.session_type.value)
             else:
                 self.keywords.append("dynamic_routing")
+                self.keywords.append(self.session_type.value)
             if self.is_production:
                 self.keywords.append("prod")
             else:
                 self.keywords.append("dev")
-            if self.is_injection_perturbation:
-                self.keywords.append("injection_perturbation")
-            elif self.is_injection_control:
-                self.keywords.append("injection_control")
             if self.is_context_naive:
                 self.keywords.append("context_naive")
-            if self.is_naive:
-                self.keywords.append("naive")
             if self.is_stage_5_passed:
                 self.keywords.append("stage_5_passed")
             if self.is_task and self.is_first_block_aud:
@@ -671,9 +699,10 @@ class DynamicRoutingSession:
             for t in self.epoch_tags:
                 if t not in self.keywords:
                     self.keywords.append(t)
-            # TODO these should be moved to `lab_metadata` when we have an ndx extension:
             if self.info and self.info.experiment_day is not None:
-                self.keywords.append(f"experiment_day_{self.info.experiment_day}")
+                self.keywords.append(f"day_{self.info.experiment_day}")
+            if (t := self.session_type.value.replace(' ', '_')) not in self.keywords:
+                self.keywords.append(t)
         return self._keywords
 
     @keywords.setter
@@ -3533,6 +3562,10 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     is_task = False
     surface_channel_number_start = 385
     surface_channel_number_stop = 768
+
+    @npc_io.cached_property
+    def session_type(self) -> DynamicRoutingSession._SessionType:
+        return DynamicRoutingSession._SessionType.SURFACE
 
     @classmethod
     def _to_surface_channel_number(cls, channel: int) -> int:
