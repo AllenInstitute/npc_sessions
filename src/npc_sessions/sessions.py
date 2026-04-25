@@ -203,7 +203,6 @@ class DynamicRoutingSession:
         HAB = "habituation"
         TRAINING = "training"
 
-
     # pass any of these properties to init to set
     # NWB metadata -------------------------------------------------------------- #
     institution: str | None = (
@@ -640,7 +639,7 @@ class DynamicRoutingSession:
         if self.is_training:
             return self._SessionType.TRAINING
         if not self.is_ephys:
-            raise LookupError(f'Cannot determine type for non-ephys session {self.id}')
+            raise LookupError(f"Cannot determine type for non-ephys session {self.id}")
         return self._SessionType.SURVEY
 
     @property
@@ -705,7 +704,7 @@ class DynamicRoutingSession:
                     self.keywords.append(t)
             if self.info and self.info.experiment_day is not None:
                 self.keywords.append(f"day_{self.info.experiment_day}")
-            if (t := self.session_type.value.replace(' ', '_')) not in self.keywords:
+            if (t := self.session_type.value.replace(" ", "_")) not in self.keywords:
                 self.keywords.append(t)
         return self._keywords
 
@@ -1598,7 +1597,9 @@ class DynamicRoutingSession:
 
         # customize default_qc:
         units = units.assign(
-            default_qc=lambda df: (df["activity_drift"] < utils.units.ACTIVITY_DRIFT_THRESHOLD)
+            default_qc=lambda df: (
+                df["activity_drift"] < utils.units.ACTIVITY_DRIFT_THRESHOLD
+            )
             & (df["isi_violations_ratio"] <= 0.5)
             & (df["amplitude_cutoff"] <= 0.1)
             & (df["presence_ratio"] >= 0.7)
@@ -1960,7 +1961,9 @@ class DynamicRoutingSession:
 
     @npc_io.cached_property
     def info(self) -> npc_lims.SessionInfo | None:
-        with contextlib.suppress(ValueError, KeyError, botocore.exceptions.BotoCoreError):
+        with contextlib.suppress(
+            ValueError, KeyError, botocore.exceptions.BotoCoreError
+        ):
             return npc_lims.get_session_info(self.id)
         return None
 
@@ -2229,7 +2232,9 @@ class DynamicRoutingSession:
         if self.is_templeton:
             return qualified.height >= 4
         n_vis = qualified.filter(pl.col("rewarded_modality") == "vis").height
-        n_aud = qualified.filter(pl.col("rewarded_modality").is_in(["aud", "sound"])).height
+        n_aud = qualified.filter(
+            pl.col("rewarded_modality").is_in(["aud", "sound"])
+        ).height
         return n_vis >= 2 and n_aud >= 2
 
     @property
@@ -3611,9 +3616,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         return int(channel) + cls.surface_channel_number_start
 
     @classmethod
-    def _to_surface_channel_numbers(
-        cls, channels: Iterable[int]
-    ) -> tuple[int, ...]:
+    def _to_surface_channel_numbers(cls, channels: Iterable[int]) -> tuple[int, ...]:
         return tuple(cls._to_surface_channel_number(channel) for channel in channels)
 
     @classmethod
@@ -3702,7 +3705,9 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
             waveform_unit="microvolts",
             electrode_table=self.electrodes,
         )
-        for column in sorted(set(self._units.columns) | {"peak_electrode", "device_name"}):
+        for column in sorted(
+            set(self._units.columns) | {"peak_electrode", "device_name"}
+        ):
             if column in (
                 "spike_times",
                 "electrodes",

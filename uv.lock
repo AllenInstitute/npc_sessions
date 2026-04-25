@@ -2614,7 +2614,7 @@ wheels = [
 
 [[package]]
 name = "npc-sessions"
-version = "0.0.279"
+version = "0.0.280"
 source = { editable = "." }
 dependencies = [
     { name = "aind-session" },
