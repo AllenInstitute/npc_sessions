@@ -1465,6 +1465,11 @@ class DynamicRoutingSession:
             if probe_letter in self.probe_letters_to_use
         )
 
+    @property
+    def electrode_channel_idx_offset(self) -> int:
+        """Can be overloaded for surface channels with incorrect xml data"""
+        return 0
+
     @npc_io.cached_property
     def electrodes(self) -> pynwb.core.DynamicTable:
         """Individual channels on an inserted probe, including location, CCF
@@ -1521,7 +1526,7 @@ class DynamicRoutingSession:
                 continue
             group = self.electrode_groups[f"probe{probe_letter}"]
             for channel_label, (x, y) in channel_pos_xy.items():
-                channel_idx = int(channel_label.strip("CH"))
+                channel_idx = int(channel_label.strip("CH")) + self.electrode_channel_idx_offset
                 row_kwargs: dict[str, str | float] = {
                     "group": group,
                     "group_name": group.name,
@@ -1594,6 +1599,10 @@ class DynamicRoutingSession:
         else:
             units["activity_drift"] = np.nan
             units["is_not_drift"] = False
+
+        # add offset in case this is a surface recording
+        units["peak_channel"] = units["peak_channel"].map(lambda pk: pk + self.electrode_channel_idx_offset)
+        units["channels"] = units["channels"].map(lambda channels: [c + self.electrode_channel_idx_offset for c in channels])
 
         # customize default_qc:
         units = units.assign(
@@ -2918,8 +2927,7 @@ class DynamicRoutingSession:
 
     @property
     def electrode_group_description(self) -> str:
-        # TODO get correct channels range from settings xml
-        return "Neuropixels 1.0 lower channels (1:384)"
+        return f"Neuropixels 1.0 ({1 + self.electrode_channel_idx_offset}:{384 + self.electrode_channel_idx_offset})"
 
     @property
     def probe_letters_with_surface_channel_recording(
@@ -3604,24 +3612,20 @@ class DynamicRoutingSession:
 class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     is_sync = False
     is_task = False
-    surface_channel_number_start = 385
-    surface_channel_number_stop = 768
-
+    is_waveforms = False
+    
     @npc_io.cached_property
     def session_type(self) -> DynamicRoutingSession._SessionType:
         return DynamicRoutingSession._SessionType.SURFACE
 
-    @classmethod
-    def _to_surface_channel_number(cls, channel: int) -> int:
-        return int(channel) + cls.surface_channel_number_start
+    def _to_surface_channel_number(self, channel: int) -> int:
+        return int(channel) + self.electrode_channel_idx_offset
 
-    @classmethod
-    def _to_surface_channel_numbers(cls, channels: Iterable[int]) -> tuple[int, ...]:
-        return tuple(cls._to_surface_channel_number(channel) for channel in channels)
+    def _to_surface_channel_numbers(self, channels: Iterable[int]) -> tuple[int, ...]:
+        return tuple(self._to_surface_channel_number(channel) for channel in channels)
 
-    @classmethod
-    def _to_local_surface_channel_index(cls, channel_number: int) -> int:
-        return int(channel_number) - cls.surface_channel_number_start
+    def _to_local_surface_channel_index(self, channel_number: int) -> int:
+        return int(channel_number) - self.electrode_channel_idx_offset
 
     @npc_io.cached_property
     def main_recording(self) -> DynamicRoutingSession:
@@ -3653,29 +3657,9 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         )
 
     @property
-    def electrode_group_description(self) -> str:
-        return (
-            f"Neuropixels 1.0 surface channels "
-            f"({self.surface_channel_number_start}:{self.surface_channel_number_stop})"
-        )
-
-    @npc_io.cached_property
-    def electrodes(self) -> pynwb.core.DynamicTable:
-        electrodes = super().electrodes
-        electrodes["channel"].data[:] = list(
-            self._to_surface_channel_numbers(electrodes["channel"].data)
-        )
-        return electrodes
-
-    @npc_io.cached_property
-    def _units(self) -> pd.DataFrame:
-        units = super()._units.copy(deep=True)
-        units["peak_channel"] = units["peak_channel"].map(
-            self._to_surface_channel_number
-        )
-        if "channels" in units.columns:
-            units["channels"] = units["channels"].map(self._to_surface_channel_numbers)
-        return units
+    def electrode_channel_idx_offset(self) -> int:
+        """Can be overloaded for surface channels with incorrect xml data"""
+        return 384
 
     def get_obs_intervals(
         self, probe: str | npc_session.ProbeRecord
@@ -3693,88 +3677,6 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         if timing_data is None:
             raise ValueError(f"no ephys timing data for {self.id} {probe}")
         return ((float(timing_data.start_time), float(timing_data.stop_time)),)
-
-    @npc_io.cached_property
-    def units(self) -> pynwb.misc.Units:
-        if not self.is_ephys:
-            raise AttributeError(f"{self.id} is not an ephys session")
-        units = pynwb.misc.Units(
-            name="units",
-            description="spike-sorted units from Kilosort 2.5",
-            waveform_rate=30_000.0,
-            waveform_unit="microvolts",
-            electrode_table=self.electrodes,
-        )
-        for column in sorted(
-            set(self._units.columns) | {"peak_electrode", "device_name"}
-        ):
-            if column in (
-                "spike_times",
-                "electrodes",
-                "electrode_group",
-                "obs_intervals",
-                "waveform_mean",
-                "waveform_sd",
-            ):
-                continue
-            if (
-                column
-                in (
-                    "peak_waveform_index",
-                    "channels",
-                )
-                and not self.is_waveforms
-            ):
-                continue
-            elif column in (
-                "spike_amplitudes",
-                "channels",
-            ):
-                index = True
-            else:
-                index = False
-            units.add_column(
-                name=column,
-                description="",
-                index=index,
-            )
-
-        electrodes = self.electrodes[:]
-        sparse_waveforms = False
-        for _, row in self._units.iterrows():
-            row = row.copy()
-            group_query = f"group_name == {row['electrode_group_name']!r}"
-            row["peak_electrode"] = electrodes.query(
-                f"{group_query} & channel == {row['peak_channel']}"
-            ).index.item()
-            row["electrode_group"] = self.electrode_groups[row["electrode_group_name"]]
-            row["device_name"] = self.electrode_groups[
-                row["electrode_group_name"]
-            ].device.name
-            if self.is_waveforms:
-                row["electrodes"] = electrodes.query(
-                    f"{group_query} & channel in {row['channels']}"
-                ).index.to_list()
-                row["peak_waveform_index"] = row["electrodes"].index(
-                    row["peak_electrode"]
-                )
-                local_channels = tuple(
-                    self._to_local_surface_channel_index(channel)
-                    for channel in row["channels"]
-                )
-                for col in ("waveform_mean", "waveform_sd"):
-                    d = np.array(row[col])  # time, electrodes
-                    a = np.zeros((d.shape[0], 384), dtype=np.float64)
-                    a[:, local_channels] = d
-                    row[col] = a
-            units.add_unit(**row)
-        if self.is_waveforms and sparse_waveforms:
-            for _, unit in units[:].iterrows():
-                for col in ("waveform_mean", "waveform_sd"):
-                    assert (
-                        len(unit.electrodes) == np.array(unit[col]).shape[1]
-                    ), f"{unit.electrodes = } != {unit[col].shape = }"
-        return units
 
     @property
     def probe_letters_to_skip(self) -> tuple[npc_session.ProbeRecord, ...]:
