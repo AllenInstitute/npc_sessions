@@ -1526,8 +1526,7 @@ class DynamicRoutingSession:
                 continue
             group = self.electrode_groups[f"probe{probe_letter}"]
             for channel_label, (x, y) in channel_pos_xy.items():
-                local_channel_idx = int(channel_label.strip("CH"))
-                channel_idx = local_channel_idx + self.electrode_channel_idx_offset
+                channel_idx = int(channel_label.strip("CH")) + self.electrode_channel_idx_offset
                 row_kwargs: dict[str, str | float] = {
                     "group": group,
                     "group_name": group.name,
@@ -1546,11 +1545,10 @@ class DynamicRoutingSession:
                     ).any()
                 ):
                     channel_row = annotated_probes.query(
-                        f"channel == {local_channel_idx}"
+                        f"channel == {channel_idx}"
                     )
                     if not channel_row.empty:
                         row_kwargs |= channel_row.iloc[0].to_dict()
-                        row_kwargs["channel"] = channel_idx  # restore offset channel
                 electrodes.add_row(
                     **row_kwargs,
                 )
