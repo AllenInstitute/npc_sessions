@@ -694,6 +694,10 @@ class DynamicRoutingSession:
                 self.keywords.append("late_autorewards")
             elif self.is_task:
                 self.keywords.append("early_autorewards")
+            if self.is_task and self.is_good_behavior:
+                self.keywords.append("good_behavior")
+            if self.is_task and self.is_bad_behavior:
+                self.keywords.append("bad_behavior")
             if self.is_sync and self.is_task and not self.is_photodiode:
                 self.keywords.append("no_photodiode")
             for t in self.epoch_tags:
@@ -2199,6 +2203,41 @@ class DynamicRoutingSession:
         if not self.is_task:
             raise AttributeError(f"{self.id} is not a session with behavior task")
         return self.sam.autoRewardOnsetFrame == 60
+
+    @property
+    def is_engaged(self) -> bool:
+        """4 or more blocks with at least 10 contingent rewards."""
+        if not self.is_task:
+            return False
+        perf = pl.DataFrame(self.performance[:])
+        return int((perf["n_contingent_rewards"] >= 10).sum()) >= 4
+
+    @property
+    def is_good_behavior(self) -> bool:
+        """2 or more blocks of each modality (vis and aud) where cross_modality_dprime >= 1.0,
+        n_trials >= 10, and n_contingent_rewards >= 10.
+        For Templeton sessions: 4 or more blocks of either modality meeting the same criteria.
+        """
+        if not self.is_task:
+            return False
+        perf = pl.DataFrame(self.performance[:])
+        qualified = perf.filter(
+            (pl.col("cross_modality_dprime") >= 1.0)
+            & (pl.col("n_trials") >= 10)
+            & (pl.col("n_contingent_rewards") >= 10)
+        )
+        if self.is_templeton:
+            return qualified.height >= 4
+        n_vis = qualified.filter(pl.col("rewarded_modality") == "vis").height
+        n_aud = qualified.filter(pl.col("rewarded_modality").is_in(["aud", "sound"])).height
+        return n_vis >= 2 and n_aud >= 2
+
+    @property
+    def is_bad_behavior(self) -> bool:
+        """Engaged (4+ blocks with 10+ contingent rewards) but not meeting good behavior criteria."""
+        if not self.is_task:
+            return False
+        return self.is_engaged and not self.is_good_behavior
 
     @property
     def is_templeton(self) -> bool:
