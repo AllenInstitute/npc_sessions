@@ -3661,6 +3661,17 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
         """Can be overloaded for surface channels with incorrect xml data"""
         return 384
 
+    @npc_io.cached_property
+    def is_annotated(self) -> bool:
+        """CCF annotation data accessible"""
+
+        try:
+            df = utils.electrodes.get_electrodes_table(self.id)
+        except(FileNotFoundError, ValueError):
+            return False
+        else:
+            return pl.from_pandas(df).filter(pl.col('channel') > self.electrode_channel_idx_offset).height > 0
+
     def get_obs_intervals(
         self, probe: str | npc_session.ProbeRecord
     ) -> tuple[tuple[float, float], ...]:
