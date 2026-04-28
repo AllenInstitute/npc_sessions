@@ -1602,7 +1602,8 @@ class DynamicRoutingSession:
 
         # add offset in case this is a surface recording
         units["peak_channel"] = units["peak_channel"].map(lambda pk: pk + self.electrode_channel_idx_offset)
-        units["channels"] = units["channels"].map(lambda channels: [c + self.electrode_channel_idx_offset for c in channels])
+        if self.is_waveforms:
+            units["channels"] = units["channels"].map(lambda channels: [c + self.electrode_channel_idx_offset for c in channels])
 
         # customize default_qc:
         units = units.assign(
@@ -3617,15 +3618,6 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     @npc_io.cached_property
     def session_type(self) -> DynamicRoutingSession._SessionType:
         return DynamicRoutingSession._SessionType.SURFACE
-
-    def _to_surface_channel_number(self, channel: int) -> int:
-        return int(channel) + self.electrode_channel_idx_offset
-
-    def _to_surface_channel_numbers(self, channels: Iterable[int]) -> tuple[int, ...]:
-        return tuple(self._to_surface_channel_number(channel) for channel in channels)
-
-    def _to_local_surface_channel_index(self, channel_number: int) -> int:
-        return int(channel_number) - self.electrode_channel_idx_offset
 
     @npc_io.cached_property
     def main_recording(self) -> DynamicRoutingSession:
