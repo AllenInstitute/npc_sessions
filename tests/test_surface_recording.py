@@ -8,7 +8,7 @@ def test_surface_recording_units_use_surface_channels() -> None:
     electrodes = surface_recording.electrodes[:]
 
     assert len(units) > 0
-    assert electrodes["channel"].min() == 385
-    assert electrodes["channel"].max() == 768
-    assert units["peak_channel"].between(385, 768).all()
+    assert electrodes["channel"].min() == 384
+    assert electrodes["channel"].max() == 767
+    assert units["peak_channel"].between(384, 767).all()
     assert units["obs_intervals"].map(bool).all()
