@@ -1306,11 +1306,12 @@ class DynamicRoutingSession:
                     ]
                 )
             else:
-                interval_names.append(
-                    utils.get_taskcontrol_intervals_table_name(stim_name)
-                )
-                if self.task_stim_name in stim_file.name and self.is_task:
-                    interval_names.append("performance")
+                if hasattr(TaskControl, stim_name):
+                    interval_names.append(
+                        utils.get_taskcontrol_intervals_table_name(stim_name)
+                    )
+                    if self.task_stim_name in stim_file.name and self.is_task:
+                        interval_names.append("performance")
             interval_names = list(dict.fromkeys(interval_names).keys())
 
             invalid_times_notes: list[str] = []
