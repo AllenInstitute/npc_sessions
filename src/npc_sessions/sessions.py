@@ -1527,7 +1527,9 @@ class DynamicRoutingSession:
                 continue
             group = self.electrode_groups[f"probe{probe_letter}"]
             for channel_label, (x, y) in channel_pos_xy.items():
-                channel_idx = int(channel_label.strip("CH")) + self.electrode_channel_idx_offset
+                channel_idx = (
+                    int(channel_label.strip("CH")) + self.electrode_channel_idx_offset
+                )
                 row_kwargs: dict[str, str | float] = {
                     "group": group,
                     "group_name": group.name,
@@ -1545,9 +1547,7 @@ class DynamicRoutingSession:
                         )
                     ).any()
                 ):
-                    channel_row = annotated_probes.query(
-                        f"channel == {channel_idx}"
-                    )
+                    channel_row = annotated_probes.query(f"channel == {channel_idx}")
                     if not channel_row.empty:
                         row_kwargs |= channel_row.iloc[0].to_dict()
                 electrodes.add_row(
@@ -1602,9 +1602,15 @@ class DynamicRoutingSession:
             units["is_not_drift"] = False
 
         # add offset in case this is a surface recording
-        units["peak_channel"] = units["peak_channel"].map(lambda pk: pk + self.electrode_channel_idx_offset)
+        units["peak_channel"] = units["peak_channel"].map(
+            lambda pk: pk + self.electrode_channel_idx_offset
+        )
         if self.is_waveforms:
-            units["channels"] = units["channels"].map(lambda channels: [c + self.electrode_channel_idx_offset for c in channels])
+            units["channels"] = units["channels"].map(
+                lambda channels: [
+                    c + self.electrode_channel_idx_offset for c in channels
+                ]
+            )
 
         # customize default_qc:
         units = units.assign(
@@ -3615,7 +3621,7 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     is_sync = False
     is_task = False
     is_waveforms = False
-    
+
     @npc_io.cached_property
     def session_type(self) -> DynamicRoutingSession._SessionType:
         return DynamicRoutingSession._SessionType.SURFACE
@@ -3660,10 +3666,15 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
 
         try:
             df = utils.electrodes.get_electrodes_table(self.id)
-        except(FileNotFoundError, ValueError):
+        except (FileNotFoundError, ValueError):
             return False
         else:
-            return pl.from_pandas(df).filter(pl.col('channel') > self.electrode_channel_idx_offset).height > 0
+            return (
+                pl.from_pandas(df)
+                .filter(pl.col("channel") > self.electrode_channel_idx_offset)
+                .height
+                > 0
+            )
 
     def get_obs_intervals(
         self, probe: str | npc_session.ProbeRecord
