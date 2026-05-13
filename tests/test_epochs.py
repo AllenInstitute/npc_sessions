@@ -98,6 +98,37 @@ def test_epochs_skip_sync_stims_with_unrecoverable_timing_failure() -> None:
     assert len(session.epochs) == 0
 
 
+class _StringDataset:
+    def __init__(self, value: str) -> None:
+        self._value = value
+
+    def asstr(self) -> "_StringDataset":
+        return self
+
+    def __getitem__(self, key: object) -> str:
+        return self._value
+
+
+def test_rig_skips_stim_files_without_rig_name_without_checking_task_status(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = sessions.DynamicRoutingSession.__new__(sessions.DynamicRoutingSession)
+    session.task_stim_name = "DynamicRouting1"
+    session.stim_data = {
+        "Spontaneous_123": {},
+        "DynamicRouting1_123": {"rigName": _StringDataset("NP3")},
+    }
+    session.is_ephys = False
+
+    @property
+    def is_task(self: sessions.DynamicRoutingSession) -> bool:
+        raise AssertionError("rig lookup should not validate task timing")
+
+    monkeypatch.setattr(sessions.DynamicRoutingSession, "is_task", is_task)
+
+    assert session.rig == "NP3"
+
+
 def test_unsynced_ephys_timing_uses_pxi_timing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

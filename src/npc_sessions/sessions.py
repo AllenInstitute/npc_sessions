@@ -2654,10 +2654,13 @@ class DynamicRoutingSession:
 
         if (v := getattr(self, "_rig", None)) is not None:
             return _format(v)
-        for hdf5 in itertools.chain(
-            (self.task_data,) if self.is_task else (),
-            (v for v in self.stim_data.values()),
-        ):
+        stim_names = tuple(self.stim_data.keys())
+        stim_names_task_first = (
+            *(name for name in stim_names if self.task_stim_name in name),
+            *(name for name in stim_names if self.task_stim_name not in name),
+        )
+        for stim_name in stim_names_task_first:
+            hdf5 = self.stim_data[stim_name]
             if rigName := hdf5.get("rigName", None):
                 rig: str = rigName.asstr()[()]
                 return _format(rig)
