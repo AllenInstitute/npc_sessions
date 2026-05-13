@@ -1352,8 +1352,14 @@ class DynamicRoutingSession:
             }
 
         records = []
+        valid_sync_stim_names = (
+            self.stim_data_without_timing_issues.keys() if self.is_sync else None
+        )
         for stim in self.stim_paths:
-            if self.is_sync and stim.stem not in self.stim_frame_times.keys():
+            if (
+                valid_sync_stim_names is not None
+                and stim.stem not in valid_sync_stim_names
+            ):
                 continue
             records.append(get_epoch_record(stim))
 
