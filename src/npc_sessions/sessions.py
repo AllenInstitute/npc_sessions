@@ -2779,12 +2779,15 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
         """Frame times dict for all stims, containing time arrays or Exceptions."""
-        frame_times = npc_stim.get_stim_frame_times(
-            *self.stim_paths,  # no longer using cached data
-            sync=self.sync_path,
-            frame_time_type="display_time",
-        )
-        return {npc_io.from_pathlike(k).stem: v for k, v in frame_times.items()}
+        try:
+            frame_times = npc_stim.get_stim_frame_times(
+                *self.stim_paths,  # no longer using cached data
+                sync=self.sync_path,
+                frame_time_type="display_time",
+            )
+            return {npc_io.from_pathlike(k).stem: v for k, v in frame_times.items()}
+        except Exception as exc:
+            return {npc_io.from_pathlike(path).stem: exc for path in self.stim_paths}
 
     @property
     def stim_frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
