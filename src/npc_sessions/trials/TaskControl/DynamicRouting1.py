@@ -31,6 +31,14 @@ from npc_sessions.trials.TaskControl import TaskControl
 
 logger = logging.getLogger(__name__)
 
+STIM_NAME_MAP: dict[str, str] = {
+    "sound1": "aud+",
+    "sound2": "aud-",
+    "vis1": "vis+",
+    "vis2": "vis-",
+}
+"""Mapping from raw stimulus names in task data to display names used in trials and performance tables."""
+
 
 class DynamicRouting1(TaskControl):
     """All property getters without a leading underscore will be
@@ -360,7 +368,7 @@ class DynamicRouting1(TaskControl):
 
     @npc_io.cached_property
     def _aud_stims(self) -> npt.NDArray[np.str_]:
-        return np.unique([stim for stim in self.stim_name if "sound" in stim.lower()])
+        return np.unique([stim for stim in self._sam.trialStim if "sound" in stim.lower()])
 
     @npc_io.cached_property
     def _vis_stims(self) -> npt.NDArray[np.str_]:
@@ -661,7 +669,7 @@ class DynamicRouting1(TaskControl):
         """the stimulus presented; corresponds to a unique stimulus definition,
         randomized over trials
         """
-        return self._sam.trialStim
+        return np.array([STIM_NAME_MAP.get(s, s) for s in self._sam.trialStim])
 
     @npc_io.cached_property
     def grating_phase(self) -> npt.NDArray[np.float64]:
