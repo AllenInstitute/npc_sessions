@@ -3282,7 +3282,7 @@ class DynamicRoutingSession:
                     f"{self.id} no video frame times found for {nwb_camera_name}, skipping LP"
                 )
                 continue
-            timestamps = _matching_ts.timestamps
+            timestamps = utils.get_timestamps_from_dynamic_table(_matching_ts)
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
 
             df = pd.DataFrame()
@@ -3333,9 +3333,9 @@ class DynamicRoutingSession:
     def _eye_tracking(self) -> pynwb.core.DynamicTable:
         if not self.is_video:
             raise ValueError(f"{self.id} is not a session with video")
-        timestamps = next(
-            t for t in self._video_frame_times if "eye" in t.name
-        ).timestamps
+        timestamps = utils.get_timestamps_from_dynamic_table(
+            next(t for t in self._video_frame_times if "eye" in t.name)
+        )
         df = utils.get_ellipse_session_dataframe_from_h5(self.id)
         df["timestamps"] = timestamps
         name = "eye_tracking"
@@ -3377,13 +3377,14 @@ class DynamicRoutingSession:
                 continue
             nwb_camera_name = self.mvr_to_nwb_camera_name[camera_name]
             try:
-                timestamps = next(
-                    t for t in self._video_frame_times if nwb_camera_name in t.name
-                ).timestamps
+                timestamps = utils.get_timestamps_from_dynamic_table(
+                    next(
+                        t for t in self._video_frame_times if nwb_camera_name in t.name
+                    )
+                )
             except StopIteration:
                 logger.info(f"Could not compute frametimes for {camera_name}")
                 continue  # some sessions have face videos with no line events on sync
-            timestamps = np.asarray(timestamps)
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
             try:
                 face_motion_svd = utils.get_facemap_output_from_s3(
@@ -3435,13 +3436,14 @@ class DynamicRoutingSession:
                 logger.warning(f"{camera_name} DLC has not been run for {self.id}")
                 continue
             try:
-                timestamps = next(
-                    t for t in self._video_frame_times if nwb_camera_name in t.name
-                ).timestamps
+                timestamps = utils.get_timestamps_from_dynamic_table(
+                    next(
+                        t for t in self._video_frame_times if nwb_camera_name in t.name
+                    )
+                )
             except StopIteration:
                 logger.info(f"Could not compute frametimes for {camera_name}")
                 continue  # some sessions have face videos with no line events on sync
-            timestamps = np.asarray(timestamps)
             assert len(timestamps) == npc_mvr.get_total_frames_in_video(video_path)
 
             if as_pose_estimation:

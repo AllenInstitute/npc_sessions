@@ -8,6 +8,7 @@ import npc_mvr
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+import pynwb
 import upath
 import zarr
 
@@ -67,6 +68,12 @@ LP_VIDEO_FEATURES_MAPPING = {
         "tongue_base_r",
     ),
 }
+
+
+def get_timestamps_from_dynamic_table(
+    table: pynwb.core.DynamicTable,
+) -> npt.NDArray[np.float64]:
+    return np.asarray(table["timestamps"], dtype=np.float64)
 
 
 def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
