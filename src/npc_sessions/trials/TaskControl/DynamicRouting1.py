@@ -368,7 +368,9 @@ class DynamicRouting1(TaskControl):
 
     @npc_io.cached_property
     def _aud_stims(self) -> npt.NDArray[np.str_]:
-        return np.unique([stim for stim in self._sam.trialStim if "sound" in stim.lower()])
+        return np.unique(
+            [stim for stim in self._sam.trialStim if "sound" in stim.lower()]
+        )
 
     @npc_io.cached_property
     def _vis_stims(self) -> npt.NDArray[np.str_]:
