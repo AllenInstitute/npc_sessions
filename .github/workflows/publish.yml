@@ -60,11 +60,17 @@ jobs:
       run: |
         uv sync --extra metadata
         
+    - name: Configure aws credentials
+      env:
+        AWS_IAM_ROLE: ${{ vars.AWS_IAM_ROLE }}
+        AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      uses: aws-actions/configure-aws-credentials@v6
+      with:
+        role-to-assume: ${{ vars.AWS_IAM_ROLE }}
+        aws-region: ${{ vars.AWS_DEFAULT_REGION }}
     - name: Test, format, lint
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         DBHUB_API_KEY: ${{ secrets.DBHUB_API_KEY }}
         CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
         CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
@@ -120,13 +126,19 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
   
+    - name: Configure aws credentials
+      env:
+        AWS_IAM_ROLE: ${{ vars.AWS_IAM_ROLE }}
+        AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      uses: aws-actions/configure-aws-credentials@v6
+      with:
+        role-to-assume: ${{ vars.AWS_IAM_ROLE }}
+        aws-region: ${{ vars.AWS_DEFAULT_REGION }}
     - name: Launch
       continue-on-error: true
       env:
         DBHUB_API_KEY: ${{ secrets.DBHUB_API_KEY }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         CODE_OCEAN_API_TOKEN: ${{ secrets.CODE_OCEAN_API_TOKEN }}
         CODE_OCEAN_DOMAIN: ${{ secrets.CODE_OCEAN_DOMAIN }}
       run: |
