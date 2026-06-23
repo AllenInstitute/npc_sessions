@@ -3346,17 +3346,17 @@ class DynamicRoutingSession:
         column_descriptions = {}
         for feature in ("cr", "eye", "pupil"):
             feature_name = "corneal reflection" if feature == "cr" else feature
-            for column_suffix, description in dict(
-                center_x=f"center of {feature_name} ellipse in pixels, with (0, 0) at top-left of frame",
-                center_y=f"center of {feature_name} ellipse in pixels, with (0, 0) at top-left of frame",
-                area=f"area of {feature_name} ellipse in pixels^2",
-                width=f"length of semi-major axis of {feature_name} ellipse in pixels",
-                height=f"length of semi-minor axis of {feature_name} ellipse in pixels",
-                phi=f"counterclockwise rotation of major-axis of {feature_name} ellipse, relative to horizontal-axis of video, in radians",
-                average_confidence=f"mean confidence [0-1] for the up-to-12 points from DLC used to fit {feature_name} ellipse",
-                is_bad_frame=f"[bool] frames which should not be used due to low confidence in {feature_name} ellipse (typically caused by blinking, grooming, poor lighting)",
-            ).items():
-                column_descriptions[f"{feature}_{column_suffix}"] = description
+            for column_name, description in {
+                f"{feature_name}_center_x": f"center of {feature_name} ellipse in pixels, with (0, 0) at top-left of frame",
+                f"{feature_name}_center_y": f"center of {feature_name} ellipse in pixels, with (0, 0) at top-left of frame",
+                f"{feature_name}_area": f"area of {feature_name} ellipse in pixels^2",
+                f"{feature_name}_width": f"length of semi-major axis of {feature_name} ellipse in pixels",
+                f"{feature_name}_height": f"length of semi-minor axis of {feature_name} ellipse in pixels",
+                f"{feature_name}_phi": f"counterclockwise rotation of major-axis of {feature_name} ellipse, relative to horizontal-axis of video, in radians",
+                f"{feature_name}_average_confidence": f"mean confidence [0-1] for the up-to-12 points from DLC used to fit {feature_name} ellipse",
+                f"is_{feature_name}_fit_high_confidence": f"[bool] frames where a minimum number of high confidence points are used to fit {feature_name} ellipse (should filter out artifacts caused by blinking, grooming, poor lighting)",
+            }.items():
+                column_descriptions[column_name] = description
 
         return pynwb.core.DynamicTable.from_dataframe(
             name=name,
