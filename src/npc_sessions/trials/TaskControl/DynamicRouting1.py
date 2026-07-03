@@ -32,10 +32,10 @@ from npc_sessions.trials.TaskControl import TaskControl
 logger = logging.getLogger(__name__)
 
 STIM_NAME_MAP: dict[str, str] = {
-    "sound1": "aud+",
-    "sound2": "aud-",
-    "vis1": "vis+",
-    "vis2": "vis-",
+    "sound1": "sound1",
+    "sound2": "sound2",
+    "vis1": "vis1",
+    "vis2": "vis2",
 }
 """Mapping from raw stimulus names in task data to display names used in trials and performance tables."""
 
