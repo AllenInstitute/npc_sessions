@@ -143,7 +143,7 @@ def get_tissuecyte_electrodes_table(
 
 def get_ibl_electrodes_table(
     session: str | npc_session.SessionRecord,
-) -> pl.DataFrame:
+) -> pd.DataFrame:
     """Get annotation data for each electrode (channel) on each probe inserted in
     a session. Column names are ready for insertion into nwb ElectrodeTable.
 
@@ -155,7 +155,7 @@ def get_ibl_electrodes_table(
     ['group_name', 'channel', 'location', 'structure', 'x', 'y', 'z']
     """
     # try 2 sources
-    annotation_df = None
+    annotation_df: pl.DataFrame | None = None
 
     # a few sessions have jsons on S3:
     with contextlib.suppress(FileNotFoundError):
@@ -214,7 +214,7 @@ def get_ibl_electrodes_table(
             pl.col("z").fill_null(pl.lit(float("nan"))),
         )
         .select("group_name", "channel", "location", "structure", "x", "y", "z")
-    )
+    ).to_pandas()
 
 
 def get_ibl_annotations_from_s3(
