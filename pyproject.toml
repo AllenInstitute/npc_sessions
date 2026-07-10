@@ -29,7 +29,7 @@ dependencies = [
     "npc-session>=0.1.41",
     "npc-mvr>=0.1.17",
     "npc-io>=0.1.32",
-    "aind-session>=0.3.21",
+    "aind-session>=0.3.24",
     "polars[pyarrow]>=1.24.0",
     "numcodecs<=0.16",
 ]
