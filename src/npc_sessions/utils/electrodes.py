@@ -177,7 +177,7 @@ def get_ibl_electrodes_table(
             {
                 "channel_number": "channel",
                 "device_name": "group_name",
-                "acronym": "structure",
+                "acronym": "location",
                 "ccf_ap": "x",
                 "ccf_dv": "y",
                 "ccf_ml": "z",
@@ -185,9 +185,9 @@ def get_ibl_electrodes_table(
             strict=False,
         )
         .with_columns(
-            pl.col("structure")
+            pl.col("location")
             .map_elements(strip_layer_from_area, return_dtype=pl.String)
-            .alias("location")
+            .alias("structure")
         )
         .with_columns(
             # ProbeA_0 -> probeA
