@@ -157,19 +157,21 @@ def get_ibl_electrodes_table(
     # try 2 sources
     annotation_df: pl.DataFrame | None = None
 
-    # a few sessions have jsons on S3:
-    with contextlib.suppress(FileNotFoundError):
-        annotation_df = get_ibl_annotations_from_s3(session)
-
     # newer sessions should be storing annotations in docdb:
-    if annotation_df is None:
-        aind_session_id = aind_session.get_sessions(*session.split("_")[:2])[0].id
-        with contextlib.suppress(KeyError):
-            annotation_df = pl.DataFrame(
-                aind_session.ecephys.get_latest_ibl_annotations(
-                    aind_session_id, as_ccf_records=True
-                )
+    aind_session_id = aind_session.get_sessions(*session.split("_")[:2])[0].id
+    with contextlib.suppress(KeyError):
+        annotation_df = pl.DataFrame(
+            aind_session.ecephys.get_latest_ibl_annotations(
+                aind_session_id, as_ccf_records=True
             )
+        )
+    
+    # a few sessions have jsons on S3:
+    if annotation_df is None:
+        with contextlib.suppress(FileNotFoundError):
+            annotation_df = get_ibl_annotations_from_s3(session)
+
+  
     if annotation_df is None:
         raise NoElectrodeDataError(
             f"No IBL electrode annotation files found for session {session} in docdb or in S3"
