@@ -150,9 +150,6 @@ def get_ibl_electrodes_table(
     >>> df = get_ibl_electrodes_table('795555_2025-08-26') # docdb session
     >>> list(df.columns)
     ['group_name', 'channel', 'location', 'structure', 'x', 'y', 'z']
-    >>> df = get_ibl_electrodes_table('752311_2025-01-22') # s3 json session
-    >>> list(df.columns)
-    ['group_name', 'channel', 'location', 'structure', 'x', 'y', 'z']
     """
     # try 2 sources
     annotation_df: pl.DataFrame | None = None
