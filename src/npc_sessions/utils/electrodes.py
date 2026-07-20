@@ -157,7 +157,6 @@ def get_ibl_electrodes_table(
     # try 2 sources
     annotation_df: pl.DataFrame | None = None
 
-    # newer sessions should be storing annotations in docdb:
     aind_session_id = aind_session.get_sessions(*session.split("_")[:2])[0].id
     with contextlib.suppress(KeyError):
         annotation_df = pl.DataFrame(
@@ -165,16 +164,10 @@ def get_ibl_electrodes_table(
                 aind_session_id, as_ccf_records=True
             )
         )
-    
-    # a few sessions have jsons on S3:
-    if annotation_df is None:
-        with contextlib.suppress(FileNotFoundError):
-            annotation_df = get_ibl_annotations_from_s3(session)
 
-  
     if annotation_df is None:
         raise NoElectrodeDataError(
-            f"No IBL electrode annotation files found for session {session} in docdb or in S3"
+            f"No IBL electrode annotation files found for session {session} in docdb"
         ) from None
     return (
         annotation_df.join(
@@ -217,64 +210,6 @@ def get_ibl_electrodes_table(
         )
         .select("group_name", "channel", "location", "structure", "x", "y", "z")
     ).to_pandas()
-
-
-def get_ibl_annotations_from_s3(
-    session: str | npc_session.SessionRecord,
-) -> pl.DataFrame:
-    """Get a polars DataFrame of CCF channel locations for all probes in a session,
-    from IBL annotation `ccf_channel_locations.json` files.
-
-    Columns: probe, channel, x, y, z, axial, lateral, brain_region_id, brain_region,
-    ccf_ap, ccf_dv, ccf_ml (all CCF values in µm).
-
-    Examples:
-        >>> df = get_ibl_annotations_from_s3('752311_2025-01-22')
-        >>> assert len(df) > 0
-        >>> assert {'ccf_ap', 'ccf_dv', 'ccf_ml', 'group_name', 'channel_number'}.issubset(df.columns)
-    """
-    ccf_ap = (pl.col("y") * 1000).abs().alias("ccf_ap")
-    ccf_dv = (pl.col("z") * 1000).abs().alias("ccf_dv")
-    ccf_ml = (pl.col("x") * 1000).abs().alias("ccf_ml")
-
-    annotation_files = npc_lims.get_ibl_annotation_files_from_s3(session)
-    if len(annotation_files) == 0:
-        raise FileNotFoundError(
-            f"No IBL electrode annotation files found for session {session}"
-        ) from None
-    frames: list[pl.DataFrame] = []
-    for path in annotation_files:
-        probe_name = path.parent.name
-        logger.info("Reading %s annotations from %s", probe_name, path)
-        data: dict[str, dict] = json.loads(path.read_text())
-        rows = [
-            {
-                "channel_number": int(key.split("_")[1]),
-                **values,
-            }
-            for key, values in data.items()
-        ]
-        if probe_name.lower().startswith("probe") and len(probe_name) == 6:
-            probe_name = f"probe{probe_name[-1].upper()}"
-        df = (
-            pl.DataFrame(rows)
-            .with_columns(pl.lit(probe_name).alias("group_name"))
-            .with_columns(
-                ccf_ap,
-                ccf_dv,
-                ccf_ml,
-            )
-        )
-        for col in ("ccf_ap", "ccf_dv", "ccf_ml"):
-            mean_val = df[col].mean()
-            if isinstance(mean_val, (int, float)) and mean_val < 0:
-                logger.warning(
-                    f"Mean of {col} coordinates in {probe_name} IBL GUI annotations for {session} have likely been updated and no longer need negating. Negation will be reverted automatically."
-                )
-                df = df.with_columns(pl.col(col) * -1)
-        frames.append(df)
-    return pl.concat(frames).sort("group_name", "channel_number")
-
 
 if __name__ == "__main__":
     import doctest
