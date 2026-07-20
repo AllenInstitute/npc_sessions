@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import contextlib
 import functools
-import json
 import logging
 
 import aind_session
@@ -207,6 +206,7 @@ def get_ibl_electrodes_table(
         )
         .select("group_name", "channel", "location", "structure", "x", "y", "z")
     ).to_pandas()
+
 
 if __name__ == "__main__":
     import doctest
