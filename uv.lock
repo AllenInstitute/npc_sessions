@@ -2548,7 +2548,7 @@ wheels = [
 
 [[package]]
 name = "npc-lims"
-version = "0.1.195"
+version = "0.1.196"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aind-session" },
@@ -2564,9 +2564,9 @@ dependencies = [
     { name = "types-pyyaml" },
     { name = "types-requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7f/61/06c506190057dbdfc33159a103841a9800963b89c49d86406d8a653bed6d/npc_lims-0.1.195.tar.gz", hash = "sha256:a7ebd3dfe1a2f09120021aa69de7f851a17e17029d25570c3f775d9c742d78f1", size = 40754, upload-time = "2026-07-20T23:51:31.958Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/d5/de78b0bcb6e08e3f573a535f41b50bb1fa9b02facb0c814bd961b7f76ff8/npc_lims-0.1.196.tar.gz", hash = "sha256:dfcf1b9bde95ade4133615f6a525d48f1c493c613c7577360ea3254c42cc5b07", size = 40758, upload-time = "2026-07-21T04:24:34.245Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cd/e4/5e29e404311279a978b1baee49e824a98087d0effdb91edf2d4e3274cb4a/npc_lims-0.1.195-py3-none-any.whl", hash = "sha256:8bc16e00d4808319b58afffbacf8286e997afd4ea011032ddc9b91bfcfe50f51", size = 47103, upload-time = "2026-07-20T23:51:30.859Z" },
+    { url = "https://files.pythonhosted.org/packages/84/c2/41d019664dceb5db24b8006bba44258174378abf71700393458c17cc6e09/npc_lims-0.1.196-py3-none-any.whl", hash = "sha256:f2374cc8bcd846c1f26082c3eeaa009890c3a200a88190096330c4e809e2d187", size = 47108, upload-time = "2026-07-21T04:24:33.06Z" },
 ]
 
 [[package]]
@@ -2686,7 +2686,7 @@ requires-dist = [
     { name = "ndx-pose", marker = "extra == 'ndx-pose'", specifier = "==0.1.1" },
     { name = "npc-ephys", extras = ["nwb"], specifier = ">=0.1.45" },
     { name = "npc-io", specifier = ">=0.1.32" },
-    { name = "npc-lims", specifier = ">=0.1.195" },
+    { name = "npc-lims", specifier = ">=0.1.196" },
     { name = "npc-mvr", specifier = ">=0.1.17" },
     { name = "npc-samstim", specifier = ">=0.1.13" },
     { name = "npc-session", specifier = ">=0.1.41" },
