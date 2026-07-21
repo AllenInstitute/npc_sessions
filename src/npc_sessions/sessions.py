@@ -1734,7 +1734,9 @@ class DynamicRoutingSession:
         for _, row in self._units.iterrows():
             group_query = f"group_name == {row['electrode_group_name']!r}"
             if len(electrodes.query(group_query)) == 0:
-                raise IndexError(f"No electrodes found matching {group_query} - annotations may be missing")
+                raise IndexError(
+                    f"No electrodes found matching {group_query} - annotations may be missing"
+                )
             row["peak_electrode"] = electrodes.query(
                 f"{group_query} & channel == {row['peak_channel']}"
             ).index.item()
