@@ -151,13 +151,13 @@ class OptoTagging(TaskControl):
         return self._hdf5_data["optoInterval"][()] / self._hdf5_data["frameRate"][()]
 
     @npc_io.cached_property
-    def start_time(self) -> npt.NDArray[np.float64]:
+    def stim_start_time(self) -> npt.NDArray[np.float64]:
         return np.array([rec.onset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
         ]
 
     @npc_io.cached_property
-    def stop_time(self) -> npt.NDArray[np.float64]:
+    def stim_stop_time(self) -> npt.NDArray[np.float64]:
         return np.array([rec.offset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
         ]
@@ -169,7 +169,7 @@ class OptoTagging(TaskControl):
         ]
 
     @npc_io.cached_property
-    def duration(self) -> npt.NDArray[np.float64]:
+    def nominal_duration(self) -> npt.NDArray[np.float64]:
         return self._hdf5_data["trialOptoDur"][self.trial_index]
 
     @npc_io.cached_property
