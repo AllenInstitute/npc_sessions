@@ -27,6 +27,7 @@ import numpy as np
 import numpy.typing as npt
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
+import npc_sessions.trials.sam as sam_utils
 from npc_sessions.trials.TaskControl import TaskControl
 
 logger = logging.getLogger(__name__)
@@ -342,11 +343,11 @@ class DynamicRouting1(TaskControl):
 
     @npc_io.cached_property
     def _is_opto(self) -> bool:
-        return npc_samstim.is_opto(self._hdf5_data)
+        return sam_utils.is_opto(self._hdf5_data)
 
     @npc_io.cached_property
     def _is_galvo_opto(self) -> bool:
-        is_galvo_opto = npc_samstim.is_galvo_opto(self._hdf5_data)
+        is_galvo_opto = sam_utils.is_galvo_opto(self._hdf5_data)
         if is_galvo_opto and not self._is_opto:
             raise AssertionError(
                 f"Conflicting results: {self._is_opto=}, {is_galvo_opto=}"
@@ -355,7 +356,7 @@ class DynamicRouting1(TaskControl):
 
     @npc_io.cached_property
     def _sam(self) -> DynRoutData:
-        return npc_samstim.get_sam(self._hdf5_data)
+        return sam_utils.get_sam(self._hdf5_data)
 
     @npc_io.cached_property
     def _len(self) -> int:
@@ -857,13 +858,16 @@ class DynamicRouting1(TaskControl):
         return {d[0]: [float(s) for s in d[1:]] for d in cols}
 
     def getBregmaGalvoCalibrationData(self) -> dict[str, float | list[float]]:
-        """From Sam's code, modified to use synced copies on s3"""
+        """From Sam's code, modified to use embedded or cloud-backed copies."""
+        voltages = sam_utils.get_bregma_galvo_calibration_data(self._hdf5_data)
+        if all(key in voltages for key in ("bregmaXOffset", "bregmaYOffset")):
+            return voltages
+
         root = npc_lims.DR_DATA_REPO.parent / "OptoGui" / self._rig
-        bregmaGalvoFile = root / f"{self._rig}_bregma_galvo.txt"
-        bregmaOffsetFile = root / f"{self._rig}_bregma_offset.txt"
-        voltages = self.txtToDict(bregmaGalvoFile.read_text())
+        bregma_offset_file = root / f"{self._rig}_bregma_offset.txt"
         offsets = {
-            k: v[0] for k, v in self.txtToDict(bregmaOffsetFile.read_text()).items()
+            key: value[0]
+            for key, value in self.txtToDict(bregma_offset_file.read_text()).items()
         }
         return voltages | offsets
 
@@ -884,23 +888,19 @@ class DynamicRouting1(TaskControl):
         - sam separated x and y values for opto in the task on 2024-03-29
         - `trialGalvoVoltage` -> `trialGalvoX` and `trialGalvoY`
         """
-        if hasattr(self._sam, "trialGalvoX") and hasattr(self._sam, "trialGalvoY"):
-            return True
-        if hasattr(self._sam, "trialGalvoVoltage"):
-            return False
-        return False
+        return all(key in self._hdf5_data for key in ("trialGalvoX", "trialGalvoY"))
 
     @npc_io.cached_property
     def _galvo_voltage_x(self):
         if self._is_galvo_voltage_xy_separate:
-            return tuple(self._sam.trialGalvoX)
+            return tuple(self._hdf5_data["trialGalvoX"][: self._len])
         else:
             return tuple([(v[0],) for v in self._galvo_voltage_xy])
 
     @npc_io.cached_property
     def _galvo_voltage_y(self):
         if self._is_galvo_voltage_xy_separate:
-            return tuple(self._sam.trialGalvoY)
+            return tuple(self._hdf5_data["trialGalvoY"][: self._len])
         else:
             return tuple([(v[1],) for v in self._galvo_voltage_xy])
 
@@ -911,8 +911,9 @@ class DynamicRouting1(TaskControl):
             raise AttributeError(
                 "This property should not be called when galvo voltage is stored as separate x and y values"
             )
-        elif len(self._sam.trialGalvoVoltage.shape) < 3:
-            if not all(len(v) == 2 for v in self._sam.trialGalvoVoltage):
+        trial_galvo_voltage = self._hdf5_data["trialGalvoVoltage"][: self._len]
+        if len(trial_galvo_voltage.shape) < 3:
+            if not all(len(v) == 2 for v in trial_galvo_voltage):
                 # a set of experiments with 670248 had a bug where galvo
                 # voltage was a single value.
                 # Fortunately, there was also only one possible galvo voltage
@@ -923,10 +924,10 @@ class DynamicRouting1(TaskControl):
                 ):
                     return tuple((xy[0], xy[1]) for _ in range(self._len))
                 raise IndexError("trialGalvoVoltage has elements with len != 2")
-            result = tuple(tuple(v) for v in self._sam.trialGalvoVoltage)
+            result = tuple(tuple(v) for v in trial_galvo_voltage)
         else:
             self.assert_single_opto_device()
-            result = tuple(tuple(v) for v in self._sam.trialGalvoVoltage[:, 0, :])
+            result = tuple(tuple(v) for v in trial_galvo_voltage[:, 0, :])
         return result
         # return tuple((np.nan, np.nan) if np.isnan(params_idx) else tuple(self._sam.trialGalvoVoltage[idx, int(params_idx), :]) for idx, params_idx in enumerate(self._opto_params_index))
 

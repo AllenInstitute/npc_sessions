@@ -41,6 +41,7 @@ from DynamicRoutingTask.Analysis import DynamicRoutingAnalysisUtils
 from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
 
 import npc_sessions.trials as TaskControl
+import npc_sessions.trials.sam as sam_utils
 import npc_sessions.utils as utils
 
 logger = logging.getLogger(__name__)
@@ -2120,7 +2121,7 @@ class DynamicRoutingSession:
         """Opto during behavior task && not wt/wt (if genotype info available)"""
         if (
             self.is_task
-            and npc_samstim.is_opto(self.task_data)
+            and sam_utils.is_opto(self.task_data)
             and not self.is_wildtype
         ):
             return True
@@ -2129,7 +2130,7 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def is_opto_control(self) -> bool:
         """Opto during behavior task && wt/wt"""
-        if self.is_task and npc_samstim.is_opto(self.task_data) and self.is_wildtype:
+        if self.is_task and sam_utils.is_opto(self.task_data) and self.is_wildtype:
             return True
         return False
 
@@ -2686,7 +2687,7 @@ class DynamicRoutingSession:
     @property
     def sam(self) -> DynRoutData:
         if getattr(self, "_sam", None) is None:
-            self._sam = npc_samstim.get_sam(self.task_data)
+            self._sam = sam_utils.get_sam(self.task_data)
         return self._sam
 
     @property
