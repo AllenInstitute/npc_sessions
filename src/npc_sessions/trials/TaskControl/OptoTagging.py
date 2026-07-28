@@ -152,12 +152,24 @@ class OptoTagging(TaskControl):
 
     @npc_io.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
+        """Optical stimulus onset time.
+
+        Data from 1.5 ms before through 1.5 ms after this time
+        (``stim_start_time - 0.0015`` to ``stim_start_time + 0.0015`` seconds)
+        should be censored.
+        """
         return np.array([rec.onset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
         ]
 
     @npc_io.cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
+        """Optical stimulus offset time.
+
+        Data from 1.5 ms before through 1.5 ms after this time
+        (``stim_stop_time - 0.0015`` to ``stim_stop_time + 0.0015`` seconds)
+        should be censored.
+        """
         return np.array([rec.offset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
         ]
