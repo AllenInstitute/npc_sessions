@@ -30,6 +30,9 @@ class OptoTagging(TaskControl):
     >>> assert not trials.to_dataframe().empty
     """
 
+    _CENSOR_PERIOD = 0.0015
+    _MAX_ANALYSIS_PERIOD = 0.2
+
     def __init__(
         self,
         hdf5: npc_io.PathLike,
@@ -151,12 +154,27 @@ class OptoTagging(TaskControl):
         return self._hdf5_data["optoInterval"][()] / self._hdf5_data["frameRate"][()]
 
     @npc_io.cached_property
+    def _analysis_period(self) -> float:
+        """Maximum period that cannot reach an adjacent trial's response."""
+        return min(self._MAX_ANALYSIS_PERIOD, 0.5 * self._inter_trial_interval)
+
+    @npc_io.cached_property
+    def start_time(self) -> npt.NDArray[np.float64]:
+        """Start of the period associated with this optical stimulus."""
+        return self.stim_start_time - self._analysis_period
+
+    @npc_io.cached_property
+    def stop_time(self) -> npt.NDArray[np.float64]:
+        """End of the period associated with this optical stimulus."""
+        return self.stim_stop_time + self._analysis_period
+
+    @npc_io.cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         """Optical stimulus onset time.
 
         Data from 1.5 ms before through 1.5 ms after this time
         (``stim_start_time - 0.0015`` to ``stim_start_time + 0.0015`` seconds)
-        should be censored.
+        should be censored (`response_start_time` incorporates the censor period).
         """
         return np.array([rec.onset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
@@ -168,11 +186,31 @@ class OptoTagging(TaskControl):
 
         Data from 1.5 ms before through 1.5 ms after this time
         (``stim_stop_time - 0.0015`` to ``stim_stop_time + 0.0015`` seconds)
-        should be censored.
+        should be censored (`response_stop_time` incorporates the censor period).
         """
         return np.array([rec.offset_time_on_sync for rec in self._stim_recordings])[
             self.trial_index
         ]
+
+    @npc_io.cached_property
+    def baseline_start_time(self) -> npt.NDArray[np.float64]:
+        """Start of the safely analyzable pre-stimulus baseline period."""
+        return self.start_time
+
+    @npc_io.cached_property
+    def baseline_stop_time(self) -> npt.NDArray[np.float64]:
+        """End of the baseline period, before the stimulus-onset censor period."""
+        return self.stim_start_time - self._CENSOR_PERIOD
+
+    @npc_io.cached_property
+    def response_start_time(self) -> npt.NDArray[np.float64]:
+        """Start of the response period, after the stimulus-onset censor period."""
+        return self.stim_start_time + self._CENSOR_PERIOD
+
+    @npc_io.cached_property
+    def response_stop_time(self) -> npt.NDArray[np.float64]:
+        """End of the response period, before the stimulus-offset censor period."""
+        return self.stim_stop_time - self._CENSOR_PERIOD
 
     @npc_io.cached_property
     def stim_name(self) -> npt.NDArray[np.str_]:
