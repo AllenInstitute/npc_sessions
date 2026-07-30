@@ -2119,11 +2119,7 @@ class DynamicRoutingSession:
     @npc_io.cached_property
     def is_opto(self) -> bool:
         """Opto during behavior task && not wt/wt (if genotype info available)"""
-        if (
-            self.is_task
-            and sam_utils.is_opto(self.task_data)
-            and not self.is_wildtype
-        ):
+        if self.is_task and sam_utils.is_opto(self.task_data) and not self.is_wildtype:
             return True
         return False
 
