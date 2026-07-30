@@ -13,9 +13,7 @@ from npc_sessions.trials.TaskControl.DynamicRouting1 import DynamicRouting1
 def legacy_opto_data() -> Iterator[h5py.File]:
     n_trials = 6
     string = h5py.string_dtype()
-    with h5py.File(
-        "legacy-opto.h5", "w", driver="core", backing_store=False
-    ) as data:
+    with h5py.File("legacy-opto.h5", "w", driver="core", backing_store=False) as data:
         data.create_dataset("rigName", data="NP0", dtype=string)
         data.create_dataset("taskVersion", data="stage 5 ori opto", dtype=string)
         data.create_dataset("startTime", data="20230101_120000", dtype=string)
@@ -53,9 +51,7 @@ def legacy_opto_data() -> Iterator[h5py.File]:
         data.create_dataset(
             "trialAutoRewardScheduled", data=np.zeros(n_trials, dtype=bool)
         )
-        data.create_dataset(
-            "trialAutoRewarded", data=np.zeros(n_trials, dtype=bool)
-        )
+        data.create_dataset("trialAutoRewarded", data=np.zeros(n_trials, dtype=bool))
         data.create_dataset("lickFrames", data=np.array([], dtype=int))
         data.create_dataset("visStimContrast", data=1.0)
         data.create_dataset("trialVisStimContrast", data=np.ones(n_trials))
@@ -69,9 +65,7 @@ def legacy_opto_data() -> Iterator[h5py.File]:
             "trialOptoOnsetFrame", data=[np.nan, 1, np.nan, 1, np.nan, 1]
         )
         data.create_dataset("trialOptoDur", data=np.full(n_trials, 0.5))
-        data.create_dataset(
-            "trialOptoVoltage", data=[0.0, 1.0, 0.0, 1.0, 0.0, 1.0]
-        )
+        data.create_dataset("trialOptoVoltage", data=[0.0, 1.0, 0.0, 1.0, 0.0, 1.0])
         data.create_dataset(
             "trialGalvoVoltage", data=np.tile([0.5, 0.5], (n_trials, 1))
         )
@@ -100,6 +94,45 @@ def test_legacy_opto_data_loads_with_latest_dynamic_routing_task(
     assert TaskUtils.getBregmaGalvoCalibrationData is original_calibration_loader
 
 
+def test_legacy_variable_length_galvo_voltage_loads_with_latest_dynamic_routing_task(
+    legacy_opto_data: h5py.File,
+) -> None:
+    n_trials = legacy_opto_data["trialEndFrame"].size
+    del legacy_opto_data["trialGalvoVoltage"]
+    trial_galvo_voltage = legacy_opto_data.create_dataset(
+        "trialGalvoVoltage", shape=(n_trials,), dtype=h5py.vlen_dtype(np.float64)
+    )
+    for trial_index in range(n_trials):
+        trial_galvo_voltage[trial_index] = (
+            np.array([0.5]) if trial_index % 2 else np.array([np.nan, np.nan])
+        )
+    trial_opto_voltage = legacy_opto_data["trialOptoVoltage"][()]
+    del legacy_opto_data["trialOptoVoltage"]
+    legacy_opto_data.create_dataset(
+        "trialOptoVoltage", data=trial_opto_voltage[:, None]
+    )
+
+    assert sam_utils.is_galvo_opto(legacy_opto_data)
+
+    sam = sam_utils.get_sam(legacy_opto_data)
+
+    expected = np.array([np.nan, 0.5, np.nan, 0.5, np.nan, 0.5])[:, None]
+    assert np.array_equal(sam.trialGalvoX, expected, equal_nan=True)
+    assert np.array_equal(sam.trialGalvoY, expected, equal_nan=True)
+
+
+def test_empty_legacy_galvo_voltage_is_not_repaired() -> None:
+    with h5py.File(
+        "empty-legacy-galvo.h5", "w", driver="core", backing_store=False
+    ) as data:
+        data.create_dataset(
+            "trialGalvoVoltage", shape=(0,), dtype=h5py.vlen_dtype(np.float64)
+        )
+
+        with sam_utils._repair_legacy_variable_length_galvo_voltage(data) as load_data:
+            assert load_data is data
+
+
 def test_legacy_galvo_layout_uses_raw_combined_coordinates(
     legacy_opto_data: h5py.File,
 ) -> None:
@@ -115,9 +148,7 @@ def test_legacy_galvo_layout_uses_raw_combined_coordinates(
 
 
 def test_modern_galvo_layout_uses_raw_split_coordinates() -> None:
-    with h5py.File(
-        "modern-opto.h5", "w", driver="core", backing_store=False
-    ) as data:
+    with h5py.File("modern-opto.h5", "w", driver="core", backing_store=False) as data:
         data.create_dataset("trialOptoOnsetFrame", data=[1.0, np.nan])
         data.create_dataset("trialGalvoX", data=[[0.1, 0.2], [np.nan, np.nan]])
         data.create_dataset("trialGalvoY", data=[[0.3, 0.4], [np.nan, np.nan]])
@@ -128,9 +159,5 @@ def test_modern_galvo_layout_uses_raw_split_coordinates() -> None:
         assert trials._is_opto
         assert trials._is_galvo_opto
         assert trials._is_galvo_voltage_xy_separate
-        assert np.array_equal(
-            trials._galvo_voltage_x[0], np.array([0.1, 0.2])
-        )
-        assert np.array_equal(
-            trials._galvo_voltage_y[0], np.array([0.3, 0.4])
-        )
+        assert np.array_equal(trials._galvo_voltage_x[0], np.array([0.1, 0.2]))
+        assert np.array_equal(trials._galvo_voltage_y[0], np.array([0.3, 0.4]))
