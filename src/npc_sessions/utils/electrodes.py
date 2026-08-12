@@ -117,8 +117,10 @@ def get_tissuecyte_electrodes_table(
         )
     for column in ("x", "y", "z"):
         # -1 is code for "not inserted": make this NaN
-        session_electrodes[column] = session_electrodes[column].replace(-1, np.nan)
-        session_electrodes[column] *= TISSUECYTE_MICRONS_PER_PIXEL
+        session_electrodes[column] = (
+            session_electrodes[column].replace(-1, np.nan).astype(float)
+            * TISSUECYTE_MICRONS_PER_PIXEL
+        )
     session_electrodes = session_electrodes[
         [
             "group_name",
