@@ -196,7 +196,7 @@ class DynamicRoutingSession:
         SURVEY = "brainwide survey"
         SURFACE = "deep-insertion surface channels recording"
         TEMPLETON = "templeton"
-        NAIVE = "context naive"
+        CONTEXT_NAIVE = "context naive"
         OPTO = "opto perturbation"
         OPTO_CONTROL = "opto control"
         MUSCIMOL = "muscimol perturbation"
@@ -625,8 +625,8 @@ class DynamicRoutingSession:
         """Primary session variant used in NWB/AIND metadata."""
         if self.is_templeton:
             return self._SessionType.TEMPLETON
-        elif self.is_naive:
-            return self._SessionType.NAIVE
+        elif self.is_context_naive:
+            return self._SessionType.CONTEXT_NAIVE
         if self.is_injection_perturbation:
             return self._SessionType.MUSCIMOL
         if self.is_injection_control:
@@ -659,12 +659,6 @@ class DynamicRoutingSession:
                 self.keywords.append("ephys")
                 if self.is_surface_channels:
                     self.keywords.append("deep_insertions")
-                    deep_probes = set("ABCDEF") - set(
-                        self.surface_recording.probe_letters_to_skip
-                    )
-                    self.keywords.append(
-                        f"deep_insertion_probe_letters={''.join(sorted(deep_probes))}"
-                    )
             if self.is_sorted:
                 self.keywords.append("units")
             if self.is_annotated:
@@ -673,11 +667,8 @@ class DynamicRoutingSession:
                 self.keywords.append("training")
             if self.is_hab:
                 self.keywords.append("hab")
-            if self.session_type is self._SessionType.TEMPLETON:
-                self.keywords.append(self.session_type.value)
-            else:
+            if not self.session_type is self._SessionType.TEMPLETON:
                 self.keywords.append("dynamic_routing")
-                self.keywords.append(self.session_type.value)
             if self.is_production:
                 self.keywords.append("prod")
             else:
