@@ -1039,7 +1039,7 @@ class DynamicRoutingSession:
                 block_trials["is_false_alarm"].sum()
             ) / (float(block_trials["is_nogo"].sum()) or float("nan"))
             block_performance["catch_response_rate"] = float(
-                block_trials["is_response"].sum()
+                block_trials.filter("is_catch")["is_response"].sum()
             ) / (float(block_trials["is_catch"].sum()) or float("nan"))
             for stim, target in itertools.product(
                 ("vis", "aud"), ("target", "nontarget")
