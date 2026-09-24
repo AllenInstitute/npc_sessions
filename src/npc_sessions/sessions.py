@@ -667,7 +667,7 @@ class DynamicRoutingSession:
                 self.keywords.append("training")
             if self.is_hab:
                 self.keywords.append("hab")
-            if not self.session_type is self._SessionType.TEMPLETON:
+            if self.session_type is not self._SessionType.TEMPLETON:
                 self.keywords.append("dynamic_routing")
             if self.is_production:
                 self.keywords.append("prod")
