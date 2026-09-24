@@ -239,12 +239,17 @@ class DynamicRouting1(TaskControl):
                 ]
             )[: self._len]
 
-        if (script_onset_frames := self._sam.trialOptoOnsetFrame).ndim == 2:
-            script_onset_frames = script_onset_frames.squeeze()
-        # note: this is different to OptoTagging, where onset frame is abs frame idx
+        script_onset_frames = np.array(
+            [
+                np.nan if frame is None else frame
+                for frame in npc_stim.get_stim_trigger_frames(
+                    self._hdf5_path, stim_type="opto"
+                )
+            ],
+            dtype=float,
+        )[: self._len]
         onset_times_based_on_script = npc_stim.safe_index(
-            self._flip_times,
-            self._sam.stimStartFrame + script_onset_frames[: self._len],
+            self._flip_times, script_onset_frames
         )
         if not self._sync:
             logger.debug("Using script frame times for opto stim onsets")
