@@ -24,6 +24,14 @@ from npc_sessions.sessions import DynamicRoutingSession, DynamicRoutingSurfaceRe
 logger = logging.getLogger(__name__)
 
 
+def _get_stim_paths(session: DynamicRoutingSession) -> tuple[upath.UPath, ...]:
+    """Return stimulus paths without making them required for metadata."""
+    try:
+        return session.stim_paths
+    except FileNotFoundError:
+        return ()
+
+
 def is_surface_recording(
     session: DynamicRoutingSession,
 ) -> TypeGuard[DynamicRoutingSurfaceRecording]:
@@ -163,10 +171,53 @@ def get_modalities(
     return modalities or [stim.NO_STIMULUS]
 
 
+def _get_performance_metrics(
+    session: DynamicRoutingSession,
+    script_name: str,
+) -> aind_data_schema.core.acquisition.PerformanceMetrics | None:
+    if "DynamicRouting" not in script_name or not session.is_task:
+        return None
+    block_metrics = {}
+    for block_index, (
+        hit_count,
+        dprime_same_modal,
+        dprime_other_modal_go,
+        block_stim_rewarded,
+    ) in enumerate(
+        zip(
+            [int(v) for v in session.sam.hitCount],
+            [float(v) for v in session.sam.dprimeSameModal],
+            [float(v) for v in session.sam.dprimeOtherModalGo],
+            [str(v) for v in session.sam.blockStimRewarded],
+            strict=False,
+        )
+    ):
+        block_metrics[str(block_index)] = dict(
+            block_index=block_index,
+            block_stim_rewarded=block_stim_rewarded,
+            hit_count=hit_count,
+            dprime_same_modal=dprime_same_modal,
+            dprime_other_modal_go=dprime_other_modal_go,
+        )
+    return aind_data_schema.core.acquisition.PerformanceMetrics(
+        output_parameters={
+            "block_metrics": block_metrics,
+            "task_version": session.sam.taskVersion,
+        },
+        reward_consumed_during_epoch=np.nanmean(session.sam.rewardSize)
+        * int(np.count_nonzero(session.sam.trialRewarded)),
+        reward_consumed_unit=aind_data_schema_models.units.VolumeUnit.ML,
+        trials_total=len(session.sam.trialRewarded),
+        trials_rewarded=int(np.count_nonzero(session.sam.rewardEarned)),
+    )
+
+
 def _get_stimulus_epochs(
     session: DynamicRoutingSession,
 ) -> list[aind_data_schema.core.acquisition.StimulusEpoch]:
     if is_surface_recording(session):
+        return []
+    if not _get_stim_paths(session):
         return []
 
     def get_speaker_config(
@@ -179,45 +230,6 @@ def _get_stimulus_epochs(
             device_name="Speaker",
             volume=68.0,
             volume_unit="decibels",
-        )
-
-    def get_performance_metrics(
-        script_name: str,
-    ) -> aind_data_schema.core.acquisition.PerformanceMetrics | None:
-        if "DynamicRouting" not in script_name or not session.is_task:
-            return None
-        block_metrics = {}
-        for block_index, (
-            hit_count,
-            dprime_same_modal,
-            dprime_other_modal_go,
-            block_stim_rewarded,
-        ) in enumerate(
-            zip(
-                [int(v) for v in session.sam.hitCount],
-                [float(v) for v in session.sam.dprimeSameModal],
-                [float(v) for v in session.sam.dprimeOtherModalGo],
-                [str(v) for v in session.sam.blockStimRewarded],
-                strict=False,
-            )
-        ):
-            block_metrics[str(block_index)] = dict(
-                block_index=block_index,
-                block_stim_rewarded=block_stim_rewarded,
-                hit_count=hit_count,
-                dprime_same_modal=dprime_same_modal,
-                dprime_other_modal_go=dprime_other_modal_go,
-            )
-        return aind_data_schema.core.acquisition.PerformanceMetrics(
-            output_parameters={
-                "block_metrics": block_metrics,
-                "task_version": session.sam.taskVersion,
-            },
-            reward_consumed_during_epoch=np.nanmean(session.sam.rewardSize)
-            * sum(session.trials[:].is_rewarded),
-            reward_consumed_unit=aind_data_schema_models.units.VolumeUnit.ML,
-            trials_total=len(session.trials[:]),
-            trials_rewarded=sum(session.trials[:].is_contingent_reward),
         )
 
     def get_laser_configs(
@@ -339,7 +351,7 @@ def _get_stimulus_epochs(
                 stimulus_name=script_name,
                 code=get_code(script_name),
                 stimulus_modalities=get_modalities(script_name, session),
-                performance_metrics=get_performance_metrics(script_name),
+                performance_metrics=_get_performance_metrics(session, script_name),
                 notes=nwb_epoch.notes.item(),
                 active_devices=get_active_devices(script_name, session),
                 configurations=get_configurations(script_name),
@@ -431,7 +443,7 @@ def _get_data_streams(
                 configurations=[],
             )
         )
-    if session.stim_paths and len(session.epochs.script_name):
+    if _get_stim_paths(session) and len(session.epochs.script_name):
         data_streams.append(
             aind_data_schema.core.acquisition.DataStream(
                 stream_start_time=session.session_start_time

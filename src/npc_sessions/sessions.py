@@ -520,7 +520,7 @@ class DynamicRoutingSession:
         if self.id.date.dt < datetime.date(2023, 8, 8):
             # older DR/Templeton sessions, prior to Hannah C becoming 100% DR
             return ["Jackie Kuyat"]
-        elif "NP" in self.rig:
+        elif self.is_task and "NP" in self.rig:
             # older DR/Templeton sessions, prior to Hannah C becoming 100% DR
             return ["Sam Gale"]
             # some sessions Sam ran with no experiment log
@@ -2646,7 +2646,10 @@ class DynamicRoutingSession:
 
         if (v := getattr(self, "_rig", None)) is not None:
             return _format(v)
-        stim_names = tuple(self.stim_data.keys())
+        try:
+            stim_names = tuple(self.stim_data.keys())
+        except FileNotFoundError:
+            stim_names = ()
         stim_names_task_first = (
             *(name for name in stim_names if self.task_stim_name in name),
             *(name for name in stim_names if self.task_stim_name not in name),
