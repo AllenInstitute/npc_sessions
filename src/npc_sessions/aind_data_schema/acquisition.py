@@ -62,6 +62,23 @@ def _merge_data_streams(
     )
 
 
+def _max_finite_trial_value(
+    values: Iterable[float | Iterable[float]],
+) -> float:
+    """Return the maximum finite value from scalar or per-location trial data.
+
+    Optogenetic trial properties can contain one value per target location, so
+    a session may contain both scalar values and tuples of different lengths.
+    Flatten one trial at a time rather than asking NumPy to create a
+    rectangular array from the whole ragged collection.
+    """
+    finite_values: list[float] = []
+    for trial_values in values:
+        values_array = np.asarray(trial_values, dtype=float).reshape(-1)
+        finite_values.extend(values_array[np.isfinite(values_array)].tolist())
+    return max(finite_values, default=0.0)
+
+
 def get_acquisition_model(
     session: DynamicRoutingSession,
 ) -> aind_data_schema.core.acquisition.Acquisition:
@@ -248,9 +265,11 @@ def _get_stimulus_epochs(
                     f"Unknown script name {script_name}: unsure how to get laser power from intervals table"
                 )
             trials = next(v for k, v in session._all_trials.items() if script_name in k)
-            max_power = np.nanmax(getattr(trials, column_name))
-            if np.isnan(max_power):  # control session
-                max_power = 0.0
+            # DynamicRouting1.opto_power is normalized per target location, so
+            # bilateral trials make this a ragged collection of tuples. Keep
+            # that structure for the trials table, but flatten it for the
+            # scalar session-level LaserConfig power.
+            max_power = _max_finite_trial_value(getattr(trials, column_name))
             configs.append(
                 aind_data_schema.components.configs.LaserConfig(
                     device_name=laser.name,

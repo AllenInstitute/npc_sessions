@@ -952,12 +952,31 @@ class DynamicRouting1(TaskControl):
 
     def bregma_to_galvo(self, trial_idx, location_idx):
         opto_params = self._hdf5_data["optoParams"]
-        i = opto_params["label"] == self.opto_label[trial_idx][location_idx]
-        x, y = (
-            opto_params[f"bregma{coord}"][i] + opto_params[f"bregma offset {coord}"][i]
+        label = self.opto_label[trial_idx][location_idx]
+        labels = np.asarray(opto_params["label"].asstr()[()])
+        matching_rows = np.flatnonzero(labels == label)
+        if len(matching_rows) != 1:
+            raise ValueError(
+                f"Expected one optoParams row for {label=!r}; found {len(matching_rows)}"
+            )
+        row_idx = matching_rows[0]
+
+        def get_location_value(name: str) -> np.float64:
+            values = np.asarray(opto_params[name][row_idx], dtype=float).reshape(-1)
+            if len(values) == 1:
+                return np.float64(values[0])
+            try:
+                return np.float64(values[location_idx])
+            except IndexError as exc:
+                raise IndexError(
+                    f"No {name} value for {label=!r} at {location_idx=}: {values}"
+                ) from exc
+
+        return tuple(
+            get_location_value(f"bregma{coord}")
+            + get_location_value(f"bregma offset {coord}")
             for coord in "XY"
         )
-        return x, y
 
     @npc_io.cached_property
     def _opto_location_bregma_y(self) -> tuple[tuple[np.float64], ...]:
