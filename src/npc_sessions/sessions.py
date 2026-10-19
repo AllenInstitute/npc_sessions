@@ -1610,6 +1610,12 @@ class DynamicRoutingSession:
                 ]
             )
 
+        # replace sorting-pipeline amplitude_cutoff (SpikeInterface 0.100, wrong tail for
+        # negative-going spikes) with corrected values computed from spike amplitudes:
+        units["amplitude_cutoff"] = units["spike_amplitudes"].map(
+            utils.get_amplitude_cutoff
+        )
+
         # customize default_qc:
         units = units.assign(
             default_qc=lambda df: (
