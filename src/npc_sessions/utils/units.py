@@ -12,6 +12,7 @@ import numpy.typing as npt
 import pandas as pd
 import polars as pl
 import polars._typing
+import scipy.ndimage
 import scipy.stats
 import tqdm
 
@@ -312,3 +313,47 @@ def add_activity_drift_metric(
         .unique("unit_id")
     )
     return units_df.merge(max_min_df.to_pandas(), on="unit_id", how="left")
+
+
+def get_amplitude_cutoff(
+    spike_amplitudes: npt.ArrayLike,
+    num_histogram_bins: int = 100,
+    histogram_smoothing_value: float = 3,
+    amplitudes_bins_min_ratio: float = 5,
+    exclude_opposite_sign: bool = True,
+) -> float:
+    """Estimated fraction of a unit's spikes missed below detection threshold.
+
+    Replicates the corrected algorithm in SpikeInterface >= 0.104 (PR #4353), which
+    fixed the use of the wrong tail of the amplitude distribution for negative-going
+    spikes in earlier versions (the `amplitude_cutoff` values from the sorting
+    pipeline used SpikeInterface 0.100 and are affected). Defaults match the
+    parameters used by the sorting pipeline. The result is capped at 0.5.
+
+    - amplitudes of either sign are accepted: units with median < 0 are flipped
+    - returns NaN if there are fewer than
+      `num_histogram_bins * amplitudes_bins_min_ratio` spikes
+    - `exclude_opposite_sign` (not part of SpikeInterface): discard amplitudes
+      whose sign differs from the unit's median before computing. Most units have
+      a few such values in peak-channel amplitudes; after the sign flip they sit
+      below zero, leave the lowest-amplitude histogram bin nearly empty and drive
+      the estimate to ~0.
+    """
+    a = np.asarray(spike_amplitudes)
+    if exclude_opposite_sign and a.size:
+        a = a[np.sign(a) == np.sign(np.median(a))]
+    if a.size / num_histogram_bins < amplitudes_bins_min_ratio:
+        return np.nan
+    if np.median(a) < 0:
+        a = -a
+    counts = np.histogram(a, num_histogram_bins)[0]
+    # as in SpikeInterface, the integer histogram is smoothed (stays int64)
+    pdf = scipy.ndimage.gaussian_filter1d(
+        counts, histogram_smoothing_value, mode="nearest"
+    )
+    # first bin = density at detection threshold; under the symmetry assumption,
+    # spikes in the high-amplitude tail beyond the last bin at least that dense
+    # mirror the spikes missing below threshold
+    last_idx_above_cutoff = np.flatnonzero(pdf >= pdf[0])[-1]
+    n_missed = pdf[last_idx_above_cutoff + 1 :].sum()
+    return float(min(n_missed / (a.size + n_missed), 0.5))
