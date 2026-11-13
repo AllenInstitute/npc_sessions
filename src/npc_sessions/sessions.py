@@ -15,7 +15,7 @@ import uuid
 from collections.abc import Iterable, Iterator
 from typing import Any, Literal
 
-from npc_sessions._lazy import cached_property, lazy_class, lazy_import
+from npc_sessions._lazy import cached_property, lazy_import
 
 if typing.TYPE_CHECKING:
     import botocore.exceptions
@@ -191,27 +191,6 @@ def get_sessions(id_or_ids=None, **all_session_kwargs):
                 continue
 
     return multi_session_generator()
-
-
-def _make_ap_class() -> type[pynwb.core.MultiContainerInterface]:
-    class AP(pynwb.core.MultiContainerInterface):
-        """
-        AP-band ephys data from one or more channels. The electrode map in each published ElectricalSeries will
-        identify which channels are providing AP data. Filter properties should be noted in the
-        ElectricalSeries description or comments field.
-        """
-
-        __clsconf__ = [
-            {
-                "attr": "electrical_series",
-                "type": pynwb.ecephys.ElectricalSeries,
-                "add": "add_electrical_series",
-                "get": "get_electrical_series",
-                "create": "create_electrical_series",
-            }
-        ]
-
-    return AP
 
 
 class DynamicRoutingSession:
@@ -1831,8 +1810,22 @@ class DynamicRoutingSession:
                     ), f"{unit.electrodes = } != {unit[col].shape = }"
         return units
 
-    AP: type[pynwb.core.MultiContainerInterface] = lazy_class(_make_ap_class)  # type: ignore[assignment]
-    """AP-band ephys container class: built on first access to avoid importing pynwb at import time."""
+    class AP(pynwb.core.MultiContainerInterface):
+        """
+        AP-band ephys data from one or more channels. The electrode map in each published ElectricalSeries will
+        identify which channels are providing AP data. Filter properties should be noted in the
+        ElectricalSeries description or comments field.
+        """
+
+        __clsconf__ = [
+            {
+                "attr": "electrical_series",
+                "type": pynwb.ecephys.ElectricalSeries,
+                "add": "add_electrical_series",
+                "get": "get_electrical_series",
+                "create": "create_electrical_series",
+            }
+        ]
 
     @cached_property
     def _raw_ap(self) -> pynwb.core.MultiContainerInterface:
@@ -3679,14 +3672,6 @@ class DynamicRoutingSession:
         )
 
 
-def _make_surface_ap_class() -> type[pynwb.core.MultiContainerInterface]:
-    class AP(DynamicRoutingSession.AP):  # type: ignore[name-defined,misc]
-        def __init__(self, *args, **kwargs) -> None:
-            super().__init__(*args, **kwargs | {"name": "surface_AP"})
-
-    return AP
-
-
 class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     is_sync = False
     is_task = False
@@ -3803,7 +3788,9 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     def stim_paths(self) -> tuple[upath.UPath, ...]:
         return ()
 
-    AP = lazy_class(_make_surface_ap_class)  # type: ignore[assignment]
+    class AP(DynamicRoutingSession.AP):
+        def __init__(self, *args, **kwargs) -> None:
+            super().__init__(*args, **kwargs | {"name": "surface_AP"})
 
 
 if __name__ == "__main__":

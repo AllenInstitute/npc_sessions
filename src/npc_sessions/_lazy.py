@@ -88,33 +88,6 @@ def lazy_njit(*njit_args: Any, **njit_kwargs: Any) -> Any:
     return decorator
 
 
-class lazy_class:
-    """Class attribute whose value (a class) is built by `factory` on first access.
-
-    For nested classes that subclass heavy third-party classes.
-    """
-
-    def __init__(self, factory: Callable[[], type]) -> None:
-        self._factory = factory
-        self._cls: type | None = None
-        self._owner: type | None = None
-        self._name: str | None = None
-
-    def __set_name__(self, owner: type, name: str) -> None:
-        self._owner, self._name = owner, name
-
-    def __get__(self, instance: object, owner: type | None = None) -> type:
-        if self._cls is None:
-            with _lock:
-                if self._cls is None:
-                    cls = self._factory()
-                    if self._owner is not None and self._name is not None:
-                        cls.__qualname__ = f"{self._owner.__qualname__}.{self._name}"
-                        cls.__module__ = self._owner.__module__
-                    self._cls = cls
-        return self._cls
-
-
 _T = TypeVar("_T")
 _NOT_FOUND = object()
 
