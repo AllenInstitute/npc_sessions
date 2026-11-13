@@ -39,21 +39,36 @@ by just adding trials to an existing nwb table, via `nwb_file.add_trial(**trial)
 from __future__ import annotations
 
 import functools
+import typing
 from collections.abc import Iterable
 from typing import Optional, SupportsFloat
 
-import h5py
-import npc_ephys
-import npc_io
-import npc_lims
-import npc_mvr
-import npc_samstim
-import npc_session
-import npc_stim
-import npc_sync
+from npc_sessions._lazy import cached_property, lazy_import
+
+if typing.TYPE_CHECKING:
+    import h5py
+    import npc_ephys
+    import npc_io
+    import npc_lims
+    import npc_mvr
+    import npc_samstim
+    import npc_session
+    import npc_stim
+    import npc_sync
+    import upath
+else:
+    h5py = lazy_import("h5py")
+    npc_ephys = lazy_import("npc_ephys")
+    npc_io = lazy_import("npc_io")
+    npc_lims = lazy_import("npc_lims")
+    npc_mvr = lazy_import("npc_mvr")
+    npc_samstim = lazy_import("npc_samstim")
+    npc_session = lazy_import("npc_session")
+    npc_stim = lazy_import("npc_stim")
+    npc_sync = lazy_import("npc_sync")
+    upath = lazy_import("upath")
 import numpy as np
 import numpy.typing as npt
-import upath
 
 import npc_sessions.trials.property_dict as property_dict
 import npc_sessions.utils as utils
@@ -83,19 +98,19 @@ class TaskControl(property_dict.PropertyDict):
             # - there can be multiple hdf5 files, all recorded on sync
             self._sync = npc_sync.get_sync_data(sync)
 
-    @npc_io.cached_property
+    @cached_property
     def _input_data_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of `getInputData()` in psychopy event loop, in seconds, from start
         of experiment. Uses preceding frame's vsync time if available."""
         return npc_stim.get_input_data_times(self._hdf5_path, self._sync)
 
-    @npc_io.cached_property
+    @cached_property
     def _flip_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of `flip()` in psychopy event loop, in seconds, from start
         of experiment. Uses frame's vsync time if available."""
         return npc_stim.get_flip_times(self._hdf5_path, self._sync)
 
-    @npc_io.cached_property
+    @cached_property
     def _vis_display_times(self) -> npt.NDArray[np.float64]:
         """Best-estimate time of monitor update. Without sync, this equals frame times."""
         return npc_stim.get_vis_display_times(self._hdf5_path, self._sync)

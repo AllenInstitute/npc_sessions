@@ -1,13 +1,28 @@
+from __future__ import annotations
+
+import typing
 from typing import Optional
 
-import npc_ephys
-import npc_io
-import npc_lims
-import npc_mvr
-import npc_samstim
-import npc_session
-import npc_stim
-import npc_sync
+from npc_sessions._lazy import lazy_import
+
+if typing.TYPE_CHECKING:
+    import npc_ephys
+    import npc_io
+    import npc_lims
+    import npc_mvr
+    import npc_samstim
+    import npc_session
+    import npc_stim
+    import npc_sync
+else:
+    npc_ephys = lazy_import("npc_ephys")
+    npc_io = lazy_import("npc_io")
+    npc_lims = lazy_import("npc_lims")
+    npc_mvr = lazy_import("npc_mvr")
+    npc_samstim = lazy_import("npc_samstim")
+    npc_session = lazy_import("npc_session")
+    npc_stim = lazy_import("npc_stim")
+    npc_sync = lazy_import("npc_sync")
 
 import npc_sessions.utils as utils
 from npc_sessions.trials.property_dict import PropertyDict

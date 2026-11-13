@@ -4,21 +4,56 @@ import typing
 from collections.abc import Iterable, Mapping, Sequence
 from typing import Literal, TypeAlias
 
-import hdmf.common
+from npc_sessions._lazy import lazy_import, lazy_njit
+
+if typing.TYPE_CHECKING:
+    import hdmf.common
+    import numba
+    import rich.progress
+else:
+    hdmf = lazy_import("hdmf", "hdmf.common")
+    rich = lazy_import("rich", "rich.progress")
+    numba = lazy_import("numba")
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
-import rich.progress
+
+if typing.TYPE_CHECKING:
+    import pandas as pd
+else:
+    pd = lazy_import("pandas")
 
 from npc_sessions.utils.misc import get_taskcontrol_intervals_table_name
 
-Interval: TypeAlias = (
-    Sequence[float]
-    | Mapping[Literal["start_time", "stop_time"], float]
-    | pd.Series
-    | pd.DataFrame
-)
-UnitSelection: TypeAlias = int | str | Iterable[int] | pd.DataFrame | pd.Series
+if typing.TYPE_CHECKING:
+    Interval: TypeAlias = (
+        Sequence[float]
+        | Mapping[Literal["start_time", "stop_time"], float]
+        | pd.Series
+        | pd.DataFrame
+    )
+    UnitSelection: TypeAlias = int | str | Iterable[int] | pd.DataFrame | pd.Series
+
+
+def __getattr__(name: str) -> typing.Any:
+    """Build the pandas-dependent type aliases on first access, so that importing
+    this module doesn't import pandas."""
+    if name == "Interval":
+        import pandas as pd
+
+        value: typing.Any = (
+            Sequence[float]
+            | Mapping[Literal["start_time", "stop_time"], float]
+            | pd.Series
+            | pd.DataFrame
+        )
+    elif name == "UnitSelection":
+        import pandas as pd
+
+        value = int | str | Iterable[int] | pd.DataFrame | pd.Series
+    else:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    globals()[name] = value
+    return value
 
 
 def parse_intervals(
@@ -145,10 +180,7 @@ def parse_units(session, unit_selection: UnitSelection = None) -> pd.DataFrame:
     return units
 
 
-import numba
-
-
-@numba.njit(nogil=True)
+@lazy_njit(nogil=True)
 def get_unit_spike_times(
     unit_spike_times: npt.NDArray[np.floating],
     start_time: float,
@@ -162,7 +194,7 @@ def get_unit_spike_times(
     ]
 
 
-@numba.njit(nogil=True, parallel=True, fastmath=True)
+@lazy_njit(nogil=True, parallel=True, fastmath=True)
 def get_spike_counts(
     spike_times: npt.NDArray[np.floating],
     intervals: npt.NDArray[np.floating],

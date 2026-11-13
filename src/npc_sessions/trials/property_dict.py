@@ -6,12 +6,22 @@ import doctest
 import functools
 import logging
 import reprlib
+import typing
 from collections.abc import Generator, Iterator, Sequence
 from typing import Any, Literal
 
-import npc_io
+from npc_sessions._lazy import cached_property, lazy_import
+
+if typing.TYPE_CHECKING:
+    import npc_io
+else:
+    npc_io = lazy_import("npc_io")
 import numpy as np
-import pandas as pd
+
+if typing.TYPE_CHECKING:
+    import pandas as pd
+else:
+    pd = lazy_import("pandas")
 
 logger = logging.getLogger(__name__)
 

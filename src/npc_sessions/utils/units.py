@@ -3,18 +3,34 @@ from __future__ import annotations
 import gc
 import logging
 import math
+import typing
 import warnings
 from collections.abc import Iterable
 from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
-import polars as pl
-import polars._typing
-import scipy.ndimage
-import scipy.stats
-import tqdm
+
+from npc_sessions._lazy import lazy_import
+
+if typing.TYPE_CHECKING:
+    import pandas as pd
+else:
+    pd = lazy_import("pandas")
+if typing.TYPE_CHECKING:
+    import polars as pl
+else:
+    pl = lazy_import("polars")
+
+if typing.TYPE_CHECKING:
+    import polars._typing
+    import scipy.ndimage
+    import scipy.stats
+    import tqdm
+else:
+    polars = lazy_import("polars", "polars._typing")
+    scipy = lazy_import("scipy", "scipy.ndimage", "scipy.stats")
+    tqdm = lazy_import("tqdm")
 
 logger = logging.getLogger(__name__)
 

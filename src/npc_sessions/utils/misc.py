@@ -2,11 +2,19 @@ from __future__ import annotations
 
 import datetime
 import importlib.metadata
+import typing
 import zoneinfo
 
-import npc_io
-import npc_lims
-import npc_session
+from npc_sessions._lazy import lazy_import
+
+if typing.TYPE_CHECKING:
+    import npc_io
+    import npc_lims
+    import npc_session
+else:
+    npc_io = lazy_import("npc_io")
+    npc_lims = lazy_import("npc_lims")
+    npc_session = lazy_import("npc_session")
 
 
 def get_package_version() -> str:

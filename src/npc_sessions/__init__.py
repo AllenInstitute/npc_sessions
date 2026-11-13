@@ -18,3 +18,9 @@ np.seterr(divide="ignore", invalid="ignore")
 
 Session = DynamicRoutingSession
 """Temp alias for backwards compatibility"""
+
+
+def __getattr__(name: str):  # lazily-built aliases, see `utils.intervals.__getattr__`
+    if name in ("Interval", "UnitSelection"):
+        return getattr(utils, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

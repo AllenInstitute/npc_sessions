@@ -9,13 +9,25 @@ display times to get stim onset times
 from __future__ import annotations
 
 import datetime
+import typing
 from collections.abc import Iterable
 
-import DynamicRoutingTask.TaskUtils
-import npc_io
-import npc_samstim
-import npc_session
-import npc_sync
+from npc_sessions._lazy import cached_property, lazy_import
+
+if typing.TYPE_CHECKING:
+    import DynamicRoutingTask.TaskUtils
+    import npc_io
+    import npc_samstim
+    import npc_session
+    import npc_sync
+else:
+    DynamicRoutingTask = lazy_import(
+        "DynamicRoutingTask", "DynamicRoutingTask.TaskUtils"
+    )
+    npc_io = lazy_import("npc_io")
+    npc_samstim = lazy_import("npc_samstim")
+    npc_session = lazy_import("npc_session")
+    npc_sync = lazy_import("npc_sync")
 import numpy as np
 import numpy.typing as npt
 
@@ -49,11 +61,11 @@ class OptoTagging(TaskControl):
             hdf5, sync, ephys_recording_dirs=ephys_recording_dirs, **kwargs
         )
 
-    @npc_io.cached_property
+    @cached_property
     def _datetime(self) -> datetime.datetime:
         return npc_session.DatetimeRecord(self._hdf5_data["startTime"].asstr()[()]).dt
 
-    @npc_io.cached_property
+    @cached_property
     def _device(self) -> str:
         """If multiple devices were used, this should be ignored."""
         if (device := self._hdf5_data.get("optoDev")) is None:
@@ -87,7 +99,7 @@ class OptoTagging(TaskControl):
             self._hdf5_data.get("trialOptoDevice") is None
         ), f"Multiple optotagging devices found for {self._datetime} session - update `get_trial_opto_device` method to handle multiple devices"
 
-    @npc_io.cached_property
+    @cached_property
     def _trial_opto_device(self) -> tuple[str, ...]:
         ## for multiple devices:
         # return tuple(self.get_trial_opto_device(idx) for idx in range(self._len))
@@ -116,15 +128,15 @@ class OptoTagging(TaskControl):
         ), f"Expected all stim recordings to be of type `npc_samstim.FlexStimRecording`, got: {recordings}"
         return tuple(_ for _ in recordings if _ is not None)  # type: ignore[misc]
 
-    @npc_io.cached_property
+    @cached_property
     def _stim_recordings_488(self) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
         return self.get_stim_recordings_from_sync("laser_488")
 
-    @npc_io.cached_property
+    @cached_property
     def _stim_recordings_633(self) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
         return self.get_stim_recordings_from_sync("laser_633")
 
-    @npc_io.cached_property
+    @cached_property
     def _stim_recordings(self) -> tuple[npc_samstim.FlexStimRecording, ...]:
         rec_488 = self._stim_recordings_488 or ()
         rec_633 = self._stim_recordings_633 or ()
@@ -139,36 +151,36 @@ class OptoTagging(TaskControl):
                 raise NotImplementedError(f"Unexpected opto device: {device}")
         return tuple(rec)
 
-    @npc_io.cached_property
+    @cached_property
     def _len(self) -> int:
         """Number of trials"""
         return len(self.trial_index)
 
-    @npc_io.cached_property
+    @cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
         """0-indexed"""
         return np.arange(len(self._hdf5_data["trialOptoOnsetFrame"]))
 
-    @npc_io.cached_property
+    @cached_property
     def _inter_trial_interval(self) -> float:
         return self._hdf5_data["optoInterval"][()] / self._hdf5_data["frameRate"][()]
 
-    @npc_io.cached_property
+    @cached_property
     def _analysis_period(self) -> float:
         """Maximum period that cannot reach an adjacent trial's response."""
         return min(self._MAX_ANALYSIS_PERIOD, 0.5 * self._inter_trial_interval)
 
-    @npc_io.cached_property
+    @cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         """Start of the period associated with this optical stimulus."""
         return self.stim_start_time - self._analysis_period
 
-    @npc_io.cached_property
+    @cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         """End of the period associated with this optical stimulus."""
         return self.stim_stop_time + self._analysis_period
 
-    @npc_io.cached_property
+    @cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
         """Optical stimulus onset time.
 
@@ -180,7 +192,7 @@ class OptoTagging(TaskControl):
             self.trial_index
         ]
 
-    @npc_io.cached_property
+    @cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
         """Optical stimulus offset time.
 
@@ -192,37 +204,37 @@ class OptoTagging(TaskControl):
             self.trial_index
         ]
 
-    @npc_io.cached_property
+    @cached_property
     def baseline_start_time(self) -> npt.NDArray[np.float64]:
         """Start of the safely analyzable pre-stimulus baseline period."""
         return self.start_time
 
-    @npc_io.cached_property
+    @cached_property
     def baseline_stop_time(self) -> npt.NDArray[np.float64]:
         """End of the baseline period, before the stimulus-onset censor period."""
         return self.stim_start_time - self._CENSOR_PERIOD
 
-    @npc_io.cached_property
+    @cached_property
     def response_start_time(self) -> npt.NDArray[np.float64]:
         """Start of the response period, after the stimulus-onset censor period."""
         return self.stim_start_time + self._CENSOR_PERIOD
 
-    @npc_io.cached_property
+    @cached_property
     def response_stop_time(self) -> npt.NDArray[np.float64]:
         """End of the response period, before the stimulus-offset censor period."""
         return self.stim_stop_time - self._CENSOR_PERIOD
 
-    @npc_io.cached_property
+    @cached_property
     def stim_name(self) -> npt.NDArray[np.str_]:
         return np.array([recording.name for recording in self._stim_recordings])[
             self.trial_index
         ]
 
-    @npc_io.cached_property
+    @cached_property
     def nominal_duration(self) -> npt.NDArray[np.float64]:
         return self._hdf5_data["trialOptoDur"][self.trial_index]
 
-    @npc_io.cached_property
+    @cached_property
     def location(self) -> npt.NDArray[np.str_]:
         if all(str(v).upper() in "ABCDEF" for v in self._location):
             return np.array(
@@ -230,7 +242,7 @@ class OptoTagging(TaskControl):
             )
         return self._location
 
-    @npc_io.cached_property
+    @cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
         bregma = self._hdf5_data.get("optoBregma", None) or self._hdf5_data.get(
             "bregmaXY", None
@@ -241,15 +253,15 @@ class OptoTagging(TaskControl):
             tuple(bregma[np.all(galvo == v, axis=1)][0]) for v in trial_voltages
         )
 
-    @npc_io.cached_property
+    @cached_property
     def bregma_x(self) -> npt.NDArray[np.float64]:
         return np.array([bregma[0] for bregma in self._bregma_xy])[self.trial_index]
 
-    @npc_io.cached_property
+    @cached_property
     def bregma_y(self) -> npt.NDArray[np.float64]:
         return np.array([bregma[1] for bregma in self._bregma_xy])[self.trial_index]
 
-    @npc_io.cached_property
+    @cached_property
     def _location(self) -> npt.NDArray[np.str_]:
         if trialOptoLabel := self._hdf5_data.get("trialOptoLabel", None):
             return np.array(trialOptoLabel.asstr()[self.trial_index], dtype=str)
@@ -263,7 +275,7 @@ class OptoTagging(TaskControl):
             )[self.trial_index]
         raise ValueError("No known optotagging location data found")
 
-    @npc_io.cached_property
+    @cached_property
     def power(self) -> npt.NDArray[np.float64]:
         calibration_data = self._hdf5_data["optoPowerCalibrationData"]
         trial_voltages = self._hdf5_data["trialOptoVoltage"][self.trial_index]
@@ -282,7 +294,7 @@ class OptoTagging(TaskControl):
         return power
         # return trial_voltages * calibration_data['slope'] + calibration_data['intercept']
 
-    @npc_io.cached_property
+    @cached_property
     def wavelength(self) -> npt.NDArray[np.int64]:
         def parse_wavelength(device: str) -> int:
             try:

@@ -2,17 +2,34 @@ from __future__ import annotations
 
 import contextlib
 import threading
+import typing
 from collections.abc import Iterator
 from typing import Any
 
-import h5py
-import npc_io
-import npc_lims
-import npc_samstim
-import npc_stim
+from npc_sessions._lazy import lazy_import
+
+if typing.TYPE_CHECKING:
+    import h5py
+    import npc_io
+    import npc_lims
+    import npc_samstim
+    import npc_stim
+else:
+    h5py = lazy_import("h5py")
+    npc_io = lazy_import("npc_io")
+    npc_lims = lazy_import("npc_lims")
+    npc_samstim = lazy_import("npc_samstim")
+    npc_stim = lazy_import("npc_stim")
 import numpy as np
-from DynamicRoutingTask import TaskUtils
-from DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils import DynRoutData
+
+if typing.TYPE_CHECKING:
+    from DynamicRoutingTask import TaskUtils
+    from DynamicRoutingTask.Analysis import DynamicRoutingAnalysisUtils
+else:
+    TaskUtils = lazy_import("DynamicRoutingTask.TaskUtils")
+    DynamicRoutingAnalysisUtils = lazy_import(
+        "DynamicRoutingTask.Analysis.DynamicRoutingAnalysisUtils"
+    )
 
 _LOAD_SAM_LOCK = threading.Lock()
 
@@ -168,7 +185,9 @@ def _repair_legacy_variable_length_galvo_voltage(
         yield repaired
 
 
-def get_sam(stim_path_or_data: npc_io.PathLike | h5py.File) -> DynRoutData:
+def get_sam(
+    stim_path_or_data: npc_io.PathLike | h5py.File,
+) -> DynamicRoutingAnalysisUtils.DynRoutData:
     """Load DynRoutData while keeping legacy opto calibration cloud-compatible.
 
     DynamicRoutingTask 0.1.106 began loading galvo calibration from a hard-coded

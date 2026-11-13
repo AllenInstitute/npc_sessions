@@ -3,13 +3,28 @@ from __future__ import annotations
 import contextlib
 import functools
 import logging
+import typing
 
-import aind_session
-import npc_lims
-import npc_session
+from npc_sessions._lazy import lazy_import
+
+if typing.TYPE_CHECKING:
+    import aind_session
+    import npc_lims
+    import npc_session
+else:
+    aind_session = lazy_import("aind_session")
+    npc_lims = lazy_import("npc_lims")
+    npc_session = lazy_import("npc_session")
 import numpy as np
-import pandas as pd
-import polars as pl
+
+if typing.TYPE_CHECKING:
+    import pandas as pd
+else:
+    pd = lazy_import("pandas")
+if typing.TYPE_CHECKING:
+    import polars as pl
+else:
+    pl = lazy_import("polars")
 
 TISSUECYTE_MICRONS_PER_PIXEL = 25
 

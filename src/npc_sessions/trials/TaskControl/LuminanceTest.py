@@ -13,11 +13,19 @@ display times to get stim onset times
 
 from __future__ import annotations
 
+import typing
 from collections.abc import Iterable
 
-import npc_io
-import npc_stim
-import npc_sync
+from npc_sessions._lazy import cached_property, lazy_import
+
+if typing.TYPE_CHECKING:
+    import npc_io
+    import npc_stim
+    import npc_sync
+else:
+    npc_io = lazy_import("npc_io")
+    npc_stim = lazy_import("npc_stim")
+    npc_sync = lazy_import("npc_sync")
 import numpy as np
 import numpy.typing as npt
 
@@ -47,24 +55,24 @@ class LuminanceTest(TaskControl):
             return ~np.isnan(self._hdf5_data[key][()])
         return None
 
-    @npc_io.cached_property
+    @cached_property
     def _len_all_trials(self) -> int:
         return len(self._hdf5_data["trialStartFrame"][()])
 
-    @npc_io.cached_property
+    @cached_property
     def _idx(self) -> npt.NDArray[np.int32]:
         """Used for extracting a subset of inds throughout all properties.
         Must be constructed from private properties directly from the hdf5 file"""
         return np.arange(self._len_all_trials)
 
-    @npc_io.cached_property
+    @cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         """falling edge of first vsync in each trial"""
         return npc_stim.safe_index(
             self._flip_times, self._hdf5_data["trialStartFrame"][self._idx]
         )
 
-    @npc_io.cached_property
+    @cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         """falling edge of vsync after stimulus end + inter-stim frames"""
         return npc_stim.safe_index(
@@ -73,16 +81,16 @@ class LuminanceTest(TaskControl):
             + self._hdf5_data["framesPerLevel"][()],
         )
 
-    @npc_io.cached_property
+    @cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
         return np.arange(self._len_all_trials)[self._idx]
 
-    @npc_io.cached_property
+    @cached_property
     def level(self) -> npt.NDArray[np.int32]:
         # round because some values end up as -0.40000000000000013
         return np.round(self._hdf5_data["trialLevel"][self._idx], 3)
 
-    @npc_io.cached_property
+    @cached_property
     def _len(self) -> int:
         return len(self._idx)
 

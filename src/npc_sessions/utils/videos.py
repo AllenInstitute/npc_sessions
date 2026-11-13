@@ -1,21 +1,35 @@
 from __future__ import annotations
 
 import tempfile
+import typing
 from typing import Literal
 
-import npc_lims
-import npc_mvr
+from npc_sessions._lazy import lazy_import
+
+if typing.TYPE_CHECKING:
+    import npc_lims
+    import npc_mvr
+    import pynwb
+    import upath
+    import zarr
+else:
+    npc_lims = lazy_import("npc_lims")
+    npc_mvr = lazy_import("npc_mvr")
+    pynwb = lazy_import("pynwb")
+    upath = lazy_import("upath")
+    zarr = lazy_import("zarr")
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
-import pynwb
-import upath
-import zarr
+
+if typing.TYPE_CHECKING:
+    import pandas as pd
+else:
+    pd = lazy_import("pandas")
 
 MODEL_FUNCTION_MAPPING = {
-    "dlc_eye": npc_lims.get_dlc_eye_s3_paths,
-    "dlc_side": npc_lims.get_dlc_side_s3_paths,
-    "dlc_face": npc_lims.get_dlc_face_s3_paths,
+    "dlc_eye": lambda session: npc_lims.get_dlc_eye_s3_paths(session),
+    "dlc_side": lambda session: npc_lims.get_dlc_side_s3_paths(session),
+    "dlc_face": lambda session: npc_lims.get_dlc_face_s3_paths(session),
 }
 
 FACEMAP_CAMERA_NAMES: tuple[npc_mvr.CameraName, ...] = ("behavior", "face", "nose")
