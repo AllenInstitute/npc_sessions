@@ -2331,13 +2331,13 @@ class DynamicRoutingSession:
             raise AttributeError(f"{self.id} is not a session with sync data")
         if not self.is_task:
             raise AttributeError(f"{self.id} is not a session with behavior task")
-        task_frame_times = next(
-            v for k, v in self.stim_frame_times.items() if self.task_stim_name in k
+        _ = self.stim_frame_times  # raises if stim errors aren't ignored
+        task_display_times = next(
+            v
+            for k, v in self._stim_display_times.items()
+            if self.task_stim_name in k and not isinstance(v, Exception)
         )
-        return not any(
-            np.array_equal(task_frame_times, array)
-            for array in self.sync_data.constant_lag_frame_display_time_blocks
-        )
+        return task_display_times.is_photodiode
 
     # helper properties -------------------------------------------------------- #
 
@@ -2821,14 +2821,24 @@ class DynamicRoutingSession:
         )
 
     @cached_property
-    def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
-        """Frame times dict for all stims, containing time arrays or Exceptions."""
-        frame_times = npc_stim.get_stim_frame_times(
+    def _stim_display_times(
+        self,
+    ) -> dict[str, Exception | npc_stim.BlockDisplayTimes]:
+        """Display times with provenance (`source`, matched sync block) for all stims, or
+        Exceptions."""
+        display_times = npc_stim.get_stim_display_times(
             *self.stim_paths,  # no longer using cached data
             sync=self.sync_path,
-            frame_time_type="display_time",
         )
-        return {npc_io.from_pathlike(k).stem: v for k, v in frame_times.items()}
+        return {npc_io.from_pathlike(k).stem: v for k, v in display_times.items()}
+
+    @cached_property
+    def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
+        """Frame times dict for all stims, containing time arrays or Exceptions."""
+        return {
+            k: v if isinstance(v, Exception) else v.display_times
+            for k, v in self._stim_display_times.items()
+        }
 
     @property
     def stim_frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
