@@ -1,0 +1,952 @@
+[
+ {
+  "folder": "DRpilot_796012_20250710",
+  "span": "4689.000-4689.500",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 31,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.23615184545633383,
+   "in_max_ms": 0.1947854270838434,
+   "post_max_ms": 0.23738663003314286,
+   "n_in": 30,
+   "lag_ms": [
+    -0.41981027425208595,
+    2.3864948907430517
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.2704985063246568,
+   "in_max_ms": 0.21290504264470655,
+   "post_max_ms": 0.2581721482783905,
+   "n_in": 30,
+   "lag_ms": [
+    4.866464681072102,
+    7.580189725558739
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_798632_20250902",
+  "span": "2415.500-2419.000",
+  "status": "ok",
+  "n_analog_in": 70,
+  "n_digital_in": 70,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.15100625842023874,
+   "in_max_ms": 0.47967654336389387,
+   "post_max_ms": 0.3549404291334213,
+   "n_in": 70,
+   "lag_ms": [
+    -0.4324394374179974,
+    2.238853393464524
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.10888032011280302,
+   "in_max_ms": 0.4819968007723219,
+   "post_max_ms": 0.6686448155051039,
+   "n_in": 70,
+   "lag_ms": [
+    6.072680749639403,
+    7.567560562392828
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_813586_20251202",
+  "span": "686.000-689.500",
+  "status": "ok",
+  "n_analog_in": 69,
+  "n_digital_in": 69,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.0993606608403752,
+   "in_max_ms": 0.11967905737719775,
+   "post_max_ms": 0.10984087526821895,
+   "n_in": 69,
+   "lag_ms": [
+    -0.4409628040775715,
+    2.107150567383087
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.06394110198471026,
+   "in_max_ms": 0.10151840592698136,
+   "post_max_ms": 0.05104625086005399,
+   "n_in": 69,
+   "lag_ms": [
+    6.398721880827907,
+    7.559037195960627
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_835598_20260223",
+  "span": "2910.000-2911.500",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 31,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.07652220710951951,
+   "in_max_ms": 0.0568749351259612,
+   "post_max_ms": 0.07654731098227785,
+   "n_in": 30,
+   "lag_ms": [
+    -0.39497166289947927,
+    2.7261131208433653
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.041431219415244414,
+   "in_max_ms": 0.04180004634690704,
+   "post_max_ms": 0.048335548854083754,
+   "n_in": 30,
+   "lag_ms": [
+    7.605028336911346,
+    5.170362268017925
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_835598_20260227",
+  "span": "4032.500-4034.000",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 30,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.08089473271866154,
+   "in_max_ms": 0.0747117912851536,
+   "post_max_ms": 0.09999472308663826,
+   "n_in": 30,
+   "lag_ms": [
+    -0.4323786997701973,
+    2.235456666085156
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.05916162058383634,
+   "in_max_ms": 0.08919664264794847,
+   "post_max_ms": 0.0881306425526418,
+   "n_in": 30,
+   "lag_ms": [
+    6.155294003065137,
+    7.567621300040628
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_836629_20260430",
+  "status": "RuntimeError: blocked: no ecephys upload on S3 within 10 min of the sync start"
+ },
+ {
+  "folder": "DRpilot_836629_20260501",
+  "span": "1427.500-1429.000",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 30,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.05810723394006345,
+   "in_max_ms": 0.3514824733201749,
+   "post_max_ms": 0.7142279201843849,
+   "n_in": 30,
+   "lag_ms": [
+    -0.3436579069102663,
+    1.9312910759481383
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.05293138065098901,
+   "in_max_ms": 0.05627167661259591,
+   "post_max_ms": 0.6838929448349518,
+   "n_in": 30,
+   "lag_ms": [
+    7.6563420931279325,
+    5.9332246578378545
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_836726_20260213",
+  "span": "6038.000-6039.500",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 30,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.09303690831075073,
+   "in_max_ms": 0.06013374013491557,
+   "post_max_ms": 0.07951031284392229,
+   "n_in": 30,
+   "lag_ms": [
+    -0.442753036168142,
+    1.79963511573078
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.0375909680769837,
+   "in_max_ms": 0.04942889927406213,
+   "post_max_ms": 0.0811619943306141,
+   "n_in": 30,
+   "lag_ms": [
+    7.557246963642683,
+    6.889684852012579
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_837230_20260420",
+  "span": "3006.500-3009.000",
+  "status": "ok",
+  "n_analog_in": 50,
+  "n_digital_in": 50,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.10266362869515433,
+   "in_max_ms": 0.0749273654037097,
+   "post_max_ms": 0.1583167381795647,
+   "n_in": 50,
+   "lag_ms": [
+    -0.4710324274128652,
+    1.7884436051645025
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.06841401159363159,
+   "in_max_ms": 0.0749273654037097,
+   "post_max_ms": 0.0845470451622532,
+   "n_in": 50,
+   "lag_ms": [
+    7.52896757239796,
+    5.6463753296611685
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_837959_20260330",
+  "span": "3255.500-3257.000",
+  "status": "ok",
+  "n_analog_in": 29,
+  "n_digital_in": 29,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.12235892222633993,
+   "in_max_ms": 0.09476993477619544,
+   "post_max_ms": 0.09631110128793807,
+   "n_in": 29,
+   "lag_ms": [
+    -0.4401592859721859,
+    2.397171108668772
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.1468229927468201,
+   "in_max_ms": 0.09314563385487418,
+   "post_max_ms": 0.18324924099033524,
+   "n_in": 29,
+   "lag_ms": [
+    7.559840713838639,
+    5.875191869790797
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_837959_20260331",
+  "span": "6001.000-6002.500",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 31,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.06869790558994282,
+   "in_max_ms": 0.13605169351649238,
+   "post_max_ms": 0.05685119322151877,
+   "n_in": 30,
+   "lag_ms": [
+    -0.3495698465485475,
+    1.8545048815212795
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.037681878438888816,
+   "in_max_ms": 0.13605169351649238,
+   "post_max_ms": 0.07283119748535682,
+   "n_in": 30,
+   "lag_ms": [
+    7.650430153262278,
+    6.232811596873944
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_837959_20260402",
+  "span": "5398.000-5400.000",
+  "status": "ok",
+  "n_analog_in": 40,
+  "n_digital_in": 40,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.1110826510739571,
+   "in_max_ms": 0.04339159249866498,
+   "post_max_ms": 0.06359227654684219,
+   "n_in": 40,
+   "lag_ms": [
+    -0.4371461736809579,
+    2.3782942057550827
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.058216538945998764,
+   "in_max_ms": 0.04615146144715254,
+   "post_max_ms": 0.09816261672312976,
+   "n_in": 40,
+   "lag_ms": [
+    5.843692767939501,
+    7.562853826129867
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_837959_20260402",
+  "span": "6654.500-6655.500",
+  "status": "ok",
+  "n_analog_in": 20,
+  "n_digital_in": 20,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.6064990684535587,
+   "in_max_ms": 0.5536869557545288,
+   "post_max_ms": 0.6831034161223215,
+   "n_in": 20,
+   "lag_ms": [
+    -0.35105190363537986,
+    2.0394606926856795
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.5359116566978628,
+   "in_max_ms": 0.05322525066731032,
+   "post_max_ms": 0.37081643677083775,
+   "n_in": 20,
+   "lag_ms": [
+    7.648948096175445,
+    5.76114183786558
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_839146_20260518",
+  "status": "RuntimeError: blocked: no ecephys upload on S3 within 10 min of the sync start"
+ },
+ {
+  "folder": "DRpilot_840160_20260429",
+  "span": "5829.500-5831.500",
+  "status": "ok",
+  "n_analog_in": 40,
+  "n_digital_in": 40,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.05220571847530664,
+   "in_max_ms": 0.06180156697155326,
+   "post_max_ms": 0.05624993400488165,
+   "n_in": 40,
+   "lag_ms": [
+    -0.10048098465631483,
+    0.982897231097013
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.06900967264300562,
+   "in_max_ms": 0.07526722993134172,
+   "post_max_ms": 0.05762922546637128,
+   "n_in": 40,
+   "lag_ms": [
+    7.89951901515451,
+    4.646846911327884
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_841308_20260511",
+  "span": "1089.500-1091.500",
+  "status": "ok",
+  "n_analog_in": 40,
+  "n_digital_in": 40,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.10961058399061585,
+   "in_max_ms": 0.6676073869584798,
+   "post_max_ms": 0.10325830737656361,
+   "n_in": 40,
+   "lag_ms": [
+    -0.2188574477486327,
+    1.1285046703051194
+   ],
+   "pass_": false
+  },
+  "V_display": {
+   "pre_max_ms": 0.972397766645372,
+   "in_max_ms": 0.9187701555219974,
+   "post_max_ms": 0.9308978637818655,
+   "n_in": 40,
+   "lag_ms": [
+    7.781142552289566,
+    5.198276651753986
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_847958_20260413",
+  "span": "5706.000-5707.500",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 30,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.7046988598631287,
+   "in_max_ms": 0.06033353474776959,
+   "post_max_ms": 0.7443708796017745,
+   "n_in": 30,
+   "lag_ms": [
+    -0.4202616919428692,
+    2.403362141649268
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.6748187115590554,
+   "in_max_ms": 0.06033353474776959,
+   "post_max_ms": 0.7193903493316611,
+   "n_in": 30,
+   "lag_ms": [
+    5.855750549926597,
+    7.579738307867956
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_847958_20260415",
+  "span": "6649.000-6650.500",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 31,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.7538978643424343,
+   "in_max_ms": 0.09071268141269684,
+   "post_max_ms": 0.6365141034621047,
+   "n_in": 30,
+   "lag_ms": [
+    -0.35661265792441554,
+    1.963870366125775
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.6892832216180977,
+   "in_max_ms": 0.10367206414230168,
+   "post_max_ms": 0.6618994602831663,
+   "n_in": 30,
+   "lag_ms": [
+    7.64338734188641,
+    5.891524279832083
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_850215_20260318",
+  "span": "6464.000-6464.500",
+  "status": "ok",
+  "n_analog_in": 10,
+  "n_digital_in": 10,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.05232187140791211,
+   "in_max_ms": 0.11863125746458536,
+   "post_max_ms": 0.08979488120530732,
+   "n_in": 10,
+   "lag_ms": [
+    -0.10337181674913154,
+    0.978437148660305
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.050001593081105966,
+   "in_max_ms": 0.09977572608477203,
+   "post_max_ms": 0.0548783527847263,
+   "n_in": 10,
+   "lag_ms": [
+    7.896628183061694,
+    4.715569862128177
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_850217_20260402",
+  "span": "246.500-247.000",
+  "status": "ok",
+  "n_analog_in": 10,
+  "n_digital_in": 11,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.10771642718054864,
+   "in_max_ms": 0.5063898443040671,
+   "post_max_ms": 0.5324355595348607,
+   "n_in": 10,
+   "lag_ms": [
+    -0.3119595368445971,
+    1.57491711169655
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.06488895826350927,
+   "in_max_ms": 0.47352797761845977,
+   "post_max_ms": 0.15205249576411006,
+   "n_in": 10,
+   "lag_ms": [
+    7.68804046316518,
+    4.982130474274982
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_850217_20260403",
+  "span": "1174.000-1176.000",
+  "status": "ok",
+  "n_analog_in": 40,
+  "n_digital_in": 40,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.06674172834664205,
+   "in_max_ms": 0.27684765825597424,
+   "post_max_ms": 0.06952178489427752,
+   "n_in": 40,
+   "lag_ms": [
+    -0.26261676725880534,
+    1.1483309903042027
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.08046501886838087,
+   "in_max_ms": 0.0935831657216113,
+   "post_max_ms": 0.0854615183243368,
+   "n_in": 40,
+   "lag_ms": [
+    5.47536949136429,
+    7.737383232779393
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_854390_20260422",
+  "span": "6069.000-6070.500",
+  "status": "ok",
+  "n_analog_in": 29,
+  "n_digital_in": 29,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.7353812288783956,
+   "in_max_ms": 0.3587603332562139,
+   "post_max_ms": 0.6650303876085673,
+   "n_in": 29,
+   "lag_ms": [
+    -0.36679838012787513,
+    1.9501189663060359
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.6677920305264706,
+   "in_max_ms": 0.3587603332562139,
+   "post_max_ms": 0.6474411889030307,
+   "n_in": 29,
+   "lag_ms": [
+    7.63320161968295,
+    5.914798324283765
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_854390_20260423",
+  "span": "5199.500-5201.500",
+  "status": "ok",
+  "n_analog_in": 39,
+  "n_digital_in": 40,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.10607639751469833,
+   "in_max_ms": 0.06450552200476523,
+   "post_max_ms": 0.6896048676026112,
+   "n_in": 39,
+   "lag_ms": [
+    -0.43286636127959355,
+    2.3911360271995363
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.08281267082566046,
+   "in_max_ms": 0.07360541940215626,
+   "post_max_ms": 0.6778870779271529,
+   "n_in": 39,
+   "lag_ms": [
+    5.851686794358102,
+    7.5671336385312316
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_854390_20260427",
+  "span": "5236.500-5238.000",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 30,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.5867082231816312,
+   "in_max_ms": 0.11522873819558299,
+   "post_max_ms": 0.6803748651691421,
+   "n_in": 30,
+   "lag_ms": [
+    -0.41935154285965837,
+    2.354359949549689
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.6443710876737896,
+   "in_max_ms": 0.09711457869343576,
+   "post_max_ms": 0.7080377304191643,
+   "n_in": 30,
+   "lag_ms": [
+    5.874291371128493,
+    7.580648456951167
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_856847_20260602",
+  "status": "RuntimeError: blocked: no ecephys upload on S3 within 10 min of the sync start"
+ },
+ {
+  "folder": "DRpilot_856847_20260604",
+  "status": "RuntimeError: blocked: no ecephys upload on S3 within 10 min of the sync start"
+ },
+ {
+  "folder": "DRpilot_856847_20260605",
+  "span": "2257.500-2259.500",
+  "status": "ok",
+  "n_analog_in": 40,
+  "n_digital_in": 40,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.07774302866891958,
+   "in_max_ms": 0.07259087942657061,
+   "post_max_ms": 0.07331940514632151,
+   "n_in": 40,
+   "lag_ms": [
+    -0.2000763486194046,
+    1.5786311851115897
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.0562855200314516,
+   "in_max_ms": 0.05524049515770457,
+   "post_max_ms": 0.07250077965181845,
+   "n_in": 40,
+   "lag_ms": [
+    7.7999236511914205,
+    4.283373107455191
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_857681_20260813",
+  "span": "5132.500-5134.000",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 30,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.07025291324680438,
+   "in_max_ms": 0.1021398247758043,
+   "post_max_ms": 0.1007463924906915,
+   "n_in": 30,
+   "lag_ms": [
+    -0.2043997938017128,
+    1.484170536059537
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.1735536907290225,
+   "in_max_ms": 0.10435697186039761,
+   "post_max_ms": 0.16235518432949902,
+   "n_in": 30,
+   "lag_ms": [
+    7.795600206009112,
+    4.64748074500676
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_859582_20260701",
+  "span": "6996.500-6998.000",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 30,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.7441659804499068,
+   "in_max_ms": 0.05971815198790864,
+   "post_max_ms": 0.05346553689378197,
+   "n_in": 30,
+   "lag_ms": [
+    -0.3390550077710941,
+    1.9398256986278284
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.717205029559409,
+   "in_max_ms": 0.0665404372739431,
+   "post_max_ms": 0.09877738057184615,
+   "n_in": 30,
+   "lag_ms": [
+    5.90513330507747,
+    7.660944992039731
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_859583_20260515",
+  "span": "1008.000-1010.000",
+  "status": "ok",
+  "n_analog_in": 40,
+  "n_digital_in": 40,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.530824723398382,
+   "in_max_ms": 0.7191132082766671,
+   "post_max_ms": 0.5620752689878827,
+   "n_in": 40,
+   "lag_ms": [
+    -0.3588840085058109,
+    2.1362905814044097
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.9688669261436189,
+   "in_max_ms": 0.789356405050512,
+   "post_max_ms": 0.959963967090971,
+   "n_in": 40,
+   "lag_ms": [
+    5.425110314092763,
+    7.641115991532388
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_862025_20260804",
+  "span": "2644.000-2646.000",
+  "status": "ok",
+  "n_analog_in": 40,
+  "n_digital_in": 41,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.08151197198458249,
+   "in_max_ms": 0.05897071105209761,
+   "post_max_ms": 0.09772913017513929,
+   "n_in": 40,
+   "lag_ms": [
+    -0.42952822900588217,
+    2.481778860783379
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.0578013575704972,
+   "in_max_ms": 0.05879503737560299,
+   "post_max_ms": 0.05143974453858391,
+   "n_in": 40,
+   "lag_ms": [
+    7.570471770804943,
+    5.497190892810977
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_862025_20260805",
+  "status": "RuntimeError: blocked: no ecephys upload on S3 within 10 min of the sync start"
+ },
+ {
+  "folder": "DRpilot_862025_20260806",
+  "span": "1764.000-1765.500",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 30,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.06482064372903551,
+   "in_max_ms": 0.0494059698894489,
+   "post_max_ms": 0.3013166153778002,
+   "n_in": 30,
+   "lag_ms": [
+    -0.35400885087710776,
+    1.7517855569622043
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.071958661806093,
+   "in_max_ms": 0.0494059698894489,
+   "post_max_ms": 0.4993021431118905,
+   "n_in": 30,
+   "lag_ms": [
+    7.645991149161091,
+    6.112653828836301
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_862027_20260916",
+  "span": "3351.000-3353.000",
+  "status": "ok",
+  "n_analog_in": 40,
+  "n_digital_in": 40,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.6127372394075792,
+   "in_max_ms": 0.42478686782487785,
+   "post_max_ms": 0.3068199030167307,
+   "n_in": 40,
+   "lag_ms": [
+    -0.4013493207821739,
+    2.450634344768332
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.5717256021853245,
+   "in_max_ms": 0.5159907241250039,
+   "post_max_ms": 0.5764510024164338,
+   "n_in": 40,
+   "lag_ms": [
+    7.598650679028651,
+    5.574867835548503
+   ],
+   "pass_": true
+  }
+ },
+ {
+  "folder": "DRpilot_872697_20260903",
+  "span": "3776.000-3777.500",
+  "status": "ok",
+  "n_analog_in": 30,
+  "n_digital_in": 30,
+  "analog_without_digital": 0,
+  "digital_without_analog": 0,
+  "V_digital": {
+   "pre_max_ms": 0.0774598322550446,
+   "in_max_ms": 0.04368671920929046,
+   "post_max_ms": 0.061668037460549385,
+   "n_in": 30,
+   "lag_ms": [
+    -0.20366459148135618,
+    1.4200456732851308
+   ],
+   "pass_": true
+  },
+  "V_display": {
+   "pre_max_ms": 0.04710458188128541,
+   "in_max_ms": 0.04881567019765498,
+   "post_max_ms": 0.06244857377168955,
+   "n_in": 30,
+   "lag_ms": [
+    4.540849958175386,
+    7.796335408329469
+   ],
+   "pass_": true
+  }
+ }
+]

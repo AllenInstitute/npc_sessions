@@ -469,7 +469,7 @@ class DynamicRoutingSession:
     @property
     def session_start_time(self) -> datetime.datetime:
         if self.is_sync:
-            return utils.get_aware_dt(self.sync_data.start_time)
+            return utils.get_aware_dt(self._raw_sync_data.start_time)
         return utils.get_aware_dt(npc_stim.get_stim_start_time(self.task_data))
 
     @property
@@ -897,8 +897,14 @@ class DynamicRoutingSession:
         see `NWBFile.Units.get_unit_obs_intervals()`
         """
         invalid_times = getattr(self, "_invalid_times", None)
-        if invalid_times is None:
+        sync_invalid_times = []
+        if self.is_sync and self.sync_patch is not None:
+            from npc_sessions import timing
+
+            sync_invalid_times = timing.get_invalid_times(self.sync_data)
+        if invalid_times is None and not sync_invalid_times:
             return None
+        invalid_times = [dict(x) for x in (invalid_times or ())] + sync_invalid_times
         intervals = pynwb.epoch.TimeIntervals(
             name="invalid_times",
             description="time intervals to be removed from analysis",
@@ -907,7 +913,7 @@ class DynamicRoutingSession:
             name="reason",
             description="reason for invalidation",
         )
-        if self.info and invalid_times is not None:
+        if invalid_times:
             for interval in invalid_times:
                 if (
                     stop_time := interval.get("stop_time", None)
@@ -945,8 +951,30 @@ class DynamicRoutingSession:
         )
         for column in self._trials.to_add_trial_column():
             trials.add_column(**column)
+        replayed = (
+            self.sync_data.invalid_intervals
+            if self.is_sync and self.sync_patch is not None
+            else ()
+        )
+        trials.add_column(
+            name="timing_source",
+            description=(
+                "'measured': all event times in the trial come from recorded sync edges (or the stim file, "
+                "without sync); 'patched': the trial overlaps a replayed sync interval and uses frame times "
+                "reconstructed from the stim file there. Trials overlapping a replayed interval in which any "
+                "line is unknown are excluded via `invalid_times`"
+            ),
+        )
         for trial in self._trials.to_add_trial():
             if self.is_valid_interval(trial["start_time"], trial["stop_time"]):
+                trial["timing_source"] = (
+                    "patched"
+                    if any(
+                        a < trial["stop_time"] and z > trial["start_time"]
+                        for a, z in replayed
+                    )
+                    else "measured"
+                )
                 trials.add_interval(**trial)
         self._cached_nwb_trials = trials
         return trials
@@ -2624,8 +2652,50 @@ class DynamicRoutingSession:
         return npc_lims.get_session_raw_data_asset(self.id)["id"]
 
     @cached_property
+    def _raw_sync_data(self) -> npc_sync.SyncDataset:
+        """The sync file as recorded, including any replayed (copied) buffers: only for
+        metadata and building the patch. Use `sync_data` for events."""
+        return npc_sync.SyncDataset(self.sync_path, on_invalid="ignore")
+
+    @cached_property
+    def sync_patch(self) -> npc_sync.SyncPatch | None:
+        """Reconstructed/unknown edges inside the sync file's replayed intervals (None if
+        there are none). See `npc_sessions.timing`."""
+        from npc_sessions import timing
+
+        return timing.get_sync_patch(
+            str(self.id), self._raw_sync_data, self.stim_paths
+        )
+
+    @cached_property
     def sync_data(self) -> npc_sync.SyncDataset:
-        return npc_sync.SyncDataset(self.sync_path)
+        """Sync data with the session's `sync_patch` applied: edge queries return measured
+        edges, plus reconstructed edges inside replayed intervals; lines that can't be
+        reconstructed return nothing there (see `get_unknown_intervals`)."""
+        return npc_sync.SyncDataset(self._raw_sync_data, patch=self.sync_patch, on_invalid="raise")
+
+    @cached_property
+    def sync_timing_report(self) -> pd.DataFrame:
+        """One row per vsync block: matched stim, status (clean / patched / rejected), reason,
+        patch gate values. See `npc_sessions.timing.get_block_report`."""
+        from npc_sessions import timing
+
+        display = tuple(
+            v for v in self._stim_display_times.values() if not isinstance(v, Exception)
+        )
+        by_block = {d.block_index: d for d in display}
+        blocks = self._raw_sync_data.vsync_times_in_blocks
+        return timing.get_block_report(
+            self.sync_data,
+            self.stim_paths,
+            display_times=[
+                by_block.get(
+                    i,
+                    npc_stim.BlockDisplayTimes(i, None, b, None, "unavailable", reason="no stim file matched"),
+                )
+                for i, b in enumerate(blocks)
+            ],
+        )
 
     @property
     def stim_path_root(self) -> upath.UPath:
@@ -2648,12 +2718,12 @@ class DynamicRoutingSession:
                 return True
             if (
                 dt := npc_session.DatetimeRecord(p.stem).dt
-            ) < self.sync_data.start_time:
+            ) < self._raw_sync_data.start_time:
                 return False
             if (
-                dt > self.sync_data.stop_time  # this check first can save opening file
+                dt > self._raw_sync_data.stop_time  # this check first can save opening file
                 or dt + datetime.timedelta(seconds=npc_stim.get_stim_duration(p))
-                > self.sync_data.stop_time
+                > self._raw_sync_data.stop_time
             ):
                 return False
             return True
@@ -2828,9 +2898,23 @@ class DynamicRoutingSession:
         Exceptions."""
         display_times = npc_stim.get_stim_display_times(
             *self.stim_paths,  # no longer using cached data
-            sync=self.sync_path,
+            sync=self.sync_data,
         )
         return {npc_io.from_pathlike(k).stem: v for k, v in display_times.items()}
+
+    @property
+    def stim_frame_time_sources(self) -> dict[str, npt.NDArray[np.int8]]:
+        """Per-frame timing source for each stim with frame times: 0 = measured, 1 =
+        interpolated inside a replayed sync interval (see `sync_patch`)."""
+        return {
+            k: (
+                np.zeros(len(v.display_times), dtype=np.int8)
+                if v.frame_source is None
+                else v.frame_source
+            )
+            for k, v in self._stim_display_times.items()
+            if not isinstance(v, Exception) and v.display_times is not None
+        }
 
     @cached_property
     def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
@@ -2904,7 +2988,7 @@ class DynamicRoutingSession:
         )
         return tuple(
             npc_ephys.get_ephys_timing_on_sync(
-                self.sync_path,
+                self.sync_data,
                 devices=pxi_data,
             )
         )
@@ -3194,17 +3278,46 @@ class DynamicRoutingSession:
         if has_precise_timing:
             column_descriptions["is_likely_lick"] = (
                 f"boolean flag indicating whether lick sensor event duration is <={max_contact}, making it likely to be a true lick"
+                " (True for licks reconstructed from the task's lickFrames, which the task registered as licks)"
             )
             column_descriptions["duration"] = (
-                "duration of each lick sensor event, in seconds"
+                "duration of each lick sensor event, in seconds (NaN where `timing_source` is 'stim_frame')"
+            )
+            column_descriptions["timing_source"] = (
+                "'sync': lick sensor edge on sync; 'stim_frame': inside a replayed sync interval (events on the lick line unknown), "
+                "reconstructed from the task's lickFrames at the midpoint of the frame interval before the frame's input read (error within +-1/2 frame)"
             )
             df = pd.DataFrame(
                 dict(
                     timestamps=rising,
                     duration=falling - rising,
                     is_likely_lick=is_likely_lick,
+                    timing_source="sync",
                 )
             )
+            if self.sync_data.get_unknown_intervals("lick_sensor"):
+                from npc_sessions import timing
+
+                reconstructed = timing.get_reconstructed_lick_times(
+                    self.sync_data, self.task_path
+                )
+                df = (
+                    pd.concat(
+                        [
+                            df,
+                            pd.DataFrame(
+                                dict(
+                                    timestamps=reconstructed,
+                                    duration=np.nan,
+                                    is_likely_lick=True,
+                                    timing_source="stim_frame",
+                                )
+                            ),
+                        ]
+                    )
+                    .sort_values("timestamps")
+                    .reset_index(drop=True)
+                )
         else:
             df = pd.DataFrame(dict(timestamps=self.sam.lickTimes))
         licks = pynwb.core.DynamicTable.from_dataframe(
@@ -3595,11 +3708,47 @@ class DynamicRoutingSession:
                         timestamps=rising,
                         duration=falling - rising,
                         is_solenoid_time=True,
+                        timing_source="sync",
                     )
                 )
                 column_descriptions["duration"] = (
                     "length of time the solenoid valve controlling water reward delivery to the subject was opened, in seconds"
+                    " (NaN where `timing_source` is 'stim_frame')"
                 )
+                column_descriptions["timing_source"] = (
+                    "'sync': solenoid line edge on sync; 'stim_frame': inside a replayed sync interval (solenoid line unknown), "
+                    "reconstructed from the stim file's reward frames + the session's median measured frame-to-solenoid latency"
+                )
+                if self.sync_data.get_unknown_intervals(15):
+                    from npc_sessions import timing
+
+                    extra = []
+                    for stim_file in self.stim_data_without_timing_issues:
+                        if any(name in stim_file.lower() for name in ("mapping", "tagging")):
+                            continue
+                        stim_path = next(p for p in self.stim_paths if p.stem == stim_file)
+                        t, _, _ = timing.get_reconstructed_reward_times(
+                            self.sync_data, stim_path, rising
+                        )
+                        extra.extend(t)
+                    if extra:
+                        df = (
+                            pd.concat(
+                                [
+                                    df,
+                                    pd.DataFrame(
+                                        dict(
+                                            timestamps=extra,
+                                            duration=np.nan,
+                                            is_solenoid_time=True,
+                                            timing_source="stim_frame",
+                                        )
+                                    ),
+                                ]
+                            )
+                            .sort_values("timestamps")
+                            .reset_index(drop=True)
+                        )
             else:
                 df = pd.DataFrame(dict(timestamps=[], duration=[], is_solenoid_time=[]))
         else:
@@ -3613,7 +3762,7 @@ class DynamicRoutingSession:
                     npc_stim.safe_index(
                         npc_stim.get_flip_times(
                             stim=stim_path,
-                            sync=self.sync_path if self.is_sync else None,
+                            sync=self.sync_data if self.is_sync else None,
                         ),
                         frame_idx,
                     )
@@ -3639,7 +3788,7 @@ class DynamicRoutingSession:
         times: npt.NDArray[np.floating] = npc_stim.safe_index(
             npc_stim.get_input_data_times(
                 stim=self.task_path,
-                sync=self.sync_path if self.is_sync else None,
+                sync=self.sync_data if self.is_sync else None,
             ),
             frames,
         )

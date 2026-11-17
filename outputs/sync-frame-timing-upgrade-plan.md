@@ -84,8 +84,8 @@ Callers to update: `npc_stim/stim.py` L319, `npc_sessions/sessions.py` `is_photo
 
 | Line (bit) | Source | Method | Gate | Output |
 |---|---|---|---|---|
-| `vsync_stim` (2) | stim `frameIntervals` | remove copies and splice edges; solve each gap's frame count from elapsed time (n = argmin\|Δt_sync − Δt_stim(n)\|); interpolate between anchors. Do **not** port the prototype `repair.reconcile_replay` as-is: it gives every missing frame to the first gap, so it only works for single-gap blocks | per-gap residual ≤0.5 ms; second-best n ≥10 ms worse; block balance = 0 | patch |
-| `stim_photodiode` (4) | NI-DAQ analog diode mapped through local barcodes; otherwise predicted (patched vsync + local latency + `diodeBoxFrameInterval` phase) | use predicted when the box flips every frame (flicker); analog then only checks it | within pre-window baseline + 0.5 ms | patch, source flagged |
+| `vsync_stim` (2) | stim `frameIntervals` | remove copies and splice edges; solve each gap's frame count from elapsed time (n = argmin\|Δt_sync − Δt_stim(n)\|); interpolate between anchors. Do **not** port the prototype `repair.reconcile_replay` as-is: it gives every missing frame to the first gap, so it only works for single-gap blocks | per-gap residual ≤0.2 ms (was 0.5 ms; re-derived from the P0 manifest, `outputs/sync-patching-report.md`); second-best n ≥10 ms worse; block balance = 0 | patch |
+| `stim_photodiode` (4) | predicted (patched vsync + local latency + `diodeBoxFrameInterval` phase). Optional, low priority: NI-DAQ analog diode mapped through local barcodes, for ephys sessions from 2025-01-13 on only (see the note below the table) | the analog, where present, only checks the prediction | edges in the 0.5 s after the span within the 3-s pre-span max error + 0.5 ms; polarity per toggle; latency per polarity | patch, source flagged |
 | cameras `*_exposing`, `*_frame_readout` (21–29) | the line itself (hardware period) | integer-period interpolation, period from a least-squares fit over 10 s each side | residual ≤0.1 ms; frac ≤0.01; count agrees with info.json and frame-ID barcodes | patch |
 | `stim_running` (5) | block boundary | TaskControl raises the acquisition line before frame 0's frame signal and drops it after the last (assumes that line is wired to stim_running) | — | patch (rare) |
 | `reward_1_actuator` (15) | `rewardFrames`, `solenoidOpenTime` | vsync[f] + per-session median latency | latency within the range measured outside intervals | patch; duration flagged nominal |
@@ -123,11 +123,85 @@ Callers to update: `npc_stim/stim.py` L319, `npc_sessions/sessions.py` `is_photo
 - [ ] npc_sessions: require `npc-sync>=0.2.8`. Hotfix npc_sync so that `vsync_times_in_blocks` and the edge getters also raise on invalid intervals.
 - [ ] Survey every session that has sync (npc_lims tracked sessions plus the share) with `invalid_intervals`, the barcode-onset check and a strict block-count check. Output a manifest CSV: intervals, the blocks they overlap, stim events lost by type, and a class (clean / replay-reconcilable / displaced / drop / unexplained). *Accept:* every block whose count ≠ stim frames is classified.
 
+> **P0 status (2026-11-17): partly done.** Checked against the code on `main` (npc_sync 0.3.1, npc_stim 0.1.24, npc_sessions local `main`).
+> - [ ] Upstream DAQ buffer fix (MPE): not started; no record of it being raised.
+> - [x] npc_sessions requires `npc-sync>=0.3.1` and `npc-stim>=0.1.24`. This is committed on local `main`, **not pushed**.
+> - [ ] npc_sync hotfix: `vsync_times_in_blocks` and `get_edges`/`get_rising_edges`/`get_falling_edges` still **don't** raise on `invalid_intervals`. Only `npc_stim.get_display_times` refuses such files (`assert_sync_frame_timing_is_valid`, which also rejects `timebase_discontinuities`). Cameras, licks and barcodes read through npc_sync are unguarded.
+> - [ ] Survey manifest: not produced. `npc_sync/sync_replay_issues.csv` is the earlier 2,916-file replay survey (pre-0.2.8 detector) and has no block classes. The 442-session Task 2 pilot QC (`experiments/display-times-move/`, `experiments/display-times-issues/`) lists 64 replayed and 2 discontinuity files, but it covers only cached Task 2 pilot sessions and doesn't classify blocks.
+
+> **P0 update (2026-11-17, sync-patching handoff): manifest and hotfix done (local branches, not pushed).** See `outputs/sync-patching-report.md`.
+> - [x] Survey manifest: `experiments/sync-patch-manifest/manifest.csv`, 2,971 sync files (2,945 on the share and 26 npc_lims sessions only on S3). 152 have replays and 11 have discontinuities. All 100 blocks with count ≠ stim frames are classified: 74 replay-reconcilable, 12 displaced, 9 unexplained, 4 drop, 1 truncated (0.2 ms gate).
+> - [x] npc_sync hotfix: every edge getter raises `SyncFaultError` on unpatched invalid intervals (`on_invalid='raise'`, the default), or masks them (`'mask'`). Branch `sync-patch`; the test fails under 0.3.1.
+> - [ ] Upstream DAQ buffer fix (MPE): still not started.
+
 **P1: npc_sync 0.3.0 + npc_stim display times.** Strict policy, `SyncPatch`, pure functions (multi-gap vsync solve), gap-aware blocks, `get_edges_in_blocks`; the barcode-onset check is done. Move display-time estimation to `npc_stim.get_display_times` and add shims in npc_sync. Drop npc_sync's npc_stim dependency. On clean sessions, `get_display_times` must reproduce `frame_display_time_blocks` byte for byte before any tolerance is removed. *Accept:* on the 7 local sessions, reproduces D1 (≤0.05 ms) and the camera residuals (≤0.032 ms); the barcode check flags 840160 among them and all 4 multi-run files in `multi_gap_check.log`; existing synthetic replay tests still pass.
+
+> **P1 status (2026-11-17): the display-time move is released; patching is not started.**
+> - [x] Display-time estimation moved to `npc_stim.get_display_times`, with deprecated shims in npc_sync. Released as npc_sync 0.3.1 and npc_stim 0.1.24 (the version was set to 0.3.0 by hand and CI bumped it to 0.3.1). On clean sessions it is byte-identical to `frame_display_time_blocks` (2,000 blocks, `outputs/display-times-move-qc.md`).
+> - [x] Barcode-onset check: `SyncDataset.timebase_discontinuities` (npc_sync 0.2.9). The claim that it flags 840160 and all 4 multi-run files comes from the npc_sync work; I didn't re-check it after the release.
+> - [x] `get_edges_in_blocks` exists (npc_sync).
+> - [x] Drop npc_sync's npc_stim dependency: `npc_sync/pyproject.toml` no longer lists npc-stim.
+> - [ ] Strict policy (raise instead of warn or skip) across npc_sync: not done. See the P0 hotfix.
+> - [ ] `SyncPatch` (data model, provenance, persistence format): **not started**. Nothing in `npc_sync/src`.
+> - [ ] Pure reconciliation functions: only a prototype, `npc_sync/experiments/vsync-frame-count/repair.py` (`find_replay_runs`, `reconcile_replay`, `locate_drop`, `reconcile_drop`). `reconcile_replay` assumes a single gap. The per-gap solve for multi-run files exists only in `experiments/sync-frame-timing/multi_gap_check.py`. Nothing is ported.
+> - [ ] Gap-aware blocks (`vsync_times_in_blocks` split and joined across a reconciled gap): not started.
+> - [ ] Acceptance (D1 ≤0.05 ms, camera ≤0.032 ms on the 7 local sessions): not run against library code. The numbers are from the prototype only.
+
+> **P1 update (2026-11-17, sync-patching handoff): done on npc_sync branch `sync-patch` (not pushed).**
+> - [x] `npc_sync.patch` contains:
+>   - `solve_vsync_gaps` / `reconcile_vsyncs` (per-gap solve)
+>   - `interpolate_periodic_edges`
+>   - `predict_diode_edges`
+>   - `locate_drop` / `reconcile_drop` (drops still rejected)
+>   - `SyncPatch` / `SpanPatch`: per line and span, reconstructed or unknown; content hash plus builder; JSON
+>   - `build_sync_patch`
+> - [x] `SyncDataset(path, patch=..., on_invalid=...)`, `get_edge_sources` and `get_unknown_intervals`. Gap-aware blocks via `reshape_into_blocks(bridge=...)`.
+> - [x] Acceptance (`experiments/sync-patch-manifest/acceptance_local7.log`): on the 7 local sessions, frame times equal the prototype to <1 µs. Max anchor residual 0.047 ms; camera exposing lines ≤0.0321 ms (22/22). 840160 is flagged and its drop located at 2472.0 s. npc_sync tests: 47 passed.
+> - [ ] Multi-run files with displaced onsets: stay rejected (as required).
 
 **P2: satellite libs.** Work through the tolerance table and make npc_stim, npc_mvr, npc_ephys and npc_samstim patch-aware. *Accept:* clean sessions give byte-identical outputs (or each diff is documented), and every removed tolerance has a test that fails under the old behaviour.
 
+> **P2 status (2026-11-17): only the npc_stim display-time items, plus `is_photodiode`.** Evidence: `outputs/display-times-issues.md`, `outputs/display-times-analog-validation.md`. Released in npc_stim 0.1.24.
+> - [x] Disabled `display ≥ vsync` assert: replaced by a hard check against the vsync *rising* edge + 15 ms (the falling edge can be late; confirmed with the analog diode).
+> - [x] ±5 flip-count check now also applies for `diodeBoxFrameInterval` > 1. It used to have no check, so times were invented.
+> - [x] Whole-block +1-frame offset corrected; larger offsets rejected.
+> - [x] `SYNC_FALLBACK_CONSTANT_LAG` / `SYNC_DEBUG` replaced by `fallback=` / `raise_on_error=` parameters (the env vars are deprecated but still honoured), and provenance is returned (`BlockDisplayTimes.source`/`.reason`).
+> - [x] npc_sessions `is_photodiode` uses explicit provenance (`_stim_display_times`). On local `main`, **not pushed**.
+> - [ ] vsync count ≠ stim frames: still returns `unavailable` with a reason rather than raising. Raising was the plan's action; decide whether `unavailable` plus a reason is acceptable.
+> - [ ] ≤3 invented end frames and ≤4 truncated end frames (`display_times.py` ~L477/L490): still present. The hard check now catches the mid-block case they hid (§1c).
+> - [ ] 25 % misalignment tolerance and the 90 % ±1 vote (`display_times.py` ~L1160): unchanged.
+> - [ ] §4 extra flips in stalls: explained with the analog diode (real screen alternation, not frames); the candidate "keep first flip" rule was shown to be fragile and **not implemented**. Blocks stay rejected.
+> - [ ] stim.py `atol=1` count match (`stim.py` L186), blocks claimed twice, and the dead ±60 branch (L348): unchanged.
+> - [ ] stim.py `td.days` / `.seconds` time arithmetic: not checked.
+> - [ ] running.py ±1 trim, npc_mvr `LostFrames` / end padding (#176), npc_samstim unbounded next-edge, npc_ephys `match_barcodes` (first/last barcode affine): **not started**.
+> - [ ] npc_sessions: largest-of-several sync files, silent reward fallback, opto fallback: not started.
+> - [ ] "Patch-aware" (consuming a `SyncPatch`): blocked on P1.
+
+> **P2 update (2026-11-17, sync-patching handoff): npc_stim is patch-aware; npc_mvr, npc_samstim and npc_ephys are not.**
+> - [x] npc_stim branch `sync-patch`:
+>   - `get_display_times` accepts a patched file.
+>   - Blocks overlapping an 'unknown' vsync or diode span become `unavailable`.
+>   - New per-frame `BlockDisplayTimes.frame_source`.
+>   - B1–B5 all pass (`p2_display_times_local.log`). Blocks away from spans are byte-identical.
+> - [ ] npc_mvr / npc_samstim / npc_ephys patch-awareness: not done. The patched `SyncDataset` already masks barcodes, and trials in replayed intervals are excluded.
+> - Measured for npc_ephys: the first/last-barcode alignment is >1 ms off a robust all-barcode fit for 104 devices in 43 sessions. Proposed gate: ≤0.5 ms AP/NI-DAQ, ≤0.8 ms LFP. See `outputs/sync-patching-report.md`.
+
 **P3: npc_sessions.timing.** Per-line builders, the gates, persisting and reusing patches, `timing_source` columns (trials, licks, rewards, frametimes), `invalid_times` for the rest. A block that fails a gate is rejected, never given a fallback.
+
+> **P3 status (2026-11-17): not started.** There is no `npc_sessions.timing` module, no per-line builders, no gates, no patch persistence and no `timing_source` columns. `invalid_times` is still the npc_lims-driven one (`sessions.py` ~L889). Blocked on P1 (`SyncPatch` plus the ported reconciliation) and on P0 (the manifest, needed to re-derive the gate thresholds; see Open questions). The lick-precision decision (open questions) is still needed for the trials `timing_source`.
+
+> **P3 update (2026-11-17, sync-patching handoff): done on npc_sessions branch `sync-patch` (not pushed).**
+> - [x] `npc_sessions.timing` covers:
+>   - exact stim matching
+>   - patch build, cache and reuse (`$NPC_SESSIONS_SYNC_PATCH_DIR`)
+>   - barcode spans widened to line-low bounds
+>   - the block report, which rejects blocks that fail a gate
+>   - `invalid_times` entries for replayed intervals
+>   - reconstructed licks and rewards
+> - [x] `DynamicRoutingSession.sync_data` is patched and strict. It is the one `SyncDataset` passed everywhere. New properties: `sync_patch`, `sync_timing_report`, `stim_frame_time_sources`.
+> - [x] `timing_source` columns in trials, licks and rewards. Frame-time provenance is in `stim_frame_time_sources`.
+> - [x] C1–C7 pass on 5 real sessions (`p3_session_check*.log`). npc_sessions suite: 20 passed, 2 failed; the failures also fail on `main` and are not regressions (see the report).
+> - [ ] Lick decision: by default, trials overlapping a replayed interval are excluded (`invalid_times`), and reconstructed licks appear only in the licks table. **Needs the user's decision.**
 
 **P4: validate and roll out.** For every ephys session, compare display times with the NI-DAQ analog diode (sampled windows plus every interval). Require a landmark (dropped-frame) index shift of 0: shifts that are a multiple of `diodeBoxFrameInterval` are invisible to diode phase. Then regenerate NWB and cache for the affected sessions and bump versions.
 
@@ -135,15 +209,41 @@ Callers to update: `npc_stim/stim.py` L319, `npc_sessions/sessions.py` `is_photo
 > - [x] Sample validation of the npc_stim `display-times-p2-fixes` branch: 11 sessions, 64 blocks, 2.2 M toggles. 0 toggles misassigned; box-3 max |err| 1.75 ms; box-1 p99 ≤1 ms, with a 0.10 % after-stall tail up to 13 ms (common to baseline and branch).
 > - [x] The NI-DAQ analog channel was confirmed per block, not guessed: AI0, on Task 2 pilot rigs, **from 2025-01-13 only**. AI0 is flat in all 42 surveyed sessions before 2025. **Sessions before 2025 can't be validated against the analog**, so the "every ephys session" scope above applies to 2025 onward only.
 > - [x] Landmark check: done as "the toggle's display time is the TTL edge of the same physical transition", plus a DP / ordinal cross-check. No shifts.
-> - [ ] Full rollout: every session from 2025 onward with an NI-DAQ upload (`fetch_analog.py` → `compare.py` → `summarize.py`).
+> - [ ] [extra] Full check: every session from 2025 onward with an NI-DAQ upload (`fetch_analog.py` → `compare.py` → `summarize.py`).
 > - [ ] NWB and cache regeneration (after the release order in the handoff).
+>
+> **Role of the NI-DAQ analog photodiode (decided 2026-11-17): QC only, not part of standard sync processing or time alignment.** Display times stay TTL-based (vsync + `stim_photodiode`).
+> - The analog photodiode exists only from 2025-01-13.
+> - At box toggles the TTL is already within about 1–2 ms of the analog, with 0 misassigned flips.
+> - Neither signal can see non-toggle frames in box-3 groups.
+> - Reading the analog costs about 1 GB of S3 zarr per session and adds S3 and wavpack dependencies.
+>
+> Allowed uses, all **low priority**:
+> 1. A per-session QC gate for 2025+ sessions (the P4 rollout above): flag blocks that fail, and store the result.
+> 2. An optional repair source for `stim_photodiode` inside replay windows, for ephys sessions from 2025 on. Replay-window files are currently rejected.
+> 3. Recovering stall-flicker (§4-type) blocks, if more of them turn up in the analog era (only 1 so far).
+>
+> NI-DAQ analog channels stay in standard processing only for sound and opto waveforms (npc_samstim).
+
+> **P4 update (2026-11-17, sync-patching handoff): replay windows validated against the analog diode for every npc_lims ephys session from 2025 on that has a reconcilable block** (34 sessions, 35 spans; `analog_windows_compare.log`, plus A7/B5 for the 5 local sessions).
+> - Display times: 35/35 within pre-window + 0.5 ms.
+> - Digital diode edges: 34/35. The one failure, 841308_20260511, is 0.67 ms against 0.61 ms allowed.
+> - One-to-one: 30/30.
+> - Rollout (NWB/cache regeneration, releases): not started; it waits on the push and release decision.
 
 ## Open questions / risks
 
 - **Multi-run files.** The note says the data are correct after an interval. That holds for single-run files but not here: displaced onsets sit outside the intervals. Reject these files until an independent-clock (OE barcode) piecewise model exists (see the npc_ephys piecewise proposal). Of the files with ≥27 runs, 8 are from Feb–Jun 2024 (sync 4.3.0–4.3.2) and one is 859582_20260612.
-- **Residual of ~0.4 ms per gap** in multi-run files, even where blocks balance (703880_20240418: max 1.7 ms). It is unexplained. Don't widen the 0.5 ms gate to accommodate it.
+- **Residual of ~0.4 ms per gap** in multi-run files, even where blocks balance (703880_20240418: max 1.7 ms). It is unexplained. Don't widen the 0.5 ms gate to accommodate it. *Update 2026-11-17:*
+  - The residual scales with span length, at about −0.55 ms per second.
+  - Camera lines across the same spans interpolate to ≤0.064 ms, so it is not a shift of the sync timeline.
+  - The same mode appears in 16 gaps of files with <20 runs. The gate was therefore tightened to 0.2 ms (`outputs/sync-patching-report.md`).
 - **Drops** (840160) leave no copies. Reject for now; a piecewise timebase comes later.
-- **Gate thresholds** (0.5 ms anchor, 0.1 ms camera) come from ≤13 files, and the ephys residual gate hasn't been measured yet. Re-derive all of them from the P0 population.
+- ~~**Gate thresholds** (0.5 ms anchor, 0.1 ms camera) come from ≤13 files, and the ephys residual gate hasn't been measured yet. Re-derive all of them from the P0 population.~~ Re-derived 2026-11-17 (`outputs/sync-patching-report.md`):
+  - anchor: 0.2 ms (applied)
+  - camera: 0.1 ms (kept)
+  - diode: 0.5-s post-span check (applied)
+  - ephys: ≤0.5 ms AP/NI-DAQ and ≤0.8 ms LFP (proposed, not applied)
 - **Lick precision** is ±8.3 ms. Decide whether trials with reconstructed licks stay in response-time analyses.
 - **Line maps** (unlabelled bits) and the NI-DAQ analog channel must be explicit per rig and date. ~~AI0 as the photodiode is a spectral guess, made only for the Task 2 pilot rigs.~~ AI0 has since been confirmed by TTL coincidence in 11 sessions from 2025–2026 (every block), and it is flat before 2025 (survey of 87 sessions; `outputs/display-times-analog-validation.md`). Other rigs and dates are still unconfirmed.
 - **Empty-buffer replays** can't be fingerprinted. They only matter when no line is active.
