@@ -2,7 +2,7 @@
 
 2026-11-17 · handoff: `notes/sync-patching-handoff.md` · plan: `outputs/sync-frame-timing-upgrade-plan.md`
 Evidence: `experiments/sync-patch-manifest/` (scripts, logs, CSVs; see its README).
-**Nothing is pushed.** All code is on local branches named `sync-patch`: npc_sync `5687360`, npc_stim `7db2ce4`, npc_sessions `0fc22cd` (report fixes after that are uncommitted).
+**Nothing is pushed.** All code is on local branches named `sync-patch`: npc_sync `5687360`, npc_stim `7db2ce4`, npc_sessions branch `sync-patch` (`0fc22cd` + a report-only commit).
 
 ## Summary
 
