@@ -1,0 +1,847 @@
+folder,kind,detail,stim,block
+DRpilot_366122_20250109,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_366122_20250109/20250109T194446.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_366122_20250109,D_onsets presence changed,,,
+DRpilot_366122_20250109,D_offsets presence changed,,,
+DRpilot_366122_20250109,_checked,0,,
+DRpilot_366122_20260306,B changed vs baseline,"2 frames, max 16.68 ms",RFMapping_366122_20260306_151309,0.0
+DRpilot_366122_20260306,B changed vs baseline,"4 frames, max 16.68 ms",SpontaneousRewards_366122_20260306_153802,2.0
+DRpilot_366122_20260306,B changed vs baseline,"6 frames, max 16.68 ms",DynamicRouting1_366122_20260306_154813,3.0
+DRpilot_366122_20260306,_checked,6,,
+DRpilot_626791_20220815,D_offsets changed,2 -> 2,,
+DRpilot_626791_20220815,_checked,2,,
+DRpilot_626791_20220816,B new (baseline had exception),,DynamicRouting1_626791_20220816_124419,0.0
+DRpilot_626791_20220816,B new (baseline had exception),,RFMapping_test_20220816_134828,1.0
+DRpilot_626791_20220816,D_offsets presence changed,,,
+DRpilot_626791_20220816,_checked,2,,
+DRpilot_626791_20220817,D_offsets changed,2 -> 2,,
+DRpilot_626791_20220817,_checked,2,,
+DRpilot_636766_20230123,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_636766_20230123/20230123T115021.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_636766_20230123,_checked,0,,
+DRpilot_636766_20230124,_checked,2,,
+DRpilot_636766_20230125,_checked,2,,
+DRpilot_636766_20230126,_checked,2,,
+DRpilot_644864_20230130,_checked,2,,
+DRpilot_644864_20230131,_checked,2,,
+DRpilot_644864_20230201,_checked,2,,
+DRpilot_644864_20230202,_checked,1,,
+DRpilot_644866_20230207,_checked,2,,
+DRpilot_644866_20230208,_checked,2,,
+DRpilot_644866_20230209,_checked,2,,
+DRpilot_644866_20230210,_checked,2,,
+DRpilot_644867_20230220,_checked,2,,
+DRpilot_644867_20230221,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_644867_20230221/20230221T121701.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_644867_20230221,_checked,0,,
+DRpilot_644867_20230222,_checked,2,,
+DRpilot_644867_20230223,_checked,2,,
+DRpilot_649943_20230213,_checked,2,,
+DRpilot_649943_20230214,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_649943_20230214/20230214T110306.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_649943_20230214,_checked,0,,
+DRpilot_649943_20230215,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_649943_20230215/20230215T115233.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_649943_20230215,_checked,0,,
+DRpilot_649943_20230216,_checked,2,,
+DRpilot_660023_20230808,B new (baseline had exception),,RFMapping_660023_20230808_130134,3.0
+DRpilot_660023_20230808,B new (baseline had exception),,Spontaneous_660023_20230808_131619,4.0
+DRpilot_660023_20230808,B new (baseline had exception),,OptoTagging_660023_20230808_132714,5.0
+DRpilot_660023_20230808,B new (baseline had exception),,OptoTagging_660023_20230808_132859,6.0
+DRpilot_660023_20230808,B new (baseline had exception),,SpontaneousRewards_660023_20230808_133644,7.0
+DRpilot_660023_20230808,_checked,5,,
+DRpilot_660023_20230809,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_660023_20230809/20230809T080909.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_660023_20230809,_checked,0,,
+DRpilot_662892_20230821,B changed vs baseline,"36000 frames, max 33.46 ms",Spontaneous_662892_20230821_130510,2.0
+DRpilot_662892_20230821,B changed vs baseline,"36000 frames, max 33.41 ms",SpontaneousRewards_662892_20230821_131809,3.0
+DRpilot_662892_20230821,B changed vs baseline,"36000 frames, max 16.71 ms",SpontaneousRewards_662892_20230821_142924,5.0
+DRpilot_662892_20230821,_checked,7,,
+DRpilot_662892_20230822,B changed vs baseline,"36000 frames, max 33.43 ms",Spontaneous_662892_20230822_122954,2.0
+DRpilot_662892_20230822,B changed vs baseline,"36000 frames, max 16.72 ms",SpontaneousRewards_662892_20230822_124019,3.0
+DRpilot_662892_20230822,B changed vs baseline,"36000 frames, max 16.72 ms",SpontaneousRewards_662892_20230822_135114,5.0
+DRpilot_662892_20230822,_checked,7,,
+DRpilot_662892_20230823,B changed vs baseline,"36000 frames, max 33.51 ms",Spontaneous_662892_20230823_142344,2.0
+DRpilot_662892_20230823,B changed vs baseline,"36000 frames, max 16.72 ms",SpontaneousRewards_662892_20230823_143357,3.0
+DRpilot_662892_20230823,B changed vs baseline,"36000 frames, max 16.71 ms",SpontaneousRewards_662892_20230823_154502,5.0
+DRpilot_662892_20230823,_checked,7,,
+DRpilot_662892_20230824,B changed vs baseline,"36000 frames, max 33.44 ms",Spontaneous_662892_20230824_144954,2.0
+DRpilot_662892_20230824,B changed vs baseline,"36000 frames, max 16.72 ms",SpontaneousRewards_662892_20230824_150026,3.0
+DRpilot_662892_20230824,B changed vs baseline,"36000 frames, max 16.71 ms",SpontaneousRewards_662892_20230824_161146,5.0
+DRpilot_662892_20230824,_checked,7,,
+DRpilot_664566_20231120,_checked,4,,
+DRpilot_664566_20231121,B session error,"{'type': 'IndexError', 'msg': 'index 0 is out of bounds for axis 0 with size 0'}",,
+DRpilot_664566_20231121,_checked,0,,
+DRpilot_664851_20231113,_checked,7,,
+DRpilot_664851_20231114,_checked,7,,
+DRpilot_664851_20231115,_checked,7,,
+DRpilot_664851_20231116,_checked,7,,
+DRpilot_666986_20230814,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_666986_20230814/20230814T113855.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_666986_20230814,_checked,0,,
+DRpilot_666986_20230815,B changed vs baseline,"36000 frames, max 33.45 ms",Spontaneous_666986_20230815_121636,5.0
+DRpilot_666986_20230815,B changed vs baseline,"36000 frames, max 33.39 ms",SpontaneousRewards_666986_20230815_122650,6.0
+DRpilot_666986_20230815,B changed vs baseline,"36000 frames, max 16.73 ms",SpontaneousRewards_666986_20230815_133758,8.0
+DRpilot_666986_20230815,_checked,7,,
+DRpilot_666986_20230816,B new (baseline had exception),,OptoTagging_666986_20230816_152759,1.0
+DRpilot_666986_20230816,B new (baseline had exception),,Spontaneous_666986_20230816_153257,2.0
+DRpilot_666986_20230816,B new (baseline had exception),,SpontaneousRewards_666986_20230816_154313,3.0
+DRpilot_666986_20230816,B new (baseline had exception),,DynamicRouting1_666986_20230816_155324,4.0
+DRpilot_666986_20230816,B new (baseline had exception),,SpontaneousRewards_666986_20230816_165421,5.0
+DRpilot_666986_20230816,B new (baseline had exception),,OptoTagging_666986_20230816_170433,6.0
+DRpilot_666986_20230816,_checked,6,,
+DRpilot_666986_20230817,B changed vs baseline,"36000 frames, max 33.42 ms",Spontaneous_666986_20230817_143955,2.0
+DRpilot_666986_20230817,B changed vs baseline,"36000 frames, max 16.72 ms",SpontaneousRewards_666986_20230817_145009,3.0
+DRpilot_666986_20230817,B changed vs baseline,"36000 frames, max 33.33 ms",SpontaneousRewards_666986_20230817_160141,5.0
+DRpilot_666986_20230817,_checked,7,,
+DRpilot_667252_20230925,_checked,7,,
+DRpilot_667252_20230926,_checked,7,,
+DRpilot_667252_20230927,B new (baseline had exception),,RFMapping_667252_20230927_122748,0.0
+DRpilot_667252_20230927,B new (baseline had exception),,OptoTagging_667252_20230927_124229,1.0
+DRpilot_667252_20230927,B new (baseline had exception),,Spontaneous_667252_20230927_124722,2.0
+DRpilot_667252_20230927,B new (baseline had exception),,SpontaneousRewards_667252_20230927_125933,3.0
+DRpilot_667252_20230927,B new (baseline had exception),,SpontaneousRewards_667252_20230927_141042,5.0
+DRpilot_667252_20230927,B new (baseline had exception),,OptoTagging_667252_20230927_142054,6.0
+DRpilot_667252_20230927,_checked,6,,
+DRpilot_667252_20230928,_checked,7,,
+DRpilot_668755_20230828,_checked,7,,
+DRpilot_668755_20230829,_checked,7,,
+DRpilot_668755_20230830,_checked,6,,
+DRpilot_668755_20230831,_checked,7,,
+DRpilot_674562_20231002,B new (baseline had exception),,RFMapping_674562_20231002_145415,0.0
+DRpilot_674562_20231002,B new (baseline had exception),,Spontaneous_674562_20231002_150909,1.0
+DRpilot_674562_20231002,B new (baseline had exception),,SpontaneousRewards_674562_20231002_152006,2.0
+DRpilot_674562_20231002,B new (baseline had exception),,SpontaneousRewards_674562_20231002_163133,4.0
+DRpilot_674562_20231002,B new (baseline had exception),,OptoTagging_674562_20231002_164529,5.0
+DRpilot_674562_20231002,_checked,5,,
+DRpilot_674562_20231003,B new (baseline had exception),,RFMapping_674562_20231003_151033,0.0
+DRpilot_674562_20231003,B new (baseline had exception),,OptoTagging_674562_20231003_152526,1.0
+DRpilot_674562_20231003,B new (baseline had exception),,Spontaneous_674562_20231003_153027,2.0
+DRpilot_674562_20231003,B new (baseline had exception),,SpontaneousRewards_674562_20231003_154123,3.0
+DRpilot_674562_20231003,B new (baseline had exception),,SpontaneousRewards_674562_20231003_165208,5.0
+DRpilot_674562_20231003,B new (baseline had exception),,OptoTagging_674562_20231003_170247,6.0
+DRpilot_674562_20231003,_checked,6,,
+DRpilot_674562_20231004,B new (baseline had exception),,RFMapping_674562_20231004_161209,0.0
+DRpilot_674562_20231004,B new (baseline had exception),,OptoTagging_674562_20231004_162701,1.0
+DRpilot_674562_20231004,B new (baseline had exception),,Spontaneous_674562_20231004_163201,2.0
+DRpilot_674562_20231004,B new (baseline had exception),,SpontaneousRewards_674562_20231004_164215,3.0
+DRpilot_674562_20231004,B new (baseline had exception),,DynamicRouting1_674562_20231004_165226,4.0
+DRpilot_674562_20231004,B new (baseline had exception),,SpontaneousRewards_674562_20231004_175311,5.0
+DRpilot_674562_20231004,_checked,6,,
+DRpilot_674562_20231005,B new (baseline had exception),,OptoTagging_674562_20231005_122939,1.0
+DRpilot_674562_20231005,B new (baseline had exception),,Spontaneous_674562_20231005_123342,2.0
+DRpilot_674562_20231005,B new (baseline had exception),,SpontaneousRewards_674562_20231005_124434,3.0
+DRpilot_674562_20231005,B new (baseline had exception),,DynamicRouting1_674562_20231005_125445,4.0
+DRpilot_674562_20231005,B new (baseline had exception),,SpontaneousRewards_674562_20231005_135519,5.0
+DRpilot_674562_20231005,B new (baseline had exception),,OptoTagging_674562_20231005_140531,6.0
+DRpilot_674562_20231005,_checked,6,,
+DRpilot_676909_20231211,_checked,8,,
+DRpilot_676909_20231212,_checked,10,,
+DRpilot_676909_20231213,_checked,8,,
+DRpilot_676909_20231214,_checked,8,,
+DRpilot_681532_20231016,_checked,7,,
+DRpilot_681532_20231017,_checked,7,,
+DRpilot_681532_20231018,_checked,7,,
+DRpilot_681532_20231019,_checked,8,,
+DRpilot_686176_20231204,_checked,5,,
+DRpilot_686176_20231205,_checked,5,,
+DRpilot_686176_20231206,_checked,5,,
+DRpilot_686176_20231207,_checked,5,,
+DRpilot_686740_20231023,_checked,7,,
+DRpilot_686740_20231024,_checked,7,,
+DRpilot_686740_20231025,_checked,7,,
+DRpilot_686740_20231026,_checked,7,,
+DRpilot_690706_20231127,_checked,7,,
+DRpilot_690706_20231128,_checked,7,,
+DRpilot_690706_20231129,_checked,7,,
+DRpilot_690706_20231130,_checked,7,,
+DRpilot_699847_20240415,B new (baseline had exception),,RFMapping_699847_20240415_124856,0.0
+DRpilot_699847_20240415,B new (baseline had exception),,Spontaneous_699847_20240415_130740,2.0
+DRpilot_699847_20240415,B new (baseline had exception),,SpontaneousRewards_699847_20240415_131755,3.0
+DRpilot_699847_20240415,B new (baseline had exception),,DynamicRouting1_699847_20240415_132808,4.0
+DRpilot_699847_20240415,B new (baseline had exception),,SpontaneousRewards_699847_20240415_142908,5.0
+DRpilot_699847_20240415,B new (baseline had exception),,Spontaneous_699847_20240415_143922,6.0
+DRpilot_699847_20240415,B new (baseline had exception),,OptoTagging_699847_20240415_144936,7.0
+DRpilot_699847_20240415,_checked,7,,
+DRpilot_699847_20240416,_checked,8,,
+DRpilot_699847_20240417,B new (baseline had exception),,RFMapping_699847_20240417_121323,0.0
+DRpilot_699847_20240417,B new (baseline had exception),,SpontaneousRewards_699847_20240417_124222,3.0
+DRpilot_699847_20240417,B new (baseline had exception),,DynamicRouting1_699847_20240417_125236,4.0
+DRpilot_699847_20240417,B new (baseline had exception),,SpontaneousRewards_699847_20240417_135339,5.0
+DRpilot_699847_20240417,B new (baseline had exception),,Spontaneous_699847_20240417_140351,6.0
+DRpilot_699847_20240417,B new (baseline had exception),,OptoTagging_699847_20240417_141405,7.0
+DRpilot_699847_20240417,_checked,6,,
+DRpilot_699847_20240418,B new (baseline had exception),,RFMapping_699847_20240418_134311,0.0
+DRpilot_699847_20240418,B new (baseline had exception),,Spontaneous_699847_20240418_140255,2.0
+DRpilot_699847_20240418,B new (baseline had exception),,SpontaneousRewards_699847_20240418_152351,5.0
+DRpilot_699847_20240418,B new (baseline had exception),,Spontaneous_699847_20240418_153402,6.0
+DRpilot_699847_20240418,_checked,4,,
+DRpilot_702131_20240226,_checked,6,,
+DRpilot_702131_20240227,B lost (now exception),"{'type': 'ValueError', 'msg': ""No frame display times for WindowsPath('C:/data/t2p_cache/DRpilot_702131_20240227/Spontaneous_702131_20240227_143450.hdf5') (sync",Spontaneous_702131_20240227_143450,5.0
+DRpilot_702131_20240227,_checked,5,,
+DRpilot_702136_20240304,_checked,6,,
+DRpilot_702136_20240305,B new (baseline had exception),,RFMapping_702136_20240305_115915,0.0
+DRpilot_702136_20240305,B new (baseline had exception),,Spontaneous_702136_20240305_121357,1.0
+DRpilot_702136_20240305,B new (baseline had exception),,SpontaneousRewards_702136_20240305_122440,2.0
+DRpilot_702136_20240305,B new (baseline had exception),,SpontaneousRewards_702136_20240305_133531,4.0
+DRpilot_702136_20240305,B new (baseline had exception),,Spontaneous_702136_20240305_134543,5.0
+DRpilot_702136_20240305,_checked,5,,
+DRpilot_702136_20240306,B new (baseline had exception),,RFMapping_702136_20240306_112601,0.0
+DRpilot_702136_20240306,B new (baseline had exception),,Spontaneous_702136_20240306_114043,1.0
+DRpilot_702136_20240306,B new (baseline had exception),,SpontaneousRewards_702136_20240306_115054,2.0
+DRpilot_702136_20240306,B new (baseline had exception),,Spontaneous_702136_20240306_131154,5.0
+DRpilot_702136_20240306,_checked,4,,
+DRpilot_702136_20240307,_checked,6,,
+DRpilot_703333_20240408,B changed vs baseline,"36000 frames, max 34.17 ms",Spontaneous_703333_20240408_144610,2.0
+DRpilot_703333_20240408,_checked,8,,
+DRpilot_703333_20240409,B changed vs baseline,"36000 frames, max 34.14 ms",Spontaneous_703333_20240409_132510,2.0
+DRpilot_703333_20240409,_checked,8,,
+DRpilot_703333_20240410,B changed vs baseline,"36000 frames, max 34.17 ms",Spontaneous_703333_20240410_123952,2.0
+DRpilot_703333_20240410,_checked,8,,
+DRpilot_703333_20240411,_checked,8,,
+DRpilot_703880_20240415,B changed vs baseline,"36000 frames, max 34.11 ms",Spontaneous_703880_20240415_142056,2.0
+DRpilot_703880_20240415,_checked,8,,
+DRpilot_703880_20240416,B changed vs baseline,"36000 frames, max 34.07 ms",Spontaneous_703880_20240416_145325,2.0
+DRpilot_703880_20240416,_checked,8,,
+DRpilot_703880_20240417,_checked,8,,
+DRpilot_703880_20240418,B session error,"{'type': 'AssertionError', 'msg': 'SyncDataset(C:/data/t2p_cache/DRpilot_703880_20240418/20240418T130656.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_703880_20240418,_checked,0,,
+DRpilot_703881_20240509,B new (baseline had exception),,RFMapping_703881_20240509_133139,0.0
+DRpilot_703881_20240509,_checked,1,,
+DRpilot_703882_20240422,B changed vs baseline,"36000 frames, max 34.07 ms",Spontaneous_703882_20240422_143918,2.0
+DRpilot_703882_20240422,_checked,8,,
+DRpilot_703882_20240423,B changed vs baseline,"36000 frames, max 32.89 ms",SpontaneousRewards_703882_20240423_133650,3.0
+DRpilot_703882_20240423,_checked,8,,
+DRpilot_703882_20240424,B new (baseline had exception),,RFMapping_703882_20240424_132110,0.0
+DRpilot_703882_20240424,B new (baseline had exception),,OptoTagging_703882_20240424_133556,1.0
+DRpilot_703882_20240424,B new (baseline had exception),,Spontaneous_703882_20240424_134000,2.0
+DRpilot_703882_20240424,B new (baseline had exception),,SpontaneousRewards_703882_20240424_135031,3.0
+DRpilot_703882_20240424,B new (baseline had exception),,SpontaneousRewards_703882_20240424_150137,5.0
+DRpilot_703882_20240424,B new (baseline had exception),,Spontaneous_703882_20240424_151152,6.0
+DRpilot_703882_20240424,B new (baseline had exception),,OptoTagging_703882_20240424_152207,7.0
+DRpilot_703882_20240424,_checked,7,,
+DRpilot_703882_20240425,B changed vs baseline,"36000 frames, max 32.17 ms",Spontaneous_703882_20240425_135624,2.0
+DRpilot_703882_20240425,B changed vs baseline,"36000 frames, max 36.43 ms",SpontaneousRewards_703882_20240425_151727,5.0
+DRpilot_703882_20240425,B changed vs baseline,"36000 frames, max 34.45 ms",Spontaneous_703882_20240425_152739,6.0
+DRpilot_703882_20240425,_checked,8,,
+DRpilot_706401_20240422,B new (baseline had exception),,RFMapping_706401_20240422_131612,0.0
+DRpilot_706401_20240422,B new (baseline had exception),,Spontaneous_706401_20240422_133402,2.0
+DRpilot_706401_20240422,B new (baseline had exception),,SpontaneousRewards_706401_20240422_134413,3.0
+DRpilot_706401_20240422,B new (baseline had exception),,SpontaneousRewards_706401_20240422_145505,5.0
+DRpilot_706401_20240422,B new (baseline had exception),,Spontaneous_706401_20240422_150516,6.0
+DRpilot_706401_20240422,_checked,5,,
+DRpilot_706401_20240423,B new (baseline had exception),,RFMapping_706401_20240423_125703,0.0
+DRpilot_706401_20240423,B new (baseline had exception),,Spontaneous_706401_20240423_131254,2.0
+DRpilot_706401_20240423,B new (baseline had exception),,SpontaneousRewards_706401_20240423_132305,3.0
+DRpilot_706401_20240423,B new (baseline had exception),,SpontaneousRewards_706401_20240423_143401,5.0
+DRpilot_706401_20240423,B new (baseline had exception),,Spontaneous_706401_20240423_144412,6.0
+DRpilot_706401_20240423,_checked,5,,
+DRpilot_706401_20240424,B new (baseline had exception),,RFMapping_706401_20240424_122642,0.0
+DRpilot_706401_20240424,B new (baseline had exception),,Spontaneous_706401_20240424_124532,2.0
+DRpilot_706401_20240424,B new (baseline had exception),,SpontaneousRewards_706401_20240424_140632,5.0
+DRpilot_706401_20240424,B new (baseline had exception),,Spontaneous_706401_20240424_141644,6.0
+DRpilot_706401_20240424,_checked,4,,
+DRpilot_706401_20240425,B new (baseline had exception),,RFMapping_706401_20240425_120341,0.0
+DRpilot_706401_20240425,B new (baseline had exception),,Spontaneous_706401_20240425_122229,2.0
+DRpilot_706401_20240425,B new (baseline had exception),,SpontaneousRewards_706401_20240425_123241,3.0
+DRpilot_706401_20240425,B new (baseline had exception),,SpontaneousRewards_706401_20240425_134341,5.0
+DRpilot_706401_20240425,B new (baseline had exception),,Spontaneous_706401_20240425_135352,6.0
+DRpilot_706401_20240425,_checked,5,,
+DRpilot_708016_20240429,_checked,8,,
+DRpilot_708016_20240430,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_708016_20240430/20240430T125828.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_708016_20240430,_checked,0,,
+DRpilot_708016_20240501,B new (baseline had exception),,RFMapping_708016_20240501_123554,0.0
+DRpilot_708016_20240501,B new (baseline had exception),,OptoTagging_708016_20240501_125035,1.0
+DRpilot_708016_20240501,B new (baseline had exception),,Spontaneous_708016_20240501_125146,2.0
+DRpilot_708016_20240501,B new (baseline had exception),,SpontaneousRewards_708016_20240501_130157,3.0
+DRpilot_708016_20240501,B new (baseline had exception),,SpontaneousRewards_708016_20240501_141300,5.0
+DRpilot_708016_20240501,B new (baseline had exception),,Spontaneous_708016_20240501_142312,6.0
+DRpilot_708016_20240501,B new (baseline had exception),,OptoTagging_708016_20240501_143323,7.0
+DRpilot_708016_20240501,_checked,7,,
+DRpilot_708016_20240502,B new (baseline had exception),,RFMapping_708016_20240502_121951,0.0
+DRpilot_708016_20240502,B new (baseline had exception),,OptoTagging_708016_20240502_123433,1.0
+DRpilot_708016_20240502,B new (baseline had exception),,Spontaneous_708016_20240502_123839,2.0
+DRpilot_708016_20240502,B new (baseline had exception),,SpontaneousRewards_708016_20240502_124850,3.0
+DRpilot_708016_20240502,B new (baseline had exception),,SpontaneousRewards_708016_20240502_135938,5.0
+DRpilot_708016_20240502,B new (baseline had exception),,Spontaneous_708016_20240502_140951,6.0
+DRpilot_708016_20240502,B new (baseline had exception),,OptoTagging_708016_20240502_142004,7.0
+DRpilot_708016_20240502,_checked,7,,
+DRpilot_708020_20240517,B session error,"{'type': 'AssertionError', 'msg': 'SyncDataset(C:/data/t2p_cache/DRpilot_708020_20240517/20240517T100128.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_708020_20240517,_checked,0,,
+DRpilot_712138_20240712,_checked,1,,
+DRpilot_712141_20240605,_checked,3,,
+DRpilot_712141_20240606,_checked,3,,
+DRpilot_712141_20240610,_checked,3,,
+DRpilot_712141_20240611,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_712141_20240611/20240611T115006.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_712141_20240611,_checked,0,,
+DRpilot_712141_20240612,B new (baseline had exception),,RFMapping_712141_20240612_124724,0.0
+DRpilot_712141_20240612,B new (baseline had exception),,RFMapping_712141_20240612_140247,2.0
+DRpilot_712141_20240612,_checked,2,,
+DRpilot_712141_20240613,_checked,3,,
+DRpilot_712815_20240520,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_712815_20240520/20240520T112202.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_712815_20240520,_checked,0,,
+DRpilot_712815_20240521,_checked,6,,
+DRpilot_712815_20240522,_checked,6,,
+DRpilot_712815_20240523,B new (baseline had exception),,RFMapping_712815_20240523_114104,0.0
+DRpilot_712815_20240523,B new (baseline had exception),,Spontaneous_712815_20240523_115545,1.0
+DRpilot_712815_20240523,B new (baseline had exception),,SpontaneousRewards_712815_20240523_120557,2.0
+DRpilot_712815_20240523,B new (baseline had exception),,SpontaneousRewards_712815_20240523_131653,4.0
+DRpilot_712815_20240523,B new (baseline had exception),,Spontaneous_712815_20240523_132705,5.0
+DRpilot_712815_20240523,_checked,5,,
+DRpilot_713655_20240805,_checked,8,,
+DRpilot_713655_20240806,_checked,8,,
+DRpilot_713655_20240807,_checked,8,,
+DRpilot_713655_20240808,_checked,8,,
+DRpilot_713655_20240809,_checked,8,,
+DRpilot_714748_20240624,B lost (now exception),"{'type': 'ValueError', 'msg': ""No frame display times for WindowsPath('C:/data/t2p_cache/DRpilot_714748_20240624/DynamicRouting1_714748_20240624_133310.hdf5') (",DynamicRouting1_714748_20240624_133310,4.0
+DRpilot_714748_20240624,_checked,7,,
+DRpilot_714748_20240625,_checked,8,,
+DRpilot_714748_20240626,_checked,8,,
+DRpilot_714748_20240627,_checked,8,,
+DRpilot_714748_20240628,B session error,"{'type': 'AssertionError', 'msg': 'SyncDataset(C:/data/t2p_cache/DRpilot_714748_20240628/20240628T095859.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_714748_20240628,_checked,0,,
+DRpilot_714753_20240701,_checked,8,,
+DRpilot_714753_20240702,_checked,8,,
+DRpilot_714753_20240703,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_714753_20240703/20240703T110353.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_714753_20240703,_checked,0,,
+DRpilot_714753_20240705,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_714753_20240705/20240705T103135.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_714753_20240705,_checked,0,,
+DRpilot_715706_20240626,B new (baseline had exception),,RFMapping_715706_20240626_142537,0.0
+DRpilot_715706_20240626,B new (baseline had exception),,RFMapping_715706_20240626_154118,2.0
+DRpilot_715706_20240626,_checked,2,,
+DRpilot_715706_20240627,B new (baseline had exception),,RFMapping_715706_20240627_125009,0.0
+DRpilot_715706_20240627,B new (baseline had exception),,RFMapping_715706_20240627_141931,2.0
+DRpilot_715706_20240627,_checked,2,,
+DRpilot_715709_20240807,_checked,1,,
+DRpilot_715709_20240808,_checked,0,,
+DRpilot_715709_20240809,_checked,1,,
+DRpilot_715710_20240715,_checked,8,,
+DRpilot_715710_20240716,_checked,8,,
+DRpilot_715710_20240717,_checked,8,,
+DRpilot_715710_20240718,_checked,8,,
+DRpilot_715710_20240719,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_715710_20240719/20240719T110007.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_715710_20240719,_checked,0,,
+DRpilot_716718_20240730,_checked,0,,
+DRpilot_716718_20240731,B session error,"{'type': 'AssertionError', 'msg': ''}",,
+DRpilot_716718_20240731,_checked,0,,
+DRpilot_716718_20240801,_checked,1,,
+DRpilot_716718_20240802,_checked,1,,
+DRpilot_718283_20240820,_checked,1,,
+DRpilot_718283_20240821,_checked,1,,
+DRpilot_718283_20240822,_checked,1,,
+DRpilot_718283_20240823,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_718283_20240823/20240823T112347.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_718283_20240823,_checked,0,,
+DRpilot_721536_20240516,_checked,1,,
+DRpilot_721536_20240517,_checked,1,,
+DRpilot_724612_20240722,_checked,1,,
+DRpilot_724612_20240723,session error (qc),"{'type': 'NotCached', 'msg': ''}",,
+DRpilot_724612_20240724,_checked,1,,
+DRpilot_724612_20240725,_checked,1,,
+DRpilot_726088_20240617,_checked,6,,
+DRpilot_726088_20240618,_checked,6,,
+DRpilot_726088_20240620,B new (baseline had exception),,RFMapping_726088_20240620_124940,0.0
+DRpilot_726088_20240620,B new (baseline had exception),,Spontaneous_726088_20240620_130422,1.0
+DRpilot_726088_20240620,B new (baseline had exception),,SpontaneousRewards_726088_20240620_131433,2.0
+DRpilot_726088_20240620,B new (baseline had exception),,SpontaneousRewards_726088_20240620_142524,4.0
+DRpilot_726088_20240620,B new (baseline had exception),,Spontaneous_726088_20240620_143534,5.0
+DRpilot_726088_20240620,_checked,5,,
+DRpilot_726088_20240621,_checked,6,,
+DRpilot_728917_20241004,_checked,1,,
+DRpilot_733780_20240826,_checked,8,,
+DRpilot_733780_20240827,_checked,8,,
+DRpilot_733780_20240829,_checked,8,,
+DRpilot_733780_20240830,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_733780_20240830/20240830T104827.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_733780_20240830,_checked,0,,
+DRpilot_733780_20240903,_checked,8,,
+DRpilot_733780_20240904,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_733780_20240904/20240904T123645.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_733780_20240904,_checked,0,,
+DRpilot_733780_20240905,B new (baseline had exception),,RFMapping_733780_20240905_123715,0.0
+DRpilot_733780_20240905,B new (baseline had exception),,OptoTagging_733780_20240905_125157,1.0
+DRpilot_733780_20240905,B new (baseline had exception),,Spontaneous_733780_20240905_125503,2.0
+DRpilot_733780_20240905,B new (baseline had exception),,SpontaneousRewards_733780_20240905_130517,3.0
+DRpilot_733780_20240905,B new (baseline had exception),,DynamicRouting1_733780_20240905_131530,4.0
+DRpilot_733780_20240905,B new (baseline had exception),,SpontaneousRewards_733780_20240905_141620,5.0
+DRpilot_733780_20240905,B new (baseline had exception),,Spontaneous_733780_20240905_142632,6.0
+DRpilot_733780_20240905,_checked,7,,
+DRpilot_733780_20240906,_checked,8,,
+DRpilot_733887_20240813,_checked,1,,
+DRpilot_733887_20240814,_checked,1,,
+DRpilot_733887_20240815,_checked,1,,
+DRpilot_733887_20240816,_checked,1,,
+DRpilot_733891_20240916,B new (baseline had exception),,RFMapping_733891_20240916_151106,0.0
+DRpilot_733891_20240916,B new (baseline had exception),,OptoTagging_733891_20240916_152548,1.0
+DRpilot_733891_20240916,B new (baseline had exception),,Spontaneous_733891_20240916_153149,2.0
+DRpilot_733891_20240916,B new (baseline had exception),,SpontaneousRewards_733891_20240916_154200,3.0
+DRpilot_733891_20240916,B new (baseline had exception),,SpontaneousRewards_733891_20240916_165257,5.0
+DRpilot_733891_20240916,B new (baseline had exception),,Spontaneous_733891_20240916_170309,6.0
+DRpilot_733891_20240916,B new (baseline had exception),,OptoTagging_733891_20240916_171320,7.0
+DRpilot_733891_20240916,_checked,7,,
+DRpilot_733891_20240917,B new (baseline had exception),,RFMapping_733891_20240917_121929,0.0
+DRpilot_733891_20240917,B new (baseline had exception),,OptoTagging_733891_20240917_123410,1.0
+DRpilot_733891_20240917,B new (baseline had exception),,Spontaneous_733891_20240917_124010,2.0
+DRpilot_733891_20240917,B new (baseline had exception),,SpontaneousRewards_733891_20240917_125021,3.0
+DRpilot_733891_20240917,B new (baseline had exception),,SpontaneousRewards_733891_20240917_140111,5.0
+DRpilot_733891_20240917,B new (baseline had exception),,Spontaneous_733891_20240917_141122,6.0
+DRpilot_733891_20240917,B new (baseline had exception),,OptoTagging_733891_20240917_142132,7.0
+DRpilot_733891_20240917,_checked,7,,
+DRpilot_733891_20240918,B lost (now exception),"{'type': 'ValueError', 'msg': ""No frame display times for WindowsPath('C:/data/t2p_cache/DRpilot_733891_20240918/DynamicRouting1_733891_20240918_125943.hdf5') (",DynamicRouting1_733891_20240918_125943,4.0
+DRpilot_733891_20240918,_checked,7,,
+DRpilot_733891_20240919,B new (baseline had exception),,RFMapping_733891_20240919_122147,0.0
+DRpilot_733891_20240919,B new (baseline had exception),,OptoTagging_733891_20240919_123629,1.0
+DRpilot_733891_20240919,B new (baseline had exception),,Spontaneous_733891_20240919_124229,2.0
+DRpilot_733891_20240919,B new (baseline had exception),,SpontaneousRewards_733891_20240919_125243,3.0
+DRpilot_733891_20240919,B new (baseline had exception),,SpontaneousRewards_733891_20240919_140349,5.0
+DRpilot_733891_20240919,B new (baseline had exception),,Spontaneous_733891_20240919_141402,6.0
+DRpilot_733891_20240919,B new (baseline had exception),,OptoTagging_733891_20240919_142415,7.0
+DRpilot_733891_20240919,_checked,7,,
+DRpilot_733891_20240920,_checked,8,,
+DRpilot_734897_20240618,_checked,1,,
+DRpilot_734897_20240620,_checked,1,,
+DRpilot_736208_20240903,_checked,3,,
+DRpilot_736208_20240904,_checked,3,,
+DRpilot_736208_20240905,_checked,3,,
+DRpilot_736803_20240813,_checked,1,,
+DRpilot_737403_20240924,_checked,8,,
+DRpilot_737403_20240925,_checked,8,,
+DRpilot_737403_20240926,_checked,8,,
+DRpilot_737403_20240927,_checked,8,,
+DRpilot_741137_20241008,_checked,6,,
+DRpilot_741137_20241009,_checked,6,,
+DRpilot_741137_20241010,_checked,6,,
+DRpilot_741137_20241011,_checked,6,,
+DRpilot_741148_20241015,_checked,6,,
+DRpilot_741148_20241016,B new (baseline had exception),,RFMapping_741148_20241016_130157,0.0
+DRpilot_741148_20241016,B new (baseline had exception),,Spontaneous_741148_20241016_131639,1.0
+DRpilot_741148_20241016,B new (baseline had exception),,SpontaneousRewards_741148_20241016_132651,2.0
+DRpilot_741148_20241016,B new (baseline had exception),,SpontaneousRewards_741148_20241016_143744,4.0
+DRpilot_741148_20241016,B new (baseline had exception),,Spontaneous_741148_20241016_144755,5.0
+DRpilot_741148_20241016,_checked,5,,
+DRpilot_741148_20241017,_checked,6,,
+DRpilot_741148_20241018,_checked,6,,
+DRpilot_741611_20240911,_checked,1,,
+DRpilot_741611_20240912,_checked,1,,
+DRpilot_742903_20241021,_checked,8,,
+DRpilot_742903_20241022,_checked,8,,
+DRpilot_742903_20241023,_checked,8,,
+DRpilot_742903_20241024,B lost (now exception),"{'type': 'ValueError', 'msg': ""No frame display times for WindowsPath('C:/data/t2p_cache/DRpilot_742903_20241024/DynamicRouting1_742903_20241024_113837.hdf5') (",DynamicRouting1_742903_20241024_113837,4.0
+DRpilot_742903_20241024,_checked,7,,
+DRpilot_742903_20241025,_checked,8,,
+DRpilot_743199_20241203,_checked,6,,
+DRpilot_743199_20241204,_checked,6,,
+DRpilot_743199_20241205,_checked,6,,
+DRpilot_743199_20241206,_checked,6,,
+DRpilot_744279_20250113,_checked,8,,
+DRpilot_744279_20250114,_checked,8,,
+DRpilot_744279_20250115,_checked,8,,
+DRpilot_744279_20250116,_checked,8,,
+DRpilot_744740_20241111,_checked,6,,
+DRpilot_744740_20241112,_checked,6,,
+DRpilot_744740_20241113,_checked,6,,
+DRpilot_744740_20241114,_checked,6,,
+DRpilot_746439_20250127,_checked,6,,
+DRpilot_746439_20250128,_checked,6,,
+DRpilot_746439_20250129,_checked,6,,
+DRpilot_746439_20250130,_checked,6,,
+DRpilot_746439_20250131,_checked,6,,
+DRpilot_748098_20241029,_checked,1,,
+DRpilot_750329_20241125,_checked,6,,
+DRpilot_750329_20241126,_checked,6,,
+DRpilot_750329_20241127,_checked,6,,
+DRpilot_751595_20241120,_checked,1,,
+DRpilot_754852_20250210,_checked,2,,
+DRpilot_754852_20250211,_checked,2,,
+DRpilot_754852_20250212,_checked,2,,
+DRpilot_754852_20250213,_checked,2,,
+DRpilot_759434_20250203,_checked,6,,
+DRpilot_759434_20250204,_checked,6,,
+DRpilot_759434_20250205,_checked,6,,
+DRpilot_759434_20250206,_checked,6,,
+DRpilot_759434_20250207,_checked,6,,
+DRpilot_761583_20241216,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_761583_20241216/20241216T105731.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_761583_20241216,_checked,0,,
+DRpilot_761583_20241217,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_761583_20241217/20241217T105140.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_761583_20241217,_checked,0,,
+DRpilot_761583_20241218,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_761583_20241218/20241218T104153.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_761583_20241218,_checked,0,,
+DRpilot_761583_20241219,B new (baseline had exception),,RFMapping_761583_20241219_102300,0.0
+DRpilot_761583_20241219,B new (baseline had exception),,Spontaneous_761583_20241219_103742,1.0
+DRpilot_761583_20241219,B new (baseline had exception),,SpontaneousRewards_761583_20241219_104753,2.0
+DRpilot_761583_20241219,B new (baseline had exception),,SpontaneousRewards_761583_20241219_115847,4.0
+DRpilot_761583_20241219,B new (baseline had exception),,Spontaneous_761583_20241219_120859,5.0
+DRpilot_761583_20241219,_checked,5,,
+DRpilot_761583_20241220,_checked,6,,
+DRpilot_761584_20241030,_checked,1,,
+DRpilot_762124_20241202,_checked,1,,
+DRpilot_762526_20250318,_checked,2,,
+DRpilot_762526_20250319,_checked,2,,
+DRpilot_762526_20250320,B new (baseline had exception),,Spontaneous_762526_20250320_111508,0.0
+DRpilot_762526_20250320,_checked,1,,
+DRpilot_762526_20250321,_checked,2,,
+DRpilot_764725_20241031,_checked,3,,
+DRpilot_767172_20241106,_checked,1,,
+DRpilot_772655_20250305,session error (qc),"{'type': 'NotCached', 'msg': ''}",,
+DRpilot_772655_20250306,_checked,0,,
+DRpilot_772656_20250423,_checked,0,,
+DRpilot_772656_20250425,B session error,"{'type': 'IndexError', 'msg': 'index 0 is out of bounds for axis 0 with size 0'}",,
+DRpilot_772656_20250425,_checked,0,,
+DRpilot_773262_20250327,_checked,1,,
+DRpilot_780329_20250319,_checked,1,,
+DRpilot_793277_20250612,_checked,2,,
+DRpilot_795555_20250821,_checked,6,,
+DRpilot_795555_20250822,_checked,6,,
+DRpilot_795555_20250825,_checked,6,,
+DRpilot_795555_20250826,_checked,6,,
+DRpilot_796012_20250710,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_796012_20250710/20250710T104158.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_796012_20250710,_checked,0,,
+DRpilot_796012_20250711,_checked,6,,
+DRpilot_796012_20250714,_checked,6,,
+DRpilot_796012_20250715,B changed vs baseline,"4 frames, max 33.36 ms",DynamicRouting1_796012_20250715_143004,3.0
+DRpilot_796012_20250715,_checked,6,,
+DRpilot_796847_20250729,B changed vs baseline,"1 frames, max 50.02 ms",Spontaneous_796847_20250729_134509,5.0
+DRpilot_796847_20250729,_checked,6,,
+DRpilot_796847_20250730,B changed vs baseline,"2 frames, max 16.68 ms",RFMapping_796847_20250730_125822,0.0
+DRpilot_796847_20250730,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_796847_20250730_133327,3.0
+DRpilot_796847_20250730,_checked,6,,
+DRpilot_796847_20250731,_checked,6,,
+DRpilot_796847_20250801,B changed vs baseline,"1 frames, max 16.68 ms",DynamicRouting1_796847_20250801_113212,3.0
+DRpilot_796847_20250801,_checked,6,,
+DRpilot_796848_20250714,_checked,6,,
+DRpilot_796848_20250715,_checked,0,,
+DRpilot_796848_20250716,B changed vs baseline,"2 frames, max 16.68 ms",RFMapping_796848_20250716_124145,0.0
+DRpilot_796848_20250716,B changed vs baseline,"2 frames, max 16.70 ms",SpontaneousRewards_796848_20250716_130639,2.0
+DRpilot_796848_20250716,B changed vs baseline,"1 frames, max 33.37 ms",DynamicRouting1_796848_20250716_131653,3.0
+DRpilot_796848_20250716,_checked,6,,
+DRpilot_796848_20250717,B changed vs baseline,"1 frames, max 16.77 ms",Spontaneous_796848_20250717_124735,1.0
+DRpilot_796848_20250717,B changed vs baseline,"1 frames, max 33.36 ms",SpontaneousRewards_796848_20250717_140857,4.0
+DRpilot_796848_20250717,_checked,6,,
+DRpilot_798632_20250829,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_798632_20250829/20250829T103812.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_798632_20250829,_checked,0,,
+DRpilot_798632_20250902,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_798632_20250902/20250902T112002.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_798632_20250902,_checked,0,,
+DRpilot_798632_20250903,_checked,6,,
+DRpilot_798632_20250904,B changed vs baseline,"2 frames, max 16.68 ms",SpontaneousRewards_798632_20250904_130707,4.0
+DRpilot_798632_20250904,_checked,6,,
+DRpilot_801857_20250925,_checked,2,,
+DRpilot_802590_20250822,_checked,2,,
+DRpilot_805142_20250912,_checked,1,,
+DRpilot_805752_20251020,B changed vs baseline,"2 frames, max 16.63 ms",RFMapping_805752_20251020_131052,0.0
+DRpilot_805752_20251020,_checked,6,,
+DRpilot_805752_20251021,_checked,6,,
+DRpilot_805752_20251022,B changed vs baseline,"3 frames, max 33.36 ms",DynamicRouting1_805752_20251022_131804,3.0
+DRpilot_805752_20251022,_checked,6,,
+DRpilot_805752_20251023,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_805752_20251023_131929,3.0
+DRpilot_805752_20251023,_checked,6,,
+DRpilot_805752_20251024,_checked,6,,
+DRpilot_807082_20250929,_checked,6,,
+DRpilot_807082_20250930,B changed vs baseline,"1 frames, max 66.73 ms",DynamicRouting1_807082_20250930_143912,3.0
+DRpilot_807082_20250930,_checked,6,,
+DRpilot_807082_20251001,B changed vs baseline,"2 frames, max 16.64 ms",DynamicRouting1_807082_20251001_122038,3.0
+DRpilot_807082_20251001,B changed vs baseline,"1 frames, max 16.70 ms",Spontaneous_807082_20251001_133120,5.0
+DRpilot_807082_20251001,_checked,6,,
+DRpilot_807082_20251002,_checked,6,,
+DRpilot_810752_20251007,_checked,6,,
+DRpilot_810752_20251008,_checked,6,,
+DRpilot_810752_20251009,_checked,6,,
+DRpilot_810752_20251010,B changed vs baseline,"1 frames, max 66.72 ms",SpontaneousRewards_810752_20251010_114231,2.0
+DRpilot_810752_20251010,_checked,6,,
+DRpilot_810754_20251027,B changed vs baseline,"1 frames, max 16.68 ms",RFMapping_810754_20251027_122159,0.0
+DRpilot_810754_20251027,B changed vs baseline,"1 frames, max 16.71 ms",SpontaneousRewards_810754_20251027_124655,2.0
+DRpilot_810754_20251027,B changed vs baseline,"2 frames, max 33.36 ms",DynamicRouting1_810754_20251027_125708,3.0
+DRpilot_810754_20251027,_checked,6,,
+DRpilot_810754_20251028,B changed vs baseline,"1 frames, max 16.68 ms",Spontaneous_810754_20251028_114134,1.0
+DRpilot_810754_20251028,B changed vs baseline,"4 frames, max 33.36 ms",DynamicRouting1_810754_20251028_120202,3.0
+DRpilot_810754_20251028,B changed vs baseline,"1 frames, max 16.68 ms",SpontaneousRewards_810754_20251028_130253,4.0
+DRpilot_810754_20251028,_checked,6,,
+DRpilot_810754_20251029,B changed vs baseline,"2 frames, max 16.68 ms",SpontaneousRewards_810754_20251029_135859,2.0
+DRpilot_810754_20251029,_checked,3,,
+DRpilot_810754_20251030,_checked,6,,
+DRpilot_810754_20251031,B changed vs baseline,"5 frames, max 33.36 ms",DynamicRouting1_810754_20251031_120254,3.0
+DRpilot_810754_20251031,_checked,6,,
+DRpilot_812113_20251113,_checked,2,,
+DRpilot_812113_20251114,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_812113_20251114_165330,0.0
+DRpilot_812113_20251114,_checked,1,,
+DRpilot_812113_20251117,_checked,1,,
+DRpilot_812113_20251118,_checked,1,,
+DRpilot_813586_20251202,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_813586_20251202/20251202T114847.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_813586_20251202,_checked,0,,
+DRpilot_813586_20251203,B changed vs baseline,"1 frames, max 16.68 ms",DynamicRouting1_813586_20251203_125130,3.0
+DRpilot_813586_20251203,_checked,6,,
+DRpilot_813586_20251204,_checked,6,,
+DRpilot_813586_20251205,B changed vs baseline,"2 frames, max 16.68 ms",RFMapping_813586_20251205_124620,0.0
+DRpilot_813586_20251205,B changed vs baseline,"1 frames, max 16.86 ms",SpontaneousRewards_813586_20251205_142208,4.0
+DRpilot_813586_20251205,B changed vs baseline,"1 frames, max 66.72 ms",Spontaneous_813586_20251205_143219,5.0
+DRpilot_813586_20251205,_checked,6,,
+DRpilot_814666_20251106,_checked,6,,
+DRpilot_814666_20251107,B changed vs baseline,"2 frames, max 33.36 ms",DynamicRouting1_814666_20251107_151302,3.0
+DRpilot_814666_20251107,_checked,6,,
+DRpilot_814666_20251110,B changed vs baseline,"4 frames, max 33.36 ms",DynamicRouting1_814666_20251110_125720,3.0
+DRpilot_814666_20251110,_checked,6,,
+DRpilot_814666_20251111,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_814666_20251111_135521,3.0
+DRpilot_814666_20251111,_checked,6,,
+DRpilot_814669_20251110,_checked,6,,
+DRpilot_814669_20251111,_checked,6,,
+DRpilot_814669_20251112,B changed vs baseline,"1 frames, max 16.68 ms",Spontaneous_814669_20251112_134938,1.0
+DRpilot_814669_20251112,_checked,6,,
+DRpilot_814669_20251113,B changed vs baseline,"3 frames, max 66.72 ms",RFMapping_814669_20251113_131743,0.0
+DRpilot_814669_20251113,_checked,6,,
+DRpilot_815144_20251119,_checked,1,,
+DRpilot_815144_20251120,B changed vs baseline,"1 frames, max 33.37 ms",DynamicRouting1_815144_20251120_135324,0.0
+DRpilot_815144_20251120,_checked,1,,
+DRpilot_815144_20251121,_checked,1,,
+DRpilot_818720_20251219,B new (baseline had exception),,RFMapping_818720_20251219_140457,0.0
+DRpilot_818720_20251219,B new (baseline had exception),,Spontaneous_818720_20251219_141938,1.0
+DRpilot_818720_20251219,B new (baseline had exception),,SpontaneousRewards_818720_20251219_142952,2.0
+DRpilot_818720_20251219,B new (baseline had exception),,DynamicRouting1_818720_20251219_144006,3.0
+DRpilot_818720_20251219,B new (baseline had exception),,SpontaneousRewards_818720_20251219_154109,4.0
+DRpilot_818720_20251219,B new (baseline had exception),,Spontaneous_818720_20251219_155123,5.0
+DRpilot_818720_20251219,_checked,6,,
+DRpilot_818720_20251222,B changed vs baseline,"2 frames, max 16.68 ms",SpontaneousRewards_818720_20251222_144212,2.0
+DRpilot_818720_20251222,B changed vs baseline,"1 frames, max 16.68 ms",DynamicRouting1_818720_20251222_145226,3.0
+DRpilot_818720_20251222,_checked,6,,
+DRpilot_822061_20260112,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_822061_20260112_164220,3.0
+DRpilot_822061_20260112,_checked,6,,
+DRpilot_822061_20260113,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_822061_20260113_120605,3.0
+DRpilot_822061_20260113,B changed vs baseline,"1 frames, max 16.68 ms",Spontaneous_822061_20260113_131724,5.0
+DRpilot_822061_20260113,_checked,6,,
+DRpilot_822061_20260114,B changed vs baseline,"3 frames, max 16.68 ms",DynamicRouting1_822061_20260114_124418,3.0
+DRpilot_822061_20260114,_checked,6,,
+DRpilot_822061_20260115,_checked,6,,
+DRpilot_822061_20260116,B changed vs baseline,"2 frames, max 16.68 ms",RFMapping_822061_20260116_112258,0.0
+DRpilot_822061_20260116,B changed vs baseline,"1 frames, max 16.68 ms",DynamicRouting1_822061_20260116_115807,3.0
+DRpilot_822061_20260116,_checked,6,,
+DRpilot_831994_20251215,B changed vs baseline,"2 frames, max 16.68 ms",DynamicRouting1_831994_20251215_145946,3.0
+DRpilot_831994_20251215,_checked,6,,
+DRpilot_831994_20251216,_checked,6,,
+DRpilot_831994_20251217,B changed vs baseline,"2 frames, max 33.36 ms",DynamicRouting1_831994_20251217_120716,3.0
+DRpilot_831994_20251217,_checked,6,,
+DRpilot_831994_20251218,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_831994_20251218_115824,3.0
+DRpilot_831994_20251218,_checked,6,,
+DRpilot_834408_20251217,B changed vs baseline,"1 frames, max 33.38 ms",DynamicRouting1_834408_20251217_133914,3.0
+DRpilot_834408_20251217,_checked,6,,
+DRpilot_834408_20251218,B changed vs baseline,"2 frames, max 16.66 ms",RFMapping_834408_20251218_122748,0.0
+DRpilot_834408_20251218,_checked,6,,
+DRpilot_834408_20251219,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_834408_20251219_130037,3.0
+DRpilot_834408_20251219,_checked,6,,
+DRpilot_834408_20251222,_checked,6,,
+DRpilot_835598_20260223,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_835598_20260223/20260223T111138.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_835598_20260223,_checked,0,,
+DRpilot_835598_20260224,B changed vs baseline,"1 frames, max 16.59 ms",RFMapping_835598_20260224_110551,0.0
+DRpilot_835598_20260224,B changed vs baseline,"1 frames, max 16.63 ms",Spontaneous_835598_20260224_112032,1.0
+DRpilot_835598_20260224,B changed vs baseline,"1 frames, max 16.68 ms",SpontaneousRewards_835598_20260224_113043,2.0
+DRpilot_835598_20260224,B changed vs baseline,"8 frames, max 16.74 ms",DynamicRouting1_835598_20260224_114053,3.0
+DRpilot_835598_20260224,_checked,6,,
+DRpilot_835598_20260225,B changed vs baseline,"4 frames, max 16.84 ms",DynamicRouting1_835598_20260225_114657,3.0
+DRpilot_835598_20260225,_checked,6,,
+DRpilot_835598_20260226,B changed vs baseline,"7 frames, max 33.36 ms",DynamicRouting1_835598_20260226_115301,3.0
+DRpilot_835598_20260226,_checked,6,,
+DRpilot_835598_20260227,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_835598_20260227/20260227T105255.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_835598_20260227,_checked,0,,
+DRpilot_836629_20260428,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_836629_20260428_135001,3.0
+DRpilot_836629_20260428,_checked,6,,
+DRpilot_836629_20260429,_checked,6,,
+DRpilot_836629_20260430,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_836629_20260430/20260430T103247.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_836629_20260430,_checked,0,,
+DRpilot_836629_20260501,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_836629_20260501/20260501T113621.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_836629_20260501,_checked,0,,
+DRpilot_836726_20260211,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_836726_20260211_125343,3.0
+DRpilot_836726_20260211,_checked,6,,
+DRpilot_836726_20260212,_checked,6,,
+DRpilot_836726_20260213,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_836726_20260213/20260213T101931.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_836726_20260213,_checked,0,,
+DRpilot_836729_20260216,B changed vs baseline,"1 frames, max 16.68 ms",RFMapping_836729_20260216_132131,0.0
+DRpilot_836729_20260216,B changed vs baseline,"1 frames, max 16.65 ms",SpontaneousRewards_836729_20260216_134625,2.0
+DRpilot_836729_20260216,B changed vs baseline,"3 frames, max 16.68 ms",DynamicRouting1_836729_20260216_135637,3.0
+DRpilot_836729_20260216,_checked,6,,
+DRpilot_836729_20260217,B changed vs baseline,"1 frames, max 16.68 ms",RFMapping_836729_20260217_121154,0.0
+DRpilot_836729_20260217,B changed vs baseline,"1 frames, max 16.68 ms",DynamicRouting1_836729_20260217_124659,3.0
+DRpilot_836729_20260217,B changed vs baseline,"1 frames, max 16.67 ms",SpontaneousRewards_836729_20260217_134741,4.0
+DRpilot_836729_20260217,_checked,6,,
+DRpilot_836729_20260218,B changed vs baseline,"1 frames, max 33.36 ms",RFMapping_836729_20260218_122157,0.0
+DRpilot_836729_20260218,B changed vs baseline,"3 frames, max 16.75 ms",DynamicRouting1_836729_20260218_125703,3.0
+DRpilot_836729_20260218,_checked,6,,
+DRpilot_837230_20260417,B changed vs baseline,"3 frames, max 16.68 ms",RFMapping_837230_20260417_133225,0.0
+DRpilot_837230_20260417,B changed vs baseline,"1 frames, max 16.69 ms",DynamicRouting1_837230_20260417_140736,3.0
+DRpilot_837230_20260417,_checked,6,,
+DRpilot_837230_20260420,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_837230_20260420/20260420T135609.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_837230_20260420,_checked,0,,
+DRpilot_837230_20260421,B changed vs baseline,"1 frames, max 16.63 ms",RFMapping_837230_20260421_122706,0.0
+DRpilot_837230_20260421,B changed vs baseline,"1 frames, max 33.36 ms",SpontaneousRewards_837230_20260421_125201,2.0
+DRpilot_837230_20260421,_checked,6,,
+DRpilot_837230_20260422,B changed vs baseline,"1 frames, max 33.36 ms",RFMapping_837230_20260422_123459,0.0
+DRpilot_837230_20260422,B changed vs baseline,"2 frames, max 33.36 ms",DynamicRouting1_837230_20260422_131008,3.0
+DRpilot_837230_20260422,B changed vs baseline,"1 frames, max 33.37 ms",Spontaneous_837230_20260422_142100,5.0
+DRpilot_837230_20260422,_checked,6,,
+DRpilot_837959_20260330,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_837959_20260330/20260330T110552.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_837959_20260330,_checked,0,,
+DRpilot_837959_20260331,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_837959_20260331/20260331T102014.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_837959_20260331,_checked,0,,
+DRpilot_837959_20260401,B changed vs baseline,"2 frames, max 16.68 ms",RFMapping_837959_20260401_102440,0.0
+DRpilot_837959_20260401,B changed vs baseline,"2 frames, max 16.68 ms",DynamicRouting1_837959_20260401_105946,3.0
+DRpilot_837959_20260401,_checked,6,,
+DRpilot_837959_20260402,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_837959_20260402/20260402T103011.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_837959_20260402,_checked,0,,
+DRpilot_837959_20260403,_checked,6,,
+DRpilot_839146_20260512,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_839146_20260512_104550,3.0
+DRpilot_839146_20260512,_checked,6,,
+DRpilot_839146_20260513,B changed vs baseline,"2 frames, max 16.68 ms",RFMapping_839146_20260513_102827,0.0
+DRpilot_839146_20260513,_checked,6,,
+DRpilot_839146_20260514,B changed vs baseline,"2 frames, max 16.68 ms",RFMapping_839146_20260514_102648,0.0
+DRpilot_839146_20260514,B changed vs baseline,"3 frames, max 33.36 ms",DynamicRouting1_839146_20260514_110159,3.0
+DRpilot_839146_20260514,_checked,6,,
+DRpilot_839146_20260515,B changed vs baseline,"1 frames, max 33.35 ms",DynamicRouting1_839146_20260515_104032,3.0
+DRpilot_839146_20260515,_checked,6,,
+DRpilot_839146_20260518,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_839146_20260518/20260518T102632.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_839146_20260518,_checked,0,,
+DRpilot_840160_20260428,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_840160_20260428/20260428T103950.h5) has a timebase discontinuity (all lines affected, l",,
+DRpilot_840160_20260428,_checked,0,,
+DRpilot_840160_20260429,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_840160_20260429/20260429T102259.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_840160_20260429,_checked,0,,
+DRpilot_840160_20260430,_checked,6,,
+DRpilot_840160_20260501,B changed vs baseline,"2 frames, max 50.04 ms",DynamicRouting1_840160_20260501_104521,3.0
+DRpilot_840160_20260501,_checked,6,,
+DRpilot_840160_20260504,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_840160_20260504_111202,3.0
+DRpilot_840160_20260504,_checked,6,,
+DRpilot_841308_20260505,_checked,6,,
+DRpilot_841308_20260506,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_841308_20260506/20260506T115939.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_841308_20260506,_checked,0,,
+DRpilot_841308_20260507,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_841308_20260507_115841,3.0
+DRpilot_841308_20260507,_checked,6,,
+DRpilot_841308_20260508,_checked,6,,
+DRpilot_841308_20260511,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_841308_20260511/20260511T114204.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_841308_20260511,_checked,0,,
+DRpilot_844567_20260408,B changed vs baseline,"2 frames, max 16.68 ms",SpontaneousRewards_844567_20260408_133004,2.0
+DRpilot_844567_20260408,_checked,6,,
+DRpilot_847958_20260413,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_847958_20260413/20260413T102509.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_847958_20260413,_checked,0,,
+DRpilot_847958_20260414,B changed vs baseline,"5 frames, max 16.69 ms",DynamicRouting1_847958_20260414_104610,3.0
+DRpilot_847958_20260414,_checked,6,,
+DRpilot_847958_20260415,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_847958_20260415/20260415T100926.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_847958_20260415,_checked,0,,
+DRpilot_847958_20260416,B changed vs baseline,"1 frames, max 16.68 ms",DynamicRouting1_847958_20260416_110250,3.0
+DRpilot_847958_20260416,_checked,6,,
+DRpilot_847958_20260417,B changed vs baseline,"3 frames, max 16.68 ms",RFMapping_847958_20260417_102032,0.0
+DRpilot_847958_20260417,B changed vs baseline,"2 frames, max 33.36 ms",DynamicRouting1_847958_20260417_105544,3.0
+DRpilot_847958_20260417,_checked,6,,
+DRpilot_850215_20260318,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_850215_20260318/20260318T124447.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_850215_20260318,_checked,0,,
+DRpilot_850215_20260319,B changed vs baseline,"2 frames, max 16.69 ms",SpontaneousRewards_850215_20260319_150259,4.0
+DRpilot_850215_20260319,_checked,6,,
+DRpilot_850215_20260320,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_850215_20260320_134403,3.0
+DRpilot_850215_20260320,_checked,6,,
+DRpilot_850215_20260323,_checked,6,,
+DRpilot_850217_20260402,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_850217_20260402/20260402T134231.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_850217_20260402,_checked,0,,
+DRpilot_850217_20260403,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_850217_20260403/20260403T114038.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_850217_20260403,_checked,0,,
+DRpilot_850217_20260406,B changed vs baseline,"3 frames, max 16.68 ms",DynamicRouting1_850217_20260406_133415,3.0
+DRpilot_850217_20260406,B changed vs baseline,"1 frames, max 16.68 ms",SpontaneousRewards_850217_20260406_143542,4.0
+DRpilot_850217_20260406,_checked,6,,
+DRpilot_852252_20260624,_checked,6,,
+DRpilot_852252_20260625,B changed vs baseline,"3 frames, max 33.36 ms",DynamicRouting1_852252_20260625_133441,3.0
+DRpilot_852252_20260625,_checked,6,,
+DRpilot_852252_20260626,_checked,6,,
+DRpilot_852255_20260616,B changed vs baseline,"2 frames, max 33.36 ms",DynamicRouting1_852255_20260616_132143,3.0
+DRpilot_852255_20260616,_checked,6,,
+DRpilot_852255_20260617,B changed vs baseline,"1 frames, max 33.35 ms",DynamicRouting1_852255_20260617_135501,3.0
+DRpilot_852255_20260617,_checked,6,,
+DRpilot_852255_20260618,B changed vs baseline,"1 frames, max 33.38 ms",DynamicRouting1_852255_20260618_144038,3.0
+DRpilot_852255_20260618,_checked,6,,
+DRpilot_852255_20260622,_checked,6,,
+DRpilot_854390_20260422,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_854390_20260422/20260422T101859.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_854390_20260422,_checked,0,,
+DRpilot_854390_20260423,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_854390_20260423/20260423T103336.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_854390_20260423,_checked,0,,
+DRpilot_854390_20260424,B changed vs baseline,"3 frames, max 33.36 ms",DynamicRouting1_854390_20260424_105525,3.0
+DRpilot_854390_20260424,_checked,6,,
+DRpilot_854390_20260427,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_854390_20260427/20260427T103252.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_854390_20260427,_checked,0,,
+DRpilot_856845_20260527,B changed vs baseline,"1 frames, max 16.68 ms",DynamicRouting1_856845_20260527_134416,3.0
+DRpilot_856845_20260527,_checked,6,,
+DRpilot_856845_20260528,B changed vs baseline,"2 frames, max 33.36 ms",DynamicRouting1_856845_20260528_140706,3.0
+DRpilot_856845_20260528,_checked,4,,
+DRpilot_856845_20260529,_checked,6,,
+DRpilot_856845_20260601,_checked,6,,
+DRpilot_856847_20260602,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_856847_20260602/20260602T114649.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_856847_20260602,_checked,0,,
+DRpilot_856847_20260603,B changed vs baseline,"2 frames, max 16.68 ms",SpontaneousRewards_856847_20260603_144616,4.0
+DRpilot_856847_20260603,_checked,6,,
+DRpilot_856847_20260604,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_856847_20260604/20260604T111425.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_856847_20260604,_checked,0,,
+DRpilot_856847_20260605,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_856847_20260605/20260605T112231.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_856847_20260605,_checked,0,,
+DRpilot_857681_20260813,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_857681_20260813/20260813T103433.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_857681_20260813,_checked,0,,
+DRpilot_857681_20260814,_checked,6,,
+DRpilot_857681_20260817,B changed vs baseline,"2 frames, max 16.68 ms",DynamicRouting1_857681_20260817_110121,3.0
+DRpilot_857681_20260817,_checked,6,,
+DRpilot_857681_20260818,_checked,6,,
+DRpilot_858182_20260925,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_858182_20260925/20260925T102422.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_858182_20260925,_checked,0,,
+DRpilot_858182_20260928,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_858182_20260928/20260928T103305.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_858182_20260928,_checked,0,,
+DRpilot_858182_20260929,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_858182_20260929/20260929T104020.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_858182_20260929,_checked,0,,
+DRpilot_858182_20260930,B changed vs baseline,"1 frames, max 33.35 ms",DynamicRouting1_858182_20260930_111610,3.0
+DRpilot_858182_20260930,_checked,6,,
+DRpilot_859582_20260629,B changed vs baseline,"1 frames, max 33.35 ms",DynamicRouting1_859582_20260629_102625,3.0
+DRpilot_859582_20260629,_checked,6,,
+DRpilot_859582_20260630,_checked,6,,
+DRpilot_859582_20260701,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_859582_20260701/20260701T100333.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_859582_20260701,_checked,0,,
+DRpilot_859582_20260702,_checked,6,,
+DRpilot_859583_20260514,B changed vs baseline,"2 frames, max 16.68 ms",DynamicRouting1_859583_20260514_134018,3.0
+DRpilot_859583_20260514,_checked,6,,
+DRpilot_859583_20260515,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_859583_20260515/20260515T114326.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_859583_20260515,_checked,0,,
+DRpilot_859583_20260519,B changed vs baseline,"6 frames, max 16.68 ms",RFMapping_859583_20260519_130557,0.0
+DRpilot_859583_20260519,_checked,6,,
+DRpilot_859583_20260520,B changed vs baseline,"3 frames, max 16.68 ms",DynamicRouting1_859583_20260520_130436,3.0
+DRpilot_859583_20260520,_checked,6,,
+DRpilot_859584_20260706,_checked,6,,
+DRpilot_859584_20260707,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_859584_20260707_101043,3.0
+DRpilot_859584_20260707,_checked,6,,
+DRpilot_859584_20260708,B changed vs baseline,"1 frames, max 33.33 ms",DynamicRouting1_859584_20260708_120745,3.0
+DRpilot_859584_20260708,_checked,6,,
+DRpilot_859584_20260709,B changed vs baseline,"1 frames, max 33.36 ms",DynamicRouting1_859584_20260709_101317,3.0
+DRpilot_859584_20260709,_checked,6,,
+DRpilot_862025_20260804,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_862025_20260804/20260804T111616.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_862025_20260804,_checked,0,,
+DRpilot_862025_20260805,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_862025_20260805/20260805T114824.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_862025_20260805,_checked,0,,
+DRpilot_862025_20260806,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_862025_20260806/20260806T113052.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_862025_20260806,_checked,0,,
+DRpilot_862027_20260915,_checked,6,,
+DRpilot_862027_20260916,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_862027_20260916/20260916T110415.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_862027_20260916,_checked,0,,
+DRpilot_862027_20260917,_checked,6,,
+DRpilot_862027_20260918,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_862027_20260918/20260918T105054.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_862027_20260918,_checked,0,,
+DRpilot_865817_20261020,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_865817_20261020/20261020T115437.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_865817_20261020,_checked,0,,
+DRpilot_865817_20261021,B changed vs baseline,"2 frames, max 16.68 ms",RFMapping_865817_20261021_120428,0.0
+DRpilot_865817_20261021,B changed vs baseline,"3 frames, max 33.36 ms",DynamicRouting1_865817_20261021_123935,3.0
+DRpilot_865817_20261021,_checked,6,,
+DRpilot_865817_20261022,B changed vs baseline,"10 frames, max 33.37 ms",DynamicRouting1_865817_20261022_123640,3.0
+DRpilot_865817_20261022,_checked,6,,
+DRpilot_867000_20261014,B changed vs baseline,"3 frames, max 16.68 ms",DynamicRouting1_867000_20261014_154017,0.0
+DRpilot_867000_20261014,_checked,1,,
+DRpilot_867000_20261015,B changed vs baseline,"5 frames, max 50.05 ms",DynamicRouting1_867000_20261015_123822,0.0
+DRpilot_867000_20261015,_checked,1,,
+DRpilot_872697_20260831,_checked,6,,
+DRpilot_872697_20260901,_checked,6,,
+DRpilot_872697_20260902,B changed vs baseline,"4 frames, max 16.68 ms",RFMapping_872697_20260902_104109,0.0
+DRpilot_872697_20260902,_checked,6,,
+DRpilot_872697_20260903,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_872697_20260903/20260903T105710.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_872697_20260903,_checked,0,,
+DRpilot_872974_20261109,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_872974_20261109/20261109T114001.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_872974_20261109,_checked,0,,
+DRpilot_872974_20261110,B session error,"{'type': 'AssertionError', 'msg': ""SyncDataset(C:/data/t2p_cache/DRpilot_872974_20261110/20261110T112724.h5) contains replayed sync data (all lines invalid) at ",,
+DRpilot_872974_20261110,_checked,0,,
+DRpilot_872974_20261112,_checked,6,,
+DRpilot_872974_20261113,B changed vs baseline,"5 frames, max 33.36 ms",DynamicRouting1_872974_20261113_114107,3.0
+DRpilot_872974_20261113,_checked,6,,
+DRpilot_873603_20260914,B changed vs baseline,"3 frames, max 33.36 ms",OptoTagging_873603_20260914_144509,1.0
+DRpilot_873603_20260914,_checked,3,,
+DRpilot_873605_20260923,B changed vs baseline,"7 frames, max 33.39 ms",OptoTagging_873605_20260923_145435,1.0
+DRpilot_873605_20260923,_checked,3,,
+DRpilot_873605_20260924,B changed vs baseline,"4 frames, max 33.37 ms",OptoTagging_873605_20260924_151839,1.0
+DRpilot_873605_20260924,_checked,3,,
+DRpilot_878901_20261006,B changed vs baseline,"4 frames, max 33.36 ms",OptoTagging_878901_20261006_145424,1.0
+DRpilot_878901_20261006,_checked,3,,
+DRpilot_878903_20261028,B changed vs baseline,"15 frames, max 33.37 ms",OptoTagging_878903_20261028_125113,0.0
+DRpilot_878903_20261028,_checked,1,,
+DRpilot_878903_20261029,B changed vs baseline,"2 frames, max 16.68 ms",OptoTagging_878903_20261029_134859,1.0
+DRpilot_878903_20261029,_checked,3,,
