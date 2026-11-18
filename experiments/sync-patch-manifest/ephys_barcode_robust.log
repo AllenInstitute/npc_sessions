@@ -1,0 +1,265 @@
+devices 5504, sessions 431
+no robust linear fit:                     key                       device                     pop    n
+435   666986_2023-08-16   Neuropix-PXI-100.ProbeA-AP                   clean  223
+436   666986_2023-08-16  Neuropix-PXI-100.ProbeA-LFP                   clean  180
+437   666986_2023-08-16   Neuropix-PXI-100.ProbeB-AP                   clean  221
+438   666986_2023-08-16  Neuropix-PXI-100.ProbeB-LFP                   clean  182
+439   666986_2023-08-16   Neuropix-PXI-100.ProbeC-AP                   clean  223
+440   666986_2023-08-16  Neuropix-PXI-100.ProbeC-LFP                   clean  193
+442   666986_2023-08-16   Neuropix-PXI-100.ProbeD-AP                   clean  223
+443   666986_2023-08-16  Neuropix-PXI-100.ProbeD-LFP                   clean  185
+444   666986_2023-08-16   Neuropix-PXI-100.ProbeE-AP                   clean  224
+445   666986_2023-08-16  Neuropix-PXI-100.ProbeE-LFP                   clean  179
+446   666986_2023-08-16   Neuropix-PXI-100.ProbeF-AP                   clean  222
+447   666986_2023-08-16  Neuropix-PXI-100.ProbeF-LFP                   clean  181
+936   699847_2024-04-18   Neuropix-PXI-100.ProbeB-AP                   clean  135
+937   699847_2024-04-18  Neuropix-PXI-100.ProbeB-LFP                   clean  135
+1188  706401_2024-04-22   Neuropix-PXI-100.ProbeB-AP                   clean  148
+1189  706401_2024-04-22  Neuropix-PXI-100.ProbeB-LFP                   clean  149
+1596  715709_2024-08-08   Neuropix-PXI-108.ProbeA-AP         discontinuities   87
+1597  715709_2024-08-08  Neuropix-PXI-108.ProbeA-LFP         discontinuities   87
+1598  715709_2024-08-08   Neuropix-PXI-108.ProbeC-AP         discontinuities   87
+1599  715709_2024-08-08  Neuropix-PXI-108.ProbeC-LFP         discontinuities   87
+1600  715709_2024-08-08        NI-DAQmx-109.PXI-6133         discontinuities  126
+1601  715709_2024-08-08        NI-DAQmx-109.PXI-6133         discontinuities  126
+4668  850217_2026-04-03   Neuropix-PXI-109.ProbeD-AP  invalid intervals only  195
+4669  850217_2026-04-03  Neuropix-PXI-109.ProbeD-LFP  invalid intervals only  201
+5127  862027_2026-09-15   Neuropix-PXI-111.ProbeC-AP                   clean  225
+5128  862027_2026-09-15  Neuropix-PXI-111.ProbeC-LFP                   clean  185
+
+robust all-barcode fit, max |residual| per device (ms), quantiles across devices:
+                                 0.5    0.9   0.99    1.0     n
+dev    pop                                                     
+AP     clean                   0.110  0.220  4.706  4.998  2142
+       discontinuities         0.205  0.221  0.226  0.227     8
+       invalid intervals only  0.122  0.276  4.821  4.933   291
+LFP    clean                   0.269  0.371  4.691  4.999  2142
+       discontinuities         0.350  0.387  0.389  0.389     8
+       invalid intervals only  0.279  0.414  4.926  4.974   291
+NI-DAQ clean                   0.054  0.103  0.159  1.994   542
+       discontinuities         0.100  0.100  0.100  0.100     3
+       invalid intervals only  0.063  0.114  0.186  0.325    77
+
+devices with value-pairing outliers (> 5 ms from the robust fit): 114 in 44 sessions
+                   devices  outliers                     pop
+key                                                         
+660023_2023-08-08       13        13                   clean
+666986_2023-08-16       12      2436                   clean
+699847_2024-04-18        2       270                   clean
+706401_2024-04-22        2       297                   clean
+706401_2024-04-25        2        78                   clean
+715709_2024-08-08        6       600         discontinuities
+837230_2026-04-17        2        74                   clean
+839146_2026-05-12        2       102                   clean
+839146_2026-05-13        2       229                   clean
+839146_2026-05-14        2       207                   clean
+839146_2026-05-15        2       117                   clean
+839146_2026-05-18        2       392  invalid intervals only
+840160_2026-04-30        2       307                   clean
+840160_2026-05-01        2        48                   clean
+840160_2026-05-04        1       188                   clean
+841308_2026-05-05        2       154                   clean
+841308_2026-05-06        2       162  invalid intervals only
+841308_2026-05-07        2       409                   clean
+841308_2026-05-08        2        70                   clean
+841308_2026-05-11        2       207  invalid intervals only
+844567_2026-04-08        2       379                   clean
+850217_2026-04-02        2       378  invalid intervals only
+850217_2026-04-03        4       467  invalid intervals only
+850217_2026-04-06        2       213                   clean
+852255_2026-06-16        2        95                   clean
+852255_2026-06-17        2       142                   clean
+852255_2026-06-18        2       315                   clean
+852255_2026-06-22        2       332                   clean
+856847_2026-06-02        2       406  invalid intervals only
+856847_2026-06-03        2       386                   clean
+856847_2026-06-04        2       119  invalid intervals only
+856847_2026-06-05        2       129  invalid intervals only
+857681_2026-08-13        2        83  invalid intervals only
+857681_2026-08-14        2        69                   clean
+857681_2026-08-17        2        48                   clean
+857681_2026-08-18        2        43                   clean
+859584_2026-07-06        2       283                   clean
+859584_2026-07-07        2       120                   clean
+859584_2026-07-08        2       239                   clean
+859584_2026-07-09        2        79                   clean
+862027_2026-09-15        2       410                   clean
+872697_2026-09-01        2        33                   clean
+872697_2026-09-02        2        69                   clean
+872697_2026-09-03        2        24  invalid intervals only
+
+current first/last-barcode alignment vs robust fit: max error over the recording (ms), quantiles:
+                                0.50   0.90    0.99          1.00
+dev    pop                                                       
+AP     clean                   0.099  0.213  11.840  6.614238e+07
+       discontinuities         0.200  0.221   0.226  2.260000e-01
+       invalid intervals only  0.117  0.231  66.850  3.103500e+02
+LFP    clean                   0.158  0.305  22.132  6.664063e+07
+       discontinuities         0.138  0.263   0.320  3.260000e-01
+       invalid intervals only  0.171  0.334  66.924  3.207060e+02
+NI-DAQ clean                   0.042  0.092   0.159  6.614238e+07
+       discontinuities         0.095  0.095   0.095  9.500000e-02
+       invalid intervals only  0.047  0.101   0.184  3.180000e-01
+
+devices whose current alignment is > 1 ms from the robust fit somewhere: 104 in 43 sessions
+                    key                       device                     pop    n  n_outliers  endpoint_error_ms  robust_res_max_ms
+4406  839146_2026-05-15   Neuropix-PXI-116.ProbeB-AP                   clean  224           0       1.030230e+00           1.030230
+4629  850217_2026-04-06  Neuropix-PXI-109.ProbeB-LFP                   clean  226           0       1.141092e+00           1.628905
+4646  850217_2026-04-02  Neuropix-PXI-109.ProbeE-LFP  invalid intervals only  222           0       1.143835e+00           1.345070
+4645  850217_2026-04-02   Neuropix-PXI-109.ProbeE-AP  invalid intervals only  223           0       1.145084e+00           1.242728
+4407  839146_2026-05-15  Neuropix-PXI-116.ProbeB-LFP                   clean  224           0       1.212773e+00           1.212773
+4628  850217_2026-04-06   Neuropix-PXI-109.ProbeB-AP                   clean  226           0       1.270826e+00           1.649634
+4516  844567_2026-04-08   Neuropix-PXI-109.ProbeB-AP                   clean  222           0       1.292385e+00           1.467491
+4517  844567_2026-04-08  Neuropix-PXI-109.ProbeB-LFP                   clean  222           0       1.301323e+00           1.493006
+4339  839146_2026-05-12   Neuropix-PXI-116.ProbeD-AP                   clean  225          51       1.481386e+00           4.916434
+4340  839146_2026-05-12  Neuropix-PXI-116.ProbeD-LFP                   clean  224          51       1.605697e+00           4.920785
+4641  850217_2026-04-02   Neuropix-PXI-109.ProbeC-AP  invalid intervals only  222           0       1.998799e+00           2.570066
+4642  850217_2026-04-02  Neuropix-PXI-109.ProbeC-LFP  invalid intervals only  221           0       2.124087e+00           2.648080
+5041  859584_2026-07-07  Neuropix-PXI-116.ProbeD-LFP                   clean  219          59       2.824979e+00           4.997167
+5078  859584_2026-07-09   Neuropix-PXI-116.ProbeD-AP                   clean  224          41       3.172862e+00           4.911349
+5079  859584_2026-07-09  Neuropix-PXI-116.ProbeD-LFP                   clean  225          38       3.251935e+00           4.999221
+5117  872697_2026-08-31  Neuropix-PXI-116.ProbeD-LFP                   clean  220           0       3.872535e+00           4.821178
+5116  872697_2026-08-31   Neuropix-PXI-116.ProbeD-AP                   clean  218           0       3.923141e+00           4.703109
+4409  839146_2026-05-15   Neuropix-PXI-116.ProbeD-AP                   clean  217          59       4.153250e+00           4.852868
+4410  839146_2026-05-15  Neuropix-PXI-116.ProbeD-LFP                   clean  216          58       5.023534e+00           4.889103
+4485  841308_2026-05-08  Neuropix-PXI-116.ProbeD-LFP                   clean  219          35       5.279882e+00           4.989689
+4484  841308_2026-05-08   Neuropix-PXI-116.ProbeD-AP                   clean  221          35       5.494905e+00           4.963228
+5180  872697_2026-09-03   Neuropix-PXI-116.ProbeD-AP  invalid intervals only  221          12       5.643110e+00           3.966384
+5181  872697_2026-09-03  Neuropix-PXI-116.ProbeD-LFP  invalid intervals only  223          12       5.744885e+00           4.038010
+5142  872697_2026-09-01   Neuropix-PXI-116.ProbeD-AP                   clean  224          18       6.657603e+00           4.837464
+5040  859584_2026-07-07   Neuropix-PXI-116.ProbeD-AP                   clean  223          61       6.887166e+00           4.986713
+4905  857681_2026-08-17  Neuropix-PXI-116.ProbeD-LFP                   clean  224          24       7.262628e+00           4.919396
+4904  857681_2026-08-17   Neuropix-PXI-116.ProbeD-AP                   clean  223          24       7.276904e+00           4.961759
+5143  872697_2026-09-01  Neuropix-PXI-116.ProbeD-LFP                   clean  223          15       7.305526e+00           4.887784
+4916  857681_2026-08-18   Neuropix-PXI-116.ProbeD-AP                   clean  221          22       9.369655e+00           4.829338
+4631  850217_2026-04-06  Neuropix-PXI-109.ProbeD-LFP                   clean  224         104       9.642032e+00           4.919113
+4917  857681_2026-08-18  Neuropix-PXI-116.ProbeD-LFP                   clean  220          21       9.779680e+00           4.974649
+4705  852255_2026-06-16  Neuropix-PXI-116.ProbeD-LFP                   clean  220          47       9.849330e+00           4.971175
+4704  852255_2026-06-16   Neuropix-PXI-116.ProbeD-AP                   clean  220          48       9.858776e+00           4.996348
+4630  850217_2026-04-06   Neuropix-PXI-109.ProbeD-AP                   clean  225         109       1.006067e+01           4.998490
+4462  841308_2026-05-06   Neuropix-PXI-116.ProbeD-AP  invalid intervals only  222          81       1.040197e+01           4.799594
+4463  841308_2026-05-06  Neuropix-PXI-116.ProbeD-LFP  invalid intervals only  222          81       1.051385e+01           4.922621
+4376  839146_2026-05-13   Neuropix-PXI-116.ProbeD-AP                   clean  215         113       1.078327e+01           4.848435
+4667  850217_2026-04-03  Neuropix-PXI-109.ProbeC-LFP  invalid intervals only  225          35       1.081251e+01           4.702252
+4666  850217_2026-04-03   Neuropix-PXI-109.ProbeC-AP  invalid intervals only  226          36       1.100793e+01           4.507073
+4377  839146_2026-05-13  Neuropix-PXI-116.ProbeD-LFP                   clean  216         116       1.123661e+01           4.997847
+5192  872697_2026-09-02   Neuropix-PXI-116.ProbeD-AP                   clean  222          35       1.233656e+01           4.636374
+5193  872697_2026-09-02  Neuropix-PXI-116.ProbeD-LFP                   clean  219          34       1.261850e+01           4.625175
+4892  857681_2026-08-14   Neuropix-PXI-116.ProbeD-AP                   clean  224          35       1.273060e+01           4.971050
+4893  857681_2026-08-14  Neuropix-PXI-116.ProbeD-LFP                   clean  223          34       1.275803e+01           4.845346
+4881  857681_2026-08-13  Neuropix-PXI-116.ProbeD-LFP  invalid intervals only  216          41       1.416692e+01           4.957619
+4880  857681_2026-08-13   Neuropix-PXI-116.ProbeD-AP  invalid intervals only  220          42       1.455976e+01           4.817044
+1209  706401_2024-04-25  Neuropix-PXI-100.ProbeB-LFP                   clean  182          38       1.490853e+01           4.956519
+1208  706401_2024-04-25   Neuropix-PXI-100.ProbeB-AP                   clean  182          40       1.493485e+01           4.987872
+4431  840160_2026-05-01  Neuropix-PXI-109.ProbeD-LFP                   clean  223          24       1.548644e+01           4.815300
+4430  840160_2026-05-01   Neuropix-PXI-109.ProbeD-AP                   clean  223          24       1.574891e+01           4.959554
+4421  840160_2026-04-30  Neuropix-PXI-109.ProbeD-LFP                   clean  223         153       2.115428e+01           4.511884
+4420  840160_2026-04-30   Neuropix-PXI-109.ProbeD-AP                   clean  224         154       2.129843e+01           4.570469
+4387  839146_2026-05-14   Neuropix-PXI-116.ProbeD-AP                   clean  215         103       2.257114e+01           4.782537
+4388  839146_2026-05-14  Neuropix-PXI-116.ProbeD-LFP                   clean  216         104       2.259248e+01           4.876111
+4442  841308_2026-05-05   Neuropix-PXI-116.ProbeD-AP                   clean  219          78       2.305077e+01           4.812207
+4443  841308_2026-05-05  Neuropix-PXI-116.ProbeD-LFP                   clean  218          76       2.337157e+01           4.956355
+4496  841308_2026-05-11  Neuropix-PXI-116.ProbeD-LFP  invalid intervals only  218         103       2.526129e+01           4.553918
+4495  841308_2026-05-11   Neuropix-PXI-116.ProbeD-AP  invalid intervals only  221         104       2.555565e+01           4.933451
+5066  859584_2026-07-08   Neuropix-PXI-116.ProbeD-AP                   clean  223         120       2.563619e+01           4.985395
+5067  859584_2026-07-08  Neuropix-PXI-116.ProbeD-LFP                   clean  222         119       2.582359e+01           4.982279
+4839  856847_2026-06-04   Neuropix-PXI-116.ProbeD-AP  invalid intervals only  217          59       3.619693e+01           4.856111
+4840  856847_2026-06-04  Neuropix-PXI-116.ProbeD-LFP  invalid intervals only  219          60       3.638020e+01           4.920285
+4868  856847_2026-06-05   Neuropix-PXI-116.ProbeD-AP  invalid intervals only  214          64       5.224949e+01           4.862269
+4243  837230_2026-04-17  Neuropix-PXI-109.ProbeD-LFP                   clean  222          37       5.235871e+01           3.615097
+4242  837230_2026-04-17   Neuropix-PXI-109.ProbeD-AP                   clean  222          37       5.243260e+01           3.756367
+4869  856847_2026-06-05  Neuropix-PXI-116.ProbeD-LFP  invalid intervals only  215          65       5.253929e+01           4.968802
+4474  841308_2026-05-07  Neuropix-PXI-116.ProbeD-LFP                   clean  220         205       6.472018e+01           4.721333
+4473  841308_2026-05-07   Neuropix-PXI-116.ProbeD-AP                   clean  219         204       6.492351e+01           4.725450
+4754  852255_2026-06-17  Neuropix-PXI-116.ProbeD-LFP                   clean  223          73       1.082001e+02           4.948294
+4753  852255_2026-06-17   Neuropix-PXI-116.ProbeD-AP                   clean  223          69       1.086247e+02           4.993497
+4728  852255_2026-06-22   Neuropix-PXI-116.ProbeD-AP                   clean  218         165       1.168792e+02           4.675548
+4729  852255_2026-06-22  Neuropix-PXI-116.ProbeD-LFP                   clean  220         167       1.168875e+02           4.481734
+4520  844567_2026-04-08  Neuropix-PXI-109.ProbeD-LFP                   clean  204         186       1.318430e+02           4.860005
+4519  844567_2026-04-08   Neuropix-PXI-109.ProbeD-AP                   clean  206         193       1.383101e+02           4.975597
+4717  852255_2026-06-18  Neuropix-PXI-116.ProbeD-LFP                   clean  216         157       1.402882e+02           4.492861
+4716  852255_2026-06-18   Neuropix-PXI-116.ProbeD-AP                   clean  218         158       1.409335e+02           4.706716
+5029  859584_2026-07-06  Neuropix-PXI-116.ProbeD-LFP                   clean  218         140       1.502791e+02           4.955632
+5028  859584_2026-07-06   Neuropix-PXI-116.ProbeD-AP                   clean  222         143       1.566010e+02           4.799916
+4857  856847_2026-06-03  Neuropix-PXI-116.ProbeD-LFP                   clean  216         197       1.604057e+02           4.181000
+4452  840160_2026-05-04  Neuropix-PXI-116.ProbeD-LFP                   clean  218         188       1.646571e+02           3.411128
+4856  856847_2026-06-03   Neuropix-PXI-116.ProbeD-AP                   clean  214         189       1.786995e+02           4.252235
+4788  856847_2026-06-02  Neuropix-PXI-116.ProbeD-LFP  invalid intervals only  217         203       1.833051e+02           4.740294
+4787  856847_2026-06-02   Neuropix-PXI-116.ProbeD-AP  invalid intervals only  218         203       1.849802e+02           4.690566
+4394  839146_2026-05-18  Neuropix-PXI-116.ProbeD-LFP  invalid intervals only  215         195       2.094257e+02           4.598895
+4393  839146_2026-05-18   Neuropix-PXI-116.ProbeD-AP  invalid intervals only  218         197       2.094399e+02           4.606489
+4643  850217_2026-04-02   Neuropix-PXI-109.ProbeD-AP  invalid intervals only  201         194       3.103500e+02           3.873501
+4644  850217_2026-04-02  Neuropix-PXI-109.ProbeD-LFP  invalid intervals only  204         184       3.207064e+02           4.973864
+2827  751595_2024-11-20  Neuropix-PXI-100.ProbeD-LFP                   clean  101           0       3.045427e+04           0.217307
+2836  751595_2024-11-20  Neuropix-PXI-100.ProbeB-LFP                   clean   99           0       3.045439e+04           0.260035
+4326  837959_2026-04-01  Neuropix-PXI-111.ProbeC-LFP                   clean  188           0       8.631640e+05           0.253449
+5404  649944_2023-02-27  Neuropix-PXI-100.ProbeE-LFP                   clean  124           0       2.491234e+06           0.319105
+287   660023_2023-08-08  Neuropix-PXI-100.ProbeD-LFP                   clean   98           1       6.614238e+07           2.222071
+289   660023_2023-08-08  Neuropix-PXI-100.ProbeE-LFP                   clean   98           1       6.614238e+07           2.596242
+290   660023_2023-08-08   Neuropix-PXI-100.ProbeF-AP                   clean  119           1       6.614238e+07           2.006574
+283   660023_2023-08-08   Neuropix-PXI-100.ProbeC-AP                   clean  120           1       6.614238e+07           2.039123
+284   660023_2023-08-08  Neuropix-PXI-100.ProbeC-LFP                   clean  101           1       6.614238e+07           2.354269
+286   660023_2023-08-08   Neuropix-PXI-100.ProbeD-AP                   clean  121           1       6.614238e+07           2.072051
+288   660023_2023-08-08   Neuropix-PXI-100.ProbeE-AP                   clean  121           1       6.614238e+07           2.090337
+291   660023_2023-08-08  Neuropix-PXI-100.ProbeF-LFP                   clean  102           1       6.614238e+07           2.296012
+279   660023_2023-08-08   Neuropix-PXI-100.ProbeA-AP                   clean  121           1       6.614238e+07           2.027643
+281   660023_2023-08-08   Neuropix-PXI-100.ProbeB-AP                   clean  121           1       6.614238e+07           2.061680
+285   660023_2023-08-08        NI-DAQmx-105.PXI-6133                   clean  121           1       6.614238e+07           1.994312
+282   660023_2023-08-08  Neuropix-PXI-100.ProbeB-LFP                   clean   98           1       6.664063e+07           2.401352
+280   660023_2023-08-08  Neuropix-PXI-100.ProbeA-LFP                   clean   99           1       6.664063e+07           2.478026
+
+---- devices with no pairing outliers (single linear segment): 5390 of 5504
+
+robust_res_max_ms:
+                                 0.5    0.9   0.99    1.0     n
+dev    pop                                                     
+AP     clean                   0.109  0.213  0.315  4.703  2100
+       discontinuities         0.205  0.221  0.226  0.227     6
+       invalid intervals only  0.119  0.224  1.770  2.966   280
+LFP    clean                   0.267  0.361  0.455  4.821  2099
+       discontinuities         0.350  0.387  0.389  0.389     6
+       invalid intervals only  0.277  0.366  1.918  3.152   280
+NI-DAQ clean                   0.054  0.103  0.158  0.270   541
+       discontinuities         0.100  0.100  0.100  0.100     1
+       invalid intervals only  0.063  0.114  0.186  0.325    77
+
+robust_res_p99_ms:
+                                 0.5    0.9   0.99    1.0     n
+dev    pop                                                     
+AP     clean                   0.098  0.197  0.295  4.506  2100
+       discontinuities         0.188  0.206  0.210  0.210     6
+       invalid intervals only  0.105  0.209  1.668  2.593   280
+LFP    clean                   0.240  0.312  0.394  4.582  2099
+       discontinuities         0.289  0.331  0.348  0.350     6
+       invalid intervals only  0.245  0.313  1.728  2.526   280
+NI-DAQ clean                   0.045  0.096  0.151  0.260   541
+       discontinuities         0.093  0.093  0.093  0.093     1
+       invalid intervals only  0.053  0.102  0.172  0.307    77
+
+endpoint_error_ms:
+                                 0.5    0.9   0.99          1.0     n
+dev    pop                                                           
+AP     clean                   0.098  0.207  0.306        3.923  2100
+       discontinuities         0.200  0.221  0.226        0.226     6
+       invalid intervals only  0.111  0.212  0.809        1.999   280
+LFP    clean                   0.156  0.294  0.430  2491233.563  2099
+       discontinuities         0.138  0.263  0.320        0.326     6
+       invalid intervals only  0.163  0.310  0.745        2.124   280
+NI-DAQ clean                   0.042  0.092  0.158        0.260   541
+       discontinuities         0.095  0.095  0.095        0.095     1
+       invalid intervals only  0.047  0.101  0.184        0.318    77
+
+---- devices with outliers: fraction of pairs that are outliers, quantiles: {0.5: 0.415, 0.9: 1.0, 0.99: 1.0, 1.0: 1.0}
+
+---- proposed ephys gate {'AP': 0.5, 'NI-DAQ': 0.5, 'LFP': 0.8} + no pairing outliers: devices failing 136 of 5504, in 45 of 431 sessions
+dev     pop                   
+AP      clean                     47
+        discontinuities            2
+        invalid intervals only    17
+LFP     clean                     48
+        discontinuities            2
+        invalid intervals only    17
+NI-DAQ  clean                      1
+        discontinuities            2
+failing devices by name (top): {'ProbeD-LFP': 40, 'ProbeD-AP': 39, 'ProbeB-AP': 12, 'ProbeB-LFP': 12, 'ProbeC-AP': 6, 'ProbeC-LFP': 6, 'ProbeE-AP': 4, 'ProbeE-LFP': 4}
+failing PXI slot/probe (top): {'Neuropix-PXI-116.ProbeD-LFP': 31, 'Neuropix-PXI-116.ProbeD-AP': 30, 'Neuropix-PXI-109.ProbeD-AP': 7, 'Neuropix-PXI-109.ProbeD-LFP': 7, 'Neuropix-PXI-100.ProbeB-AP': 5, 'Neuropix-PXI-100.ProbeB-LFP': 5, 'Neuropix-PXI-109.ProbeB-AP': 4, 'Neuropix-PXI-109.ProbeB-LFP': 4}

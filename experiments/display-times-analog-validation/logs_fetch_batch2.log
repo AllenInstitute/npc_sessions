@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\display-times-analog-validation\fetch_analog.py", line 211, in <module>
+    main(f, force="--force" in sys.argv)
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\display-times-analog-validation\fetch_analog.py", line 99, in main
+    node = zpath.split("experiment1_")[1].split("#")[0]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+DRpilot_818720_20251219: ERROR IndexError: list index out of range
+DRpilot_744279_20250116: aind-private-data-prod-o5171v/ecephys_744279_2025-01-16_14-01-37/ecephys/ecephys_compressed/experiment1_Record Node 104#NI-DAQmx-101.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=249 global resid -0.06..0.06 ms, max step 0.04 ms
+  block 0: sync edges=1764 confirmed=[0] AI0:1.00/1.00 AI1:0.10/0.81 AI2:0.00/0.00 AI3:0.24/0.81 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=1779 confirmed=[0] AI0:1.00/1.00 AI1:0.02/0.83 AI2:0.00/0.00 AI3:0.10/0.80 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 874 s [18 s]
+  block 1: saved 350 s [25 s]
+  block 2: saved 606 s [38 s]
+  block 3: saved 606 s [50 s]
+  block 4: saved 3659 s [128 s]
+  block 5: saved 606 s [141 s]
+  block 6: saved 606 s [154 s]
+  block 7: saved 354 s [162 s]
+DRpilot_744279_20250116 b0: 48430 transitions, 0 low-swing bins of 1748
+DRpilot_744279_20250116 b1: 14226 transitions, 0 low-swing bins of 701
+DRpilot_744279_20250116 b2: 36000 transitions, 0 low-swing bins of 1212
+DRpilot_744279_20250116 b3: 36000 transitions, 0 low-swing bins of 1212
+DRpilot_744279_20250116 b4: 217554 transitions, 0 low-swing bins of 7318
+DRpilot_744279_20250116 b5: 36000 transitions, 0 low-swing bins of 1212
+DRpilot_744279_20250116 b6: 36000 transitions, 0 low-swing bins of 1212
+DRpilot_744279_20250116 b7: 18966 transitions, 0 low-swing bins of 708
+DRpilot_818720_20251219: aind-open-data/ecephys_818720_2025-12-19_14-04-19/ecephys/ecephys_compressed/experiment2_Record Node 101#NI-DAQmx-108.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=226 global resid -0.04..0.04 ms, max step 0.04 ms
+  block 0: sync edges=593 confirmed=[0] AI0:1.00/1.00 AI1:0.06/0.33 AI2:0.00/0.00 AI3:0.20/0.34 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=593 confirmed=[0] AI0:1.00/1.00 AI1:0.02/0.33 AI2:0.00/0.00 AI3:0.07/0.36 AI4:0.00/0.50 AI5:0.00/0.00 AI6:0.04/0.31 AI7:0.00/0.00
+  block 0: saved 874 s [16 s]
+  block 1: saved 607 s [27 s]
+  block 2: saved 607 s [39 s]
+  block 3: saved 3657 s [106 s]
+  block 4: saved 607 s [118 s]
+  block 5: saved 607 s [129 s]
+DRpilot_818720_20251219 b0: 17112 transitions, 0 low-swing bins of 1748
+DRpilot_818720_20251219 b1: 12000 transitions, 0 low-swing bins of 1215
+DRpilot_818720_20251219 b2: 12000 transitions, 0 low-swing bins of 1215
+DRpilot_818720_20251219 b3: 72320 transitions, 0 low-swing bins of 7314
+DRpilot_818720_20251219 b4: 12000 transitions, 0 low-swing bins of 1215
+DRpilot_818720_20251219 b5: 12000 transitions, 0 low-swing bins of 1215

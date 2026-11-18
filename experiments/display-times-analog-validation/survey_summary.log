@@ -1,0 +1,4 @@
+surveyed 87 sessions
+before 2025: AI0 photodiode-like 0, no signal 42, no NI-DAQ data on S3 5
+2025 on:     AI0 photodiode-like 33, no signal 0, no NI-DAQ data on S3 7
+2025+ sessions with a low-swing window (AI0 ptp per window): [('DRpilot_744279_20250114', [1216, 1228, 1232, 56]), ('DRpilot_793277_20250612', [48, 56, 52, 1196]), ('DRpilot_801857_20250925', [1160, 1232, 80, 1248]), ('DRpilot_850215_20260318', [1456, 1456, 1460, 48])]

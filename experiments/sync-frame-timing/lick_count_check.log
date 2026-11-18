@@ -1,0 +1,7 @@
+DRpilot_836629_20260430: sync lick onsets in task block=1144, stim lickFrames=1144, sync onsets with no lickFrame read within 34 ms=15
+DRpilot_839146_20260518: sync lick onsets in task block=3138, stim lickFrames=3137, sync onsets with no lickFrame read within 34 ms=67
+DRpilot_847958_20260413: sync lick onsets in task block=2097, stim lickFrames=2096, sync onsets with no lickFrame read within 34 ms=38
+DRpilot_856847_20260602: sync lick onsets in task block=1265, stim lickFrames=1265, sync onsets with no lickFrame read within 34 ms=20
+DRpilot_856847_20260604: sync lick onsets in task block=1518, stim lickFrames=1518, sync onsets with no lickFrame read within 34 ms=29
+DRpilot_862025_20260805: sync lick onsets in task block=1378, stim lickFrames=1376, sync onsets with no lickFrame read within 34 ms=25
+ALL: sync=10540 stim=10536 unmatched sync onsets=194 (0.018)

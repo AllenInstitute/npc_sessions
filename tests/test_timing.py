@@ -157,3 +157,76 @@ def test_reconstructed_licks_and_rewards(files) -> None:
     assert latency == pytest.approx(0.0008, abs=2e-5)
     if len(t):
         assert np.max(np.abs(t - true)) < 3 / FS
+
+
+@pytest.fixture(scope="module")
+def flicker_files(tmp_path_factory):
+    """A box-1 session without replays: phantom flicker (one-refresh flashes of the other
+    buffer) in 4 held frames."""
+    tmp = tmp_path_factory.mktemp("flicker")
+    R = 1 / 60
+    n = 4000
+    holds = {700: 3, 1500: 2, 1520: 4, 2400: 11, 3000: 3, 3300: 3, 3600: 2}
+    pairs = {700: [1], 2400: [1, 3, 5, 7], 3000: [1], 3300: [1]}
+    n_ref = np.ones(n - 1, int)
+    for k, h in holds.items():
+        n_ref[k] = h
+    display = 5.0 + np.r_[0, np.cumsum(n_ref)] * R
+    # jitter: exactly periodic data would look like replayed (identical) buffers
+    fall = display + 0.0002 + np.random.default_rng(2).normal(0, 2e-5, n)
+    edges = []
+    for t in fall:
+        edges += [(t - 0.015, 2, 1), (t, 2, 0)]
+    pol = 1
+    for k in range(n):
+        edges.append((display[k] + (0.020 if pol else 0.024), 4, pol))
+        for r in pairs.get(k, []):
+            edges.append((display[k] + r * R + (0.020 if 1 - pol else 0.024) + 0.003, 4, 1 - pol))
+            edges.append((display[k] + (r + 1) * R + (0.020 if pol else 0.024), 4, pol))
+        pol ^= 1
+    edges += [(4.95, 5, 1), (fall[-1] + 0.05, 5, 0)]
+    items = sorted((int(round(t * FS)), b, v) for t, b, v in edges)
+    times, states, state = [0], [0], 0
+    for smp, b, v in items:
+        state = (state | (1 << b)) if v else (state & ~(1 << b))
+        if times[-1] == smp:
+            states[-1] = state
+        else:
+            times.append(smp)
+            states.append(state)
+    sync = tmp / "20260101T100000.h5"
+    meta = {
+        "ni_daq": {"sample_freq": float(FS), "counter_bits": 32, "event_bits": 32},
+        "start_time": "2026-01-01 10:00:00.000000",
+        "stop_time": "2026-01-01 10:01:40.000000",
+        "line_labels": LABELS,
+        "timeouts": [],
+        "version": "synthetic",
+        "total_samples": 100 * FS,
+    }
+    with h5py.File(sync, "w") as f:
+        f["data"] = np.c_[np.asarray(times, np.uint32), np.asarray(states, np.uint32)]
+        f["meta"] = str(meta)
+    stim = tmp / "DynamicRouting1_000000_20260101_100004.hdf5"
+    with h5py.File(stim, "w") as f:
+        f["frameIntervals"] = np.diff(fall)
+        f["startTime"] = b"20260101_100004"
+        f["diodeBoxFrameInterval"] = 1
+    return dict(sync=sync, stim=stim, display=display, n_phantom=2 * sum(len(v) for v in pairs.values()))
+
+
+@pytest.mark.skipif(not hasattr(npc_sync, "align_diode_toggles"), reason="npc_sync without phantom-flicker removal")
+def test_phantom_flicker_patch_for_a_session_without_replays(flicker_files) -> None:
+    patch = timing.get_sync_patch("s", flicker_files["sync"], [flicker_files["stim"]])
+    assert patch is not None and patch.invalid_intervals == ()
+    assert patch.diode_summary()["phantom_flicker_removed"] == flicker_files["n_phantom"]
+    sync = npc_sync.SyncDataset(flicker_files["sync"], patch=patch)
+    display = npc_stim.get_display_times(sync, [flicker_files["stim"]])
+    (row,) = timing.get_block_report(sync, [flicker_files["stim"]], display).to_dict("records")
+    assert row["status"] == "clean" and row["diode_status"] == "cleaned"
+    assert row["n_phantom_flicker_removed"] == flicker_files["n_phantom"]
+    assert row["display_time_source"] == "photodiode"
+    assert timing.get_invalid_times(sync) == []
+    # unpatched, npc_stim rejects the block (flip count)
+    (unpatched,) = npc_stim.get_display_times(npc_sync.SyncDataset(flicker_files["sync"]), [flicker_files["stim"]])
+    assert unpatched.source == "unavailable"

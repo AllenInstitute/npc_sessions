@@ -1,0 +1,20 @@
+
+DRpilot_714748_20240628: 137 invalid intervals
+  barcode onset t=3582.999 s displaced by -1000.0 ms (k=-2.00); nearest invalid interval [3580.0, 3580.5) at 2.50 s; inside an interval: False (masked)
+  barcode onset t=3644.430 s displaced by -1500.0 ms (k=-3.00); nearest invalid interval [3644.5, 3646.0) at 0.07 s; inside an interval: False (masked)
+  barcode onset t=5347.554 s displaced by -1500.0 ms (k=-3.00); nearest invalid interval [5340.5, 5341.0) at 6.55 s; inside an interval: False (masked)
+  barcode onset t=5472.417 s displaced by -500.0 ms (k=-1.00); nearest invalid interval [5473.0, 5473.5) at 0.58 s; inside an interval: False (masked)
+  barcode onset t=5899.940 s displaced by -6500.0 ms (k=-13.00); nearest invalid interval [5900.0, 5907.0) at 0.06 s; inside an interval: False (masked)
+
+DRpilot_703880_20240418: 47 invalid intervals
+  barcode onset t=926.492 s displaced by -1000.1 ms (k=-2.00); nearest invalid interval [930.0, 931.0) at 3.51 s; inside an interval: False (masked)
+  barcode onset t=2009.790 s displaced by -1500.0 ms (k=-3.00); nearest invalid interval [2013.0, 2015.0) at 3.21 s; inside an interval: False (masked)
+  barcode onset t=3217.451 s displaced by -1500.0 ms (k=-3.00); nearest invalid interval [3218.0, 3220.0) at 0.55 s; inside an interval: False (masked)
+  barcode onset t=3279.882 s displaced by -1000.0 ms (k=-2.00); nearest invalid interval [3280.0, 3281.0) at 0.12 s; inside an interval: False (masked)
+
+DRpilot_708016_20240426: 30 invalid intervals
+  barcode onset t=3589.459 s displaced by -500.0 ms (k=-1.00); nearest invalid interval [3589.5, 3590.0) at 0.04 s; inside an interval: False (masked)
+  barcode onset t=3681.856 s displaced by -999.9 ms (k=-2.00); nearest invalid interval [3682.5, 3683.0) at 0.64 s; inside an interval: False (masked)
+
+DRpilot_859582_20260612: 27 invalid intervals
+  barcode onset t=4610.965 s displaced by -2000.0 ms (k=-4.00); nearest invalid interval [4609.5, 4610.5) at 0.46 s; inside an interval: False (masked)

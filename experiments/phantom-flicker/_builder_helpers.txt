@@ -1,0 +1,38 @@
+def _append_diode_span(
+    spans: list[SpanPatch],
+    span: tuple[float, float],
+    rising: npt.NDArray,
+    falling: npt.NDArray,
+    sol: DiodeSpanSolution,
+    method: str,
+) -> None:
+    fails = sol.failures()
+    diag = _jsonable(dataclasses.asdict(sol))
+    if fails:
+        spans.append(SpanPatch(span, "unknown", method="mask", diagnostics=diag, reason="; ".join(fails)))
+    else:
+        spans.append(
+            SpanPatch(
+                span,
+                "reconstructed",
+                rising=rising,
+                falling=falling,
+                method=method,
+                error_bound_sec=sol.baseline_error_sec + DIODE_MAX_RESIDUAL_ABOVE_BASELINE_SEC,
+                diagnostics=diag,
+            )
+        )
+
+
+def _extend_span_over_splice(raw: Any, bit: int, span: tuple[float, float]) -> tuple[float, float]:
+    """The first event after a copy is compared with the copy's last state, so a change of `bit`
+    there may be a splice artefact rather than a real edge: include that event in the span."""
+    times = np.asarray(raw.get_all_times("samples"), dtype=np.int64)
+    bits = np.asarray(raw.get_all_bits(), dtype=np.int64)
+    fs = raw.sample_freq
+    j = int(np.searchsorted(times, span[1] * fs - 1e-6))
+    if 0 < j < len(times) and ((bits[j] >> bit) & 1) != ((bits[j - 1] >> bit) & 1):
+        return (span[0], (times[j] + 1) / fs)
+    return span
+
+

@@ -4,6 +4,11 @@
 Evidence: `experiments/sync-patch-manifest/` (scripts, logs, CSVs; see its README).
 **Nothing is pushed.** All code is on local branches named `sync-patch`: npc_sync `7e64286`, npc_stim `7db2ce4`, npc_sessions branch `sync-patch` (`0fc22cd` + a report-only commit).
 
+> **Update 2026-11-17 (handoff 2, phantom flicker): `outputs/phantom-flicker-report.md`.**
+> - The box-1 photodiode failures below came from a pairing bug in `predict_diode_edges` (one frame late when the latency exceeds a refresh), not from phantom flicker. With the new block alignment, 53/53 box-1 spans with reconstructed vsyncs pass.
+> - Phantom flicker is now removed by the patch in every session.
+> - All `sync-patch` branches are merged into local `main` (not pushed).
+
 ## Summary
 
 - **The P0 manifest covers all 2,971 sync files**: 2,945 on the Task 2 Pilot share, plus 26 npc_lims sessions whose raw data is only on S3. 152 files (5.1%) contain replayed buffers and 11 have timebase discontinuities.
@@ -121,6 +126,8 @@ The old post-span check compared the maxima of two 3-s windows, which fails by c
 | 1 (key absent, pre-2023 files) | 60 | 25 | 40 |
 
 Box-1 spans are often rejected, mostly for polarity mismatches and unpairable pre-span edges. The new check rejects more of them than the old one did. Their display times stay unavailable, as they are on `main` today.
+
+*Superseded (phantom-flicker report):* the box-1 rejections were caused by `predict_diode_edges` pairing each edge with the next frame. With box interval 1 the latency (19–26 ms) is longer than a refresh, so the pairing broke at every held frame. The same error inflated the box-1 baselines to 10–22 ms. Box-1 spans now use `align_diode_toggles` and `predict_box1_diode_edges`: 53/53 pass (`experiments/phantom-flicker/diode_gate_recheck.log`).
 
 ### Ephys barcode residual (first measurement; `ephys_barcode_robust.log`)
 
@@ -247,7 +254,7 @@ Covered: every npc_lims ephys session from 2025-01-13 on with a reconcilable blo
 - **npc_mvr:** not patch-aware. Camera exposing spans that fail the gate (6 of 1,274) become unknown, and npc_mvr's existing <20-frame tolerance still applies.
 - **npc_samstim:** the onset search is unbounded. Trials in replayed intervals are excluded, so the wrong onsets there are dropped.
 - **npc_ephys:** barcodes in replayed intervals are masked by the patch, but the first/last-barcode fit is unchanged. See the 104 devices above.
-- **Box-1 photodiode prediction (pre-2023 files).** 35/60 spans are rejected. A box-1-specific method is needed.
+- **Box-1 photodiode prediction (pre-2023 files).** 35/60 spans are rejected. A box-1-specific method is needed. *Done 2026-11-17: 53/53 spans with reconstructed vsyncs pass; the other 7 fail the vsync gate (`outputs/phantom-flicker-report.md`).*
 - **Multi-run and displaced files stay rejected**, as the plan requires. The −0.55 ms/s residual is unexplained.
 - **Plan leftovers:**
   - stim matcher exactness in npc_stim (`atol=1`); the manifest and timing use an exact matcher of their own

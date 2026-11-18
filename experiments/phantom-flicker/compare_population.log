@@ -1,0 +1,125 @@
+sessions: 441 (DRpilot_366122_20250109 not run: dev mouse, box interval 2, O(n^2) flip removal in npc_stim > 2 h)
+  patch build errors: 0; display-time errors A: 69 (replay/discontinuity files raise unpatched), B: 8
+  A errors: {'IndexError: index 0 is out of bounds for axis 0 with size 0': 2, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_636766_20230123/20230123T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_644867_20230221/20230221T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_649943_20230214/20230214T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_649943_20230215/20230215T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_660023_20230809/20230809T0': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_666986_20230814/20230814T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_703880_20240418/20240418T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_708016_20240430/20240430T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_708020_20240517/20240517T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_712141_20240611/20240611T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_712815_20240520/20240520T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_714748_20240628/20240628T0': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_714753_20240703/20240703T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_714753_20240705/20240705T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_715709_20240808/20240808T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_715710_20240719/20240719T1': 1, 'AssertionError': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_718283_20240823/20240823T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_733780_20240830/20240830T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_733780_20240904/20240904T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_761583_20241216/20241216T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_761583_20241217/20241217T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_761583_20241218/20241218T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_796012_20250710/20250710T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_798632_20250829/20250829T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_798632_20250902/20250902T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_813586_20251202/20251202T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_835598_20260223/20260223T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_835598_20260227/20260227T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_836629_20260430/20260430T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_836629_20260501/20260501T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_836726_20260213/20260213T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_837230_20260420/20260420T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_837959_20260330/20260330T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_837959_20260331/20260331T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_837959_20260402/20260402T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_839146_20260518/20260518T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_840160_20260428/20260428T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_840160_20260429/20260429T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_841308_20260506/20260506T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_841308_20260511/20260511T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_847958_20260413/20260413T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_847958_20260415/20260415T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_850215_20260318/20260318T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_850217_20260402/20260402T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_850217_20260403/20260403T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_854390_20260422/20260422T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_854390_20260423/20260423T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_854390_20260427/20260427T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_856847_20260602/20260602T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_856847_20260604/20260604T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_856847_20260605/20260605T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_857681_20260813/20260813T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_858182_20260925/20260925T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_858182_20260928/20260928T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_858182_20260929/20260929T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_859582_20260701/20260701T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_859583_20260515/20260515T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_862025_20260804/20260804T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_862025_20260805/20260805T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_862025_20260806/20260806T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_862027_20260916/20260916T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_862027_20260918/20260918T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_865817_20261020/20261020T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_872697_20260903/20260903T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_872974_20261109/20261109T1': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_872974_20261110/20261110T1': 1}
+  B errors: {'IndexError: index 0 is out of bounds for axis 0 with size 0': 2, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_703880_20240418/20240418T130656.h5) has a timebase discontinuity (': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_708020_20240517/20240517T100128.h5) has a timebase discontinuity (': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_714748_20240628/20240628T095859.h5) has a timebase discontinuity (': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_715709_20240808/20240808T150522.h5) has a timebase discontinuity (': 1, 'AssertionError': 1, 'AssertionError: SyncDataset(C:/data/t2p_cache/DRpilot_840160_20260428/20260428T103950.h5) has a timebase discontinuity (': 1}
+blocks: 2369
+
+== A (branch code, no patch) vs fixE (released behaviour) ==
+A            photodiode  unavailable
+fixE                                
+photodiode         1936            0
+unavailable           0           70
+photodiode in both: 1936; identical arrays: 1936
+Empty DataFrame
+Columns: [folder, block, stim]
+Index: []
+
+== B (with SyncPatch) vs A (no patch) ==
+B            photodiode  unavailable
+A                                   
+photodiode         1936            0
+unavailable          11           59
+photodiode in both: 1936; identical: 1936
+changed (photodiode in both, arrays differ):
+Empty DataFrame
+Columns: [folder, block, stim, box, diode_status, phantom, glitch, B_minus_A_max_ms]
+Index: []
+
+lost (A photodiode -> B not):
+Empty DataFrame
+Columns: [folder, block, stim, diode_status, B_reason]
+Index: []
+
+recovered (A not photodiode -> B photodiode):
+                       folder  block                                         stim diode_status  phantom  glitch                                                                                                                                                         A_reason
+225   DRpilot_674562_20231002      3  DynamicRouting1_674562_20231002_153018.hdf5      cleaned        2      10  estimator failed: AssertionError('DRpilot_674562_20231002_3_DynamicRouting1_674562_20231002_153018: Too many frames are misaligned with vsyncs - check plots.')
+232   DRpilot_674562_20231003      4  DynamicRouting1_674562_20231003_155134.hdf5      cleaned        4      32  estimator failed: AssertionError('DRpilot_674562_20231003_4_DynamicRouting1_674562_20231003_155134: Too many frames are misaligned with vsyncs - check plots.')
+513   DRpilot_703881_20240509      1  DynamicRouting1_703881_20240509_134622.hdf5      cleaned        2       0  estimator failed: AssertionError('DRpilot_703881_20240509_1_DynamicRouting1_703881_20240509_134622: Too many frames are misaligned with vsyncs - check plots.')
+606   DRpilot_708016_20240502      4  DynamicRouting1_708016_20240502_125901.hdf5      cleaned        4      16  estimator failed: AssertionError('DRpilot_708016_20240502_4_DynamicRouting1_708016_20240502_125901: Too many frames are misaligned with vsyncs - check plots.')
+805   DRpilot_716718_20240730      0  DynamicRouting1_716718_20240730_170717.hdf5      cleaned       12       2                                                                                                    216806 diode flips (after basic filtering), but 216794 vsyncs
+915   DRpilot_733891_20240916      4  DynamicRouting1_733891_20240916_155211.hdf5      cleaned        8      32                                                                                                    217262 diode flips (after basic filtering), but 217253 vsyncs
+931   DRpilot_733891_20240918      4  DynamicRouting1_733891_20240918_125943.hdf5      cleaned        2       2                    3829 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+939   DRpilot_733891_20240919      4  DynamicRouting1_733891_20240919_130255.hdf5      cleaned        2       4  estimator failed: AssertionError('DRpilot_733891_20240919_4_DynamicRouting1_733891_20240919_130255: Too many frames are misaligned with vsyncs - check plots.')
+1029  DRpilot_741148_20241016      3  DynamicRouting1_741148_20241016_133702.hdf5      cleaned        4       2                                                                                                    216968 diode flips (after basic filtering), but 216962 vsyncs
+1275  DRpilot_761583_20241219      3  DynamicRouting1_761583_20241219_105803.hdf5      cleaned        4      34  estimator failed: AssertionError('DRpilot_761583_20241219_3_DynamicRouting1_761583_20241219_105803: Too many frames are misaligned with vsyncs - check plots.')
+1291  DRpilot_762526_20250320      1  DynamicRouting1_762526_20250320_112519.hdf5      cleaned        6       4                                                                                                    216856 diode flips (after basic filtering), but 216849 vsyncs
+
+still rejected, cleaned by the patch (phantom flicker removed but npc_stim rejects):
+                      folder  block                                         stim  phantom                                                                                                                                                         B_reason
+241  DRpilot_674562_20231004      6      OptoTagging_674562_20231004_180414.hdf5      168                       4 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+389  DRpilot_699847_20240415      1      OptoTagging_699847_20240415_130338.hdf5      376                      19 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+405  DRpilot_699847_20240417      1      OptoTagging_699847_20240417_122804.hdf5      362                      19 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+413  DRpilot_699847_20240418      1      OptoTagging_699847_20240418_135753.hdf5      360                      20 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+419  DRpilot_699847_20240418      7      OptoTagging_699847_20240418_154413.hdf5      346                      17 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+441  DRpilot_702136_20240305      3  DynamicRouting1_702136_20240305_123451.hdf5        6  estimator failed: AssertionError('DRpilot_702136_20240305_3_DynamicRouting1_702136_20240305_123451: Too many frames are misaligned with vsyncs - check plots.')
+547  DRpilot_706401_20240422      1      OptoTagging_706401_20240422_133055.hdf5      330                      16 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+553  DRpilot_706401_20240422      7      OptoTagging_706401_20240422_151528.hdf5      148                       6 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+555  DRpilot_706401_20240423      1      OptoTagging_706401_20240423_131144.hdf5      150                       4 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+561  DRpilot_706401_20240423      7      OptoTagging_706401_20240423_145423.hdf5      140                       3 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+563  DRpilot_706401_20240424      1      OptoTagging_706401_20240424_124127.hdf5      286                      13 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+569  DRpilot_706401_20240424      7      OptoTagging_706401_20240424_142657.hdf5      136                       6 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+571  DRpilot_706401_20240425      1      OptoTagging_706401_20240425_121823.hdf5      606                      18 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+574  DRpilot_706401_20240425      4  DynamicRouting1_706401_20240425_124252.hdf5        8                       9 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+577  DRpilot_706401_20240425      7      OptoTagging_706401_20240425_140402.hdf5      212                      12 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+624  DRpilot_712141_20240612      1  DynamicRouting1_712141_20240612_130206.hdf5        8                       2 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+758  DRpilot_715706_20240626      1  DynamicRouting1_715706_20240626_144020.hdf5        6                       1 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+761  DRpilot_715706_20240627      1  DynamicRouting1_715706_20240627_131843.hdf5        8                       1 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+898  DRpilot_733780_20240905      7      OptoTagging_733780_20240905_143642.hdf5      202                      11 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+923  DRpilot_733891_20240917      4  DynamicRouting1_733891_20240917_130032.hdf5        4                       1 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+
+replay files (A raised unpatched): B sources
+B
+photodiode     354
+unavailable      9
+
+== diode records (box-1 blocks with a stim file) ==
+diode_status
+not_checked    1175
+cleaned        1162
+NaN              21
+rejected         11
+rejected:
+                      folder  block                                         stim            A            B                                                                                                                                                  diode_reason
+185  DRpilot_667252_20230927      4  DynamicRouting1_667252_20230927_130943.hdf5  unavailable  unavailable     114 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch; 3834 toggle frame(s) have no diode edge
+406  DRpilot_699847_20240417      2      Spontaneous_699847_20240417_123208.hdf5  unavailable  unavailable      32 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch; 1012 toggle frame(s) have no diode edge
+416  DRpilot_699847_20240418      4  DynamicRouting1_699847_20240418_142318.hdf5  unavailable  unavailable    51 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch; 104905 toggle frame(s) have no diode edge
+447  DRpilot_702136_20240306      3  DynamicRouting1_702136_20240306_120106.hdf5  unavailable  unavailable                                                2 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch
+534  DRpilot_703882_20240424      4  DynamicRouting1_703882_20240424_140043.hdf5  unavailable  unavailable    3821 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch; 9391 toggle frame(s) have no diode edge
+550  DRpilot_706401_20240422      4  DynamicRouting1_706401_20240422_135424.hdf5  unavailable  unavailable                                                                                                                      88396 toggle frame(s) have no diode edge
+558  DRpilot_706401_20240423      4  DynamicRouting1_706401_20240423_133316.hdf5  unavailable  unavailable                                                                                                                       3579 toggle frame(s) have no diode edge
+566  DRpilot_706401_20240424      4  DynamicRouting1_706401_20240424_130555.hdf5  unavailable  unavailable    61 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch; 100895 toggle frame(s) have no diode edge
+598  DRpilot_708016_20240501      4  DynamicRouting1_708016_20240501_131208.hdf5  unavailable  unavailable                                                4 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch
+650  DRpilot_712815_20240523      3  DynamicRouting1_712815_20240523_121608.hdf5  unavailable  unavailable    5247 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch; 8681 toggle frame(s) have no diode edge
+833  DRpilot_726088_20240620      3  DynamicRouting1_726088_20240620_132444.hdf5  unavailable  unavailable  37314 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch; 40094 toggle frame(s) have no diode edge
+
+phantom-flicker removal per session (sessions with any):
+                         blocks  phantom  glitch  photodiode_after
+folder                                                            
+DRpilot_674562_20231002       1        2      10                 1
+DRpilot_674562_20231003       1        4      32                 1
+DRpilot_674562_20231004       1      168      16                 0
+DRpilot_699847_20240415       1      376      16                 0
+DRpilot_699847_20240417       1      362      18                 0
+DRpilot_699847_20240418       2      706      46                 0
+DRpilot_702136_20240305       1        6      40                 0
+DRpilot_703881_20240509       1        2       0                 1
+DRpilot_706401_20240422       2      478      10                 0
+DRpilot_706401_20240423       2      290       0                 0
+DRpilot_706401_20240424       2      422      30                 0
+DRpilot_706401_20240425       3      826     134                 0
+DRpilot_708016_20240502       1        4      16                 1
+DRpilot_712141_20240612       1        8       8                 0
+DRpilot_712815_20240520       1        2       0                 1
+DRpilot_715706_20240626       1        6       0                 0
+DRpilot_715706_20240627       1        8      20                 0
+DRpilot_716718_20240730       1       12       2                 1
+DRpilot_733780_20240905       1      202       4                 0
+DRpilot_733891_20240916       1        8      32                 1
+DRpilot_733891_20240917       1        4     146                 0
+DRpilot_733891_20240918       1        2       2                 1
+DRpilot_733891_20240919       1        2       4                 1
+DRpilot_741148_20241016       1        4       2                 1
+DRpilot_761583_20241218       1        2       2                 1
+DRpilot_761583_20241219       1        4      34                 1
+DRpilot_762526_20250320       1        6       4                 1
+total phantom-flicker edges removed: 3916 in 33 blocks, 27 sessions; glitch edges removed: 788 in 56 blocks

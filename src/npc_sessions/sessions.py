@@ -2659,8 +2659,9 @@ class DynamicRoutingSession:
 
     @cached_property
     def sync_patch(self) -> npc_sync.SyncPatch | None:
-        """Reconstructed/unknown edges inside the sync file's replayed intervals (None if
-        there are none). See `npc_sessions.timing`."""
+        """Corrections to the sync file: photodiode phantom flicker and glitches removed (every
+        session), reconstructed/unknown edges inside replayed intervals (if any). See
+        `npc_sessions.timing`."""
         from npc_sessions import timing
 
         return timing.get_sync_patch(

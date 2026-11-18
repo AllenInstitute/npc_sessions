@@ -1,0 +1,491 @@
+DRpilot_366122_20250109: skipped (invalid intervals 7, discontinuities 0)
+DRpilot_366122_20260306: 6 blocks
+DRpilot_626791_20220815: 1 blocks
+DRpilot_626791_20220816: 1 blocks
+DRpilot_626791_20220817: 1 blocks
+DRpilot_636766_20230123: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_636766_20230124: 2 blocks
+DRpilot_636766_20230125: 2 blocks
+DRpilot_636766_20230126: 2 blocks
+DRpilot_644864_20230130: 2 blocks
+DRpilot_644864_20230131: 2 blocks
+DRpilot_644864_20230201: 2 blocks
+DRpilot_644864_20230202: 1 blocks
+DRpilot_644866_20230207: 2 blocks
+DRpilot_644866_20230208: 2 blocks
+DRpilot_644866_20230209: 2 blocks
+DRpilot_644866_20230210: 2 blocks
+DRpilot_644867_20230220: 2 blocks
+DRpilot_644867_20230221: skipped (invalid intervals 7, discontinuities 0)
+DRpilot_644867_20230222: 2 blocks
+DRpilot_644867_20230223: 2 blocks
+DRpilot_649943_20230213: 2 blocks
+DRpilot_649943_20230214: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_649943_20230215: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_649943_20230216: 2 blocks
+DRpilot_660023_20230808: 6 blocks
+DRpilot_660023_20230809: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_662892_20230821: 7 blocks
+DRpilot_662892_20230822: 7 blocks
+DRpilot_662892_20230823: 7 blocks
+DRpilot_662892_20230824: 7 blocks
+DRpilot_664566_20231120: 4 blocks
+DRpilot_664566_20231121: ERROR Traceback (most recent call last):
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\phantom-flicker\survey.py", line 48, in run_session
+    blocks, matches = common.matches(folder)
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\phantom-flicker\common.py", line 53, in matches
+    blocks = list(s.vsync_times_in_blocks)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\.venv\Lib\site-packages\npc_io\cached_property.py", line 79, in __get__
+    val = self.func(instance)
+          ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sync\src\npc_sync\sync.py", line 1409, in vsync_times_in_blocks
+    if vsync_rising_edges[0] < vsync_falling_edges[0]
+       ~~~~~~~~~~~~~~~~~~^^^
+IndexError: index 0 is out of bounds for axis 0 with size 0
+
+DRpilot_664851_20231113: 7 blocks
+DRpilot_664851_20231114: 7 blocks
+DRpilot_664851_20231115: 7 blocks
+DRpilot_664851_20231116: 7 blocks
+DRpilot_666986_20230814: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_666986_20230815: 7 blocks
+DRpilot_666986_20230816: 7 blocks
+DRpilot_666986_20230817: 7 blocks
+DRpilot_667252_20230925: 7 blocks
+DRpilot_667252_20230926: 7 blocks
+DRpilot_667252_20230927: 7 blocks
+DRpilot_667252_20230928: 7 blocks
+DRpilot_668755_20230828: 7 blocks
+DRpilot_668755_20230829: 7 blocks
+DRpilot_668755_20230830: 6 blocks
+DRpilot_668755_20230831: 7 blocks
+DRpilot_674562_20231002: 6 blocks
+DRpilot_674562_20231003: 7 blocks
+DRpilot_674562_20231004: 7 blocks
+DRpilot_674562_20231005: 7 blocks
+DRpilot_676909_20231211: 8 blocks
+DRpilot_676909_20231212: 10 blocks
+DRpilot_676909_20231213: 8 blocks
+DRpilot_676909_20231214: 8 blocks
+DRpilot_681532_20231016: 7 blocks
+DRpilot_681532_20231017: 7 blocks
+DRpilot_681532_20231018: 7 blocks
+DRpilot_681532_20231019: 8 blocks
+DRpilot_686176_20231204: 5 blocks
+DRpilot_686176_20231205: 5 blocks
+DRpilot_686176_20231206: 5 blocks
+DRpilot_686176_20231207: 5 blocks
+DRpilot_686740_20231023: 7 blocks
+DRpilot_686740_20231024: 7 blocks
+DRpilot_686740_20231025: 7 blocks
+DRpilot_686740_20231026: 7 blocks
+DRpilot_690706_20231127: 7 blocks
+DRpilot_690706_20231128: 7 blocks
+DRpilot_690706_20231129: 7 blocks
+DRpilot_690706_20231130: 7 blocks
+DRpilot_699847_20240415: 8 blocks
+DRpilot_699847_20240416: 8 blocks
+DRpilot_699847_20240417: 8 blocks
+DRpilot_699847_20240418: 8 blocks
+DRpilot_702131_20240226: 6 blocks
+DRpilot_702131_20240227: 6 blocks
+DRpilot_702136_20240304: 6 blocks
+DRpilot_702136_20240305: 6 blocks
+DRpilot_702136_20240306: 6 blocks
+DRpilot_702136_20240307: 6 blocks
+DRpilot_703333_20240408: 8 blocks
+DRpilot_703333_20240409: 8 blocks
+DRpilot_703333_20240410: 8 blocks
+DRpilot_703333_20240411: 8 blocks
+DRpilot_703880_20240415: 8 blocks
+DRpilot_703880_20240416: 8 blocks
+DRpilot_703880_20240417: 8 blocks
+DRpilot_703880_20240418: skipped (invalid intervals 47, discontinuities 4)
+DRpilot_703881_20240509: 2 blocks
+DRpilot_703882_20240422: 8 blocks
+DRpilot_703882_20240423: 8 blocks
+DRpilot_703882_20240424: 8 blocks
+DRpilot_703882_20240425: 8 blocks
+DRpilot_706401_20240422: 8 blocks
+DRpilot_706401_20240423: 8 blocks
+DRpilot_706401_20240424: 8 blocks
+DRpilot_706401_20240425: 8 blocks
+DRpilot_708016_20240429: 8 blocks
+DRpilot_708016_20240430: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_708016_20240501: 8 blocks
+DRpilot_708016_20240502: 8 blocks
+DRpilot_708020_20240517: skipped (invalid intervals 89, discontinuities 2)
+DRpilot_712138_20240712: 1 blocks
+DRpilot_712141_20240605: 3 blocks
+DRpilot_712141_20240606: 3 blocks
+DRpilot_712141_20240610: 3 blocks
+DRpilot_712141_20240611: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_712141_20240612: 3 blocks
+DRpilot_712141_20240613: 3 blocks
+DRpilot_712815_20240520: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_712815_20240521: 6 blocks
+DRpilot_712815_20240522: 6 blocks
+DRpilot_712815_20240523: 6 blocks
+DRpilot_713655_20240805: 8 blocks
+DRpilot_713655_20240806: 8 blocks
+DRpilot_713655_20240807: 8 blocks
+DRpilot_713655_20240808: 8 blocks
+DRpilot_713655_20240809: 8 blocks
+DRpilot_714748_20240624: 8 blocks
+DRpilot_714748_20240625: 8 blocks
+DRpilot_714748_20240626: 8 blocks
+DRpilot_714748_20240627: 8 blocks
+DRpilot_714748_20240628: skipped (invalid intervals 137, discontinuities 6)
+DRpilot_714753_20240701: 8 blocks
+DRpilot_714753_20240702: 8 blocks
+DRpilot_714753_20240703: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_714753_20240705: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_715706_20240626: 3 blocks
+DRpilot_715706_20240627: 3 blocks
+DRpilot_715709_20240807: 1 blocks
+DRpilot_715709_20240808: skipped (invalid intervals 0, discontinuities 2)
+DRpilot_715709_20240809: 1 blocks
+DRpilot_715710_20240715: 8 blocks
+DRpilot_715710_20240716: 8 blocks
+DRpilot_715710_20240717: 8 blocks
+DRpilot_715710_20240718: 8 blocks
+DRpilot_715710_20240719: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_716718_20240730: 1 blocks
+DRpilot_716718_20240731: ERROR Traceback (most recent call last):
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\phantom-flicker\survey.py", line 48, in run_session
+    blocks, matches = common.matches(folder)
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\phantom-flicker\common.py", line 53, in matches
+    blocks = list(s.vsync_times_in_blocks)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\.venv\Lib\site-packages\npc_io\cached_property.py", line 79, in __get__
+    val = self.func(instance)
+          ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sync\src\npc_sync\sync.py", line 1425, in vsync_times_in_blocks
+    stim_running_rising_edges, stim_running_falling_edges = self.stim_running_edges
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\.venv\Lib\site-packages\npc_io\cached_property.py", line 79, in __get__
+    val = self.func(instance)
+          ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sync\src\npc_sync\sync.py", line 1271, in stim_running_edges
+    assert len(stim_running_rising_edges) == len(stim_running_falling_edges)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+DRpilot_716718_20240801: 1 blocks
+DRpilot_716718_20240802: 1 blocks
+DRpilot_718283_20240820: 1 blocks
+DRpilot_718283_20240821: 1 blocks
+DRpilot_718283_20240822: 1 blocks
+DRpilot_718283_20240823: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_721536_20240516: 1 blocks
+DRpilot_721536_20240517: 1 blocks
+DRpilot_724612_20240722: 1 blocks
+DRpilot_724612_20240724: 1 blocks
+DRpilot_724612_20240725: 1 blocks
+DRpilot_726088_20240617: 6 blocks
+DRpilot_726088_20240618: 6 blocks
+DRpilot_726088_20240620: 6 blocks
+DRpilot_726088_20240621: 6 blocks
+DRpilot_728917_20241004: 1 blocks
+DRpilot_733780_20240826: 8 blocks
+DRpilot_733780_20240827: 8 blocks
+DRpilot_733780_20240829: 8 blocks
+DRpilot_733780_20240830: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_733780_20240903: 8 blocks
+DRpilot_733780_20240904: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_733780_20240905: 8 blocks
+DRpilot_733780_20240906: 8 blocks
+DRpilot_733887_20240813: 1 blocks
+DRpilot_733887_20240814: 1 blocks
+DRpilot_733887_20240815: 1 blocks
+DRpilot_733887_20240816: 1 blocks
+DRpilot_733891_20240916: 8 blocks
+DRpilot_733891_20240917: 8 blocks
+DRpilot_733891_20240918: 8 blocks
+DRpilot_733891_20240919: 8 blocks
+DRpilot_733891_20240920: 8 blocks
+DRpilot_734897_20240618: 1 blocks
+DRpilot_734897_20240620: 1 blocks
+DRpilot_736208_20240903: 3 blocks
+DRpilot_736208_20240904: 3 blocks
+DRpilot_736208_20240905: 3 blocks
+DRpilot_736803_20240813: 1 blocks
+DRpilot_737403_20240924: 8 blocks
+DRpilot_737403_20240925: 8 blocks
+DRpilot_737403_20240926: 8 blocks
+DRpilot_737403_20240927: 8 blocks
+DRpilot_741137_20241008: 6 blocks
+DRpilot_741137_20241009: 6 blocks
+DRpilot_741137_20241010: 6 blocks
+DRpilot_741137_20241011: 6 blocks
+DRpilot_741148_20241015: 6 blocks
+DRpilot_741148_20241016: 6 blocks
+DRpilot_741148_20241017: 6 blocks
+DRpilot_741148_20241018: 6 blocks
+DRpilot_741611_20240911: 1 blocks
+DRpilot_741611_20240912: 1 blocks
+DRpilot_742903_20241021: 8 blocks
+DRpilot_742903_20241022: 8 blocks
+DRpilot_742903_20241023: 8 blocks
+DRpilot_742903_20241024: 8 blocks
+DRpilot_742903_20241025: 8 blocks
+DRpilot_743199_20241203: 6 blocks
+DRpilot_743199_20241204: 6 blocks
+DRpilot_743199_20241205: 6 blocks
+DRpilot_743199_20241206: 6 blocks
+DRpilot_744279_20250113: 8 blocks
+DRpilot_744279_20250114: 8 blocks
+DRpilot_744279_20250115: 8 blocks
+DRpilot_744279_20250116: 8 blocks
+DRpilot_744740_20241111: 6 blocks
+DRpilot_744740_20241112: 6 blocks
+DRpilot_744740_20241113: 6 blocks
+DRpilot_744740_20241114: 6 blocks
+DRpilot_746439_20250127: 6 blocks
+DRpilot_746439_20250128: 6 blocks
+DRpilot_746439_20250129: 6 blocks
+DRpilot_746439_20250130: 6 blocks
+DRpilot_746439_20250131: 6 blocks
+DRpilot_748098_20241029: 1 blocks
+DRpilot_750329_20241125: 6 blocks
+DRpilot_750329_20241126: 6 blocks
+DRpilot_750329_20241127: 6 blocks
+DRpilot_751595_20241120: 1 blocks
+DRpilot_754852_20250210: 2 blocks
+DRpilot_754852_20250211: 2 blocks
+DRpilot_754852_20250212: 2 blocks
+DRpilot_754852_20250213: 2 blocks
+DRpilot_759434_20250203: 6 blocks
+DRpilot_759434_20250204: 6 blocks
+DRpilot_759434_20250205: 6 blocks
+DRpilot_759434_20250206: 6 blocks
+DRpilot_759434_20250207: 6 blocks
+DRpilot_761583_20241216: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_761583_20241217: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_761583_20241218: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_761583_20241219: 6 blocks
+DRpilot_761583_20241220: 6 blocks
+DRpilot_761584_20241030: 1 blocks
+DRpilot_762124_20241202: 1 blocks
+DRpilot_762526_20250318: 2 blocks
+DRpilot_762526_20250319: 2 blocks
+DRpilot_762526_20250320: 2 blocks
+DRpilot_762526_20250321: 2 blocks
+DRpilot_764725_20241031: 3 blocks
+DRpilot_767172_20241106: 1 blocks
+DRpilot_772655_20250306: 0 blocks
+DRpilot_772656_20250423: 0 blocks
+DRpilot_772656_20250425: ERROR Traceback (most recent call last):
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\phantom-flicker\survey.py", line 48, in run_session
+    blocks, matches = common.matches(folder)
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\phantom-flicker\common.py", line 53, in matches
+    blocks = list(s.vsync_times_in_blocks)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\.venv\Lib\site-packages\npc_io\cached_property.py", line 79, in __get__
+    val = self.func(instance)
+          ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sync\src\npc_sync\sync.py", line 1409, in vsync_times_in_blocks
+    if vsync_rising_edges[0] < vsync_falling_edges[0]
+       ~~~~~~~~~~~~~~~~~~^^^
+IndexError: index 0 is out of bounds for axis 0 with size 0
+
+DRpilot_773262_20250327: 1 blocks
+DRpilot_780329_20250319: 1 blocks
+DRpilot_793277_20250612: 2 blocks
+DRpilot_795555_20250821: 6 blocks
+DRpilot_795555_20250822: 6 blocks
+DRpilot_795555_20250825: 6 blocks
+DRpilot_795555_20250826: 6 blocks
+DRpilot_796012_20250710: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_796012_20250711: 6 blocks
+DRpilot_796012_20250714: 6 blocks
+DRpilot_796012_20250715: 6 blocks
+DRpilot_796847_20250729: 6 blocks
+DRpilot_796847_20250730: 6 blocks
+DRpilot_796847_20250731: 6 blocks
+DRpilot_796847_20250801: 6 blocks
+DRpilot_796848_20250714: 6 blocks
+DRpilot_796848_20250715: 6 blocks
+DRpilot_796848_20250716: 6 blocks
+DRpilot_796848_20250717: 6 blocks
+DRpilot_798632_20250829: skipped (invalid intervals 2, discontinuities 0)
+DRpilot_798632_20250902: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_798632_20250903: 6 blocks
+DRpilot_798632_20250904: 6 blocks
+DRpilot_801857_20250925: 2 blocks
+DRpilot_802590_20250822: 2 blocks
+DRpilot_805142_20250912: 1 blocks
+DRpilot_805752_20251020: 6 blocks
+DRpilot_805752_20251021: 6 blocks
+DRpilot_805752_20251022: 6 blocks
+DRpilot_805752_20251023: 6 blocks
+DRpilot_805752_20251024: 6 blocks
+DRpilot_807082_20250929: 6 blocks
+DRpilot_807082_20250930: 6 blocks
+DRpilot_807082_20251001: 6 blocks
+DRpilot_807082_20251002: 6 blocks
+DRpilot_810752_20251007: 6 blocks
+DRpilot_810752_20251008: 6 blocks
+DRpilot_810752_20251009: 6 blocks
+DRpilot_810752_20251010: 6 blocks
+DRpilot_810754_20251027: 6 blocks
+DRpilot_810754_20251028: 6 blocks
+DRpilot_810754_20251029: 3 blocks
+DRpilot_810754_20251030: 6 blocks
+DRpilot_810754_20251031: 6 blocks
+DRpilot_812113_20251113: 2 blocks
+DRpilot_812113_20251114: 1 blocks
+DRpilot_812113_20251117: 1 blocks
+DRpilot_812113_20251118: 1 blocks
+DRpilot_813586_20251202: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_813586_20251203: 6 blocks
+DRpilot_813586_20251204: 6 blocks
+DRpilot_813586_20251205: 6 blocks
+DRpilot_814666_20251106: 6 blocks
+DRpilot_814666_20251107: 6 blocks
+DRpilot_814666_20251110: 6 blocks
+DRpilot_814666_20251111: 6 blocks
+DRpilot_814669_20251110: 6 blocks
+DRpilot_814669_20251111: 6 blocks
+DRpilot_814669_20251112: 6 blocks
+DRpilot_814669_20251113: 6 blocks
+DRpilot_815144_20251119: 1 blocks
+DRpilot_815144_20251120: 1 blocks
+DRpilot_815144_20251121: 1 blocks
+DRpilot_818720_20251219: 6 blocks
+DRpilot_818720_20251222: 6 blocks
+DRpilot_822061_20260112: 6 blocks
+DRpilot_822061_20260113: 6 blocks
+DRpilot_822061_20260114: 6 blocks
+DRpilot_822061_20260115: 6 blocks
+DRpilot_822061_20260116: 6 blocks
+DRpilot_831994_20251215: 6 blocks
+DRpilot_831994_20251216: 6 blocks
+DRpilot_831994_20251217: 6 blocks
+DRpilot_831994_20251218: 6 blocks
+DRpilot_834408_20251217: 6 blocks
+DRpilot_834408_20251218: 6 blocks
+DRpilot_834408_20251219: 6 blocks
+DRpilot_834408_20251222: 6 blocks
+DRpilot_835598_20260223: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_835598_20260224: 6 blocks
+DRpilot_835598_20260225: 6 blocks
+DRpilot_835598_20260226: 6 blocks
+DRpilot_835598_20260227: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_836629_20260428: 6 blocks
+DRpilot_836629_20260429: 6 blocks
+DRpilot_836629_20260430: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_836629_20260501: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_836726_20260211: 6 blocks
+DRpilot_836726_20260212: 6 blocks
+DRpilot_836726_20260213: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_836729_20260216: 6 blocks
+DRpilot_836729_20260217: 6 blocks
+DRpilot_836729_20260218: 6 blocks
+DRpilot_837230_20260417: 6 blocks
+DRpilot_837230_20260420: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_837230_20260421: 6 blocks
+DRpilot_837230_20260422: 6 blocks
+DRpilot_837959_20260330: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_837959_20260331: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_837959_20260401: 6 blocks
+DRpilot_837959_20260402: skipped (invalid intervals 2, discontinuities 0)
+DRpilot_837959_20260403: 6 blocks
+DRpilot_839146_20260512: 6 blocks
+DRpilot_839146_20260513: 6 blocks
+DRpilot_839146_20260514: 6 blocks
+DRpilot_839146_20260515: 6 blocks
+DRpilot_839146_20260518: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_840160_20260428: skipped (invalid intervals 0, discontinuities 1)
+DRpilot_840160_20260429: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_840160_20260430: 6 blocks
+DRpilot_840160_20260501: 6 blocks
+DRpilot_840160_20260504: 6 blocks
+DRpilot_841308_20260505: 6 blocks
+DRpilot_841308_20260506: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_841308_20260507: 6 blocks
+DRpilot_841308_20260508: 6 blocks
+DRpilot_841308_20260511: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_844567_20260408: 6 blocks
+DRpilot_847958_20260413: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_847958_20260414: 6 blocks
+DRpilot_847958_20260415: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_847958_20260416: 6 blocks
+DRpilot_847958_20260417: 6 blocks
+DRpilot_850215_20260318: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_850215_20260319: 6 blocks
+DRpilot_850215_20260320: 6 blocks
+DRpilot_850215_20260323: 6 blocks
+DRpilot_850217_20260402: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_850217_20260403: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_850217_20260406: 6 blocks
+DRpilot_852252_20260624: 6 blocks
+DRpilot_852252_20260625: 6 blocks
+DRpilot_852252_20260626: 6 blocks
+DRpilot_852255_20260616: 6 blocks
+DRpilot_852255_20260617: 6 blocks
+DRpilot_852255_20260618: 6 blocks
+DRpilot_852255_20260622: 6 blocks
+DRpilot_854390_20260422: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_854390_20260423: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_854390_20260424: 6 blocks
+DRpilot_854390_20260427: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_856845_20260527: 6 blocks
+DRpilot_856845_20260528: 4 blocks
+DRpilot_856845_20260529: 6 blocks
+DRpilot_856845_20260601: 6 blocks
+DRpilot_856847_20260602: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_856847_20260603: 6 blocks
+DRpilot_856847_20260604: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_856847_20260605: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_857681_20260813: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_857681_20260814: 6 blocks
+DRpilot_857681_20260817: 6 blocks
+DRpilot_857681_20260818: 6 blocks
+DRpilot_858182_20260925: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_858182_20260928: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_858182_20260929: skipped (invalid intervals 2, discontinuities 0)
+DRpilot_858182_20260930: 6 blocks
+DRpilot_859582_20260629: 6 blocks
+DRpilot_859582_20260630: 6 blocks
+DRpilot_859582_20260701: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_859582_20260702: 6 blocks
+DRpilot_859583_20260514: 6 blocks
+DRpilot_859583_20260515: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_859583_20260519: 6 blocks
+DRpilot_859583_20260520: 6 blocks
+DRpilot_859584_20260706: 6 blocks
+DRpilot_859584_20260707: 6 blocks
+DRpilot_859584_20260708: 6 blocks
+DRpilot_859584_20260709: 6 blocks
+DRpilot_862025_20260804: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_862025_20260805: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_862025_20260806: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_862027_20260915: 6 blocks
+DRpilot_862027_20260916: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_862027_20260917: 6 blocks
+DRpilot_862027_20260918: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_865817_20261020: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_865817_20261021: 6 blocks
+DRpilot_865817_20261022: 6 blocks
+DRpilot_867000_20261014: 1 blocks
+DRpilot_867000_20261015: 1 blocks
+DRpilot_872697_20260831: 6 blocks
+DRpilot_872697_20260901: 6 blocks
+DRpilot_872697_20260902: 6 blocks
+DRpilot_872697_20260903: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_872974_20261109: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_872974_20261110: skipped (invalid intervals 1, discontinuities 0)
+DRpilot_872974_20261112: 6 blocks
+DRpilot_872974_20261113: 6 blocks
+DRpilot_873603_20260914: 3 blocks
+DRpilot_873605_20260923: 3 blocks
+DRpilot_873605_20260924: 3 blocks
+DRpilot_878901_20261006: 3 blocks
+DRpilot_878903_20261028: 1 blocks
+DRpilot_878903_20261029: 3 blocks
+done: 442 sessions in 452 s

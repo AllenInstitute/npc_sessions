@@ -1,0 +1,210 @@
+============================== population
+sync files: 2971 (2945 share, 26 npc_lims-only on S3); files with errors: 5
+files with invalid intervals: 152 (5.1%); with timebase discontinuities: 11; both: 7
+files with >=20 invalid intervals: 9
+npc_lims-tracked files: 465; of which with invalid intervals: 58, discontinuities: 5
+stim-without-block rows dropped (stim starts outside this sync file's recording): 62
+
+files with errors:
+                      session                                                                               error
+34    DRpilot_664566_20231121  vsync_times_in_blocks: IndexError: index 0 is out of bounds for axis 0 with size 0
+356   DRpilot_716718_20240731                                             vsync_times_in_blocks: AssertionError: 
+1079  DRpilot_772656_20250425  vsync_times_in_blocks: IndexError: index 0 is out of bounds for axis 0 with size 0
+2354  DRpilot_848820_20260713  vsync_times_in_blocks: IndexError: index 0 is out of bounds for axis 0 with size 0
+2384  DRpilot_850215_20260305  vsync_times_in_blocks: IndexError: index 0 is out of bounds for axis 0 with size 0
+
+============================== block classes
+cls
+clean                  5795
+replay-reconcilable     133
+no-stim                  85
+displaced                16
+stim-without-block       14
+unexplained               9
+drop                      4
+truncated                 1
+
+matched blocks: 5958; count != stim frames: 100; unclassified: 0
+cls
+replay-reconcilable    77
+displaced              12
+unexplained             6
+drop                    4
+truncated               1
+
+blocks overlapping invalid intervals: 158 (count == stim frames despite copies: 62)
+cls
+replay-reconcilable    133
+displaced               15
+unexplained              9
+no-stim                  1
+
+npc_lims-tracked sessions only:
+cls
+clean                  2291
+replay-reconcilable      54
+no-stim                  33
+stim-without-block       10
+displaced                 9
+drop                      2
+truncated                 1
+
+----- unexplained (9)
+                      session  block_index                        stim   n_vsync    n_stim  diff  n_overlap  n_disc_in_block  n_invalid  balance  max_abs_resid_ms
+1090  DRpilot_708016_20240426            2  DynamicRouting1_708016_202  217287.0  217287.0   0.0       30.0              0.0         30      2.0           16.6839
+1142  DRpilot_708020_20240516            0  SpontaneousRewards_708020_   36000.0   36000.0   0.0        4.0              0.0         41      0.0            0.8390
+1143  DRpilot_708020_20240516            1  DynamicRouting1_708020_202  217017.0  217013.0   4.0       37.0              0.0         41      2.0            1.3439
+2281  DRpilot_746439_20250103            2  DynamicRouting1_746439_202  216554.0  216554.0   0.0        5.0              0.0          5      0.0            1.2689
+3709  DRpilot_813586_20251117            0  RFMapping_813586_20251117_   51325.0   51336.0 -11.0        2.0              0.0          6      2.0            3.3534
+4187  DRpilot_833388_20260420            0  DynamicRouting1_833388_202  217272.0  217271.0   1.0        1.0              0.0          1     -1.0            1.6371
+4571  DRpilot_839144_20260416            0  DynamicRouting1_839144_202  218694.0  218692.0   2.0        4.0              0.0          4     -1.0            3.6731
+4594  DRpilot_839144_20260429            0  DynamicRouting1_839144_202  217776.0  217774.0   2.0        5.0              0.0          5      0.0            0.8846
+6006  DRpilot_872974_20261105            2  DynamicRouting1_872974_202  217290.0  217292.0  -2.0       11.0              0.0         11      2.0            0.8567
+
+----- truncated (1)
+                     session  block_index                        stim  n_vsync    n_stim      diff  n_overlap  n_disc_in_block  n_invalid  balance  max_abs_resid_ms
+101  DRpilot_660023_20230808            8  DynamicRouting1_660023_202  58217.0  217078.0 -158861.0        0.0              0.0          0      NaN               NaN
+
+----- drop (4)
+                      session  block_index                        stim   n_vsync    n_stim   diff  n_overlap  n_disc_in_block  n_invalid  balance  max_abs_resid_ms
+1387  DRpilot_715709_20240808            0  DynamicRouting1_715709_202  217171.0  217320.0 -149.0        0.0              2.0          0      NaN               NaN
+1483  DRpilot_717473_20240916            0  RFMapping_717473_20240916_   51248.0   51336.0  -88.0        0.0              1.0          0      NaN               NaN
+4130  DRpilot_832032_20260223            0  DynamicRouting1_832032_202  216859.0  216948.0  -89.0        0.0              1.0          0      NaN               NaN
+4658  DRpilot_840160_20260428            3  DynamicRouting1_840160_202  217104.0  217162.0  -58.0        0.0              1.0          0      NaN               NaN
+                      session      drop_t  drop_n_missing  drop_sec  drop_cost_ms notes
+1387  DRpilot_715709_20240808   111.50889           149.0       2.5      0.070696    []
+1483  DRpilot_717473_20240916   782.50349            88.0       1.5      0.057765    []
+4130  DRpilot_832032_20260223  3598.00308            89.0       1.5      0.066765    []
+4658  DRpilot_840160_20260428  2472.01090            58.0       1.0      0.058622    []
+
+----- displaced (16)
+                      session  block_index                        stim   n_vsync    n_stim  diff  n_overlap  n_disc_in_block  n_invalid  balance  max_abs_resid_ms
+909   DRpilot_702131_20240223            0  RFMapping_702131_20240223_   51333.0   51336.0  -3.0       18.0              2.0         73     -2.0            2.5296
+910   DRpilot_702131_20240223            1  SpontaneousRewards_702131_   36004.0   36000.0   4.0        5.0              0.0         73     -4.0            0.4439
+911   DRpilot_702131_20240223            2  DynamicRouting1_702131_202  217642.0  217622.0  20.0       50.0              6.0         73    -18.0           16.6400
+1011  DRpilot_703880_20240418            0  RFMapping_703880_20240418_   51336.0   51336.0   0.0        0.0              1.0         47      NaN               NaN
+1012  DRpilot_703880_20240418            1  OptoTagging_703880_2024041   18976.0   18955.0  21.0        1.0              2.0         47    -30.0            0.9069
+1013  DRpilot_703880_20240418            2  Spontaneous_703880_2024041   36006.0   36000.0   6.0       15.0              0.0         47     -3.0            1.2476
+1014  DRpilot_703880_20240418            3  SpontaneousRewards_703880_   36001.0   36000.0   1.0       12.0              2.0         47     -1.0            1.4074
+1015  DRpilot_703880_20240418            4  DynamicRouting1_703880_202  216923.0  216923.0   0.0       19.0              0.0         47      0.0            1.7067
+1059  DRpilot_703880_20240412            1  SpontaneousRewards_703880_   35919.0   36000.0 -81.0       27.0              6.0        122     85.0           16.3423
+1060  DRpilot_703880_20240412            2  DynamicRouting1_703880_202  217067.0  217029.0  38.0       90.0              2.0        122    -24.0           16.2930
+1182  DRpilot_712139_20240510            2  DynamicRouting1_712139_202  217147.0  217142.0   5.0       39.0              2.0         39     -7.0            1.6677
+1219  DRpilot_708020_20240517            2  DynamicRouting1_708020_202  216723.0  216710.0  13.0       86.0              2.0         89     -2.0            3.3274
+1527  DRpilot_714748_20240628            2  Spontaneous_714748_2024062   36000.0   36000.0   0.0        2.0              0.0        137      0.0            1.2260
+1529  DRpilot_714748_20240628            4  DynamicRouting1_714748_202  217123.0  217089.0  34.0      120.0              6.0        137    -20.0           14.0623
+1530  DRpilot_714748_20240628            5  SpontaneousRewards_714748_   36000.0   36000.0   0.0       14.0              0.0        137      0.0            3.9818
+5469  DRpilot_859582_20260612            2  DynamicRouting1_859582_202  216020.0  216000.0  20.0       27.0              2.0         27     -8.0            3.3156
+
+============================== stim-file events inside invalid spans (blocks with a solved reconciliation)
+events lost (sum over blocks): {'lickFrames': 181, 'rewardFrames': 6, 'manualRewardFrames': 0, 'stimStartFrame': 56, 'trialStimStartFrame': 25, 'trialOptoOnsetFrame': 0}
+blocks where frame times unknown (solve failed), by key: {'lickFrames': 18, 'rewardFrames': 18, 'manualRewardFrames': 18, 'stimStartFrame': 2, 'trialStimStartFrame': 11, 'trialOptoOnsetFrame': 12}
+  in replay-reconcilable blocks: {'lickFrames': 175, 'rewardFrames': 6, 'manualRewardFrames': 0, 'stimStartFrame': 56, 'trialStimStartFrame': 21, 'trialOptoOnsetFrame': 0}
+
+============================== gate: vsync per-gap anchor residual
+<20 runs, no discontinuity   n= 183  |res| ms quantiles {0.5: 0.027, 0.9: 0.356, 0.95: 0.425, 0.99: 3.397, 1.0: 3.673}  fit res = -0.016 ms/s x span -0.069
+>=20 runs                    n=  71  |res| ms quantiles {0.5: 0.403, 0.9: 0.823, 0.95: 1.031, 0.99: 5.946, 1.0: 16.684}  fit res = -0.541 ms/s x span -0.228
+discontinuities              n= 525  |res| ms quantiles {0.5: 0.421, 0.9: 2.097, 0.95: 3.091, 0.99: 6.961, 1.0: 16.64}  fit res = -0.576 ms/s x span -0.145
+
+|residual| histogram, <20 runs & no discontinuity:
+residual_ms
+(0.0, 0.05]    144
+(0.05, 0.1]     15
+(0.1, 0.15]      1
+(0.15, 0.2]      0
+(0.2, 0.3]       3
+(0.3, 0.4]       8
+(0.4, 0.5]       5
+(0.5, 1.0]       2
+(1.0, 5.0]       5
+(5.0, 20.0]      0
+
+gaps with 0.1 < |residual| <= 0.5 ms (pass the current gate):
+                     session  block_index                  cls  n_invalid  span_s  residual_ms  second_best_ms  balance
+2    DRpilot_644867_20230221            0  replay-reconcilable          7     1.5       0.3608         16.3621      0.0
+5    DRpilot_644867_20230221            0  replay-reconcilable          7     1.0       0.4345         16.2441      0.0
+7    DRpilot_644867_20230221            0  replay-reconcilable          7     0.5       0.2105         16.4545      0.0
+14   DRpilot_667252_20230905            2  replay-reconcilable          1     0.5       0.1256         16.5589      0.0
+635  DRpilot_798632_20250829            3  replay-reconcilable          2     0.5       0.3641         16.3091      0.0
+636  DRpilot_798632_20250829            3  replay-reconcilable          2     0.5      -0.4399         16.2461      0.0
+651  DRpilot_833385_20260317            0  replay-reconcilable          2     0.5       0.4174         16.2646      0.0
+652  DRpilot_833385_20260317            0  replay-reconcilable          2     0.5      -0.3880         16.2911      0.0
+669  DRpilot_839144_20260416            0          unexplained          4     0.5       0.2307         15.8097     -1.0
+670  DRpilot_839144_20260416            0          unexplained          4     0.5       0.2830         16.4289     -1.0
+666  DRpilot_839144_20260417            0  replay-reconcilable          1     0.5      -0.3947         16.2926      0.0
+672  DRpilot_839144_20260429            0          unexplained          5     1.0      -0.3811         16.2979      0.0
+674  DRpilot_839144_20260429            0          unexplained          5     0.5      -0.4230         16.2332      0.0
+766  DRpilot_872974_20261105            2          unexplained         11     0.5      -0.3679         16.3218      2.0
+767  DRpilot_872974_20261105            2          unexplained         11     0.5      -0.4257         16.2335      2.0
+774  DRpilot_872974_20261105            2          unexplained         11     0.5      -0.3382         16.3365      2.0
+776  DRpilot_872974_20261105            2          unexplained         11     0.5      -0.3926         16.2761      2.0
+
+second-best margin (gaps within the current gate): min 15.6 ms
+
+with a 0.2 ms gate: 4 replay-reconcilable blocks become unexplained:
+                      session  block_index                                    stim  n_invalid  max_abs_resid_ms
+82    DRpilot_644867_20230221            0        RFMapping_644867_20230221_121904          7            0.4345
+3260  DRpilot_798632_20250829            3  DynamicRouting1_798632_20250829_111358          2            0.4399
+4168  DRpilot_833385_20260317            0  DynamicRouting1_833385_20260317_115301          2            0.4174
+4570  DRpilot_839144_20260417            0  DynamicRouting1_839144_20260417_154953          1            0.3947
+
+============================== gate: camera integer-period residual
+status                                inactive  reconstructed
+population                 line_type                         
+<20 runs, no discontinuity exposing         24           1274
+                           readout          16           1142
+>=20 runs                  exposing          0            426
+                           readout           0            426
+discontinuities            exposing          0           3204
+                           readout           0           3204
+<20 runs, no discontinuity   exposing  n= 1274 |res| ms {0.5: 0.004, 0.9: 0.0162, 0.95: 0.0212, 0.99: 0.0542, 1.0: 0.1507}; frac p99 0.0033 max 0.0090; in-segment fit residual max p99 0.073 ms
+<20 runs, no discontinuity   readout   n= 1142 |res| ms {0.5: 0.0042, 0.9: 0.0175, 0.95: 0.024, 0.99: 0.0787, 1.0: 0.7721}; frac p99 0.0047 max 0.0463; in-segment fit residual max p99 0.334 ms
+>=20 runs                    exposing  n=  426 |res| ms {0.5: 0.0081, 0.9: 0.0273, 0.95: 0.0364, 0.99: 0.0513, 1.0: 0.064}; frac p99 0.0031 max 0.0038; in-segment fit residual max p99 0.045 ms
+>=20 runs                    readout   n=  426 |res| ms {0.5: 0.0104, 0.9: 0.0272, 0.95: 0.0357, 0.99: 0.0583, 1.0: 0.064}; frac p99 0.0035 max 0.0038; in-segment fit residual max p99 0.045 ms
+discontinuities              exposing  n= 3204 |res| ms {0.5: 0.015, 0.9: 0.046, 0.95: 0.0746, 0.99: 0.1779, 1.0: 1.2414}; frac p99 0.0107 max 0.0746; in-segment fit residual max p99 0.069 ms
+discontinuities              readout   n= 3204 |res| ms {0.5: 0.0152, 0.9: 0.045, 0.95: 0.0698, 0.99: 0.1558, 1.0: 0.3649}; frac p99 0.0094 max 0.0219; in-segment fit residual max p99 0.066 ms
+
+|residual| histogram (ms), exposing, <20 runs & no discontinuity:
+residual_sec
+(0.0, 0.01]      1044
+(0.01, 0.02]      154
+(0.02, 0.032]      49
+(0.032, 0.05]      11
+(0.05, 0.1]        10
+(0.1, 0.2]          6
+(0.2, 0.5]          0
+(0.5, 5.0]          0
+readout:
+residual_sec
+(0.0, 0.01]      911
+(0.01, 0.02]     151
+(0.02, 0.032]     42
+(0.032, 0.05]     13
+(0.05, 0.1]       15
+(0.1, 0.2]         7
+(0.2, 0.5]         1
+(0.5, 5.0]         2
+
+failed camera spans by reason:
+Series([], )
+
+============================== gate: photodiode prediction (replay-reconcilable blocks)
+status
+reconstructed    95
+n=95; baseline error ms quantiles {0.5: 0.315, 0.9: 0.654, 0.95: 0.824, 0.99: 3.434, 1.0: 34.197}
+after-span error ms quantiles {0.5: 0.24, 0.9: 0.834, 0.95: 1.813, 0.99: 7.863, 1.0: 16.995}
+(after - baseline) ms quantiles {0.5: 0.0, 0.9: 0.39, 0.95: 1.535, 0.99: 7.368, 1.0: 16.575}
+polarity errors after span: 0; gate failures: 9
+                      session  block_index  baseline_error_sec  after_error_sec                                                                                  failures
+7802  DRpilot_798632_20250829          3.0            0.000420         0.016995  [predicted edges after the span are off by 17.00 ms (baseline 0.42 ms + 0.5 ms allowed)]
+7828  DRpilot_802592_20250923          0.0            0.000080         0.002430   [predicted edges after the span are off by 2.43 ms (baseline 0.08 ms + 0.5 ms allowed)]
+7881  DRpilot_813586_20251117          1.0            0.000395         0.004505   [predicted edges after the span are off by 4.50 ms (baseline 0.40 ms + 0.5 ms allowed)]
+7969  DRpilot_831994_20251210          0.0            0.000350         0.000920   [predicted edges after the span are off by 0.92 ms (baseline 0.35 ms + 0.5 ms allowed)]
+8167  DRpilot_837959_20260331          4.0            0.000365         0.001790   [predicted edges after the span are off by 1.79 ms (baseline 0.36 ms + 0.5 ms allowed)]
+8885  DRpilot_859582_20260622          0.0            0.000075         0.001865   [predicted edges after the span are off by 1.87 ms (baseline 0.07 ms + 0.5 ms allowed)]
+9411  DRpilot_864753_20260721          0.0            0.000500         0.007280   [predicted edges after the span are off by 7.28 ms (baseline 0.50 ms + 0.5 ms allowed)]
+9546  DRpilot_872697_20260828          2.0            0.000100         0.000840   [predicted edges after the span are off by 0.84 ms (baseline 0.10 ms + 0.5 ms allowed)]
+9591  DRpilot_872974_20261109          1.0            0.000430         0.001735   [predicted edges after the span are off by 1.74 ms (baseline 0.43 ms + 0.5 ms allowed)]
+failed: Series([], )
+
+wrote manifest.csv, gap_residuals.csv, gates.json

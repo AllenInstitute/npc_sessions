@@ -1,0 +1,26 @@
+survey file: C:\Users\ben.hardcastle\github\npc_sync\sync_replay_issues.csv
+files scanned: 2916 | status: {'ok': 2916}
+roots: {'Task 2 Pilot': 2916}
+files with >=1 replay run: 148
+files by year (all): {'2022': 3, '2023': 159, '2024': 586, '2025': 1109, '2026': 1059}
+files by year (replay): {'2023': 20, '2024': 24, '2025': 29, '2026': 75}
+sync versions (replay): {'4.3.2+g3cb00d4.b156438': 119, '4.2.1+g3ef53ff.b129958': 16, '4.3.1+gf7d54d5.b155115': 8, '4.3.0+g1eabc73.b149408': 5}
+sync versions (all): {'4.3.2+g3cb00d4.b156438': 2624, '4.3.1+gf7d54d5.b155115': 101, '4.2.1+g3ef53ff.b129958': 89, '4.3.0+g1eabc73.b149408': 88, '4.3.2.dev1+ga0da1e6.b156008': 11, '3.0.1+gf8a2da6.b86425': 3}
+replay windows: 783 | during stim: 771 | not during stim: 12 | unknown: 0
+window duration incl. genuine last chunk (s): value counts: {1.0: 495, 1.5: 139, 2.0: 71, 2.5: 35, 3.0: 13, 3.5: 7, 4.0: 8, 4.5: 6, 5.0: 1, 6.5: 3, 7.0: 1, 7.5: 2, 8.5: 1, 10.0: 1}
+window duration quantiles [50,90,99,100]% (s): [1.0, 2.0, 5.27, 10.0]
+runs per affected file: median 1.0 max 137
+files with >5 runs:
+                 folder  n_replay_runs  replayed_s                version
+DRpilot_714748_20240628            137       134.0 4.3.2+g3cb00d4.b156438
+DRpilot_703880_20240412            120        98.0 4.3.1+gf7d54d5.b155115
+DRpilot_708020_20240517             89        70.0 4.3.1+gf7d54d5.b155115
+DRpilot_702131_20240223             72        60.0 4.3.0+g1eabc73.b149408
+DRpilot_703880_20240418             47        29.0 4.3.1+gf7d54d5.b155115
+DRpilot_708020_20240516             41        26.5 4.3.1+gf7d54d5.b155115
+DRpilot_712139_20240510             39        26.5 4.3.1+gf7d54d5.b155115
+DRpilot_708016_20240426             29        16.0 4.3.1+gf7d54d5.b155115
+DRpilot_859582_20260612             27        27.0 4.3.2+g3cb00d4.b156438
+DRpilot_366122_20250109              7         4.5 4.3.2+g3cb00d4.b156438
+DRpilot_644867_20230221              7         8.5 4.2.1+g3ef53ff.b129958
+DRpilot_813586_20251117              6         9.0 4.3.2+g3cb00d4.b156438

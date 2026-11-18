@@ -1,0 +1,28 @@
+
+===== DRpilot_714748_20240628 (3 s): invalid_intervals=137 (134.0 s)
+  barcodes: n=246, median interval 30.9659 s; |dev|>10 ms: 19 (19 within 35 s of an invalid interval, 0 not); examples (t, dev ms): [(3553.0, -1000.0), (3583.0, 1000.0), (3615.0, -1500.0), (3644.4, 1500.0), (5318.1, -1500.0), (5347.6, 1500.0), (5442.0, -500.0), (5472.4, 500.0)]
+  task block 4: raw vsync-stim diff=34, gaps=120, balance=-20; per-gap residual ms: median=0.785 max=14.062 n>0.5ms=65 n>3ms=23; min second-best=8.5 ms
+
+===== DRpilot_703880_20240418 (3 s): invalid_intervals=47 (29.0 s)
+  barcodes: n=249, median interval 30.9657 s; |dev|>10 ms: 8 (8 within 35 s of an invalid interval, 0 not); examples (t, dev ms): [(896.5, -1000.1), (926.5, 999.9), (1980.3, -1500.0), (2009.8, 1500.0), (3188.0, -1500.0), (3217.5, 1500.0), (3249.9, -1000.0), (3279.9, 1000.0)]
+  task block 4: raw vsync-stim diff=0, gaps=19, balance=0; per-gap residual ms: median=0.388 max=1.707 n>0.5ms=1 n>3ms=0; min second-best=15.0 ms
+
+===== DRpilot_708016_20240426 (2 s): invalid_intervals=30 (16.5 s)
+  barcodes: n=167, median interval 30.9655 s; |dev|>10 ms: 4 (4 within 35 s of an invalid interval, 0 not); examples (t, dev ms): [(3559.0, -500.0), (3589.5, 500.0), (3651.9, -999.9), (3681.9, 1000.0)]
+  task block 2: raw vsync-stim diff=0, gaps=30, balance=2; per-gap residual ms: median=0.419 max=16.684 n>0.5ms=4 n>3ms=2; min second-best=9.4 ms
+
+===== DRpilot_859582_20260612 (1 s): invalid_intervals=27 (27.0 s)
+  barcodes: n=166, median interval 30.9654 s; |dev|>10 ms: 4 (4 within 35 s of an invalid interval, 0 not); examples (t, dev ms): [(4582.0, -2000.0), (4611.0, 2000.1), (4953.6, -1000.0), (5014.5, 1000.0)]
+  task block 2: raw vsync-stim diff=20, gaps=27, balance=-8; per-gap residual ms: median=0.457 max=3.316 n>0.5ms=12 n>3ms=1; min second-best=13.4 ms
+
+===== DRpilot_746439_20250103 (2 s): invalid_intervals=5 (7.0 s)
+  barcodes: n=166, median interval 30.9656 s; |dev|>10 ms: 0 (0 within 35 s of an invalid interval, 0 not); examples (t, dev ms): []
+  task block 2: raw vsync-stim diff=0, gaps=5, balance=0; per-gap residual ms: median=0.012 max=1.269 n>0.5ms=1 n>3ms=0; min second-best=15.4 ms
+
+===== DRpilot_813586_20251117 (2 s): invalid_intervals=6 (9.0 s)
+  barcodes: n=166, median interval 30.9655 s; |dev|>10 ms: 3 (3 within 35 s of an invalid interval, 0 not); examples (t, dev ms): [(781.6, 30965.4), (936.4, 649.3), (968.0, -649.4)]
+  task block 2: raw vsync-stim diff=0, gaps=0, balance=0; no gaps
+
+===== DRpilot_836629_20260430 (1 s): invalid_intervals=1 (9.5 s)
+  barcodes: n=227, median interval 30.9658 s; |dev|>10 ms: 0 (0 within 35 s of an invalid interval, 0 not); examples (t, dev ms): []
+  task block 3: raw vsync-stim diff=5, gaps=1, balance=0; per-gap residual ms: median=0.036 max=0.036 n>0.5ms=0 n>3ms=0; min second-best=16.6 ms

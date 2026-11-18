@@ -1,0 +1,142 @@
+npc_sessions C:\Users\ben.hardcastle\github\npc_sessions\src\npc_sessions\__init__.py | npc_sync C:\Users\ben.hardcastle\github\npc_sync\src\npc_sync\__init__.py
+
+===== 839146_2026-05-18
+  C1 PASS: patch: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 0, 'unknown': 1}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  C1 PASS: edge queries on all 32 bits: errors []
+   block_index                                       stim  n_stim_frames  n_vsyncs_recorded   status display_time_source  n_interpolated_frames anchor_residuals_ms reason
+0            0           RFMapping_839146_20260518_102707          51336              51336    clean          photodiode                      0                  []       
+1            1         Spontaneous_839146_20260518_104149          36000              36000    clean          photodiode                      0                  []       
+2            2  SpontaneousRewards_839146_20260518_105205          36000              36000    clean          photodiode                      0                  []       
+3            3     DynamicRouting1_839146_20260518_110220         216992             216997  patched          photodiode                    421           [-0.0185]       
+4            4  SpontaneousRewards_839146_20260518_120323          36000              36000    clean          photodiode                      0                  []       
+5            5         Spontaneous_839146_20260518_121338          36000              36000    clean          photodiode                      0                  []       
+  C2 PASS: block 0 (RFMapping_839146_20260518_102707): clean 
+  C2 PASS: block 1 (Spontaneous_839146_20260518_104149): clean 
+  C2 PASS: block 2 (SpontaneousRewards_839146_20260518_105205): clean 
+  C2 PASS: block 3 (DynamicRouting1_839146_20260518_110220) overlapping replay: patched, photodiode, 421 interpolated
+  C2 PASS: block 4 (SpontaneousRewards_839146_20260518_120323): clean 
+  C2 PASS: block 5 (Spontaneous_839146_20260518_121338): clean 
+    start_time  stop_time                                             reason
+id                                                                          
+0   5621.99999     5629.0  replayed sync data (copied acquisition buffers...
+  C3 PASS: invalid_times covers 5622.000-5629.000
+  C4 PASS: 546 trials, overlapping invalid_times: 0; timing_source: {'measured': 546}
+  C5 PASS: licks: {'sync': 3594, 'stim_frame': 6}; reconstructed [5627.981, 5628.114, 5628.281, 5628.381, 5628.498, 5628.631] in ((5621.99999, 5629.0),)
+  C6 PASS: rewards: {'sync': 150}
+  C7 PASS: interpolated frames per stim: {'RFMapping_839146_20260518_102707': 0, 'Spontaneous_839146_20260518_104149': 0, 'SpontaneousRewards_839146_20260518_105205': 0, 'DynamicRouting1_839146_20260518_110220': 421, 'SpontaneousRewards_839146_20260518_120323': 0, 'Spontaneous_839146_20260518_121338': 0}
+  (65 s)
+
+===== 835598_2026-02-27
+  C1 PASS: patch: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 1, 'unknown': 0}, 'bit26': {'reconstructed': 1, 'unknown': 0}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  C1 PASS: edge queries on all 32 bits: errors []
+   block_index                                       stim  n_stim_frames  n_vsyncs_recorded   status display_time_source  n_interpolated_frames anchor_residuals_ms reason
+0            0           RFMapping_835598_20260227_105334          51336              51336    clean          photodiode                      0                  []       
+1            1         Spontaneous_835598_20260227_110816          36000              36000    clean          photodiode                      0                  []       
+2            2  SpontaneousRewards_835598_20260227_112432          36000              36000    clean          photodiode                      0                  []       
+3            3     DynamicRouting1_835598_20260227_113442         217360             217361  patched          photodiode                     96           [-0.0289]       
+4            4  SpontaneousRewards_835598_20260227_123534          36000              36000    clean          photodiode                      0                  []       
+5            5         Spontaneous_835598_20260227_124544          36000              36000    clean          photodiode                      0                  []       
+  C2 PASS: block 0 (RFMapping_835598_20260227_105334): clean 
+  C2 PASS: block 1 (Spontaneous_835598_20260227_110816): clean 
+  C2 PASS: block 2 (SpontaneousRewards_835598_20260227_112432): clean 
+  C2 PASS: block 3 (DynamicRouting1_835598_20260227_113442) overlapping replay: patched, photodiode, 96 interpolated
+  C2 PASS: block 4 (SpontaneousRewards_835598_20260227_123534): clean 
+  C2 PASS: block 5 (Spontaneous_835598_20260227_124544): clean 
+    start_time  stop_time                                             reason
+id                                                                          
+0   4032.49999     4034.0  replayed sync data (copied acquisition buffers...
+  C3 PASS: invalid_times covers 4032.500-4034.000
+  C4 PASS: 542 trials, overlapping invalid_times: 0; timing_source: {'measured': 542}
+  C5 PASS: licks: {'sync': 1032, 'stim_frame': 4}; reconstructed [4033.458, 4033.591, 4033.758, 4033.875] in ((4032.49999, 4034.0),)
+  C6 PASS: rewards: {'sync': 95, 'stim_frame': 1}
+  C7 PASS: interpolated frames per stim: {'RFMapping_835598_20260227_105334': 0, 'Spontaneous_835598_20260227_110816': 0, 'SpontaneousRewards_835598_20260227_112432': 0, 'DynamicRouting1_835598_20260227_113442': 96, 'SpontaneousRewards_835598_20260227_123534': 0, 'Spontaneous_835598_20260227_124544': 0}
+  (82 s)
+
+===== 837959_2026-04-02
+  C1 PASS: patch: {'vsync_stim': {'reconstructed': 2, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 2, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 2, 'unknown': 0}, 'face_cam_frame_readout': {'reconstructed': 2, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 2, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 2, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 2, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 2, 'unknown': 0}, 'stim_running': {'reconstructed': 2, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 2}, 'bit1': {'reconstructed': 0, 'unknown': 2}, 'bit3': {'reconstructed': 2, 'unknown': 0}, 'bit6': {'reconstructed': 2, 'unknown': 0}, 'bit7': {'reconstructed': 2, 'unknown': 0}, 'bit8': {'reconstructed': 2, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 2}, 'laser_633': {'reconstructed': 2, 'unknown': 0}, 'laser_488': {'reconstructed': 2, 'unknown': 0}, 'bit12': {'reconstructed': 2, 'unknown': 0}, 'bit13': {'reconstructed': 2, 'unknown': 0}, 'bit14': {'reconstructed': 2, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 2}, 'bit16': {'reconstructed': 2, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 2, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 2, 'unknown': 0}, 'bit19': {'reconstructed': 2, 'unknown': 0}, 'bit20': {'reconstructed': 2, 'unknown': 0}, 'bit23': {'reconstructed': 2, 'unknown': 0}, 'bit24': {'reconstructed': 2, 'unknown': 0}, 'bit26': {'reconstructed': 2, 'unknown': 0}, 'bit30': {'reconstructed': 2, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 2}}
+  C1 PASS: edge queries on all 32 bits: errors []
+   block_index                                       stim  n_stim_frames  n_vsyncs_recorded   status display_time_source  n_interpolated_frames anchor_residuals_ms reason
+0            0           RFMapping_837959_20260402_103049          51336              51336    clean          photodiode                      0                  []       
+1            1         Spontaneous_837959_20260402_104531          36000              36000    clean          photodiode                      0                  []       
+2            2  SpontaneousRewards_837959_20260402_105543          36000              36000    clean          photodiode                      0                  []       
+3            3     DynamicRouting1_837959_20260402_110556         216642             216643  patched          photodiode                    125             [0.011]       
+4            4  SpontaneousRewards_837959_20260402_120638          36000              36000    clean          photodiode                      0                  []       
+5            5         Spontaneous_837959_20260402_121651          36000              36001  patched          photodiode                     66            [0.0638]       
+  C2 PASS: block 0 (RFMapping_837959_20260402_103049): clean 
+  C2 PASS: block 1 (Spontaneous_837959_20260402_104531): clean 
+  C2 PASS: block 2 (SpontaneousRewards_837959_20260402_105543): clean 
+  C2 PASS: block 3 (DynamicRouting1_837959_20260402_110556) overlapping replay: patched, photodiode, 125 interpolated
+  C2 PASS: block 4 (SpontaneousRewards_837959_20260402_120638): clean 
+  C2 PASS: block 5 (Spontaneous_837959_20260402_121651) overlapping replay: patched, photodiode, 66 interpolated
+    start_time  stop_time                                             reason
+id                                                                          
+0   5397.99999     5400.0  replayed sync data (copied acquisition buffers...
+1   6654.49999     6655.5  replayed sync data (copied acquisition buffers...
+  C3 PASS: invalid_times covers 5398.000-5400.000
+  C3 PASS: invalid_times covers 6654.500-6655.500
+  C4 PASS: 543 trials, overlapping invalid_times: 0; timing_source: {'measured': 543}
+  C5 PASS: licks: {'sync': 2574, 'stim_frame': 8}; reconstructed [5399.061, 5399.161, 5399.278, 5399.378, 5399.512, 5399.629, 5399.762, 5399.879] in ((5397.99999, 5400.0), (6654.49999, 6655.5))
+  C6 PASS: rewards: {'sync': 150, 'stim_frame': 1}
+  C7 PASS: interpolated frames per stim: {'RFMapping_837959_20260402_103049': 0, 'Spontaneous_837959_20260402_104531': 0, 'SpontaneousRewards_837959_20260402_105543': 0, 'DynamicRouting1_837959_20260402_110556': 125, 'SpontaneousRewards_837959_20260402_120638': 0, 'Spontaneous_837959_20260402_121651': 66}
+  (77 s)
+
+===== 856847_2026-06-04
+  C1 PASS: patch: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 0, 'unknown': 1}, 'nose_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 0, 'unknown': 1}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  C1 PASS: edge queries on all 32 bits: errors []
+   block_index                                       stim  n_stim_frames  n_vsyncs_recorded   status display_time_source  n_interpolated_frames anchor_residuals_ms reason
+0            0           RFMapping_856847_20260604_111502          51336              51336    clean          photodiode                      0                  []       
+1            1         Spontaneous_856847_20260604_112944          36000              36000    clean          photodiode                      0                  []       
+2            2  SpontaneousRewards_856847_20260604_113956          36000              36000    clean          photodiode                      0                  []       
+3            3     DynamicRouting1_856847_20260604_115007         217264             217258  patched          photodiode                     96            [0.0074]       
+4            4  SpontaneousRewards_856847_20260604_125051          36000              36000    clean          photodiode                      0                  []       
+5            5         Spontaneous_856847_20260604_130102          36000              36000    clean          photodiode                      0                  []       
+  C2 PASS: block 0 (RFMapping_856847_20260604_111502): clean 
+  C2 PASS: block 1 (Spontaneous_856847_20260604_112944): clean 
+  C2 PASS: block 2 (SpontaneousRewards_856847_20260604_113956): clean 
+  C2 PASS: block 3 (DynamicRouting1_856847_20260604_115007) overlapping replay: patched, photodiode, 96 interpolated
+  C2 PASS: block 4 (SpontaneousRewards_856847_20260604_125051): clean 
+  C2 PASS: block 5 (Spontaneous_856847_20260604_130102): clean 
+    start_time  stop_time                                             reason
+id                                                                          
+0   2742.99999     2744.5  replayed sync data (copied acquisition buffers...
+  C3 PASS: invalid_times covers 2743.000-2744.500
+  C4 PASS: 545 trials, overlapping invalid_times: 0; timing_source: {'measured': 545}
+  C5 PASS: licks: {'sync': 1764}; reconstructed [] in ((2742.99999, 2744.5),)
+  C6 PASS: rewards: {'sync': 98}
+  C7 PASS: interpolated frames per stim: {'RFMapping_856847_20260604_111502': 0, 'Spontaneous_856847_20260604_112944': 0, 'SpontaneousRewards_856847_20260604_113956': 0, 'DynamicRouting1_856847_20260604_115007': 96, 'SpontaneousRewards_856847_20260604_125051': 0, 'Spontaneous_856847_20260604_130102': 0}
+  (43 s)
+
+===== 862025_2026-08-05
+  C1 PASS: patch: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 0, 'unknown': 1}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  C1 PASS: edge queries on all 32 bits: errors []
+   block_index                                       stim  n_stim_frames  n_vsyncs_recorded   status display_time_source  n_interpolated_frames anchor_residuals_ms reason
+0            0           RFMapping_862025_20260805_114901          51336              51340  patched          photodiode                     92           [-0.0006]       
+1            1         Spontaneous_862025_20260805_120344          36000              36000    clean          photodiode                      0                  []       
+2            2  SpontaneousRewards_862025_20260805_121356          36000              36000    clean          photodiode                      0                  []       
+3            3     DynamicRouting1_862025_20260805_122408         217276             217276    clean          photodiode                      0                  []       
+4            4  SpontaneousRewards_862025_20260805_132503          36000              36000    clean          photodiode                      0                  []       
+5            5         Spontaneous_862025_20260805_133514          36000              36000    clean          photodiode                      0                  []       
+  C2 PASS: block 0 (RFMapping_862025_20260805_114901) overlapping replay: patched, photodiode, 92 interpolated
+  C2 PASS: block 1 (Spontaneous_862025_20260805_120344): clean 
+  C2 PASS: block 2 (SpontaneousRewards_862025_20260805_121356): clean 
+  C2 PASS: block 3 (DynamicRouting1_862025_20260805_122408): clean 
+  C2 PASS: block 4 (SpontaneousRewards_862025_20260805_132503): clean 
+  C2 PASS: block 5 (Spontaneous_862025_20260805_133514): clean 
+    start_time  stop_time                                             reason
+id                                                                          
+0    704.99999      706.5  replayed sync data (copied acquisition buffers...
+  C3 PASS: invalid_times covers 705.000-706.500
+  C4 PASS: 533 trials, overlapping invalid_times: 0; timing_source: {'measured': 533}
+  C5 PASS: licks: {'sync': 1471}; reconstructed [] in ((704.99999, 706.5),)
+  C6 PASS: rewards: {'sync': 116}
+  C7 PASS: interpolated frames per stim: {'RFMapping_862025_20260805_114901': 92, 'Spontaneous_862025_20260805_120344': 0, 'SpontaneousRewards_862025_20260805_121356': 0, 'DynamicRouting1_862025_20260805_122408': 0, 'SpontaneousRewards_862025_20260805_132503': 0, 'Spontaneous_862025_20260805_133514': 0}
+  (57 s)
+
+===== summary
+C1: 10/10 pass
+C2: 30/30 pass
+C3: 6/6 pass
+C4: 5/5 pass
+C5: 5/5 pass
+C6: 5/5 pass
+C7: 5/5 pass

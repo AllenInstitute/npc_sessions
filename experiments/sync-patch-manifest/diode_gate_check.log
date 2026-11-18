@@ -1,0 +1,98 @@
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+C:\Users\ben.hardcastle\github\npc_sessions\experiments\sync-patch-manifest\diode_gate_check.py:66: RuntimeWarning: All-NaN slice encountered
+  after_3s_ms=float(np.nanmax(err)) * 1e3, worst_edge_after_z_s=float(post[np.nanargmax(err)] - z) if len(post) and np.isfinite(err).any() else np.nan,
+spans: 155 in 132 sessions; box from file: 95, defaulted to 1: 60
+status: {'reconstructed': 145, 'failed': 10}
+gate failures: old (3 s) 29, new (0.5 s) 37
+baseline ms quantiles: {0.5: 0.41, 0.9: 16.755, 0.99: 22.51, 1.0: 34.197}
+after (0.5 s) ms quantiles: {0.5: 0.11, 0.9: 0.938, 0.99: 16.845, 1.0: 16.905}
+after (0.5 s) - baseline ms quantiles: {0.5: -0.22, 0.9: 0.028, 0.99: 3.393, 1.0: 6.34}
+
+old-gate failures:
+                     session  block_index  box               span  baseline_ms  after_0p5s_ms  after_3s_ms  worst_edge_after_z_s                 first4_ms  fail_new
+8    DRpilot_644867_20230221            0    1    509.000-510.000        0.605          0.500    10.505000               2.78926  [0.12, 0.13, 0.13, 0.07]     False
+11   DRpilot_662892_20230818            1    1  1701.000-1701.500        0.120          0.935     1.025000               1.45602  [0.78, 0.29, 0.83, 0.32]      True
+18   DRpilot_668755_20230823            0    1  3646.500-3648.000          NaN            NaN          NaN                   NaN                     [nan]      True
+26   DRpilot_706401_20240416            2    1  4660.000-4661.000          NaN            NaN          NaN                   NaN                     [nan]      True
+27   DRpilot_708016_20240430            0    1    786.000-787.000          NaN            NaN          NaN                   NaN                     [nan]      True
+28   DRpilot_712141_20240611            0    1    604.500-605.500          NaN            NaN          NaN                   NaN                     [nan]      True
+30   DRpilot_714753_20240703            4    1  3374.500-3375.500       12.570          0.110    13.585000               0.61502  [0.02, 0.01, 0.03, 0.03]     False
+31   DRpilot_714753_20240705            4    1  5311.000-5311.500        0.110          0.850     0.920000               1.61072  [0.79, 0.34, 0.85, 0.34]      True
+35   DRpilot_733780_20240904            0    1    731.500-732.000        0.550          0.090    16.620000               0.70421    [0.06, 0.09, 0.0, 0.0]      True
+36   DRpilot_737414_20241211            0    1  2755.500-2756.500          NaN            NaN          NaN                   NaN                     [nan]      True
+39   DRpilot_746439_20250108            0    1    162.500-165.000        1.940          0.070    16.700000               1.75030  [0.05, 0.06, 0.02, 0.01]      True
+41   DRpilot_746439_20250117            0    1    837.000-838.000       12.810          0.160    16.710000               1.97381  [0.01, 0.05, 0.02, 0.01]      True
+42   DRpilot_746439_20250117            0    1    847.000-847.500       12.820         12.890    16.690000               0.94752  [0.01, 0.03, 0.04, 0.03]      True
+43   DRpilot_761583_20241216            3    1  3746.000-3746.500        0.110          0.080     9.200000               1.62992  [0.05, 0.02, 0.04, 0.03]      True
+48   DRpilot_764436_20250530            0    1  2783.000-2783.500          NaN            NaN          NaN                   NaN                     [nan]      True
+50   DRpilot_767405_20250522            0    1  3365.000-3366.000          NaN            NaN          NaN                   NaN                     [nan]      True
+51   DRpilot_772656_20250225            0    1  3646.500-3652.500          NaN            NaN          NaN                   NaN                     [nan]      True
+52   DRpilot_772657_20250217            0    1  2953.000-2954.000          NaN            NaN          NaN                   NaN                     [nan]      True
+58   DRpilot_796012_20250626            0    1  1714.000-1715.500          NaN            NaN          NaN                   NaN                     [nan]      True
+60   DRpilot_796848_20250630            0    1    430.000-431.000        0.470          0.940    11.010000               2.55010  [0.89, 0.44, 0.92, 0.47]      True
+61   DRpilot_798632_20250829            3    3  4917.500-4918.000        0.420          0.110    16.965057               0.95372    [0.0, 0.03, 0.1, 0.02]     False
+64   DRpilot_802592_20250923            0    3  3163.000-3163.500        0.080          0.070     2.430000               2.47747  [0.01, 0.01, 0.04, 0.03]     False
+69   DRpilot_813586_20251117            1    3  1020.000-1022.000        0.395          0.345     4.505000               0.72050    [0.0, 0.02, 0.02, 0.0]     False
+73   DRpilot_831994_20251210            0    3    326.500-328.000        0.350          0.920     0.920000               0.16636  [0.02, 0.03, 0.03, 0.92]      True
+87   DRpilot_837959_20260331            4    3  6001.000-6002.500        0.365          0.060     1.790000               1.30233    [0.0, 0.0, 0.05, 0.02]     False
+127  DRpilot_859582_20260622            0    3    271.500-272.500        0.075          0.065     1.865000               2.99565  [0.05, 0.03, 0.02, 0.06]     False
+141  DRpilot_864753_20260721            0    3    192.500-193.500        0.500          0.350     2.000000               2.50194    [0.1, 0.35, 0.1, 0.23]     False
+150  DRpilot_872697_20260828            2    3  2416.000-2417.000        0.100          0.190     0.839832               0.56124  [0.11, 0.01, 0.01, 0.19]     False
+153  DRpilot_872974_20261109            1    3  1214.500-1216.000        0.430          1.395     1.735000               2.27238  [0.39, 1.31, 0.41, 1.29]      True
+
+new-gate failures:
+                     session  block_index  box               span         status  baseline_ms  after_0p5s_ms                 first4_ms                                                                               failures_new
+0          636397_2022-09-27            1    1  1419.000-1419.500  reconstructed       17.850          0.310  [0.03, 0.05, 0.01, 0.07]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+1    DRpilot_636766_20230123            0    1    589.000-589.500  reconstructed       10.380          0.340  [0.13, 0.25, 0.09, 0.34]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+3    DRpilot_644867_20230221            0    1    296.000-297.500  reconstructed       17.180          9.810  [0.03, 0.03, 0.01, 0.05]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+4    DRpilot_644867_20230221            0    1    304.000-306.000  reconstructed       10.370          0.580  [0.11, 0.07, 0.17, 0.01]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+5    DRpilot_644867_20230221            0    1    312.500-313.500  reconstructed       16.765          0.475   [0.35, 0.47, 0.03, 0.0]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+9    DRpilot_649943_20230214            1    1  3425.000-3425.500  reconstructed       16.680         10.070  [0.04, 0.01, 0.03, 0.02]   [2 measured edges after the span have the wrong polarity for the predicted toggle count]
+10   DRpilot_649943_20230215            0    1    456.500-457.500  reconstructed       10.430          0.540  [0.08, 0.05, 0.04, 0.02]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+11   DRpilot_662892_20230818            1    1  1701.000-1701.500  reconstructed        0.120          0.935  [0.78, 0.29, 0.83, 0.32]    [predicted edges after the span are off by 0.94 ms (baseline 0.12 ms + 0.5 ms allowed)]
+13   DRpilot_666986_20230814            4    1  1273.000-1273.500  reconstructed       10.220          0.210  [0.08, 0.06, 0.03, 0.02]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+17   DRpilot_667252_20230922            0    1    784.500-785.000  reconstructed       10.170          0.080   [0.01, 0.02, 0.0, 0.01]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+18   DRpilot_668755_20230823            0    1  3646.500-3648.000         failed          NaN            NaN                     [nan]                                [2 pre-span diode edges don't alternate with toggle frames]
+22   DRpilot_674562_20230919            0    1    682.500-683.000  reconstructed       16.790          0.080   [0.06, 0.02, 0.0, 0.04]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+23   DRpilot_674562_20230920            2    1  4544.500-4545.500  reconstructed       10.330         16.670  [0.01, 0.01, 0.04, 0.09]  [predicted edges after the span are off by 16.67 ms (baseline 10.33 ms + 0.5 ms allowed)]
+25   DRpilot_684071_20231127            0    1    381.500-382.000  reconstructed       22.510          0.090  [0.01, 0.04, 0.02, 0.01]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+26   DRpilot_706401_20240416            2    1  4660.000-4661.000         failed          NaN            NaN                     [nan]                              [178 pre-span diode edges don't alternate with toggle frames]
+27   DRpilot_708016_20240430            0    1    786.000-787.000         failed          NaN            NaN                     [nan]                                [3 pre-span diode edges don't alternate with toggle frames]
+28   DRpilot_712141_20240611            0    1    604.500-605.500         failed          NaN            NaN                     [nan]                              [172 pre-span diode edges don't alternate with toggle frames]
+31   DRpilot_714753_20240705            4    1  5311.000-5311.500  reconstructed        0.110          0.850  [0.79, 0.34, 0.85, 0.34]    [predicted edges after the span are off by 0.85 ms (baseline 0.11 ms + 0.5 ms allowed)]
+35   DRpilot_733780_20240904            0    1    731.500-732.000  reconstructed        0.550          0.090    [0.06, 0.09, 0.0, 0.0]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+36   DRpilot_737414_20241211            0    1  2755.500-2756.500         failed          NaN            NaN                     [nan]                                [2 pre-span diode edges don't alternate with toggle frames]
+37   DRpilot_737414_20241218            0    1  2980.500-2982.000  reconstructed       17.010         16.800   [0.03, 0.04, 0.05, 0.1]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+38   DRpilot_741137_20241007            2    1  2672.000-2673.000  reconstructed       11.210          0.060  [0.01, 0.05, 0.06, 0.01]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+39   DRpilot_746439_20250108            0    1    162.500-165.000  reconstructed        1.940          0.070  [0.05, 0.06, 0.02, 0.01]   [2 measured edges after the span have the wrong polarity for the predicted toggle count]
+41   DRpilot_746439_20250117            0    1    837.000-838.000  reconstructed       12.810          0.160  [0.01, 0.05, 0.02, 0.01]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+42   DRpilot_746439_20250117            0    1    847.000-847.500  reconstructed       12.820         12.890  [0.01, 0.03, 0.04, 0.03]   [3 measured edges after the span have the wrong polarity for the predicted toggle count]
+43   DRpilot_761583_20241216            3    1  3746.000-3746.500  reconstructed        0.110          0.080  [0.05, 0.02, 0.04, 0.03]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+45   DRpilot_761583_20241218            3    1  4680.500-4681.500  reconstructed       18.050         16.760  [0.06, 0.01, 0.04, 0.05]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+47   DRpilot_764436_20250515            0    1  1553.500-1557.000  reconstructed       11.605         16.905  [0.02, 0.08, 0.05, 0.06]  [predicted edges after the span are off by 16.91 ms (baseline 11.60 ms + 0.5 ms allowed)]
+48   DRpilot_764436_20250530            0    1  2783.000-2783.500         failed          NaN            NaN                     [nan]                                [2 pre-span diode edges don't alternate with toggle frames]
+50   DRpilot_767405_20250522            0    1  3365.000-3366.000         failed          NaN            NaN                     [nan]                                [2 pre-span diode edges don't alternate with toggle frames]
+51   DRpilot_772656_20250225            0    1  3646.500-3652.500         failed          NaN            NaN                     [nan]                                [2 pre-span diode edges don't alternate with toggle frames]
+52   DRpilot_772657_20250217            0    1  2953.000-2954.000         failed          NaN            NaN                     [nan]                                [2 pre-span diode edges don't alternate with toggle frames]
+56   DRpilot_796012_20250625            0    1  3310.000-3311.500  reconstructed       16.770          0.130  [0.01, 0.04, 0.01, 0.03]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+58   DRpilot_796012_20250626            0    1  1714.000-1715.500         failed          NaN            NaN                     [nan]                                [2 pre-span diode edges don't alternate with toggle frames]
+60   DRpilot_796848_20250630            0    1    430.000-431.000  reconstructed        0.470          0.940  [0.89, 0.44, 0.92, 0.47]   [1 measured edges after the span have the wrong polarity for the predicted toggle count]
+73   DRpilot_831994_20251210            0    3    326.500-328.000  reconstructed        0.350          0.920  [0.02, 0.03, 0.03, 0.92]    [predicted edges after the span are off by 0.92 ms (baseline 0.35 ms + 0.5 ms allowed)]
+153  DRpilot_872974_20261109            1    3  1214.500-1216.000  reconstructed        0.430          1.395  [0.39, 1.31, 0.41, 1.29]    [predicted edges after the span are off by 1.40 ms (baseline 0.43 ms + 0.5 ms allowed)]

@@ -1,0 +1,33 @@
+
+===== DRpilot_836629_20260430: invalid_intervals=[(5247.5, 5257.0)]
+D1 DynamicRouting1_836629_20260430_110832 block 3: n_sync=216005 n_stim=216000; gap [5247.500,5257.000) s: removed 570 replayed vsyncs, interpolated 565 frames from frameIntervals (anchor residual 0.04 ms)
+D2 stim events with frame time inside invalid intervals: lickFrames: 0/1144; rewardFrames: 0/147; manualRewardFrames: 0/0; trialStimStartFrame: 2/712; stimStartFrame: 0/0; trialOptoOnsetFrame: 0/0
+D3 barcodes: unmasked n=227, masked n=227, edges inside intervals=0, only-unmasked=[], only-masked=[]
+
+===== DRpilot_839146_20260518: invalid_intervals=[(5622.0, 5629.0)]
+D1 DynamicRouting1_839146_20260518_110220 block 3: n_sync=216997 n_stim=216992; gap [5622.000,5629.000) s: removed 420 replayed vsyncs, interpolated 415 frames from frameIntervals (anchor residual -0.02 ms)
+D2 stim events with frame time inside invalid intervals: lickFrames: 6/3143; rewardFrames: 0/138; manualRewardFrames: 0/0; trialStimStartFrame: 1/549; stimStartFrame: 0/0; trialOptoOnsetFrame: 0/0
+D3 barcodes: unmasked n=227, masked n=227, edges inside intervals=0, only-unmasked=[], only-masked=[]
+
+===== DRpilot_840160_20260428: invalid_intervals=[]
+
+===== DRpilot_847958_20260413: invalid_intervals=[(5706.0, 5707.5)]
+D1 DynamicRouting1_847958_20260413_110058 block 3: n_sync=217029 n_stim=217028; gap [5706.000,5707.500) s: removed 90 replayed vsyncs, interpolated 90 frames from frameIntervals (anchor residual 0.05 ms)
+D2 stim events with frame time inside invalid intervals: lickFrames: 0/2096; rewardFrames: 0/135; manualRewardFrames: 0/0; trialStimStartFrame: 1/556; stimStartFrame: 0/0; trialOptoOnsetFrame: 0/0
+D3 barcodes: unmasked n=227, masked n=227, edges inside intervals=0, only-unmasked=[], only-masked=[]
+
+===== DRpilot_856847_20260602: invalid_intervals=[(801.5, 805.0)]
+D1 RFMapping_856847_20260602_114728 block 0: n_sync=51342 n_stim=51336; gap [801.500,805.000) s: removed 210 replayed vsyncs, interpolated 204 frames from frameIntervals (anchor residual -0.03 ms)
+D2 stim events with frame time inside invalid intervals: lickFrames: 0/0; rewardFrames: 0/0; manualRewardFrames: 0/0; trialStimStartFrame: 0/0; stimStartFrame: 6/1656; trialOptoOnsetFrame: 0/0
+D3 barcodes: unmasked n=225, masked n=226, edges inside intervals=42, only-unmasked=[], only-masked=[(805.04177, 1072955199)]
+    barcode starts within 3 s of an interval: []; last start before first interval: 773.755 s
+
+===== DRpilot_856847_20260604: invalid_intervals=[(2743.0, 2744.5)]
+D1 DynamicRouting1_856847_20260604_115007 block 3: n_sync=217258 n_stim=217264; gap [2743.000,2744.500) s: removed 84 replayed vsyncs, interpolated 90 frames from frameIntervals (anchor residual 0.01 ms)
+D2 stim events with frame time inside invalid intervals: lickFrames: 0/1518; rewardFrames: 0/86; manualRewardFrames: 0/0; trialStimStartFrame: 0/546; stimStartFrame: 0/0; trialOptoOnsetFrame: 0/0
+D3 barcodes: unmasked n=225, masked n=225, edges inside intervals=0, only-unmasked=[], only-masked=[]
+
+===== DRpilot_862025_20260805: invalid_intervals=[(705.0, 706.5)]
+D1 RFMapping_862025_20260805_114901 block 0: n_sync=51340 n_stim=51336; gap [705.000,706.500) s: removed 90 replayed vsyncs, interpolated 86 frames from frameIntervals (anchor residual -0.00 ms)
+D2 stim events with frame time inside invalid intervals: lickFrames: 0/0; rewardFrames: 0/0; manualRewardFrames: 0/0; trialStimStartFrame: 0/0; stimStartFrame: 3/1656; trialOptoOnsetFrame: 0/0
+D3 barcodes: unmasked n=227, masked n=227, edges inside intervals=0, only-unmasked=[], only-masked=[]

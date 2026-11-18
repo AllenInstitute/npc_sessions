@@ -1,0 +1,23 @@
+npc_stim C:\data\t2p_qc\wt\npc_stim_fix\src\npc_stim\__init__.py 
+npc_sync C:\Users\ben.hardcastle\github\npc_sync\src\npc_sync\__init__.py 
+npc_sessions C:\Users\ben.hardcastle\github\npc_sessions\src\npc_sessions\__init__.py
+===== DRpilot_807082_20250930
+  RFMapping_807082_20250930_140408: source=photodiode block=0 n=51336 identical_to_fixE_A=True
+  Spontaneous_807082_20250930_141849: source=photodiode block=1 n=36000 identical_to_fixE_A=True
+  SpontaneousRewards_807082_20250930_142900: source=photodiode block=2 n=36000 identical_to_fixE_A=True
+  DynamicRouting1_807082_20250930_143912: source=photodiode block=3 n=217224 identical_to_fixE_A=True
+  SpontaneousRewards_807082_20250930_154002: source=photodiode block=4 n=36000 identical_to_fixE_A=True
+  Spontaneous_807082_20250930_155015: source=photodiode block=5 n=36000 identical_to_fixE_A=True
+  trials: 507 rows, 49 columns; NaN counts {'start_time': 0, 'stim_start_time': 0, 'response_time': 237}
+  [58 s]
+===== DRpilot_744279_20250116
+  RFMapping_744279_20250116_140219: source=photodiode block=0 n=51336 identical_to_fixE_A=True
+  OptoTagging_744279_20250116_141701: source=photodiode block=1 n=18936 identical_to_fixE_A=True
+  Spontaneous_744279_20250116_142258: source=photodiode block=2 n=36000 identical_to_fixE_A=True
+  SpontaneousRewards_744279_20250116_143312: source=photodiode block=3 n=36000 identical_to_fixE_A=True
+  DynamicRouting1_744279_20250116_144325: source=photodiode block=4 n=217553 identical_to_fixE_A=True
+  SpontaneousRewards_744279_20250116_154430: source=photodiode block=5 n=36000 identical_to_fixE_A=True
+  Spontaneous_744279_20250116_155443: source=photodiode block=6 n=36000 identical_to_fixE_A=True
+  OptoTagging_744279_20250116_160457: source=photodiode block=7 n=18966 identical_to_fixE_A=True
+  trials: 541 rows, 49 columns; NaN counts {'start_time': 0, 'stim_start_time': 0, 'response_time': 262}
+  [37 s]

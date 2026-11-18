@@ -1,0 +1,9 @@
+blocks compared: 1029 in 220 sessions; frames compared 33985956, agree 33985956, disagree 0
+blocks with any disagreement: 0
+Empty DataFrame
+Columns: [folder, block, stim, n_compared, n_disagree, disagree_frames, disagree_shift, n_landmarks, validated]
+Index: []
+
+status counts: {'ok': 1029, 'offset undetermined': 116, 'error: IndexError: index 0 is out of bou': 2, 'error: AssertionError': 1}
+
+blocks with <= 3 landmarks: 0; disagreeing: 0

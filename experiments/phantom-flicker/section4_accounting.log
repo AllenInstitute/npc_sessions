@@ -1,0 +1,49 @@
+                     folder  block             stim  excess  extra_edges  n_phantom  n_holds_with_phantom  n_glitch  n_outside  n_unexplained  n_missing  accounted validated            B
+0   DRpilot_674562_20231004      6      OptoTagging     173        185.0      168.0                  28.0      16.0        1.0            0.0        0.0      185.0      True  unavailable
+1   DRpilot_699847_20240415      1      OptoTagging     380        393.0      376.0                  70.0      16.0        1.0            0.0        0.0      393.0      True  unavailable
+2   DRpilot_699847_20240417      1      OptoTagging     369        382.0      362.0                  60.0      18.0        2.0            0.0        0.0      382.0      True  unavailable
+3   DRpilot_699847_20240418      1      OptoTagging     367        384.0      360.0                  66.0      24.0        0.0            0.0        0.0      384.0      True  unavailable
+4   DRpilot_699847_20240418      7      OptoTagging     354        369.0      346.0                  70.0      22.0        1.0            0.0        0.0      369.0      True  unavailable
+5   DRpilot_702136_20240305      3  DynamicRouting1       8         47.0        6.0                   3.0      40.0        2.0            0.0        1.0       47.0     False  unavailable
+6   DRpilot_706401_20240422      1      OptoTagging     325        332.0      330.0                  56.0       2.0        1.0            0.0        1.0      332.0     False  unavailable
+7   DRpilot_706401_20240422      7      OptoTagging     142        157.0      148.0                  32.0       8.0        1.0            0.0        0.0      157.0      True  unavailable
+8   DRpilot_706401_20240423      1      OptoTagging     151        152.0      150.0                  21.0       0.0        2.0            0.0        0.0      152.0      True  unavailable
+9   DRpilot_706401_20240423      7      OptoTagging     140        141.0      140.0                  18.0       0.0        2.0            0.0        1.0      141.0     False  unavailable
+10  DRpilot_706401_20240424      1      OptoTagging     287        302.0      286.0                  54.0      14.0        2.0            0.0        0.0      302.0      True  unavailable
+11  DRpilot_706401_20240424      7      OptoTagging     143        154.0      136.0                  22.0      16.0        2.0            0.0        0.0      154.0      True  unavailable
+12  DRpilot_706401_20240425      1      OptoTagging     613        636.0      606.0                  88.0      28.0        2.0            0.0        0.0      636.0      True  unavailable
+13  DRpilot_706401_20240425      4  DynamicRouting1       8         89.0        8.0                   4.0      80.0        1.0            0.0        0.0       89.0      True  unavailable
+14  DRpilot_706401_20240425      7      OptoTagging     215        240.0      212.0                  38.0      26.0        2.0            0.0        0.0      240.0      True  unavailable
+15  DRpilot_708016_20240501      4  DynamicRouting1       6       1159.0        6.0                   3.0    1148.0        2.0            4.0        1.0     1159.0     False  unavailable
+16  DRpilot_712141_20240612      1  DynamicRouting1       8         16.0        8.0                   4.0       8.0        0.0            0.0        0.0       16.0      True  unavailable
+17  DRpilot_715706_20240626      1  DynamicRouting1       7          7.0        6.0                   3.0       0.0        1.0            0.0        0.0        7.0      True  unavailable
+18  DRpilot_715706_20240627      1  DynamicRouting1       9         29.0        8.0                   4.0      20.0        1.0            0.0        0.0       29.0      True  unavailable
+19  DRpilot_716718_20240730      0  DynamicRouting1      12         14.0       12.0                   6.0       2.0        0.0            0.0        0.0       14.0      True   photodiode
+20  DRpilot_733780_20240905      7      OptoTagging     191        207.0      202.0                  36.0       4.0        1.0            0.0        0.0      207.0      True  unavailable
+21  DRpilot_733891_20240916      4  DynamicRouting1       9         41.0        8.0                   4.0      32.0        1.0            0.0        0.0       41.0      True   photodiode
+22  DRpilot_741148_20241016      3  DynamicRouting1       6          6.0        4.0                   2.0       2.0        0.0            0.0        0.0        6.0      True   photodiode
+23  DRpilot_762526_20250320      1  DynamicRouting1       7         11.0        6.0                   3.0       4.0        1.0            0.0        0.0       11.0      True   photodiode
+
+§4 blocks: 24; every extra TTL edge accounted for: 24; no unexplained edge: 23; phantom-flicker edges: 3894 (all inside stim-recorded held frames of >= 3 refreshes, by construction); glitches 1530
+after the patch (npc_stim, B): {'unavailable': 20, 'photodiode': 4}
+                     folder  block             stim                                                                                                                                                         B_reason
+0   DRpilot_674562_20231004      6      OptoTagging                       4 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+1   DRpilot_699847_20240415      1      OptoTagging                      19 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+2   DRpilot_699847_20240417      1      OptoTagging                      19 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+3   DRpilot_699847_20240418      1      OptoTagging                      20 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+4   DRpilot_699847_20240418      7      OptoTagging                      17 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+5   DRpilot_702136_20240305      3  DynamicRouting1  estimator failed: AssertionError('DRpilot_702136_20240305_3_DynamicRouting1_702136_20240305_123451: Too many frames are misaligned with vsyncs - check plots.')
+6   DRpilot_706401_20240422      1      OptoTagging                      16 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+7   DRpilot_706401_20240422      7      OptoTagging                       6 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+8   DRpilot_706401_20240423      1      OptoTagging                       4 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+9   DRpilot_706401_20240423      7      OptoTagging                       3 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+10  DRpilot_706401_20240424      1      OptoTagging                      13 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+11  DRpilot_706401_20240424      7      OptoTagging                       6 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+12  DRpilot_706401_20240425      1      OptoTagging                      18 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+13  DRpilot_706401_20240425      4  DynamicRouting1                       9 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+14  DRpilot_706401_20240425      7      OptoTagging                      12 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+15  DRpilot_708016_20240501      4  DynamicRouting1  SyncPatch rejected the block's photodiode edges: 4 diode edge(s) are neither a frame's toggle, nor phantom flicker inside a held frame, nor a comparator glitch
+16  DRpilot_712141_20240612      1  DynamicRouting1                       2 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+17  DRpilot_715706_20240626      1  DynamicRouting1                       1 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+18  DRpilot_715706_20240627      1  DynamicRouting1                       1 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+20  DRpilot_733780_20240905      7      OptoTagging                      11 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned

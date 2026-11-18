@@ -1,0 +1,41 @@
+
+===== DRpilot_836629_20260430 task block 3 (len 216000)
+G1 licks: stim lickFrames=1144, sync onsets=1256; onset within the preceding frame interval: 0.988
+G2 lick  d = read time - onset: n=1144 median=8.60 p5=0.69 p95=15.67 min=0.01 max=54337.36 ms
+G2 reward latency (edge - vsync[rewardFrame]): n=147 median=0.81 p5=0.74 p95=0.94 min=0.72 max=1.19 ms
+G2 sound latency (bit1 edge - vsync[trialStimStartFrame], aud trials): n=313 median=7.85 p5=7.26 p95=8.26 min=7.11 max=8.33 ms
+
+===== DRpilot_839146_20260518 task block 3 (len 216992)
+G1 licks: stim lickFrames=3137, sync onsets=3594; onset within the preceding frame interval: 0.979
+G2 lick  d = read time - onset: n=3137 median=8.30 p5=0.88 p95=16.04 min=0.01 max=51272.41 ms
+G2 reward latency (edge - vsync[rewardFrame]): n=138 median=0.80 p5=0.74 p95=1.07 min=0.72 max=1.35 ms
+G2 sound latency (bit1 edge - vsync[trialStimStartFrame], aud trials): n=245 median=7.85 p5=7.25 p95=8.27 min=7.15 max=8.36 ms
+DRpilot_840160_20260428: task block len 217104 != 217162 and no invalid intervals: skip (e.g. timebase drop)
+
+===== DRpilot_847958_20260413 task block 3 (len 217028)
+G1 licks: stim lickFrames=2096, sync onsets=2246; onset within the preceding frame interval: 0.982
+G2 lick  d = read time - onset: n=2096 median=8.45 p5=0.88 p95=15.93 min=0.02 max=4547.84 ms
+G2 reward latency (edge - vsync[rewardFrame]): n=135 median=0.82 p5=0.75 p95=1.00 min=0.71 max=1.25 ms
+G2 sound latency (bit1 edge - vsync[trialStimStartFrame], aud trials): n=247 median=7.86 p5=7.25 p95=8.24 min=7.01 max=8.30 ms
+
+===== DRpilot_856847_20260602 task block 3 (len 216918)
+G1 licks: stim lickFrames=1265, sync onsets=1394; onset within the preceding frame interval: 0.983
+G2 lick  d = read time - onset: n=1265 median=8.30 p5=0.76 p95=16.00 min=0.00 max=4340.18 ms
+G2 reward latency (edge - vsync[rewardFrame]): n=79 median=0.79 p5=0.74 p95=0.88 min=0.72 max=1.23 ms
+G2 sound latency (bit1 edge - vsync[trialStimStartFrame], aud trials): n=251 median=7.85 p5=7.20 p95=8.26 min=7.12 max=8.32 ms
+
+===== DRpilot_856847_20260604 task block 3 (len 217264)
+G1 licks: stim lickFrames=1518, sync onsets=1764; onset within the preceding frame interval: 0.980
+G2 lick  d = read time - onset: n=1518 median=8.21 p5=0.79 p95=15.89 min=0.00 max=43472.13 ms
+G2 reward latency (edge - vsync[rewardFrame]): n=86 median=0.79 p5=0.73 p95=0.89 min=0.72 max=1.06 ms
+G2 sound latency (bit1 edge - vsync[trialStimStartFrame], aud trials): n=246 median=7.87 p5=7.21 p95=8.26 min=7.11 max=8.30 ms
+
+===== DRpilot_862025_20260805 task block 3 (len 217276)
+G1 licks: stim lickFrames=1376, sync onsets=1471; onset within the preceding frame interval: 0.982
+G2 lick  d = read time - onset: n=1376 median=8.25 p5=0.81 p95=15.80 min=0.00 max=8916.16 ms
+G2 reward latency (edge - vsync[rewardFrame]): n=104 median=0.80 p5=0.73 p95=0.90 min=0.69 max=1.05 ms
+G2 sound latency (bit1 edge - vsync[trialStimStartFrame], aud trials): n=241 median=7.91 p5=7.23 p95=8.26 min=7.11 max=8.33 ms
+
+ALL lick d: n=10536 median=8.35 p5=0.82 p95=15.93 min=0.00 max=54337.36 ms
+ALL reward latency: n=689 median=0.80 p5=0.74 p95=0.95 min=0.69 max=1.35 ms
+ALL sound latency: n=1543 median=7.86 p5=7.23 p95=8.26 min=7.01 max=8.36 ms

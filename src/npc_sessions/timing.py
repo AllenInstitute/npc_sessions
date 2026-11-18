@@ -1,10 +1,19 @@
 """Sync timing for a session: build, validate, persist and apply a `npc_sync.SyncPatch`.
 
-Some sync files contain replayed acquisition buffers (`npc_sync.SyncDataset.invalid_intervals`):
-the copies overwrite real events on every line. Instead of rejecting the session, a patch
-reconstructs the lines that can be reconstructed within known error (vsync from the stim
-file's `frameIntervals`, the digital photodiode from reconstructed vsyncs, camera exposures from
-their fixed period) and marks the rest 'unknown' (see `npc_sync.patch.build_sync_patch`).
+Every session with stim files gets a patch (`get_sync_patch`):
+
+- Photodiode phantom flicker (diodeBoxFrameInterval 1): extra diode edges while a frame is held
+  (a dropped frame in the stim's `frameIntervals`), in state-restoring pairs, at most one per
+  missed refresh. The patch removes them, and comparator glitches, from the measured line, in
+  files with or without replays, after checking that every diode edge of the block is explained;
+  a block with unexplained edges is rejected (`SyncPatch.diode_blocks`). npc_stim uses a cleaned
+  block as patched and removes nothing itself. Evidence: experiments/phantom-flicker,
+  outputs/phantom-flicker-report.md.
+- Replayed acquisition buffers (`npc_sync.SyncDataset.invalid_intervals`): the copies overwrite
+  real events on every line. Instead of rejecting the session, the patch reconstructs the lines
+  that can be reconstructed within known error (vsync from the stim file's `frameIntervals`, the
+  digital photodiode from reconstructed vsyncs, camera exposures from their fixed period) and
+  marks the rest 'unknown' (see `npc_sync.patch.build_sync_patch`).
 
 This module adds what npc_sync can't know about a session:
 
@@ -48,7 +57,9 @@ import upath
 
 logger = logging.getLogger(__name__)
 
-BUILDER = "npc_sessions.timing 1"
+BUILDER = "npc_sessions.timing 2"
+"""2: phantom-flicker removal and photodiode checks on every box-1 block (any file), box-1
+prediction inside replayed spans from the block alignment."""
 """Recorded in each patch. Bump when the builder's output would change: cached patches with
 another builder are rebuilt."""
 
@@ -155,12 +166,20 @@ def get_stim_blocks(
 def build_session_sync_patch(
     sync: npc_sync.SyncPathOrDataset, stim_paths: Iterable[npc_io.PathLike]
 ) -> npc_sync.SyncPatch:
-    """Patch for a sync file with invalid intervals (see module docstring)."""
+    """Patch for a sync file (see module docstring)."""
     raw = npc_sync.SyncDataset(npc_sync.get_sync_data(sync), on_invalid="ignore")
     stim_paths = tuple(stim_paths)
-    patch = npc_sync.build_sync_patch(
-        raw, get_stim_blocks(raw, stim_paths), builder=BUILDER
-    )
+    try:
+        stim_blocks = get_stim_blocks(raw, stim_paths)
+        note = ""
+    except (AssertionError, IndexError, ValueError) as exc:
+        # sync-level failure (no vsync edges, unbalanced stim_running, ...): the patch can't
+        # check or reconstruct anything that needs stim files, but other lines still apply
+        stim_blocks, note = [], f"stim files could not be matched to vsync blocks: {exc!r}"
+        logger.warning(f"{raw}: {note}")
+    patch = npc_sync.build_sync_patch(raw, stim_blocks, builder=BUILDER)
+    if note:
+        patch.notes.append(note)
     if "barcode_ephys" in patch.lines:
         rising = raw.get_rising_edges("barcode_ephys", units="seconds")
         falling = raw.get_falling_edges("barcode_ephys", units="seconds")
@@ -227,14 +246,13 @@ def get_sync_patch(
     root: npc_io.PathLike | None = None,
     write: bool = True,
 ) -> npc_sync.SyncPatch | None:
-    """The session's patch, or None if the sync file has no invalid intervals.
+    """The session's patch (every session: photodiode phantom-flicker removal applies to files
+    without replays too).
 
     Loaded from `root` (default: `$NPC_SESSIONS_SYNC_PATCH_DIR`) if a patch for the same
     sync content hash and builder exists; otherwise built, and saved there if `write`.
     """
     raw = npc_sync.SyncDataset(npc_sync.get_sync_data(sync), on_invalid="ignore")
-    if not raw.invalid_intervals:
-        return None
     path = get_patch_path(session_id, raw.content_hash, root)
     if path is not None and path.exists():
         patch = npc_sync.SyncPatch.load(path)
@@ -282,6 +300,11 @@ def get_block_report(
             ]
         unknown = [s for s in spans if s.status == "unknown"]
         row["n_patched_spans"] = len({s.span for s in spans})
+        diode = patch.diode_block(float(b[0]), float(b[-1])) if patch is not None else None
+        row["diode_status"] = diode.status if diode is not None else None
+        row["diode_reason"] = diode.reason if diode is not None else None
+        row["n_phantom_flicker_removed"] = diode.n_phantom_flicker if diode and diode.status == "cleaned" else 0
+        row["n_glitch_removed"] = diode.n_glitch if diode and diode.status == "cleaned" else 0
         row["anchor_residuals_ms"] = [
             round(s.diagnostics["anchor_residual_sec"] * 1e3, 4)
             for s in spans
@@ -296,6 +319,9 @@ def get_block_report(
         elif unknown:
             row["status"] = "rejected"
             row["reason"] = "; ".join(sorted({s.reason for s in unknown}))
+        elif diode is not None and diode.status == "rejected":
+            row["status"] = "rejected"
+            row["reason"] = f"photodiode edges not explained: {diode.reason}"
         elif spans:
             row["status"], row["reason"] = "patched", ""
         elif len(b) != m.n_frames:

@@ -1,0 +1,25 @@
+share: 3201 DRpilot_ folders (8 s)
+  0/3201 folders (8 s)
+  200/3201 folders (9 s)
+  400/3201 folders (11 s)
+  600/3201 folders (13 s)
+  800/3201 folders (15 s)
+  1000/3201 folders (17 s)
+  1200/3201 folders (19 s)
+  1400/3201 folders (21 s)
+  1600/3201 folders (23 s)
+  1800/3201 folders (25 s)
+  2000/3201 folders (27 s)
+  2200/3201 folders (29 s)
+  2400/3201 folders (31 s)
+  2600/3201 folders (32 s)
+  2800/3201 folders (35 s)
+  3000/3201 folders (36 s)
+  3200/3201 folders (38 s)
+npc_lims: 453 sessions with sync
+  772655_2025-03-05: ValueError: Session 772655_2025-03-05 has no raw data assets
+  724612_2024-07-23: ValueError: Session 724612_2024-07-23 has no raw data assets
+WARNING:aind_session.utils.codeocean_utils:Not authorized to access data asset ID obtained from DocDB: subject_id=668759, id_='1f39d028-d88a-44fa-9743-cf20de91e07b'
+WARNING:aind_session.utils.codeocean_utils:Not authorized to access data asset ID obtained from DocDB: subject_id=668759, id_='711ef7cc-745c-4c22-849b-4c991b7b534f'
+WARNING:aind_session.utils.codeocean_utils:Not authorized to access data asset ID obtained from DocDB: subject_id=668759, id_='5503c0a1-6c0d-4efc-8e4c-c90e4a30d3aa'
+rows: 2973 (2945 share sync files, 28 npc_lims sessions not on the share); npc_lims sessions on the share: 425; 73 s

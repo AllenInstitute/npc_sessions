@@ -1,0 +1,18 @@
+baseline: photodiode blocks 1938; median-latency range 27.17-109.66 ms; blocks >35 ms: 39
+  n_lt_fall: frames 4065 in 169 blocks | excl. 733891_20240918 b4: 236 in 168 blocks
+  n_lt_rise15: frames 3941 in 78 blocks | excl. 733891_20240918 b4: 112 in 77 blocks
+  n_lt_rise: frames 23 in 10 blocks | excl. 733891_20240918 b4: 9 in 9 blocks
+fixC: photodiode blocks 1937; median-latency range 27.17-32.84 ms; blocks >35 ms: 0
+  n_lt_fall: frames 3979 in 130 blocks | excl. 733891_20240918 b4: 150 in 129 blocks
+  n_lt_rise15: frames 3830 in 2 blocks | excl. 733891_20240918 b4: 1 in 1 blocks
+  n_lt_rise: frames 14 in 1 blocks | excl. 733891_20240918 b4: 0 in 0 blocks
+fixD: photodiode blocks 1939; median-latency range 27.17-32.84 ms; blocks >35 ms: 0
+  n_lt_fall: frames 3979 in 130 blocks | excl. 733891_20240918 b4: 150 in 129 blocks
+  n_lt_rise23: frames 3831 in 3 blocks | excl. 733891_20240918 b4: 2 in 2 blocks
+  n_lt_rise15: frames 3830 in 2 blocks | excl. 733891_20240918 b4: 1 in 1 blocks
+  n_lt_rise: frames 14 in 1 blocks | excl. 733891_20240918 b4: 0 in 0 blocks
+fixE: photodiode blocks 1936; median-latency range 27.17-32.84 ms; blocks >35 ms: 0
+  n_lt_fall: frames 148 in 127 blocks | excl. 733891_20240918 b4: 148 in 127 blocks
+  n_lt_rise23: frames 0 in 0 blocks | excl. 733891_20240918 b4: 0 in 0 blocks
+  n_lt_rise15: frames 0 in 0 blocks | excl. 733891_20240918 b4: 0 in 0 blocks
+  n_lt_rise: frames 0 in 0 blocks | excl. 733891_20240918 b4: 0 in 0 blocks

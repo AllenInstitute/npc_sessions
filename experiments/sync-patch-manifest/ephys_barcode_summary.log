@@ -1,0 +1,76 @@
+rows (devices): 5644; sessions: 446; errors: 140
+error
+AssertionError: on and off times should be same length (1393 != 1394)                                                                                                                                                                           1
+AssertionError: on and off times should be same length (1993 != 1994)                                                                                                                                                                           1
+AssertionError: on and off times should be same length (2023 != 2024)                                                                                                                                                                           1
+AssertionError: on and off times should be same length (2055 != 2056)                                                                                                                                                                           1
+AssertionError: on and off times should be same length (2076 != 2077)                                                                                                                                                                           1
+AssertionError: on and off times should be same length (2178 != 2179)                                                                                                                                                                           1
+IndexError: index -1 is out of bounds for axis 0 with size 0                                                                                                                                                                                    3
+IndexError: index 0 is out of bounds for axis 0 with size 0                                                                                                                                                                                     1
+ValueError: invalid literal for int() with base 10: 'Software Time (milliseconds since midnight Jan 1st 1970 UTC): 1780349879831'                                                                                                               1
+match: ValueError: No matching barcodes found between master and probe lines. Either the sync file did not capture this ephys recording (session mix-up), or there was a problem with barcode generation or recording (a line disconnected)    11
+no devices                                                                                                                                                                                                                                      1
+
+endpoint_res_max_ms (per device: max |residual| over its matched barcodes), quantiles across devices:
+                                    0.5       0.9      0.99           1.0  n_devices  n_sessions
+dev    pop                                                                                      
+AP     clean                      0.152     0.313    70.357  1.486348e+07       2142         378
+       discontinuities            0.293  1799.985  1799.996  1.799997e+03          8           2
+       invalid intervals only     0.171     0.397   210.938  4.000230e+02        291          51
+LFP    clean                      0.348     0.507   160.056  1.486348e+07       2142         378
+       discontinuities            0.415  1800.084  1800.114  1.800117e+03          8           2
+       invalid intervals only     0.351     0.562   211.036  3.999750e+02        291          51
+NI-DAQ clean                      0.071     0.142     0.230  1.486348e+07        542         358
+       discontinuities         1821.416  1821.416  1821.416  1.821416e+03          3           2
+       invalid intervals only     0.076     0.159     0.263  4.990000e-01         77          51
+
+ls_res_max_ms (per device: max |residual| over its matched barcodes), quantiles across devices:
+                                    0.5       0.9      0.99           1.0  n_devices  n_sessions
+dev    pop                                                                                      
+AP     clean                      0.111     0.223    59.323  1.998233e+07       2142         378
+       discontinuities            0.213  1331.364  1331.369  1.331369e+03          8           2
+       invalid intervals only     0.122     0.277   156.136  3.183810e+02        291          51
+LFP    clean                      0.269     0.374    77.836  1.969923e+07       2142         378
+       discontinuities            0.372  1331.313  1331.378  1.331385e+03          8           2
+       invalid intervals only     0.279     0.422   154.600  3.234180e+02        291          51
+NI-DAQ clean                      0.054     0.103     0.159  1.998233e+07        542         358
+       discontinuities         1454.310  1454.310  1454.310  1.454310e+03          3           2
+       invalid intervals only     0.063     0.114     0.186  3.250000e-01         77          51
+
+matched barcodes per device: median 197.0 min 19.0
+
+AP, clean files: endpoint max > 0.2 ms: 729 of 2142
+                    key                      device  n_matched  endpoint_res_max_ms  ls_res_max_ms      worst_t
+938   699847_2024-04-18  Neuropix-PXI-100.ProbeB-AP      135.0         3.999403e+03   3.105637e+03    637.14012
+1191  706401_2024-04-22  Neuropix-PXI-100.ProbeB-AP      148.0         6.619695e+05   4.574934e+05   3662.94783
+287   660023_2023-08-08  Neuropix-PXI-100.ProbeD-AP      121.0         1.486348e+07   1.998233e+07  21895.48870
+284   660023_2023-08-08  Neuropix-PXI-100.ProbeC-AP      120.0         1.486348e+07   1.995401e+07  21895.48870
+280   660023_2023-08-08  Neuropix-PXI-100.ProbeA-AP      121.0         1.486348e+07   1.998233e+07  21895.48870
+291   660023_2023-08-08  Neuropix-PXI-100.ProbeF-AP      119.0         1.486348e+07   1.995396e+07  21895.48870
+282   660023_2023-08-08  Neuropix-PXI-100.ProbeB-AP      121.0         1.486348e+07   1.998233e+07  21895.48870
+289   660023_2023-08-08  Neuropix-PXI-100.ProbeE-AP      121.0         1.486348e+07   1.998233e+07  21895.48870
+
+largest endpoint residuals overall:
+                    key                       device    pop  n_invalid  n_discontinuities  n_matched  endpoint_res_max_ms  ls_res_max_ms      worst_t
+4451  837959_2026-04-01  Neuropix-PXI-111.ProbeC-LFP  clean        0.0                0.0      188.0         8.631642e+05   2.697300e-01     68.09532
+5544  649944_2023-02-27  Neuropix-PXI-100.ProbeE-LFP  clean        0.0                0.0      124.0         2.491233e+06   2.170750e-01    110.95118
+283   660023_2023-08-08  Neuropix-PXI-100.ProbeB-LFP  clean        0.0                0.0       98.0         1.482289e+07   1.941820e+07  21895.48870
+281   660023_2023-08-08  Neuropix-PXI-100.ProbeA-LFP  clean        0.0                0.0       99.0         1.482289e+07   1.955689e+07  21895.48870
+285   660023_2023-08-08  Neuropix-PXI-100.ProbeC-LFP  clean        0.0                0.0      101.0         1.486348e+07   1.969923e+07  21895.48870
+290   660023_2023-08-08  Neuropix-PXI-100.ProbeE-LFP  clean        0.0                0.0       98.0         1.486348e+07   1.949086e+07  21895.48870
+287   660023_2023-08-08   Neuropix-PXI-100.ProbeD-AP  clean        0.0                0.0      121.0         1.486348e+07   1.998233e+07  21895.48870
+284   660023_2023-08-08   Neuropix-PXI-100.ProbeC-AP  clean        0.0                0.0      120.0         1.486348e+07   1.995401e+07  21895.48870
+280   660023_2023-08-08   Neuropix-PXI-100.ProbeA-AP  clean        0.0                0.0      121.0         1.486348e+07   1.998233e+07  21895.48870
+291   660023_2023-08-08   Neuropix-PXI-100.ProbeF-AP  clean        0.0                0.0      119.0         1.486348e+07   1.995396e+07  21895.48870
+282   660023_2023-08-08   Neuropix-PXI-100.ProbeB-AP  clean        0.0                0.0      121.0         1.486348e+07   1.998233e+07  21895.48870
+289   660023_2023-08-08   Neuropix-PXI-100.ProbeE-AP  clean        0.0                0.0      121.0         1.486348e+07   1.998233e+07  21895.48870
+286   660023_2023-08-08        NI-DAQmx-105.PXI-6133  clean        0.0                0.0      121.0         1.486348e+07   1.998233e+07  21895.48870
+288   660023_2023-08-08  Neuropix-PXI-100.ProbeD-LFP  clean        0.0                0.0       98.0         1.486348e+07   1.955941e+07  21895.48870
+292   660023_2023-08-08  Neuropix-PXI-100.ProbeF-LFP  clean        0.0                0.0      102.0         1.486348e+07   1.949747e+07  21895.48870
+
+files with timebase discontinuities (AP devices):
+                   endpoint_res_max_ms  ls_res_max_ms
+key                                                  
+708020_2024-05-17                  0.3            0.2
+715709_2024-08-08               1800.0         1331.4

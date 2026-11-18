@@ -1,0 +1,35 @@
+34 sessions
+DRpilot_796012_20250710 1 spans, 743 diode edges, 744 toggle frames
+DRpilot_798632_20250902 1 spans, 309 diode edges, 309 toggle frames
+DRpilot_813586_20251202 1 spans, 306 diode edges, 305 toggle frames
+DRpilot_835598_20260223 1 spans, 269 diode edges, 270 toggle frames
+DRpilot_835598_20260227 1 spans, 269 diode edges, 269 toggle frames
+DRpilot_836629_20260430 1 spans, 426 diode edges, 426 toggle frames
+DRpilot_836629_20260501 1 spans, 269 diode edges, 269 toggle frames
+DRpilot_836726_20260213 1 spans, 270 diode edges, 270 toggle frames
+DRpilot_837230_20260420 1 spans, 289 diode edges, 290 toggle frames
+DRpilot_837959_20260330 1 spans, 268 diode edges, 268 toggle frames
+DRpilot_837959_20260331 1 spans, 269 diode edges, 269 toggle frames
+DRpilot_837959_20260402 2 spans, 537 diode edges, 536 toggle frames
+DRpilot_839146_20260518 1 spans, 376 diode edges, 376 toggle frames
+DRpilot_840160_20260429 ERROR AssertionError on and off times should be same length (2076 != 2077)
+DRpilot_841308_20260511 1 spans, 278 diode edges, 278 toggle frames
+DRpilot_847958_20260413 1 spans, 267 diode edges, 267 toggle frames
+DRpilot_847958_20260415 1 spans, 267 diode edges, 268 toggle frames
+DRpilot_850215_20260318 1 spans, 248 diode edges, 248 toggle frames
+DRpilot_850217_20260402 1 spans, 246 diode edges, 246 toggle frames
+DRpilot_850217_20260403 1 spans, 280 diode edges, 280 toggle frames
+DRpilot_854390_20260422 1 spans, 267 diode edges, 267 toggle frames
+DRpilot_854390_20260423 ERROR AssertionError on and off times should be same length (2055 != 2056)
+DRpilot_854390_20260427 1 spans, 267 diode edges, 267 toggle frames
+DRpilot_856847_20260602 1 spans, 305 diode edges, 305 toggle frames
+DRpilot_856847_20260604 1 spans, 268 diode edges, 268 toggle frames
+DRpilot_856847_20260605 1 spans, 279 diode edges, 279 toggle frames
+DRpilot_857681_20260813 1 spans, 268 diode edges, 268 toggle frames
+DRpilot_859582_20260701 1 spans, 268 diode edges, 267 toggle frames
+DRpilot_859583_20260515 1 spans, 278 diode edges, 278 toggle frames
+DRpilot_862025_20260804 1 spans, 279 diode edges, 280 toggle frames
+DRpilot_862025_20260805 1 spans, 265 diode edges, 265 toggle frames
+DRpilot_862025_20260806 1 spans, 269 diode edges, 269 toggle frames
+DRpilot_862027_20260916 1 spans, 279 diode edges, 279 toggle frames
+DRpilot_872697_20260903 1 spans, 268 diode edges, 268 toggle frames

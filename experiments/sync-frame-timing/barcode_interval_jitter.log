@@ -1,0 +1,7 @@
+DRpilot_836629_20260430: n_intervals=226 median=30.9658 s; max |dev| (not within 35 s of an invalid interval) = 0.16 ms; intervals with |dev| > 10 ms: []
+DRpilot_839146_20260518: n_intervals=226 median=31.0146 s; max |dev| (not within 35 s of an invalid interval) = 0.31 ms; intervals with |dev| > 10 ms: []
+DRpilot_840160_20260428: n_intervals=187 median=31.0145 s; max |dev| (not within 35 s of an invalid interval) = 999.98 ms; intervals with |dev| > 10 ms: [(2458.56, -1000.0)]
+DRpilot_847958_20260413: n_intervals=226 median=30.9656 s; max |dev| (not within 35 s of an invalid interval) = 0.14 ms; intervals with |dev| > 10 ms: []
+DRpilot_856847_20260602: n_intervals=225 median=31.0147 s; max |dev| (not within 35 s of an invalid interval) = 0.11 ms; intervals with |dev| > 10 ms: [(773.75, 272.5), (805.04, -272.6)]
+DRpilot_856847_20260604: n_intervals=225 median=31.0148 s; max |dev| (not within 35 s of an invalid interval) = 0.26 ms; intervals with |dev| > 10 ms: []
+DRpilot_862025_20260805: n_intervals=226 median=30.9659 s; max |dev| (not within 35 s of an invalid interval) = 0.16 ms; intervals with |dev| > 10 ms: []

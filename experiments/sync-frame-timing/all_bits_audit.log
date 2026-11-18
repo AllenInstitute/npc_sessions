@@ -1,0 +1,131 @@
+
+===== DRpilot_836629_20260430 invalid=[(5247.5, 5257.0)]
+E1 bit0:barcode_ephys: total=2038 in_invalid=0/0
+   bit1:<unlabelled>: total=746 in_invalid=0/0
+   bit2:vsync_stim: total=411341 in_invalid=570/570
+   bit4:stim_photodiode: total=68559 in_invalid=95/95
+   bit5:stim_running: total=6 in_invalid=0/0
+   bit9:galvo_xy: total=6 in_invalid=0/0
+   bit15:reward_1_actuator: total=159 in_invalid=0/0
+   bit21:beh_cam_frame_readout: total=419355 in_invalid=570/570
+   bit22:face_cam_frame_readout: total=419333 in_invalid=570/570
+   bit25:eye_cam_frame_readout: total=419340 in_invalid=570/570
+   bit27:beh_cam_exposing: total=419355 in_invalid=570/570
+   bit28:face_cam_exposing: total=419333 in_invalid=570/570
+   bit29:eye_cam_exposing: total=419341 in_invalid=570/570
+   bit31:lick_sensor: total=1256 in_invalid=0/0
+E2 barcode durations (s): n=227 min=0.678 median=0.911 max=0.940
+
+===== DRpilot_839146_20260518 invalid=[(5622.0, 5629.0)]
+E1 bit0:barcode_ephys: total=2075 in_invalid=0/0
+   bit1:<unlabelled>: total=677 in_invalid=0/0
+   bit2:vsync_stim: total=412333 in_invalid=420/420
+   bit4:stim_photodiode: total=68727 in_invalid=70/70
+   bit5:stim_running: total=6 in_invalid=0/0
+   bit9:galvo_xy: total=6 in_invalid=0/0
+   bit15:reward_1_actuator: total=150 in_invalid=0/0
+   bit21:beh_cam_frame_readout: total=421388 in_invalid=420/420
+   bit22:nose_cam_frame_readout: total=421338 in_invalid=420/420
+   bit24:<unlabelled>: total=344 in_invalid=0/0
+   bit25:eye_cam_frame_readout: total=421365 in_invalid=420/420
+   bit26:face_cam_exposing: total=421351 in_invalid=420/420
+   bit27:beh_cam_exposing: total=421388 in_invalid=420/420
+   bit28:nose_cam_exposing: total=421340 in_invalid=420/420
+   bit29:eye_cam_exposing: total=421366 in_invalid=420/420
+   bit31:lick_sensor: total=3594 in_invalid=0/0
+E2 barcode durations (s): n=227 min=0.767 median=0.941 max=0.941
+
+===== DRpilot_840160_20260428 invalid=[]
+E1 bit0:barcode_ephys: total=1713 in_invalid=0/0
+   bit1:<unlabelled>: total=667 in_invalid=0/0
+   bit2:vsync_stim: total=340440 in_invalid=0/0
+   bit4:stim_photodiode: total=56745 in_invalid=0/0
+   bit5:stim_running: total=4 in_invalid=0/0
+   bit9:galvo_xy: total=4 in_invalid=0/0
+   bit15:reward_1_actuator: total=106 in_invalid=0/0
+   bit21:beh_cam_frame_readout: total=347743 in_invalid=0/0
+   bit22:nose_cam_frame_readout: total=347697 in_invalid=0/0
+   bit24:<unlabelled>: total=853 in_invalid=0/0
+   bit25:eye_cam_frame_readout: total=347725 in_invalid=0/0
+   bit26:face_cam_exposing: total=347709 in_invalid=0/0
+   bit27:beh_cam_exposing: total=347744 in_invalid=0/0
+   bit28:nose_cam_exposing: total=347699 in_invalid=0/0
+   bit29:eye_cam_exposing: total=347726 in_invalid=0/0
+   bit31:lick_sensor: total=1906 in_invalid=0/0
+E2 barcode durations (s): n=188 min=0.738 median=0.912 max=0.941
+
+===== DRpilot_847958_20260413 invalid=[(5706.0, 5707.5)]
+E1 bit0:barcode_ephys: total=2031 in_invalid=0/0
+   bit1:<unlabelled>: total=679 in_invalid=0/0
+   bit2:vsync_stim: total=412365 in_invalid=90/90
+   bit4:stim_photodiode: total=68731 in_invalid=15/15
+   bit5:stim_running: total=6 in_invalid=0/0
+   bit9:galvo_xy: total=6 in_invalid=0/0
+   bit15:reward_1_actuator: total=147 in_invalid=0/0
+   bit21:beh_cam_frame_readout: total=421266 in_invalid=90/90
+   bit22:face_cam_frame_readout: total=421246 in_invalid=90/90
+   bit25:eye_cam_frame_readout: total=421253 in_invalid=90/90
+   bit27:beh_cam_exposing: total=421266 in_invalid=90/90
+   bit28:face_cam_exposing: total=421246 in_invalid=90/90
+   bit29:eye_cam_exposing: total=421254 in_invalid=90/90
+   bit31:lick_sensor: total=2246 in_invalid=0/0
+E2 barcode durations (s): n=227 min=0.765 median=0.940 max=0.940
+
+===== DRpilot_856847_20260602 invalid=[(801.5, 805.0)]
+E1 bit0:barcode_ephys: total=2047 in_invalid=21/21
+   bit1:<unlabelled>: total=688 in_invalid=7/7
+   bit2:vsync_stim: total=412260 in_invalid=210/210
+   bit4:stim_photodiode: total=68713 in_invalid=35/35
+   bit5:stim_running: total=6 in_invalid=0/0
+   bit9:galvo_xy: total=6 in_invalid=0/0
+   bit15:reward_1_actuator: total=91 in_invalid=0/0
+   bit21:beh_cam_frame_readout: total=420694 in_invalid=210/210
+   bit22:nose_cam_frame_readout: total=420659 in_invalid=210/210
+   bit24:<unlabelled>: total=1400 in_invalid=0/0
+   bit25:eye_cam_frame_readout: total=420688 in_invalid=210/210
+   bit26:face_cam_exposing: total=420674 in_invalid=210/210
+   bit27:beh_cam_exposing: total=420707 in_invalid=210/210
+   bit28:nose_cam_exposing: total=420663 in_invalid=210/210
+   bit29:eye_cam_exposing: total=420689 in_invalid=210/210
+   bit31:lick_sensor: total=1394 in_invalid=0/0
+E2 barcode durations (s): n=226 min=0.738 median=0.912 max=1.820
+
+===== DRpilot_856847_20260604 invalid=[(2743.0, 2744.5)]
+E1 bit0:barcode_ephys: total=2047 in_invalid=0/0
+   bit1:<unlabelled>: total=678 in_invalid=0/0
+   bit2:vsync_stim: total=412594 in_invalid=84/84
+   bit4:stim_photodiode: total=68787 in_invalid=15/15
+   bit5:stim_running: total=6 in_invalid=0/0
+   bit9:galvo_xy: total=6 in_invalid=0/0
+   bit15:reward_1_actuator: total=98 in_invalid=0/0
+   bit21:beh_cam_frame_readout: total=419371 in_invalid=90/90
+   bit22:nose_cam_frame_readout: total=419339 in_invalid=90/90
+   bit24:<unlabelled>: total=1289 in_invalid=0/0
+   bit25:eye_cam_frame_readout: total=419366 in_invalid=90/90
+   bit26:face_cam_exposing: total=419352 in_invalid=90/90
+   bit27:beh_cam_exposing: total=419385 in_invalid=90/90
+   bit28:nose_cam_exposing: total=419342 in_invalid=90/90
+   bit29:eye_cam_exposing: total=419367 in_invalid=90/90
+   bit31:lick_sensor: total=1764 in_invalid=0/0
+E2 barcode durations (s): n=226 min=0.679 median=0.941 max=0.941
+
+===== DRpilot_862025_20260805 invalid=[(705.0, 706.5)]
+E1 bit0:barcode_ephys: total=2047 in_invalid=0/0
+   bit1:<unlabelled>: total=671 in_invalid=0/0
+   bit2:vsync_stim: total=412616 in_invalid=90/90
+   bit4:stim_photodiode: total=68773 in_invalid=15/15
+   bit5:stim_running: total=6 in_invalid=0/0
+   bit9:galvo_xy: total=6 in_invalid=0/0
+   bit15:reward_1_actuator: total=116 in_invalid=0/0
+   bit21:beh_cam_frame_readout: total=420268 in_invalid=90/90
+   bit22:nose_cam_frame_readout: total=420231 in_invalid=90/90
+   bit24:<unlabelled>: total=870 in_invalid=0/0
+   bit25:eye_cam_frame_readout: total=420255 in_invalid=90/90
+   bit26:face_cam_exposing: total=420246 in_invalid=90/90
+   bit27:beh_cam_exposing: total=420268 in_invalid=90/90
+   bit28:nose_cam_exposing: total=420231 in_invalid=90/90
+   bit29:eye_cam_exposing: total=420256 in_invalid=90/90
+   bit31:lick_sensor: total=1471 in_invalid=0/0
+E2 barcode durations (s): n=227 min=0.736 median=0.911 max=0.940
+
+E2 all sessions: n=1548 min=0.678 median=0.940 max=1.820; fraction <0.5 s: 0.00

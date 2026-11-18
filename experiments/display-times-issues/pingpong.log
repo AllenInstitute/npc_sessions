@@ -1,0 +1,15 @@
+rejected blocks with excess flips: (vsync interval in refreshes, flips in window, flips in next window): count
+  (10, 9, 1) 123
+  (4, 3, 1) 94
+  (11, 11, 1) 84
+  (11, 9, 1) 62
+  (3, 3, 1) 35
+  (10, 7, 1) 18
+  (11, 5, 1) 4
+  (11, 3, 1) 3
+  (10, 5, 1) 2
+  (2, 2, 1) 2
+  (10, 3, 1) 1
+  (11, 7, 1) 1
+  (12, 11, 1) 1
+accepted box-1 blocks in the same sessions: {'long windows': 10625, 'long windows with flips == refreshes': 0, 'long windows with 1 flip': 10394}

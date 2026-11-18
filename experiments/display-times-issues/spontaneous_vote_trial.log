@@ -1,0 +1,18 @@
+# Rejected alternative for issue 2 (not committed): remove the `"spontaneous" not in stim_id` exclusion
+# from the long-interval alignment vote in get_frame_display_times, run on 5 sessions.
+# Transcribed from compare_fix.py output in the 2026-11-15 session (the run's outputs were
+# overwritten by the committed fix, label fixB, which used the same output directory).
+sessions: 5 | blocks: 31
+identical                                 21
+photodiode->unavailable                    7
+photodiode->photodiode (times changed)     3
+DRpilot_662892_20230821 b2 Spontaneous         times changed  44.260 -> 27.58 ms
+DRpilot_702131_20240227 b1 Spontaneous         -> unavailable (base 27.48 ms): fewer than 3 long intervals in photodiode signal, but 13 long intervals in vsync signal
+DRpilot_702131_20240227 b5 Spontaneous         -> unavailable (base 109.665 ms): IndexError could not find long vsync ... signals have become too misaligned
+DRpilot_703882_20240425 b2 Spontaneous         -> unavailable (base 45.215 ms): fewer than 3 ... but 14 long intervals in vsync signal
+DRpilot_703882_20240425 b5 SpontaneousRewards  times changed  47.555 -> 30.87 ms
+DRpilot_703882_20240425 b6 Spontaneous         times changed  44.645 -> 27.95 ms
+DRpilot_706401_20240423 b2 Spontaneous         -> unavailable (base 49.52 ms): fewer than 3 ... but 18
+DRpilot_706401_20240423 b3 SpontaneousRewards  -> unavailable (base 27.72 ms): fewer than 3 ... but 15
+DRpilot_706401_20240423 b5 SpontaneousRewards  -> unavailable (base 27.70 ms): fewer than 3 ... but 16
+DRpilot_706401_20240423 b6 Spontaneous         -> unavailable (base 29.52 ms): fewer than 3 ... but 16

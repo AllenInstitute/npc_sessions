@@ -1,0 +1,13 @@
+DRpilot_807082_20250930: aind-open-data/ecephys_807082_2025-09-30_14-03-30/ecephys/ecephys_compressed/experiment1_Record Node 104#NI-DAQmx-101.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=226 global resid -0.08..0.05 ms, max step 0.03 ms
+  block 0: sync edges=587 confirmed=[0] AI0:1.00/1.00 AI1:0.13/0.34 AI2:0.00/0.00 AI3:0.59/0.34 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=596 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 2: sync edges=597 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=596 confirmed=[0] AI0:1.00/1.00 AI1:0.03/0.33 AI2:0.00/0.00 AI3:0.21/0.33 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=594 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: 17112 analog transitions over 874 s (invalid-signal bins 15) [24 s]
+  block 1: 12000 analog transitions over 604 s (invalid-signal bins 17) [40 s]
+  block 2: 12000 analog transitions over 604 s (invalid-signal bins 11) [56 s]
+  block 3: 72408 analog transitions over 3645 s (invalid-signal bins 19) [153 s]
+  block 4: 12000 analog transitions over 606 s (invalid-signal bins 16) [169 s]
+  block 5: 12000 analog transitions over 603 s (invalid-signal bins 1) [185 s]

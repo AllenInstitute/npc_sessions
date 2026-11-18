@@ -1,0 +1,139 @@
+DRpilot_807082_20250930: aind-open-data/ecephys_807082_2025-09-30_14-03-30/ecephys/ecephys_compressed/experiment1_Record Node 104#NI-DAQmx-101.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=226 global resid -0.08..0.05 ms, max step 0.03 ms
+  block 0: sync edges=587 confirmed=[0] AI0:1.00/1.00 AI1:0.13/0.35 AI2:0.00/0.00 AI3:0.24/0.34 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=596 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 2: sync edges=597 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=596 confirmed=[0] AI0:1.00/1.00 AI1:0.03/0.30 AI2:0.00/0.00 AI3:0.13/0.32 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=594 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 874 s [17 s]
+  block 1: saved 604 s [29 s]
+  block 2: saved 604 s [41 s]
+  block 3: saved 3645 s [111 s]
+  block 4: saved 606 s [122 s]
+  block 5: saved 603 s [134 s]
+DRpilot_807082_20250930 b0: 17112 transitions, 0 low-swing bins of 1748
+DRpilot_807082_20250930 b1: 12000 transitions, 0 low-swing bins of 1208
+DRpilot_807082_20250930 b2: 12000 transitions, 0 low-swing bins of 1208
+DRpilot_807082_20250930 b3: 72408 transitions, 0 low-swing bins of 7290
+DRpilot_807082_20250930 b4: 12000 transitions, 0 low-swing bins of 1212
+DRpilot_807082_20250930 b5: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_813586_20251205: aind-open-data/ecephys_813586_2025-12-05_12-45-41/ecephys/ecephys_compressed/experiment1_Record Node 101#NI-DAQmx-108.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=225 global resid -0.08..0.08 ms, max step 0.03 ms
+  block 0: sync edges=587 confirmed=[0] AI0:1.00/1.00 AI1:0.12/0.34 AI2:0.00/0.00 AI3:0.25/0.34 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 2: sync edges=597 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=594 confirmed=[0] AI0:1.00/1.00 AI1:0.06/0.33 AI2:0.00/0.00 AI3:0.28/0.34 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=597 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 874 s [15 s]
+  block 1: saved 603 s [27 s]
+  block 2: saved 603 s [37 s]
+  block 3: saved 3642 s [102 s]
+  block 4: saved 603 s [113 s]
+  block 5: saved 603 s [125 s]
+DRpilot_813586_20251205 b0: 17112 transitions, 0 low-swing bins of 1748
+DRpilot_813586_20251205 b1: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_813586_20251205 b2: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_813586_20251205 b3: 72504 transitions, 0 low-swing bins of 7285
+DRpilot_813586_20251205 b4: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_813586_20251205 b5: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_810752_20251010: aind-open-data/ecephys_810752_2025-10-10_11-17-00/ecephys/ecephys_compressed/experiment1_Record Node 101#NI-DAQmx-108.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=223 global resid -0.07..0.05 ms, max step 0.04 ms
+  block 0: sync edges=591 confirmed=[0] AI0:1.00/1.00 AI1:0.06/0.33 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 2: sync edges=597 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 874 s [18 s]
+  block 1: saved 603 s [31 s]
+  block 2: saved 603 s [43 s]
+  block 3: saved 3639 s [119 s]
+  block 4: saved 603 s [132 s]
+  block 5: saved 603 s [144 s]
+DRpilot_810752_20251010 b0: 17112 transitions, 0 low-swing bins of 1748
+DRpilot_810752_20251010 b1: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_810752_20251010 b2: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_810752_20251010 b3: 72436 transitions, 0 low-swing bins of 7278
+DRpilot_810752_20251010 b4: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_810752_20251010 b5: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_814669_20251113: aind-open-data/ecephys_814669_2025-11-13_13-17-03/ecephys/ecephys_compressed/experiment1_Record Node 106#NI-DAQmx-108.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=226 global resid -0.03..0.05 ms, max step 0.04 ms
+  block 0: sync edges=588 confirmed=[0] AI0:1.00/1.00 AI1:0.11/0.34 AI2:0.00/0.00 AI3:0.23/0.34 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 2: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=597 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=598 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 874 s [18 s]
+  block 1: saved 603 s [30 s]
+  block 2: saved 603 s [43 s]
+  block 3: saved 3637 s [119 s]
+  block 4: saved 604 s [131 s]
+  block 5: saved 603 s [144 s]
+DRpilot_814669_20251113 b0: 17112 transitions, 0 low-swing bins of 1748
+DRpilot_814669_20251113 b1: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_814669_20251113 b2: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_814669_20251113 b3: 72382 transitions, 0 low-swing bins of 7274
+DRpilot_814669_20251113 b4: 12000 transitions, 0 low-swing bins of 1208
+DRpilot_814669_20251113 b5: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_840160_20260501: aind-open-data/ecephys_840160_2026-05-01_10-09-37/ecephys/ecephys_compressed/experiment1_Record Node 101#NI-DAQmx-110.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=224 global resid -0.06..0.04 ms, max step 0.03 ms
+  block 0: sync edges=589 confirmed=[0] AI0:1.00/1.00 AI1:0.10/0.34 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=595 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 2: sync edges=596 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=593 confirmed=[0] AI0:1.00/1.00 AI1:0.02/0.36 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=594 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=595 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 874 s [19 s]
+  block 1: saved 606 s [31 s]
+  block 2: saved 605 s [44 s]
+  block 3: saved 3650 s [120 s]
+  block 4: saved 605 s [133 s]
+  block 5: saved 606 s [146 s]
+DRpilot_840160_20260501 b0: 17112 transitions, 0 low-swing bins of 1748
+DRpilot_840160_20260501 b1: 12000 transitions, 0 low-swing bins of 1212
+DRpilot_840160_20260501 b2: 12000 transitions, 0 low-swing bins of 1210
+DRpilot_840160_20260501 b3: 72344 transitions, 0 low-swing bins of 7301
+DRpilot_840160_20260501 b4: 12000 transitions, 0 low-swing bins of 1211
+DRpilot_840160_20260501 b5: 12000 transitions, 0 low-swing bins of 1212
+DRpilot_867000_20261015 blocked: no ecephys upload on S3 within 10 min of the sync start
+DRpilot_744279_20250116: aind-private-data-prod-o5171v/ecephys_744279_2025-01-16_14-01-37/ecephys/ecephys_compressed/experiment1_Record Node 104#NI-DAQmx-101.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=249 global resid -0.06..0.06 ms, max step 0.04 ms
+  block 0: sync edges=1764 confirmed=[0] AI0:1.00/1.00 AI1:0.10/0.81 AI2:0.00/0.00 AI3:0.24/0.81 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=1638 confirmed=[] AI0:0.63/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.08/0.74 AI4:0.00/0.00 AI5:0.03/0.77 AI6:0.01/0.81 AI7:0.01/0.88
+  block 2: sync edges=1784 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=1784 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=1779 confirmed=[0] AI0:1.00/1.00 AI1:0.02/0.83 AI2:0.00/0.00 AI3:0.10/0.80 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=1784 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 6: sync edges=1784 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 7: sync edges=1604 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.07/0.70 AI4:0.00/0.00 AI5:0.02/0.87 AI6:0.01/0.83 AI7:0.01/0.94
+DRpilot_744279_20250116 blocked: photodiode channel not uniquely confirmed (per block: [[0], [], [0], [0], [0], [0], [0], [0]])
+DRpilot_796012_20250714: aind-open-data/ecephys_796012_2025-07-14_13-30-15/ecephys/ecephys_compressed/experiment1_Record Node 104#NI-DAQmx-101.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=226 global resid -0.05..0.04 ms, max step 0.04 ms
+  block 0: sync edges=1764 confirmed=[0] AI0:1.00/1.00 AI1:0.08/0.81 AI2:0.00/0.00 AI3:0.17/0.81 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=1783 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.02/0.78 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 2: sync edges=1785 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.09/0.82 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=1779 confirmed=[0] AI0:1.00/1.00 AI1:0.03/0.79 AI2:0.00/0.00 AI3:0.06/0.81 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=1783 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=1783 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 874 s [18 s]
+  block 1: saved 606 s [30 s]
+  block 2: saved 605 s [42 s]
+  block 3: saved 3649 s [116 s]
+  block 4: saved 606 s [128 s]
+  block 5: saved 606 s [140 s]
+DRpilot_796012_20250714 b0: 49592 transitions, 0 low-swing bins of 1748
+DRpilot_796012_20250714 b1: 33298 transitions, 0 low-swing bins of 1212
+DRpilot_796012_20250714 b2: 36000 transitions, 0 low-swing bins of 1211
+DRpilot_796012_20250714 b3: 217100 transitions, 0 low-swing bins of 7298
+DRpilot_796012_20250714 b4: 36000 transitions, 0 low-swing bins of 1212
+DRpilot_796012_20250714 b5: 36000 transitions, 0 low-swing bins of 1212
+DRpilot_762526_20250320: aind-private-data-prod-o5171v/ecephys_762526_2025-03-20_11-14-29/ecephys/ecephys_compressed/experiment1_Record Node 104#NI-DAQmx-101.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=138 global resid -0.04..0.04 ms, max step 0.03 ms
+  block 0: sync edges=1792 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=1789 confirmed=[0] AI0:1.00/1.00 AI1:0.03/0.81 AI2:0.00/0.00 AI3:0.10/0.80 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 603 s [12 s]
+  block 1: saved 3634 s [87 s]
+Traceback (most recent call last):
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\display-times-analog-validation\fetch_analog.py", line 205, in <module>
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\display-times-analog-validation\fetch_analog.py", line 98, in main
+    zpath = comp[0]
+           ^^^^^^^^^
+IndexError: list index out of range
+DRpilot_762526_20250320 b0: 36000 transitions, 0 low-swing bins of 1207
+DRpilot_762526_20250320 b1: 209692 transitions, 0 low-swing bins of 7268
+DRpilot_818720_20251219: ERROR IndexError: list index out of range

@@ -1,0 +1,26 @@
+camera line x span x edge: 9692 (matched to manifest run: 9692)
+
+failures old -> new, by population and line type (edge-level):
+                                        n  fail_old  fail_new
+pop                        type                              
+<20 runs, no discontinuity exposing  1286         6         5
+                           readout   1146        10        10
+>=20 runs                  exposing   426         0         0
+                           readout    426         0         0
+discontinuities            exposing  3204        91        91
+                           readout   3204        87        87
+
+now pass, failed before:
+                      session              line     edge              span  residual_old  residual_sec  fit_residual_max_sec
+8679  DRpilot_857681_20260720  eye_cam_exposing  falling  [20.49999, 22.0]     -0.000146     -0.000004              0.000014
+
+now fail, passed before:
+Empty DataFrame
+Columns: [session, line, edge, span, residual_old, residual_sec, reason]
+Index: []
+
+camera lines with a PWM section: 391 in 152 files (of 968 lines in 152 files)
+sections per line: {1: 391} | first section starts at the line's first edge: 391
+Empty DataFrame
+Columns: [session, line, sections, first_rise, n_sections, starts_at_first_rise]
+Index: []

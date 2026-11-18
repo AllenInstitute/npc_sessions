@@ -1,0 +1,36 @@
+
+===== DRpilot_836629_20260430 invalid=[(5247.5, 5257.0)]
+  beh_cam_exposing   period=16.66626 ms (before 16.66626, after 16.66626); (t1-t0)/p=571.0004; gap resid=+0.007 ms; in-segment fit resid max=0.005 ms; copies=570 reconstructed=570
+  face_cam_exposing  period=16.66605 ms (before 16.66605, after 16.66605); (t1-t0)/p=570.9997; gap resid=-0.004 ms; in-segment fit resid max=0.005 ms; copies=570 reconstructed=570
+  eye_cam_exposing   period=16.66622 ms (before 16.66622, after 16.66622); (t1-t0)/p=571.0007; gap resid=+0.011 ms; in-segment fit resid max=0.015 ms; copies=570 reconstructed=570
+
+===== DRpilot_839146_20260518 invalid=[(5622.0, 5629.0)]
+  face_cam_exposing  period=16.66623 ms (before 16.66623, after 16.66623); (t1-t0)/p=420.9993; gap resid=-0.012 ms; in-segment fit resid max=0.013 ms; copies=420 reconstructed=420
+  beh_cam_exposing   period=16.66581 ms (before 16.66581, after 16.66581); (t1-t0)/p=420.9996; gap resid=-0.006 ms; in-segment fit resid max=0.005 ms; copies=420 reconstructed=420
+  nose_cam_exposing  period=16.66619 ms (before 16.66619, after 16.66620); (t1-t0)/p=421.0019; gap resid=+0.032 ms; in-segment fit resid max=0.036 ms; copies=420 reconstructed=420
+  eye_cam_exposing   period=16.66608 ms (before 16.66608, after 16.66608); (t1-t0)/p=421.0007; gap resid=+0.011 ms; in-segment fit resid max=0.015 ms; copies=420 reconstructed=420
+
+===== DRpilot_847958_20260413 invalid=[(5706.0, 5707.5)]
+  beh_cam_exposing   period=16.66626 ms (before 16.66626, after 16.66626); (t1-t0)/p=91.0000; gap resid=+0.000 ms; in-segment fit resid max=0.005 ms; copies=90 reconstructed=90
+  face_cam_exposing  period=16.66607 ms (before 16.66607, after 16.66607); (t1-t0)/p=91.0004; gap resid=+0.007 ms; in-segment fit resid max=0.005 ms; copies=90 reconstructed=90
+  eye_cam_exposing   period=16.66623 ms (before 16.66623, after 16.66623); (t1-t0)/p=90.9996; gap resid=-0.007 ms; in-segment fit resid max=0.014 ms; copies=90 reconstructed=90
+
+===== DRpilot_856847_20260602 invalid=[(801.5, 805.0)]
+  face_cam_exposing  period=16.66623 ms (before 16.66623, after 16.66623); (t1-t0)/p=211.0003; gap resid=+0.006 ms; in-segment fit resid max=0.010 ms; copies=210 reconstructed=210
+  beh_cam_exposing   period=16.66581 ms (before 16.66581, after 16.66581); (t1-t0)/p=211.0002; gap resid=+0.003 ms; in-segment fit resid max=0.005 ms; copies=210 reconstructed=210
+  nose_cam_exposing  period=16.66621 ms (before 16.66621, after 16.66621); (t1-t0)/p=211.0000; gap resid=-0.001 ms; in-segment fit resid max=0.009 ms; copies=210 reconstructed=210
+  eye_cam_exposing   period=16.66608 ms (before 16.66608, after 16.66608); (t1-t0)/p=210.9998; gap resid=-0.003 ms; in-segment fit resid max=0.014 ms; copies=210 reconstructed=210
+
+===== DRpilot_856847_20260604 invalid=[(2743.0, 2744.5)]
+  face_cam_exposing  period=16.66624 ms (before 16.66623, after 16.66626); (t1-t0)/p=91.0001; gap resid=+0.002 ms; in-segment fit resid max=0.031 ms; copies=90 reconstructed=90
+  beh_cam_exposing   period=16.66581 ms (before 16.66581, after 16.66581); (t1-t0)/p=91.0001; gap resid=+0.001 ms; in-segment fit resid max=0.005 ms; copies=90 reconstructed=90
+  nose_cam_exposing  period=16.66621 ms (before 16.66621, after 16.66621); (t1-t0)/p=90.9997; gap resid=-0.005 ms; in-segment fit resid max=0.012 ms; copies=90 reconstructed=90
+  eye_cam_exposing   period=16.66608 ms (before 16.66608, after 16.66608); (t1-t0)/p=90.9992; gap resid=-0.013 ms; in-segment fit resid max=0.014 ms; copies=90 reconstructed=90
+
+===== DRpilot_862025_20260805 invalid=[(705.0, 706.5)]
+  face_cam_exposing  period=16.66607 ms (before 16.66607, after 16.66607); (t1-t0)/p=90.9999; gap resid=-0.002 ms; in-segment fit resid max=0.005 ms; copies=90 reconstructed=90
+  beh_cam_exposing   period=16.66626 ms (before 16.66626, after 16.66626); (t1-t0)/p=91.0000; gap resid=+0.000 ms; in-segment fit resid max=0.005 ms; copies=90 reconstructed=90
+  nose_cam_exposing  period=16.66611 ms (before 16.66611, after 16.66611); (t1-t0)/p=91.0002; gap resid=+0.004 ms; in-segment fit resid max=0.005 ms; copies=90 reconstructed=90
+  eye_cam_exposing   period=16.66623 ms (before 16.66623, after 16.66623); (t1-t0)/p=91.0008; gap resid=+0.013 ms; in-segment fit resid max=0.014 ms; copies=90 reconstructed=90
+
+worst |gap resid| = 0.032 ms

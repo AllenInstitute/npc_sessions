@@ -1,0 +1,122 @@
+...........F..F.......                                                   [100%]
+================================== FAILURES ===================================
+______ test_opto[kwargsets1-636766_2023-01-23-session_kwargs0-expected0] ______
+
+session = '636766_2023-01-23', session_kwargs = {}
+expected = {'eval': {'df.index.size': 531, "df.query('is_opto').index.size": 313, "df.query('is_opto').opto_stim_name.unique().size": 3}}
+kwargsets = {'is_ephys': False}
+
+    @pytest.mark.parametrize("session, session_kwargs, expected", opto_sessions)
+    def test_opto(session, session_kwargs, expected, kwargsets):
+        s = npc_sessions.Session(session, **kwargsets | session_kwargs)
+>       df = s.trials[:]    # get nwb module
+             ^^^^^^^^
+
+tests\test_task_trials.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\npc_sessions\sessions.py:947: in trials
+    description=self.intervals_descriptions.get(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:878: in intervals_descriptions
+    TaskControl.DynamicRouting1: self.experiment_description.replace(
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:616: in experiment_description
+    elif self.epoch_tags == ["LuminanceTest"]:
+         ^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:755: in epoch_tags
+    self._epoch_tags: list[str] = list(set(self.epochs.tags or []))
+                                           ^^^^^^^^^^^
+src\npc_sessions\_lazy.py:129: in __get__
+    val = self.func(instance)
+          ^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:1427: in epochs
+    records.append(get_epoch_record(stim))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:1386: in get_epoch_record
+    frame_times = self.stim_frame_times[stim_file.stem]
+                  ^^^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:2939: in stim_frame_times
+    v = npc_stim.assert_stim_times(v)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+result = ValueError("No frame display times for S3Path('s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/RFMapp... (sync block 0): block overlaps a replayed sync interval that the SyncPatch couldn't reconstruct for vsync/photodiode")
+
+    def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
+        """Raise exception if result is an exception, otherwise return result"""
+        if isinstance(result, Exception):
+>           raise result from None
+E           ValueError: No frame display times for S3Path('s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/RFMapping_636766_20230123_115051.hdf5') (sync block 0): block overlaps a replayed sync interval that the SyncPatch couldn't reconstruct for vsync/photodiode
+
+..\npc_stim\src\npc_stim\stim.py:411: ValueError
+------------------------------ Captured log call ------------------------------
+WARNING  npc_sync.sync:sync.py:1345 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5): 1 interval(s) of replayed sync data with 50000-sample buffers (all lines invalid): [(589.0, 589.5)]
+WARNING  npc_sync.sync:sync.py:1345 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5): 1 interval(s) of replayed sync data with 50000-sample buffers (all lines invalid): [(589.0, 589.5)]
+WARNING  npc_sync.sync:sync.py:1345 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5): 1 interval(s) of replayed sync data with 50000-sample buffers (all lines invalid): [(589.0, 589.5)]
+WARNING  npc_sync.sync:sync.py:1345 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5): 1 interval(s) of replayed sync data with 50000-sample buffers (all lines invalid): [(589.0, 589.5)]
+WARNING  npc_stim.display_times:display_times.py:406 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5) block 0: block overlaps a replayed sync interval that the SyncPatch couldn't reconstruct for vsync/photodiode
+______ test_opto[kwargsets2-636766_2023-01-23-session_kwargs0-expected0] ______
+
+session = '636766_2023-01-23', session_kwargs = {}
+expected = {'eval': {'df.index.size': 531, "df.query('is_opto').index.size": 313, "df.query('is_opto').opto_stim_name.unique().size": 3}}
+kwargsets = {}
+
+    @pytest.mark.parametrize("session, session_kwargs, expected", opto_sessions)
+    def test_opto(session, session_kwargs, expected, kwargsets):
+        s = npc_sessions.Session(session, **kwargsets | session_kwargs)
+>       df = s.trials[:]    # get nwb module
+             ^^^^^^^^
+
+tests\test_task_trials.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\npc_sessions\sessions.py:947: in trials
+    description=self.intervals_descriptions.get(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:878: in intervals_descriptions
+    TaskControl.DynamicRouting1: self.experiment_description.replace(
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:616: in experiment_description
+    elif self.epoch_tags == ["LuminanceTest"]:
+         ^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:755: in epoch_tags
+    self._epoch_tags: list[str] = list(set(self.epochs.tags or []))
+                                           ^^^^^^^^^^^
+src\npc_sessions\_lazy.py:129: in __get__
+    val = self.func(instance)
+          ^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:1427: in epochs
+    records.append(get_epoch_record(stim))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:1386: in get_epoch_record
+    frame_times = self.stim_frame_times[stim_file.stem]
+                  ^^^^^^^^^^^^^^^^^^^^^
+src\npc_sessions\sessions.py:2939: in stim_frame_times
+    v = npc_stim.assert_stim_times(v)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+result = ValueError("No frame display times for S3Path('s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/RFMapp... (sync block 0): block overlaps a replayed sync interval that the SyncPatch couldn't reconstruct for vsync/photodiode")
+
+    def assert_stim_times(result: Exception | npt.NDArray) -> npt.NDArray:
+        """Raise exception if result is an exception, otherwise return result"""
+        if isinstance(result, Exception):
+>           raise result from None
+E           ValueError: No frame display times for S3Path('s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/RFMapping_636766_20230123_115051.hdf5') (sync block 0): block overlaps a replayed sync interval that the SyncPatch couldn't reconstruct for vsync/photodiode
+
+..\npc_stim\src\npc_stim\stim.py:411: ValueError
+------------------------------ Captured log call ------------------------------
+WARNING  npc_sync.sync:sync.py:1345 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5): 1 interval(s) of replayed sync data with 50000-sample buffers (all lines invalid): [(589.0, 589.5)]
+WARNING  npc_sync.sync:sync.py:1345 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5): 1 interval(s) of replayed sync data with 50000-sample buffers (all lines invalid): [(589.0, 589.5)]
+WARNING  npc_sync.sync:sync.py:1345 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5): 1 interval(s) of replayed sync data with 50000-sample buffers (all lines invalid): [(589.0, 589.5)]
+WARNING  npc_sync.sync:sync.py:1345 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5): 1 interval(s) of replayed sync data with 50000-sample buffers (all lines invalid): [(589.0, 589.5)]
+WARNING  npc_stim.display_times:display_times.py:406 SyncDataset(s3://aind-ephys-data/ecephys_636766_2023-01-23_00-00-00/behavior/20230123T115021.h5) block 0: block overlaps a replayed sync interval that the SyncPatch couldn't reconstruct for vsync/photodiode
+============================== warnings summary ===============================
+tests/test_task_trials.py: 25480 warnings
+  C:\Users\ben.hardcastle\github\npc_sessions\src\npc_sessions\trials\property_dict.py:90: DeprecationWarning: Converting `np.inexact` or `np.floating` to a dtype is deprecated. The current result is `float64` which is not strictly correct.
+    and a.dtype == np.floating
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_task_trials.py::test_opto[kwargsets1-636766_2023-01-23-session_kwargs0-expected0]
+FAILED tests/test_task_trials.py::test_opto[kwargsets2-636766_2023-01-23-session_kwargs0-expected0]
+2 failed, 20 passed, 25480 warnings in 509.29s (0:08:29)

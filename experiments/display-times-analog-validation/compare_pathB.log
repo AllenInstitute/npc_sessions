@@ -1,0 +1,247 @@
+sessions checked: 442; B arrays: 1936
+kind
+B new (baseline had exception)    170
+B changed vs baseline             154
+B session error                    69
+B lost (now exception)              4
+D_offsets presence changed          2
+D_offsets changed                   2
+session error (qc)                  2
+D_onsets presence changed           1
+B changes vs baseline: 328; in blocks changed in path A: 170; not: 158
+                 folder                           kind detail                                      stim  block
+DRpilot_660023_20230808 B new (baseline had exception)                 RFMapping_660023_20230808_130134    3.0
+DRpilot_660023_20230808 B new (baseline had exception)               OptoTagging_660023_20230808_132714    5.0
+DRpilot_660023_20230808 B new (baseline had exception)               OptoTagging_660023_20230808_132859    6.0
+DRpilot_666986_20230816 B new (baseline had exception)               OptoTagging_666986_20230816_152759    1.0
+DRpilot_666986_20230816 B new (baseline had exception)           DynamicRouting1_666986_20230816_155324    4.0
+DRpilot_666986_20230816 B new (baseline had exception)               OptoTagging_666986_20230816_170433    6.0
+DRpilot_667252_20230927 B new (baseline had exception)                 RFMapping_667252_20230927_122748    0.0
+DRpilot_667252_20230927 B new (baseline had exception)               OptoTagging_667252_20230927_124229    1.0
+DRpilot_667252_20230927 B new (baseline had exception)               Spontaneous_667252_20230927_124722    2.0
+DRpilot_667252_20230927 B new (baseline had exception)        SpontaneousRewards_667252_20230927_125933    3.0
+DRpilot_667252_20230927 B new (baseline had exception)        SpontaneousRewards_667252_20230927_141042    5.0
+DRpilot_667252_20230927 B new (baseline had exception)               OptoTagging_667252_20230927_142054    6.0
+DRpilot_674562_20231002 B new (baseline had exception)                 RFMapping_674562_20231002_145415    0.0
+DRpilot_674562_20231002 B new (baseline had exception)               Spontaneous_674562_20231002_150909    1.0
+DRpilot_674562_20231002 B new (baseline had exception)        SpontaneousRewards_674562_20231002_152006    2.0
+DRpilot_674562_20231002 B new (baseline had exception)        SpontaneousRewards_674562_20231002_163133    4.0
+DRpilot_674562_20231002 B new (baseline had exception)               OptoTagging_674562_20231002_164529    5.0
+DRpilot_674562_20231003 B new (baseline had exception)                 RFMapping_674562_20231003_151033    0.0
+DRpilot_674562_20231003 B new (baseline had exception)               OptoTagging_674562_20231003_152526    1.0
+DRpilot_674562_20231003 B new (baseline had exception)               Spontaneous_674562_20231003_153027    2.0
+DRpilot_674562_20231003 B new (baseline had exception)        SpontaneousRewards_674562_20231003_154123    3.0
+DRpilot_674562_20231003 B new (baseline had exception)        SpontaneousRewards_674562_20231003_165208    5.0
+DRpilot_674562_20231003 B new (baseline had exception)               OptoTagging_674562_20231003_170247    6.0
+DRpilot_674562_20231004 B new (baseline had exception)                 RFMapping_674562_20231004_161209    0.0
+DRpilot_674562_20231004 B new (baseline had exception)               OptoTagging_674562_20231004_162701    1.0
+DRpilot_674562_20231004 B new (baseline had exception)               Spontaneous_674562_20231004_163201    2.0
+DRpilot_674562_20231004 B new (baseline had exception)        SpontaneousRewards_674562_20231004_164215    3.0
+DRpilot_674562_20231004 B new (baseline had exception)           DynamicRouting1_674562_20231004_165226    4.0
+DRpilot_674562_20231004 B new (baseline had exception)        SpontaneousRewards_674562_20231004_175311    5.0
+DRpilot_674562_20231005 B new (baseline had exception)               OptoTagging_674562_20231005_122939    1.0
+DRpilot_674562_20231005 B new (baseline had exception)               Spontaneous_674562_20231005_123342    2.0
+DRpilot_674562_20231005 B new (baseline had exception)        SpontaneousRewards_674562_20231005_124434    3.0
+DRpilot_674562_20231005 B new (baseline had exception)           DynamicRouting1_674562_20231005_125445    4.0
+DRpilot_674562_20231005 B new (baseline had exception)        SpontaneousRewards_674562_20231005_135519    5.0
+DRpilot_674562_20231005 B new (baseline had exception)               OptoTagging_674562_20231005_140531    6.0
+DRpilot_699847_20240415 B new (baseline had exception)                 RFMapping_699847_20240415_124856    0.0
+DRpilot_699847_20240415 B new (baseline had exception)        SpontaneousRewards_699847_20240415_131755    3.0
+DRpilot_699847_20240415 B new (baseline had exception)           DynamicRouting1_699847_20240415_132808    4.0
+DRpilot_699847_20240415 B new (baseline had exception)        SpontaneousRewards_699847_20240415_142908    5.0
+DRpilot_699847_20240415 B new (baseline had exception)               Spontaneous_699847_20240415_143922    6.0
+DRpilot_699847_20240415 B new (baseline had exception)               OptoTagging_699847_20240415_144936    7.0
+DRpilot_699847_20240417 B new (baseline had exception)                 RFMapping_699847_20240417_121323    0.0
+DRpilot_699847_20240417 B new (baseline had exception)        SpontaneousRewards_699847_20240417_124222    3.0
+DRpilot_699847_20240417 B new (baseline had exception)           DynamicRouting1_699847_20240417_125236    4.0
+DRpilot_699847_20240417 B new (baseline had exception)        SpontaneousRewards_699847_20240417_135339    5.0
+DRpilot_699847_20240417 B new (baseline had exception)               Spontaneous_699847_20240417_140351    6.0
+DRpilot_699847_20240417 B new (baseline had exception)               OptoTagging_699847_20240417_141405    7.0
+DRpilot_699847_20240418 B new (baseline had exception)                 RFMapping_699847_20240418_134311    0.0
+DRpilot_699847_20240418 B new (baseline had exception)               Spontaneous_699847_20240418_140255    2.0
+DRpilot_699847_20240418 B new (baseline had exception)        SpontaneousRewards_699847_20240418_152351    5.0
+DRpilot_699847_20240418 B new (baseline had exception)               Spontaneous_699847_20240418_153402    6.0
+DRpilot_702136_20240305 B new (baseline had exception)                 RFMapping_702136_20240305_115915    0.0
+DRpilot_702136_20240305 B new (baseline had exception)               Spontaneous_702136_20240305_121357    1.0
+DRpilot_702136_20240305 B new (baseline had exception)        SpontaneousRewards_702136_20240305_122440    2.0
+DRpilot_702136_20240305 B new (baseline had exception)        SpontaneousRewards_702136_20240305_133531    4.0
+DRpilot_702136_20240305 B new (baseline had exception)               Spontaneous_702136_20240305_134543    5.0
+DRpilot_702136_20240306 B new (baseline had exception)                 RFMapping_702136_20240306_112601    0.0
+DRpilot_702136_20240306 B new (baseline had exception)               Spontaneous_702136_20240306_114043    1.0
+DRpilot_702136_20240306 B new (baseline had exception)        SpontaneousRewards_702136_20240306_115054    2.0
+DRpilot_702136_20240306 B new (baseline had exception)               Spontaneous_702136_20240306_131154    5.0
+DRpilot_703881_20240509 B new (baseline had exception)                 RFMapping_703881_20240509_133139    0.0
+DRpilot_703882_20240424 B new (baseline had exception)                 RFMapping_703882_20240424_132110    0.0
+DRpilot_703882_20240424 B new (baseline had exception)               OptoTagging_703882_20240424_133556    1.0
+DRpilot_703882_20240424 B new (baseline had exception)               Spontaneous_703882_20240424_134000    2.0
+DRpilot_703882_20240424 B new (baseline had exception)        SpontaneousRewards_703882_20240424_135031    3.0
+DRpilot_703882_20240424 B new (baseline had exception)        SpontaneousRewards_703882_20240424_150137    5.0
+DRpilot_703882_20240424 B new (baseline had exception)               Spontaneous_703882_20240424_151152    6.0
+DRpilot_703882_20240424 B new (baseline had exception)               OptoTagging_703882_20240424_152207    7.0
+DRpilot_706401_20240422 B new (baseline had exception)                 RFMapping_706401_20240422_131612    0.0
+DRpilot_706401_20240422 B new (baseline had exception)               Spontaneous_706401_20240422_133402    2.0
+DRpilot_706401_20240422 B new (baseline had exception)        SpontaneousRewards_706401_20240422_134413    3.0
+DRpilot_706401_20240422 B new (baseline had exception)        SpontaneousRewards_706401_20240422_145505    5.0
+DRpilot_706401_20240422 B new (baseline had exception)               Spontaneous_706401_20240422_150516    6.0
+DRpilot_706401_20240423 B new (baseline had exception)                 RFMapping_706401_20240423_125703    0.0
+DRpilot_706401_20240423 B new (baseline had exception)        SpontaneousRewards_706401_20240423_132305    3.0
+DRpilot_706401_20240423 B new (baseline had exception)        SpontaneousRewards_706401_20240423_143401    5.0
+DRpilot_706401_20240423 B new (baseline had exception)               Spontaneous_706401_20240423_144412    6.0
+DRpilot_706401_20240424 B new (baseline had exception)                 RFMapping_706401_20240424_122642    0.0
+DRpilot_706401_20240424 B new (baseline had exception)               Spontaneous_706401_20240424_124532    2.0
+DRpilot_706401_20240424 B new (baseline had exception)               Spontaneous_706401_20240424_141644    6.0
+DRpilot_706401_20240425 B new (baseline had exception)                 RFMapping_706401_20240425_120341    0.0
+DRpilot_706401_20240425 B new (baseline had exception)        SpontaneousRewards_706401_20240425_123241    3.0
+DRpilot_706401_20240425 B new (baseline had exception)        SpontaneousRewards_706401_20240425_134341    5.0
+DRpilot_706401_20240425 B new (baseline had exception)               Spontaneous_706401_20240425_135352    6.0
+DRpilot_708016_20240501 B new (baseline had exception)                 RFMapping_708016_20240501_123554    0.0
+DRpilot_708016_20240501 B new (baseline had exception)               OptoTagging_708016_20240501_125035    1.0
+DRpilot_708016_20240501 B new (baseline had exception)               Spontaneous_708016_20240501_125146    2.0
+DRpilot_708016_20240501 B new (baseline had exception)        SpontaneousRewards_708016_20240501_130157    3.0
+DRpilot_708016_20240501 B new (baseline had exception)        SpontaneousRewards_708016_20240501_141300    5.0
+DRpilot_708016_20240501 B new (baseline had exception)               Spontaneous_708016_20240501_142312    6.0
+DRpilot_708016_20240501 B new (baseline had exception)               OptoTagging_708016_20240501_143323    7.0
+DRpilot_708016_20240502 B new (baseline had exception)                 RFMapping_708016_20240502_121951    0.0
+DRpilot_708016_20240502 B new (baseline had exception)               OptoTagging_708016_20240502_123433    1.0
+DRpilot_708016_20240502 B new (baseline had exception)               Spontaneous_708016_20240502_123839    2.0
+DRpilot_708016_20240502 B new (baseline had exception)        SpontaneousRewards_708016_20240502_124850    3.0
+DRpilot_708016_20240502 B new (baseline had exception)        SpontaneousRewards_708016_20240502_135938    5.0
+DRpilot_708016_20240502 B new (baseline had exception)               Spontaneous_708016_20240502_140951    6.0
+DRpilot_708016_20240502 B new (baseline had exception)               OptoTagging_708016_20240502_142004    7.0
+DRpilot_712141_20240612 B new (baseline had exception)                 RFMapping_712141_20240612_124724    0.0
+DRpilot_712141_20240612 B new (baseline had exception)                 RFMapping_712141_20240612_140247    2.0
+DRpilot_712815_20240523 B new (baseline had exception)                 RFMapping_712815_20240523_114104    0.0
+DRpilot_712815_20240523 B new (baseline had exception)               Spontaneous_712815_20240523_115545    1.0
+DRpilot_712815_20240523 B new (baseline had exception)        SpontaneousRewards_712815_20240523_120557    2.0
+DRpilot_712815_20240523 B new (baseline had exception)        SpontaneousRewards_712815_20240523_131653    4.0
+DRpilot_712815_20240523 B new (baseline had exception)               Spontaneous_712815_20240523_132705    5.0
+DRpilot_715706_20240626 B new (baseline had exception)                 RFMapping_715706_20240626_142537    0.0
+DRpilot_715706_20240626 B new (baseline had exception)                 RFMapping_715706_20240626_154118    2.0
+DRpilot_715706_20240627 B new (baseline had exception)                 RFMapping_715706_20240627_125009    0.0
+DRpilot_715706_20240627 B new (baseline had exception)                 RFMapping_715706_20240627_141931    2.0
+DRpilot_726088_20240620 B new (baseline had exception)                 RFMapping_726088_20240620_124940    0.0
+DRpilot_726088_20240620 B new (baseline had exception)               Spontaneous_726088_20240620_130422    1.0
+DRpilot_726088_20240620 B new (baseline had exception)        SpontaneousRewards_726088_20240620_131433    2.0
+DRpilot_726088_20240620 B new (baseline had exception)        SpontaneousRewards_726088_20240620_142524    4.0
+DRpilot_726088_20240620 B new (baseline had exception)               Spontaneous_726088_20240620_143534    5.0
+DRpilot_733780_20240905 B new (baseline had exception)                 RFMapping_733780_20240905_123715    0.0
+DRpilot_733780_20240905 B new (baseline had exception)               OptoTagging_733780_20240905_125157    1.0
+DRpilot_733780_20240905 B new (baseline had exception)               Spontaneous_733780_20240905_125503    2.0
+DRpilot_733780_20240905 B new (baseline had exception)        SpontaneousRewards_733780_20240905_130517    3.0
+DRpilot_733780_20240905 B new (baseline had exception)           DynamicRouting1_733780_20240905_131530    4.0
+DRpilot_733780_20240905 B new (baseline had exception)        SpontaneousRewards_733780_20240905_141620    5.0
+DRpilot_733780_20240905 B new (baseline had exception)               Spontaneous_733780_20240905_142632    6.0
+DRpilot_733891_20240916 B new (baseline had exception)                 RFMapping_733891_20240916_151106    0.0
+DRpilot_733891_20240916 B new (baseline had exception)               OptoTagging_733891_20240916_152548    1.0
+DRpilot_733891_20240916 B new (baseline had exception)               Spontaneous_733891_20240916_153149    2.0
+DRpilot_733891_20240916 B new (baseline had exception)        SpontaneousRewards_733891_20240916_154200    3.0
+DRpilot_733891_20240916 B new (baseline had exception)        SpontaneousRewards_733891_20240916_165257    5.0
+DRpilot_733891_20240916 B new (baseline had exception)               Spontaneous_733891_20240916_170309    6.0
+DRpilot_733891_20240916 B new (baseline had exception)               OptoTagging_733891_20240916_171320    7.0
+DRpilot_733891_20240917 B new (baseline had exception)                 RFMapping_733891_20240917_121929    0.0
+DRpilot_733891_20240917 B new (baseline had exception)               OptoTagging_733891_20240917_123410    1.0
+DRpilot_733891_20240917 B new (baseline had exception)               Spontaneous_733891_20240917_124010    2.0
+DRpilot_733891_20240917 B new (baseline had exception)        SpontaneousRewards_733891_20240917_125021    3.0
+DRpilot_733891_20240917 B new (baseline had exception)        SpontaneousRewards_733891_20240917_140111    5.0
+DRpilot_733891_20240917 B new (baseline had exception)               Spontaneous_733891_20240917_141122    6.0
+DRpilot_733891_20240917 B new (baseline had exception)               OptoTagging_733891_20240917_142132    7.0
+DRpilot_733891_20240919 B new (baseline had exception)                 RFMapping_733891_20240919_122147    0.0
+DRpilot_733891_20240919 B new (baseline had exception)               OptoTagging_733891_20240919_123629    1.0
+DRpilot_733891_20240919 B new (baseline had exception)               Spontaneous_733891_20240919_124229    2.0
+DRpilot_733891_20240919 B new (baseline had exception)        SpontaneousRewards_733891_20240919_125243    3.0
+DRpilot_733891_20240919 B new (baseline had exception)        SpontaneousRewards_733891_20240919_140349    5.0
+DRpilot_733891_20240919 B new (baseline had exception)               Spontaneous_733891_20240919_141402    6.0
+DRpilot_733891_20240919 B new (baseline had exception)               OptoTagging_733891_20240919_142415    7.0
+DRpilot_741148_20241016 B new (baseline had exception)                 RFMapping_741148_20241016_130157    0.0
+DRpilot_741148_20241016 B new (baseline had exception)               Spontaneous_741148_20241016_131639    1.0
+DRpilot_741148_20241016 B new (baseline had exception)        SpontaneousRewards_741148_20241016_132651    2.0
+DRpilot_741148_20241016 B new (baseline had exception)        SpontaneousRewards_741148_20241016_143744    4.0
+DRpilot_741148_20241016 B new (baseline had exception)               Spontaneous_741148_20241016_144755    5.0
+DRpilot_761583_20241219 B new (baseline had exception)                 RFMapping_761583_20241219_102300    0.0
+DRpilot_761583_20241219 B new (baseline had exception)               Spontaneous_761583_20241219_103742    1.0
+DRpilot_761583_20241219 B new (baseline had exception)        SpontaneousRewards_761583_20241219_104753    2.0
+DRpilot_761583_20241219 B new (baseline had exception)        SpontaneousRewards_761583_20241219_115847    4.0
+DRpilot_761583_20241219 B new (baseline had exception)               Spontaneous_761583_20241219_120859    5.0
+DRpilot_762526_20250320 B new (baseline had exception)               Spontaneous_762526_20250320_111508    0.0
+DRpilot_818720_20251219 B new (baseline had exception)                 RFMapping_818720_20251219_140457    0.0
+DRpilot_818720_20251219 B new (baseline had exception)               Spontaneous_818720_20251219_141938    1.0
+DRpilot_818720_20251219 B new (baseline had exception)        SpontaneousRewards_818720_20251219_142952    2.0
+DRpilot_818720_20251219 B new (baseline had exception)        SpontaneousRewards_818720_20251219_154109    4.0
+DRpilot_818720_20251219 B new (baseline had exception)               Spontaneous_818720_20251219_155123    5.0
+                 folder                       kind                                                                                                                                                           detail stim  block
+DRpilot_366122_20250109            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_366122_20250109/20250109T194446.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_366122_20250109  D_onsets presence changed                                                                                                                                                              NaN  NaN    NaN
+DRpilot_366122_20250109 D_offsets presence changed                                                                                                                                                              NaN  NaN    NaN
+DRpilot_626791_20220815          D_offsets changed                                                                                                                                                           2 -> 2  NaN    NaN
+DRpilot_626791_20220816 D_offsets presence changed                                                                                                                                                              NaN  NaN    NaN
+DRpilot_626791_20220817          D_offsets changed                                                                                                                                                           2 -> 2  NaN    NaN
+DRpilot_636766_20230123            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_636766_20230123/20230123T115021.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_644867_20230221            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_644867_20230221/20230221T121701.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_649943_20230214            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_649943_20230214/20230214T110306.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_649943_20230215            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_649943_20230215/20230215T115233.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_660023_20230809            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_660023_20230809/20230809T080909.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_664566_20231121            B session error                                                                                 {'type': 'IndexError', 'msg': 'index 0 is out of bounds for axis 0 with size 0'}  NaN    NaN
+DRpilot_666986_20230814            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_666986_20230814/20230814T113855.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_703880_20240418            B session error {'type': 'AssertionError', 'msg': 'SyncDataset(C:/data/t2p_cache/DRpilot_703880_20240418/20240418T130656.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_708016_20240430            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_708016_20240430/20240430T125828.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_708020_20240517            B session error {'type': 'AssertionError', 'msg': 'SyncDataset(C:/data/t2p_cache/DRpilot_708020_20240517/20240517T100128.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_712141_20240611            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_712141_20240611/20240611T115006.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_712815_20240520            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_712815_20240520/20240520T112202.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_714748_20240628            B session error {'type': 'AssertionError', 'msg': 'SyncDataset(C:/data/t2p_cache/DRpilot_714748_20240628/20240628T095859.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_714753_20240703            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_714753_20240703/20240703T110353.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_714753_20240705            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_714753_20240705/20240705T103135.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_715710_20240719            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_715710_20240719/20240719T110007.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_716718_20240731            B session error                                                                                                                            {'type': 'AssertionError', 'msg': ''}  NaN    NaN
+DRpilot_718283_20240823            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_718283_20240823/20240823T112347.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_724612_20240723         session error (qc)                                                                                                                                 {'type': 'NotCached', 'msg': ''}  NaN    NaN
+DRpilot_733780_20240830            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_733780_20240830/20240830T104827.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_733780_20240904            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_733780_20240904/20240904T123645.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_761583_20241216            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_761583_20241216/20241216T105731.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_761583_20241217            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_761583_20241217/20241217T105140.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_761583_20241218            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_761583_20241218/20241218T104153.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_772655_20250305         session error (qc)                                                                                                                                 {'type': 'NotCached', 'msg': ''}  NaN    NaN
+DRpilot_772656_20250425            B session error                                                                                 {'type': 'IndexError', 'msg': 'index 0 is out of bounds for axis 0 with size 0'}  NaN    NaN
+DRpilot_796012_20250710            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_796012_20250710/20250710T104158.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_798632_20250829            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_798632_20250829/20250829T103812.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_798632_20250902            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_798632_20250902/20250902T112002.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_813586_20251202            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_813586_20251202/20251202T114847.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_835598_20260223            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_835598_20260223/20260223T111138.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_835598_20260227            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_835598_20260227/20260227T105255.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_836629_20260430            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_836629_20260430/20260430T103247.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_836629_20260501            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_836629_20260501/20260501T113621.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_836726_20260213            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_836726_20260213/20260213T101931.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_837230_20260420            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_837230_20260420/20260420T135609.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_837959_20260330            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_837959_20260330/20260330T110552.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_837959_20260331            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_837959_20260331/20260331T102014.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_837959_20260402            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_837959_20260402/20260402T103011.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_839146_20260518            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_839146_20260518/20260518T102632.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_840160_20260428            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_840160_20260428/20260428T103950.h5) has a timebase discontinuity (all lines affected, l  NaN    NaN
+DRpilot_840160_20260429            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_840160_20260429/20260429T102259.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_841308_20260506            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_841308_20260506/20260506T115939.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_841308_20260511            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_841308_20260511/20260511T114204.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_847958_20260413            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_847958_20260413/20260413T102509.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_847958_20260415            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_847958_20260415/20260415T100926.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_850215_20260318            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_850215_20260318/20260318T124447.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_850217_20260402            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_850217_20260402/20260402T134231.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_850217_20260403            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_850217_20260403/20260403T114038.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_854390_20260422            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_854390_20260422/20260422T101859.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_854390_20260423            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_854390_20260423/20260423T103336.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_854390_20260427            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_854390_20260427/20260427T103252.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_856847_20260602            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_856847_20260602/20260602T114649.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_856847_20260604            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_856847_20260604/20260604T111425.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_856847_20260605            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_856847_20260605/20260605T112231.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_857681_20260813            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_857681_20260813/20260813T103433.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_858182_20260925            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_858182_20260925/20260925T102422.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_858182_20260928            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_858182_20260928/20260928T103305.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_858182_20260929            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_858182_20260929/20260929T104020.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_859582_20260701            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_859582_20260701/20260701T100333.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_859583_20260515            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_859583_20260515/20260515T114326.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_862025_20260804            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_862025_20260804/20260804T111616.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_862025_20260805            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_862025_20260805/20260805T114824.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_862025_20260806            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_862025_20260806/20260806T113052.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_862027_20260916            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_862027_20260916/20260916T110415.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_862027_20260918            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_862027_20260918/20260918T105054.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_865817_20261020            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_865817_20261020/20261020T115437.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_872697_20260903            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_872697_20260903/20260903T105710.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_872974_20261109            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_872974_20261109/20261109T114001.h5) contains replayed sync data (all lines invalid) at   NaN    NaN
+DRpilot_872974_20261110            B session error {'type': 'AssertionError', 'msg': "SyncDataset(C:/data/t2p_cache/DRpilot_872974_20261110/20261110T112724.h5) contains replayed sync data (all lines invalid) at   NaN    NaN

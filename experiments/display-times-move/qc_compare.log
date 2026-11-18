@@ -1,0 +1,66 @@
+{
+ "n_sessions_listed": 444,
+ "status": {
+  "no_run:Timeout": 1,
+  "compared": 441,
+  "no_run:NotCached": 2
+ },
+ "n_compared": 441,
+ "A_identical": {
+  "true": 441
+ },
+ "B_identical": {
+  "true": 406,
+  "false": 35
+ },
+ "C_identical": {
+  "true": 441
+ },
+ "A2_equals_A": {
+  "true": 441
+ },
+ "A_sources_same": {
+  "true": 441
+ },
+ "A_stim_paths_same": {
+  "true": 441
+ },
+ "vsync_blocks_identical": {
+  "true": 441
+ },
+ "D_onsets_identical": {
+  "true": 441
+ },
+ "D_offsets_identical": {
+  "true": 438,
+  "false": 3
+ },
+ "A_error_base": {
+  "none": 371,
+  "AssertionError": 67,
+  "IndexError": 3
+ },
+ "A_error_new": {
+  "none": 371,
+  "AssertionError": 67,
+  "IndexError": 3
+ },
+ "B_error_base": {
+  "none": 337,
+  "TypeError": 35,
+  "AssertionError": 66,
+  "IndexError": 3
+ },
+ "B_error_new": {
+  "none": 372,
+  "AssertionError": 66,
+  "IndexError": 3
+ },
+ "block_sources_new": {
+  "photodiode": 1938,
+  "unavailable": 62
+ },
+ "blocks_identical": {
+  "true": 2000
+ }
+}

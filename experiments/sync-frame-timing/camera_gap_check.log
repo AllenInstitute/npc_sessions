@@ -1,0 +1,34 @@
+
+===== DRpilot_836629_20260430 invalid=[(5247.5, 5257.0)]
+  beh_cam_exposing       [5247.5,5257.0) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=570.8722 -> frac 0.1278; resid=-2.130 ms; jitter max=0.010 ms; copies=570 vs reconstructed=570
+  face_cam_exposing      [5247.5,5257.0) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=570.8644 -> frac 0.1356; resid=-2.260 ms; jitter max=0.010 ms; copies=570 vs reconstructed=570
+  eye_cam_exposing       [5247.5,5257.0) period=16.6600 ms (before 16.6600, after 16.6600); (t1-t0)/p=571.2137 -> frac 0.2137; resid=+3.560 ms; jitter max=0.020 ms; copies=570 vs reconstructed=570
+
+===== DRpilot_839146_20260518 invalid=[(5622.0, 5629.0)]
+  face_cam_exposing      [5622.0,5629.0) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=420.9040 -> frac 0.0960; resid=-1.600 ms; jitter max=0.020 ms; copies=420 vs reconstructed=420
+  beh_cam_exposing       [5622.0,5629.0) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=420.8938 -> frac 0.1062; resid=-1.770 ms; jitter max=0.010 ms; copies=420 vs reconstructed=420
+  nose_cam_exposing      [5622.0,5629.0) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=420.9058 -> frac 0.0942; resid=-1.570 ms; jitter max=0.040 ms; copies=420 vs reconstructed=420
+  eye_cam_exposing       [5622.0,5629.0) period=16.6600 ms (before 16.6600, after 16.6600); (t1-t0)/p=421.1543 -> frac 0.1543; resid=+2.570 ms; jitter max=0.020 ms; copies=420 vs reconstructed=420
+
+===== DRpilot_847958_20260413 invalid=[(5706.0, 5707.5)]
+  beh_cam_exposing       [5706.0,5707.5) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=90.9796 -> frac 0.0204; resid=-0.340 ms; jitter max=0.010 ms; copies=90 vs reconstructed=90
+  face_cam_exposing      [5706.0,5707.5) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=90.9790 -> frac 0.0210; resid=-0.350 ms; jitter max=0.010 ms; copies=90 vs reconstructed=90
+  eye_cam_exposing       [5706.0,5707.5) period=16.6600 ms (before 16.6600, after 16.6600); (t1-t0)/p=91.0336 -> frac 0.0336; resid=+0.560 ms; jitter max=0.020 ms; copies=90 vs reconstructed=90
+
+===== DRpilot_856847_20260602 invalid=[(801.5, 805.0)]
+  face_cam_exposing      [801.5,805.0) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=210.9526 -> frac 0.0474; resid=-0.790 ms; jitter max=0.010 ms; copies=210 vs reconstructed=210
+  beh_cam_exposing       [801.5,805.0) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=210.9472 -> frac 0.0528; resid=-0.880 ms; jitter max=0.010 ms; copies=210 vs reconstructed=210
+  nose_cam_exposing      [801.5,805.0) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=210.9520 -> frac 0.0480; resid=-0.800 ms; jitter max=0.010 ms; copies=210 vs reconstructed=210
+  eye_cam_exposing       [801.5,805.0) period=16.6600 ms (before 16.6600, after 16.6600); (t1-t0)/p=211.0768 -> frac 0.0768; resid=+1.280 ms; jitter max=0.020 ms; copies=210 vs reconstructed=210
+
+===== DRpilot_856847_20260604 invalid=[(2743.0, 2744.5)]
+  face_cam_exposing      [2743.0,2744.5) period=16.6650 ms (before 16.6700, after 16.6600); (t1-t0)/p=91.0069 -> frac 0.0069; resid=+0.115 ms; jitter max=0.045 ms; copies=90 vs reconstructed=90
+  beh_cam_exposing       [2743.0,2744.5) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=90.9772 -> frac 0.0228; resid=-0.380 ms; jitter max=0.010 ms; copies=90 vs reconstructed=90
+  nose_cam_exposing      [2743.0,2744.5) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=90.9790 -> frac 0.0210; resid=-0.350 ms; jitter max=0.020 ms; copies=90 vs reconstructed=90
+  eye_cam_exposing       [2743.0,2744.5) period=16.6600 ms (before 16.6600, after 16.6600); (t1-t0)/p=91.0324 -> frac 0.0324; resid=+0.540 ms; jitter max=0.020 ms; copies=90 vs reconstructed=90
+
+===== DRpilot_862025_20260805 invalid=[(705.0, 706.5)]
+  face_cam_exposing      [705.0,706.5) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=90.9784 -> frac 0.0216; resid=-0.360 ms; jitter max=0.010 ms; copies=90 vs reconstructed=90
+  beh_cam_exposing       [705.0,706.5) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=90.9796 -> frac 0.0204; resid=-0.340 ms; jitter max=0.010 ms; copies=90 vs reconstructed=90
+  nose_cam_exposing      [705.0,706.5) period=16.6700 ms (before 16.6700, after 16.6700); (t1-t0)/p=90.9790 -> frac 0.0210; resid=-0.350 ms; jitter max=0.010 ms; copies=90 vs reconstructed=90
+  eye_cam_exposing       [705.0,706.5) period=16.6600 ms (before 16.6600, after 16.6600); (t1-t0)/p=91.0348 -> frac 0.0348; resid=+0.580 ms; jitter max=0.020 ms; copies=90 vs reconstructed=90

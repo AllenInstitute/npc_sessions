@@ -1,0 +1,90 @@
+npc_sync source: C:\Users\ben.hardcastle\github\npc_sync\src\npc_sync\__init__.py
+npc_stim: C:\Users\ben.hardcastle\github\npc_sync\.venv\Lib\site-packages\npc_stim\__init__.py
+
+===== DRpilot_836629_20260430  sync=20260430T103247.h5  n_stim=6
+C1 invalid_intervals: [(5247.5, 5257.0)]
+C2 lines with edges in invalid intervals: vsync_stim(bit2): rise=570 fall=570; stim_photodiode(bit4): rise=95 fall=95; beh_cam_frame_readout(bit21): rise=570 fall=570; face_cam_frame_readout(bit22): rise=570 fall=570; eye_cam_frame_readout(bit25): rise=570 fall=570; beh_cam_exposing(bit27): rise=570 fall=570; face_cam_exposing(bit28): rise=570 fall=570; eye_cam_exposing(bit29): rise=570 fall=570
+C3 frame_display_time_blocks: AssertionError (SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRp...)
+C4 vsync_times_in_blocks: returned 6 blocks, lens=[51336, 36000, 36000, 216005, 36000, 36000]; blocks overlapping invalid intervals=[3]
+C5 DynamicRouting1_836629_20260430_110832: MISSING KEY
+C5 RFMapping_836629_20260430_103326: array len=51336 (stim frames=51336)
+C5 Spontaneous_836629_20260430_104808: array len=36000 (stim frames=36000)
+C5 Spontaneous_836629_20260430_121923: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_836629_20260430_105819: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_836629_20260430_120911: array len=36000 (stim frames=36000)
+C6 sync barcode starts (crude): n=227; within 1 s of an invalid interval: []
+
+===== DRpilot_839146_20260518  sync=20260518T102632.h5  n_stim=6
+C1 invalid_intervals: [(5622.0, 5629.0)]
+C2 lines with edges in invalid intervals: vsync_stim(bit2): rise=420 fall=420; stim_photodiode(bit4): rise=70 fall=70; beh_cam_frame_readout(bit21): rise=420 fall=420; nose_cam_frame_readout(bit22): rise=420 fall=420; eye_cam_frame_readout(bit25): rise=420 fall=420; face_cam_exposing(bit26): rise=420 fall=420; beh_cam_exposing(bit27): rise=420 fall=420; nose_cam_exposing(bit28): rise=420 fall=420; eye_cam_exposing(bit29): rise=420 fall=420
+C3 frame_display_time_blocks: AssertionError (SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRp...)
+C4 vsync_times_in_blocks: returned 6 blocks, lens=[51336, 36000, 36000, 216997, 36000, 36000]; blocks overlapping invalid intervals=[3]
+C5 DynamicRouting1_839146_20260518_110220: MISSING KEY
+C5 RFMapping_839146_20260518_102707: array len=51336 (stim frames=51336)
+C5 Spontaneous_839146_20260518_104149: array len=36000 (stim frames=36000)
+C5 Spontaneous_839146_20260518_121338: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_839146_20260518_105205: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_839146_20260518_120323: array len=36000 (stim frames=36000)
+C6 sync barcode starts (crude): n=227; within 1 s of an invalid interval: []
+
+===== DRpilot_840160_20260428  sync=20260428T103950.h5  n_stim=4
+C1 invalid_intervals: []
+C3 frame_display_time_blocks: returned (no guard triggered)
+C4 vsync_times_in_blocks: returned 4 blocks, lens=[51336, 36000, 36000, 217104]; blocks overlapping invalid intervals=[]
+C5 DynamicRouting1_840160_20260428_111539: MISSING KEY
+C5 RFMapping_840160_20260428_104029: array len=51336 (stim frames=51336)
+C5 Spontaneous_840160_20260428_105511: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_840160_20260428_110525: array len=36000 (stim frames=36000)
+C6 sync barcode starts (crude): n=188; within 1 s of an invalid interval: []
+
+===== DRpilot_847958_20260413  sync=20260413T102509.h5  n_stim=6
+C1 invalid_intervals: [(5706.0, 5707.5)]
+C2 lines with edges in invalid intervals: vsync_stim(bit2): rise=90 fall=90; stim_photodiode(bit4): rise=15 fall=15; beh_cam_frame_readout(bit21): rise=90 fall=90; face_cam_frame_readout(bit22): rise=90 fall=90; eye_cam_frame_readout(bit25): rise=90 fall=90; beh_cam_exposing(bit27): rise=90 fall=90; face_cam_exposing(bit28): rise=90 fall=90; eye_cam_exposing(bit29): rise=90 fall=90
+C3 frame_display_time_blocks: AssertionError (SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRp...)
+C4 vsync_times_in_blocks: returned 6 blocks, lens=[51336, 36000, 36000, 217029, 36000, 36000]; blocks overlapping invalid intervals=[3]
+C5 DynamicRouting1_847958_20260413_110058: array len=217029 (stim frames=217028) OVERLAPS INVALID INTERVAL
+C5 RFMapping_847958_20260413_102547: array len=51336 (stim frames=51336)
+C5 Spontaneous_847958_20260413_104028: array len=36000 (stim frames=36000)
+C5 Spontaneous_847958_20260413_121215: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_847958_20260413_105043: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_847958_20260413_120200: array len=36000 (stim frames=36000)
+C6 sync barcode starts (crude): n=227; within 1 s of an invalid interval: []
+
+===== DRpilot_856847_20260602  sync=20260602T114649.h5  n_stim=6
+C1 invalid_intervals: [(801.5, 805.0)]
+C2 lines with edges in invalid intervals: barcode_ephys(bit0): rise=21 fall=21; vsync_stim(bit2): rise=210 fall=210; stim_photodiode(bit4): rise=35 fall=35; beh_cam_frame_readout(bit21): rise=210 fall=210; nose_cam_frame_readout(bit22): rise=210 fall=210; eye_cam_frame_readout(bit25): rise=210 fall=210; face_cam_exposing(bit26): rise=210 fall=210; beh_cam_exposing(bit27): rise=210 fall=210; nose_cam_exposing(bit28): rise=210 fall=210; eye_cam_exposing(bit29): rise=210 fall=210
+C3 frame_display_time_blocks: AssertionError (SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRp...)
+C4 vsync_times_in_blocks: returned 6 blocks, lens=[51342, 36000, 36000, 216918, 36000, 36000]; blocks overlapping invalid intervals=[0]
+C5 DynamicRouting1_856847_20260602_122238: array len=216918 (stim frames=216918)
+C5 RFMapping_856847_20260602_114728: MISSING KEY
+C5 Spontaneous_856847_20260602_120211: array len=36000 (stim frames=36000)
+C5 Spontaneous_856847_20260602_133346: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_856847_20260602_121224: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_856847_20260602_132332: array len=36000 (stim frames=36000)
+C6 sync barcode starts (crude): n=225; within 1 s of an invalid interval: []
+
+===== DRpilot_856847_20260604  sync=20260604T111425.h5  n_stim=6
+C1 invalid_intervals: [(2743.0, 2744.5)]
+C2 lines with edges in invalid intervals: vsync_stim(bit2): rise=84 fall=84; stim_photodiode(bit4): rise=15 fall=15; beh_cam_frame_readout(bit21): rise=90 fall=90; nose_cam_frame_readout(bit22): rise=90 fall=90; eye_cam_frame_readout(bit25): rise=90 fall=90; face_cam_exposing(bit26): rise=90 fall=90; beh_cam_exposing(bit27): rise=90 fall=90; nose_cam_exposing(bit28): rise=90 fall=90; eye_cam_exposing(bit29): rise=90 fall=90
+C3 frame_display_time_blocks: AssertionError (SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRp...)
+C4 vsync_times_in_blocks: returned 6 blocks, lens=[51336, 36000, 36000, 217258, 36000, 36000]; blocks overlapping invalid intervals=[3]
+C5 DynamicRouting1_856847_20260604_115007: MISSING KEY
+C5 RFMapping_856847_20260604_111502: array len=51336 (stim frames=51336)
+C5 Spontaneous_856847_20260604_112944: array len=36000 (stim frames=36000)
+C5 Spontaneous_856847_20260604_130102: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_856847_20260604_113956: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_856847_20260604_125051: array len=36000 (stim frames=36000)
+C6 sync barcode starts (crude): n=226; within 1 s of an invalid interval: []
+
+===== DRpilot_862025_20260805  sync=20260805T114824.h5  n_stim=6
+C1 invalid_intervals: [(705.0, 706.5)]
+C2 lines with edges in invalid intervals: vsync_stim(bit2): rise=90 fall=90; stim_photodiode(bit4): rise=15 fall=15; beh_cam_frame_readout(bit21): rise=90 fall=90; nose_cam_frame_readout(bit22): rise=90 fall=90; eye_cam_frame_readout(bit25): rise=90 fall=90; face_cam_exposing(bit26): rise=90 fall=90; beh_cam_exposing(bit27): rise=90 fall=90; nose_cam_exposing(bit28): rise=90 fall=90; eye_cam_exposing(bit29): rise=90 fall=90
+C3 frame_display_time_blocks: AssertionError (SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRp...)
+C4 vsync_times_in_blocks: returned 6 blocks, lens=[51340, 36000, 36000, 217276, 36000, 36000]; blocks overlapping invalid intervals=[0]
+C5 DynamicRouting1_862025_20260805_122408: array len=217276 (stim frames=217276)
+C5 RFMapping_862025_20260805_114901: MISSING KEY
+C5 Spontaneous_862025_20260805_120344: array len=36000 (stim frames=36000)
+C5 Spontaneous_862025_20260805_133514: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_862025_20260805_121356: array len=36000 (stim frames=36000)
+C5 SpontaneousRewards_862025_20260805_132503: array len=36000 (stim frames=36000)
+C6 sync barcode starts (crude): n=227; within 1 s of an invalid interval: []

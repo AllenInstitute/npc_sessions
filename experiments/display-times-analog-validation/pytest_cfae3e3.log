@@ -1,0 +1,11 @@
+....x...                                                                 [100%]
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.5-final-0 _______________
+
+Coverage HTML written to dir htmlcov
+7 passed, 1 deselected, 1 xfailed in 140.26s (0:02:20)
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.5-final-0 _______________
+
+Coverage HTML written to dir htmlcov
+4 passed in 9.21s

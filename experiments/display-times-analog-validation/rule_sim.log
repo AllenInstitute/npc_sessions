@@ -1,0 +1,70 @@
+DRpilot_762526_20250320 b1: rule grid (TTL edges dropped that are frames / flicker; kept total - vsyncs)
+  min 1.5 refr, offset 8 ms, pairs_only=False: dropped frame=73 flicker=0 none=0; kept-vsyncs=-62; flicker kept=7
+  min 1.5 refr, offset 8 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+11; flicker kept=7
+  min 1.5 refr, offset 12 ms, pairs_only=False: dropped frame=1 flicker=0 none=0; kept-vsyncs=+10; flicker kept=7
+  min 1.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+11; flicker kept=7
+  min 1.5 refr, offset 16 ms, pairs_only=False: dropped frame=0 flicker=6 none=0; kept-vsyncs=+5; flicker kept=1
+  min 1.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=6 none=0; kept-vsyncs=+5; flicker kept=1
+  min 2.5 refr, offset 8 ms, pairs_only=False: dropped frame=22 flicker=0 none=0; kept-vsyncs=-11; flicker kept=7
+  min 2.5 refr, offset 8 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+11; flicker kept=7
+  min 2.5 refr, offset 12 ms, pairs_only=False: dropped frame=1 flicker=0 none=0; kept-vsyncs=+10; flicker kept=7
+  min 2.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+11; flicker kept=7
+  min 2.5 refr, offset 16 ms, pairs_only=False: dropped frame=0 flicker=6 none=0; kept-vsyncs=+5; flicker kept=1
+  min 2.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=6 none=0; kept-vsyncs=+5; flicker kept=1
+DRpilot_744279_20250116 b1: rule grid (TTL edges dropped that are frames / flicker; kept total - vsyncs)
+  min 1.5 refr, offset 8 ms, pairs_only=False: dropped frame=43 flicker=0 none=0; kept-vsyncs=-43; flicker kept=0
+  min 1.5 refr, offset 8 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 12 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 16 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 8 ms, pairs_only=False: dropped frame=43 flicker=0 none=0; kept-vsyncs=-43; flicker kept=0
+  min 2.5 refr, offset 8 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 12 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 16 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+DRpilot_744279_20250116 b7: rule grid (TTL edges dropped that are frames / flicker; kept total - vsyncs)
+  min 1.5 refr, offset 8 ms, pairs_only=False: dropped frame=160 flicker=0 none=0; kept-vsyncs=-160; flicker kept=0
+  min 1.5 refr, offset 8 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 12 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 16 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 8 ms, pairs_only=False: dropped frame=160 flicker=0 none=0; kept-vsyncs=-160; flicker kept=0
+  min 2.5 refr, offset 8 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 12 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 16 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+DRpilot_744279_20250116 b0: rule grid (TTL edges dropped that are frames / flicker; kept total - vsyncs)
+  min 1.5 refr, offset 8 ms, pairs_only=False: dropped frame=114 flicker=0 none=0; kept-vsyncs=-114; flicker kept=0
+  min 1.5 refr, offset 8 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 12 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 16 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 1.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 8 ms, pairs_only=False: dropped frame=114 flicker=0 none=0; kept-vsyncs=-114; flicker kept=0
+  min 2.5 refr, offset 8 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 12 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 16 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+  min 2.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+0; flicker kept=0
+DRpilot_796012_20250714 b3: rule grid (TTL edges dropped that are frames / flicker; kept total - vsyncs)
+  min 1.5 refr, offset 8 ms, pairs_only=False: dropped frame=439 flicker=0 none=0; kept-vsyncs=-438; flicker kept=1
+  min 1.5 refr, offset 8 ms, pairs_only=True: dropped frame=2 flicker=0 none=0; kept-vsyncs=-1; flicker kept=1
+  min 1.5 refr, offset 12 ms, pairs_only=False: dropped frame=1 flicker=0 none=0; kept-vsyncs=+0; flicker kept=1
+  min 1.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+1; flicker kept=1
+  min 1.5 refr, offset 16 ms, pairs_only=False: dropped frame=1 flicker=0 none=0; kept-vsyncs=+0; flicker kept=1
+  min 1.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+1; flicker kept=1
+  min 2.5 refr, offset 8 ms, pairs_only=False: dropped frame=87 flicker=0 none=0; kept-vsyncs=-86; flicker kept=1
+  min 2.5 refr, offset 8 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+1; flicker kept=1
+  min 2.5 refr, offset 12 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+1; flicker kept=1
+  min 2.5 refr, offset 12 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+1; flicker kept=1
+  min 2.5 refr, offset 16 ms, pairs_only=False: dropped frame=0 flicker=0 none=0; kept-vsyncs=+1; flicker kept=1
+  min 2.5 refr, offset 16 ms, pairs_only=True: dropped frame=0 flicker=0 none=0; kept-vsyncs=+1; flicker kept=1
+DRpilot_762526_20250320 b1: vsyncs=216849 analog frame transitions=216849 analog flicker=11 TTL edges=216860
+  TTL before rule: {'frame': 216832, 'flicker': 7, 'none': 21} (total 216860; excess over vsyncs +11)
+  dropped by rule (min 1.5 refreshes, window offset 8 ms, pairs_only=False): {'frame': 73, 'flicker': 0, 'none': 0}
+  TTL after rule: {'frame': 216759, 'flicker': 7, 'none': 21} (total 216787; excess over vsyncs -62)
+  surviving flicker edges at ~frames [78659, 78659, 79731, 79731, 80793, 80793, 216849]; dropped frame edges at ~frames [110860, 112180, 112558, 114432, 115706, 116414, 122768, 123930, 127096, 127438, 127894, 129002, 131550, 132350, 135157]

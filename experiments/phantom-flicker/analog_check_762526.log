@@ -1,0 +1,38 @@
+DRpilot_762526_20250320 b1: 216849 analog transitions assigned to frames; all transitions 216860, not frames 11
+session analog -> TTL lag: rising 0.32 ms, falling 2.81 ms
+patch: diode block status cleaned; 6 phantom-flicker and 4 glitch edges removed
+analog trace: 18169982 samples at 5000.0 Hz; mapping keys: ['barcode_sync_range', 'barcode_ttl_line', 'blocks_not_uniquely_confirmed', 'bucket', 'channel', 'channel_confirmation', 'channel_ids', 'contiguous']
+
+1-2. removed TTL edges vs analog:
+  phantom pair TTL 1969.2105-1969.2149 s (4.5 ms): analog dip 1969.2039-1969.2154 s (11.4 ms) -> ok
+  phantom pair TTL 1987.1596-1987.1633 s (3.7 ms): analog dip 1987.1525-1987.1637 s (11.2 ms) -> ok
+  phantom pair TTL 2004.9094-2004.9114 s (2.0 ms): analog dip 2004.9010-2004.9118 s (10.9 ms) -> ok
+phantom-flicker TTL pairs inside an analog non-frame dip: 3/3
+  glitch TTL 1796.57462 s: nearest frame analog transition -0.87 ms
+  glitch TTL 1796.57465 s: nearest frame analog transition -0.84 ms
+  glitch TTL 1893.65599 s: nearest frame analog transition -1.08 ms
+  glitch TTL 1893.65602 s: nearest frame analog transition -1.05 ms
+glitch edges at a frame transition: 4/4
+non-frame analog transitions without a removed TTL pair: 2026.5529, 2026.5633, 2053.9766, 2053.9862, 4282.5236
+  2026.5529 s: nearest TTL edge -23.22 ms
+  2026.5633 s: nearest TTL edge +25.71 ms
+  2053.9766 s: nearest TTL edge -23.89 ms
+  2053.9862 s: nearest TTL edge +25.40 ms
+  4282.5236 s: nearest TTL edge +2.18 ms
+
+3. frame <-> TTL edge assignment vs the analog DP:
+analog-assigned frames 216849; with an aligned TTL toggle 216849; TTL toggle == TTL edge nearest the frame's analog transition: 216841; disagree 8
+TTL - analog (ms): p0.1 -1.71 p50 0.27 p99.9 5.81 max 10.58
+  frame 63169 (refreshes of frames k-3..k-1: [1, 1, 1]): TTL 1710.1689, analog 1710.1594
+  frame 64483 (refreshes of frames k-3..k-1: [1, 1, 1]): TTL 1732.1207, analog 1732.1110
+  frame 66259 (refreshes of frames k-3..k-1: [1, 1, 1]): TTL 1761.8123, analog 1761.8025
+  frame 68087 (refreshes of frames k-3..k-1: [1, 1, 1]): TTL 1792.3709, analog 1792.3613
+  frame 69179 (refreshes of frames k-3..k-1: [1, 1, 1]): TTL 1810.6530, analog 1810.6433
+  frame 73059 (refreshes of frames k-3..k-1: [1, 1, 1]): TTL 1875.5073, analog 1875.4975
+  frame 74269 (refreshes of frames k-3..k-1: [1, 1, 1]): TTL 1895.7911, analog 1895.7811
+  frame 77529 (refreshes of frames k-3..k-1: [1, 1, 1]): TTL 1950.2701, analog 1950.2601
+
+4. display times vs analog (compare.py error: analog - (display - 8 ms) - session lag[polarity]):
+b0 (control, accepted with and without the patch): 36000 frames: p1/p99 -0.36/+0.44 ms, max |err| 0.53 ms, >2 ms 0, >4 ms 0, >8 ms 0; compare.py on the released display times: p1/p99 -0.36/+0.44, max 0.53
+b1 (recovered by the patch): 216849 frames: p1/p99 -1.37/+2.38 ms, max |err| 14.92 ms, >2 ms 4545, >4 ms 124, >8 ms 60
+block 1 had no display times without the patch: True

@@ -1,0 +1,208 @@
+
+===== DRpilot_836629_20260430: invalid=[(5247.5, 5257.0)] discontinuities=[]
+  block 0: n_vsync=51336 stim=RFMapping_836629_20260430_103326 n_stim=51336 offset=5.38 
+  block 1: n_vsync=36000 stim=Spontaneous_836629_20260430_104808 n_stim=36000 offset=4.58 
+  block 2: n_vsync=36000 stim=SpontaneousRewards_836629_20260430_105819 n_stim=36000 offset=5.14 
+  block 3: n_vsync=216005 stim=DynamicRouting1_836629_20260430_110832 n_stim=216000 offset=4.52 
+  block 4: n_vsync=36000 stim=SpontaneousRewards_836629_20260430_120911 n_stim=36000 offset=4.65 
+  block 5: n_vsync=36000 stim=Spontaneous_836629_20260430_121923 n_stim=36000 offset=4.88 
+  A4 PASS: clean block 0 count 51336 == 51336
+  A4 PASS: clean block 1 count 36000 == 36000
+  A4 PASS: clean block 2 count 36000 == 36000
+  A1 PASS: block 3 gaps=1 balance=0 residuals ms=[0.0355] second-best ms=[16.6] n_frames=[565] n_removed=[570] failures=[]
+  A2 PASS: vs prototype: max |diff|=0.000 us, same sources=True
+  A4 PASS: clean block 4 count 36000 == 36000
+  A4 PASS: clean block 5 count 36000 == 36000
+  patch summary: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 1, 'unknown': 0}, 'bit26': {'reconstructed': 1, 'unknown': 0}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  A3-readout (info): beh_cam_frame_readout    (5247.49999, 5257.0): reconstructed periodic inserted rising 570 (copies 570), max |resid| 0.0030 ms, frac 0.0002 
+  A3-readout (info): face_cam_frame_readout   (5247.49999, 5257.0): reconstructed periodic inserted rising 570 (copies 570), max |resid| 0.0058 ms, frac 0.0003 
+  A3-readout (info): eye_cam_frame_readout    (5247.49999, 5257.0): reconstructed periodic inserted rising 570 (copies 570), max |resid| 0.0110 ms, frac 0.0007 
+  A3 PASS: beh_cam_exposing         (5247.49999, 5257.0): reconstructed periodic inserted rising 570 (copies 570), max |resid| 0.0071 ms, frac 0.0004 
+  A3 PASS: face_cam_exposing        (5247.49999, 5257.0): reconstructed periodic inserted rising 570 (copies 570), max |resid| 0.0043 ms, frac 0.0003 
+  A3 PASS: eye_cam_exposing         (5247.49999, 5257.0): reconstructed periodic inserted rising 570 (copies 570), max |resid| 0.0110 ms, frac 0.0007 
+  A5 PASS: unpatched raises on vsync/lick/barcode/camera/vsync blocks: [True, True, True, True, True]
+  A5 PASS: patched: no line raises ([])
+  A5 PASS: lick_sensor and barcode_ephys unknown in every invalid interval: ((5247.49999, 5257.0),) ((5247.49999, 5257.0),)
+  A5 PASS: mask policy: no lick edges inside intervals
+  A4 PASS: patched blocks 6 == raw blocks 6
+  A4 PASS: block 3: patched n=216000 (stim 216000), equal to reconciliation=True, interpolated edges=565
+  A6 PASS: JSON round trip (212 kB) gives identical edges on all 32 bits
+    stim_photodiode (5247.5, 5257.0): reconstructed vsync+latency {'latency_rising_sec': 19.56, 'latency_falling_sec': 24.06, 'baseline_error_sec': 0.07, 'after_error_sec': 0.05, 'n_polarity_errors_after': 0, 'n_inserted': 188, 'n_removed': 190} 
+  A7 PASS: digital diode - analog (per-polarity lag -1.61/4.15 ms removed): pre max 0.08 ms (n=60), window max 0.13 ms (n=188), post max 0.09 ms (n=50); window errors > pre max at t=[]
+
+===== DRpilot_839146_20260518: invalid=[(5622.0, 5629.0)] discontinuities=[]
+  block 0: n_vsync=51336 stim=RFMapping_839146_20260518_102707 n_stim=51336 offset=5.04 
+  block 1: n_vsync=36000 stim=Spontaneous_839146_20260518_104149 n_stim=36000 offset=4.76 
+  block 2: n_vsync=36000 stim=SpontaneousRewards_839146_20260518_105205 n_stim=36000 offset=4.19 
+  block 3: n_vsync=216997 stim=DynamicRouting1_839146_20260518_110220 n_stim=216992 offset=4.27 
+  block 4: n_vsync=36000 stim=SpontaneousRewards_839146_20260518_120323 n_stim=36000 offset=4.04 
+  block 5: n_vsync=36000 stim=Spontaneous_839146_20260518_121338 n_stim=36000 offset=3.96 
+  A4 PASS: clean block 0 count 51336 == 51336
+  A4 PASS: clean block 1 count 36000 == 36000
+  A4 PASS: clean block 2 count 36000 == 36000
+  A1 PASS: block 3 gaps=1 balance=0 residuals ms=[-0.0185] second-best ms=[16.7] n_frames=[415] n_removed=[420] failures=[]
+  A2 PASS: vs prototype: max |diff|=0.000 us, same sources=True
+  A4 PASS: clean block 4 count 36000 == 36000
+  A4 PASS: clean block 5 count 36000 == 36000
+  patch summary: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 0, 'unknown': 1}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  A3-readout (info): beh_cam_frame_readout    (5621.99999, 5629.0): reconstructed periodic inserted rising 421 (copies 421), max |resid| 0.0063 ms, frac 0.0004 
+  A3-readout (info): nose_cam_frame_readout   (5621.99999, 5629.0): reconstructed periodic inserted rising 420 (copies 420), max |resid| 0.0188 ms, frac 0.0011 
+  A3-readout (info): eye_cam_frame_readout    (5621.99999, 5629.0): reconstructed periodic inserted rising 420 (copies 420), max |resid| 0.0186 ms, frac 0.0011 
+  A3 PASS: face_cam_exposing        (5621.99999, 5629.0): reconstructed periodic inserted rising 420 (copies 420), max |resid| 0.0115 ms, frac 0.0007 
+  A3 PASS: beh_cam_exposing         (5621.99999, 5629.0): reconstructed periodic inserted rising 420 (copies 420), max |resid| 0.0063 ms, frac 0.0004 
+  A3 PASS: nose_cam_exposing        (5621.99999, 5629.0): reconstructed periodic inserted rising 420 (copies 420), max |resid| 0.0321 ms, frac 0.0019 
+  A3 PASS: eye_cam_exposing         (5621.99999, 5629.0): reconstructed periodic inserted rising 420 (copies 420), max |resid| 0.0189 ms, frac 0.0011 
+  A5 PASS: unpatched raises on vsync/lick/barcode/camera/vsync blocks: [True, True, True, True, True]
+  A5 PASS: patched: no line raises ([])
+  A5 PASS: lick_sensor and barcode_ephys unknown in every invalid interval: ((5621.99999, 5629.0),) ((5621.99999, 5629.0),)
+  A5 PASS: mask policy: no lick edges inside intervals
+  A4 PASS: patched blocks 6 == raw blocks 6
+  A4 PASS: block 3: patched n=216992 (stim 216992), equal to reconciliation=True, interpolated edges=415
+  A6 PASS: JSON round trip (182 kB) gives identical edges on all 32 bits
+    stim_photodiode (5622.0, 5629.0): reconstructed vsync+latency {'latency_rising_sec': 19.61, 'latency_falling_sec': 24.52, 'baseline_error_sec': 0.1, 'after_error_sec': 0.05, 'n_polarity_errors_after': 0, 'n_inserted': 139, 'n_removed': 141} 
+  A7 PASS: digital diode - analog (per-polarity lag -1.33/3.44 ms removed): pre max 0.08 ms (n=59), window max 0.09 ms (n=139), post max 0.09 ms (n=49); window errors > pre max at t=[]
+
+===== DRpilot_840160_20260428: invalid=[] discontinuities=[(2458.56, 2488.58, -1.0)]
+  block 0: n_vsync=51336 stim=RFMapping_840160_20260428_104029 n_stim=51336 offset=4.71 
+  block 1: n_vsync=36000 stim=Spontaneous_840160_20260428_105511 n_stim=36000 offset=4.3 
+  block 2: n_vsync=36000 stim=SpontaneousRewards_840160_20260428_110525 n_stim=36000 offset=4.5 
+  block 3: n_vsync=217104 stim=DynamicRouting1_840160_20260428_111539 n_stim=217162 offset=4.28 
+  A8 PASS: timebase_discontinuities=((2458.56048, 2488.57502, -0.9999799999998231),)
+  A8 PASS: drop located at vsync 19041 t=2472.0109 s, n_missing=58, drop=1.0 s, cost=0.059 ms
+
+===== DRpilot_847958_20260413: invalid=[(5706.0, 5707.5)] discontinuities=[]
+  block 0: n_vsync=51336 stim=RFMapping_847958_20260413_102547 n_stim=51336 offset=5.22 
+  block 1: n_vsync=36000 stim=Spontaneous_847958_20260413_104028 n_stim=36000 offset=4.94 
+  block 2: n_vsync=36000 stim=SpontaneousRewards_847958_20260413_105043 n_stim=36000 offset=4.87 
+  block 3: n_vsync=217029 stim=DynamicRouting1_847958_20260413_110058 n_stim=217028 offset=4.6 
+  block 4: n_vsync=36000 stim=SpontaneousRewards_847958_20260413_120200 n_stim=36000 offset=4.39 
+  block 5: n_vsync=36000 stim=Spontaneous_847958_20260413_121215 n_stim=36000 offset=4.13 
+  A4 PASS: clean block 0 count 51336 == 51336
+  A4 PASS: clean block 1 count 36000 == 36000
+  A4 PASS: clean block 2 count 36000 == 36000
+  A1 PASS: block 3 gaps=1 balance=0 residuals ms=[0.0465] second-best ms=[16.6] n_frames=[90] n_removed=[91] failures=[]
+  A2 PASS: vs prototype: max |diff|=0.000 us, same sources=True
+  A4 PASS: clean block 4 count 36000 == 36000
+  A4 PASS: clean block 5 count 36000 == 36000
+  patch summary: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 1, 'unknown': 0}, 'bit26': {'reconstructed': 1, 'unknown': 0}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  A3-readout (info): beh_cam_frame_readout    (5705.99999, 5707.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0001 ms, frac 0.0000 
+  A3-readout (info): face_cam_frame_readout   (5705.99999, 5707.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0074 ms, frac 0.0004 
+  A3-readout (info): eye_cam_frame_readout    (5705.99999, 5707.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0131 ms, frac 0.0008 
+  A3 PASS: beh_cam_exposing         (5705.99999, 5707.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0001 ms, frac 0.0000 
+  A3 PASS: face_cam_exposing        (5705.99999, 5707.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0074 ms, frac 0.0004 
+  A3 PASS: eye_cam_exposing         (5705.99999, 5707.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0069 ms, frac 0.0004 
+  A5 PASS: unpatched raises on vsync/lick/barcode/camera/vsync blocks: [True, True, True, True, True]
+  A5 PASS: patched: no line raises ([])
+  A5 PASS: lick_sensor and barcode_ephys unknown in every invalid interval: ((5705.99999, 5707.5),) ((5705.99999, 5707.5),)
+  A5 PASS: mask policy: no lick edges inside intervals
+  A4 PASS: patched blocks 6 == raw blocks 6
+  A4 PASS: block 3: patched n=217028 (stim 217028), equal to reconciliation=True, interpolated edges=90
+  A6 PASS: JSON round trip (47 kB) gives identical edges on all 32 bits
+    stim_photodiode (5706.0, 5707.5): reconstructed vsync+latency {'latency_rising_sec': 19.59, 'latency_falling_sec': 24.13, 'baseline_error_sec': 0.43, 'after_error_sec': 0.15, 'n_polarity_errors_after': 0, 'n_inserted': 30, 'n_removed': 30} 
+  A7 not run: no analog npz
+
+===== DRpilot_856847_20260602: invalid=[(801.5, 805.0)] discontinuities=[]
+  block 0: n_vsync=51342 stim=RFMapping_856847_20260602_114728 n_stim=51336 offset=5.55 
+  block 1: n_vsync=36000 stim=Spontaneous_856847_20260602_120211 n_stim=36000 offset=4.58 
+  block 2: n_vsync=36000 stim=SpontaneousRewards_856847_20260602_121224 n_stim=36000 offset=4.75 
+  block 3: n_vsync=216918 stim=DynamicRouting1_856847_20260602_122238 n_stim=216918 offset=4.56 
+  block 4: n_vsync=36000 stim=SpontaneousRewards_856847_20260602_132332 n_stim=36000 offset=4.94 
+  block 5: n_vsync=36000 stim=Spontaneous_856847_20260602_133346 n_stim=36000 offset=4.59 
+  A1 PASS: block 0 gaps=1 balance=0 residuals ms=[-0.0256] second-best ms=[16.7] n_frames=[204] n_removed=[210] failures=[]
+  A2 PASS: vs prototype: max |diff|=0.000 us, same sources=True
+  A4 PASS: clean block 1 count 36000 == 36000
+  A4 PASS: clean block 2 count 36000 == 36000
+  A4 PASS: clean block 3 count 216918 == 216918
+  A4 PASS: clean block 4 count 36000 == 36000
+  A4 PASS: clean block 5 count 36000 == 36000
+  patch summary: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 0, 'unknown': 1}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  A3-readout (info): beh_cam_frame_readout    (801.49999, 805.0): reconstructed periodic inserted rising 210 (copies 210), max |resid| 0.0032 ms, frac 0.0002 
+  A3-readout (info): nose_cam_frame_readout   (801.49999, 805.0): reconstructed periodic inserted rising 210 (copies 210), max |resid| 0.0093 ms, frac 0.0006 
+  A3-readout (info): eye_cam_frame_readout    (801.49999, 805.0): reconstructed periodic inserted rising 210 (copies 210), max |resid| 0.0074 ms, frac 0.0004 
+  A3 PASS: face_cam_exposing        (801.49999, 805.0): reconstructed periodic inserted rising 210 (copies 210), max |resid| 0.0057 ms, frac 0.0003 
+  A3 PASS: beh_cam_exposing         (801.49999, 805.0): reconstructed periodic inserted rising 210 (copies 210), max |resid| 0.0033 ms, frac 0.0002 
+  A3 PASS: nose_cam_exposing        (801.49999, 805.0): reconstructed periodic inserted rising 210 (copies 210), max |resid| 0.0008 ms, frac 0.0000 
+  A3 PASS: eye_cam_exposing         (801.49999, 805.0): reconstructed periodic inserted rising 210 (copies 210), max |resid| 0.0027 ms, frac 0.0002 
+  A5 PASS: unpatched raises on vsync/lick/barcode/camera/vsync blocks: [True, True, True, True, True]
+  A5 PASS: patched: no line raises ([])
+  A5 PASS: lick_sensor and barcode_ephys unknown in every invalid interval: ((801.49999, 805.0),) ((801.49999, 805.0),)
+  A5 PASS: mask policy: no lick edges inside intervals
+  A4 PASS: patched blocks 6 == raw blocks 6
+  A4 PASS: block 0: patched n=51336 (stim 51336), equal to reconciliation=True, interpolated edges=204
+  A6 PASS: JSON round trip (99 kB) gives identical edges on all 32 bits
+    stim_photodiode (801.5, 805.0): reconstructed vsync+latency {'latency_rising_sec': 19.96, 'latency_falling_sec': 24.135, 'baseline_error_sec': 0.095, 'after_error_sec': 0.055, 'n_polarity_errors_after': 0, 'n_inserted': 68, 'n_removed': 70} 
+  A7 PASS: digital diode - analog (per-polarity lag -2.70/3.88 ms removed): pre max 0.09 ms (n=60), window max 0.36 ms (n=68), post max 0.10 ms (n=50); window errors > pre max at t=[]
+
+===== DRpilot_856847_20260604: invalid=[(2743.0, 2744.5)] discontinuities=[]
+  block 0: n_vsync=51336 stim=RFMapping_856847_20260604_111502 n_stim=51336 offset=5.26 
+  block 1: n_vsync=36000 stim=Spontaneous_856847_20260604_112944 n_stim=36000 offset=5.15 
+  block 2: n_vsync=36000 stim=SpontaneousRewards_856847_20260604_113956 n_stim=36000 offset=4.38 
+  block 3: n_vsync=217258 stim=DynamicRouting1_856847_20260604_115007 n_stim=217264 offset=4.54 
+  block 4: n_vsync=36000 stim=SpontaneousRewards_856847_20260604_125051 n_stim=36000 offset=4.69 
+  block 5: n_vsync=36000 stim=Spontaneous_856847_20260604_130102 n_stim=36000 offset=4.44 
+  A4 PASS: clean block 0 count 51336 == 51336
+  A4 PASS: clean block 1 count 36000 == 36000
+  A4 PASS: clean block 2 count 36000 == 36000
+  A1 PASS: block 3 gaps=1 balance=0 residuals ms=[0.0074] second-best ms=[16.7] n_frames=[90] n_removed=[84] failures=[]
+  A2 PASS: vs prototype: max |diff|=0.000 us, same sources=True
+  A4 PASS: clean block 4 count 36000 == 36000
+  A4 PASS: clean block 5 count 36000 == 36000
+  patch summary: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 0, 'unknown': 1}, 'nose_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 0, 'unknown': 1}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  A3-readout (info): beh_cam_frame_readout    (2742.99999, 2744.5): unknown mask inserted rising 90 (copies 90), max |resid| 0.3540 ms, frac 0.0212 residual +0.3540 ms > 0.100 ms; fraction 0.0212 > 0.01
+  A3-readout (info): nose_cam_frame_readout   (2742.99999, 2744.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0664 ms, frac 0.0040 
+  A3-readout (info): eye_cam_frame_readout    (2742.99999, 2744.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0168 ms, frac 0.0010 
+  A3 PASS: face_cam_exposing        (2742.99999, 2744.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0065 ms, frac 0.0004 
+  A3 PASS: beh_cam_exposing         (2742.99999, 2744.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0013 ms, frac 0.0001 
+  A3 PASS: nose_cam_exposing        (2742.99999, 2744.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0049 ms, frac 0.0003 
+  A3 PASS: eye_cam_exposing         (2742.99999, 2744.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0168 ms, frac 0.0010 
+  A5 PASS: unpatched raises on vsync/lick/barcode/camera/vsync blocks: [True, True, True, True, True]
+  A5 PASS: patched: no line raises ([])
+  A5 PASS: lick_sensor and barcode_ephys unknown in every invalid interval: ((2742.99999, 2744.5),) ((2742.99999, 2744.5),)
+  A5 PASS: mask policy: no lick edges inside intervals
+  A4 PASS: patched blocks 6 == raw blocks 6
+  A4 PASS: block 3: patched n=217264 (stim 217264), equal to reconciliation=True, interpolated edges=90
+  A6 PASS: JSON round trip (49 kB) gives identical edges on all 32 bits
+    stim_photodiode (2743.0, 2744.5): reconstructed vsync+latency {'latency_rising_sec': 19.885, 'latency_falling_sec': 24.16, 'baseline_error_sec': 0.08, 'after_error_sec': 0.06, 'n_polarity_errors_after': 0, 'n_inserted': 30, 'n_removed': 30} 
+  A7 PASS: digital diode - analog (per-polarity lag -2.41/3.78 ms removed): pre max 0.10 ms (n=60), window max 0.08 ms (n=30), post max 0.11 ms (n=50); window errors > pre max at t=[]
+
+===== DRpilot_862025_20260805: invalid=[(705.0, 706.5)] discontinuities=[]
+  block 0: n_vsync=51340 stim=RFMapping_862025_20260805_114901 n_stim=51336 offset=5.22 
+  block 1: n_vsync=36000 stim=Spontaneous_862025_20260805_120344 n_stim=36000 offset=4.47 
+  block 2: n_vsync=36000 stim=SpontaneousRewards_862025_20260805_121356 n_stim=36000 offset=4.54 
+  block 3: n_vsync=217276 stim=DynamicRouting1_862025_20260805_122408 n_stim=217276 offset=5.22 
+  block 4: n_vsync=36000 stim=SpontaneousRewards_862025_20260805_132503 n_stim=36000 offset=5.08 
+  block 5: n_vsync=36000 stim=Spontaneous_862025_20260805_133514 n_stim=36000 offset=4.54 
+  A1 PASS: block 0 gaps=1 balance=0 residuals ms=[-0.0006] second-best ms=[16.7] n_frames=[86] n_removed=[90] failures=[]
+  A2 PASS: vs prototype: max |diff|=0.000 us, same sources=True
+  A4 PASS: clean block 1 count 36000 == 36000
+  A4 PASS: clean block 2 count 36000 == 36000
+  A4 PASS: clean block 3 count 217276 == 217276
+  A4 PASS: clean block 4 count 36000 == 36000
+  A4 PASS: clean block 5 count 36000 == 36000
+  patch summary: {'vsync_stim': {'reconstructed': 1, 'unknown': 0}, 'stim_photodiode': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_frame_readout': {'reconstructed': 1, 'unknown': 0}, 'face_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'beh_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'nose_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'eye_cam_exposing': {'reconstructed': 1, 'unknown': 0}, 'stim_running': {'reconstructed': 1, 'unknown': 0}, 'barcode_ephys': {'reconstructed': 0, 'unknown': 1}, 'bit1': {'reconstructed': 0, 'unknown': 1}, 'bit3': {'reconstructed': 1, 'unknown': 0}, 'bit6': {'reconstructed': 1, 'unknown': 0}, 'bit7': {'reconstructed': 1, 'unknown': 0}, 'bit8': {'reconstructed': 1, 'unknown': 0}, 'galvo_xy': {'reconstructed': 0, 'unknown': 1}, 'laser_633': {'reconstructed': 1, 'unknown': 0}, 'laser_488': {'reconstructed': 1, 'unknown': 0}, 'bit12': {'reconstructed': 1, 'unknown': 0}, 'bit13': {'reconstructed': 1, 'unknown': 0}, 'bit14': {'reconstructed': 1, 'unknown': 0}, 'reward_1_actuator': {'reconstructed': 0, 'unknown': 1}, 'bit16': {'reconstructed': 1, 'unknown': 0}, 'stim_running_opto': {'reconstructed': 1, 'unknown': 0}, 'stim_trial_opto': {'reconstructed': 1, 'unknown': 0}, 'bit19': {'reconstructed': 1, 'unknown': 0}, 'bit20': {'reconstructed': 1, 'unknown': 0}, 'bit23': {'reconstructed': 1, 'unknown': 0}, 'bit24': {'reconstructed': 0, 'unknown': 1}, 'bit30': {'reconstructed': 1, 'unknown': 0}, 'lick_sensor': {'reconstructed': 0, 'unknown': 1}}
+  A3-readout (info): beh_cam_frame_readout    (704.99999, 706.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0002 ms, frac 0.0000 
+  A3-readout (info): nose_cam_frame_readout   (704.99999, 706.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0061 ms, frac 0.0004 
+  A3-readout (info): eye_cam_frame_readout    (704.99999, 706.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0074 ms, frac 0.0004 
+  A3 PASS: face_cam_exposing        (704.99999, 706.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0024 ms, frac 0.0001 
+  A3 PASS: beh_cam_exposing         (704.99999, 706.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0002 ms, frac 0.0000 
+  A3 PASS: nose_cam_exposing        (704.99999, 706.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0060 ms, frac 0.0004 
+  A3 PASS: eye_cam_exposing         (704.99999, 706.5): reconstructed periodic inserted rising 90 (copies 90), max |resid| 0.0127 ms, frac 0.0008 
+  A5 PASS: unpatched raises on vsync/lick/barcode/camera/vsync blocks: [True, True, True, True, True]
+  A5 PASS: patched: no line raises ([])
+  A5 PASS: lick_sensor and barcode_ephys unknown in every invalid interval: ((704.99999, 706.5),) ((704.99999, 706.5),)
+  A5 PASS: mask policy: no lick edges inside intervals
+  A4 PASS: patched blocks 6 == raw blocks 6
+  A4 PASS: block 0: patched n=51336 (stim 51336), equal to reconciliation=True, interpolated edges=86
+  A6 PASS: JSON round trip (52 kB) gives identical edges on all 32 bits
+    stim_photodiode (705.0, 706.5): reconstructed vsync+latency {'latency_rising_sec': 19.8, 'latency_falling_sec': 23.52, 'baseline_error_sec': 0.61, 'after_error_sec': 0.53, 'n_polarity_errors_after': 0, 'n_inserted': 29, 'n_removed': 31} 
+  A7 PASS: digital diode - analog (per-polarity lag -1.87/3.97 ms removed): pre max 0.53 ms (n=59), window max 0.09 ms (n=29), post max 0.43 ms (n=50); window errors > pre max at t=[]
+
+===== summary
+A1: 6/6 pass
+A2: 6/6 pass
+A3: 22/22 pass
+A4: 42/42 pass
+A5: 24/24 pass
+A6: 6/6 pass
+A7: 5/5 pass
+A8: 2/2 pass

@@ -1,0 +1,263 @@
+def build_sync_patch(
+    sync: Any,
+    stim_blocks: Sequence[StimBlock] = (),
+    builder: str = "",
+    periodic_lines: Sequence[str] | None = None,
+) -> SyncPatch:
+    """Build a `SyncPatch` for a sync file: phantom-flicker removal on the photodiode line of
+    every box-1 block with a stim file (any file), and reconstructions inside invalid (replayed)
+    intervals.
+
+    - `stim_photodiode`, every block with a matched stim file and diodeBoxFrameInterval 1: edges
+      aligned with the block's frames (`align_diode_toggles`, with reconstructed vsyncs where the
+      block has replayed spans). If every edge is explained, phantom flicker and glitches are
+      removed (`SyncPatch.removed`) and the block is 'cleaned'; edges that can't be explained
+      make it 'rejected' (nothing removed). `SyncPatch.diode_blocks` records the outcome for every
+      block with a stim file.
+    - `vsync_stim`: for each span inside a block with a matched stim file, frames are solved
+      per gap from `frameIntervals` (`reconcile_vsyncs`); rising edges are placed at the
+      reconstructed falling edge minus the median measured pulse width in the block. Spans in
+      blocks without a stim file, or that fail a gate, are 'unknown'. Spans outside every
+      block with no recorded vsync edges are reconstructed as 'no_edges'.
+    - `stim_photodiode` inside spans: box interval 1 in a 'cleaned' block: expected toggles of
+      the frames in the span (`predict_box1_diode_edges`); box interval > 1:
+      `predict_diode_edges`; otherwise, or if a gate fails, 'unknown'.
+    - camera lines (`*_cam_exposing`, `*_cam_frame_readout`, or `periodic_lines`): integer-period
+      interpolation (`interpolate_periodic_edges`), checked against its gates; 'unknown' if a
+      gate fails.
+    - `stim_running`: 'no_edges' if no edges were recorded in the span and the level is the
+      same on both sides (assumes no stimulus started and stopped within the span); else
+      'unknown'.
+    - every other line: 'unknown' (licks, rewards, sound, opto, barcodes, unlabelled bits).
+
+    Parameters
+    ----------
+    sync
+        A `SyncDataset` (read with `on_invalid='ignore'` and no patch internally, so the edges
+        are as recorded).
+    stim_blocks
+        Stim data per vsync block index (`SyncDataset.vsync_times_in_blocks` order, unpatched).
+    builder
+        Identifier of the calling builder (recorded in the patch), e.g. 'npc_sessions 0.0.292'.
+    """
+    from npc_sync.sync import SyncDataset  # avoid import cycle
+
+    raw = SyncDataset(sync, on_invalid="ignore")
+    raw.patch = None
+    invalid = tuple(raw.invalid_intervals)
+    import importlib.metadata
+
+    patch = SyncPatch(
+        sync_content_hash=raw.content_hash,
+        builder=builder or f"npc_sync {importlib.metadata.version('npc_sync')}",
+        invalid_intervals=invalid,
+        faults=tuple(SyncFault("replay", a, z) for a, z in invalid)
+        + tuple(SyncFault("timebase_discontinuity", a, z, d) for a, z, d in raw.timebase_discontinuities),
+    )
+    if raw.timebase_discontinuities:
+        patch.notes.append(
+            "file has timebase discontinuities: edges after them are shifted; not corrected by this patch"
+        )
+    fs = raw.sample_freq
+    # in 4 of 6 replays checked, the event at the sample before a copy already carries the
+    # copy's state (experiments/sync-patch-manifest/acceptance_local7.log), so every span starts
+    # one sample early
+    spans_base = tuple((a - 1 / fs, z) for a, z in invalid)
+
+    labels = [line_key(raw.line_labels, bit) for bit in range(len(raw.line_labels))]
+    # --- vsync + photodiode ----------------------------------------------------------
+    vsync_spans: list[SpanPatch] = []
+    diode_spans: list[SpanPatch] = []
+    has_vsync = "vsync_stim" in labels and raw.get_falling_edges("vsync_stim").size > 0
+    blocks = raw.vsync_times_in_blocks if has_vsync else ()
+    vr_all = raw.get_rising_edges("vsync_stim", units="seconds") if has_vsync else np.array([])
+    vf_all = raw.get_falling_edges("vsync_stim", units="seconds") if has_vsync else np.array([])
+    has_diode = "stim_photodiode" in labels
+    if has_diode:
+        d_rs = np.asarray(raw.get_rising_edges("stim_photodiode", units="samples"), dtype=np.int64)
+        d_fs = np.asarray(raw.get_falling_edges("stim_photodiode", units="samples"), dtype=np.int64)
+        dr_all, df_all = d_rs / fs, d_fs / fs
+        d_samples = np.concatenate([d_rs, d_fs])
+        d_rising = np.concatenate([np.ones(len(d_rs), bool), np.zeros(len(d_fs), bool)])
+        o = np.argsort(d_samples, kind="stable")
+        d_samples, d_rising = d_samples[o], d_rising[o]
+        d_times = d_samples / fs
+        diode_bit = raw._line_to_bit("stim_photodiode")
+    else:
+        dr_all = df_all = np.array([])
+    by_block = {sb.block_index: sb for sb in stim_blocks}
+    covered: list[tuple[float, float]] = []
+
+    def diode_record(
+        bi: int,
+        block: npt.NDArray,
+        status: DiodeBlockStatus,
+        reason: str = "",
+        sb: StimBlock | None = None,
+        diagnostics: dict[str, Any] | None = None,
+    ) -> None:
+        patch.diode_blocks.append(
+            DiodeBlockPatch(
+                block_index=bi,
+                start=float(block[0]),
+                stop=float(block[-1]),
+                status=status,
+                reason=reason,
+                stim=sb.name if sb else "",
+                diode_box_frame_interval=sb.diode_box_frame_interval if sb else None,
+                diagnostics=_jsonable(diagnostics or {}),
+            )
+        )
+
+    for bi, block in enumerate(blocks):
+        overlapping = [(a, z) for a, z in spans_base if a <= block[-1] and z > block[0]]
+        sb = by_block.get(bi)
+        if sb is None:
+            for a, z in overlapping:
+                vsync_spans.append(SpanPatch((a, z), "unknown", method="mask", reason=f"block {bi}: no stim file"))
+                diode_spans.append(SpanPatch((a, z), "unknown", method="mask", reason=f"block {bi}: no stim file"))
+                covered.append((a, z))
+            continue
+        rec: VsyncReconciliation | None = None
+        if overlapping:
+            rec = solve_vsync_gaps(block, sb.frame_intervals, overlapping)
+            failures = rec.failures()
+            if failures:
+                reason = f"block {bi} ({sb.name}): " + "; ".join(failures)
+                for a, z in overlapping:
+                    vsync_spans.append(SpanPatch((a, z), "unknown", method="mask", reason=reason))
+                    diode_spans.append(SpanPatch((a, z), "unknown", method="mask", reason=reason))
+                    covered.append((a, z))
+                if has_diode:
+                    diode_record(bi, block, "not_checked", "vsyncs not reconstructed: " + "; ".join(failures), sb)
+                continue
+            # pulse width from measured edges in the block
+            in_block_f = vf_all[(vf_all >= block[0]) & (vf_all <= block[-1])]
+            j = np.searchsorted(vr_all, in_block_f) - 1
+            ok = j >= 0
+            widths = in_block_f[ok] - vr_all[j[ok]]
+            widths = widths[~in_intervals(in_block_f[ok], [g.span for g in rec.gaps])]
+            width = float(np.median(widths))
+            for g in rec.gaps:
+                idx = np.arange(g.frame_before + 1, g.frame_before + 1 + g.n_frames)
+                fall = rec.times[idx]
+                vsync_spans.append(
+                    SpanPatch(
+                        g.span,
+                        "reconstructed",
+                        rising=fall - width,
+                        falling=fall,
+                        method="frame_intervals",
+                        error_bound_sec=VSYNC_MAX_GAP_RESIDUAL_SEC,
+                        diagnostics={
+                            "block_index": bi,
+                            "stim": sb.name,
+                            "frame_before": g.frame_before,
+                            "n_frames": g.n_frames,
+                            "n_removed": g.n_removed,
+                            "anchor_residual_sec": g.residual_sec,
+                            "second_best_sec": g.second_best_sec,
+                            "pulse_width_sec": width,
+                        },
+                    )
+                )
+                covered.append(g.span)
+            frame_times = rec.times
+            frame_measured = rec.source == MEASURED
+        else:
+            if len(block) != len(sb.frame_intervals) + 1:
+                if has_diode:
+                    diode_record(
+                        bi, block, "not_checked",
+                        f"{len(block)} vsyncs, {len(sb.frame_intervals) + 1} stim frames", sb,
+                    )
+                continue
+            frame_times = np.asarray(block, dtype=float)
+            frame_measured = np.ones(len(block), bool)
+        if not has_diode:
+            continue
+        gap_spans = [g.span for g in rec.gaps] if rec is not None else []
+        box = sb.diode_box_frame_interval
+        if box is None:
+            for sp in gap_spans:
+                diode_spans.append(SpanPatch(sp, "unknown", method="mask", reason="diodeBoxFrameInterval unknown"))
+            diode_record(bi, block, "not_checked", "diodeBoxFrameInterval unknown", sb)
+            continue
+        if box != 1:
+            for sp in gap_spans:
+                others = [x for x in spans_base if not (x[0] >= sp[0] - 1e-9 and x[1] <= sp[1] + 1e-9)]
+                rise, fall_d, sol = predict_diode_edges(frame_times, dr_all, df_all, sp, box, exclude=others)
+                _append_diode_span(diode_spans, sp, rise, fall_d, sol, method="vsync+latency")
+            diode_record(
+                bi, block, "not_checked",
+                f"phantom flicker removal applies to diodeBoxFrameInterval 1 (this block: {box})", sb,
+            )
+            continue
+        # box interval 1: align every measured edge with the block's frames
+        d_spans = [_extend_span_over_splice(raw, diode_bit, sp) for sp in gap_spans]
+        in_win = (d_times >= block[0]) & (d_times < block[-1] + DIODE_BLOCK_END_PADDING_SEC)
+        sel = np.flatnonzero(in_win & ~in_intervals(d_times, d_spans))
+        jr = np.searchsorted(vr_all, frame_times) - 1
+        frame_rise = np.where(frame_measured & (jr >= 0), vr_all[np.clip(jr, 0, None)], np.nan)
+        try:
+            al = align_diode_toggles(
+                frame_times,
+                sb.frame_intervals,
+                d_times[sel],
+                d_rising[sel],
+                frame_signal_rising=frame_rise,
+                unobserved=d_spans,
+            )
+        except DiodeOffsetUndetermined as exc:
+            for sp in d_spans:
+                diode_spans.append(SpanPatch(sp, "unknown", method="mask", reason=f"diodeBoxFrameInterval 1: {exc}"))
+            diode_record(bi, block, "not_checked", f"frame <-> diode edge offset undetermined: {exc}", sb)
+            continue
+        diag = al.summary()
+        fails = al.failures()
+        if fails:
+            reason = "; ".join(fails)
+            for sp in d_spans:
+                diode_spans.append(
+                    SpanPatch(sp, "unknown", method="mask", diagnostics=diag, reason=f"diode edges not explained: {reason}")
+                )
+            diode_record(bi, block, "rejected", reason, sb, diag)
+            continue
+        for cls_value, reason in ((DIODE_PHANTOM_FLICKER, "phantom_flicker"), (DIODE_GLITCH, "glitch")):
+            idx = sel[np.flatnonzero(al.edge_class == cls_value)]
+            if len(idx):
+                patch.removed.setdefault("stim_photodiode", []).append(
+                    RemovedEdges(
+                        reason=reason,
+                        block_index=bi,
+                        rising_samples=d_samples[idx[d_rising[idx]]],
+                        falling_samples=d_samples[idx[~d_rising[idx]]],
+                    )
+                )
+        diode_record(bi, block, "cleaned", "", sb, diag)
+        for sp in d_spans:
+            n_in = int(in_intervals(d_times, [sp]).sum())
+            rise, fall_d, sol = predict_box1_diode_edges(al, sp, n_removed=n_in)
+            _append_diode_span(diode_spans, sp, rise, fall_d, sol, method="vsync+latency (box 1 alignment)")
+    if not invalid:
+        return patch
+    # invalid intervals not overlapping any block: vsync + diode reconstructed as 'no edges'
+    # if nothing was recorded there, else unknown
+    for a, z in spans_base:
+        if any(a >= ca - 1e-9 and z <= cz + 1e-9 for ca, cz in merge_intervals(covered)):
+            continue
+        for spans, line_edges in (
+            (vsync_spans, (vr_all, vf_all)),
+            (diode_spans, (dr_all, df_all) if has_diode else None),
+        ):
+            if line_edges is None:
+                continue
+            n_in = sum(int(in_intervals(x, [(a, z)]).sum()) for x in line_edges)
+            if n_in == 0:
+                spans.append(SpanPatch((a, z), "reconstructed", method="no_edges", reason="outside every vsync block"))
+            else:
+                spans.append(SpanPatch((a, z), "unknown", method="mask", reason=f"{n_in} edges outside every vsync block"))
+    patch.lines["vsync_stim"] = sorted(vsync_spans, key=lambda s: s.span)
+    if has_diode:
+        patch.lines["stim_photodiode"] = sorted(diode_spans, key=lambda s: s.span)
+

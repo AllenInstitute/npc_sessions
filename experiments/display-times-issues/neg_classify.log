@@ -1,0 +1,16 @@
+                                     frames  blocks
+klass                                              
+733891_20240918 b4 (degraded diode)    3829       1
+consistent: display >= rise + 15 ms     148     127
+impossible: display < rise + 15 ms       88      62
+
+by class x box:
+box                                  1.0  3.0
+klass                                        
+consistent: display >= rise + 15 ms   96   52
+impossible: display < rise + 15 ms     1   87
+
+consistent frames: long vsync pulse (>25 ms) fraction 1.0 | next falling edge < 0.5 frame later fraction 0.568
+impossible frames: previous frame has long pulse (>25 ms): 17 of 88
+impossible frames per block: {'count': 62.0, 'mean': 1.4193548387096775, 'max': 7.0}
+impossible frames lat_rise ms p50/min: 8.5 -34.0

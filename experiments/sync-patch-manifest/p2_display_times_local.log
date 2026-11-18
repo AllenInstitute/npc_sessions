@@ -1,0 +1,77 @@
+npc_stim C:\Users\ben.hardcastle\github\npc_stim\src\npc_stim\__init__.py | npc_sync C:\Users\ben.hardcastle\github\npc_sync\src\npc_sync\__init__.py
+
+===== DRpilot_836629_20260430: invalid=((5247.5, 5257.0),) disc=()
+  B1 PASS: unpatched raises: SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRpilot_836629_20260430/20260430T
+  B3 PASS: block 0 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 1 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 2 (no span): source photodiode, identical to baseline=True
+  B2 PASS: block 3 (patched): source photodiode ; n=216000 stim=216000; baseline source unavailable (no stim file matched to block: number of vsyncs and diode-bo)
+  B4 PASS: frame_source: 571 interpolated frames (vsync interpolated: 565)
+  B5 PASS: toggle-frame display times - analog: pre max 0.07 ms (n=60), window max 0.13 ms (n=188), post max 0.07 ms (n=50)
+  B3 PASS: block 4 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 5 (no span): source photodiode, identical to baseline=True
+
+===== DRpilot_839146_20260518: invalid=((5622.0, 5629.0),) disc=()
+  B1 PASS: unpatched raises: SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRpilot_839146_20260518/20260518T
+  B3 PASS: block 0 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 1 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 2 (no span): source photodiode, identical to baseline=True
+  B2 PASS: block 3 (patched): source photodiode ; n=216992 stim=216992; baseline source unavailable (no stim file matched to block: number of vsyncs and diode-bo)
+  B4 PASS: frame_source: 421 interpolated frames (vsync interpolated: 415)
+  B5 PASS: toggle-frame display times - analog: pre max 0.08 ms (n=59), window max 0.10 ms (n=139), post max 0.07 ms (n=49)
+  B3 PASS: block 4 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 5 (no span): source photodiode, identical to baseline=True
+
+===== DRpilot_840160_20260428: invalid=() disc=((2458.56048, 2488.57502, -0.9999799999998231),)
+  B1 PASS: unpatched raises: SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRpilot_840160_20260428/20260428T
+
+===== DRpilot_847958_20260413: invalid=((5706.0, 5707.5),) disc=()
+  B1 PASS: unpatched raises: SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRpilot_847958_20260413/20260413T
+  B3 PASS: block 0 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 1 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 2 (no span): source photodiode, identical to baseline=True
+  B2 PASS: block 3 (patched): source photodiode ; n=217028 stim=217028; baseline source photodiode ()
+  B4 PASS: frame_source: 96 interpolated frames (vsync interpolated: 90)
+  B5 not run: no analog npz
+  B3 PASS: block 4 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 5 (no span): source photodiode, identical to baseline=True
+
+===== DRpilot_856847_20260602: invalid=((801.5, 805.0),) disc=()
+  B1 PASS: unpatched raises: SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRpilot_856847_20260602/20260602T
+  B2 PASS: block 0 (patched): source photodiode ; n=51336 stim=51336; baseline source unavailable (no stim file matched to block: number of vsyncs and diode-bo)
+  B4 PASS: frame_source: 210 interpolated frames (vsync interpolated: 204)
+  B5 PASS: toggle-frame display times - analog: pre max 0.07 ms (n=60), window max 0.36 ms (n=68), post max 0.10 ms (n=50)
+  B3 PASS: block 1 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 2 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 3 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 4 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 5 (no span): source photodiode, identical to baseline=True
+
+===== DRpilot_856847_20260604: invalid=((2743.0, 2744.5),) disc=()
+  B1 PASS: unpatched raises: SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRpilot_856847_20260604/20260604T
+  B3 PASS: block 0 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 1 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 2 (no span): source photodiode, identical to baseline=True
+  B2 PASS: block 3 (patched): source photodiode ; n=217264 stim=217264; baseline source unavailable (no stim file matched to block: number of vsyncs and diode-bo)
+  B4 PASS: frame_source: 96 interpolated frames (vsync interpolated: 90)
+  B5 PASS: toggle-frame display times - analog: pre max 0.10 ms (n=60), window max 0.08 ms (n=30), post max 0.11 ms (n=50)
+  B3 PASS: block 4 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 5 (no span): source photodiode, identical to baseline=True
+
+===== DRpilot_862025_20260805: invalid=((705.0, 706.5),) disc=()
+  B1 PASS: unpatched raises: SyncDataset(C:/Users/ben.hardcastle/github/npc_sync/experiments/vsync-frame-count/data/DRpilot_862025_20260805/20260805T
+  B2 PASS: block 0 (patched): source photodiode ; n=51336 stim=51336; baseline source unavailable (no stim file matched to block: number of vsyncs and diode-bo)
+  B4 PASS: frame_source: 92 interpolated frames (vsync interpolated: 86)
+  B5 PASS: toggle-frame display times - analog: pre max 0.26 ms (n=59), window max 0.09 ms (n=29), post max 0.26 ms (n=50)
+  B3 PASS: block 1 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 2 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 3 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 4 (no span): source photodiode, identical to baseline=True
+  B3 PASS: block 5 (no span): source photodiode, identical to baseline=True
+
+===== summary
+B1: 7/7 pass
+B2: 6/6 pass
+B3: 30/30 pass
+B4: 6/6 pass
+B5: 5/5 pass

@@ -1,0 +1,38 @@
+DRpilot_836729_20260216: aind-open-data/ecephys_836729_2026-02-16_13-20-53/ecephys/ecephys_compressed/experiment1_Record Node 101#NI-DAQmx-108.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=225 global resid -0.03..0.03 ms, max step 0.04 ms
+  block 0: sync edges=587 confirmed=[0] AI0:1.00/1.00 AI1:0.12/0.34 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=596 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 2: sync edges=595 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=595 confirmed=[0] AI0:1.00/1.00 AI1:0.04/0.37 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=595 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=597 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 874 s [19 s]
+  block 1: saved 605 s [32 s]
+  block 2: saved 605 s [44 s]
+  block 3: saved 3650 s [123 s]
+  block 4: saved 605 s [137 s]
+  block 5: saved 603 s [150 s]
+DRpilot_836729_20260216 b0: 17112 transitions, 0 low-swing bins of 1748
+DRpilot_836729_20260216 b1: 12000 transitions, 0 low-swing bins of 1211
+DRpilot_836729_20260216 b2: 12000 transitions, 0 low-swing bins of 1211
+DRpilot_836729_20260216 b3: 72414 transitions, 0 low-swing bins of 7301
+DRpilot_836729_20260216 b4: 12000 transitions, 0 low-swing bins of 1211
+DRpilot_836729_20260216 b5: 12000 transitions, 0 low-swing bins of 1207
+DRpilot_837230_20260422: aind-open-data/ecephys_837230_2026-04-22_12-34-16/ecephys/ecephys_compressed/experiment1_Record Node 101#NI-DAQmx-110.PXI-6133.zarr/ contiguous=True line=1 shared barcodes=226 global resid -0.07..0.05 ms, max step 0.04 ms
+  block 0: sync edges=584 confirmed=[0] AI0:1.00/1.00 AI1:0.15/0.34 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 1: sync edges=594 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 2: sync edges=594 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 3: sync edges=593 confirmed=[0] AI0:1.00/1.00 AI1:0.04/0.34 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 4: sync edges=595 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 5: sync edges=595 confirmed=[0] AI0:1.00/1.00 AI1:0.00/0.00 AI2:0.00/0.00 AI3:0.00/0.00 AI4:0.00/0.00 AI5:0.00/0.00 AI6:0.00/0.00 AI7:0.00/0.00
+  block 0: saved 874 s [19 s]
+  block 1: saved 606 s [31 s]
+  block 2: saved 606 s [44 s]
+  block 3: saved 3632 s [123 s]
+  block 4: saved 606 s [136 s]
+  block 5: saved 606 s [148 s]
+DRpilot_837230_20260422 b0: 17112 transitions, 0 low-swing bins of 1748
+DRpilot_837230_20260422 b1: 12000 transitions, 0 low-swing bins of 1212
+DRpilot_837230_20260422 b2: 12000 transitions, 0 low-swing bins of 1212
+DRpilot_837230_20260422 b3: 72000 transitions, 0 low-swing bins of 7265
+DRpilot_837230_20260422 b4: 12000 transitions, 0 low-swing bins of 1213
+DRpilot_837230_20260422 b5: 12000 transitions, 0 low-swing bins of 1212

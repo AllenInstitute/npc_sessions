@@ -1,0 +1,41 @@
+fuzz mismatches: 0 of 3000 synthetic trains
+stim_running block [1624.21:1624.23] has 1 vsync(s) - excluding from analysis
+stim_running block [40.78:40.80] has 1 vsync(s) - excluding from analysis
+stim_running block [40.98:40.98] has 1 vsync(s) - excluding from analysis
+stim_running block [89.73:89.74] has 1 vsync(s) - excluding from analysis
+stim_running block [5430.52:5430.53] has 1 vsync(s) - excluding from analysis
+stim_running block [5440.27:5440.28] has 1 vsync(s) - excluding from analysis
+stim_running block [3375.33:3375.34] has 1 vsync(s) - excluding from analysis
+stim_running block [3384.66:3384.67] has 1 vsync(s) - excluding from analysis
+blocks compared: 1987 identical: 1987 different: 0
+blocks with >=1 removal: 66 | removals per block p50/p99/max (excl. 366122_20250109): [0.0, 9.0] 839
+fraction of intervals removed, max over compared blocks: 0.04454236568273519
+total time old (s): 185.6 new: 129.7
+Empty DataFrame
+Columns: [folder, block, box, n_flips, n_removed, t_new, t_old, identical]
+Index: []
+session errors: {}
+ERROR:npc_stim.display_times:Failed to get correct frame display times for DRpilot_366122_20250109_0_RFMapping_366122_20250109_153804 block 0.No frame display times will be available
+AssertionError
+ERROR:npc_stim.display_times:Failed to get correct frame display times for DRpilot_366122_20250109_1_Spontaneous_366122_20250109_155245 block 1.No frame display times will be available
+AssertionError
+ERROR:npc_stim.display_times:Failed to get correct frame display times for DRpilot_366122_20250109_2_SpontaneousRewards_366122_20250109_160256 block 2.No frame display times will be available
+AssertionError
+ERROR:npc_stim.display_times:Failed to get correct frame display times for DRpilot_366122_20250109_4_SpontaneousRewards_366122_20250109_171343 block 4.No frame display times will be available
+AssertionError
+ERROR:npc_stim.display_times:Failed to get correct frame display times for DRpilot_366122_20250109_5_SpontaneousRewards_366122_20250109_202056 block 5.No frame display times will be available
+AssertionError
+0  DRpilot_366122_20250109      0    2    25668      12544  0.125004
+1  DRpilot_366122_20250109      1    2    18000          0  0.031247
+2  DRpilot_366122_20250109      2    2    18000          0  0.031265
+3  DRpilot_366122_20250109      3    2   108418      54154  0.968888
+4  DRpilot_366122_20250109      4    2    18000          0  0.015620
+5  DRpilot_366122_20250109      5    2    18000          0  0.015636
+total s 5.0
+get_display_times s 5.0
+0 RFMapping_366122_20250109_153804.hdf5 unavailable estimator failed: AssertionError()
+1 Spontaneous_366122_20250109_155245.hdf5 unavailable estimator failed: AssertionError()
+2 SpontaneousRewards_366122_20250109_160256.hdf5 unavailable estimator failed: AssertionError()
+3 DynamicRouting1_366122_20250109_161307.hdf5 photodiode 
+4 SpontaneousRewards_366122_20250109_171343.hdf5 unavailable estimator failed: AssertionError()
+5 SpontaneousRewards_366122_20250109_202056.hdf5 unavailable estimator failed: AssertionError()
