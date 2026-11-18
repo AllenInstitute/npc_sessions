@@ -22,5 +22,7 @@ Session = DynamicRoutingSession
 
 def __getattr__(name: str):  # lazily-built aliases, see `utils.intervals.__getattr__`
     if name in ("Interval", "UnitSelection"):
+        from npc_sessions import utils
+
         return getattr(utils, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

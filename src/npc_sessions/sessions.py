@@ -985,7 +985,7 @@ class DynamicRoutingSession:
                 trial["timing_source"] = (
                     "patched"
                     if any(
-                        a < trial["stop_time"] and z > trial["start_time"]
+                        a < trial["stop_time"] and z > trial["start_time"]  # type: ignore[operator]
                         for a, z in replayed
                     )
                     else "measured"
@@ -2939,7 +2939,7 @@ class DynamicRoutingSession:
     def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
         """Frame times dict for all stims, containing time arrays or Exceptions."""
         return {
-            k: v if isinstance(v, Exception) else v.display_times
+            k: v if isinstance(v, Exception) else v.display_times  # type: ignore[misc]
             for k, v in self._stim_display_times.items()
         }
 
@@ -3023,7 +3023,7 @@ class DynamicRoutingSession:
         for timing in self.ephys_timing_qc:
             if not getattr(timing, "is_valid", True):
                 logger.warning(
-                    f"{self.id} {timing.device.name} excluded: ephys timing QC failed: {timing.reason}"
+                    f"{self.id} {timing.device.name} excluded: ephys timing QC failed: {getattr(timing, 'reason', '')}"
                 )
         return tuple(
             t for t in self.ephys_timing_qc if getattr(t, "is_valid", True)
@@ -3035,7 +3035,7 @@ class DynamicRoutingSession:
         if not (self.is_ephys and self.is_sync):
             return {}
         return {
-            t.device.name: t.reason
+            t.device.name: getattr(t, "reason", "")
             for t in self.ephys_timing_qc
             if not getattr(t, "is_valid", True)
         }
@@ -3769,7 +3769,7 @@ class DynamicRoutingSession:
                 if self.sync_data.get_unknown_intervals(15):
                     from npc_sessions import timing
 
-                    extra = []
+                    extra: list[float] = []
                     for stim_file in self.stim_data_without_timing_issues:
                         if any(name in stim_file.lower() for name in ("mapping", "tagging")):
                             continue

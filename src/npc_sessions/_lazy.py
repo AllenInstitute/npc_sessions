@@ -92,7 +92,7 @@ _T = TypeVar("_T")
 _NOT_FOUND = object()
 
 
-class cached_property(functools.cached_property, Generic[_T]):  # type: ignore[type-arg]
+class cached_property(functools.cached_property, Generic[_T]):
     """Same as `npc_io.cached_property` (stdlib `cached_property` without the
     instance lock), duplicated here so that importing it doesn't import `npc_io`
     (and boto3 etc.)."""
