@@ -2,7 +2,7 @@
 
 2026-11-17 · handoff: `notes/sync-patching-handoff.md` · plan: `outputs/sync-frame-timing-upgrade-plan.md`
 Evidence: `experiments/sync-patch-manifest/` (scripts, logs, CSVs; see its README).
-**Nothing is pushed.** All code is on local branches named `sync-patch`: npc_sync `5687360`, npc_stim `7db2ce4`, npc_sessions branch `sync-patch` (`0fc22cd` + a report-only commit).
+**Nothing is pushed.** All code is on local branches named `sync-patch`: npc_sync `7e64286`, npc_stim `7db2ce4`, npc_sessions branch `sync-patch` (`0fc22cd` + a report-only commit).
 
 ## Summary
 
@@ -101,7 +101,11 @@ Histogram for the first row:
 | exposing | 1,274 | 0.054 ms | 0.151 | 6 |
 | readout | 1,142 | 0.079 ms | 0.772 | 10 |
 
-The distribution has no break near 0.1 ms, so the **0.1 ms gate is kept**. Spans that fail become 'unknown' for that line. `|gap/period − n|` reaches at most 0.009 for exposing lines and 0.046 for readout lines, against a gate of 0.01.
+The distribution has no break near 0.1 ms, so the **0.1 ms gate is kept**.
+
+**Update:** the period fit now excludes each camera's startup PWM section, the signature exposures (`startup_pwm_section`). Re-checked on all 9,692 camera line × span × edge cases (`camera_gate_check.log`):
+- The one exposing failure it caused is fixed: 857681_20260720 eye cam, falling edges, −0.146 → −0.004 ms.
+- Nothing else changes. The remaining 5 exposing failures are all in 813586_20251117 at 811–815 s, where all three cameras agree on a +0.1–0.15 ms excess, a timeline problem in a block that is already rejected. Spans that fail become 'unknown' for that line. `|gap/period − n|` reaches at most 0.009 for exposing lines and 0.046 for readout lines, against a gate of 0.01.
 
 ### Photodiode prediction (`diode_gate_check.log`)
 

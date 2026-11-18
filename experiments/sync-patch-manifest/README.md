@@ -20,6 +20,7 @@ npc_sessions `sync-patch`. Interpreters:
 | `diode_gate_check.py` | `diode_gate_check.csv/.log` | photodiode prediction gate, 3 s vs 0.5 s post-span check, on all replay-reconcilable blocks |
 | `ephys_barcode_residuals.py` | `ephys_barcode_residuals.jsonl`, `_run.log` | barcode residuals, every device of 446 npc_lims ephys sessions |
 | `ephys_barcode_summary.py`, `ephys_barcode_robust.py` | `ephys_barcode_summary.log`, `ephys_barcode_robust.log/.csv` | residual distributions; robust all-barcode fit; current first/last alignment error; proposed ephys gate |
+| `camera_gate_check.py` | `camera_gate_check.log/.csv` | camera gate re-check with the startup PWM section excluded from fits |
 | `acceptance_local7.py` | `acceptance_local7.log` | P1 acceptance on the 7 local sessions (A1–A8) vs the prototype |
 | `p2_display_times_local.py` | `p2_display_times_local.log` | npc_stim display times with a patch (B1–B5) |
 | `p3_session_check.py` | `p3_session_check.log`, `p3_session_check_events.log`, `p3_session_check_final.log` (all 5 sessions, final code) | npc_sessions end to end on 5 real replay sessions (C1–C7) |
