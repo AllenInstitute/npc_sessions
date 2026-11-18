@@ -104,7 +104,8 @@ def get_tissuecyte_electrodes_table(
     session_electrodes = pd.DataFrame()
 
     for electrode_file in electrode_files:
-        probe_electrodes = pd.read_csv(electrode_file)
+        with electrode_file.open("rb") as f:  # UPath isn't os.PathLike for remote paths
+            probe_electrodes = pd.read_csv(f)
 
         probe_name = npc_session.ProbeRecord(electrode_file.stem).name
 

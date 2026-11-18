@@ -50,7 +50,8 @@ Report: `outputs/phantom-flicker-report.md`. Evidence: `experiments/phantom-flic
 
 ## Next work (not started)
 
-## Decisions needed
+## Decis
+ions needed
 
 1. **Licks:** trials overlapping a replayed interval are currently excluded via `invalid_times`, and reconstructed licks (±8.3 ms) appear only in the licks table. Keep that, or keep the trials?
 	comments:
@@ -59,36 +60,75 @@ Report: `outputs/phantom-flicker-report.md`. Evidence: `experiments/phantom-flic
 2. **Count ≠ stim with no explained fault:** currently `unavailable` plus a reason; nothing raises.
    comments: fine. 
 3. **Release order and timing:** npc_sync → npc_stim (floor) → npc_sessions (floors). The strict default in npc_sync breaks rig QC and npc_sessions_cache on ~5% of files.
-  comments: fine. 
-4. **Ephys barcode gate** (≤0.5 ms AP/NI-DAQ, ≤0.8 ms LFP): apply it, or not?
+  comments: these are released except for _cache
+4. **Ephys
+ barcode gate** (≤0.5 ms AP/NI-DAQ, ≤0.8 ms LFP): apply it, or not?
 	comment: only 1 gate is necessary (same clock for both). <1ms for AP is fine.
 
 - **npc_ephys:** re
 p
-lace the first/last-barcode fit. It is >1 ms off on 104 devices in 43 sessions (`ephys_barcode_robust.log`), mostly ProbeD on PXI-116. 17 devices are off by ≥30 s because barcodes were mispaired: 751595_2024-11-20, 837959_2026-04-01, 649944_2023-02-27, 660023_2023-08-08. **Check against real NWB unit times first.**
-comments: fixing with another agent - skip.
-- is npc_mvr patch aware now? 
-- **Box-1 photodiode prediction** (pre-2023 files): 35 of 60 spans are rejected.
-- **Unexplained residua
-l** in multi-run files: about −0.55 ms per second of span. The camera clock is continuous across those spans.
-- **Test failures:** `t
-est_opto` for 636766_2023-01-23 (2 failures, not regressions). The RF-mapping block is rejected by the box-1 gate.
-- **Plan leftovers:** the npc_stim `atol=1` matcher, end-of-block truncation, generate patches, feynamn docs cleanup/preservation.
+lace the 
+fi
+rst/last-barcode fit. It is >1 ms off on 104 devices in 43 sessions (`ephys_barcode_robust.log`), mostly ProbeD on PXI-116. 17 devices are off by ≥30 s because barcodes were mispaired: 751595_2024-11-20, 837959_2026-04-01, 649944_2023-02-27, 660023_2023-08-08. **Check against real NWB unit times first.**
+comments: 
+fixing with another agent - skip.
+- is npc_m
+vr patch aware now? 
+- **Box-1 
+photodiode prediction** (pre-2023 files): 35 of 60 spans are rejected.
+- **Unexpl
+ained residua
+l** in mult
+i-run files: about −0.55 ms per second of span. The camera clock is continuous across those spans.
+- **Test f
+ailures:** `t
+est_opto` f
+or 636766_2023-01-23 (2 failures, not regressions). The RF-mapping block is rejected by the box-1 gate.
+- **Plan l
+eftovers:** the npc_stim `atol=1` matcher, end-of-block truncation, generate patches, feynamn docs cleanup/preservation.
 
-## Gotchas
-- The npc_sync dev venv
- has no S3 access. Use the npc_sessions venv with `PYTHONPATH`.
-- `ephys_barcode_residu
-als.jsonl` (21 MB) is uncommitted, on disk only. The analog window data is in `C:/data/t2p_qc/analog_windows/`.
-- Patches are written o
-nly if `$NPC_SESSIONS_SYNC_PATCH_DIR` is set. Nothing has been written to S3.
-comment: let's change this - we should always update patches if AWS creds are available and the versions of any of the libraries invovled have changed.
+## Gotcha
+s
+- The npc_
+sync dev venv
+ has no S3 
+access. Use the npc_sessions venv with `PYTHONPATH`.
+- `ephys_b
+arcode_residu
+als.jsonl` 
+(21 MB) is uncommitted, on disk only. The analog window data is in `C:/data/t2p_qc/analog_windows/`.
+- Patches 
+are written o
+nly if `$NP
+C_SESSIONS_SYNC_PATCH_DIR` is set. Nothing has been written to S3.
+comment: l
+et's change this - we should always update patches if AWS creds are available and the versions of any of the libraries invovled have changed.
 
-## Your notes
+## Your n
+o
+tes
 
-- 
+- ensure we have patch info written to s3 includs versions of deps that could affect it, for knowing when to regenerate. 
 
+## Close-out (2026-11-18)
 
+Applied in npc_sessions local `main` (committed, not pushed, no version bump). Evidence: `experiments/sync-patch-manifest/p4_replay_trials_check.log`. Summary: `outputs/sync-patching-report.md` § Close-out.
 
+| Item | Status |
+|---|---|
+| 1. Replayed intervals in `invalid_times` | **Done.** They are no longer `invalid_times`. Overlapping trials are kept (`timing_source='patched'`). Epochs get the tag `replayed_sync` and a note. |
+| 1. Reconstructed licks only in the licks table; `response_time` NaN | **Done.** `response_time` is NaN when the lick line is unknown in the response window before the first measured lick. Sound and opto onsets/offsets on an unknown line are NaN too. Without that, npc_samstim's unbounded search would return the next stimulus's edge. OptoTagging rows with an unknown onset are left out of the table (logged). |
+| 2. Count ≠ stim | Unchanged (agreed). |
+| 3. Release order | npc_sync 0.3.5, npc_stim 0.1.25, npc_ephys 0.1.52 are released, and the npc_sessions floors already require them. **npc_sessions_cache is not done:** its branch `move-display-times-to-npc-stim` has uncommitted changes. I didn't touch it. |
+| 4. Ephys gate | **Already in npc_ephys 0.1.52.** The gate is 1 ms max leave-one-out residual for AP, LFP and NI-DAQ, and an LFP stream fails with its AP stream. The LFP stream still gets its own 1 ms check when AP passes. That's left to the npc_ephys work. |
+| Patches always updated with AWS creds + dep versions | **Done.** The default cache is `s3://aind-scratch-data/dynamic-routing/cache/sync_patches` when botocore finds credentials. `$NPC_SESSIONS_SYNC_PATCH_DIR` overrides it; `none` disables it. The JSON adds `dependency_versions` (npc_sessions, npc_sync, npc_stim). A patch is rebuilt and overwritten when the builder or any version differs. Read and write errors are logged and the patch is built in memory. Still nothing on S3: test and check runs used `none` or a temp dir. |
+| npc_mvr patch-aware? | **No** (unchanged). It reads the patched `SyncDataset`, so it gets reconstructed camera edges. Camera spans that fail the gate (6/1,274 exposing spans) return no edges there. It never calls `get_unknown_intervals`. Not checked: whether npc_mvr's frame-count tolerance then rejects those videos or shifts their frames. |
+| Also fixed (found while testing) | Upstream breakage (pandas 3 / universal-pathlib 0.3 / zarr): remote UPaths passed to `pd.read_csv`/`read_pickle`/`read_excel` and `zarr.open` now go through file handles or fsspec mappers. 2 doctests were made independent of UPath repr, pandas Index repr and the last digits of the new ephys fit. Also fixed: the opto latency assert in `DynamicRouting1.get_trial_opto_onset`, which compared absolute onset times with 0.1 s. |
+| Tests | Suite: 49 passed, 2 skipped, 1 failed. The failure is `test_surface_recording` ("703880_2024-04-17_1 has no main raw data assets"). It also fails on `HEAD`; it's a data lookup problem, not a code one. `tests/test_timing.py` has 8 tests (3 new). mypy is clean on the changed modules. |
 
+Still open (not addressed here):
+- 20 cleaned blocks (14 OptoTagging) are still rejected by npc_stim's rise + 15 ms check (`asym_round`; see `outputs/phantom-flicker-report.md`).
+- The −0.55 ms/s residual in multi-run files is unexplained.
+- Plan leftovers: the npc_stim `atol=1` matcher, end-of-block truncation, NWB/cache regeneration after release, and Feynman docs cleanup.
+- Release steps: bump the npc_sessions version, push `main` (local `main` is ahead of origin), and release npc_sessions_cache after the strict-sync changes.
 

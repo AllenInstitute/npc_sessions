@@ -264,6 +264,16 @@ Covered: every npc_lims ephys session from 2025-01-13 on with a reconcilable blo
   - cache cleanup
 - **Not committed (too large):** `experiments/sync-patch-manifest/ephys_barcode_residuals.jsonl` (21 MB), kept on disk. Analog window files are in `C:/data/t2p_qc/analog_windows/`.
 
+
+## Close-out (2026-11-18)
+
+Decisions from `notes/sync-patching-handoff-2.md` applied in npc_sessions (local `main`, not pushed):
+
+- **Decision 1 (licks/trials):** replayed intervals are no longer `invalid_times`. Trials overlapping them are kept with `timing_source='patched'`. Reconstructed licks stay in the licks table only. In the trials tables, events whose sync line is unknown in the interval are NaN: `response_time` (if the lick line is unknown in the response window before the first measured lick), sound onsets/offsets, and opto onsets/offsets (DynamicRouting1, RFMapping, OptoTagging). OptoTagging rows with an unknown onset are omitted from the intervals table (logged). Epochs overlapping a replay get the tag `replayed_sync` and a note. This also closes the "npc_samstim onset search is unbounded" item for npc_sessions: such onsets are now masked instead of dropped with the trial.
+- **Patch cache:** written by default to `s3://aind-scratch-data/dynamic-routing/cache/sync_patches/<session>_<hash12>.json` when AWS credentials are available. The JSON adds `dependency_versions` (npc_sessions, npc_sync, npc_stim). A patch is rebuilt and overwritten when the builder or any version differs.
+- **Checks:** D1–D7 pass on the 5 replay sessions (`experiments/sync-patch-manifest/p4_replay_trials_check.log`). 5 trials recovered in 4 sessions (2+1+1+1) compared with `p3_session_check_final.log`. npc_sessions suite: 49 passed, 2 skipped, 1 failed. The failure is `test_surface_recording` ("703880_2024-04-17_1 has no main raw data assets", npc_lims/Code Ocean lookup), which also fails on `HEAD`.
+- **Decision 4 (ephys gate):** already in npc_ephys 0.1.52 (`DEFAULT_MAX_RESIDUAL_MS` = 1 ms; an LFP stream fails with its AP stream). Nothing changed here.
+
 ## Sources
 
 - Handoff: `notes/sync-patching-handoff.md`. Plan: `outputs/sync-frame-timing-upgrade-plan.md`.

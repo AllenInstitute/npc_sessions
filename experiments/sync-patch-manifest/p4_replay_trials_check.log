@@ -1,0 +1,67 @@
+npc_sessions C:\Users\ben.hardcastle\github\npc_sessions\src\npc_sessions\__init__.py | npc_sync 0.3.5
+dependency versions {'npc_sessions': '0.0.291', 'npc_sync': '0.3.5', 'npc_stim': '0.1.25'}
+
+===== 839146_2026-05-18
+  replayed intervals: ((5622.0, 5629.0),)
+  D7 PASS: saved ['839146_2026-05-18_8efe4a2b0f6c.json']
+  D1 PASS: invalid_times: None entries, overlapping replay: 0
+  D2 PASS: epoch 3: tags ['task', 'rewards', 'replayed_sync']; notes 'includes replayed sync data (copied acquisition buffers): events unknown on barcode_ephys, galvo_xy, lick_sensor, reward_1_actuator, bit1, b'
+  D3 PASS: 548/548 trials; timing_source {'measured': 546, 'patched': 2}
+  D4 PASS: 2 trials masked (lick unknown ((5621.99999, 5629.0),)); mismatches []
+  D5 PASS: sound unknown ((5621.99999, 5629.0),); aud trials 245, NaN onsets 1, finite onsets inside unknown 0
+  D6 PASS: tables (rows, NaN stim_start_time): {'performance': (6, None), 'trials': (548, 1), 'aud_rf_mapping_trials': (432, 0), 'vis_rf_mapping_trials': (1224, 0)}
+  (77 s)
+
+===== 835598_2026-02-27
+  replayed intervals: ((4032.5, 4034.0),)
+  D7 PASS: saved ['835598_2026-02-27_8fbfa0821c98.json']
+  D1 PASS: invalid_times: None entries, overlapping replay: 0
+  D2 PASS: epoch 3: tags ['task', 'rewards', 'replayed_sync']; notes 'includes replayed sync data (copied acquisition buffers): events unknown on barcode_ephys, galvo_xy, lick_sensor, reward_1_actuator, bit1; r'
+  D3 PASS: 543/543 trials; timing_source {'measured': 542, 'patched': 1}
+  D4 PASS: 1 trials masked (lick unknown ((4032.49999, 4034.0),)); mismatches []
+  D5 PASS: sound unknown ((4032.49999, 4034.0),); aud trials 243, NaN onsets 1, finite onsets inside unknown 0
+  D6 PASS: tables (rows, NaN stim_start_time): {'performance': (6, None), 'trials': (543, 1), 'aud_rf_mapping_trials': (432, 0), 'vis_rf_mapping_trials': (1224, 0)}
+  (91 s)
+
+===== 837959_2026-04-02
+  replayed intervals: ((5398.0, 5400.0), (6654.5, 6655.5))
+  D7 PASS: saved ['837959_2026-04-02_bfd4603b9462.json']
+  D1 PASS: invalid_times: None entries, overlapping replay: 0
+  D2 PASS: epoch 3: tags ['task', 'rewards', 'replayed_sync']; notes 'includes replayed sync data (copied acquisition buffers): events unknown on barcode_ephys, galvo_xy, lick_sensor, reward_1_actuator, bit1; r'
+  D2 PASS: epoch 5: tags ['spontaneous', 'replayed_sync']; notes 'includes replayed sync data (copied acquisition buffers): events unknown on barcode_ephys, galvo_xy, lick_sensor, reward_1_actuator, bit1; r'
+  D3 PASS: 544/544 trials; timing_source {'measured': 543, 'patched': 1}
+  D4 PASS: 1 trials masked (lick unknown ((5397.99999, 5400.0), (6654.49999, 6655.5))); mismatches []
+  D5 PASS: sound unknown ((5397.99999, 5400.0), (6654.49999, 6655.5)); aud trials 243, NaN onsets 0, finite onsets inside unknown 0
+  D6 PASS: tables (rows, NaN stim_start_time): {'performance': (6, None), 'trials': (544, 0), 'aud_rf_mapping_trials': (432, 0), 'vis_rf_mapping_trials': (1224, 0)}
+  (90 s)
+
+===== 856847_2026-06-04
+  replayed intervals: ((2743.0, 2744.5),)
+  D7 PASS: saved ['856847_2026-06-04_83555ede6083.json']
+  D1 PASS: invalid_times: None entries, overlapping replay: 0
+  D2 PASS: epoch 3: tags ['task', 'rewards', 'replayed_sync']; notes 'includes replayed sync data (copied acquisition buffers): events unknown on barcode_ephys, beh_cam_frame_readout, galvo_xy, lick_sensor, rew'
+  D3 PASS: 546/546 trials; timing_source {'measured': 545, 'patched': 1}
+  D4 PASS: 0 trials masked (lick unknown ((2742.99999, 2744.5),)); mismatches []
+  D5 PASS: sound unknown ((2742.99999, 2744.5),); aud trials 246, NaN onsets 0, finite onsets inside unknown 0
+  D6 PASS: tables (rows, NaN stim_start_time): {'performance': (6, None), 'trials': (546, 0), 'aud_rf_mapping_trials': (432, 0), 'vis_rf_mapping_trials': (1224, 0)}
+  (53 s)
+
+===== 862025_2026-08-05
+  replayed intervals: ((705.0, 706.5),)
+  D7 PASS: saved ['862025_2026-08-05_3dc8ca310745.json']
+  D1 PASS: invalid_times: None entries, overlapping replay: 0
+  D2 PASS: epoch 0: tags ['mapping', 'replayed_sync']; notes 'includes replayed sync data (copied acquisition buffers): events unknown on barcode_ephys, galvo_xy, lick_sensor, reward_1_actuator, bit1, b'
+  D3 PASS: 533/533 trials; timing_source {'measured': 533}
+  D4 PASS: 0 trials masked (lick unknown ((704.99999, 706.5),)); mismatches []
+  D5 PASS: sound unknown ((704.99999, 706.5),); aud trials 241, NaN onsets 0, finite onsets inside unknown 0
+  D6 PASS: tables (rows, NaN stim_start_time): {'performance': (6, None), 'trials': (533, 0), 'aud_rf_mapping_trials': (432, 2), 'vis_rf_mapping_trials': (1224, 0)}
+  (49 s)
+
+===== summary
+D1: 5/5 pass
+D2: 6/6 pass
+D3: 5/5 pass
+D4: 5/5 pass
+D5: 5/5 pass
+D6: 5/5 pass
+D7: 5/5 pass

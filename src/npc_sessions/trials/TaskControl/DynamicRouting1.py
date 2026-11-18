@@ -27,6 +27,8 @@ if typing.TYPE_CHECKING:
     import npc_session
     import npc_stim
     import npc_sync
+
+    import npc_sessions.timing as timing
 else:
     DynamicRoutingTask = lazy_import(
         "DynamicRoutingTask", "DynamicRoutingTask.TaskUtils"
@@ -37,6 +39,7 @@ else:
     npc_session = lazy_import("npc_session")
     npc_stim = lazy_import("npc_stim")
     npc_sync = lazy_import("npc_sync")
+    timing = lazy_import("npc_sessions.timing")
 import numpy as np
 import numpy.typing as npt
 
@@ -119,10 +122,14 @@ class DynamicRouting1(TaskControl):
         if self._sync:
             try:
                 self._cached_opto_stim_recordings = (
-                    npc_samstim.get_stim_latencies_from_sync(
-                        self._hdf5_path,
+                    timing.mask_unknown_stim_recordings(
+                        npc_samstim.get_stim_latencies_from_sync(
+                            self._hdf5_path,
+                            self._sync,
+                            waveform_type="opto",
+                        ),
                         self._sync,
-                        waveform_type="opto",
+                        self._sync.get_line_for_stim_onset("opto"),
                     )
                 )
             except npc_samstim.MissingSyncLineError:
@@ -175,10 +182,15 @@ class DynamicRouting1(TaskControl):
             self._sync
             and self._sync.start_time.date() >= npc_sync.FIRST_SOUND_ON_SYNC_DATE
         ):
-            self._cached_aud_stim_recordings = npc_samstim.get_stim_latencies_from_sync(
-                self._hdf5_path,
+            self._cached_aud_stim_recordings = timing.mask_unknown_stim_recordings(
+                npc_samstim.get_stim_latencies_from_sync(
+                    self._hdf5_path,
+                    self._sync,
+                    waveform_type="sound",
+                ),
                 self._sync,
-                waveform_type="sound",
+                self._sync.get_line_for_stim_onset("sound"),
+                include_offset=False,
             )
         elif (
             recording_dirs := getattr(self, "_ephys_recording_dirs", None)
@@ -298,16 +310,27 @@ class DynamicRouting1(TaskControl):
             )
             - 1
         ]
+        # edges on the line are unknown in replayed sync intervals: the edge found may belong
+        # to another stimulus
+        onset_times_based_on_sync = np.where(
+            timing.unknown_overlap_mask(
+                onset_times_based_on_script,
+                onset_times_based_on_sync,
+                timing.get_unknown_intervals(self._sync, line_number),
+            ),
+            np.nan,
+            onset_times_based_on_sync,
+        )
         opto_onset_latency = onset_times_based_on_sync - onset_times_based_on_script
         logger.debug(
             f"Opto onset latencies (sync line - script flip): {np.median(opto_onset_latency)=} {np.max(opto_onset_latency)=}"
         )
         assert np.all(
-            opto_onset_latency >= 0
+            np.isnan(opto_onset_latency) | (opto_onset_latency >= 0)
         ), f"Negative opto latencies found (sync line - script flip): {opto_onset_latency = }"
         assert np.all(
-            onset_times_based_on_sync < 0.1
-        ), f"Large opto onset times found: {onset_times_based_on_sync = }"
+            np.isnan(opto_onset_latency) | (opto_onset_latency < 0.1)
+        ), f"Large opto onset latencies found (sync line - script flip): {opto_onset_latency = }"
         return onset_times_based_on_sync
 
     def get_trial_opto_offset(
@@ -355,6 +378,15 @@ class DynamicRouting1(TaskControl):
             )
             - 1
         ]
+        offset_times_based_on_sync = np.where(
+            timing.unknown_overlap_mask(
+                offset_times_based_on_nominal_duration,
+                offset_times_based_on_sync,
+                timing.get_unknown_intervals(self._sync, line_number),
+            ),
+            np.nan,
+            offset_times_based_on_sync,
+        )
         opto_duration = (
             self.get_trial_opto_onset(line=line) - offset_times_based_on_sync
         )
@@ -558,17 +590,32 @@ class DynamicRouting1(TaskControl):
         - nan if no lick occurred
         - may be nan even if `is_response` is True, for sessions prior to
           2023-10-20 (see `task_control_response_time.description`)
+        - nan if the lick line is unknown (replayed sync interval) in the response window
+          before the first measured lick in it
         """
         if not self._sync:
             return self.task_control_response_time
 
         lick_times = self._sync.get_rising_edges("lick_sensor", units="seconds")
+        unknown = timing.get_unknown_intervals(self._sync, "lick_sensor")
         all_response_times = np.full(self._len, np.nan)
         for idx in self.trial_index:
             trial_response_times = lick_times[
                 (lick_times > self.response_window_start_time[idx])
                 & (lick_times < self.response_window_stop_time[idx])
             ]
+            if unknown and timing.unknown_overlap_mask(
+                self.response_window_start_time[idx],
+                (
+                    trial_response_times[0]
+                    if len(trial_response_times)
+                    else self.response_window_stop_time[idx]
+                ),
+                unknown,
+            )[0]:
+                # the first lick may be in the unknown interval: reconstructed licks
+                # (+-1/2 frame) are in the licks table only
+                continue
             if not trial_response_times.any():
                 if self.is_response[idx]:
                     logger.warning(

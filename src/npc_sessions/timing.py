@@ -21,19 +21,22 @@ This module adds what npc_sync can't know about a session:
   frame-count mismatch is detected, not hidden)
 - the gates: a block that fails one is rejected (no display times, no fallback)
 - barcode spans widened so that no partially-copied barcode is decoded
-- persistence: the patch is cached as JSON keyed by session, sync content hash and builder
-- what goes in `invalid_times` (time ranges where trial timing can't be trusted), and
+- persistence: the patch is cached as JSON keyed by session and sync content hash, with the
+  builder and the versions of the packages that build it (`PATCH_DEPENDENCIES`); a cached
+  patch is rebuilt (and overwritten, if writable) when any of them differ
+- masks for trial events whose sync line is unknown inside a replayed interval, and
   reconstructed licks/rewards with a `timing_source` for the tables
 
-Policy decisions (outputs/sync-frame-timing-upgrade-plan.md):
+Policy decisions (outputs/sync-frame-timing-upgrade-plan.md, notes/sync-patching-handoff-2.md):
 
 - files with a timebase discontinuity (dropped or displaced buffers) are not patched: npc_stim
   still refuses them, so they stay rejected
-- trials overlapping a replayed interval are excluded via `invalid_times`: licks, sound and
-  opto edges are unknown there. OPEN DECISION: keeping them would need reconstructed licks
-  (+-8.3 ms) in the trials table, and sound/opto onsets from a source other than sync
+- replayed intervals are NOT `invalid_times` (decided 2026-11-18): frame times are
+  reconstructed there, so trials overlapping them are kept (`timing_source='patched'`).
+  Events on lines that are unknown there are NaN in the trials tables instead: `response_time`
+  (lick line), sound and opto onsets/offsets (their sync lines). See `unknown_overlap_mask`.
 - licks inside replayed intervals are reconstructed from `lickFrames` for the licks table only
-  (`timing_source='stim_frame'`, duration NaN)
+  (`timing_source='stim_frame'`, duration NaN); `response_time` is NaN there
 - rewards inside replayed intervals are reconstructed from `rewardFrames` + the session's
   median measured frame->solenoid latency (`timing_source='stim_frame'`, duration NaN)
 """
@@ -42,6 +45,8 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+import importlib.metadata
+import json
 import logging
 import os
 from collections.abc import Iterable, Sequence
@@ -64,8 +69,14 @@ prediction inside replayed spans from the block alignment."""
 another builder are rebuilt."""
 
 PATCH_DIR_ENV_VAR = "NPC_SESSIONS_SYNC_PATCH_DIR"
-"""Directory (local or s3://) where patches are cached as `<session>_<hash[:12]>.json`. If
-unset, patches are built in memory and not saved. TODO: `npc_lims.get_sync_patch_path`."""
+"""Overrides `DEFAULT_PATCH_ROOT` (local dir or s3://). Set to 'none' to disable the cache."""
+
+DEFAULT_PATCH_ROOT = "s3://aind-scratch-data/dynamic-routing/cache/sync_patches"
+"""Where patches are cached as `<session>_<hash[:12]>.json` when AWS credentials are available."""
+
+PATCH_DEPENDENCIES = ("npc_sessions", "npc_sync", "npc_stim")
+"""Packages whose code determines a patch's content: their versions are saved with the patch
+(`dependency_versions`), and a cached patch with different versions is rebuilt."""
 
 MATCH_OFFSET_MIN_SEC = -1.5
 MATCH_OFFSET_MAX_SEC = 60.0
@@ -121,7 +132,7 @@ def match_stims_to_blocks(
             data = npc_stim.get_h5_stim_data(path)
             n = npc_stim.get_total_stim_frames(data)
             start = _stim_start_on_sync(data, sync)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             unmatched.append((path, f"unreadable: {exc!r}"))
             continue
         if n == 0:
@@ -230,13 +241,60 @@ def _span_with_line_low_at_bounds(
     return (a, z)
 
 
+def get_dependency_versions() -> dict[str, str]:
+    """Installed versions of `PATCH_DEPENDENCIES` ('unknown' if not installed as a dist)."""
+    out = {}
+    for name in PATCH_DEPENDENCIES:
+        try:
+            out[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            out[name] = "unknown"
+    return out
+
+
+def has_aws_credentials() -> bool:
+    try:
+        import botocore.session
+
+        return botocore.session.get_session().get_credentials() is not None
+    except Exception:
+        return False
+
+
+def get_patch_root(root: npc_io.PathLike | None = None) -> upath.UPath | None:
+    """`root`, else `$NPC_SESSIONS_SYNC_PATCH_DIR`, else `DEFAULT_PATCH_ROOT` if AWS
+    credentials are available, else None (no cache)."""
+    root = root or os.environ.get(PATCH_DIR_ENV_VAR)
+    if root is not None and str(root).lower() in ("", "none", "0", "false"):
+        return None
+    if not root:
+        if not has_aws_credentials():
+            return None
+        root = DEFAULT_PATCH_ROOT
+    return npc_io.from_pathlike(root)
+
+
 def get_patch_path(
     session_id: str, content_hash: str, root: npc_io.PathLike | None = None
 ) -> upath.UPath | None:
-    root = root or os.environ.get(PATCH_DIR_ENV_VAR)
-    if not root:
+    r = get_patch_root(root)
+    if r is None:
         return None
-    return npc_io.from_pathlike(root) / f"{session_id}_{content_hash[:12]}.json"
+    return r / f"{session_id}_{content_hash[:12]}.json"
+
+
+def save_patch(patch: npc_sync.SyncPatch, path: npc_io.PathLike) -> None:
+    """Save as `SyncPatch` JSON plus `dependency_versions` (ignored by `SyncPatch.load`)."""
+    d = patch.to_dict() | {"dependency_versions": get_dependency_versions()}
+    npc_io.from_pathlike(path).write_text(json.dumps(d, indent=1))
+
+
+def load_patch(
+    path: npc_io.PathLike,
+) -> tuple[npc_sync.SyncPatch, dict[str, str]]:
+    """(patch, dependency versions it was built with: empty for patches saved without)."""
+    d = json.loads(npc_io.from_pathlike(path).read_text())
+    return npc_sync.SyncPatch.from_dict(d), dict(d.get("dependency_versions") or {})
 
 
 def get_sync_patch(
@@ -249,20 +307,39 @@ def get_sync_patch(
     """The session's patch (every session: photodiode phantom-flicker removal applies to files
     without replays too).
 
-    Loaded from `root` (default: `$NPC_SESSIONS_SYNC_PATCH_DIR`) if a patch for the same
-    sync content hash and builder exists; otherwise built, and saved there if `write`.
+    Loaded from the cache (`get_patch_root`: `root`, `$NPC_SESSIONS_SYNC_PATCH_DIR`, or
+    `DEFAULT_PATCH_ROOT` on S3 when AWS credentials are available) if a patch exists there
+    for the same sync content hash, builder and `PATCH_DEPENDENCIES` versions. Otherwise
+    built, and saved there (overwriting a stale one) if `write`. Cache read/write failures
+    are logged and the patch is built in memory.
     """
     raw = npc_sync.SyncDataset(npc_sync.get_sync_data(sync), on_invalid="ignore")
     path = get_patch_path(session_id, raw.content_hash, root)
-    if path is not None and path.exists():
-        patch = npc_sync.SyncPatch.load(path)
-        if patch.sync_content_hash == raw.content_hash and patch.builder == BUILDER:
-            return patch
-        logger.info(f"{session_id}: cached sync patch {path} is stale: rebuilding")
+    versions = get_dependency_versions()
+    if path is not None:
+        try:
+            if path.exists():
+                patch, saved_versions = load_patch(path)
+                if (
+                    patch.sync_content_hash == raw.content_hash
+                    and patch.builder == BUILDER
+                    and saved_versions == versions
+                ):
+                    return patch
+                logger.info(
+                    f"{session_id}: cached sync patch {path} is stale "
+                    f"(builder {patch.builder!r}, versions {saved_versions}; now {BUILDER!r}, "
+                    f"{versions}): rebuilding"
+                )
+        except Exception as exc:
+            logger.warning(f"{session_id}: could not read cached sync patch {path}: {exc!r}")
     patch = build_session_sync_patch(raw, stim_paths)
     if path is not None and write:
-        patch.save(path)
-        logger.info(f"{session_id}: saved sync patch to {path}")
+        try:
+            save_patch(patch, path)
+            logger.info(f"{session_id}: saved sync patch to {path}")
+        except Exception as exc:
+            logger.warning(f"{session_id}: could not save sync patch to {path}: {exc!r}")
     return patch
 
 
@@ -341,44 +418,132 @@ def get_block_report(
     return pd.DataFrame(rows)
 
 
-def get_invalid_times(sync: npc_sync.SyncDataset) -> list[dict[str, Any]]:
-    """`invalid_times` entries for replayed intervals in which events on any line are
-    unknown (in practice every replayed interval: licks, sound and barcodes are never
-    reconstructed on sync)."""
+def get_replayed_intervals(sync: npc_sync.SyncDataset) -> list[dict[str, Any]]:
+    """One entry per replayed interval of a patched file: `start_time`, `stop_time` and a
+    `reason` listing the lines whose events are unknown there and those reconstructed.
+
+    Not `invalid_times` (see module docstring): for notes, and for the trials tables, which
+    NaN the affected events (`unknown_overlap_mask`)."""
     patch = sync.patch
     if patch is None or not sync.invalid_intervals:
         return []
     out = []
     for a, z in sync.invalid_intervals:
         unknown, reconstructed = [], []
-        start, stop = a, z
         for line, spans in patch.lines.items():
             for s in spans:
                 if s.span[0] <= a + 1e-6 and s.span[1] >= z - 1e-6:
-                    if s.status == "unknown" and line != "barcode_ephys":
+                    if s.status == "unknown":
                         unknown.append(line)
-                        start, stop = min(start, s.span[0]), max(stop, s.span[1])
                     elif s.status == "reconstructed" and s.method != "no_edges":
                         reconstructed.append(line)
-        if not unknown:
-            continue
-        labelled = sorted(x for x in unknown if not x.startswith("bit"))
+
+        def fmt(lines: list[str]) -> str:
+            return ", ".join(
+                sorted(x for x in lines if not x.startswith("bit"))
+                + sorted(x for x in lines if x.startswith("bit"))
+            )
+
         out.append(
             dict(
-                start_time=float(start),
-                stop_time=float(stop),
+                start_time=float(a),
+                stop_time=float(z),
                 reason=(
-                    "replayed sync data (copied acquisition buffers): events unknown on "
-                    + ", ".join(labelled + sorted(x for x in unknown if x.startswith("bit")))
-                    + (
-                        f"; reconstructed: {', '.join(sorted(reconstructed))}"
-                        if reconstructed
-                        else ""
-                    )
+                    "replayed sync data (copied acquisition buffers)"
+                    + (f": events unknown on {fmt(unknown)}" if unknown else "")
+                    + (f"; reconstructed: {fmt(reconstructed)}" if reconstructed else "")
                 ),
             )
         )
     return out
+
+
+# -------------------------------------------------------------------------- masks
+
+
+def get_unknown_intervals(
+    sync: npc_sync.SyncDataset | None, line: str | int
+) -> tuple[tuple[float, float], ...]:
+    """`sync.get_unknown_intervals(line)`, or () without sync or if the line isn't on the
+    file."""
+    if sync is None:
+        return ()
+    try:
+        return sync.get_unknown_intervals(line)
+    except (ValueError, IndexError, KeyError):  # line label not on this file
+        return ()
+
+
+def unknown_overlap_mask(
+    start: npt.ArrayLike,
+    stop: npt.ArrayLike,
+    unknown: Iterable[tuple[float, float]],
+) -> npt.NDArray[np.bool_]:
+    """True where the closed interval [start, stop] (either order) overlaps an unknown
+    interval. NaN bounds are ignored (a NaN stop checks `start` only).
+
+    >>> unknown_overlap_mask([0, 2, 5], [1, 3, np.nan], [(1.5, 2.5), (4.9, 5.1)]).tolist()
+    [False, True, True]
+    """
+    a = np.atleast_1d(np.asarray(start, dtype=float))
+    z = np.atleast_1d(np.asarray(stop, dtype=float))
+    z = np.where(np.isnan(z), a, z)
+    a = np.where(np.isnan(a), z, a)
+    lo, hi = np.minimum(a, z), np.maximum(a, z)
+    mask = np.zeros(lo.shape, dtype=bool)
+    for u0, u1 in unknown:
+        mask |= (lo < u1) & (hi >= u0)
+    return mask
+
+
+def stim_recordings_unknown_mask(
+    recordings: Sequence[Any],
+    sync: npc_sync.SyncDataset | None,
+    line: str | int,
+    include_offset: bool = True,
+) -> npt.NDArray[np.bool_]:
+    """True for npc_samstim recordings (sound/opto onsets found on a sync line) whose
+    trigger-to-onset range (to the offset, if `include_offset`: opto offsets are falling edges
+    on the line; sound offsets are onset + duration) overlaps an interval in which `line` is
+    unknown: the edge may be missing there, and the edge found would then belong to another
+    stimulus. False for None entries."""
+    mask = np.zeros(len(recordings), dtype=bool)
+    unknown = get_unknown_intervals(sync, line)
+    if not unknown:
+        return mask
+    for i, rec in enumerate(recordings):
+        if rec is None:
+            continue
+        trigger = getattr(getattr(rec, "presentation", None), "trigger_time_on_sync", None)
+        times = [
+            float(t)
+            for t in (
+                trigger,
+                rec.onset_time_on_sync,
+                rec.offset_time_on_sync if include_offset else None,
+            )
+            if t is not None and np.isfinite(t)
+        ]
+        if times and unknown_overlap_mask(min(times), max(times), unknown)[0]:
+            mask[i] = True
+    if mask.any():
+        logger.info(
+            f"{mask.sum()} stim recordings on sync line {line!r} masked: line unknown in a replayed interval"
+        )
+    return mask
+
+
+def mask_unknown_stim_recordings(
+    recordings: Sequence[Any] | None,
+    sync: npc_sync.SyncDataset | None,
+    line: str | int,
+    include_offset: bool = True,
+) -> tuple[Any, ...] | None:
+    """`recordings` with None where `stim_recordings_unknown_mask` is True."""
+    if recordings is None:
+        return None
+    mask = stim_recordings_unknown_mask(recordings, sync, line, include_offset)
+    return tuple(None if m else r for r, m in zip(recordings, mask))
 
 
 # -------------------------------------------------------------------------- tables
@@ -454,4 +619,4 @@ def get_reconstructed_reward_times(
 
 
 def utc_now() -> str:
-    return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+    return datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds")

@@ -5,8 +5,6 @@ Needs npc_sync with `SyncPatch` and npc_stim with patch-aware display times (bra
 
 from __future__ import annotations
 
-import pathlib
-
 import h5py
 import numpy as np
 import pytest
@@ -15,6 +13,7 @@ npc_sync = pytest.importorskip("npc_sync")
 if not hasattr(npc_sync, "SyncPatch"):
     pytest.skip("npc_sync without SyncPatch", allow_module_level=True)
 
+import npc_io  # noqa: E402
 import npc_stim  # noqa: E402
 
 from npc_sessions import timing  # noqa: E402
@@ -133,14 +132,72 @@ def test_report_gates_and_invalid_times(files) -> None:
     assert row["status"] == "patched" and row["display_time_source"] == "photodiode"
     assert row["n_interpolated_frames"] > 0
     assert all(abs(r) < 0.5 for r in row["anchor_residuals_ms"])
-    (inv,) = timing.get_invalid_times(sync)
-    assert inv["start_time"] <= 18.0 and inv["stop_time"] >= 20.0
-    assert "lick_sensor" in inv["reason"] and "vsync_stim" in inv["reason"].split("reconstructed:")[1]
+    (rep,) = timing.get_replayed_intervals(sync)
+    assert (rep["start_time"], rep["stop_time"]) == files["interval"]
+    unknown, reconstructed = rep["reason"].split("reconstructed:")
+    assert "lick_sensor" in unknown and "vsync_stim" in reconstructed
     # without a stim file the vsync span is unknown -> block rejected
     p0 = timing.build_session_sync_patch(files["sync"], [])
     s0 = npc_sync.SyncDataset(files["sync"], patch=p0)
     (row0,) = timing.get_block_report(s0, [], npc_stim.get_display_times(s0, {})).to_dict("records")
     assert row0["status"] == "rejected"
+
+
+def test_patch_cache_records_dependency_versions(files, tmp_path, monkeypatch) -> None:
+    p1 = timing.get_sync_patch("s", files["sync"], [files["stim"]], root=tmp_path)
+    (saved,) = tmp_path.glob("s_*.json")
+    loaded, versions = timing.load_patch(saved)
+    assert versions == timing.get_dependency_versions()
+    assert set(versions) == set(timing.PATCH_DEPENDENCIES)
+    assert npc_sync.SyncPatch.load(saved).created == p1.created  # still a valid SyncPatch file
+    # a changed dependency version -> rebuilt and overwritten
+    monkeypatch.setattr(
+        timing, "get_dependency_versions", lambda: {**versions, "npc_stim": "0.0.0"}
+    )
+    p2 = timing.get_sync_patch("s", files["sync"], [files["stim"]], root=tmp_path)
+    assert p2 is not p1 and p2.to_dict()["lines"] == p1.to_dict()["lines"]
+    assert timing.load_patch(saved)[1]["npc_stim"] == "0.0.0"
+    assert timing.get_sync_patch("s", files["sync"], [files["stim"]], root=tmp_path).created == p2.created
+
+
+def test_patch_root(monkeypatch, tmp_path) -> None:
+    monkeypatch.delenv(timing.PATCH_DIR_ENV_VAR, raising=False)
+    monkeypatch.setattr(timing, "has_aws_credentials", lambda: False)
+    assert timing.get_patch_root() is None
+    monkeypatch.setattr(timing, "has_aws_credentials", lambda: True)
+    assert timing.get_patch_root().as_posix() == timing.DEFAULT_PATCH_ROOT
+    monkeypatch.setenv(timing.PATCH_DIR_ENV_VAR, "none")
+    assert timing.get_patch_root() is None
+    monkeypatch.setenv(timing.PATCH_DIR_ENV_VAR, str(tmp_path))
+    assert timing.get_patch_root() == npc_io.from_pathlike(tmp_path)
+    assert timing.get_patch_root(tmp_path / "x") == npc_io.from_pathlike(tmp_path / "x")
+
+
+def test_unknown_masks(files) -> None:
+    patch = timing.get_sync_patch("s", files["sync"], [files["stim"]])
+    sync = npc_sync.SyncDataset(files["sync"], patch=patch)
+    (u,) = timing.get_unknown_intervals(sync, "lick_sensor")
+    assert u[0] <= 18.0 and u[1] >= 20.0
+    assert timing.get_unknown_intervals(sync, "no_such_line") == ()
+    assert timing.get_unknown_intervals(None, "lick_sensor") == ()
+    m = timing.unknown_overlap_mask([10, 17.5, 19, 21, 17], [11, 18.5, np.nan, 22, 23], [u])
+    assert m.tolist() == [False, True, True, False, True]
+
+    class Rec:
+        def __init__(self, trigger, onset, offset):
+            self.presentation = type("P", (), {"trigger_time_on_sync": trigger})()
+            self.onset_time_on_sync, self.offset_time_on_sync = onset, offset
+
+    recs = [Rec(10, 10.01, 10.5), Rec(17.9, 20.1, 20.6), Rec(17.0, 17.01, 18.5), None]
+    assert timing.stim_recordings_unknown_mask(recs, sync, "lick_sensor").tolist() == [
+        False, True, True, False
+    ]
+    # sound: offset is onset + duration, not an edge on the line
+    assert timing.stim_recordings_unknown_mask(
+        recs, sync, "lick_sensor", include_offset=False
+    ).tolist() == [False, True, False, False]
+    masked = timing.mask_unknown_stim_recordings(recs, sync, "lick_sensor")
+    assert masked[0] is recs[0] and masked[1] is None and masked[2] is None
 
 
 def test_reconstructed_licks_and_rewards(files) -> None:
@@ -226,7 +283,7 @@ def test_phantom_flicker_patch_for_a_session_without_replays(flicker_files) -> N
     assert row["status"] == "clean" and row["diode_status"] == "cleaned"
     assert row["n_phantom_flicker_removed"] == flicker_files["n_phantom"]
     assert row["display_time_source"] == "photodiode"
-    assert timing.get_invalid_times(sync) == []
+    assert timing.get_replayed_intervals(sync) == []
     # unpatched, npc_stim rejects the block (flip count)
     (unpatched,) = npc_stim.get_display_times(npc_sync.SyncDataset(flicker_files["sync"]), [flicker_files["stim"]])
     assert unpatched.source == "unavailable"

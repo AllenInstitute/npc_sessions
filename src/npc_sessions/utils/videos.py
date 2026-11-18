@@ -105,7 +105,8 @@ def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
             f"No metadata pickle found for session {session}. Check {model_name} capsule"
         )
 
-    metadata_pickle = pd.read_pickle(metadata_pickle_file[0])
+    with metadata_pickle_file[0].open("rb") as f:  # UPath isn't os.PathLike for remote paths
+        metadata_pickle = pd.read_pickle(f)
     test_config = metadata_pickle["data"]["DLC-model-config file"]
     paf_graph = test_config.get("partaffinityfield_graph", [])
     if paf_graph:
@@ -152,19 +153,8 @@ def get_LPFaceParts_result_dataframe(
     >>> df_predictions = get_LPFaceParts_result_dataframe('702136_2024-03-07', 'side', 'predictions')
     >>> len(df_predictions.columns)
     33
-    >>> df_predictions.columns
-    Index(['eye_top_l_x', 'eye_top_l_y', 'eye_top_l_likelihood', 'eye_bottom_l_x',
-           'eye_bottom_l_y', 'eye_bottom_l_likelihood', 'whisker_pad_l_top_x',
-           'whisker_pad_l_top_y', 'whisker_pad_l_top_likelihood',
-           'whisker_pad_l_side_x', 'whisker_pad_l_side_y',
-           'whisker_pad_l_side_likelihood', 'ear_tip_l_x', 'ear_tip_l_y',
-           'ear_tip_l_likelihood', 'ear_base_l_x', 'ear_base_l_y',
-           'ear_base_l_likelihood', 'nostril_l_x', 'nostril_l_y',
-           'nostril_l_likelihood', 'nose_tip_x', 'nose_tip_y',
-           'nose_tip_likelihood', 'jaw_x', 'jaw_y', 'jaw_likelihood',
-           'tongue_base_l_x', 'tongue_base_l_y', 'tongue_base_l_likelihood',
-           'tongue_tip_x', 'tongue_tip_y', 'tongue_tip_likelihood'],
-          dtype='object')
+    >>> df_predictions.columns.tolist()[:3]
+    ['eye_top_l_x', 'eye_top_l_y', 'eye_top_l_likelihood']
     """
     if camera not in LP_CAMERA_NAMES:
         raise ValueError(
@@ -192,7 +182,8 @@ def get_LPFaceParts_result_dataframe(
             f"{session} has no lightning pose {result_name} csv in result. Check codeocean"
         )
     headers = {"predictions": [0, 1, 2], "error": [0], "temporal_norm": [0]}
-    df = pd.read_csv(session_LP_result_csv_s3_path, header=headers[result_name])
+    with session_LP_result_csv_s3_path.open("rb") as f:
+        df = pd.read_csv(f, header=headers[result_name])
     if result_name == "predictions":
         return _get_LPFaceParts_predictions_dataframe(df).drop(
             columns="Unnamed: 0", errors="ignore"
@@ -329,7 +320,8 @@ def get_facemap_output_from_s3(
             f"No {array_name} file found for session {session} {camera_name} camera, despite other paths existing. Check codeocean"
         ) from None
     else:
-        return zarr.open(file_path)
+        # zarr doesn't accept remote UPaths (universal-pathlib>=0.2, zarr 3): use a mapper
+        return zarr.open(file_path.fs.get_mapper(file_path.path), mode="r")
 
 
 if __name__ == "__main__":

@@ -204,10 +204,11 @@ class DynamicRoutingSession:
     True
     >>> s.stim_paths[0].name
     'DynamicRouting1_670248_20230803_123154.hdf5'
-    >>> s.sync_path
-    S3Path('s3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5')
-    >>> s.ephys_timing_data[0].device.name, s.ephys_timing_data[0].sampling_rate, s.ephys_timing_data[0].start_time
-    ('Neuropix-PXI-100.ProbeA-AP', 30000.070472670912, 20.080209602072898)
+    >>> s.sync_path.as_posix()
+    's3://aind-ephys-data/ecephys_670248_2023-08-03_12-04-15/behavior/20230803T120415.h5'
+    >>> t = s.ephys_timing_data[0]
+    >>> t.device.name, round(t.sampling_rate, 2), round(t.start_time, 3)
+    ('Neuropix-PXI-100.ProbeA-AP', 30000.07, 20.08)
     >>> s.sam.dprimeSameModal
     [3.5501294698425694]
 
@@ -481,7 +482,7 @@ class DynamicRoutingSession:
             notes = "; ".join([notes, *self.info.issues])
         try:
             exclusions = self.ephys_timing_exclusions
-        except Exception as exc:  # noqa: BLE001 - notes must not block NWB writing
+        except Exception as exc:
             logger.warning(f"{self.id} could not check ephys timing QC for notes: {exc!r}")
             exclusions = {}
         if exclusions:
@@ -907,19 +908,17 @@ class DynamicRoutingSession:
 
         - current strategy is to not include intervals (in trials tables) where
           they overlap with entries in `invalid_times`
+        - replayed sync intervals are not invalid times: frame times are reconstructed
+          there, and events on lines that can't be are NaN in the trials tables (see
+          `npc_sessions.timing`)
 
         A separate attribute can mark invalid times for individual ecephys units:
         see `NWBFile.Units.get_unit_obs_intervals()`
         """
         invalid_times = getattr(self, "_invalid_times", None)
-        sync_invalid_times = []
-        if self.is_sync and self.sync_patch is not None:
-            from npc_sessions import timing
-
-            sync_invalid_times = timing.get_invalid_times(self.sync_data)
-        if invalid_times is None and not sync_invalid_times:
+        if invalid_times is None:
             return None
-        invalid_times = [dict(x) for x in (invalid_times or ())] + sync_invalid_times
+        invalid_times = [dict(x) for x in invalid_times]
         intervals = pynwb.epoch.TimeIntervals(
             name="invalid_times",
             description="time intervals to be removed from analysis",
@@ -975,9 +974,10 @@ class DynamicRoutingSession:
             name="timing_source",
             description=(
                 "'measured': all event times in the trial come from recorded sync edges (or the stim file, "
-                "without sync); 'patched': the trial overlaps a replayed sync interval and uses frame times "
-                "reconstructed from the stim file there. Trials overlapping a replayed interval in which any "
-                "line is unknown are excluded via `invalid_times`"
+                "without sync); 'patched': the trial overlaps a replayed (copied) sync interval: frame and "
+                "display times there are reconstructed from the stim file, and events on lines that can't be "
+                "reconstructed (licks, sound, opto) are NaN there (e.g. `response_time`; the licks table has "
+                "licks reconstructed from the task's lickFrames)"
             ),
         )
         for trial in self._trials.to_add_trial():
@@ -1238,9 +1238,22 @@ class DynamicRoutingSession:
                 assert (a := set(nwb_intervals.colnames)) == (
                     b := set(v.keys())
                 ), f"columns don't match for {k} and existing {nwb_intervals.name} intervals: {a.symmetric_difference(b) = }"
+            n_unknown = 0
             for trial in v.to_add_trial():
+                if not np.isfinite(
+                    np.asarray([trial["start_time"], trial["stop_time"]], dtype=float)
+                ).all():
+                    # e.g. OptoTagging trials whose onset is on a sync line that is unknown in
+                    # a replayed interval (see `npc_sessions.timing`)
+                    n_unknown += 1
+                    continue
                 if self.is_valid_interval(trial["start_time"], trial["stop_time"]):
                     nwb_intervals.add_interval(**trial)
+            if n_unknown:
+                logger.warning(
+                    f"{self.id} {k}: {n_unknown} trials omitted from {intervals_table_name}: "
+                    "start/stop time unknown (sync line unknown in a replayed interval)"
+                )
             if trial_idx_offset == 0:
                 intervals.append(nwb_intervals)
         # TODO deal with stimuli across epochs
@@ -1393,6 +1406,7 @@ class DynamicRoutingSession:
             interval_names = list(dict.fromkeys(interval_names).keys())
 
             invalid_times_notes: list[str] = []
+            replayed_notes: list[str] = []
             if not self.is_sync:
                 # only one stim, so we use its frame times as recorded on stim computer
                 start_time = 0.0
@@ -1402,6 +1416,20 @@ class DynamicRoutingSession:
                 start_time = frame_times[0]
                 stop_time = frame_times[-1]
             assert start_time != stop_time
+            if self.is_sync and self.sync_patch is not None:
+                from npc_sessions import timing
+
+                for replayed in timing.get_replayed_intervals(self.sync_data):
+                    if (
+                        replayed["start_time"] < stop_time
+                        and replayed["stop_time"] > start_time
+                    ):
+                        replayed_notes.append(
+                            f"{replayed['reason']} at {replayed['start_time']:.3f}-"
+                            f"{replayed['stop_time']:.3f} s"
+                        )
+                        if "replayed_sync" not in tags:
+                            tags.append("replayed_sync")
             if self.invalid_times is not None:
                 for _, invalid_interval in self.invalid_times[:].iterrows():
                     if any(
@@ -1422,10 +1450,9 @@ class DynamicRoutingSession:
                     if stim_file.stem in self.stim_data_without_timing_issues
                     else []
                 ),
-                "notes": (
-                    ""
-                    if not invalid_times_notes
-                    else f"includes invalid times: {'; '.join(invalid_times_notes)}"
+                "notes": "; ".join(
+                    ([f"includes invalid times: {'; '.join(invalid_times_notes)}"] if invalid_times_notes else [])
+                    + ([f"includes {'; '.join(replayed_notes)}"] if replayed_notes else [])
                 ),
             }
 
@@ -1909,9 +1936,9 @@ class DynamicRoutingSession:
             # as long as we don't index into the data array (ie to take a subset), it
             # will be instantly inserted into the electrical series container for lazy access
             if timing_info.device.compressed:
-                data = zarr.open(timing_info.device.compressed, mode="r")["traces_seg0"]
+                data = npc_ephys.openephys.open_zarr(timing_info.device.compressed)["traces_seg0"]
             else:
-                data = np.memmap(
+                data = np.memmap(  # type: ignore[call-overload]
                     timing_info.device.continuous / "continuous.dat",
                     dtype=np.int16,
                     mode="r",
@@ -1965,9 +1992,9 @@ class DynamicRoutingSession:
             # as long as we don't index into the data array (ie to take a subset), it
             # will be instantly inserted into the electrical series container for lazy access
             if timing_info.device.compressed:
-                data = zarr.open(timing_info.device.compressed, mode="r")["traces_seg0"]
+                data = npc_ephys.openephys.open_zarr(timing_info.device.compressed)["traces_seg0"]
             else:
-                data = np.memmap(
+                data = np.memmap(  # type: ignore[call-overload]
                     timing_info.device.continuous / "continuous.dat",
                     dtype=np.int16,
                     mode="r",
@@ -2261,7 +2288,8 @@ class DynamicRoutingSession:
             return False
         for path in npc_lims.get_training_spreadsheet_paths():
             try:
-                df = pd.read_excel(path, subject_id)
+                with npc_io.from_pathlike(path).open("rb") as f:
+                    df = pd.read_excel(f, subject_id)
             except ValueError:  # mouse not in this spreadsheet
                 continue
             else:

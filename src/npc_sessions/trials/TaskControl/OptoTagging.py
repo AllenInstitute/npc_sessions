@@ -20,6 +20,8 @@ if typing.TYPE_CHECKING:
     import npc_samstim
     import npc_session
     import npc_sync
+
+    import npc_sessions.timing as timing
 else:
     DynamicRoutingTask = lazy_import(
         "DynamicRoutingTask", "DynamicRoutingTask.TaskUtils"
@@ -28,6 +30,7 @@ else:
     npc_samstim = lazy_import("npc_samstim")
     npc_session = lazy_import("npc_session")
     npc_sync = lazy_import("npc_sync")
+    timing = lazy_import("npc_sessions.timing")
 import numpy as np
 import numpy.typing as npt
 
@@ -137,6 +140,30 @@ class OptoTagging(TaskControl):
         return self.get_stim_recordings_from_sync("laser_633")
 
     @cached_property
+    def _is_stim_time_unknown(self) -> npt.NDArray[np.bool_]:
+        """Per recording in `_stim_recordings`: onset/offset edges may be missing because the
+        laser line is unknown in a replayed sync interval (see `npc_sessions.timing`). Their
+        times are NaN (and the trials are omitted from the NWB intervals table)."""
+        recs = self._stim_recordings
+        mask = np.zeros(len(recs), dtype=bool)
+        sync = getattr(self, "_sync", None)
+        if sync is None or not getattr(sync, "invalid_intervals", ()):
+            return mask
+        for label in ("laser_488", "laser_633"):
+            idx = [
+                i
+                for i in range(len(recs))
+                if label.split("_")[1] in self._trial_opto_device[i]
+            ]
+            if idx:
+                mask[idx] = timing.stim_recordings_unknown_mask(
+                    [recs[i] for i in idx],
+                    sync,
+                    npc_sync.get_sync_line_for_stim_onset(label),
+                )
+        return mask
+
+    @cached_property
     def _stim_recordings(self) -> tuple[npc_samstim.FlexStimRecording, ...]:
         rec_488 = self._stim_recordings_488 or ()
         rec_633 = self._stim_recordings_633 or ()
@@ -188,9 +215,11 @@ class OptoTagging(TaskControl):
         (``stim_start_time - 0.0015`` to ``stim_start_time + 0.0015`` seconds)
         should be censored (`response_start_time` incorporates the censor period).
         """
-        return np.array([rec.onset_time_on_sync for rec in self._stim_recordings])[
-            self.trial_index
-        ]
+        return np.where(
+            self._is_stim_time_unknown,
+            np.nan,
+            np.array([rec.onset_time_on_sync for rec in self._stim_recordings], dtype=float),
+        )[self.trial_index]
 
     @cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
@@ -200,9 +229,11 @@ class OptoTagging(TaskControl):
         (``stim_stop_time - 0.0015`` to ``stim_stop_time + 0.0015`` seconds)
         should be censored (`response_stop_time` incorporates the censor period).
         """
-        return np.array([rec.offset_time_on_sync for rec in self._stim_recordings])[
-            self.trial_index
-        ]
+        return np.where(
+            self._is_stim_time_unknown,
+            np.nan,
+            np.array([rec.offset_time_on_sync for rec in self._stim_recordings], dtype=float),
+        )[self.trial_index]
 
     @cached_property
     def baseline_start_time(self) -> npt.NDArray[np.float64]:

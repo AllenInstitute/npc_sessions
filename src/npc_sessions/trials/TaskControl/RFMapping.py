@@ -25,11 +25,14 @@ if typing.TYPE_CHECKING:
     import npc_samstim
     import npc_stim
     import npc_sync
+
+    import npc_sessions.timing as timing
 else:
     npc_io = lazy_import("npc_io")
     npc_samstim = lazy_import("npc_samstim")
     npc_stim = lazy_import("npc_stim")
     npc_sync = lazy_import("npc_sync")
+    timing = lazy_import("npc_sessions.timing")
 import numpy as np
 import numpy.typing as npt
 
@@ -73,10 +76,15 @@ class RFMapping(TaskControl):
             self._sync
             and self._sync.start_time.date() >= npc_sync.FIRST_SOUND_ON_SYNC_DATE
         ):
-            self._cached_aud_stim_recordings = npc_samstim.get_stim_latencies_from_sync(
-                self._hdf5_path,
+            self._cached_aud_stim_recordings = timing.mask_unknown_stim_recordings(
+                npc_samstim.get_stim_latencies_from_sync(
+                    self._hdf5_path,
+                    self._sync,
+                    waveform_type="sound",
+                ),
                 self._sync,
-                waveform_type="sound",
+                self._sync.get_line_for_stim_onset("sound"),
+                include_offset=False,
             )
         elif (
             recording_dirs := getattr(self, "_ephys_recording_dirs", None)
