@@ -253,3 +253,63 @@ This is the only recovered block from the analog era (AI0 photodiode from 2025-0
 - Old npc_sync phantom-flicker notes: npc_sync `55dfefe:src/npc_sync/sync.py` (`frame_display_time_blocks`, `get_frame_display_times`), `tests/test_known_files.py::test_screen_flicker_file`.
 - TaskControl `showFrame` (box toggles every `diodeBoxFrameInterval` frames): `DynamicRoutingTask/TaskControl.py` L394–418.
 - Evidence: `experiments/phantom-flicker/` (`survey_summary.log`, `crosscheck_npc_stim.log`, `compare_population.log`, `diag_polarity.log`, `diode_gate_recheck.log`, `section4_accounting.log`, `analog_check_762526.log`, `figs/`); acceptance re-runs `experiments/sync-patch-manifest/acceptance_local7.log` (A1–A8 all pass, unchanged) and `p2_display_times_local.log` (B1–B5 all pass, unchanged).
+
+## Appendix: removal counts per session
+
+Every cached session where the patch removed photodiode edges, with npc_stim on the branch (`experiments/phantom-flicker/compare_population.csv`). Glitch-only sessions are blocks npc_stim already accepted; their display times are byte-identical. Blocks with zero removals are not listed.
+
+| Session | Blocks with removals | Phantom-flicker edges | Glitch edges | Of those blocks, with display times |
+|---|---:|---:|---:|---:|
+| 664851_20231113 | 1 | 0 | 2 | 1 |
+| 666986_20230814 | 1 | 0 | 2 | 1 |
+| 674562_20231002 | 1 | 2 | 10 | 1 |
+| 674562_20231003 | 1 | 4 | 32 | 1 |
+| 674562_20231004 | 2 | 168 | 18 | 1 |
+| 676909_20231212 | 1 | 0 | 2 | 1 |
+| 676909_20231213 | 1 | 0 | 2 | 1 |
+| 699847_20240415 | 1 | 376 | 16 | 0 |
+| 699847_20240417 | 1 | 362 | 18 | 0 |
+| 699847_20240418 | 2 | 706 | 46 | 0 |
+| 702131_20240226 | 1 | 0 | 2 | 1 |
+| 702136_20240305 | 1 | 6 | 40 | 0 |
+| 702136_20240307 | 2 | 0 | 16 | 2 |
+| 703881_20240509 | 1 | 2 | 0 | 1 |
+| 703882_20240423 | 1 | 0 | 2 | 1 |
+| 703882_20240425 | 2 | 0 | 48 | 2 |
+| 706401_20240422 | 2 | 478 | 10 | 0 |
+| 706401_20240423 | 2 | 290 | 0 | 0 |
+| 706401_20240424 | 2 | 422 | 30 | 0 |
+| 706401_20240425 | 3 | 826 | 134 | 0 |
+| 708016_20240502 | 1 | 4 | 16 | 1 |
+| 712138_20240712 | 1 | 0 | 8 | 1 |
+| 712141_20240610 | 1 | 0 | 2 | 1 |
+| 712141_20240612 | 1 | 8 | 8 | 0 |
+| 712815_20240520 | 1 | 2 | 0 | 1 |
+| 713655_20240805 | 1 | 0 | 2 | 1 |
+| 713655_20240809 | 1 | 0 | 2 | 1 |
+| 714753_20240703 | 1 | 0 | 2 | 1 |
+| 715706_20240626 | 1 | 6 | 0 | 0 |
+| 715706_20240627 | 1 | 8 | 20 | 0 |
+| 715710_20240719 | 1 | 0 | 2 | 1 |
+| 716718_20240730 | 1 | 12 | 2 | 1 |
+| 726088_20240621 | 1 | 0 | 12 | 1 |
+| 733780_20240826 | 1 | 0 | 2 | 1 |
+| 733780_20240903 | 1 | 0 | 2 | 1 |
+| 733780_20240904 | 1 | 0 | 2 | 1 |
+| 733780_20240905 | 1 | 202 | 4 | 0 |
+| 733780_20240906 | 1 | 0 | 6 | 1 |
+| 733887_20240813 | 1 | 0 | 10 | 1 |
+| 733887_20240814 | 1 | 0 | 2 | 1 |
+| 733891_20240916 | 1 | 8 | 32 | 1 |
+| 733891_20240917 | 1 | 4 | 146 | 0 |
+| 733891_20240918 | 1 | 2 | 2 | 1 |
+| 733891_20240919 | 1 | 2 | 4 | 1 |
+| 741137_20241008 | 1 | 0 | 2 | 1 |
+| 741148_20241016 | 1 | 4 | 2 | 1 |
+| 741148_20241017 | 1 | 0 | 14 | 1 |
+| 761583_20241217 | 1 | 0 | 4 | 1 |
+| 761583_20241218 | 1 | 2 | 2 | 1 |
+| 761583_20241219 | 1 | 4 | 34 | 1 |
+| 762526_20250318 | 1 | 0 | 8 | 1 |
+| 762526_20250320 | 1 | 6 | 4 | 1 |
+| **total (52 sessions)** | 61 | 3916 | 788 | 41 |
