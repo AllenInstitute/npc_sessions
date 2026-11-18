@@ -479,7 +479,22 @@ class DynamicRoutingSession:
             notes = "; ".join([notes, self.info.notes])
         if self.info and self.info.issues:
             notes = "; ".join([notes, *self.info.issues])
-        return notes or None
+        try:
+            exclusions = self.ephys_timing_exclusions
+        except Exception as exc:  # noqa: BLE001 - notes must not block NWB writing
+            logger.warning(f"{self.id} could not check ephys timing QC for notes: {exc!r}")
+            exclusions = {}
+        if exclusions:
+            notes = "; ".join(
+                [
+                    notes,
+                    *(
+                        f"{name} excluded: ephys timing QC failed ({reason})"
+                        for name, reason in exclusions.items()
+                    ),
+                ]
+            )
+        return notes.strip("; ") or None
 
     @property
     def exp_path(self) -> upath.UPath | None:
@@ -1713,19 +1728,24 @@ class DynamicRoutingSession:
         - multiple intervals when recording is split into parts # TODO not supported yet
         - if sync stopped before ephys for any reason, stop time is sync stop time
         """
+        candidates = [
+            t
+            for t in self.ephys_timing_data
+            if npc_session.extract_probe_letter(t.device.name)
+            == npc_session.ProbeRecord(probe)
+        ]
+        # units come from the AP stream: prefer its timing (and its invalid intervals)
         timing_data = next(
-            (
-                t
-                for t in self.ephys_timing_data
-                if npc_session.extract_probe_letter(t.device.name)
-                == npc_session.ProbeRecord(probe)
-            ),
-            None,
+            (t for t in candidates if not t.device.name.endswith("-LFP")),
+            candidates[0] if candidates else None,
         )
         if timing_data is None:
             raise ValueError(f"no ephys timing data for {self.id} {probe}")
         stop_time = min(timing_data.stop_time, self.sync_data.total_seconds)
-        return ((timing_data.start_time, stop_time),)
+        return utils.subtract_intervals(
+            ((float(timing_data.start_time), float(stop_time)),),
+            getattr(timing_data, "invalid_intervals", ()),
+        )
 
     @cached_property
     def sorted_channel_indices(self) -> dict[npc_session.ProbeRecord, tuple[int, ...]]:
@@ -1901,8 +1921,7 @@ class DynamicRoutingSession:
                 name=probe.name,
                 data=data,
                 electrodes=electrode_table_region,
-                starting_time=float(timing_info.start_time),
-                rate=float(timing_info.sampling_rate),
+                **utils.electrical_series_timing(timing_info, data.shape[0]),
                 channel_conversion=None,
                 filtering=band,
                 conversion=0.195e-6,  # bit/microVolt from open-ephys
@@ -1958,8 +1977,7 @@ class DynamicRoutingSession:
                 name=probe.name,
                 data=data,
                 electrodes=electrode_table_region,
-                starting_time=float(timing_info.start_time),
-                rate=float(timing_info.sampling_rate),
+                **utils.electrical_series_timing(timing_info, data.shape[0]),
                 channel_conversion=None,
                 filtering=band,
                 conversion=0.195e-6,  # bit/microVolt from open-ephys
@@ -2977,7 +2995,10 @@ class DynamicRoutingSession:
         )
 
     @cached_property
-    def ephys_timing_data(self) -> tuple[npc_ephys.EphysTimingInfo, ...]:
+    def ephys_timing_qc(self) -> tuple[npc_ephys.EphysTimingInfo, ...]:
+        """Timing on sync for every ephys device in use, each with its own `status` ('pass' or
+        'fail'), `reason` and QC metrics - including devices that failed. Use
+        `ephys_timing_data` for the devices that can be used."""
         pxi_data = (
             timing
             for timing in npc_ephys.get_ephys_timing_on_pxi(
@@ -2993,6 +3014,31 @@ class DynamicRoutingSession:
                 devices=pxi_data,
             )
         )
+
+    @cached_property
+    def ephys_timing_data(self) -> tuple[npc_ephys.EphysTimingInfo, ...]:
+        """Timing on sync for ephys devices that passed timing QC. Devices that failed are
+        excluded (per device, never per session), with the reason logged and recorded in
+        `ephys_timing_exclusions` (also written to the NWB file's `notes`)."""
+        for timing in self.ephys_timing_qc:
+            if not getattr(timing, "is_valid", True):
+                logger.warning(
+                    f"{self.id} {timing.device.name} excluded: ephys timing QC failed: {timing.reason}"
+                )
+        return tuple(
+            t for t in self.ephys_timing_qc if getattr(t, "is_valid", True)
+        )
+
+    @property
+    def ephys_timing_exclusions(self) -> dict[str, str]:
+        """{device name: reason} for ephys devices excluded by timing QC"""
+        if not (self.is_ephys and self.is_sync):
+            return {}
+        return {
+            t.device.name: t.reason
+            for t in self.ephys_timing_qc
+            if not getattr(t, "is_valid", True)
+        }
 
     @cached_property
     def drift_map_paths(self) -> tuple[upath.UPath, ...]:

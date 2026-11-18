@@ -391,3 +391,41 @@ if __name__ == "__main__":
     doctest.testmod(
         optionflags=(doctest.IGNORE_EXCEPTION_DETAIL | doctest.NORMALIZE_WHITESPACE)
     )
+
+
+def subtract_intervals(
+    intervals: Iterable[tuple[float, float]],
+    to_remove: Iterable[tuple[float, float]],
+) -> tuple[tuple[float, float], ...]:
+    """Remove `to_remove` from `intervals` (all closed intervals in seconds).
+
+    >>> subtract_intervals([(0, 100)], [(10, 20), (90, 120)])
+    ((0.0, 10.0), (20.0, 90.0))
+    >>> subtract_intervals([(0, 100)], [])
+    ((0.0, 100.0),)
+    """
+    out = [(float(a), float(b)) for a, b in intervals]
+    for ra, rb in sorted((float(a), float(b)) for a, b in to_remove):
+        nxt = []
+        for a, b in out:
+            if rb <= a or ra >= b:
+                nxt.append((a, b))
+                continue
+            if ra > a:
+                nxt.append((a, ra))
+            if rb < b:
+                nxt.append((rb, b))
+        out = nxt
+    return tuple(out)
+
+
+def electrical_series_timing(timing_info, num_samples: int) -> dict[str, typing.Any]:
+    """kwargs for `pynwb.ecephys.ElectricalSeries` timing: a scalar `starting_time` and `rate`
+    when the device lost no samples (identical to the affine map), otherwise explicit
+    `timestamps` from the drop-corrected map (`timing_info.to_sync_time`)."""
+    if not getattr(timing_info, "drops", ()):
+        return dict(
+            starting_time=float(timing_info.start_time),
+            rate=float(timing_info.sampling_rate),
+        )
+    return dict(timestamps=timing_info.to_sync_time(np.arange(num_samples)))
