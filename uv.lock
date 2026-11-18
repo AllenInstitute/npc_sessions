@@ -2937,7 +2937,7 @@ requires-dist = [
     { name = "npc-samstim", specifier = ">=0.1.15" },
     { name = "npc-session", specifier = ">=0.1.41" },
     { name = "npc-stim", specifier = ">=0.1.24" },
-    { name = "npc-sync", specifier = ">=0.3.1" },
+    { name = "npc-sync", specifier = ">=0.3.2" },
     { name = "numba", specifier = ">=0.57.1" },
     { name = "numcodecs", specifier = "<=0.16" },
     { name = "pandas", specifier = ">=2.0" },
@@ -2986,7 +2986,7 @@ wheels = [
 
 [[package]]
 name = "npc-sync"
-version = "0.3.1"
+version = "0.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "h5py" },
@@ -2998,9 +2998,9 @@ dependencies = [
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/34/2c/90c3741ea0b659d1c22ffe99107b9ccc51eef6ed3bf960847d7f9ee1c4ac/npc_sync-0.3.1.tar.gz", hash = "sha256:ed6960bc68d8f244c0a3949f12ae8295084940222cdae960af8c691a6a23dc2a", size = 24692, upload-time = "2026-11-17T07:24:07.343Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5b/7a/e9054c4f46abc1bc7dca083fbb969fddfa00fa7e59847f94468c3a20e68f/npc_sync-0.3.2.tar.gz", hash = "sha256:779b6c226c677488a3abdbf11c7979ec3989c102098ea7233c06c1e5b50cc238", size = 60906, upload-time = "2026-11-18T17:17:35.346Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ac/81/1fa79331713a5f097f612d02d73030f2ba75bfba7d001b17fbcc717daf4e/npc_sync-0.3.1-py3-none-any.whl", hash = "sha256:a580e97f2b9bedb61479c2ac2352110d0a2ae013af4e5aebe7c456f4c5301d71", size = 20134, upload-time = "2026-11-17T07:24:06.424Z" },
+    { url = "https://files.pythonhosted.org/packages/df/6d/8537fe5c79802d283de6309264ad5629b287692b3f15c552eef991543ef8/npc_sync-0.3.2-py3-none-any.whl", hash = "sha256:12bb8af32a5c91a6c437dca82da2f99bfa11400b9be77cd2317a9013dde5c0c0", size = 49197, upload-time = "2026-11-18T17:17:34.239Z" },
 ]
 
 [[package]]
