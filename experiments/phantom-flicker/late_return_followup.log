@@ -1,0 +1,35 @@
+1. 'stim on grid' delay (ms) histogram:
+    0.00- 1.67: 23
+    1.67- 2.50: 1315
+    2.50- 3.50: 1814
+    3.50- 4.40: 1992
+    4.40- 4.50: 339
+    4.50- 4.60: 1866
+    4.60- 4.70: 7672
+    4.70- 4.80: 1541
+    4.80- 5.00: 134
+    5.00- 5.50: 9
+    5.50-10.00: 71
+   10.00-25.00: 19
+   sessions with >=1: 198 of 222; per-session median delay quantiles: {0.05: 1.81, 0.5: 4.62, 0.95: 4.73}
+
+2. 'stim == sync' with delay < 2 ms: 1235; stim types {'DynamicRouting1': 1029, 'Spontaneous': 71, 'RFMapping': 67, 'SpontaneousRewards': 49, 'OptoTagging': 19}
+   status: {'ambiguous (0 edges)': 622, 'on time': 428, 'off grid': 131, 'before the rise': 50, 'follows the late fall': 4}
+   n_rise quantiles: {0.05: 0.05, 0.5: 0.07, 0.95: 2.15} (controls: {0.05: 0.05, 0.5: 0.07, 0.95: 0.81} )
+   (n_prev, n_next): {(0, 1): 618, (1, 1): 471, (2, 1): 96, (3, 0): 32, (0, 2): 6}
+   top sessions: {'DRpilot_726088_20240620': 223, 'DRpilot_703882_20240424': 218, 'DRpilot_712815_20240523': 190, 'DRpilot_667252_20230927': 152, 'DRpilot_699847_20240417': 32}
+
+3. C5 by class (sync intervals -> display intervals), top patterns:
+  stim == sync: {(1, 1, 1.0, 1.0): 4074, (2, 0, 1.0, 1.0): 738, (2, 1, 1.0, 2.0): 203, (3, 0, 1.0, 2.0): 87, (3, 1, 1.0, 3.0): 19, (1, 0, 1.0, 1.0): 10}
+  stim on grid: {(1, 1, 1.0, 1.0): 16592, (1, 3, 1.0, 3.0): 33, (3, 1, 3.0, 1.0): 29, (2, 1, 2.0, 1.0): 18, (1, 2, 1.0, 2.0): 6, (1, 4, 1.0, 4.0): 4}
+  'stim == sync' with a long stim interval before frame j (n_prev >= 2): 1092; display: no drop at all 739, drop one frame later than the stim says 339, same place 10
+
+4. controls not on time: {'DRpilot_703882_20240424': 62, 'DRpilot_726088_20240620': 55, 'DRpilot_712815_20240523': 51, 'DRpilot_706401_20240422': 44, 'DRpilot_699847_20240417': 42}
+
+5. excluding the 11 blocks the patch rejects (diode signal lost):
+   candidates 23281 (removed 1504), controls 106400
+   stim on grid  n= 16329  on time: 16295, off grid: 23, later: 11
+   stim == sync  n=  4998  on time: 4907, off grid: 89, follows the late fall: 1, later: 1
+   other         n=  1954  on time: 1941, follows the late fall: 6, off grid: 6, later: 1
+   all candidates: on time 23143/23281 = 99.41%; follows the late fall 7; displayed after flip() returned 0
+   controls: on time 106393/106400 = 99.99%

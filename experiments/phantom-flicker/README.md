@@ -21,6 +21,8 @@ session). Interpreter: `../../.venv/Scripts/python.exe` with
 | `diode_gate_recheck.py` | `diode_gate_recheck.csv/.log` | photodiode gate on the 155 replay spans of the P0 manifest with the new builder (old: `../sync-patch-manifest/diode_gate_check.csv`) |
 | `section4_accounting.py` | `section4_accounting.log` | every extra flip of the 24 §4 blocks (`../display-times-issues/flip_extra.csv`) |
 | `analog_check_762526.py` | `analog_check_762526.log` | NI-DAQ AI0 check of the removed edges and recovered display times, DRpilot_762526_20250320 block 1 |
+| `late_return_check.py` → `late_return_followup.py` | `late_return_check.csv.gz`, `late_return_blocks.csv`, `late_return_check.log`, `late_return_followup.log` | added 2026-11-18: are frames with a late frame-signal falling edge displayed on time (TTL and AI0), and does the delay reach PsychoPy's `frameIntervals`? 24,785 isolated off-grid falling edges, 107,500 controls. Checks C1–C5 are defined in the script's docstring, including the first C3 definition, superseded after a 2-session test |
+| `_ast_same.py` | – | one-off: confirms an edit changed only docstrings/comments (AST compared with HEAD) |
 | `npc_sessions_tests.log` | – | npc_sessions test suite with the branch libraries: 23 passed |
 | `fig_phantom.py` | `figs/phantom_examples.png`, `figs/phantom_population.png`, `figs/box1_gate.png` | report figures |
 | `_edit_builder.py`, `_builder_*.txt` | – | one-off edit of npc_sync's builder (provenance only) |

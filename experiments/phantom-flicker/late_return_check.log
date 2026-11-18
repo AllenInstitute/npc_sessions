@@ -1,0 +1,118 @@
+441 sessions in 497 s; errors: ['DRpilot_664566_20231121: ERROR IndexError: index 0 is out of bounds for axis 0 with size 0', 'DRpilot_716718_20240731: ERROR AssertionError', 'DRpilot_772656_20250425: ERROR IndexError: index 0 is out of bounds for axis 0 with size 0']
+box-1 blocks aligned: 1075 in 222 sessions; frame intervals 74566401
+off-grid sync falling-edge intervals (>0.1 refresh): 51498; off-grid stim frameIntervals: 14958; off-grid in stim only (sync regular): 0; in sync only (stim regular): 34003
+candidates (isolated off-grid falling edge): 24785 in 1018 blocks, 222 sessions; controls 107500
+
+C1 stim frameIntervals - sync falling-edge intervals (ms):
+  all intervals: |diff| > 0.2 ms in 856141 of 74566401; per-block p0.1 min -0.755, p99.9 max 0.713
+  candidates: 'stim == sync' = the delay is also in PsychoPy's frame interval (inside flip(), before its timestamp); 'stim on grid' = PsychoPy's interval is regular, only the falling edge is late (after flip()'s timestamp)
+c1_class
+stim on grid    16795
+stim == sync     6001
+other            1989
+  delay (falling edge - first refresh after the rise) by class, quantiles (ms):
+                count  mean    std    min     5%   50%    95%     max
+c1_class                                                             
+other          1989.0  3.83   4.16 -14.58   1.68  1.99  12.52   38.49
+stim == sync   6001.0  3.82  10.04 -14.73 -14.18  3.74  15.01  176.62
+stim on grid  16795.0  4.20   1.01   1.67   2.14  4.62   4.73   21.69
+
+C2 pulse excess dw and rise gap excess (ms):
+              dw_ms  gap_excess_ms
+c1_class                          
+other         -5.54           7.34
+stim == sync   3.99          -0.01
+stim on grid   4.53          -0.01
+
+C3 TTL photodiode: display refresh of frame j:
+status_ttl               ambiguous (0 edges)  ambiguous (2 edges)  before the rise  follows the late fall  later  off grid  on time    All
+c1_class     delay                                                                                                                        
+other        < 2 ms                        4                    0                0                      5      0         4      989   1002
+             2 ms - R-1                    0                    1                2                      1      0         8      948    960
+             >= R+1                        0                    1                0                      0      1         2       23     27
+stim == sync < 2 ms                      622                    0               50                      4      0       131      428   1235
+             2 ms - R-1                   26                    1                1                      1      0        29     4408   4466
+             >= R+1                        0                    1                0                      0      1        75      223    300
+stim on grid < 2 ms                        1                    0                0                      0      0         0      594    595
+             2 ms - R-1                  103                    0                0                      0      0        16    16062  16181
+             >= R+1                        0                    0                0                      0     11         8        0     19
+All                                      756                    4               53                     11     13       273    23675  24785
+  displayed after flip() returned (non-blocking): 0
+controls: {'on time': 107141, 'off grid': 214, 'ambiguous (0 edges)': 135, 'before the rise': 8, 'follows the late fall': 2}
+  how align_diode_toggles matched candidate toggles: {'first': 23321, 'unmatched': 783, 'second': 681}
+
+C4 NI-DAQ AI0 (3 sessions, 451 candidates, 1500 controls), +-2 ms:
+status_an                off grid  on time  All
+c1_class     delay                             
+other        2 ms - R-1         0        9    9
+             >= R+1             0        5    5
+stim == sync < 2 ms             0        3    3
+             2 ms - R-1         0       85   85
+             >= R+1             1       10   11
+stim on grid < 2 ms             0       21   21
+             2 ms - R-1         1      316  317
+All                             2      449  451
+  TTL vs analog verdict: {('off grid', 'off grid'): 1, ('off grid', 'on time'): 1, ('on time', 'off grid'): 1, ('on time', 'on time'): 448}
+  displayed after flip() returned: 0
+controls: {'on time': 1499, 'off grid': 1}
+
+C5 frame counts: sync intervals (n_prev, n_next) vs display from the toggles (disp_prev, disp_next), candidates:
+n_prev  n_next  disp_prev  disp_next
+1       1       1.0        1.0          22326
+2       0       1.0        1.0            904
+0       1       NaN        NaN            499
+2       1       1.0        2.0            244
+1       1       NaN        NaN            140
+0       1       NaN        2.0            111
+2       1       NaN        NaN             96
+3       0       1.0        2.0             94
+1       2       1.0        2.0             94
+        3       1.0        3.0             43
+3       0       NaN        NaN             32
+        1       3.0        1.0             32
+
+examples, largest delays:
+                         folder  block       j  dv_prev_ms  dv_next_ms  c1_ms      c1_class  return_delay_ms   dw_ms  gap_excess_ms status_ttl  m_ttl matched  res_ms
+111482  DRpilot_744279_20250116      1    1827      193.30        6.83  -0.13  stim == sync           176.62  176.62          -0.00    on time    1.0  second -176.59
+67037   DRpilot_714753_20240701      0   19982      146.04        4.19  -0.18  stim == sync           129.36  129.41          -0.05    on time    1.0  second -128.70
+86290   DRpilot_733891_20240917      4  176313      141.64        8.57  -0.09  stim == sync           124.96  125.00          -0.04   off grid    NaN  second -133.97
+99964   DRpilot_741148_20241018      3   81937      140.67        9.51  -0.14  stim == sync           123.99  123.92           0.07   off grid    NaN  second -127.25
+26749   DRpilot_686740_20231023      1   18587      137.31       12.92  -0.13  stim == sync           120.63  120.63           0.00   off grid    NaN  second -122.73
+36105   DRpilot_702131_20240226      3   73754      125.67        7.78  -0.14  stim == sync           108.99  100.92           7.97    on time    1.0  second -108.98
+99129   DRpilot_741148_20241016      3  154197      124.99        8.49  -0.10  stim == sync           108.31  108.36          -0.05    on time    1.0  second -108.36
+77565   DRpilot_726088_20240620      0   49678      112.20        4.64  -0.12  stim == sync            95.52   95.55          -0.02   off grid    NaN  second  -94.08
+examples, median delays:
+                         folder  block       j  dv_prev_ms  dv_next_ms  c1_ms      c1_class  return_delay_ms  dw_ms  gap_excess_ms status_ttl  m_ttl matched  res_ms
+43527   DRpilot_703880_20240416      4   90555       21.28       12.09  -4.60  stim on grid              4.6   6.86          -2.36    on time    1.0   first   -4.58
+105907  DRpilot_743199_20241203      4   28664       21.28       12.07  -4.60  stim on grid              4.6  -0.53           5.05    on time    1.0   first   -4.57
+113529  DRpilot_744740_20241112      3  160014       21.28       12.04  -4.61  stim on grid              4.6   2.36           2.24    on time    1.0   first   -4.60
+55434   DRpilot_712141_20240613      1    8736       21.28       12.03  -4.60  stim on grid              4.6   4.69          -0.09    on time    1.0   first   -4.61
+99087   DRpilot_741148_20241016      3   68497       21.28       12.05  -4.60  stim on grid              4.6   4.54           0.06    on time    1.0   first   -4.67
+
+candidates not 'on time' (TTL): 1110
+                        folder  block       j  dv_prev_ms  dv_next_ms  c1_ms      c1_class  return_delay_ms  dw_ms  gap_excess_ms             status_ttl  m_ttl    matched  res_ms
+118    DRpilot_626791_20220817      0  211209       14.71       17.08   0.38         other            -1.97  -9.00           7.04  follows the late fall    NaN      first   -0.03
+942    DRpilot_636766_20230126      1  145082       14.99       17.11   0.40         other            -1.69  -8.86           7.06  follows the late fall    NaN      first   -0.24
+1527   DRpilot_644864_20230131      1  200518       31.57       17.06   0.22         other            14.89   8.67           6.12               off grid    NaN      first   -1.02
+1802   DRpilot_644864_20230201      1  185610       14.99       16.79   0.32         other            -1.69  -7.06           5.26  follows the late fall    NaN      first   -0.04
+2804   DRpilot_644866_20230209      1  134271       35.09       15.27  -1.20         other            18.41  10.27           8.03                  later    2.0      first   -1.70
+2829   DRpilot_644866_20230209      1  184592       31.68       16.85   0.53         other            15.00   8.70           6.19               off grid    NaN      first   -1.26
+3090   DRpilot_644866_20230210      1  118668       14.89       16.83   0.45         other            -1.79  -6.85           4.96  follows the late fall    NaN      first    0.09
+3237   DRpilot_644867_20230220      0   47173       14.85       18.03   0.46         other            -1.83  -9.22           7.33  follows the late fall    NaN      first    0.03
+4196   DRpilot_649943_20230213      1   74959       18.48       14.94   0.02  stim == sync             1.80  -4.16           5.85               off grid    NaN      first   -3.01
+4218   DRpilot_649943_20230213      1  154385       31.64       16.89   0.35         other            14.96   9.09           5.76  follows the late fall    NaN      first   -0.22
+7436   DRpilot_664851_20231113      0   40268       37.28       12.77  -0.18  stim == sync            20.60  20.59           0.01               off grid    NaN     second  -19.51
+9303   DRpilot_664851_20231115      4   51547       36.18       13.85  -0.05  stim == sync            19.50  14.90           4.50               off grid    NaN     second  -18.41
+11680  DRpilot_666986_20230817      4   11914       41.87        8.10   0.02  stim == sync            25.19  17.61           7.48               off grid    NaN     second  -23.11
+12292  DRpilot_667252_20230925      6    5090       42.43        7.62  -0.06  stim == sync            25.75  25.69           0.06               off grid    NaN     second  -26.81
+13219  DRpilot_667252_20230927      4  115561        3.35       12.73   0.11  stim == sync           -13.34  -0.63         -12.75    ambiguous (0 edges)    NaN  unmatched     NaN
+13220  DRpilot_667252_20230927      4  115954        2.81       13.97   0.00  stim == sync           -13.88  -1.28         -12.64               off grid    NaN      first    4.80
+13221  DRpilot_667252_20230927      4  116213       18.64       15.31  -0.00  stim == sync           -14.73  -1.22           3.13               off grid    NaN      first   -8.17
+13222  DRpilot_667252_20230927      4  117334        2.50       14.42   0.02  stim == sync           -14.19  -1.39         -12.84    ambiguous (0 edges)    NaN      first  -11.55
+13223  DRpilot_667252_20230927      4  118021        2.63       13.97   0.02  stim == sync           -14.06  -1.38         -12.72    ambiguous (0 edges)    NaN  unmatched     NaN
+13224  DRpilot_667252_20230927      4  119122        2.46       14.53   0.02  stim == sync           -14.23  -1.35         -12.92    ambiguous (0 edges)    NaN  unmatched     NaN
+13225  DRpilot_667252_20230927      4  119322       24.30        8.79   0.00  stim == sync            -9.07  -1.43           9.00        before the rise    1.0      first   -7.30
+13226  DRpilot_667252_20230927      4  120620        2.73       14.20   0.09  stim == sync           -13.96  -1.44         -12.56    ambiguous (0 edges)    NaN  unmatched     NaN
+13227  DRpilot_667252_20230927      4  121441        2.54       14.46   0.03  stim == sync           -14.15  -1.40         -12.79    ambiguous (0 edges)    NaN  unmatched     NaN
+13228  DRpilot_667252_20230927      4  122041       24.09        9.74   0.02  stim == sync            -9.28  -1.43           8.79               off grid    NaN      first   -6.20
+13229  DRpilot_667252_20230927      4  122939        2.47       14.71   0.08  stim == sync           -14.22  -1.43         -12.83    ambiguous (0 edges)    NaN  unmatched     NaN

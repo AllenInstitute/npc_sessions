@@ -3,6 +3,7 @@
 2026-11-17 · handoff: `notes/sync-patching-handoff-2.md` ("Critical before proceeding - phantom flicker", design agreed 2026-11-17) · previous report: `outputs/sync-patching-report.md`.
 Evidence: `experiments/phantom-flicker/` (scripts, logs, CSVs, `figs/`; see its README). Population: the 442 cached Task 2 pilot sessions in `C:/data/t2p_cache` (441 run; see Caveats) and the 155 replay spans of the P0 manifest (share).
 Code: branches `sync-patch` of npc_sync, npc_stim and npc_sessions, merged into local `main`. **Nothing is pushed.**
+Updated 2026-11-18: "late `flip()` returns" corrected to late frame-signal falling edges, with the evidence (Results, "Late falling edges").
 
 ## Summary
 
@@ -65,11 +66,11 @@ flowchart LR
    - With box interval 1, the latency (~20 ms rising, ~25 ms falling) is longer than a refresh. Regular frames therefore can't distinguish v[k] + L from v[k+1] + L − R. A score over the whole block picked that alias (`try_align` history in the scripts).
    - A landmark is a long diode interval whose length matches a held frame on the refresh grid, starting 5–35 ms after it.
    - At least 3 consistent landmarks are required (≥90% within 8 ms of their polarity's mode); otherwise the offset is undetermined and nothing is changed.
-   - The on-grid and 5–35 ms conditions remove the alias that a late `flip()` return produces (next bullet).
+   - The on-grid and 5–35 ms conditions exclude an alias that late falling edges produce: when a frame whose late edge reached PsychoPy's record is then held, PsychoPy's long interval comes one frame before the display's, which reads as a latency one refresh too long (339 cases; see "Late falling edges" in Results). I didn't isolate whether these conditions or the 3-landmark minimum removed the disagreements with npc_stim.
 3. **Toggles.**
    - Per-polarity latency is piecewise constant between held frames; it can switch by about 5.5 ms at a stall.
    - Each frame takes the polarity-correct edge within 12 ms of its expected time.
-   - A second pass, bounded below by the frame-signal rising edge + 15 ms, catches **late `flip()` returns**: the frame-signal falling edge and PsychoPy's frame interval are late, but the frame was displayed on time. This is common: in 1,507 off-grid holds the next toggle needed the second pass 645 times. In those cases PsychoPy's `frameIntervals` puts the "dropped frame" one frame early. This is not flicker, and the diode is right.
+   - A second pass, bounded below by the frame-signal rising edge + 15 ms, catches toggles of frames whose **frame-signal falling edge came late** by more than the tolerance. Those frames were displayed on time (99.4% of 23,281 checked; see "Late falling edges" in Results), so this is not flicker, and the diode is right.
 4. **Classification.** Edges between the toggles of frames k and k+1 are phantom flicker only if frame k is held for n ≥ 3 refreshes and they are an even number ≤ n − 1. Anything else between the first and last toggles is unexplained.
 5. **Block outcome.**
    - **Cleaned:** no unexplained edge, no toggle missing except possibly the first or last frame's (a known boundary case npc_stim handles), and no unexplained long-interval mismatch (below). Glitches and phantom edges are removed.
@@ -78,10 +79,10 @@ flowchart LR
 **The user's validation, "long-interval indices from the stim file should perfectly match those on the patched line".**
 - The check compares latency-corrected toggle-to-toggle intervals of 1.5 refreshes or more with the stim's long intervals.
 - The mismatches it finds have two known causes, neither phantom flicker nor misassignment:
-  - late `flip()` returns, where the stim side is wrong: 1,878 mismatches in 488 blocks
+  - late falling edges, where the stim side is wrong: 1,878 mismatches in 488 blocks (labelled by a rule: an off-grid stim interval at or next to the mismatch)
   - after-hold TTL deviations above ¼ refresh: 13,291 mismatches in 165 blocks
 - Mismatches with neither cause would fail the block. There are **0 in all 1,075 blocks** (`survey_summary.log`).
-- A literal "perfect match" would reject hundreds of accepted DR1 blocks for late `flip()` returns, which aren't diode errors.
+- A literal "perfect match" would reject hundreds of accepted DR1 blocks for late falling edges, which aren't diode errors.
 
 **Assignment check against npc_stim.** On the 1,029 accepted box-1 blocks whose offset is determined, the TTL edge my alignment assigns to each frame equals npc_stim's raw-edge assignment: 33,985,956 of 33,985,956 frames (`crosscheck_npc_stim.log`). npc_stim's assignment is the one the analog validation checked for 2025+ blocks (0 misassigned toggles).
 
@@ -150,7 +151,7 @@ flowchart LR
   - **No flicker.** There are 0 phantom, glitch or unexplained edges within 3 s of any of the 60 box-1 spans, so phantom flicker is not the explanation.
 - **New prediction (`predict_box1_diode_edges`).** Inside a span, each unobserved frame gets its expected toggle (frame time + local per-polarity latency). Held frames get no toggle until the next frame's.
   - The check after the span uses the block alignment: no unexplained or missing toggles within 3 s. The toggles in the 0.5 s after the span must be within the pre-span error + 0.5 ms.
-  - Toggles right after a hold, and late `flip()` returns, are left out of both the baseline and the check, because their TTL timing deviates in ways the prediction can't model.
+  - Toggles right after a hold, and toggles matched in the second pass (late falling edges), are left out of both the baseline and the check, because the prediction (frame time + latency) doesn't hold for them.
 - **Side effect: a handoff failure fixed.** The 2 `test_opto` failures for 636766_2023-01-23 were caused by its RF-mapping block's span (589.0–589.5 s), one of the 21 polarity failures. That span is now reconstructed, and the npc_sessions suite passes: 23/23 (`experiments/phantom-flicker/npc_sessions_tests.log`; before: 20 passed, 2 failed).
 - **The 7 box-1 spans that still fail** are all in 644867_20230221 block 0, whose vsyncs fail the 0.2 ms per-gap gate. The same 2 box-3 spans as before fail (831994_1210, 872974_1109).
 - **Spans that passed the old gate were also affected.** In 25/60 box-1 spans the old gate passed, often against a 10–17 ms baseline, so predicted edges at held frames inside them could be a refresh off (shown in `tests/test_phantom_flicker.py::test_box1_prediction_in_a_replayed_span`). Only 1 box-1 span had an analog check before, 796012_20250710, and it passed with a 0.19 ms in-window error; I didn't check whether it contains a held frame.
@@ -177,6 +178,35 @@ This is the only recovered block from the analog era (AI0 photodiode from 2025-0
 
 **Removed edges' analog amplitude** (the user's "sometimes less than full amplitude"). The TTL pulses of the three phantom pairs (2.0–4.5 ms) are much narrower than their analog dips (about 11 ms). The TTL crosses the threshold late on the fall and early on the rise, which fits a dip that doesn't reach full black. I didn't measure dip depth from the trace directly.
 
+### Late falling edges, not "late `flip()` returns" (checked 2026-11-18: `late_return_check.log`, `late_return_followup.log`)
+
+This report first called these "late `flip()` returns". Only part of that holds.
+
+- **What happens.** A frame is displayed on time, but its frame-signal falling edge comes late. TaskControl writes that edge right after `self._win.flip()` returns (`TaskControl.py` L413–416), so the delay is somewhere between the buffer swap and the write. The falling-edge interval before the frame is then off the refresh grid, and the next one restores it.
+- **Check.** I took 24,785 isolated off-grid falling edges in 1,018 box-1 blocks (74.6 M frame intervals in all), with 107,500 regular frames as controls. Each frame's display refresh comes from its diode toggle, read on the refresh grid of the previous falling edge, so it doesn't assume when the frame was due.
+
+| | Displayed at the first refresh after its frame signal rose | Toggle follows the late falling edge | Displayed after the falling edge |
+|---|---:|---:|---:|
+| Candidates, TTL (the 11 blocks the patch rejects excluded) | 23,143/23,281 (99.4%) | 7 | 0 |
+| Controls, TTL | 106,393/106,400 (99.99%) | – | – |
+| Candidates, NI-DAQ AI0 (744279_0116, 762526_0320, 796012_0714) | 449/451 | 0 | 0 |
+| Controls, AI0 | 1,499/1,500 | – | – |
+
+- **Where the delay is.** PsychoPy's `frameIntervals` never show an off-grid interval that is regular on sync, but 34,003 of the 51,498 off-grid sync intervals are regular in PsychoPy's record. Of the 24,785 candidates:
+  - **68% (16,795): PsychoPy's interval is regular.** The delay comes after PsychoPy's frame timestamp: later in `flip()`, or in the NI-DAQ write.
+  - **24% (6,001): PsychoPy's interval is late too.** The delay comes before its timestamp. That is a late `flip()` return proper, if PsychoPy timestamps inside `flip()` as I believe. PsychoPy isn't installed here, so I couldn't check the version used.
+  - **8% (1,989):** neither pattern.
+  - **What this supersedes.** Both "late `flip()` return" (my earlier wording) and "the script stalled after `flip()` returned" (`display-times-issues.md` §1(a), `display-times-analog-validation.md`). Both happen, and most delays don't reach PsychoPy's timestamp.
+- **The commonest delay is stereotyped.** In the 68% group, 7,672 of 16,795 delays fall between 4.6 and 4.7 ms (95th percentile 4.73 ms). Delays of 4.5–4.8 ms occur in 157 of the 222 sessions (2023-10-19 to 2025-07-14), which isn't random OS jitter. One untested hypothesis: the main thread waits for the Python GIL after a C call (OpenGL or NI-DAQ) while another thread holds it; CPython's default thread switch interval is 5 ms.
+- **What PsychoPy's `frameIntervals` say about dropped frames.** In 1,092 frames the late edge shows in PsychoPy's record as a long interval (≥ 2 refreshes) just before the frame:
+  - in 739, no frame was dropped at all (e.g. 30.3 + 3.0 ms);
+  - in 339, the drop is one frame later than the stim file says;
+  - in 10, it's in the same place.
+
+  The 339 are the one-refresh latency alias that the landmark rule excludes (Method, step 2). My earlier claim that `frameIntervals` put "the dropped frame one frame early" was wrong for most of these.
+- **Effect on the alignment: none of its decisions change.** Most delays are under 5 ms, inside the 12 ms match tolerance: only 681 of the 24,785 candidate toggles needed the second pass. The `late_return` key of `long_interval_mismatch` keeps its name for compatibility. It means "an off-grid stim interval at or next to the mismatch", a rule that wasn't checked case by case.
+- **Open:** the AI0 check covers 3 sessions (451 candidates), and where in `flip()` or the NI-DAQ call the delay arises is unknown.
+
 ## No double-fixing: the earlier mechanisms
 
 | Mechanism (where) | Addressed | Now |
@@ -195,18 +225,19 @@ This is the only recovered block from the analog era (AI0 photodiode from 2025-0
 - **Strictness vs the agreed design.**
   - **What follows the design.** Every removal is a state-restoring set inside a stim-recorded hold of ≤ n − 1 edges. Any other extra edge rejects the block.
   - **Glitch removal, added by me.** Sub-ms chatter was moved into the patch because npc_stim must not remove edges any more and these aren't flicker. They are counted separately, and the outcome is identical to npc_stim's old removal. Reversible.
-  - **Validation criterion relaxed, by me.** Mismatches explained by late `flip()` returns or after-hold timing are allowed; see Method. Reversible.
+  - **Validation criterion relaxed, by me.** Mismatches explained by late falling edges (rule-labelled) or after-hold timing are allowed; see Method. Reversible.
 - **Box 3.** Phantom-flicker handling is limited to box interval 1, as specified. I didn't survey box-3 blocks for extra edges in holds; their records say "not checked".
 - **Undetermined offset.** 127 box-1 blocks have fewer than 3 landmarks (mostly Spontaneous*, 0–2 holds). They are not checked, and npc_stim keeps its own handling.
 - **Not run: DRpilot_366122_20250109** (dev mouse, box interval 2). npc_stim's O(n²) flip removal (restored in `cfae3e3`) takes more than 2 h, with or without a patch.
 - **Analog coverage.** Only one recovered block is in the analog era. The other recovered blocks (2023–2024) are checked through consistency with npc_stim's analog-validated assignment and the alignment's own residuals.
 - **Mechanism.** That the display shows the other buffer during a hold is still an inference.
+- **Late falling edges inside replayed spans.** Reconstructed frame times come from PsychoPy's `frameIntervals`. A frame whose late falling edge reached PsychoPy's record gets a predicted diode edge, and so a box-1 display time, late by the delay, although it was displayed on time. In box-1 blocks about 1 PsychoPy frame interval in 5,000 is off the refresh grid. Not corrected; the post-span check can't see it.
 
 ## Answers to the handoff's validation items
 
 | Item | Answer |
 |---|---|
-| long-interval indices on the patched line match the stim | 0 unexplained mismatches in 1,075 blocks. The 15,169 explained ones are late `flip()` returns (stim side) or after-hold TTL deviations |
+| long-interval indices on the patched line match the stim | 0 unexplained mismatches in 1,075 blocks. The 15,169 explained ones are late falling edges (stim side; labelled by rule) or after-hold TTL deviations. Frames with a late falling edge were displayed on time (99.4% of 23,281 checked) |
 | removed edges have less than full-amplitude AI0 transitions | 3/3 removed pairs are narrow TTL pulses (2–4.5 ms) inside about 11 ms analog dips; depth not measured |
 | rerun the box-1 gate | 53/53 box-1 spans with reconstructed vsyncs pass (was 21/53); the 21 polarity failures were a pairing bug plus copies, not flicker |
 | do the §4 stall extra flips fall inside recorded long intervals | yes: in 24/24 §4 blocks every extra edge is accounted for, and all 3,894 phantom edges are inside stim-recorded holds of ≥ 3 refreshes; the remainder are glitches, block-end edges, and 4 unexplained edges in one block |
@@ -223,6 +254,7 @@ This is the only recovered block from the analog era (AI0 photodiode from 2025-0
    - npc_sessions needs floors on the released versions: the CI bumps the patch number, so set the floors after release.
    - The strict default in npc_sync is breaking for rig QC and npc_sessions_cache on files with replays.
 4. **Optional.** Survey box-3 blocks for extra edges in holds, and box 2 (366122) once npc_stim's removal is fast again.
+5. **Optional.** Find where the stereotyped 4.6–4.7 ms falling-edge delays arise (Python threads in TaskControl, the NI-DAQ write). They don't affect display times outside replayed spans.
 
 ## Changes (branches `sync-patch` → local `main`)
 
@@ -252,7 +284,7 @@ This is the only recovered block from the analog era (AI0 photodiode from 2025-0
 - Handoff and design: `notes/sync-patching-handoff-2.md`. Earlier work: `outputs/sync-patching-report.md`, `outputs/display-times-issues.md` (§1c, §4, §5), `outputs/display-times-analog-validation.md` (§4, Fig. 5).
 - Old npc_sync phantom-flicker notes: npc_sync `55dfefe:src/npc_sync/sync.py` (`frame_display_time_blocks`, `get_frame_display_times`), `tests/test_known_files.py::test_screen_flicker_file`.
 - TaskControl `showFrame` (box toggles every `diodeBoxFrameInterval` frames): `DynamicRoutingTask/TaskControl.py` L394–418.
-- Evidence: `experiments/phantom-flicker/` (`survey_summary.log`, `crosscheck_npc_stim.log`, `compare_population.log`, `diag_polarity.log`, `diode_gate_recheck.log`, `section4_accounting.log`, `analog_check_762526.log`, `figs/`); acceptance re-runs `experiments/sync-patch-manifest/acceptance_local7.log` (A1–A8 all pass, unchanged) and `p2_display_times_local.log` (B1–B5 all pass, unchanged).
+- Evidence: `experiments/phantom-flicker/` (`survey_summary.log`, `crosscheck_npc_stim.log`, `compare_population.log`, `diag_polarity.log`, `diode_gate_recheck.log`, `section4_accounting.log`, `analog_check_762526.log`, `late_return_check.log`, `late_return_followup.log`, `figs/`); acceptance re-runs `experiments/sync-patch-manifest/acceptance_local7.log` (A1–A8 all pass, unchanged) and `p2_display_times_local.log` (B1–B5 all pass, unchanged).
 
 ## Appendix: removal counts per session
 
