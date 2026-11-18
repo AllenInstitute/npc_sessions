@@ -37,12 +37,12 @@ concurrency: # jobs currently running on main will be cancelled when this workfl
 jobs:
   test:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # wavpack-numcodecs ships libs for glibc <= 2.39 only
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.10"]
-        os: [ubuntu-latest]
+        python-version: ["3.11"]
+        os: [ubuntu-24.04]
     permissions: write-all
 
     steps:
@@ -81,7 +81,7 @@ jobs:
   publish:
     needs: test
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # wavpack-numcodecs ships libs for glibc <= 2.39 only
     permissions: write-all
 
     steps:
@@ -112,12 +112,12 @@ jobs:
 
   update_cache:
     needs: publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # wavpack-numcodecs ships libs for glibc <= 2.39 only
     if: github.ref == 'refs/heads/main'
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.11"]
     permissions: write-all
 
     steps:
