@@ -2,7 +2,7 @@
 
 2026-11-17 · handoff: `notes/sync-patching-handoff-2.md` ("Critical before proceeding - phantom flicker", design agreed 2026-11-17) · previous report: `outputs/sync-patching-report.md`.
 Evidence: `experiments/phantom-flicker/` (scripts, logs, CSVs, `figs/`; see its README). Population: the 442 cached Task 2 pilot sessions in `C:/data/t2p_cache` (441 run; see Caveats) and the 155 replay spans of the P0 manifest (share).
-Code: branches `sync-patch` of npc_sync, npc_stim and npc_sessions, merged into local `main`. **Nothing is pushed.**
+Code: branches `sync-patch` of npc_sync, npc_stim and npc_sessions, merged into `main`. Pushed: npc_sync only, on 2026-11-18 (CI released 0.3.2; the docstring commit after it is local). npc_stim and npc_sessions aren't pushed.
 Updated 2026-11-18: "late `flip()` returns" corrected to late frame-signal falling edges, with the evidence (Results, "Late falling edges").
 
 ## Summary
@@ -30,7 +30,7 @@ Updated 2026-11-18: "late `flip()` returns" corrected to late frame-signal falli
 - **Not done (needs you):**
   - npc_stim's after-hold frame placement (it causes the 20 remaining rejections)
   - the handoff's decisions 1 (`invalid_times`) and 4 (ephys gate)
-  - release and push
+  - releases: npc_sync is out as 0.3.2; npc_stim and npc_sessions aren't pushed
 
 ```mermaid
 flowchart LR
@@ -250,13 +250,13 @@ This report first called these "late `flip()` returns". Only part of that holds.
    - 1: replayed intervals out of `invalid_times`, keep the trials, NaN response times
    - 4: one ephys gate, < 1 ms for AP
 3. **Release.**
-   - The merges are local. A push to `main` publishes npc_sync and npc_stim.
-   - npc_sessions needs floors on the released versions: the CI bumps the patch number, so set the floors after release.
+   - npc_sync `main` was pushed on 2026-11-18 and CI released it as 0.3.2. The docstring commit after it, npc_stim and npc_sessions are local; a push to npc_stim `main` publishes it.
+   - Floors: `npc-sync>=0.3.2` in npc_stim and npc_sessions, and npc_stim's released version in npc_sessions once it's out (CI bumps the patch number on release).
    - The strict default in npc_sync is breaking for rig QC and npc_sessions_cache on files with replays.
 4. **Optional.** Survey box-3 blocks for extra edges in holds, and box 2 (366122) once npc_stim's removal is fast again.
 5. **Optional.** Find where the stereotyped 4.6–4.7 ms falling-edge delays arise (Python threads in TaskControl, the NI-DAQ write). They don't affect display times outside replayed spans.
 
-## Changes (branches `sync-patch` → local `main`)
+## Changes (branches `sync-patch` → `main`)
 
 - **npc_sync**
   - `patch.py`:
