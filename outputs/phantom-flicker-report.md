@@ -256,7 +256,7 @@ This is the only recovered block from the analog era (AI0 photodiode from 2025-0
 
 ## Appendix: removal counts per session
 
-Every cached session where the patch removed photodiode edges, with npc_stim on the branch (`experiments/phantom-flicker/compare_population.csv`). Glitch-only sessions are blocks npc_stim already accepted; their display times are byte-identical. Blocks with zero removals are not listed.
+Every cached session where the patch removed photodiode edges, with npc_stim on the branch (`experiments/phantom-flicker/compare_population.csv`). Of the 28 blocks with glitches but no phantom flicker, 23 were already accepted by npc_stim, with byte-identical display times. The other 5 are in files with replays, which have no unpatched display times to compare. Blocks with zero removals are not listed.
 
 | Session | Blocks with removals | Phantom-flicker edges | Glitch edges | Of those blocks, with display times |
 |---|---:|---:|---:|---:|
