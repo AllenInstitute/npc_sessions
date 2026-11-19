@@ -191,13 +191,23 @@ class OptoTagging(TaskControl):
 
     @cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
-        """0-indexed trial number in the stim file.
+        """0-indexed trial number across all OptoTagging stim files in the session: the count
+        continues from one file to the next (in time order) and doesn't reset to 0. Trials left
+        out of the table (invalid times, or overlapping a replayed sync interval) keep their
+        numbers, so values can be skipped. For a single stim file this equals
+        `trial_index_in_block`.
 
-        Trials overlapping a replayed sync interval are omitted: the laser line there is at
+        Trials overlapping a replayed sync interval are left out: the laser line there is at
         best reconstructed from the trigger frame (+-1/2 frame), which is not usable for
-        optotagging. Indices of the remaining trials are unchanged.
+        optotagging.
         """
         return np.flatnonzero(~self._is_replayed_trial_all)
+
+    @cached_property
+    def trial_index_in_block(self) -> npt.NDArray[np.int32]:
+        """0-indexed trial number within its stim file (block). Trials left out of the
+        table keep their numbers, so values can be skipped."""
+        return np.asarray(self.trial_index).copy()
 
     @cached_property
     def _inter_trial_interval(self) -> float:

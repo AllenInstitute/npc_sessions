@@ -155,3 +155,6 @@ Notes:
 - **Not changed (existing behaviour):** a session with 2 OptoTagging files has `trial_index` 0–149 twice in `optotagging_trials` (714753_2024-07-03). The sessions code computes an offset but never applies it.
 
 - Filed as https://github.com/AllenInstitute/npc_sessions/issues/195 (2026-11-18). Common: 116/130 sessions with OptoTagging have 2+ files. The fix needs a decision (unique index vs per-file index + file column).
+- **#195 implemented (2026-11-18, local `main`, not pushed).** In intervals tables built from several stim files (OptoTagging, RFMapping, LuminanceTest), `trial_index` now continues across the files in time order: each file is offset by the total trial count of the earlier files. `trial_index_in_block` is the new per-file index. Trials left out of a table change neither.
+  - Evidence: `experiments/sync-patch-manifest/p8_trial_index_check.log` (H1–H4 pass). mypy is clean. The tests were not run locally; they'll run in CI on push.
+  - The task `trials` table is unchanged. Its `trial_index_in_block` already means the index within a task block.

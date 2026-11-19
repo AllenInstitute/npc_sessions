@@ -193,6 +193,17 @@ def get_sessions(id_or_ids=None, **all_session_kwargs):
     return multi_session_generator()
 
 
+def _n_trials_in_stim_file(trials: TaskControl.TaskControl) -> int:
+    """Total trials in the stim file behind a TaskControl object, including any left out of
+    its table (`trial_index` offsets for the next file of the same table)."""
+    for attr in ("_n_all_trials", "_len_all_trials"):
+        n = getattr(trials, attr, None)
+        if n is not None:
+            return int(n)
+    index = np.asarray(getattr(trials, "trial_index", ()))
+    return int(index.max()) + 1 if index.size else 0
+
+
 class DynamicRoutingSession:
     """Class for fetching & processing raw data for a session, making
     NWB modules and an NWBFile instance available as attributes.
@@ -1189,7 +1200,13 @@ class DynamicRoutingSession:
     def _intervals(self) -> tuple[pynwb.epoch.TimeIntervals, ...]:
         """The version passed to NWBFile.__init__"""
         intervals: list[pynwb.epoch.TimeIntervals] = []
-        for k, v in self._all_trials.items():
+        # `trial_index` continues across the stim files of a table (in time order), offset by
+        # the total trial count of the earlier files, so it doesn't reset to 0; trials left out
+        # of a table don't change it (`trial_index_in_block` is the index within the file)
+        next_trial_index: dict[str, int] = {}
+        for k, v in sorted(
+            self._all_trials.items(), key=lambda kv: npc_session.DatetimeRecord(kv[0]).dt
+        ):
             if self.task_stim_name in k and self.is_task:
                 # intervals.append(self.trials)
                 intervals.append(self.performance)
@@ -1206,17 +1223,25 @@ class DynamicRoutingSession:
                         f"{intervals_table_name.replace('_', ' ')} table",
                     ),
                 )
-                trial_idx_offset = 0
+                is_new_table = True
                 for column in v.to_add_trial_column():
                     nwb_intervals.add_column(**column)
             else:
                 nwb_intervals = existing[0]
-                trial_idx_offset = nwb_intervals[:]["trial_index"].max() + 1
+                is_new_table = False
                 assert (a := set(nwb_intervals.colnames)) == (
                     b := set(v.keys())
                 ), f"columns don't match for {k} and existing {nwb_intervals.name} intervals: {a.symmetric_difference(b) = }"
+            trial_index_offset = next_trial_index.get(intervals_table_name, 0)
+            next_trial_index[intervals_table_name] = (
+                trial_index_offset + _n_trials_in_stim_file(v)
+            )
             n_unknown = 0
             for trial in v.to_add_trial():
+                if "trial_index" in trial:
+                    trial["trial_index"] = (
+                        int(trial["trial_index"]) + trial_index_offset  # type: ignore[arg-type]
+                    )
                 if not np.isfinite(
                     np.asarray([trial["start_time"], trial["stop_time"]], dtype=float)
                 ).all():
@@ -1231,7 +1256,7 @@ class DynamicRoutingSession:
                     f"{self.id} {k}: {n_unknown} trials omitted from {intervals_table_name}: "
                     "start/stop time unknown (sync line unknown in a replayed interval)"
                 )
-            if trial_idx_offset == 0:
+            if is_new_table:
                 intervals.append(nwb_intervals)
         # TODO deal with stimuli across epochs
         #! requires stimulus param hashes or links to stimulus table, to

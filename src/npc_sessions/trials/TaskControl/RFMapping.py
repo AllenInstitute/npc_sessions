@@ -264,6 +264,17 @@ class RFMapping(TaskControl):
 
     @cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
+        """0-indexed trial number across all RFMapping stim files in the session: the count
+        continues from one file to the next (in time order) and doesn't reset to 0. Trials left
+        out of the table (invalid times, or overlapping a replayed sync interval) keep their
+        numbers, so values can be skipped. For a single stim file this equals
+        `trial_index_in_block`."""
+        return np.arange(self._len_all_trials)[self._idx]
+
+    @cached_property
+    def trial_index_in_block(self) -> npt.NDArray[np.int32]:
+        """0-indexed trial number within its stim file (block). Trials left out of the
+        table keep their numbers, so values can be skipped."""
         return np.arange(self._len_all_trials)[self._idx]
 
     @cached_property
