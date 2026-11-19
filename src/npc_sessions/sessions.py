@@ -3382,11 +3382,18 @@ class DynamicRoutingSession:
             else:
                 licks_on_sync = rising.size > 0 and falling.size > 0
             if licks_on_sync:
-                if falling[0] < rising[0]:
-                    falling = falling[1:]
-                if rising[-1] > falling[-1]:
-                    rising = rising[:-1]
-                assert len(rising) == len(falling)
+                from npc_sessions import timing
+
+                # edges don't necessarily alternate: a replayed interval can cut off
+                # the falling edge of a lick at its boundary (licks inside it come from
+                # lickFrames instead)
+                rising, falling = timing.pair_rising_falling_edges(
+                    rising,
+                    falling,
+                    self.sync_data.get_unknown_intervals("lick_sensor"),
+                )
+                licks_on_sync = rising.size > 0
+            if licks_on_sync:
 
                 rising_falling = np.array([rising, falling]).T
                 lick_duration = np.diff(rising_falling, axis=1).squeeze()
@@ -3498,7 +3505,9 @@ class DynamicRoutingSession:
         )
         units_description = "all good units"
         if units.empty:
-            units = self.units.query("electrode_group_name == @electrode_group_name")
+            units = self.units[:].query(
+                "electrode_group_name == @electrode_group_name"
+            )
             units_description = "all units"
         bin_interval = 1  # seconds
         if not units.empty:

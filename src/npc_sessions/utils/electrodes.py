@@ -171,7 +171,13 @@ def get_ibl_electrodes_table(
     # try 2 sources
     annotation_df: pl.DataFrame | None = None
 
-    aind_session_id = aind_session.get_sessions(*session.split("_")[:2])[0].id
+    aind_sessions = aind_session.get_sessions(*session.split("_")[:2])
+    if not aind_sessions:
+        raise NoElectrodeDataError(
+            f"No AIND session found for {session} (raw data may not be uploaded yet): "
+            "cannot get IBL electrode annotations"
+        )
+    aind_session_id = aind_sessions[0].id
     with contextlib.suppress(KeyError):
         annotation_df = pl.DataFrame(
             aind_session.ecephys.get_latest_ibl_annotations(

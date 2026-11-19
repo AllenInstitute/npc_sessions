@@ -158,6 +158,51 @@ def test_patch_cache_records_dependency_versions(files, tmp_path, monkeypatch) -
     assert p2 is not p1 and p2.to_dict()["lines"] == p1.to_dict()["lines"]
     assert timing.load_patch(saved)[1]["npc_stim"] == "0.0.0"
     assert timing.get_sync_patch("s", files["sync"], [files["stim"]], root=tmp_path).created == p2.created
+    # a changed npc_sessions version alone -> reused (BUILDER covers its patch code)
+    monkeypatch.setattr(
+        timing,
+        "get_dependency_versions",
+        lambda: {**versions, "npc_stim": "0.0.0", "npc_sessions": "9.9.9"},
+    )
+    assert timing.get_sync_patch("s", files["sync"], [files["stim"]], root=tmp_path).created == p2.created
+
+
+def test_npc_sessions_version_records_git_state(monkeypatch) -> None:
+    monkeypatch.setattr(timing, "get_npc_sessions_git_state", lambda: ("a" * 40, True))
+    v = timing.get_dependency_versions()["npc_sessions"]
+    assert v.endswith("+g" + "a" * 12 + ".dirty")
+    monkeypatch.setattr(timing, "get_npc_sessions_git_state", lambda: ("a" * 40, False))
+    assert timing.get_npc_sessions_version().endswith("+g" + "a" * 12)
+    monkeypatch.setattr(timing, "get_npc_sessions_git_state", lambda: None)
+    assert "+" not in timing.get_npc_sessions_version()
+
+
+def test_dirty_checkout_does_not_write_shared_cache(files, tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(timing, "get_npc_sessions_git_state", lambda: ("a" * 40, True))
+    monkeypatch.setattr(timing, "DEFAULT_PATCH_ROOT", tmp_path.as_posix())
+    assert timing.is_shared_patch_root(tmp_path / "x.json")
+    assert not timing.is_shared_patch_root(tmp_path.parent / "other" / "x.json")
+    assert timing.get_sync_patch("s", files["sync"], [files["stim"]], root=tmp_path) is not None
+    assert not list(tmp_path.glob("*.json"))
+    monkeypatch.setattr(timing, "get_npc_sessions_git_state", lambda: ("a" * 40, False))
+    timing.get_sync_patch("s", files["sync"], [files["stim"]], root=tmp_path)
+    assert len(list(tmp_path.glob("*.json"))) == 1
+
+
+def test_pair_rising_falling_edges() -> None:
+    # lick straddling the start of a replayed interval: its falling edge was masked out
+    rising = [1.0, 2.0, 4680.48616, 4737.8633]
+    falling = [1.05, 2.05, 4737.9]
+    r, f = timing.pair_rising_falling_edges(rising, falling, [(4680.49999, 4681.5)])
+    assert r.tolist() == [1.0, 2.0, 4737.8633] and f.tolist() == [1.05, 2.05, 4737.9]
+    # leading falling / trailing rising edges are dropped
+    r, f = timing.pair_rising_falling_edges([1, 3, 5], [0.5, 2, 4])
+    assert r.tolist() == [1, 3] and f.tolist() == [2, 4]
+    # a pair spanning an unknown interval is dropped
+    r, f = timing.pair_rising_falling_edges([1, 3], [2, 6], [(4, 5)])
+    assert r.tolist() == [1] and f.tolist() == [2]
+    r, f = timing.pair_rising_falling_edges([], [1])
+    assert r.size == 0 and f.size == 0
 
 
 def test_patch_root(monkeypatch, tmp_path) -> None:

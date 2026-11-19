@@ -30,7 +30,10 @@ This module adds what npc_sync can't know about a session:
     index-based trial/stim mapping consistent; trial opto times are NaN there anyway
 - persistence: the patch is cached as JSON keyed by session and sync content hash, with the
   builder and the versions of the packages that build it (`PATCH_DEPENDENCIES`); a cached
-  patch is rebuilt (and overwritten, if writable) when any of them differ
+  patch is rebuilt (and overwritten, if writable) when the builder or the version of any
+  `REUSE_DEPENDENCIES` differs. npc_sessions' own version is provenance only (`BUILDER` is
+  bumped when its patch code changes); from a git checkout it includes the commit and a dirty
+  flag, and a dirty checkout doesn't write to the shared `DEFAULT_PATCH_ROOT`
 - reconstructed licks/rewards for the tables, and masks for trial events on lines still
   unknown inside a replayed interval
 
@@ -56,10 +59,13 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+import functools
 import importlib.metadata
 import json
 import logging
 import os
+import pathlib
+import subprocess
 from collections.abc import Iterable, Sequence
 from typing import Any
 
@@ -97,7 +103,11 @@ PATCH_DEPENDENCIES = (
     "npc_ephys",
 )
 """Packages whose code determines a patch's content: their versions are saved with the patch
-(`dependency_versions`), and a cached patch with different versions is rebuilt."""
+(`dependency_versions`) as provenance."""
+
+REUSE_DEPENDENCIES = tuple(d for d in PATCH_DEPENDENCIES if d != "npc_sessions")
+"""A cached patch is rebuilt if the version of any of these differs. npc_sessions is excluded:
+`BUILDER` is bumped when its patch code changes, and its version changes with every release."""
 
 MATCH_OFFSET_MIN_SEC = -1.5
 MATCH_OFFSET_MAX_SEC = 60.0
@@ -668,15 +678,73 @@ def _span_with_line_low_at_bounds(
     return (a, z)
 
 
+@functools.cache
+def get_npc_sessions_git_state() -> tuple[str, bool] | None:
+    """(commit, is_dirty) if npc_sessions is imported from a git checkout (e.g. an editable
+    install), else None. Dirty means uncommitted changes under the package's source dir."""
+    pkg_dir = pathlib.Path(__file__).resolve().parent
+
+    def git(*args: str) -> str:
+        return subprocess.run(
+            ["git", *args],
+            cwd=pkg_dir,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=10,
+        ).stdout.strip()
+
+    try:
+        top = pathlib.Path(git("rev-parse", "--show-toplevel")).resolve()
+        if "site-packages" in pkg_dir.relative_to(top).parts:
+            return None  # installed dist inside some other repo (e.g. a venv in a repo)
+        commit = git("rev-parse", "HEAD")
+        dirty = bool(git("status", "--porcelain", "--", str(pkg_dir)))
+    except Exception:
+        return None
+    return commit, dirty
+
+
+def get_npc_sessions_version() -> str:
+    """Installed version, with a local suffix identifying the code when imported from a git
+    checkout: `<version>+g<commit[:12]>`, plus `.dirty` with uncommitted changes."""
+    try:
+        version = importlib.metadata.version("npc_sessions")
+    except importlib.metadata.PackageNotFoundError:
+        version = "unknown"
+    state = get_npc_sessions_git_state()
+    if state is None:
+        return version
+    commit, dirty = state
+    return f"{version}+g{commit[:12]}" + (".dirty" if dirty else "")
+
+
 def get_dependency_versions() -> dict[str, str]:
-    """Installed versions of `PATCH_DEPENDENCIES` ('unknown' if not installed as a dist)."""
+    """Installed versions of `PATCH_DEPENDENCIES` ('unknown' if not installed as a dist).
+    npc_sessions' includes the git commit when run from a checkout
+    (`get_npc_sessions_version`)."""
     out = {}
     for name in PATCH_DEPENDENCIES:
+        if name == "npc_sessions":
+            out[name] = get_npc_sessions_version()
+            continue
         try:
             out[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:
             out[name] = "unknown"
     return out
+
+
+def is_reusable_versions(saved: dict[str, str], current: dict[str, str]) -> bool:
+    """Whether a patch saved with `saved` dependency versions can be reused now: only
+    `REUSE_DEPENDENCIES` are compared."""
+    return all(saved.get(name) == current.get(name) for name in REUSE_DEPENDENCIES)
+
+
+def is_shared_patch_root(path: npc_io.PathLike) -> bool:
+    """Whether `path` is in the shared `DEFAULT_PATCH_ROOT`."""
+    root = npc_io.from_pathlike(DEFAULT_PATCH_ROOT).as_posix().rstrip("/")
+    return npc_io.from_pathlike(path).as_posix().startswith(root + "/")
 
 
 def has_aws_credentials() -> bool:
@@ -737,9 +805,10 @@ def get_sync_patch(
 
     Loaded from the cache (`get_patch_root`: `root`, `$NPC_SESSIONS_SYNC_PATCH_DIR`, or
     `DEFAULT_PATCH_ROOT` on S3 when AWS credentials are available) if a patch exists there
-    for the same sync content hash, builder and `PATCH_DEPENDENCIES` versions. Otherwise
-    built, and saved there (overwriting a stale one) if `write`. Cache read/write failures
-    are logged and the patch is built in memory.
+    for the same sync content hash, builder and `REUSE_DEPENDENCIES` versions. Otherwise
+    built, and saved there (overwriting a stale one) if `write` - except to the shared
+    `DEFAULT_PATCH_ROOT` from a git checkout of npc_sessions with uncommitted changes. Cache
+    read/write failures are logged and the patch is built in memory.
     """
     raw = npc_sync.SyncDataset(npc_sync.get_sync_data(sync), on_invalid="ignore")
     path = get_patch_path(session_id, raw.content_hash, root)
@@ -751,7 +820,7 @@ def get_sync_patch(
                 if (
                     patch.sync_content_hash == raw.content_hash
                     and patch.builder == BUILDER
-                    and saved_versions == versions
+                    and is_reusable_versions(saved_versions, versions)
                 ):
                     return patch
                 logger.info(
@@ -765,6 +834,14 @@ def get_sync_patch(
             )
     patch = build_session_sync_patch(raw, stim_paths, ephys_recording_dirs)
     if path is not None and write:
+        state = get_npc_sessions_git_state()
+        if state is not None and state[1] and is_shared_patch_root(path):
+            logger.warning(
+                f"{session_id}: not saving sync patch to shared cache {path}: npc_sessions "
+                f"has uncommitted changes ({versions['npc_sessions']}). Commit them, or set "
+                f"${PATCH_DIR_ENV_VAR} to another location"
+            )
+            return patch
         try:
             save_patch(patch, path)
             logger.info(f"{session_id}: saved sync patch to {path}")
@@ -938,6 +1015,38 @@ def unknown_overlap_mask(
     for u0, u1 in unknown:
         mask |= (lo < u1) & (hi >= u0)
     return mask
+
+
+def pair_rising_falling_edges(
+    rising: npt.ArrayLike,
+    falling: npt.ArrayLike,
+    unknown: Iterable[tuple[float, float]] = (),
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Pair each rising edge with the first falling edge after it and before the next rising
+    edge, without assuming the edges alternate. A rising edge with no such falling edge (e.g.
+    the falling edge was cut off by a replayed interval) is dropped, as is a falling edge with
+    no rising edge. Pairs whose [rising, falling] span overlaps an `unknown` interval are
+    dropped too: events there come from another source (e.g. `lickFrames`).
+
+    >>> r, f = pair_rising_falling_edges([1, 3, 5, 9], [0.5, 2, 6, 10], [(8.5, 9.5)])
+    >>> r.tolist(), f.tolist()
+    ([1.0, 5.0], [2.0, 6.0])
+    """
+    r = np.sort(np.asarray(rising, dtype=float).ravel())
+    f = np.sort(np.asarray(falling, dtype=float).ravel())
+    if r.size == 0 or f.size == 0:
+        return np.array([]), np.array([])
+    idx = np.searchsorted(f, r, side="right")  # first falling edge after each rising edge
+    next_r = np.r_[r[1:], np.inf]
+    has_f = idx < f.size
+    f_next = np.where(has_f, f[np.minimum(idx, f.size - 1)], np.inf)
+    keep = has_f & (f_next <= next_r)
+    r, f_next = r[keep], f_next[keep]
+    unknown = tuple(unknown)
+    if unknown and r.size:
+        ok = ~unknown_overlap_mask(r, f_next, unknown)
+        r, f_next = r[ok], f_next[ok]
+    return r, f_next
 
 
 def replayed_overlap_mask(
