@@ -2241,6 +2241,7 @@ class DynamicRoutingSession:
             ValueError,
         ):
             utils.electrodes.get_electrodes_table(self.id)
+            return True
         return False
 
     @cached_property
