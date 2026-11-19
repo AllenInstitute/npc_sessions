@@ -153,3 +153,5 @@ Notes:
 - **Task trials:** trials with opto that overlap a replay are **kept**. Opto times are NaN there, and `is_opto` stays True. Before this fix, the NaN would have turned `is_opto` False.
 - **Evidence:** `experiments/sync-patch-manifest/p7_opto_replay_simulation.log`. The intervals are simulated, because no real opto block has a replay.
 - **Not changed (existing behaviour):** a session with 2 OptoTagging files has `trial_index` 0–149 twice in `optotagging_trials` (714753_2024-07-03). The sessions code computes an offset but never applies it.
+
+- Filed as https://github.com/AllenInstitute/npc_sessions/issues/195 (2026-11-18). Common: 116/130 sessions with OptoTagging have 2+ files. The fix needs a decision (unique index vs per-file index + file column).
