@@ -1,0 +1,26 @@
+
+===== 715706_2024-06-26
+ERROR:npc_stim.display_times:behavior_1_DynamicRouting1_715706_20240626_144020: Block 1: 1 frame(s) have a diode flip less than 15 ms after their vsync rising edge (frame signal raised before draw + flip): flips are misassigned
+  rejected stims: ['DynamicRouting1_715706_20240626_144020']
+  J1 PASS: stim_frame_times: ['RFMapping_715706_20240626_142537', 'RFMapping_715706_20240626_154118']
+  J2 PASS: 2 epochs for 2 stims with frame times; script names ['RFMapping', 'RFMapping']
+  J3 PASS: is_task=False; No trials table available for 715706_2024-06-26: the task stim file has no usable frame times (ValueError("No frame display times for S3Path('aind-private-data-prod-o5171v/ecephys_715706_2024-06-26_14
+  J4 PASS: intervals: ['aud_rf_mapping_trials', 'vis_rf_mapping_trials']
+  J5 PASS: keywords ['sync', 'video', 'ephys', 'units', 'dynamic_routing', 'dev', 'mapping', 'day_1', 'muscimol_perturbation']; behavior modules ['running_speed', 'rewards', 'eye_tracking', 'dlc_eye_camera', 'facemap_side_camera', 'facemap_front_camera', 'lp_side_camera', 'lp_front_camera']
+
+===== 714753_2024-07-03 (control)
+trialSoundArray empty; regenerating sound arrays
+trialSoundArray empty; regenerating sound arrays
+trialSoundArray empty; regenerating sound arrays
+trialSoundArray empty; regenerating sound arrays
+trialSoundArray empty; regenerating sound arrays
+trialSoundArray empty; regenerating sound arrays
+  J6 PASS: is_task=True; intervals ['aud_rf_mapping_trials', 'vis_rf_mapping_trials', 'optotagging_trials', 'performance', 'trials']; 538 trials
+
+===== summary
+J1: 1/1 pass
+J2: 1/1 pass
+J3: 1/1 pass
+J4: 1/1 pass
+J5: 1/1 pass
+J6: 1/1 pass

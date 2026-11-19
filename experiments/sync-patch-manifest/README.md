@@ -30,6 +30,7 @@ npc_sessions `sync-patch`. Interpreters:
 | `p6_event_lines_check.py`, `p6_followup_rf862025.py` | `p6_event_lines_check.log` | builder 3: sound line from NI-DAQ, laser lines from trigger frames (leave-out error ≤0.99 ms), licks in `response_time`, no trials `timing_source` (F1–F7). Supersedes p4 D3 (trials `timing_source`) |
 | `p7_opto_replay_simulation.py` | `p7_opto_replay_simulation.log` | simulated replayed intervals (no real opto replay exists): OptoTagging trials overlapping them removed, task trials kept with opto times NaN and `is_opto` unchanged (G1–G2) |
 | `p8_trial_index_check.py` | `p8_trial_index_check.log` | #195: `trial_index` continues across stim files of a table, `trial_index_in_epoch` per file (named `trial_index_in_block` in the log, renamed after the run), neither changed by removed trials (H1–H4; 2 OptoTagging files in 714753/733780, 2 RFMapping files in 712141_2024-06-05) |
+| `p9_rejected_task_block_check.py` | `p9_rejected_task_block_check.log` | a stim without usable frame times (715706_2024-06-26 task block) gets no epoch or table and no longer breaks `epochs`/`intervals`/keywords (J1–J6) |
 | `npc_sessions_tests.log` | – | npc_sessions test suite with the branch libraries |
 | `debug_diode.py`, `debug_diode2.py`, `debug_diode3.py` | (stdout) | diagnosis of the polarity-dependent diode latency, the splice event at sample start−1, and post-span outliers |
 

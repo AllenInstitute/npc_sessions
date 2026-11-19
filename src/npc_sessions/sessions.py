@@ -353,7 +353,10 @@ class DynamicRoutingSession:
     @property
     def ignore_stim_errors(self) -> bool:
         """If True, just compile as much as possible from available stim files,
-        ignoring non-critical errors."""
+        ignoring non-critical errors.
+
+        No longer affects stims without usable frame times: they are always left out (see
+        `stim_frame_times`)."""
         return getattr(self, "_suppress_errors", False) or getattr(
             self, "_ignore_stim_errors", False
         )
@@ -962,8 +965,25 @@ class DynamicRoutingSession:
                     "DynamicRouting1*.hdf5 was recorded badly for 670248_20230802 and won't open. "
                     "If you wish to compile an nwb anyway, set `session.is_task = False` for this session and re-run"
                 )
+            rejected = (
+                next(
+                    (
+                        v
+                        for k, v in self._stim_frame_times.items()
+                        if self.task_stim_name in k and isinstance(v, Exception)
+                    ),
+                    None,
+                )
+                if self.is_sync
+                else None
+            )
             raise AttributeError(
-                f"No trials table available for {self.id}: {self.is_task=}"
+                f"No trials table available for {self.id}: "
+                + (
+                    f"the task stim file has no usable frame times ({rejected!r})"
+                    if rejected is not None
+                    else f"{self.is_task=}"
+                )
             )
         if (cached := getattr(self, "_cached_nwb_trials", None)) is not None:
             return cached
@@ -2406,8 +2426,9 @@ class DynamicRoutingSession:
         if not self.is_sync:
             raise AttributeError(f"{self.id} is not a session with sync data")
         if not self.is_task:
-            raise AttributeError(f"{self.id} is not a session with behavior task")
-        _ = self.stim_frame_times  # raises if stim errors aren't ignored
+            raise AttributeError(
+                f"{self.id} is not a session with behavior task (with usable frame times)"
+            )
         task_display_times = next(
             v
             for k, v in self._stim_display_times.items()
@@ -2867,6 +2888,8 @@ class DynamicRoutingSession:
     @property
     def task_data(self) -> h5py.File:
         # don't check if self.is_task here, as this is used to determine that!
+        # (only a task stim file with usable frame times counts: without, `is_task` is False,
+        # so there is no trials/performance table and nothing derived from them)
         return self.stim_data[
             next(
                 k
@@ -2985,22 +3008,23 @@ class DynamicRoutingSession:
 
     @property
     def stim_frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
-        """Frame times dict for stims with time arrays, or optionally raising
-        exceptions."""
-        if self.ignore_stim_errors:
-            return {
-                path: times
-                for path, times in self._stim_frame_times.items()
-                if not isinstance(times, Exception)
-            }
-        asserted_stim_frame_times: dict[str, npt.NDArray[np.float64]] = {}
+        """Frame (display) times for the stims that have them.
+
+        Stims without usable frame times are left out (logged once, with the reason; see
+        `sync_timing_report`): they get no epoch, intervals table or trials table.
+        """
+        out: dict[str, npt.NDArray[np.float64]] = {}
         for k, v in self._stim_frame_times.items():
-            v = npc_stim.assert_stim_times(v)
-            asserted_stim_frame_times[k] = v
-        assert not any(
-            isinstance(v, Exception) for v in asserted_stim_frame_times.values()
-        )
-        return asserted_stim_frame_times
+            if isinstance(v, Exception):
+                logged = self.__dict__.setdefault("_logged_stims_without_frame_times", set())
+                if k not in logged:
+                    logged.add(k)
+                    logger.warning(
+                        f"{self.id}: {k} left out (no usable frame times): {v!r}"
+                    )
+                continue
+            out[k] = v
+        return out
 
     @property
     def ephys_record_node_dirs(self) -> tuple[upath.UPath, ...]:
