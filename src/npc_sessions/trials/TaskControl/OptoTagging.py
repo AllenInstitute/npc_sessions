@@ -224,7 +224,9 @@ class OptoTagging(TaskControl):
         return np.where(
             self._is_stim_time_unknown,
             np.nan,
-            np.array([rec.onset_time_on_sync for rec in self._stim_recordings], dtype=float),
+            np.array(
+                [rec.onset_time_on_sync for rec in self._stim_recordings], dtype=float
+            ),
         )
 
     @cached_property
@@ -232,7 +234,9 @@ class OptoTagging(TaskControl):
         return np.where(
             self._is_stim_time_unknown,
             np.nan,
-            np.array([rec.offset_time_on_sync for rec in self._stim_recordings], dtype=float),
+            np.array(
+                [rec.offset_time_on_sync for rec in self._stim_recordings], dtype=float
+            ),
         )
 
     @cached_property
@@ -242,7 +246,9 @@ class OptoTagging(TaskControl):
         recs = self._stim_recordings
         trigger = np.array(
             [
-                getattr(getattr(r, "presentation", None), "trigger_time_on_sync", np.nan)
+                getattr(
+                    getattr(r, "presentation", None), "trigger_time_on_sync", np.nan
+                )
                 for r in recs
             ],
             dtype=float,

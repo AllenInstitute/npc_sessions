@@ -121,16 +121,14 @@ class DynamicRouting1(TaskControl):
             return cached
         if self._sync:
             try:
-                self._cached_opto_stim_recordings = (
-                    timing.mask_unknown_stim_recordings(
-                        npc_samstim.get_stim_latencies_from_sync(
-                            self._hdf5_path,
-                            self._sync,
-                            waveform_type="opto",
-                        ),
+                self._cached_opto_stim_recordings = timing.mask_unknown_stim_recordings(
+                    npc_samstim.get_stim_latencies_from_sync(
+                        self._hdf5_path,
                         self._sync,
-                        self._sync.get_line_for_stim_onset("opto"),
-                    )
+                        waveform_type="opto",
+                    ),
+                    self._sync,
+                    self._sync.get_line_for_stim_onset("opto"),
                 )
             except npc_samstim.MissingSyncLineError:
                 if self._ephys_recording_dirs:
@@ -561,9 +559,7 @@ class DynamicRouting1(TaskControl):
         interval, see `opto_start_time`)"""
         if not self._is_opto:
             return np.full(self._len, np.nan)
-        return np.where(
-            self._is_replayed_trial, np.nan, self.get_trial_opto_offset()
-        )
+        return np.where(self._is_replayed_trial, np.nan, self.get_trial_opto_offset())
 
     @cached_property
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
@@ -1519,7 +1515,9 @@ class DynamicRouting1(TaskControl):
         triggered = np.array(
             [
                 f is not None and np.isfinite(f)
-                for f in npc_stim.get_stim_trigger_frames(self._hdf5_path, stim_type="opto")
+                for f in npc_stim.get_stim_trigger_frames(
+                    self._hdf5_path, stim_type="opto"
+                )
             ][: self._len],
             dtype=bool,
         )

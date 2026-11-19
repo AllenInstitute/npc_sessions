@@ -10,7 +10,7 @@ import typing
 from collections.abc import Generator, Iterator, Sequence
 from typing import Any, Literal
 
-from npc_sessions._lazy import cached_property, lazy_import
+from npc_sessions._lazy import lazy_import
 
 if typing.TYPE_CHECKING:
     import npc_io

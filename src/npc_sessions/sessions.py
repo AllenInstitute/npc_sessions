@@ -497,7 +497,9 @@ class DynamicRoutingSession:
         try:
             exclusions = self.ephys_timing_exclusions
         except Exception as exc:
-            logger.warning(f"{self.id} could not check ephys timing QC for notes: {exc!r}")
+            logger.warning(
+                f"{self.id} could not check ephys timing QC for notes: {exc!r}"
+            )
             exclusions = {}
         if exclusions:
             notes = "; ".join(
@@ -1225,7 +1227,8 @@ class DynamicRoutingSession:
         # of a table don't change it (`trial_index_in_epoch` is the index within the file)
         next_trial_index: dict[str, int] = {}
         for k, v in sorted(
-            self._all_trials.items(), key=lambda kv: npc_session.DatetimeRecord(kv[0]).dt
+            self._all_trials.items(),
+            key=lambda kv: npc_session.DatetimeRecord(kv[0]).dt,
         ):
             if self.task_stim_name in k and self.is_task:
                 # intervals.append(self.trials)
@@ -1473,8 +1476,16 @@ class DynamicRoutingSession:
                     else []
                 ),
                 "notes": "; ".join(
-                    ([f"includes invalid times: {'; '.join(invalid_times_notes)}"] if invalid_times_notes else [])
-                    + ([f"includes {'; '.join(replayed_notes)}"] if replayed_notes else [])
+                    (
+                        [f"includes invalid times: {'; '.join(invalid_times_notes)}"]
+                        if invalid_times_notes
+                        else []
+                    )
+                    + (
+                        [f"includes {'; '.join(replayed_notes)}"]
+                        if replayed_notes
+                        else []
+                    )
                 ),
             }
 
@@ -1958,7 +1969,9 @@ class DynamicRoutingSession:
             # as long as we don't index into the data array (ie to take a subset), it
             # will be instantly inserted into the electrical series container for lazy access
             if timing_info.device.compressed:
-                data = npc_ephys.openephys.open_zarr(timing_info.device.compressed)["traces_seg0"]
+                data = npc_ephys.openephys.open_zarr(timing_info.device.compressed)[
+                    "traces_seg0"
+                ]
             else:
                 data = np.memmap(  # type: ignore[call-overload]
                     timing_info.device.continuous / "continuous.dat",
@@ -2014,7 +2027,9 @@ class DynamicRoutingSession:
             # as long as we don't index into the data array (ie to take a subset), it
             # will be instantly inserted into the electrical series container for lazy access
             if timing_info.device.compressed:
-                data = npc_ephys.openephys.open_zarr(timing_info.device.compressed)["traces_seg0"]
+                data = npc_ephys.openephys.open_zarr(timing_info.device.compressed)[
+                    "traces_seg0"
+                ]
             else:
                 data = np.memmap(  # type: ignore[call-overload]
                     timing_info.device.continuous / "continuous.dat",
@@ -2738,8 +2753,10 @@ class DynamicRoutingSession:
             # the NI-DAQ recording of the sound replaces the sync sound line there
             try:
                 recording_dirs = self.ephys_recording_dirs
-            except Exception as exc:  # noqa: BLE001
-                logger.warning(f"{self.id}: no ephys recording dirs for the sync patch: {exc!r}")
+            except Exception as exc:
+                logger.warning(
+                    f"{self.id}: no ephys recording dirs for the sync patch: {exc!r}"
+                )
         return timing.get_sync_patch(
             str(self.id),
             self._raw_sync_data,
@@ -2752,7 +2769,9 @@ class DynamicRoutingSession:
         """Sync data with the session's `sync_patch` applied: edge queries return measured
         edges, plus reconstructed edges inside replayed intervals; lines that can't be
         reconstructed return nothing there (see `get_unknown_intervals`)."""
-        return npc_sync.SyncDataset(self._raw_sync_data, patch=self.sync_patch, on_invalid="raise")
+        return npc_sync.SyncDataset(
+            self._raw_sync_data, patch=self.sync_patch, on_invalid="raise"
+        )
 
     @cached_property
     def sync_timing_report(self) -> pd.DataFrame:
@@ -2771,7 +2790,9 @@ class DynamicRoutingSession:
             display_times=[
                 by_block.get(
                     i,
-                    npc_stim.BlockDisplayTimes(i, None, b, None, "unavailable", reason="no stim file matched"),
+                    npc_stim.BlockDisplayTimes(
+                        i, None, b, None, "unavailable", reason="no stim file matched"
+                    ),
                 )
                 for i, b in enumerate(blocks)
             ],
@@ -2801,7 +2822,8 @@ class DynamicRoutingSession:
             ) < self._raw_sync_data.start_time:
                 return False
             if (
-                dt > self._raw_sync_data.stop_time  # this check first can save opening file
+                dt
+                > self._raw_sync_data.stop_time  # this check first can save opening file
                 or dt + datetime.timedelta(seconds=npc_stim.get_stim_duration(p))
                 > self._raw_sync_data.stop_time
             ):
@@ -3016,7 +3038,9 @@ class DynamicRoutingSession:
         out: dict[str, npt.NDArray[np.float64]] = {}
         for k, v in self._stim_frame_times.items():
             if isinstance(v, Exception):
-                logged = self.__dict__.setdefault("_logged_stims_without_frame_times", set())
+                logged = self.__dict__.setdefault(
+                    "_logged_stims_without_frame_times", set()
+                )
                 if k not in logged:
                     logged.add(k)
                     logger.warning(
@@ -3089,9 +3113,7 @@ class DynamicRoutingSession:
                 logger.warning(
                     f"{self.id} {timing.device.name} excluded: ephys timing QC failed: {getattr(timing, 'reason', '')}"
                 )
-        return tuple(
-            t for t in self.ephys_timing_qc if getattr(t, "is_valid", True)
-        )
+        return tuple(t for t in self.ephys_timing_qc if getattr(t, "is_valid", True))
 
     @property
     def ephys_timing_exclusions(self) -> dict[str, str]:
@@ -3835,9 +3857,13 @@ class DynamicRoutingSession:
 
                     extra: list[float] = []
                     for stim_file in self.stim_data_without_timing_issues:
-                        if any(name in stim_file.lower() for name in ("mapping", "tagging")):
+                        if any(
+                            name in stim_file.lower() for name in ("mapping", "tagging")
+                        ):
                             continue
-                        stim_path = next(p for p in self.stim_paths if p.stem == stim_file)
+                        stim_path = next(
+                            p for p in self.stim_paths if p.stem == stim_file
+                        )
                         t, _, _ = timing.get_reconstructed_reward_times(
                             self.sync_data, stim_path, rising
                         )

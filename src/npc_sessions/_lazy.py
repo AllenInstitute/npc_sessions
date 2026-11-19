@@ -17,9 +17,7 @@ import importlib
 import threading
 import types
 from collections.abc import Callable
-from typing import Any, Generic, TypeVar, overload
-
-from typing_extensions import Self
+from typing import Any, Generic, Self, TypeVar, overload
 
 _lock = threading.RLock()
 

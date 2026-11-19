@@ -105,7 +105,9 @@ def get_dlc_session_paf_graph(session: str, model_name: str) -> list:
             f"No metadata pickle found for session {session}. Check {model_name} capsule"
         )
 
-    with metadata_pickle_file[0].open("rb") as f:  # UPath isn't os.PathLike for remote paths
+    with metadata_pickle_file[0].open(
+        "rb"
+    ) as f:  # UPath isn't os.PathLike for remote paths
         metadata_pickle = pd.read_pickle(f)
     test_config = metadata_pickle["data"]["DLC-model-config file"]
     paf_graph = test_config.get("partaffinityfield_graph", [])

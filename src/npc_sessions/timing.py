@@ -89,7 +89,13 @@ PATCH_DIR_ENV_VAR = "NPC_SESSIONS_SYNC_PATCH_DIR"
 DEFAULT_PATCH_ROOT = "s3://aind-scratch-data/dynamic-routing/cache/sync_patches"
 """Where patches are cached as `<session>_<hash[:12]>.json` when AWS credentials are available."""
 
-PATCH_DEPENDENCIES = ("npc_sessions", "npc_sync", "npc_stim", "npc_samstim", "npc_ephys")
+PATCH_DEPENDENCIES = (
+    "npc_sessions",
+    "npc_sync",
+    "npc_stim",
+    "npc_samstim",
+    "npc_ephys",
+)
 """Packages whose code determines a patch's content: their versions are saved with the patch
 (`dependency_versions`), and a cached patch with different versions is rebuilt."""
 
@@ -155,7 +161,9 @@ def match_stims_to_blocks(
         off = onsets - start
         ok = (off >= MATCH_OFFSET_MIN_SEC) & (off <= MATCH_OFFSET_MAX_SEC)
         if not ok.any():
-            unmatched.append((path, "no vsync block starts near the stim file's start time"))
+            unmatched.append(
+                (path, "no vsync block starts near the stim file's start time")
+            )
             continue
         j = int(np.flatnonzero(ok)[np.argmin(np.abs(off[ok]))])
         claims.setdefault(j, []).append(StimMatch(j, path, float(off[j]), n))
@@ -164,7 +172,9 @@ def match_stims_to_blocks(
         if len(c) == 1:
             matches[j] = c[0]
         else:
-            unmatched.extend((m.stim_path, f"block {j} claimed by {len(c)} stim files") for m in c)
+            unmatched.extend(
+                (m.stim_path, f"block {j} claimed by {len(c)} stim files") for m in c
+            )
     return matches, unmatched
 
 
@@ -208,7 +218,10 @@ def build_session_sync_patch(
     except (AssertionError, IndexError, ValueError) as exc:
         # sync-level failure (no vsync edges, unbalanced stim_running, ...): the patch can't
         # check or reconstruct anything that needs stim files, but other lines still apply
-        stim_blocks, note = [], f"stim files could not be matched to vsync blocks: {exc!r}"
+        stim_blocks, note = (
+            [],
+            f"stim files could not be matched to vsync blocks: {exc!r}",
+        )
         logger.warning(f"{raw}: {note}")
     patch = npc_sync.build_sync_patch(raw, stim_blocks, builder=BUILDER)
     if note:
@@ -241,7 +254,7 @@ def build_session_sync_patch(
         for fn, kwargs in steps:
             try:
                 fn(raw, patch, stim_paths, **kwargs)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 msg = f"{fn.__name__} failed: {exc!r}"
                 logger.warning(f"{raw}: {msg}")
                 patch.notes.append(msg)
@@ -325,7 +338,9 @@ def _check_edges_explained(
     def select(t: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         keep = ~npc_sync.in_intervals(t, spans)
         if window is not None:
-            keep &= npc_sync.in_intervals(t, [(a - window, z + window) for a, z in spans])
+            keep &= npc_sync.in_intervals(
+                t, [(a - window, z + window) for a, z in spans]
+            )
         return np.sort(t[keep])
 
     m, p = select(measured), select(predicted)
@@ -394,7 +409,7 @@ def reconstruct_sound_line(
         stim = npc_stim.get_h5_stim_data(stim_path)
         try:
             waveforms = npc_samstim.get_waveforms_from_stim_file(stim, "sound")
-        except Exception:  # noqa: BLE001  no sound in this stim file
+        except Exception:
             continue
         if not any(w is not None for w in waveforms):
             continue
@@ -532,8 +547,13 @@ def predict_opto_line(
     outside = ~npc_sync.in_intervals(trig, spans)
     t_out = trig[outside]
     if not len(on) and not len(trig):
-        return dict(status="reconstructed", rising=np.array([]), falling=np.array([]),
-                    n_paired=0, n_triggers_in_spans=0)
+        return dict(
+            status="reconstructed",
+            rising=np.array([]),
+            falling=np.array([]),
+            n_paired=0,
+            n_triggers_in_spans=0,
+        )
     j = np.searchsorted(on, t_out)
     paired = j < len(on)
     lat = np.full(len(t_out), np.inf)
@@ -563,7 +583,9 @@ def predict_opto_line(
         latency_range_sec=[float(lat.min()), float(lat.max())],
         excess_width_sec=w_med,
         max_abs_excess_deviation_sec=(
-            float(np.nanmax(np.abs(excess - w_med))) if np.isfinite(excess).any() else None
+            float(np.nanmax(np.abs(excess - w_med)))
+            if np.isfinite(excess).any()
+            else None
         ),
         n_triggers_in_spans=int((~outside).sum()),
     )
@@ -738,14 +760,18 @@ def get_sync_patch(
                     f"{versions}): rebuilding"
                 )
         except Exception as exc:
-            logger.warning(f"{session_id}: could not read cached sync patch {path}: {exc!r}")
+            logger.warning(
+                f"{session_id}: could not read cached sync patch {path}: {exc!r}"
+            )
     patch = build_session_sync_patch(raw, stim_paths, ephys_recording_dirs)
     if path is not None and write:
         try:
             save_patch(patch, path)
             logger.info(f"{session_id}: saved sync patch to {path}")
         except Exception as exc:
-            logger.warning(f"{session_id}: could not save sync patch to {path}: {exc!r}")
+            logger.warning(
+                f"{session_id}: could not save sync patch to {path}: {exc!r}"
+            )
     return patch
 
 
@@ -783,11 +809,17 @@ def get_block_report(
             ]
         unknown = [s for s in spans if s.status == "unknown"]
         row["n_patched_spans"] = len({s.span for s in spans})
-        diode = patch.diode_block(float(b[0]), float(b[-1])) if patch is not None else None
+        diode = (
+            patch.diode_block(float(b[0]), float(b[-1])) if patch is not None else None
+        )
         row["diode_status"] = diode.status if diode is not None else None
         row["diode_reason"] = diode.reason if diode is not None else None
-        row["n_phantom_flicker_removed"] = diode.n_phantom_flicker if diode and diode.status == "cleaned" else 0
-        row["n_glitch_removed"] = diode.n_glitch if diode and diode.status == "cleaned" else 0
+        row["n_phantom_flicker_removed"] = (
+            diode.n_phantom_flicker if diode and diode.status == "cleaned" else 0
+        )
+        row["n_glitch_removed"] = (
+            diode.n_glitch if diode and diode.status == "cleaned" else 0
+        )
         row["anchor_residuals_ms"] = [
             round(s.diagnostics["anchor_residual_sec"] * 1e3, 4)
             for s in spans
@@ -809,7 +841,9 @@ def get_block_report(
             row["status"], row["reason"] = "patched", ""
         elif len(b) != m.n_frames:
             row["status"] = "rejected"
-            row["reason"] = f"{len(b)} vsyncs, {m.n_frames} stim frames, no fault explains it"
+            row["reason"] = (
+                f"{len(b)} vsyncs, {m.n_frames} stim frames, no fault explains it"
+            )
         else:
             row["status"], row["reason"] = "clean", ""
         if (
@@ -857,7 +891,11 @@ def get_replayed_intervals(sync: npc_sync.SyncDataset) -> list[dict[str, Any]]:
                 reason=(
                     "replayed sync data (copied acquisition buffers)"
                     + (f": events unknown on {fmt(unknown)}" if unknown else "")
-                    + (f"; reconstructed: {fmt(reconstructed)}" if reconstructed else "")
+                    + (
+                        f"; reconstructed: {fmt(reconstructed)}"
+                        if reconstructed
+                        else ""
+                    )
                 ),
             )
         )
@@ -930,7 +968,9 @@ def stim_recordings_unknown_mask(
     for i, rec in enumerate(recordings):
         if rec is None:
             continue
-        trigger = getattr(getattr(rec, "presentation", None), "trigger_time_on_sync", None)
+        trigger = getattr(
+            getattr(rec, "presentation", None), "trigger_time_on_sync", None
+        )
         times = [
             float(t)
             for t in (
