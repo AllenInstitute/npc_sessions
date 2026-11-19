@@ -43,8 +43,9 @@ Policy decisions (outputs/sync-frame-timing-upgrade-plan.md, notes/sync-patching
 - licks inside replayed intervals are reconstructed from `lickFrames` (+-1/2 frame): in the
   licks table (`timing_source='stim_frame'`, duration NaN) and in the trials table
   (`response_time`). Provenance is only in the licks table (decided 2026-11-18)
-- opto times (DynamicRouting1 `opto_start/stop_time`, OptoTagging stimulus times) are NaN in
-  trials overlapping a replayed interval: +-1/2 frame is not usable for opto
+- opto: +-1/2 frame is not usable. Task trials overlapping a replayed interval are kept, with
+  `opto_start/stop_time` NaN and `is_opto` still True (it matters that opto happened).
+  OptoTagging trials overlapping one are removed (their `trial_index` values are skipped)
 - sound onsets on a sound line that is still unknown (no NI-DAQ, or the gate failed) are NaN
   (`mask_unknown_stim_recordings`): npc_samstim would otherwise take the next stimulus's edge
 - rewards inside replayed intervals are reconstructed from `rewardFrames` + the session's

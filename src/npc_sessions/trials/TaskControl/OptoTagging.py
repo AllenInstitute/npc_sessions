@@ -108,7 +108,7 @@ class OptoTagging(TaskControl):
         # return tuple(self.get_trial_opto_device(idx) for idx in range(self._len))
         self.assert_is_single_device()
         ## for single device:
-        return (self._device,) * self._len
+        return (self._device,) * self._n_all_trials
 
     def get_stim_recordings_from_sync(
         self, line_label: str = "laser_488"
@@ -143,8 +143,8 @@ class OptoTagging(TaskControl):
     def _is_stim_time_unknown(self) -> npt.NDArray[np.bool_]:
         """Per recording in `_stim_recordings`: onset/offset edges may be missing because the
         laser line is unknown (not reconstructed) in a replayed sync interval (see
-        `npc_sessions.timing`). Their times are NaN and the trials are omitted from the NWB
-        intervals table."""
+        `npc_sessions.timing`). Their times are NaN; such trials overlap a replayed interval,
+        so they are omitted (`trial_index`)."""
         recs = self._stim_recordings
         mask = np.zeros(len(recs), dtype=bool)
         sync = getattr(self, "_sync", None)
@@ -169,7 +169,7 @@ class OptoTagging(TaskControl):
         rec_488 = self._stim_recordings_488 or ()
         rec_633 = self._stim_recordings_633 or ()
         rec = []
-        for i in range(self._len):
+        for i in range(self._n_all_trials):
             device = self._trial_opto_device[i]
             if "633" in device:
                 rec.append(rec_633[i])
@@ -185,9 +185,19 @@ class OptoTagging(TaskControl):
         return len(self.trial_index)
 
     @cached_property
+    def _n_all_trials(self) -> int:
+        """Number of trials in the stim file, including those omitted (see `trial_index`)."""
+        return len(self._hdf5_data["trialOptoOnsetFrame"])
+
+    @cached_property
     def trial_index(self) -> npt.NDArray[np.int32]:
-        """0-indexed"""
-        return np.arange(len(self._hdf5_data["trialOptoOnsetFrame"]))
+        """0-indexed trial number in the stim file.
+
+        Trials overlapping a replayed sync interval are omitted: the laser line there is at
+        best reconstructed from the trigger frame (+-1/2 frame), which is not usable for
+        optotagging. Indices of the remaining trials are unchanged.
+        """
+        return np.flatnonzero(~self._is_replayed_trial_all)
 
     @cached_property
     def _inter_trial_interval(self) -> float:
@@ -199,39 +209,51 @@ class OptoTagging(TaskControl):
         return min(self._MAX_ANALYSIS_PERIOD, 0.5 * self._inter_trial_interval)
 
     @cached_property
-    def _onset_time(self) -> npt.NDArray[np.float64]:
-        """Laser onset on sync, all trials (NaN where the line is unknown)."""
+    def _onset_time_all(self) -> npt.NDArray[np.float64]:
+        """Laser onset on sync, every trial in the stim file (NaN where the line is unknown)."""
         return np.where(
             self._is_stim_time_unknown,
             np.nan,
             np.array([rec.onset_time_on_sync for rec in self._stim_recordings], dtype=float),
-        )[self.trial_index]
+        )
 
     @cached_property
-    def _offset_time(self) -> npt.NDArray[np.float64]:
+    def _offset_time_all(self) -> npt.NDArray[np.float64]:
         return np.where(
             self._is_stim_time_unknown,
             np.nan,
             np.array([rec.offset_time_on_sync for rec in self._stim_recordings], dtype=float),
-        )[self.trial_index]
+        )
 
     @cached_property
-    def _is_replayed_trial(self) -> npt.NDArray[np.bool_]:
-        """Trials overlapping a replayed sync interval: the laser line there is at best
-        reconstructed from the trigger frame (+-1/2 frame), so stimulus times are NaN."""
+    def _is_replayed_trial_all(self) -> npt.NDArray[np.bool_]:
+        """Every trial in the stim file: its analysis period overlaps a replayed sync
+        interval. Trials with an unknown onset are bounded by their trigger time."""
+        recs = self._stim_recordings
+        trigger = np.array(
+            [
+                getattr(getattr(r, "presentation", None), "trigger_time_on_sync", np.nan)
+                for r in recs
+            ],
+            dtype=float,
+        )
+        on = np.where(np.isfinite(self._onset_time_all), self._onset_time_all, trigger)
+        off = np.where(np.isfinite(self._offset_time_all), self._offset_time_all, on)
         return timing.replayed_overlap_mask(
-            getattr(self, "_sync", None), self.start_time, self.stop_time
+            getattr(self, "_sync", None),
+            on - self._analysis_period,
+            off + self._analysis_period,
         )
 
     @cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         """Start of the period associated with this optical stimulus."""
-        return self._onset_time - self._analysis_period
+        return self.stim_start_time - self._analysis_period
 
     @cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         """End of the period associated with this optical stimulus."""
-        return self._offset_time + self._analysis_period
+        return self.stim_stop_time + self._analysis_period
 
     @cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
@@ -240,11 +262,8 @@ class OptoTagging(TaskControl):
         Data from 1.5 ms before through 1.5 ms after this time
         (``stim_start_time - 0.0015`` to ``stim_start_time + 0.0015`` seconds)
         should be censored (`response_start_time` incorporates the censor period).
-
-        NaN in trials overlapping a replayed sync interval (their `start_time`/`stop_time`
-        come from the reconstructed laser edges, +-1/2 frame).
         """
-        return np.where(self._is_replayed_trial, np.nan, self._onset_time)
+        return self._onset_time_all[self.trial_index]
 
     @cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
@@ -253,10 +272,8 @@ class OptoTagging(TaskControl):
         Data from 1.5 ms before through 1.5 ms after this time
         (``stim_stop_time - 0.0015`` to ``stim_stop_time + 0.0015`` seconds)
         should be censored (`response_stop_time` incorporates the censor period).
-
-        NaN in trials overlapping a replayed sync interval (see `stim_start_time`).
         """
-        return np.where(self._is_replayed_trial, np.nan, self._offset_time)
+        return self._offset_time_all[self.trial_index]
 
     @cached_property
     def baseline_start_time(self) -> npt.NDArray[np.float64]:
@@ -365,7 +382,7 @@ class OptoTagging(TaskControl):
 
         return np.array(
             [parse_wavelength(device) for device in self._trial_opto_device]
-        )
+        )[self.trial_index]
 
 
 if __name__ == "__main__":

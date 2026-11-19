@@ -298,3 +298,9 @@ Changed decisions: reconstructed licks go in the trials table too, `timing_sourc
   - No opto task session with a replay exists in the npc_lims set, so the DynamicRouting1 opto NaN path is covered only by construction, not by data.
 - **Patch:** `PATCH_DEPENDENCIES` now also includes npc_samstim and npc_ephys. The sound reconstruction needs `ephys_recording_dirs`; `DynamicRoutingSession.sync_patch` passes them only for ephys sessions with replays.
 - **Checks:** F1–F7 pass (`p6_event_lines_check.log`; F2 for 862025 was checked on the RF-mapping table, see the follow-up in the log). The suite gives 51 passed, 2 skipped, and 1 failed (`test_surface_recording`, the same failure as before). mypy is clean.
+
+### Follow-up 2 (2026-11-18): opto rows
+
+- **OptoTagging:** trials whose analysis period overlaps a replayed interval are removed. The remaining rows keep their stim-file `trial_index`, so index-based mapping holds.
+- **Task trials:** the trials are kept. `opto_start_time`/`opto_stop_time` are NaN there, and `is_opto` is still True. It used to be `~isnan(opto_start_time)`; now it uses the unmasked onset, or the task's opto trigger frame if the laser line is unknown.
+- **Checks:** this is simulated, because no real session has a replay in an opto block (`p7_opto_replay_simulation.log`). G1 4/4 and G2 2/2 pass. The suite gives 51 passed, 2 skipped and 1 failed (the same `test_surface_recording`). mypy is clean.

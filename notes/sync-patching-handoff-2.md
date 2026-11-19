@@ -146,3 +146,10 @@ Builder `npc_sessions.timing 3`. Evidence: `experiments/sync-patch-manifest/p5_s
 Notes:
 - Building a patch for an ephys session with a replay now reads the NI-DAQ: 3–5 min per session (p5 timings), once per patch (cached).
 - Fixed in passing: the sound reconstruction ignores pulses more than 60 s from the span, because 839146_20260518 has an extra pulse after the task's last trial.
+
+### Follow-up 2 (2026-11-18): opto rows
+
+- **OptoTagging:** trials overlapping a replayed interval are **removed**; `trial_index` keeps the stim-file indices.
+- **Task trials:** trials with opto that overlap a replay are **kept**. Opto times are NaN there, and `is_opto` stays True. Before this fix, the NaN would have turned `is_opto` False.
+- **Evidence:** `experiments/sync-patch-manifest/p7_opto_replay_simulation.log`. The intervals are simulated, because no real opto block has a replay.
+- **Not changed (existing behaviour):** a session with 2 OptoTagging files has `trial_index` 0–149 twice in `optotagging_trials` (714753_2024-07-03). The sessions code computes an offset but never applies it.

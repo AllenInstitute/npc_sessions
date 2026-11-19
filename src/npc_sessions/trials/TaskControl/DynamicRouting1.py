@@ -542,9 +542,13 @@ class DynamicRouting1(TaskControl):
         """
         if not self._is_opto:
             return np.full(self._len, np.nan)
-        return np.where(
-            self._is_replayed_trial, np.nan, self.get_trial_opto_onset()
-        )
+        return np.where(self._is_replayed_trial, np.nan, self._opto_onset_unmasked)
+
+    @cached_property
+    def _opto_onset_unmasked(self) -> npt.NDArray[np.float64]:
+        """Opto onsets including trials overlapping a replayed sync interval (there: from the
+        reconstructed laser line, +-1/2 frame, or NaN if the line is unknown)."""
+        return self.get_trial_opto_onset()
 
     @cached_property
     def _is_replayed_trial(self) -> npt.NDArray[np.bool_]:
@@ -1505,8 +1509,24 @@ class DynamicRouting1(TaskControl):
 
     @cached_property
     def is_opto(self) -> npt.NDArray[np.bool_]:
-        """optogenetic inactivation was applied during the trial"""
-        return ~np.isnan(self.opto_start_time)
+        """optogenetic inactivation was applied during the trial
+
+        - True in trials overlapping a replayed sync interval if an opto onset was found or
+          the task triggered opto, although `opto_start_time`/`opto_stop_time` are NaN there
+        """
+        if not self._is_opto:
+            return np.full(self._len, False)
+        triggered = np.array(
+            [
+                f is not None and np.isfinite(f)
+                for f in npc_stim.get_stim_trigger_frames(self._hdf5_path, stim_type="opto")
+            ][: self._len],
+            dtype=bool,
+        )
+        triggered = np.r_[triggered, np.zeros(self._len - len(triggered), dtype=bool)]
+        return ~np.isnan(self._opto_onset_unmasked) | (
+            self._is_replayed_trial & triggered
+        )
 
     @cached_property
     def is_single_opto_location(self) -> npt.NDArray[np.bool_]:
