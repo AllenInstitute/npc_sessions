@@ -1202,7 +1202,7 @@ class DynamicRoutingSession:
         intervals: list[pynwb.epoch.TimeIntervals] = []
         # `trial_index` continues across the stim files of a table (in time order), offset by
         # the total trial count of the earlier files, so it doesn't reset to 0; trials left out
-        # of a table don't change it (`trial_index_in_block` is the index within the file)
+        # of a table don't change it (`trial_index_in_epoch` is the index within the file)
         next_trial_index: dict[str, int] = {}
         for k, v in sorted(
             self._all_trials.items(), key=lambda kv: npc_session.DatetimeRecord(kv[0]).dt
