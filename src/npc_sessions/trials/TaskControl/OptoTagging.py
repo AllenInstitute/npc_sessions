@@ -142,8 +142,9 @@ class OptoTagging(TaskControl):
     @cached_property
     def _is_stim_time_unknown(self) -> npt.NDArray[np.bool_]:
         """Per recording in `_stim_recordings`: onset/offset edges may be missing because the
-        laser line is unknown in a replayed sync interval (see `npc_sessions.timing`). Their
-        times are NaN (and the trials are omitted from the NWB intervals table)."""
+        laser line is unknown (not reconstructed) in a replayed sync interval (see
+        `npc_sessions.timing`). Their times are NaN and the trials are omitted from the NWB
+        intervals table."""
         recs = self._stim_recordings
         mask = np.zeros(len(recs), dtype=bool)
         sync = getattr(self, "_sync", None)
@@ -198,14 +199,39 @@ class OptoTagging(TaskControl):
         return min(self._MAX_ANALYSIS_PERIOD, 0.5 * self._inter_trial_interval)
 
     @cached_property
+    def _onset_time(self) -> npt.NDArray[np.float64]:
+        """Laser onset on sync, all trials (NaN where the line is unknown)."""
+        return np.where(
+            self._is_stim_time_unknown,
+            np.nan,
+            np.array([rec.onset_time_on_sync for rec in self._stim_recordings], dtype=float),
+        )[self.trial_index]
+
+    @cached_property
+    def _offset_time(self) -> npt.NDArray[np.float64]:
+        return np.where(
+            self._is_stim_time_unknown,
+            np.nan,
+            np.array([rec.offset_time_on_sync for rec in self._stim_recordings], dtype=float),
+        )[self.trial_index]
+
+    @cached_property
+    def _is_replayed_trial(self) -> npt.NDArray[np.bool_]:
+        """Trials overlapping a replayed sync interval: the laser line there is at best
+        reconstructed from the trigger frame (+-1/2 frame), so stimulus times are NaN."""
+        return timing.replayed_overlap_mask(
+            getattr(self, "_sync", None), self.start_time, self.stop_time
+        )
+
+    @cached_property
     def start_time(self) -> npt.NDArray[np.float64]:
         """Start of the period associated with this optical stimulus."""
-        return self.stim_start_time - self._analysis_period
+        return self._onset_time - self._analysis_period
 
     @cached_property
     def stop_time(self) -> npt.NDArray[np.float64]:
         """End of the period associated with this optical stimulus."""
-        return self.stim_stop_time + self._analysis_period
+        return self._offset_time + self._analysis_period
 
     @cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
@@ -214,12 +240,11 @@ class OptoTagging(TaskControl):
         Data from 1.5 ms before through 1.5 ms after this time
         (``stim_start_time - 0.0015`` to ``stim_start_time + 0.0015`` seconds)
         should be censored (`response_start_time` incorporates the censor period).
+
+        NaN in trials overlapping a replayed sync interval (their `start_time`/`stop_time`
+        come from the reconstructed laser edges, +-1/2 frame).
         """
-        return np.where(
-            self._is_stim_time_unknown,
-            np.nan,
-            np.array([rec.onset_time_on_sync for rec in self._stim_recordings], dtype=float),
-        )[self.trial_index]
+        return np.where(self._is_replayed_trial, np.nan, self._onset_time)
 
     @cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
@@ -228,12 +253,10 @@ class OptoTagging(TaskControl):
         Data from 1.5 ms before through 1.5 ms after this time
         (``stim_stop_time - 0.0015`` to ``stim_stop_time + 0.0015`` seconds)
         should be censored (`response_stop_time` incorporates the censor period).
+
+        NaN in trials overlapping a replayed sync interval (see `stim_start_time`).
         """
-        return np.where(
-            self._is_stim_time_unknown,
-            np.nan,
-            np.array([rec.offset_time_on_sync for rec in self._stim_recordings], dtype=float),
-        )[self.trial_index]
+        return np.where(self._is_replayed_trial, np.nan, self._offset_time)
 
     @cached_property
     def baseline_start_time(self) -> npt.NDArray[np.float64]:

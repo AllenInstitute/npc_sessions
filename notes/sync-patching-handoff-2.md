@@ -132,3 +132,17 @@ Still open (not addressed here):
 - Plan leftovers: the npc_stim `atol=1` matcher, end-of-block truncation, NWB/cache regeneration after release, and Feynman docs cleanup.
 - Release steps: bump the npc_sessions version, push `main` (local `main` is ahead of origin), and release npc_sessions_cache after the strict-sync changes.
 
+### Follow-up (2026-11-18): licks in trials, sound from NI-DAQ, opto NaN
+
+Builder `npc_sessions.timing 3`. Evidence: `experiments/sync-patch-manifest/p5_sound_nidaq_vs_sync.log` and `p6_event_lines_check.log`. Summary: report § Follow-up.
+
+| Request | Status |
+|---|---|
+| Reconstructed licks in the trials table | **Done.** `response_time` uses measured and reconstructed licks. |
+| `timing_source` in the licks table, not the trials table | **Done.** The trials column is removed. The licks and rewards tables keep theirs. |
+| Sound patched in sync from the NI-DAQ, via npc_samstim | **Done, for ephys sessions.** It wasn't before: the sound line was 'unknown' in every replay. The sound is on NI-DAQ AI1 (`npc_samstim.get_nidaq_channel_for_stim_onset`); AI0 is the photodiode. The patch now reconstructs the sync sound line from npc_samstim's NI-DAQ onsets, gated at ≤1 ms against the sync line on the other trials (observed ≤0.211 ms). It is reconstructed in 5/5 sessions. Behavior-only sessions have no NI-DAQ, so their sound line stays unknown and onsets there are NaN. |
+| Opto patched from npc_stim; NaN in trials overlapping replays | **Done.** Laser lines are reconstructed from trigger frames + latency, only if the edges pair one-to-one with triggers outside the span. Leave-out error was ≤0.99 ms, but the stated bound is ±1/2 frame. Trial opto times are NaN in overlapping trials. OptoTagging rows are kept, with bounds from the reconstructed edges. Not testable on data: no opto task session with a replay exists. |
+
+Notes:
+- Building a patch for an ephys session with a replay now reads the NI-DAQ: 3–5 min per session (p5 timings), once per patch (cached).
+- Fixed in passing: the sound reconstruction ignores pulses more than 60 s from the span, because 839146_20260518 has an extra pulse after the task's last trial.

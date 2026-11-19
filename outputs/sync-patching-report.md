@@ -280,3 +280,21 @@ Decisions from `notes/sync-patching-handoff-2.md` applied in npc_sessions (local
 - Evidence: `experiments/sync-patch-manifest/` (`summary.log`, `gates.json`, `manifest.csv`, `acceptance_local7.log`, `p2_display_times_local.log`, `p3_session_check*.log`, `diode_gate_check.log`, `ephys_barcode_robust.log`, `analog_windows_compare.log`).
 - Prototype and earlier evidence: `../npc_sync/experiments/vsync-frame-count/repair.py`, `validate_repair.log`; `experiments/sync-frame-timing/` (`multi_gap_check.log`, `camera_gap_check2.log`, `lost_events.log`, `lick_count_check.log`, `event_latency_check.log`).
 - Analog channel and diode conventions: `outputs/display-times-analog-validation.md`. npc_stim display-time fixes: `outputs/display-times-issues.md`.
+
+### Follow-up (2026-11-18, builder `npc_sessions.timing 3`)
+
+Changed decisions: reconstructed licks go in the trials table too, `timing_source` is only in the licks (and rewards) tables, sound is patched from the NI-DAQ, and opto is NaN.
+
+- **Licks:** `response_time` uses measured and reconstructed licks (±1/2 frame). The trials `timing_source` column is removed. The licks table keeps `timing_source`, so a `response_time` can be traced to its lick (F3: every finite `response_time` is a licks-table timestamp).
+- **Sound (npc_samstim):** the patch reconstructs the sync sound line inside replayed spans from the NI-DAQ for ephys sessions (`reconstruct_sound_line`, method `nidaq_sound`). Onset = NI-DAQ onset − the median (NI-DAQ − sync) difference of the file. Offset = onset + waveform duration + the median measured excess width (0.08 ms).
+  - It is applied only if the NI-DAQ agrees with the sync line to ≤1 ms on every other trial of the file. Observed max deviation: 0.211 ms (`p5_sound_nidaq_vs_sync.log`).
+  - Every sound-line edge within 60 s of the span must also be explained by a presentation. 839146_20260518 has one pulse after the task's last trial, which no trial accounts for.
+  - Result: sound is reconstructed in 5/5 replay sessions, and the 4 previously NaN aud onsets are recovered.
+  - Without a NI-DAQ, or if the checks fail, the line stays unknown and onsets there are NaN.
+- **Opto (npc_stim):** laser lines with an unknown span are reconstructed from opto trigger-frame vsyncs + the median measured latency and width (`reconstruct_opto_lines`). This applies only if the measured rising edges pair one-to-one with all triggers outside the spans.
+  - Leave-out check: I hid edges in synthetic spans inside OptoTagging blocks (714753_20240703, 733780_20240830). Max error was 0.99 ms on onsets and 1.00 ms on offsets, over 19 + 19 hidden pulses. The stated bound stays ±1/2 frame.
+  - These edges keep edge counts and index-based mapping consistent. Trial opto times (DynamicRouting1 `opto_start/stop_time`, OptoTagging `stim_start/stop_time` and the derived baseline/response times) are NaN in trials overlapping a replayed interval.
+  - OptoTagging rows are kept, with `start_time`/`stop_time` from the reconstructed edges.
+  - No opto task session with a replay exists in the npc_lims set, so the DynamicRouting1 opto NaN path is covered only by construction, not by data.
+- **Patch:** `PATCH_DEPENDENCIES` now also includes npc_samstim and npc_ephys. The sound reconstruction needs `ephys_recording_dirs`; `DynamicRoutingSession.sync_patch` passes them only for ephys sessions with replays.
+- **Checks:** F1–F7 pass (`p6_event_lines_check.log`; F2 for 862025 was checked on the RF-mapping table, see the follow-up in the log). The suite gives 51 passed, 2 skipped, and 1 failed (`test_surface_recording`, the same failure as before). mypy is clean.

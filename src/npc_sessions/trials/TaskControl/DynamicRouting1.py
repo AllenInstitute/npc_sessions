@@ -535,17 +535,31 @@ class DynamicRouting1(TaskControl):
 
     @cached_property
     def opto_start_time(self) -> npt.NDArray[np.float64]:
-        """onset of optogenetic inactivation"""
+        """onset of optogenetic inactivation
+
+        - nan in trials overlapping a replayed sync interval: the laser line there is at best
+          reconstructed from the trigger frame (+-1/2 frame)
+        """
         if not self._is_opto:
             return np.full(self._len, np.nan)
-        return self.get_trial_opto_onset()
+        return np.where(
+            self._is_replayed_trial, np.nan, self.get_trial_opto_onset()
+        )
+
+    @cached_property
+    def _is_replayed_trial(self) -> npt.NDArray[np.bool_]:
+        """Trials overlapping a replayed sync interval."""
+        return timing.replayed_overlap_mask(self._sync, self.start_time, self.stop_time)
 
     @cached_property
     def opto_stop_time(self) -> npt.NDArray[np.float64]:
-        """offset of optogenetic inactivation"""
+        """offset of optogenetic inactivation (nan in trials overlapping a replayed sync
+        interval, see `opto_start_time`)"""
         if not self._is_opto:
             return np.full(self._len, np.nan)
-        return self.get_trial_opto_offset()
+        return np.where(
+            self._is_replayed_trial, np.nan, self.get_trial_opto_offset()
+        )
 
     @cached_property
     def response_window_start_time(self) -> npt.NDArray[np.float64]:
@@ -590,32 +604,31 @@ class DynamicRouting1(TaskControl):
         - nan if no lick occurred
         - may be nan even if `is_response` is True, for sessions prior to
           2023-10-20 (see `task_control_response_time.description`)
-        - nan if the lick line is unknown (replayed sync interval) in the response window
-          before the first measured lick in it
+        - inside a replayed sync interval (lick line unknown), licks are reconstructed from
+          the task's `lickFrames` (+-1/2 frame; `timing_source='stim_frame'` in the licks
+          table)
         """
         if not self._sync:
             return self.task_control_response_time
 
         lick_times = self._sync.get_rising_edges("lick_sensor", units="seconds")
-        unknown = timing.get_unknown_intervals(self._sync, "lick_sensor")
+        if timing.get_unknown_intervals(self._sync, "lick_sensor"):
+            lick_times = np.sort(
+                np.concatenate(
+                    [
+                        lick_times,
+                        timing.get_reconstructed_lick_times(
+                            self._sync, self._hdf5_path
+                        ),
+                    ]
+                )
+            )
         all_response_times = np.full(self._len, np.nan)
         for idx in self.trial_index:
             trial_response_times = lick_times[
                 (lick_times > self.response_window_start_time[idx])
                 & (lick_times < self.response_window_stop_time[idx])
             ]
-            if unknown and timing.unknown_overlap_mask(
-                self.response_window_start_time[idx],
-                (
-                    trial_response_times[0]
-                    if len(trial_response_times)
-                    else self.response_window_stop_time[idx]
-                ),
-                unknown,
-            )[0]:
-                # the first lick may be in the unknown interval: reconstructed licks
-                # (+-1/2 frame) are in the licks table only
-                continue
             if not trial_response_times.any():
                 if self.is_response[idx]:
                     logger.warning(

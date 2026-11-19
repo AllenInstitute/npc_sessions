@@ -287,3 +287,51 @@ def test_phantom_flicker_patch_for_a_session_without_replays(flicker_files) -> N
     # unpatched, npc_stim rejects the block (flip count)
     (unpatched,) = npc_stim.get_display_times(npc_sync.SyncDataset(flicker_files["sync"]), [flicker_files["stim"]])
     assert unpatched.source == "unavailable"
+
+
+def test_predict_opto_line_from_trigger_frames() -> None:
+    rng = np.random.default_rng(3)
+    trig = np.sort(rng.uniform(10, 1000, 200))
+    durs = rng.choice([0.01, 0.1, 0.2], len(trig))
+    lat = 0.0042 + rng.uniform(-0.004, 0.004, len(trig))  # jitter within a frame
+    on = trig + lat
+    off = on + durs + 0.002
+    span = [(500.0, 502.0)]
+    # a trigger inside the span: its edges are missing from the line
+    inside = npc_sync.in_intervals(on, span)
+    trig = np.r_[trig, 501.0]
+    durs = np.r_[durs, 0.1]
+    order = np.argsort(trig)
+    trig, durs = trig[order], durs[order]
+    pred = timing.predict_opto_line(on[~inside], off[~inside], trig, durs, span)
+    assert pred["status"] == "reconstructed" and pred["n_triggers_in_spans"] >= 1
+    k = np.searchsorted(trig, 501.0)
+    assert abs(pred["rising"][k] - (501.0 + np.median(lat))) < 1e-3
+    assert abs(pred["falling"][k] - pred["rising"][k] - 0.102) < 1e-3
+    # outside the span predictions are within +-1/2 frame of the measured edges
+    m = ~npc_sync.in_intervals(trig, span)
+    assert np.max(np.abs(pred["rising"][m] - np.sort(on[~inside]))) <= timing.OPTO_ERROR_BOUND_SEC
+    # an extra edge not explained by a trigger: the line stays unknown
+    bad = timing.predict_opto_line(np.sort(np.r_[on[~inside], 5.0]), off[~inside], trig, durs, span)
+    assert bad["status"] == "unknown"
+    # no triggers and no edges: reconstructed, nothing inside
+    none = timing.predict_opto_line(np.array([]), np.array([]), np.array([]), np.array([]), span)
+    assert none["status"] == "reconstructed" and len(none["rising"]) == 0
+
+
+def test_edges_explained_and_span_replacement(files) -> None:
+    span = [(18.0, 20.0)]
+    m = np.array([1.0, 5.0, 25.0])
+    assert timing._check_edges_explained(m, np.array([1.0002, 5.0, 19.0, 25.0]), span, 1e-3) == ""
+    assert "differ" in timing._check_edges_explained(m, np.array([1.01, 5.0, 25.0]), span, 1e-3)
+    assert "2 predicted" in timing._check_edges_explained(m, np.array([1.0, 25.0]), span, 1e-3)
+    patch = timing.build_session_sync_patch(files["sync"], [files["stim"]])
+    key = "lick_sensor"
+    assert patch.unknown_intervals(key)
+    timing._replace_unknown_spans(
+        patch, key, np.array([18.5, 30.0]), np.array([18.6]), "test", 0.001, {}, "test"
+    )
+    assert not patch.unknown_intervals(key)
+    s = npc_sync.SyncDataset(files["sync"], patch=patch)
+    on = s.get_rising_edges(key, units="seconds")
+    assert np.any(np.isclose(on, 18.5, atol=2 / FS)) and not s.get_unknown_intervals(key)

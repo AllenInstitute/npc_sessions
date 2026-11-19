@@ -26,6 +26,8 @@ npc_sessions `sync-patch`. Interpreters:
 | `p3_session_check.py` | `p3_session_check.log`, `p3_session_check_events.log`, `p3_session_check_final.log` (all 5 sessions, final code) | npc_sessions end to end on 5 real replay sessions (C1–C7) |
 | `analog_windows_prep.py` → `analog_windows_compare.py` | `analog_windows_prep.log`, `analog_windows_compare.log/.json` | step 6: patched photodiode edges and display times inside every replay window vs NI-DAQ AI0, npc_lims ephys sessions from 2025-01-13 with reconcilable blocks (34) |
 | `p4_replay_trials_check.py` | `p4_replay_trials_check.log` | 2026-11-18 close-out: replayed intervals not in `invalid_times`, trials kept (`timing_source='patched'`), `response_time`/sound/opto NaN where their line is unknown, patch cache with `dependency_versions` (D1–D7, 5 replay sessions) |
+| `p5_sound_nidaq_vs_sync.py` | `p5_sound_nidaq_vs_sync.log` | NI-DAQ (npc_samstim) vs sync-line sound onsets on the 5 replay sessions: max deviation from median ≤0.211 ms; masked onsets recovered |
+| `p6_event_lines_check.py`, `p6_followup_rf862025.py` | `p6_event_lines_check.log` | builder 3: sound line from NI-DAQ, laser lines from trigger frames (leave-out error ≤0.99 ms), licks in `response_time`, no trials `timing_source` (F1–F7). Supersedes p4 D3 (trials `timing_source`) |
 | `npc_sessions_tests.log` | – | npc_sessions test suite with the branch libraries |
 | `debug_diode.py`, `debug_diode2.py`, `debug_diode3.py` | (stdout) | diagnosis of the polarity-dependent diode latency, the splice event at sample start−1, and post-span outliers |
 

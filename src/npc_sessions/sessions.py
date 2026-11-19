@@ -965,31 +965,8 @@ class DynamicRoutingSession:
         )
         for column in self._trials.to_add_trial_column():
             trials.add_column(**column)
-        replayed = (
-            self.sync_data.invalid_intervals
-            if self.is_sync and self.sync_patch is not None
-            else ()
-        )
-        trials.add_column(
-            name="timing_source",
-            description=(
-                "'measured': all event times in the trial come from recorded sync edges (or the stim file, "
-                "without sync); 'patched': the trial overlaps a replayed (copied) sync interval: frame and "
-                "display times there are reconstructed from the stim file, and events on lines that can't be "
-                "reconstructed (licks, sound, opto) are NaN there (e.g. `response_time`; the licks table has "
-                "licks reconstructed from the task's lickFrames)"
-            ),
-        )
         for trial in self._trials.to_add_trial():
             if self.is_valid_interval(trial["start_time"], trial["stop_time"]):
-                trial["timing_source"] = (
-                    "patched"
-                    if any(
-                        a < trial["stop_time"] and z > trial["start_time"]  # type: ignore[operator]
-                        for a, z in replayed
-                    )
-                    else "measured"
-                )
                 trials.add_interval(**trial)
         self._cached_nwb_trials = trials
         return trials
@@ -2710,8 +2687,18 @@ class DynamicRoutingSession:
         `npc_sessions.timing`."""
         from npc_sessions import timing
 
+        recording_dirs = None
+        if self._raw_sync_data.invalid_intervals and self.is_ephys:
+            # the NI-DAQ recording of the sound replaces the sync sound line there
+            try:
+                recording_dirs = self.ephys_recording_dirs
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(f"{self.id}: no ephys recording dirs for the sync patch: {exc!r}")
         return timing.get_sync_patch(
-            str(self.id), self._raw_sync_data, self.stim_paths
+            str(self.id),
+            self._raw_sync_data,
+            self.stim_paths,
+            ephys_recording_dirs=recording_dirs,
         )
 
     @cached_property
