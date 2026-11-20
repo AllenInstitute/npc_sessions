@@ -3385,21 +3385,31 @@ class DynamicRoutingSession:
             if licks_on_sync:
                 from npc_sessions import timing
 
-                # edges don't necessarily alternate: a replayed interval can cut off
-                # the falling edge of a lick at its boundary (licks inside it come from
-                # lickFrames instead)
-                rising, falling = timing.pair_rising_falling_edges(
-                    rising,
-                    falling,
-                    self.sync_data.get_unknown_intervals("lick_sensor"),
+                # the sync patch keeps the line alternating across replayed intervals
+                # (synthetic edges where needed); pair explicitly anyway, so an unexpected
+                # missing edge only affects one lick
+                rising_source = self.sync_data.get_edge_sources("lick_sensor", "rising")
+                falling_source = self.sync_data.get_edge_sources(
+                    "lick_sensor", "falling"
+                )
+                ri, fi = timing.pair_edge_indices(rising, falling)
+                n_unpaired = len(rising) - len(ri)
+                if n_unpaired > 1:  # one can be a lick in progress at the end of the file
+                    logger.warning(
+                        f"{self.id}: {n_unpaired} lick sensor rising edges have no falling edge"
+                    )
+                rising, falling = rising[ri], falling[fi]
+                is_interpolated_onset = rising_source[ri] != npc_sync.patch.MEASURED
+                is_interpolated_edge = is_interpolated_onset | (
+                    falling_source[fi] != npc_sync.patch.MEASURED
                 )
                 licks_on_sync = rising.size > 0
             if licks_on_sync:
-
-                rising_falling = np.array([rising, falling]).T
-                lick_duration = np.diff(rising_falling, axis=1).squeeze()
-
-                is_likely_lick = lick_duration <= max_contact
+                # durations involving a synthetic edge aren't measured
+                lick_duration = np.where(is_interpolated_edge, np.nan, falling - rising)
+                is_likely_lick = (lick_duration <= max_contact) | np.isnan(
+                    lick_duration
+                )
 
                 # # remove licks that aren't part of a sequence of licks at at least ~3 Hz
                 # max_interval = 0.5
@@ -3419,21 +3429,22 @@ class DynamicRoutingSession:
         if has_precise_timing:
             column_descriptions["is_likely_lick"] = (
                 f"boolean flag indicating whether lick sensor event duration is <={max_contact}, making it likely to be a true lick"
-                " (True for licks reconstructed from the task's lickFrames, which the task registered as licks)"
+                " (True where duration is unknown, e.g. licks reconstructed from the task's lickFrames, which the task registered as licks)"
             )
             column_descriptions["duration"] = (
-                "duration of each lick sensor event, in seconds (NaN where `timing_source` is 'stim_frame')"
+                "duration of each lick sensor event, in seconds (NaN where either edge was reconstructed rather than measured, e.g. "
+                "where `timing_source` is 'stim_frame', or for a lick in progress at the bound of a replayed sync interval)"
             )
             column_descriptions["timing_source"] = (
-                "'sync': lick sensor edge on sync; 'stim_frame': inside a replayed sync interval (events on the lick line unknown), "
+                "'sync': lick sensor edge on sync; 'stim_frame': inside a replayed sync interval (events on the lick line not recorded), "
                 "reconstructed from the task's lickFrames at the midpoint of the frame interval before the frame's input read (error within +-1/2 frame)"
             )
             df = pd.DataFrame(
                 dict(
                     timestamps=rising,
-                    duration=falling - rising,
+                    duration=lick_duration,
                     is_likely_lick=is_likely_lick,
-                    timing_source="sync",
+                    timing_source=np.where(is_interpolated_onset, "stim_frame", "sync"),
                 )
             )
             if self.sync_data.get_unknown_intervals("lick_sensor"):

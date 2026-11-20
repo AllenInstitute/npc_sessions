@@ -25,6 +25,11 @@ This module adds what npc_sync can't know about a session:
   - sound: from the NI-DAQ recording of the sound (npc_samstim), offset to the sync line,
     for ephys sessions (`reconstruct_sound_line`; gate: <= 1 ms against the sync line on
     every trial outside the intervals)
+  - licks: onsets from the stim files' `lickFrames` (+-1/2 frame), offsets synthetic
+    (`reconstruct_lick_line`): lick durations aren't reliable anyway. A lick in progress at
+    either bound gets a synthetic edge, so the line alternates rising/falling everywhere.
+    Where no stim file covers the span, it stays unknown, widened so the line is low at
+    both bounds (the edge-based lick at a bound is dropped rather than left unpaired)
   - opto (laser lines): from the stim files' opto trigger frames (npc_stim) + the measured
     latency, +-1/2 frame (`reconstruct_opto_lines`). This keeps edge counts and
     index-based trial/stim mapping consistent; trial opto times are NaN there anyway
@@ -43,9 +48,10 @@ Policy decisions (outputs/sync-frame-timing-upgrade-plan.md, notes/sync-patching
   still refuses them, so they stay rejected
 - replayed intervals are NOT `invalid_times` (decided 2026-11-18): frame times are
   reconstructed there, so trials overlapping them are kept
-- licks inside replayed intervals are reconstructed from `lickFrames` (+-1/2 frame): in the
-  licks table (`timing_source='stim_frame'`, duration NaN) and in the trials table
-  (`response_time`). Provenance is only in the licks table (decided 2026-11-18)
+- licks inside replayed intervals are reconstructed from `lickFrames` (+-1/2 frame) on the
+  lick line itself, so downstream code needs no special handling. Provenance is in the licks
+  table (`timing_source='stim_frame'` where the onset is interpolated; duration NaN where
+  either edge is). Decided 2026-11-18, moved into the patch in builder 4
 - opto: +-1/2 frame is not usable. Task trials overlapping a replayed interval are kept, with
   `opto_start/stop_time` NaN and `is_opto` still True (it matters that opto happened).
   OptoTagging trials overlapping one are removed (their `trial_index` values are skipped)
@@ -79,7 +85,7 @@ import upath
 
 logger = logging.getLogger(__name__)
 
-BUILDER = "npc_sessions.timing 3"
+BUILDER = "npc_sessions.timing 4"
 """Recorded in each patch. Bump when the builder's output would change: cached patches with
 another builder are rebuilt.
 
@@ -87,6 +93,9 @@ another builder are rebuilt.
   prediction inside replayed spans from the block alignment
 - 3: sound line reconstructed from the NI-DAQ (npc_samstim) and laser lines from opto
   trigger frames (npc_stim) inside replayed intervals
+- 4: lick line reconstructed from the stim files' `lickFrames` inside replayed intervals,
+  with synthetic falling edges so that the line alternates; lick spans that stay unknown are
+  widened so that the line is low at both bounds (`reconstruct_lick_line`)
 """
 
 PATCH_DIR_ENV_VAR = "NPC_SESSIONS_SYNC_PATCH_DIR"
@@ -119,6 +128,12 @@ BARCODE_SPAN_PADDING_SEC = npc_sync.sync.BARCODE_MAX_DURATION_SEC
 inside a replayed interval is dropped rather than decoded to a wrong value."""
 
 LICK_FRAME_MAX_ERROR_SEC = 1 / 120
+"""Lick onsets from `lickFrames`: +-1/2 frame at 60 Hz."""
+LICK_DEFAULT_DURATION_SEC = 0.08
+"""Synthetic lick duration if the session has no measured licks to take a median from."""
+LICK_MAX_DURATION_SEC = 0.5
+"""Measured licks longer than this aren't used for the median duration."""
+LICK_LINE = "lick_sensor"
 REWARD_LATENCY_MAX_SEC = 0.005
 """Measured solenoid onsets more than this after the trigger frame's flip aren't paired."""
 
@@ -258,6 +273,7 @@ def build_session_sync_patch(
         ]
     if patch.invalid_intervals and stim_paths:
         steps: list[tuple[Any, dict[str, Any]]] = [
+            (reconstruct_lick_line, {}),
             (reconstruct_opto_lines, {}),
             (reconstruct_sound_line, {"ephys_recording_dirs": ephys_recording_dirs}),
         ]
@@ -268,6 +284,9 @@ def build_session_sync_patch(
                 msg = f"{fn.__name__} failed: {exc!r}"
                 logger.warning(f"{raw}: {msg}")
                 patch.notes.append(msg)
+    if patch.invalid_intervals:
+        # lick spans still unknown (no stim file covers them, or reconstruction failed)
+        widen_unknown_lick_spans(raw, patch)
     return patch
 
 
@@ -651,6 +670,267 @@ def reconstruct_opto_lines(
     return info
 
 
+def _line_state_before(
+    rising: npt.NDArray[np.float64], falling: npt.NDArray[np.float64], t: float
+) -> tuple[bool, float]:
+    """(line is high just before `t`, time of the last rising edge before `t`)."""
+    r = rising[rising < t]
+    f = falling[falling < t]
+    last_r = float(r[-1]) if len(r) else -np.inf
+    last_f = float(f[-1]) if len(f) else -np.inf
+    return last_r > last_f, last_r
+
+
+def _first_edge_after(
+    rising: npt.NDArray[np.float64], falling: npt.NDArray[np.float64], t: float
+) -> tuple[str | None, float]:
+    """('rising' / 'falling' / None, time) of the first edge at or after `t`."""
+    r = rising[rising >= t]
+    f = falling[falling >= t]
+    r0 = float(r[0]) if len(r) else np.inf
+    f0 = float(f[0]) if len(f) else np.inf
+    if not np.isfinite(min(r0, f0)):
+        return None, np.inf
+    return ("rising", r0) if r0 < f0 else ("falling", f0)
+
+
+def _measured_outside(
+    raw: npc_sync.SyncDataset, line: str, spans: Sequence[tuple[float, float]]
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Recorded rising/falling edges on `line` outside `spans` and the file's invalid
+    intervals (starting one sample early, as `SyncDataset._mask_intervals`)."""
+    masked = [*spans, *raw._mask_intervals]
+    r = np.asarray(raw.get_rising_edges(line, units="seconds"), dtype=float)
+    f = np.asarray(raw.get_falling_edges(line, units="seconds"), dtype=float)
+    return r[~npc_sync.in_intervals(r, masked)], f[~npc_sync.in_intervals(f, masked)]
+
+
+def predict_lick_onsets(
+    sync: npc_sync.SyncDataset, stim_path: npc_io.PathLike
+) -> tuple[npt.NDArray[np.float64], tuple[float, float]]:
+    """(lick onsets from the stim file's `lickFrames`, (first, last) input read time).
+
+    Outside replayed intervals, ~98% of `lickFrames` have a sync lick onset in the frame
+    interval before the frame's input read (median 8.35 ms before it,
+    experiments/sync-frame-timing/lick_count_check.log); the midpoint of that interval is used,
+    so the error is within +-1/2 frame (+-8.3 ms at 60 Hz).
+    """
+    data = npc_stim.get_h5_stim_data(stim_path)
+    if "lickFrames" not in data:
+        return np.array([]), (np.nan, np.nan)
+    frames = np.asarray(data["lickFrames"][()], dtype=float).ravel()
+    frames = frames[np.isfinite(frames)].astype(int)
+    read = np.asarray(npc_stim.get_input_data_times(stim_path, sync=sync), dtype=float)
+    if np.isfinite(read).sum() < 2:
+        return np.array([]), (np.nan, np.nan)
+    frames = frames[(frames >= 2) & (frames < len(read))]
+    t = read[frames] - 0.5 * (read[frames] - read[frames - 1])
+    return np.sort(t[np.isfinite(t)]), (float(np.nanmin(read)), float(np.nanmax(read)))
+
+
+def synthesize_lick_edges(
+    onsets: npt.ArrayLike,
+    span: tuple[float, float],
+    high_at_entry: bool,
+    last_rising_before: float,
+    high_at_exit: bool,
+    duration: float,
+    min_gap: float = 1e-5,
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Rising and falling edges inside `span` = [a, z) for the lick `onsets` there, so that
+    the line alternates together with the measured edges outside. Each onset is a rising
+    edge, with a falling edge `duration` later (shortened to half the gap to the next onset,
+    or to the end of the span), plus:
+
+    - `high_at_entry` (a lick in progress at `a`): a falling edge at
+      `last_rising_before + duration`, no earlier than `a` and before the first onset
+    - `high_at_exit` (the first measured edge after `z` is falling): the line is left high.
+      The last onset's falling edge is omitted, or with no onsets a rising edge is added
+      `duration` before `z` (unless the line is high at entry: then it stays high throughout)
+
+    >>> r, f = synthesize_lick_edges([2.0, 2.2], (1.0, 3.0), True, 0.95, False, 0.1)
+    >>> r.tolist(), [round(x, 6) for x in f]
+    ([2.0, 2.2], [1.05, 2.1, 2.3])
+    >>> r, f = synthesize_lick_edges([2.0], (1.0, 3.0), False, -1, True, 0.1)
+    >>> r.tolist(), f.tolist()
+    ([2.0], [])
+    >>> [x.size for x in synthesize_lick_edges([], (1.0, 3.0), True, 0.9, True, 0.1)]
+    [0, 0]
+    >>> r, f = synthesize_lick_edges([], (1.0, 3.0), False, 0.5, True, 0.1)
+    >>> r.tolist(), f.tolist()
+    ([2.9], [])
+    """
+    a, z = span
+    on = np.asarray(onsets, dtype=float).ravel()
+    on = np.sort(on[(on >= a) & (on < z)])
+    rising = [float(x) for x in on]
+    falling: list[float] = []
+    for i, r in enumerate(on):
+        nxt = on[i + 1] if i + 1 < len(on) else z
+        falling.append(float(r + min(duration, 0.5 * (nxt - r))))
+    if high_at_exit:
+        if len(on):
+            falling.pop()
+        elif not high_at_entry:
+            rising.append(max(a, z - duration))
+    if high_at_entry and (len(on) or not high_at_exit):
+        first = float(on[0]) if len(on) else z
+        f0 = max(a, last_rising_before + duration)
+        if f0 > first - min_gap:
+            f0 = 0.5 * (a + first)
+        falling.insert(0, f0)
+    return np.asarray(rising, dtype=float), np.sort(np.asarray(falling, dtype=float))
+
+
+def _median_lick_duration(
+    rising: npt.NDArray[np.float64], falling: npt.NDArray[np.float64]
+) -> float:
+    r, f = pair_rising_falling_edges(rising, falling)
+    d = f - r
+    d = d[(d > 0) & (d <= LICK_MAX_DURATION_SEC)]
+    return float(np.median(d)) if len(d) else LICK_DEFAULT_DURATION_SEC
+
+
+def _lick_frame_match_fraction(
+    onsets: npt.NDArray[np.float64],
+    measured: npt.NDArray[np.float64],
+    excluded: Sequence[tuple[float, float]],
+) -> tuple[int, float | None]:
+    """(n, fraction of `lickFrames` onsets outside `excluded` with a measured onset within
+    one frame): a diagnostic of the reconstruction, not a gate (~98% expected)."""
+    t = onsets[~npc_sync.in_intervals(onsets, excluded)]
+    if len(measured) < 2:
+        return 0, None
+    t = t[(t >= measured[0]) & (t <= measured[-1])]
+    if not len(t):
+        return 0, None
+    j = np.clip(np.searchsorted(measured, t), 1, len(measured) - 1)
+    err = np.minimum(np.abs(measured[j] - t), np.abs(measured[j - 1] - t))
+    return int(len(t)), float(np.mean(err <= 2 * LICK_FRAME_MAX_ERROR_SEC))
+
+
+def reconstruct_lick_line(
+    raw: npc_sync.SyncDataset,
+    patch: npc_sync.SyncPatch,
+    stim_paths: Sequence[npc_io.PathLike],
+) -> dict[str, Any]:
+    """Replace the lick line's 'unknown' spans, in place, with onsets from the `lickFrames`
+    (`predict_lick_onsets`, +-`LICK_FRAME_MAX_ERROR_SEC`) of a stim file whose frames cover
+    the span, and synthetic offsets from the session's median measured lick duration
+    (`synthesize_lick_edges`). The line then alternates rising/falling across the span
+    bounds, so downstream code pairs edges as usual. Lick durations on the line aren't
+    reliable anyway, and the licks table marks interpolated edges.
+
+    Spans that no stim file covers stay unknown (see `widen_unknown_lick_spans`). Returns
+    diagnostics.
+    """
+    spans = [s.span for s in _unknown_spans(patch, LICK_LINE)]
+    if not spans:
+        return {}
+    rising, falling = _measured_outside(raw, LICK_LINE, spans)
+    duration = _median_lick_duration(rising, falling)
+    view = _patched_view(raw, patch)
+    predictions = []
+    for stim_path in stim_paths:
+        try:
+            onsets, (t0, t1) = predict_lick_onsets(view, stim_path)
+        except Exception as exc:
+            logger.debug(f"{raw}: no lick onsets from {stim_path}: {exc!r}")
+            continue
+        if np.isfinite(t0):
+            predictions.append((npc_io.from_pathlike(stim_path).stem, onsets, t0, t1))
+    info: dict[str, Any] = {"median_duration_sec": duration, "spans": []}
+    out = []
+    for s in patch.lines[LICK_LINE]:
+        if s.status != "unknown":
+            out.append(s)
+            continue
+        a, z = s.span
+        source = next(
+            ((n, on) for n, on, t0, t1 in predictions if t0 <= a and z <= t1), None
+        )
+        if source is None:
+            info["spans"].append({"span": [a, z], "status": "unknown"})
+            out.append(s)
+            continue
+        name, onsets = source
+        high_at_entry, last_r = _line_state_before(rising, falling, a)
+        high_at_exit = _first_edge_after(rising, falling, z)[0] == "falling"
+        r, f = synthesize_lick_edges(
+            onsets, (a, z), high_at_entry, last_r, high_at_exit, duration
+        )
+        n_checked, frac = _lick_frame_match_fraction(
+            onsets, rising, [*spans, *raw._mask_intervals]
+        )
+        diag = dict(
+            stim=name,
+            n_onsets=int(np.sum((onsets >= a) & (onsets < z))),
+            high_at_entry=high_at_entry,
+            high_at_exit=high_at_exit,
+            median_duration_sec=duration,
+            n_lick_frames_checked=n_checked,
+            fraction_lick_frames_within_1_frame=frac,
+        )
+        info["spans"].append({"span": [a, z], "status": "reconstructed", **diag})
+        out.append(
+            npc_sync.SpanPatch(
+                span=s.span,
+                status="reconstructed",
+                rising=r,
+                falling=f,
+                method="lick_frames",
+                error_bound_sec=LICK_FRAME_MAX_ERROR_SEC,
+                diagnostics=diag,
+                reason=(
+                    f"onsets from {name} lickFrames (midpoint of the frame interval before "
+                    "the input read, +-1/2 frame); offsets synthetic (onset + median measured "
+                    "lick duration, shortened to fit), plus a synthetic edge for a lick in "
+                    "progress at either bound, so the line alternates"
+                ),
+            )
+        )
+    patch.lines[LICK_LINE] = out
+    return info
+
+
+def widen_unknown_lick_spans(
+    raw: npc_sync.SyncDataset, patch: npc_sync.SyncPatch
+) -> None:
+    """Widen the lick line's remaining 'unknown' spans, in place, so the line is low at both
+    bounds. A lick in progress at the start (rising edge measured, falling edge in the span)
+    or at the end (falling edge is the first measured edge after the span) is included
+    whole, so the measured edges outside still alternate."""
+    unknown = [s.span for s in _unknown_spans(patch, LICK_LINE)]
+    if not unknown:
+        return
+    rising, falling = _measured_outside(raw, LICK_LINE, unknown)
+    out = []
+    for s in patch.lines[LICK_LINE]:
+        if s.status != "unknown":
+            out.append(s)
+            continue
+        a, z = s.span
+        high, last_r = _line_state_before(rising, falling, a)
+        if high:
+            a = last_r
+        kind, t = _first_edge_after(rising, falling, z)
+        if kind == "falling":
+            z = t + 1 / raw.sample_freq
+        if (a, z) == tuple(s.span):
+            out.append(s)
+            continue
+        out.append(
+            dataclasses.replace(
+                s,
+                span=(a, z),
+                reason=s.reason
+                + "; widened to where the line is low (a lick in progress at a bound is "
+                "included whole, so the measured edges outside alternate)",
+            )
+        )
+    patch.lines[LICK_LINE] = out
+
+
 def _span_with_line_low_at_bounds(
     span: tuple[float, float],
     rising: npt.NDArray[np.float64],
@@ -1017,6 +1297,27 @@ def unknown_overlap_mask(
     return mask
 
 
+def pair_edge_indices(
+    rising: npt.ArrayLike, falling: npt.ArrayLike
+) -> tuple[npt.NDArray[np.intp], npt.NDArray[np.intp]]:
+    """Indices into sorted `rising`, `falling` of the pairs in `pair_rising_falling_edges`
+    (without the unknown-interval filter).
+
+    >>> [x.tolist() for x in pair_edge_indices([1, 3, 5], [0.5, 2, 6, 7])]
+    [[0, 2], [1, 2]]
+    """
+    r = np.asarray(rising, dtype=float).ravel()
+    f = np.asarray(falling, dtype=float).ravel()
+    if r.size == 0 or f.size == 0:
+        return np.array([], dtype=np.intp), np.array([], dtype=np.intp)
+    idx = np.searchsorted(f, r, side="right")  # first falling edge after each rising edge
+    next_r = np.r_[r[1:], np.inf]
+    has_f = idx < f.size
+    f_next = np.where(has_f, f[np.minimum(idx, f.size - 1)], np.inf)
+    keep = has_f & (f_next <= next_r)
+    return np.flatnonzero(keep), idx[keep]
+
+
 def pair_rising_falling_edges(
     rising: npt.ArrayLike,
     falling: npt.ArrayLike,
@@ -1034,14 +1335,8 @@ def pair_rising_falling_edges(
     """
     r = np.sort(np.asarray(rising, dtype=float).ravel())
     f = np.sort(np.asarray(falling, dtype=float).ravel())
-    if r.size == 0 or f.size == 0:
-        return np.array([]), np.array([])
-    idx = np.searchsorted(f, r, side="right")  # first falling edge after each rising edge
-    next_r = np.r_[r[1:], np.inf]
-    has_f = idx < f.size
-    f_next = np.where(has_f, f[np.minimum(idx, f.size - 1)], np.inf)
-    keep = has_f & (f_next <= next_r)
-    r, f_next = r[keep], f_next[keep]
+    ri, fi = pair_edge_indices(r, f)
+    r, f_next = r[ri], f[fi]
     unknown = tuple(unknown)
     if unknown and r.size:
         ok = ~unknown_overlap_mask(r, f_next, unknown)
@@ -1117,24 +1412,13 @@ def mask_unknown_stim_recordings(
 def get_reconstructed_lick_times(
     sync: npc_sync.SyncDataset, task_path: npc_io.PathLike
 ) -> npt.NDArray[np.float64]:
-    """Lick onsets inside the lick line's unknown spans, from the task's `lickFrames`.
-
-    Outside replayed intervals, ~98% of `lickFrames` have a sync lick onset in the frame
-    interval before the frame's input read (median 8.35 ms before it,
-    experiments/sync-frame-timing/lick_count_check.log); the midpoint of that interval is used,
-    so the error is within +-1/2 frame (+-8.3 ms at 60 Hz).
-    """
-    unknown = sync.get_unknown_intervals("lick_sensor")
+    """Lick onsets inside the lick line's unknown spans, from the task's `lickFrames`
+    (`predict_lick_onsets`). Empty when the patch reconstructs the lick line: the onsets are
+    on the line then."""
+    unknown = sync.get_unknown_intervals(LICK_LINE)
     if not unknown:
         return np.array([])
-    data = npc_stim.get_h5_stim_data(task_path)
-    if "lickFrames" not in data:
-        return np.array([])
-    frames = np.asarray(data["lickFrames"][()], dtype=float).ravel()
-    frames = frames[np.isfinite(frames)].astype(int)
-    read = npc_stim.get_input_data_times(task_path, sync=sync)
-    frames = frames[(frames >= 2) & (frames < len(read))]
-    t = read[frames] - 0.5 * (read[frames] - read[frames - 1])
+    t, _ = predict_lick_onsets(sync, task_path)
     return t[npc_sync.in_intervals(t, unknown)]
 
 

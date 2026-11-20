@@ -18,6 +18,13 @@ import npc_stim  # noqa: E402
 
 from npc_sessions import timing  # noqa: E402
 
+
+@pytest.fixture(autouse=True)
+def _no_shared_patch_cache(monkeypatch):
+    """Never read or write the shared S3 patch cache from tests (`root=` still works)."""
+    monkeypatch.setenv(timing.PATCH_DIR_ENV_VAR, "none")
+
+
 FS = 100_000
 BUFFER = 50_000
 LABELS = [""] * 32
@@ -135,7 +142,8 @@ def test_report_gates_and_invalid_times(files) -> None:
     (rep,) = timing.get_replayed_intervals(sync)
     assert (rep["start_time"], rep["stop_time"]) == files["interval"]
     unknown, reconstructed = rep["reason"].split("reconstructed:")
-    assert "lick_sensor" in unknown and "vsync_stim" in reconstructed
+    assert "reward_1_actuator" in unknown and "vsync_stim" in reconstructed
+    assert "lick_sensor" in reconstructed
     # without a stim file the vsync span is unknown -> block rejected
     p0 = timing.build_session_sync_patch(files["sync"], [])
     s0 = npc_sync.SyncDataset(files["sync"], patch=p0)
@@ -221,10 +229,10 @@ def test_patch_root(monkeypatch, tmp_path) -> None:
 def test_unknown_masks(files) -> None:
     patch = timing.get_sync_patch("s", files["sync"], [files["stim"]])
     sync = npc_sync.SyncDataset(files["sync"], patch=patch)
-    (u,) = timing.get_unknown_intervals(sync, "lick_sensor")
+    (u,) = timing.get_unknown_intervals(sync, "reward_1_actuator")
     assert u[0] <= 18.0 and u[1] >= 20.0
     assert timing.get_unknown_intervals(sync, "no_such_line") == ()
-    assert timing.get_unknown_intervals(None, "lick_sensor") == ()
+    assert timing.get_unknown_intervals(None, "reward_1_actuator") == ()
     m = timing.unknown_overlap_mask([10, 17.5, 19, 21, 17], [11, 18.5, np.nan, 22, 23], [u])
     assert m.tolist() == [False, True, True, False, True]
 
@@ -234,24 +242,35 @@ def test_unknown_masks(files) -> None:
             self.onset_time_on_sync, self.offset_time_on_sync = onset, offset
 
     recs = [Rec(10, 10.01, 10.5), Rec(17.9, 20.1, 20.6), Rec(17.0, 17.01, 18.5), None]
-    assert timing.stim_recordings_unknown_mask(recs, sync, "lick_sensor").tolist() == [
+    assert timing.stim_recordings_unknown_mask(recs, sync, "reward_1_actuator").tolist() == [
         False, True, True, False
     ]
     # sound: offset is onset + duration, not an edge on the line
     assert timing.stim_recordings_unknown_mask(
-        recs, sync, "lick_sensor", include_offset=False
+        recs, sync, "reward_1_actuator", include_offset=False
     ).tolist() == [False, True, False, False]
-    masked = timing.mask_unknown_stim_recordings(recs, sync, "lick_sensor")
+    masked = timing.mask_unknown_stim_recordings(recs, sync, "reward_1_actuator")
     assert masked[0] is recs[0] and masked[1] is None and masked[2] is None
 
 
 def test_reconstructed_licks_and_rewards(files) -> None:
     patch = timing.get_sync_patch("s", files["sync"], [files["stim"]])
     sync = npc_sync.SyncDataset(files["sync"], patch=patch)
-    licks = timing.get_reconstructed_lick_times(sync, files["stim"])
-    true = files["lick_onsets"][npc_sync.in_intervals(files["lick_onsets"], sync.get_unknown_intervals("lick_sensor"))]
+    # licks: reconstructed on the line itself, alternating with synthetic offsets
+    assert not sync.get_unknown_intervals("lick_sensor")
+    assert timing.get_reconstructed_lick_times(sync, files["stim"]).size == 0
+    on = sync.get_rising_edges("lick_sensor", units="seconds")
+    off = sync.get_falling_edges("lick_sensor", units="seconds")
+    assert len(on) == len(off) and np.all(on < off) and np.all(off[:-1] < on[1:])
+    src = sync.get_edge_sources("lick_sensor", "rising")
+    (span,) = [s.span for s in patch.lines["lick_sensor"]]
+    true = files["lick_onsets"][npc_sync.in_intervals(files["lick_onsets"], [span])]
+    licks = on[src == npc_sync.patch.INTERPOLATED]
     assert len(licks) == len(true) > 0
     assert np.max(np.abs(licks - true)) <= 1 / 120 + 1e-4
+    (rec,) = patch.lines["lick_sensor"]
+    assert rec.status == "reconstructed" and rec.method == "lick_frames"
+    assert rec.diagnostics["fraction_lick_frames_within_1_frame"] > 0.95
     measured = sync.get_rising_edges("reward_1_actuator", units="seconds")
     t, manual, latency = timing.get_reconstructed_reward_times(sync, files["stim"], measured)
     true = files["reward_on"][npc_sync.in_intervals(files["reward_on"], sync.get_unknown_intervals(15))]
@@ -371,7 +390,7 @@ def test_edges_explained_and_span_replacement(files) -> None:
     assert "differ" in timing._check_edges_explained(m, np.array([1.01, 5.0, 25.0]), span, 1e-3)
     assert "2 predicted" in timing._check_edges_explained(m, np.array([1.0, 25.0]), span, 1e-3)
     patch = timing.build_session_sync_patch(files["sync"], [files["stim"]])
-    key = "lick_sensor"
+    key = "reward_1_actuator"
     assert patch.unknown_intervals(key)
     timing._replace_unknown_spans(
         patch, key, np.array([18.5, 30.0]), np.array([18.6]), "test", 0.001, {}, "test"
@@ -380,3 +399,77 @@ def test_edges_explained_and_span_replacement(files) -> None:
     s = npc_sync.SyncDataset(files["sync"], patch=patch)
     on = s.get_rising_edges(key, units="seconds")
     assert np.any(np.isclose(on, 18.5, atol=2 / FS)) and not s.get_unknown_intervals(key)
+
+
+class _FakeRaw:
+    """Minimal stand-in for a SyncDataset with one replayed interval on the lick line."""
+
+    sample_freq = FS
+
+    def __init__(self, rising, falling, interval):
+        self.r, self.f = np.asarray(rising, float), np.asarray(falling, float)
+        self.invalid_intervals = (interval,)
+        self._mask_intervals = ((interval[0] - 1 / FS, interval[1]),)
+
+    def get_rising_edges(self, line, units="seconds"):
+        return self.r
+
+    def get_falling_edges(self, line, units="seconds"):
+        return self.f
+
+
+def _lick_patch(interval, status="unknown"):
+    a = interval[0] - 1 / FS
+    return npc_sync.SyncPatch(
+        sync_content_hash="x",
+        builder=timing.BUILDER,
+        invalid_intervals=(interval,),
+        lines={"lick_sensor": [npc_sync.SpanPatch(span=(a, interval[1]), status=status)]},
+    )
+
+
+def _alternates(rising, falling) -> bool:
+    e = sorted([(t, 1) for t in rising] + [(t, 0) for t in falling])
+    return all(e[i][1] != e[i + 1][1] for i in range(len(e) - 1))
+
+
+@pytest.mark.parametrize("onsets", [[], [10.3, 10.6]])
+def test_lick_line_alternates_across_both_bounds(monkeypatch, onsets) -> None:
+    interval = (10.0, 11.0)
+    # lick in progress at entry (falling edge masked at the sample before the copy) and at
+    # exit (rising edge inside the copy, falling edge the first measured edge after it)
+    rising = [8.0, 9.98, 10.5, 11.02]
+    falling = [8.05, 10.0 - 1 / FS, 10.55, 11.01, 11.08]
+    raw = _FakeRaw(rising, falling, interval)
+    patch = _lick_patch(interval)
+    monkeypatch.setattr(timing, "_patched_view", lambda raw, patch: raw)
+    monkeypatch.setattr(
+        timing, "predict_lick_onsets", lambda sync, path: (np.asarray(onsets, float), (5.0, 20.0))
+    )
+    info = timing.reconstruct_lick_line(raw, patch, ["DynamicRouting1_x.hdf5"])
+    (sp,) = patch.lines["lick_sensor"]
+    assert sp.status == "reconstructed" and info["spans"][0]["high_at_entry"]
+    assert info["spans"][0]["high_at_exit"]
+    a, z = sp.span
+    outside_r = [t for t in rising if not a <= t < z]
+    outside_f = [t for t in falling if not a <= t < z]
+    r = np.sort(np.r_[outside_r, sp.rising])
+    f = np.sort(np.r_[outside_f, sp.falling])
+    assert _alternates(r, f), (r, f)
+    assert np.all((sp.rising >= a) & (sp.rising < z)) and np.all((sp.falling >= a) & (sp.falling < z))
+    assert np.isin(onsets, sp.rising).all()
+
+
+def test_unknown_lick_span_widened_to_low_bounds() -> None:
+    interval = (10.0, 11.0)
+    rising = [8.0, 9.98, 10.5, 11.02]
+    falling = [8.05, 10.0 - 1 / FS, 10.55, 11.01, 11.08]
+    raw = _FakeRaw(rising, falling, interval)
+    patch = _lick_patch(interval)
+    timing.widen_unknown_lick_spans(raw, patch)
+    (sp,) = patch.lines["lick_sensor"]
+    a, z = sp.span
+    assert sp.status == "unknown" and a == 9.98 and z > 11.01
+    r = [t for t in rising if not a <= t < z]
+    f = [t for t in falling if not a <= t < z]
+    assert r == [8.0, 11.02] and f == [8.05, 11.08]
