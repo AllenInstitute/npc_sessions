@@ -11,14 +11,17 @@ Model: recorded chunk p holds true chunk p + s(p), s = cumsum(J). Replays and dr
 
 ## Task ledger
 - [x] T1 investigate locator (step_fit_explore, pair_explore, chunk_identity, stretch_fit, shift_state)
-- [ ] T2 independent validation of the model: barcodes after remap; licks vs stim lickFrames; vsync gap residuals
-- [ ] T3 survey: all cached files with replays/discontinuities + clean sample (false positives, s < 0, uncovered runs)
-- [ ] T4 npc_sync: `timebase.py` (find jumps, Timebase remap), SyncDataset applies it, SyncPatch carries it, builder uses remapped view; tests
-- [ ] T5 npc_sessions: builder on remapped view, BUILDER bump, notes/tags; npc_stim/npc_mvr/npc_ephys audit
-- [ ] T6 end-to-end on problem sessions (715709_2024-08-08, 840160_2026-04-28, 703880_2024-04-18, 708020_2024-05-17, 714748_2024-06-28): barcodes/ephys residuals, display times, licks
-- [ ] T7 release: push npc_sync -> CI publish -> floors (npc_stim?, npc_sessions) -> push
-- [ ] T8 S3 patch cache for problem sessions; validate from cache
-- [ ] T9 report outputs/sync-dropped-chunks-report.md; update notes checklist
+- [x] T2 independent validation: barcodes 37 -> 0 irregular intervals; licks 6% -> 99% within 25 ms; vsync gap residual median 0.385 -> 0.024 ms
+- [x] T3 survey: 156 faulty + 100 clean files (survey_summary.log): 0 false jumps, 1,487 buffers located, 1 assumed
+- [x] T4 npc_sync 0.3.8: timebase.py, SyncDataset(timebase=), SyncPatch format 3, builder on the timebase, tests/test_timebase.py (10 tests)
+- [x] T5 npc_sessions 0.0.294: timing.true_clock_view, builder 5, floor npc-sync>=0.3.8, test_dropped_buffers_are_located_and_reconstructed
+- [x] T6 end to end on 5 sessions (e2e_release.json): 4 fully usable, 714748 task block rejected by the photodiode check
+- [x] T7 released: npc_sync CI run 44695310796 (72 passed x 3 OS), npc_sessions CI run 44695811631 (65 passed, mypy clean)
+- [x] T8 S3 patch cache for the 5 sessions; reloaded in a new process (cache_reload_check.md)
+- [x] T9 report outputs/sync-dropped-chunks-report.md; notes checklist closed
 
 ## Verification log
-(see experiments/sync-timebase-drops/README.md for per-script results)
+- npc_sync local: 83 passed, 4 failed (S3 doctests/tests that fail the same way on `main` in this checkout: its `.env` credentials are refused). CI is the reference: 72 passed, 16 skipped.
+- npc_sessions local: tests/ 38 passed (test_aind_metadata not collected: optional deps missing locally); tests/test_timing.py 17 passed with released npc_sync 0.3.8. CI: 65 passed, 2 skipped.
+- Stalled runs: the first e2e pass and the old-code baseline both stopped making progress (no CPU) after ~40 min; killed and rerun (new) or replaced by old_refusal_check.log (old).
+- Not verified: analog photodiode inside dropped intervals; the 15 share-only files end to end.

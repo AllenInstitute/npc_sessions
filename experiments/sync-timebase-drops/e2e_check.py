@@ -35,6 +35,14 @@ for sid in sessions:
         rec["timebase"] = None if tb is None else dict(
             drops=[(j.sample / fs, j.n_chunks, j.source) for j in tb.drops], n_copies=sum(j.n_chunks == -1 for j in tb.jumps),
             net_shift_s=tb.net_shift_samples / fs, notes=list(tb.notes))
+        try:  # patch cache: where it is, and whether this run loaded it or built it
+            ppath = timing.get_patch_path(str(s.id), s._raw_sync_data.content_hash)
+            on_disk = timing.load_patch(ppath) if ppath is not None and ppath.exists() else None
+            rec["patch_cache"] = dict(path=str(ppath), exists=on_disk is not None, created=patch.created, builder=patch.builder,
+                                      saved_versions=on_disk[1] if on_disk else None, saved_created=on_disk[0].created if on_disk else None,
+                                      saved_has_timebase=(on_disk[0].timebase is not None) if on_disk else None)
+        except Exception as exc:
+            rec["patch_cache_error"] = repr(exc)[:300]
         rec["n_invalid_intervals"] = len(sync.invalid_intervals)
         rec["invalid_s"] = float(sum(z - a for a, z in sync.invalid_intervals))
         rec["barcode_discontinuities"] = [[round(v, 4) for v in d] for d in sync.timebase_discontinuities]
@@ -77,4 +85,5 @@ for sid in sessions:
         rec |= dict(ok=False, error=repr(exc)[:500], tb=traceback.format_exc()[-2500:])
     rec["sec"] = round(time.time() - t0)
     with open(out_path, "a") as f: f.write(json.dumps(jsonable(rec), default=str) + "\n")
+    out_path.with_suffix(".json").write_text(json.dumps([json.loads(x) for x in open(out_path)], indent=1))
     print(sid, "ok" if rec.get("ok") else rec.get("error"), rec["sec"], "s", flush=True)

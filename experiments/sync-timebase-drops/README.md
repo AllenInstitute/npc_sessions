@@ -56,11 +56,20 @@ of each buffer reads s directly; the jump at every buffer boundary is an integer
 at their recorded time, 99% at their true time (on-time licks: 99.8%). Not usable:
 832032_20260223 (lick line noise, 202,800 edges), 717473_20240916 (drop before the task).
 
-### End to end (`e2e_summary.py new old`)
+### End to end
 
-See the report. 840160_2026-04-28 and 715709_2024-08-08 were refused before (no frame times;
-715709: 6/6 ephys devices failed timing QC on a 1.97 s step). Now: task blocks patched, ephys
-devices pass with leave-one-out barcode residuals <= 0.4 ms.
+| Files | What |
+|---|---|
+| `e2e_release.jsonl` / `.json`, `e2e_release_summary.md`, `e2e_release_run.log` | Released npc_sync 0.3.8 + npc_sessions at the released commit, S3 patch cache: the 5 npc_lims sessions with displaced data or a net shift |
+| `e2e_release_reload.jsonl` / `.json`, `cache_reload_check.md` | Same sessions in a new process: patches loaded from S3 (same `created`), same results |
+| `e2e_new.jsonl`, `e2e_new_v1.jsonl`, `e2e_new_run*.log` | Development runs (local npc_sync branch, local patch dir); v1 predates the camera-gap and photodiode-check fixes |
+| `e2e_old.jsonl`, `e2e_old_run.log`, `old_refusal_check.log` | Before: `HEAD` + released npc_sync 0.3.7. 840160 refused, 715709 task block rejected and ephys failing. The run stalled on 703880 and was stopped; the last three rest on the refusal check |
+| `vsync_rising_check.py`, `vsync_rising_check.md` | Vsync rising edges at reconstructed spans: one rising-rising and one falling-falling pair per span (predates this work) |
+| `npc_sessions_tests.log` | npc_sessions `tests/` with the local branch: 38 passed |
+
+Result: 4 of 5 sessions fully usable (task trials, ephys devices pass with leave-one-out barcode
+residuals <= 0.4 ms). 714748_2024-06-28: 7 of 8 blocks; the task block is rejected by the box-1
+photodiode alignment. See the report.
 
 ## Earlier results (first session of the day, superseded where they differ)
 
