@@ -2467,7 +2467,7 @@ wheels = [
 
 [[package]]
 name = "npc-samstim"
-version = "0.1.17"
+version = "0.1.19"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dynamicroutingtask" },
@@ -2476,9 +2476,9 @@ dependencies = [
     { name = "npc-sync" },
     { name = "numba" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/84/c5/cfa46992b8b14410931add1ee3bffc065f4e5fb849c85fb600354d11c20a/npc_samstim-0.1.17.tar.gz", hash = "sha256:1fc850e1496e33305ca472fe349f372c63e10231ca5ee1d49c530f476676e348", size = 31896, upload-time = "2026-11-18T21:54:50.502Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/07/653be1588c8b244d8282db2aa077b32d3aac5a019c44c9b1c20350ca721a/npc_samstim-0.1.19.tar.gz", hash = "sha256:e16774eba9f7e7628a98f0b0336cfc4965b3df19c34092e90b050a8123b2460d", size = 33757, upload-time = "2026-11-20T02:33:48.379Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/c5/f13f6055eb780f410c4b2539ae829880a2cf5b0c407b8d6c1ce4ba0d1c9d/npc_samstim-0.1.17-py3-none-any.whl", hash = "sha256:9e5307d3f237e7f17985a7cfc9b78e076bddf5ce00567cf2f6a7e82627f57c4e", size = 26847, upload-time = "2026-11-18T21:54:49.379Z" },
+    { url = "https://files.pythonhosted.org/packages/ef/28/dec9dfbc82df31e108378f0ddfaed119633dba73061014d4f99846528d61/npc_samstim-0.1.19-py3-none-any.whl", hash = "sha256:aea9305c5bf95d552f0209fedeed55c57c93781a922ca2f61621d0a99d1b0f65", size = 27801, upload-time = "2026-11-20T02:33:47.512Z" },
 ]
 
 [[package]]
@@ -2570,7 +2570,7 @@ requires-dist = [
     { name = "npc-io", specifier = ">=0.1.34" },
     { name = "npc-lims", specifier = ">=0.1.204" },
     { name = "npc-mvr", specifier = ">=0.1.18" },
-    { name = "npc-samstim", specifier = ">=0.1.17" },
+    { name = "npc-samstim", specifier = ">=0.1.19" },
     { name = "npc-session", specifier = ">=0.1.41" },
     { name = "npc-stim", specifier = ">=0.1.26" },
     { name = "npc-sync", specifier = ">=0.3.7" },

@@ -9,6 +9,7 @@ display times to get stim onset times
 from __future__ import annotations
 
 import datetime
+import re
 import typing
 from collections.abc import Iterable
 
@@ -97,31 +98,61 @@ class OptoTagging(TaskControl):
         assert len(devices) == 1, f"Expected one opto device, got {len(devices)}"
         return devices[0]
 
-    def assert_is_single_device(self) -> None:
-        assert (
-            self._hdf5_data.get("trialOptoDevice") is None
-        ), f"Multiple optotagging devices found for {self._datetime} session - update `get_trial_opto_device` method to handle multiple devices"
-
     @cached_property
     def _trial_opto_device(self) -> tuple[str, ...]:
-        ## for multiple devices:
-        # return tuple(self.get_trial_opto_device(idx) for idx in range(self._len))
-        self.assert_is_single_device()
-        ## for single device:
+        """Device for every trial in the stim file (including omitted trials).
+
+        OptoTagging.py from samgale/DynamicRoutingTask@55e88fa saves `trialOptoDevice` and
+        interleaves laser_488/laser_633 trials in one file; older files have a single
+        device for the whole file."""
+        if (
+            devices := self._hdf5_data.get("trialOptoDevice")
+        ) is not None and devices.size > 0:
+            return tuple(
+                self.get_trial_opto_device(idx) for idx in range(self._n_all_trials)
+            )
         return (self._device,) * self._n_all_trials
 
     def get_stim_recordings_from_sync(
         self, line_label: str = "laser_488"
-    ) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
+    ) -> tuple[npc_samstim.FlexStimRecording | None, ...] | None:
+        """Stim recordings for every trial in the stim file, from the sync line for
+        `line_label`.
+
+        If the file has `trialOptoDevice` (eg interleaved laser_488/laser_633 trials, from
+        samgale/DynamicRoutingTask@55e88fa), only trials for this device are matched to the
+        line: others are None."""
+        trial_indices = None
+        if (
+            devices := self._hdf5_data.get("trialOptoDevice")
+        ) is not None and devices.size > 0:
+            trial_indices = [
+                i
+                for i, device in enumerate(self._trial_opto_device)
+                if device == line_label
+            ]
+            if not trial_indices:
+                return None
         try:
             recordings = npc_samstim.get_stim_latencies_from_sync(
                 self._hdf5_path,
                 self._sync,
                 waveform_type="opto",
                 line_index_or_label=npc_sync.get_sync_line_for_stim_onset(line_label),
+                trial_indices=trial_indices,
             )
         except IndexError:
             return None
+        if trial_indices is not None:
+            missing = [i for i in trial_indices if recordings[i] is None]
+            assert (
+                not missing
+            ), f"No {line_label} stim onset found on sync for trials {missing[:10]}{'...' if len(missing) > 10 else ''}"
+            assert all(
+                isinstance(recordings[i], npc_samstim.FlexStimRecording)
+                for i in trial_indices
+            ), f"Expected all stim recordings to be of type `npc_samstim.FlexStimRecording`, got: {recordings}"
+            return recordings  # type: ignore[return-value]
         assert (
             None not in recordings
         ), f"{recordings.count(None) = } encountered: expected a recording of stim onset for every trial"
@@ -132,11 +163,15 @@ class OptoTagging(TaskControl):
         return tuple(_ for _ in recordings if _ is not None)  # type: ignore[misc]
 
     @cached_property
-    def _stim_recordings_488(self) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
+    def _stim_recordings_488(
+        self,
+    ) -> tuple[npc_samstim.FlexStimRecording | None, ...] | None:
         return self.get_stim_recordings_from_sync("laser_488")
 
     @cached_property
-    def _stim_recordings_633(self) -> tuple[npc_samstim.FlexStimRecording, ...] | None:
+    def _stim_recordings_633(
+        self,
+    ) -> tuple[npc_samstim.FlexStimRecording | None, ...] | None:
         return self.get_stim_recordings_from_sync("laser_633")
 
     @cached_property
@@ -172,11 +207,13 @@ class OptoTagging(TaskControl):
         for i in range(self._n_all_trials):
             device = self._trial_opto_device[i]
             if "633" in device:
-                rec.append(rec_633[i])
+                r = rec_633[i]
             elif "488" in device:
-                rec.append(rec_488[i])
+                r = rec_488[i]
             else:
                 raise NotImplementedError(f"Unexpected opto device: {device}")
+            assert r is not None, f"No stim recording for trial {i} ({device})"
+            rec.append(r)
         return tuple(rec)
 
     @cached_property
@@ -323,11 +360,17 @@ class OptoTagging(TaskControl):
 
     @cached_property
     def location(self) -> npt.NDArray[np.str_]:
-        if all(str(v).upper() in "ABCDEF" for v in self._location):
-            return np.array(
-                [f"probe{str(v).upper()}" for v in self._location], dtype=str
-            )
-        return self._location
+        """Single-letter labels are probe locations (eg 'probeA'); other labels (eg
+        control sites 'off_brain', 'str') are kept as-is."""
+        # labels from files with multiple lasers have a wavelength suffix, eg 'F_633'
+        labels = (re.sub(r"_\d{3}$", "", str(v)) for v in self._location)
+        return np.array(
+            [
+                f"probe{v.upper()}" if len(v) == 1 and v.upper() in "ABCDEF" else v
+                for v in labels
+            ],
+            dtype=str,
+        )
 
     @cached_property
     def _bregma_xy(self) -> tuple[tuple[np.float64, np.float64], ...]:
@@ -364,6 +407,12 @@ class OptoTagging(TaskControl):
 
     @cached_property
     def power(self) -> npt.NDArray[np.float64]:
+        if "trialOptoPower" in self._hdf5_data:
+            # OptoTagging.py from samgale/DynamicRoutingTask@55e88fa saves power (mW)
+            # per trial and no `trialOptoVoltage`
+            return np.asarray(self._hdf5_data["trialOptoPower"][()], dtype=float)[
+                self.trial_index
+            ]
         calibration_data = self._hdf5_data["optoPowerCalibrationData"]
         trial_voltages = self._hdf5_data["trialOptoVoltage"][self.trial_index]
         if "poly coefficients" in calibration_data:

@@ -269,7 +269,14 @@ def _get_stimulus_epochs(
             # bilateral trials make this a ragged collection of tuples. Keep
             # that structure for the trials table, but flatten it for the
             # scalar session-level LaserConfig power.
-            max_power = _max_finite_trial_value(getattr(trials, column_name))
+            power = getattr(trials, column_name)
+            if script_name == "OptoTagging":
+                # one laser per trial: only use this laser's trials (files from
+                # samgale/DynamicRoutingTask@55e88fa interleave both lasers)
+                power = np.asarray(power)[
+                    np.asarray(trials.wavelength) == laser.wavelength  # type: ignore[attr-defined]
+                ]
+            max_power = _max_finite_trial_value(power)
             configs.append(
                 aind_data_schema.components.configs.LaserConfig(
                     device_name=laser.name,
