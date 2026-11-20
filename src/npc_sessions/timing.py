@@ -94,7 +94,7 @@ import upath
 
 logger = logging.getLogger(__name__)
 
-BUILDER = "npc_sessions.timing 7"
+BUILDER = "npc_sessions.timing 8"
 """Recorded in each patch. Bump when the builder's output would change: cached patches with
 another builder are rebuilt.
 
@@ -115,6 +115,9 @@ another builder are rebuilt.
   one cut to 2 pulses, onset 765 ms late). 7: also removes the tail of a barcode whose onset
   fell inside a dropped interval (708020_2024-05-17, 714748_2024-06-28: 3 tails that 6 kept),
   and a barcode that may continue into one
+- 8: the 2 s padding is back (6 and 7 dropped it on a timebase, which broke npc_ephys: see
+  `BARCODE_SPAN_PADDING_SEC`), now with whole barcodes: the padded span takes in every
+  barcode it touches
 """
 
 PATCH_DIR_ENV_VAR = "NPC_SESSIONS_SYNC_PATCH_DIR"
@@ -143,9 +146,14 @@ MATCH_OFFSET_MAX_SEC = 60.0
 experiments/sync-patch-manifest/README.md."""
 
 BARCODE_SPAN_PADDING_SEC = npc_sync.sync.BARCODE_MAX_DURATION_SEC
-"""Without a timebase (replayed copies still in the data), barcode 'unknown' spans are widened
-by this on both sides before whole barcodes are taken in (`barcode_spans`). On a
-timebase no padding is needed: data outside a dropped interval is measured."""
+"""Barcode 'unknown' spans are widened by this on both sides before whole barcodes are taken
+in (`barcode_spans`). It must not be smaller than npc_ephys'
+`SYNC_INVALID_INTERVAL_PADDING_S` (2 s): npc_ephys drops barcode edges, one by one, within
+that distance of every invalid interval, and fails if that leaves rising and falling counts
+unequal ('on and off times should be same length'), which it does if a barcode is left
+there (builders 6 and 7 did, on a timebase: ephys timing failed for 703880_2024-04-18,
+708020_2024-05-17 and 715709_2024-08-08). So barcodes within 2 s of a dropped interval are
+removed even where they are complete."""
 
 LICK_FRAME_MAX_ERROR_SEC = 1 / 120
 """Lick onsets from `lickFrames`: +-1/2 frame at 60 Hz."""
@@ -291,7 +299,7 @@ def build_session_sync_patch(
     if "barcode_ephys" in patch.lines:
         rising = raw.get_rising_edges("barcode_ephys", units="seconds")
         falling = raw.get_falling_edges("barcode_ephys", units="seconds")
-        padding = 0.0 if raw.timebase is not None else BARCODE_SPAN_PADDING_SEC
+        padding = BARCODE_SPAN_PADDING_SEC
         old_spans = patch.lines["barcode_ephys"]
         patch.lines["barcode_ephys"] = [
             dataclasses.replace(
@@ -1037,13 +1045,13 @@ def barcode_spans(
         return bool(abs(dev) <= npc_sync.sync.BARCODE_INTERVAL_TOLERANCE_SEC)
 
     out = []
-    for a, z in padded:
+    for (a, z), (a0, z0) in zip(padded, spans, strict=True):
         lo, hi = a, z
         for b0, b1 in zip(onsets, ends, strict=True):
             remove = (
-                (b1 >= a and b0 < z)
-                or (b0 < a < b0 + max_dur)
-                or (z <= b0 < z + max_dur and not on_period(float(b0)))
+                (b1 >= a and b0 < z)  # touches the padded span
+                or (b0 < a0 < b0 + max_dur)  # may continue into the span
+                or (z0 <= b0 < z0 + max_dur and not on_period(float(b0)))  # a tail
             )
             if remove:
                 lo, hi = min(lo, float(b0)), max(hi, float(b1) + 1e-9)

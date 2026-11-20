@@ -121,10 +121,10 @@ def test_patch_is_built_saved_and_reused(files, tmp_path) -> None:
     p2 = timing.get_sync_patch("s", files["sync"], [files["stim"]], root=tmp_path)
     assert p2.created == p1.created  # loaded, not rebuilt
     assert p1.builder == timing.BUILDER
-    # barcode spans end where the line is low (the pulses on this line are not barcodes, so
-    # none is taken in whole): edges stay paired
+    # barcode spans widened by >= 2 s (npc_ephys drops edges that close to an invalid
+    # interval, one by one), to bounds where the line is low: edges stay paired
     (bc,) = p1.lines["barcode_ephys"]
-    assert bc.span[0] <= 18.0 and bc.span[1] >= 20.0
+    assert bc.span[0] <= 18.0 - 2 and bc.span[1] >= 20.0 + 2
     s = npc_sync.SyncDataset(files["sync"], patch=p1)
     on = s.get_rising_edges("barcode_ephys", units="seconds")
     off = s.get_falling_edges("barcode_ephys", units="seconds")
@@ -632,3 +632,22 @@ def test_barcode_spans_take_whole_barcodes_only() -> None:
     # several spans at once: only the incomplete barcodes go
     got = timing.barcode_spans([span, (67.3, 67.8), (130.0, 130.5)], rising, falling)
     assert n_in(got) == 22
+
+
+def test_barcode_spans_cover_npc_ephys_padding() -> None:
+    """npc_ephys removes barcode edges within 2 s of an invalid interval, edge by edge, and
+    requires equal rising and falling counts afterwards: with the builder's padding, no edge
+    is left for it to remove, whatever the phase of the barcodes."""
+    pad = timing.BARCODE_SPAN_PADDING_SEC
+    rng = np.random.default_rng(0)
+    onsets = 5.0 + 31.0 * np.arange(40)
+    rising = np.concatenate([t + np.sort(rng.uniform(0, 1.7, 12)) for t in onsets])
+    falling = rising + 0.01
+    intervals = [(float(a), float(a) + 0.5) for a in np.sort(rng.uniform(40, 1200, 60))]
+    spans = timing.barcode_spans(intervals, rising, falling, pad)
+    on = rising[~npc_sync.in_intervals(rising, spans)]
+    off = falling[~npc_sync.in_intervals(falling, spans)]
+    assert len(on) == len(off) and len(on) % 12 == 0  # whole barcodes only
+    ephys_cut = [(a - pad, z + pad) for a, z in intervals]
+    assert not npc_sync.in_intervals(on, ephys_cut).any()
+    assert not npc_sync.in_intervals(off, ephys_cut).any()
