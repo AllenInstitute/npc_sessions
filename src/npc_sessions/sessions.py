@@ -3394,7 +3394,9 @@ class DynamicRoutingSession:
                 )
                 ri, fi = timing.pair_edge_indices(rising, falling)
                 n_unpaired = len(rising) - len(ri)
-                if n_unpaired > 1:  # one can be a lick in progress at the end of the file
+                if (
+                    n_unpaired > 1
+                ):  # one can be a lick in progress at the end of the file
                     logger.warning(
                         f"{self.id}: {n_unpaired} lick sensor rising edges have no falling edge"
                     )
@@ -3517,9 +3519,7 @@ class DynamicRoutingSession:
         )
         units_description = "all good units"
         if units.empty:
-            units = self.units[:].query(
-                "electrode_group_name == @electrode_group_name"
-            )
+            units = self.units[:].query("electrode_group_name == @electrode_group_name")
             units_description = "all units"
         bin_interval = 1  # seconds
         if not units.empty:

@@ -961,7 +961,8 @@ def _span_with_line_low_at_bounds(
 @functools.cache
 def get_npc_sessions_git_state() -> tuple[str, bool] | None:
     """(commit, is_dirty) if npc_sessions is imported from a git checkout (e.g. an editable
-    install), else None. Dirty means uncommitted changes under the package's source dir."""
+    install), else None. Dirty means uncommitted changes under the package's source dir.
+    """
     pkg_dir = pathlib.Path(__file__).resolve().parent
 
     def git(*args: str) -> str:
@@ -1310,7 +1311,9 @@ def pair_edge_indices(
     f = np.asarray(falling, dtype=float).ravel()
     if r.size == 0 or f.size == 0:
         return np.array([], dtype=np.intp), np.array([], dtype=np.intp)
-    idx = np.searchsorted(f, r, side="right")  # first falling edge after each rising edge
+    idx = np.searchsorted(
+        f, r, side="right"
+    )  # first falling edge after each rising edge
     next_r = np.r_[r[1:], np.inf]
     has_f = idx < f.size
     f_next = np.where(has_f, f[np.minimum(idx, f.size - 1)], np.inf)
