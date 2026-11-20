@@ -572,15 +572,152 @@ def test_lick_falling_edge_at_first_sample_of_span(monkeypatch) -> None:
     assert _alternates(*_patched_lick_line(raw, patch))
 
 
-def test_lick_state_carried_when_no_event_between_spans(monkeypatch) -> None:
-    # no event of any line between the spans: the entry state is the previous exit state
+@pytest.mark.parametrize(
+    "rising, falling, n_synthetic_onsets",
+    [
+        ([8.0, 9.98], [8.05, 11.03], 0),  # lick in progress through both spans and the gap
+        ([8.0, 9.98], [8.05, 10.1], 0),  # ends inside the run (its fall is synthesized)
+        ([8.0, 10.8], [8.05, 11.03], 1),  # starts inside the run: one lick in progress
+        ([8.0, 12.0], [8.05, 12.05], 0),  # low throughout
+    ],
+)
+def test_lick_state_carried_when_no_event_between_spans(
+    monkeypatch, rising, falling, n_synthetic_onsets
+) -> None:
+    # no event of any line between the spans (so no lick edge): one state across the gap.
+    # Assuming the line low in the gap (builder 9 before this) split a held lick in two
     run = [(10.0, 10.5), (10.6, 11.0)]
     other = [t for t in np.arange(5.0, 20.0, 1 / 60) if not 10.0 - 1 / FS <= t < 11.0]
     raw, patch, info = _run_lick_reconstruction(
-        monkeypatch, [8.0, 9.98], [8.05, 11.03], other=other, run=run
+        monkeypatch, rising, falling, other=other, run=run
     )
     assert [d["state_at_bounds"] for d in info["spans"]] == ["carried", "carried"]
     assert _alternates(*_patched_lick_line(raw, patch))
+    synth = np.concatenate([s.rising for s in patch.lines["lick_sensor"]])
+    assert len(synth) == n_synthetic_onsets
+
+
+def test_lick_line_not_alternating_raises(monkeypatch) -> None:
+    # a reconstruction inconsistent with the recorded line is a bug: raised, not hidden
+    monkeypatch.setattr(
+        timing,
+        "synthesize_lick_edges",
+        lambda onsets, span, *args, **kwargs: (np.array([span[0] + 0.1]), np.array([])),
+    )
+    with pytest.raises(timing.LickLineReconstructionError):
+        _run_lick_reconstruction(monkeypatch, [8.0, 15.0], [8.05, 15.05])
+
+
+def test_synthesized_lick_edges_go_from_entry_to_exit_state() -> None:
+    """Every entry/exit state, random onsets incl. duplicates and one exactly at the span
+    start: distinct edge times inside the span, alternating from entry to exit state."""
+    rng = np.random.default_rng(201)
+    a, z = 10.0, 10.5
+    for _ in range(3000):
+        on = rng.uniform(a - 0.05, z + 0.05, rng.integers(0, 6))
+        if rng.random() < 0.3:
+            on = np.r_[on, a]
+        if rng.random() < 0.2 and len(on):
+            on = np.r_[on, on[:1]]
+        entry, exit_ = bool(rng.integers(2)), bool(rng.integers(2))
+        last_r = a - rng.uniform(0, 0.2) if entry else a - 1
+        r, f = timing.synthesize_lick_edges(
+            on, (a, z), entry, last_r, exit_, rng.choice([0.01, 0.07, 0.3])
+        )
+        t = np.r_[r, f]
+        assert len(np.unique(t)) == len(t) and np.all((t >= a) & (t < z))
+        k = np.r_[np.ones(len(r)), np.zeros(len(f))][np.argsort(t)]
+        seq = np.r_[float(entry), k, float(not exit_)]  # next edge: the opposite of exit
+        assert np.all(seq[1:] != seq[:-1]), (entry, exit_, on)
+
+
+def _lick_train(rng, t0, t1):
+    """(rising, falling) of random lick bouts in [t0, t1)."""
+    r, f, t = [], [], t0 + rng.uniform(0, 1)
+    while t < t1 - 0.2:
+        if rng.random() < 0.3:  # pause
+            t += rng.uniform(0.3, 3.0)
+            continue
+        d = rng.uniform(0.02, 0.12)
+        r.append(t)
+        f.append(t + d)
+        t += d + rng.uniform(0.03, 0.2)
+    return np.asarray(r), np.asarray(f)
+
+
+def _replayed_line(rng, true_r, true_f, spans, t0, t1):
+    """Recorded lick edges with each span holding a copy of other data: the true line outside
+    the spans, a random train inside, and an edge at a span's first sample (or at its end)
+    where the copied state differs from the state around it, as in replayed sync data."""
+    copy_r, copy_f = _lick_train(rng, t0, t1)
+
+    def state(r, f, t):
+        lr, lf = r[r <= t], f[f <= t]
+        return (lr[-1] if len(lr) else -np.inf) > (lf[-1] if len(lf) else -np.inf)
+
+    grid_edges = []
+    for r, f, inside in ((true_r, true_f, False), (copy_r, copy_f, True)):
+        for tt, k in [(x, 1) for x in r] + [(x, 0) for x in f]:
+            if any(a <= tt < z for a, z in spans) == inside:
+                grid_edges.append((tt, k))
+    for a, z in spans:
+        for t, before, after in (
+            (a + 0.5 / FS, state(true_r, true_f, a), state(copy_r, copy_f, a)),
+            (z, state(copy_r, copy_f, z - 1e-9), state(true_r, true_f, z)),
+        ):
+            if before != after:
+                grid_edges.append((t, int(after)))
+    grid_edges.sort()
+    r, f, high = [], [], False
+    for t, k in grid_edges:  # keep a consistent recorded sequence (it always alternates)
+        if bool(k) != high:
+            (r if k else f).append(t)
+            high = bool(k)
+    return np.asarray(r), np.asarray(f)
+
+
+@pytest.mark.parametrize("seed", range(40))
+def test_lick_reconstruction_alternates_by_construction(monkeypatch, seed) -> None:
+    rng = np.random.default_rng(seed)
+    t0, t1 = 5.0, 60.0
+    true_r, true_f = _lick_train(rng, t0, t1)
+    spans, t = [], t0 + rng.uniform(2, 5)
+    while t < t1 - 5:  # runs of 0.5 s spans, gaps of 0 (touching) to 3 s
+        n = int(rng.integers(1, 6))
+        for _ in range(n):
+            spans.append((round(t, 5), round(t + 0.5, 5)))
+            t += 0.5 + rng.choice([0.0, 0.1, 0.5, 1.0])
+        t += rng.uniform(2, 8)
+    rec_r, rec_f = _replayed_line(rng, true_r, true_f, spans, t0, t1)
+    # other line: events every ~16.7 ms, but none in some gaps between spans
+    other = np.arange(t0, t1, 1 / 60)
+    quiet = [(spans[i][1], spans[i + 1][0]) for i in range(len(spans) - 1) if rng.random() < 0.3]
+    other = other[~npc_sync.in_intervals(other, [*spans, *quiet])]
+    # lickFrames: true onsets inside spans within +-1/2 frame, some missing, some extra
+    on = true_r[npc_sync.in_intervals(true_r, spans)]
+    on = on[rng.random(len(on)) > 0.1]
+    on = on + rng.uniform(-1 / 120, 1 / 120, len(on))
+    extra = rng.uniform(t0, t1, 5)
+    on = np.sort(np.r_[on, extra[npc_sync.in_intervals(extra, spans)], [a for a, _ in spans[:1]]])
+    # as npc_sync builds them: from half a sample before the sample whose edge carries the
+    # copied state, to half a sample after the first sample after the interval
+    patch_spans = [(a, z + 0.5 / FS) for a, z in spans]
+    raw = _FakeRaw(rec_r, rec_f, None, other=other, intervals=patch_spans)
+    patch = npc_sync.SyncPatch(
+        sync_content_hash="x",
+        builder=timing.BUILDER,
+        invalid_intervals=tuple(spans),
+        lines={"lick_sensor": [npc_sync.SpanPatch(span=sp, status="unknown") for sp in patch_spans]},
+    )
+    monkeypatch.setattr(timing, "_patched_view", lambda raw, patch: raw)
+    monkeypatch.setattr(timing, "predict_lick_onsets", lambda sync, path: (on, (t0, t1)))
+    info = timing.reconstruct_lick_line(raw, patch, ["DynamicRouting1_x.hdf5"])  # never raises
+    r, f = _patched_lick_line(raw, patch)
+    assert len(np.unique(np.r_[r, f])) == len(r) + len(f)  # no tied edge times
+    assert _alternates(r, f) and info["alternation_errors"] == 0
+    # outside the spans the patched line is the recorded (true) line
+    out = lambda x: x[~npc_sync.in_intervals(x, patch_spans)]  # noqa: E731
+    assert np.array_equal(out(r), out(true_r)) and np.array_equal(out(f), out(true_f))
 
 
 def test_lick_run_widened_unknown_spans_alternate() -> None:

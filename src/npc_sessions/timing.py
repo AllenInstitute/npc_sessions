@@ -122,7 +122,10 @@ another builder are rebuilt.
   (`_line_states_at_bounds`), not inferred from the nearest measured lick edges: in runs of
   spans with no lick edge between them, builders 4-8 gave every span the same synthetic edge
   (fake licks: 82 in 714748_2024-06-28, 5 in 708020_2024-05-17; #201). The patched lick
-  line must alternate, else its spans stay unknown
+  line alternates by construction: no event between two spans means no lick edge, so one
+  state across the gap; synthesized edges have distinct times (onsets deduplicated, an onset
+  at the start of a span the line is already high in is the lick in progress). Asserted
+  (`LickLineReconstructionError`, not caught)
 """
 
 PATCH_DIR_ENV_VAR = "NPC_SESSIONS_SYNC_PATCH_DIR"
@@ -330,6 +333,8 @@ def build_session_sync_patch(
         for fn, kwargs in steps:
             try:
                 fn(raw, patch, stim_paths, **kwargs)
+            except LickLineReconstructionError:
+                raise
             except Exception as exc:
                 msg = f"{fn.__name__} failed: {exc!r}"
                 logger.warning(f"{raw}: {msg}")
@@ -847,6 +852,9 @@ def synthesize_lick_edges(
 
     - `high_at_entry` (a lick in progress at `a`): a falling edge at
       `last_rising_before + duration`, no earlier than `a` and before the first onset
+    - onsets are deduplicated (closer than `min_gap`: one lick), and with `high_at_entry` an
+      onset within `2 * min_gap` of `a` is the lick in progress, not a new one, so every
+      edge time is distinct and the edges alternate from the entry state to the exit state
     - `high_at_exit` (the first measured edge after `z` is falling): the line is left high.
       The last onset's falling edge is omitted, or with no onsets a rising edge is added
       `duration` before `z` (unless the line is high at entry: then it stays high throughout)
@@ -865,7 +873,13 @@ def synthesize_lick_edges(
     """
     a, z = span
     on = np.asarray(onsets, dtype=float).ravel()
-    on = np.sort(on[(on >= a) & (on < z)])
+    on = np.unique(on[(on >= a) & (on < z)])  # sorted, no duplicates
+    if len(on) > 1:  # onsets closer than `min_gap` are one lick
+        on = on[np.r_[True, np.diff(on) >= min_gap]]
+    if high_at_entry and len(on) and on[0] < a + 2 * min_gap:
+        # the line is already high at `a`, with no time to fall before this onset: it's the
+        # lick in progress, not a new one
+        on = on[1:]
     rising = [float(x) for x in on]
     falling: list[float] = []
     for i, r in enumerate(on):
@@ -912,6 +926,11 @@ def _lick_frame_match_fraction(
     return int(len(t)), float(np.mean(err <= 2 * LICK_FRAME_MAX_ERROR_SEC))
 
 
+class LickLineReconstructionError(RuntimeError):
+    """The patched lick line would not alternate: a bug in `reconstruct_lick_line` (the
+    recorded line always alternates). Not caught by `build_session_sync_patch`."""
+
+
 def reconstruct_lick_line(
     raw: npc_sync.SyncDataset,
     patch: npc_sync.SyncPatch,
@@ -927,12 +946,16 @@ def reconstruct_lick_line(
     The line state at each bound is read from the sync data words just outside the span
     (`_line_states_at_bounds`), not inferred from the nearest measured lick edges: in a run of
     spans with no lick edge between them, that inference gave every span the same synthetic
-    edge (fake licks, #201). Where no event separates two spans, the entry state is the
-    previous span's exit state and the exit state is low.
+    edge (fake licks, #201). Where no event of any line separates two spans, there is no lick
+    edge between them either, so the line holds one state across that gap: it is taken to be
+    the state at entry to the first span of such a run (the last span takes the line to the
+    observed state after the run).
 
-    Checks: the patched line must alternate, else every span reconstructed here is left
-    unknown (and widened by `widen_unknown_lick_spans`): no fake licks. Synthetic onsets
-    without a `lickFrames` onset (a lick in progress at a span's end) are counted.
+    The recorded line always alternates, and the edges synthesized here go from the state at
+    each span's entry to the state at its exit, so the patched line alternates too. If it
+    doesn't, the reconstruction is wrong (a bug, not a property of the data):
+    `LickLineReconstructionError` is raised and the patch isn't built. Synthetic onsets without
+    a `lickFrames` onset (a lick in progress at a span's end) are counted in the diagnostics.
 
     Spans that no stim file covers stay unknown (see `widen_unknown_lick_spans`). Returns
     diagnostics.
@@ -964,7 +987,9 @@ def reconstruct_lick_line(
         a, z = s.span
         before, after = bounds[s.span]
         high_at_entry = exit_high if before is None else before
-        high_at_exit = bool(after)
+        # no event (so no lick edge) between this span and the next: the line holds its
+        # state across the gap, taken as the state at entry to this span
+        high_at_exit = high_at_entry if after is None else after
         exit_high = high_at_exit
         if s.status != "unknown":
             r_s, f_s = np.asarray(s.rising), np.asarray(s.falling)
@@ -1030,14 +1055,10 @@ def reconstruct_lick_line(
     info["n_synthetic_onsets_without_lick_frame"] = n_without_onset
     info["alternation_errors"] = errors
     if errors:
-        msg = (
-            f"lick line not reconstructed: it would not alternate ({errors} adjacent "
-            "same-kind edges); spans left unknown"
+        raise LickLineReconstructionError(
+            f"{raw}: the reconstructed lick line would not alternate ({errors} adjacent "
+            "same-kind edges): reconstruct_lick_line is inconsistent with the recorded line"
         )
-        logger.warning(f"{raw}: {msg}")
-        patch.notes.append(msg)
-        info["spans"] = [{**d, "status": "unknown"} for d in info["spans"]]
-        return info
     patch.lines[LICK_LINE] = [new.get(s.span, s) for s in patch.lines[LICK_LINE]]
     return info
 

@@ -1,0 +1,28 @@
+[
+ {
+  "session": "708020_2024-05-17",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 1992,
+  "n_falling": 1992,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 0,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 0,
+  "n_carried": 0
+ },
+ {
+  "session": "714748_2024-06-28",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 1026,
+  "n_falling": 1026,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 0,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 0,
+  "n_carried": 0
+ }
+]
