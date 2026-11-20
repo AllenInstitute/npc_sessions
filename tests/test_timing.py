@@ -121,9 +121,10 @@ def test_patch_is_built_saved_and_reused(files, tmp_path) -> None:
     p2 = timing.get_sync_patch("s", files["sync"], [files["stim"]], root=tmp_path)
     assert p2.created == p1.created  # loaded, not rebuilt
     assert p1.builder == timing.BUILDER
-    # barcode spans widened by >= 2 s, to bounds where the line is low: edges stay paired
+    # barcode spans end where the line is low (the pulses on this line are not barcodes, so
+    # none is taken in whole): edges stay paired
     (bc,) = p1.lines["barcode_ephys"]
-    assert bc.span[0] <= 18.0 - 2 and bc.span[1] >= 20.0 + 2
+    assert bc.span[0] <= 18.0 and bc.span[1] >= 20.0
     s = npc_sync.SyncDataset(files["sync"], patch=p1)
     on = s.get_rising_edges("barcode_ephys", units="seconds")
     off = s.get_falling_edges("barcode_ephys", units="seconds")
@@ -594,3 +595,23 @@ def test_dropped_buffers_are_located_and_reconstructed(dropped_files) -> None:
     replayed = timing.get_replayed_intervals(sync)
     assert [(r["start_time"], r["stop_time"]) for r in replayed] == [(30.0, 31.0), (40.0, 40.5)]
     assert "dropped acquisition buffers" in replayed[0]["reason"]
+
+
+def test_barcode_spans_take_whole_barcodes_only() -> None:
+    """703880_2024-04-18: with 2 s of padding to where the line is low, a span ended between
+    two pulses of a barcode that started 1.3 s after a dropped interval (2 of 11 pulses left,
+    onset 765 ms late), and barcodes that didn't touch a dropped interval were removed."""
+    onsets = 5.0 + 31.0 * np.arange(4)
+    rising = np.concatenate([t + 0.09 * np.arange(11) for t in onsets])
+    falling = rising + 0.03
+    # dropped interval ending 1.3 s before the second barcode: nothing to remove
+    span = (34.2, 34.7)
+    assert timing._span_over_whole_barcodes(span, rising, falling) == span
+    old = timing._span_with_line_low_at_bounds((span[0] - 2, span[1] + 2), rising, falling)
+    kept = rising[~npc_sync.in_intervals(rising, [old])]
+    assert 0 < ((kept >= 36.0) & (kept < 38.0)).sum() < 11  # what builder 5 left: a fragment
+    # dropped interval inside the third barcode: all of it goes, the others stay
+    a, z = timing._span_over_whole_barcodes((67.3, 67.8), rising, falling)
+    gone = npc_sync.in_intervals(rising, [(a, z)])
+    assert gone.sum() == 11 and np.all((rising[gone] >= 67.0) & (rising[gone] < 68.0))
+    assert npc_sync.in_intervals(falling, [(a, z)]).sum() == 11
