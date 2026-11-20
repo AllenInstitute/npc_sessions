@@ -835,7 +835,7 @@ def reconstruct_lick_line(
         try:
             onsets, (t0, t1) = predict_lick_onsets(view, stim_path)
         except Exception as exc:
-            logger.debug(f"{raw}: no lick onsets from {stim_path}: {exc!r}")
+            logger.debug(f"{raw}: no lick onsets from {stim_path!r}: {exc!r}")
             continue
         if np.isfinite(t0):
             predictions.append((npc_io.from_pathlike(stim_path).stem, onsets, t0, t1))
