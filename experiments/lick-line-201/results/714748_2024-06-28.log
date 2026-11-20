@@ -1,0 +1,47 @@
+WARNING:npc_sync.sync:SyncDataset(s3://aind-private-data-prod-o5171v/ecephys_714748_2024-06-28_09-58-59/behavior/20240628T095859.h5): timebase: 268 dropped buffer(s) of 50000 samples at 263 place(s) (0 assumed at the start of a replayed run), 268 replayed copies; net shift +0.0 s
+{
+ "session": "714748_2024-06-28",
+ "raw_rising": 1007,
+ "raw_falling": 1007,
+ "raw_alternation_errors": 0,
+ "n_lick_spans": 263,
+ "real_current": {
+  "n_rising": 1108,
+  "n_falling": 1047,
+  "alternation_errors": 107,
+  "n_synthetic_rising": 103,
+  "n_synthetic_rising_without_lick_frame": 82,
+  "n_unknown_spans": 1
+ },
+ "real_fixed": {
+  "n_rising": 1026,
+  "n_falling": 1026,
+  "alternation_errors": 0,
+  "n_synthetic_rising": 21,
+  "n_synthetic_rising_without_lick_frame": 0,
+  "n_unknown_spans": 1,
+  "n_spans_lick_in_progress_at_exit_without_onset": 0
+ },
+ "inj_current": {
+  "n_true_onsets": 78,
+  "n_reconstructed_onsets": 93,
+  "n_matched": 78,
+  "n_fake": 15,
+  "n_missed": 0,
+  "state_agreement": 0.9198046511627906,
+  "alternation_errors": 133,
+  "n_runs": 40,
+  "n_spans": 215
+ },
+ "inj_fixed": {
+  "n_true_onsets": 78,
+  "n_reconstructed_onsets": 79,
+  "n_matched": 78,
+  "n_fake": 1,
+  "n_missed": 0,
+  "state_agreement": 0.9782697674418604,
+  "alternation_errors": 0,
+  "n_runs": 40,
+  "n_spans": 215
+ }
+}

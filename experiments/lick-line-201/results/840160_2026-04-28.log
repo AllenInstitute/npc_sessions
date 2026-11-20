@@ -1,0 +1,47 @@
+WARNING:npc_sync.sync:SyncDataset(//allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_840160_20260428/20260428T103950.h5): timebase: 2 dropped buffer(s) of 50000 samples at 1 place(s) (0 assumed at the start of a replayed run), 0 replayed copies; net shift +1.0 s
+{
+ "session": "840160_2026-04-28",
+ "raw_rising": 1906,
+ "raw_falling": 1906,
+ "raw_alternation_errors": 0,
+ "n_lick_spans": 1,
+ "real_current": {
+  "n_rising": 1906,
+  "n_falling": 1906,
+  "alternation_errors": 0,
+  "n_synthetic_rising": 0,
+  "n_synthetic_rising_without_lick_frame": 0,
+  "n_unknown_spans": 0
+ },
+ "real_fixed": {
+  "n_rising": 1906,
+  "n_falling": 1906,
+  "alternation_errors": 0,
+  "n_synthetic_rising": 0,
+  "n_synthetic_rising_without_lick_frame": 0,
+  "n_unknown_spans": 0,
+  "n_spans_lick_in_progress_at_exit_without_onset": 0
+ },
+ "inj_current": {
+  "n_true_onsets": 91,
+  "n_reconstructed_onsets": 93,
+  "n_matched": 89,
+  "n_fake": 4,
+  "n_missed": 2,
+  "state_agreement": 0.9518777292576419,
+  "alternation_errors": 39,
+  "n_runs": 40,
+  "n_spans": 229
+ },
+ "inj_fixed": {
+  "n_true_onsets": 91,
+  "n_reconstructed_onsets": 90,
+  "n_matched": 89,
+  "n_fake": 1,
+  "n_missed": 2,
+  "state_agreement": 0.9632401746724891,
+  "alternation_errors": 0,
+  "n_runs": 40,
+  "n_spans": 229
+ }
+}

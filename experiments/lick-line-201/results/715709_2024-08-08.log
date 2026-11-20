@@ -1,0 +1,47 @@
+WARNING:npc_sync.sync:SyncDataset(s3://aind-private-data-prod-o5171v/ecephys_715709_2024-08-08_15-05-22/behavior/20240808T150522.h5): timebase: 5 dropped buffer(s) of 50000 samples at 2 place(s) (0 assumed at the start of a replayed run), 0 replayed copies; net shift +2.5 s
+{
+ "session": "715709_2024-08-08",
+ "raw_rising": 2005,
+ "raw_falling": 2005,
+ "raw_alternation_errors": 0,
+ "n_lick_spans": 2,
+ "real_current": {
+  "n_rising": 2009,
+  "n_falling": 2009,
+  "alternation_errors": 0,
+  "n_synthetic_rising": 4,
+  "n_synthetic_rising_without_lick_frame": 0,
+  "n_unknown_spans": 0
+ },
+ "real_fixed": {
+  "n_rising": 2009,
+  "n_falling": 2009,
+  "alternation_errors": 0,
+  "n_synthetic_rising": 4,
+  "n_synthetic_rising_without_lick_frame": 0,
+  "n_unknown_spans": 0,
+  "n_spans_lick_in_progress_at_exit_without_onset": 0
+ },
+ "inj_current": {
+  "n_true_onsets": 95,
+  "n_reconstructed_onsets": 106,
+  "n_matched": 93,
+  "n_fake": 13,
+  "n_missed": 2,
+  "state_agreement": 0.9161315789473684,
+  "alternation_errors": 32,
+  "n_runs": 40,
+  "n_spans": 228
+ },
+ "inj_fixed": {
+  "n_true_onsets": 95,
+  "n_reconstructed_onsets": 97,
+  "n_matched": 93,
+  "n_fake": 4,
+  "n_missed": 2,
+  "state_agreement": 0.9605175438596492,
+  "alternation_errors": 0,
+  "n_runs": 40,
+  "n_spans": 228
+ }
+}

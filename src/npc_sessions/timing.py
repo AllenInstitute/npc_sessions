@@ -94,7 +94,7 @@ import upath
 
 logger = logging.getLogger(__name__)
 
-BUILDER = "npc_sessions.timing 8"
+BUILDER = "npc_sessions.timing 9"
 """Recorded in each patch. Bump when the builder's output would change: cached patches with
 another builder are rebuilt.
 
@@ -118,6 +118,11 @@ another builder are rebuilt.
 - 8: the 2 s padding is back (6 and 7 dropped it on a timebase, which broke npc_ephys: see
   `BARCODE_SPAN_PADDING_SEC`), now with whole barcodes: the padded span takes in every
   barcode it touches
+- 9: lick line state at each span bound read from the sync data words just outside the span
+  (`_line_states_at_bounds`), not inferred from the nearest measured lick edges: in runs of
+  spans with no lick edge between them, builders 4-8 gave every span the same synthetic edge
+  (fake licks: 82 in 714748_2024-06-28, 5 in 708020_2024-05-17; #201). The patched lick
+  line must alternate, else its spans stay unknown
 """
 
 PATCH_DIR_ENV_VAR = "NPC_SESSIONS_SYNC_PATCH_DIR"
@@ -726,28 +731,81 @@ def _line_state_before(
     return last_r > last_f, last_r
 
 
-def _first_edge_after(
-    rising: npt.NDArray[np.float64], falling: npt.NDArray[np.float64], t: float
-) -> tuple[str | None, float]:
-    """('rising' / 'falling' / None, time) of the first edge at or after `t`."""
-    r = rising[rising >= t]
-    f = falling[falling >= t]
-    r0 = float(r[0]) if len(r) else np.inf
-    f0 = float(f[0]) if len(f) else np.inf
-    if not np.isfinite(min(r0, f0)):
-        return None, np.inf
-    return ("rising", r0) if r0 < f0 else ("falling", f0)
-
-
-def _measured_outside(
+def _measured_kept(
     raw: npc_sync.SyncDataset, line: str, spans: Sequence[tuple[float, float]]
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
-    """Recorded rising/falling edges on `line` outside `spans` and the file's invalid
-    intervals (starting one sample early, as `SyncDataset._mask_intervals`)."""
-    masked = [*spans, *raw._mask_intervals]
+    """Recorded rising/falling edges on `line` that the patched view keeps: outside every
+    span [a, z) (`npc_sync.SyncPatch.apply`). Edges at the first sample of a span (a drop or
+    copy boundary, which can carry the state of the data after it) are removed there, so the
+    line state at the bounds is taken from `_line_states_at_bounds`, not from them."""
     r = np.asarray(raw.get_rising_edges(line, units="seconds"), dtype=float)
     f = np.asarray(raw.get_falling_edges(line, units="seconds"), dtype=float)
-    return r[~npc_sync.in_intervals(r, masked)], f[~npc_sync.in_intervals(f, masked)]
+    return r[~npc_sync.in_intervals(r, spans)], f[~npc_sync.in_intervals(f, spans)]
+
+
+def _line_states_at_bounds(
+    raw: npc_sync.SyncDataset, line: str, spans: Sequence[tuple[float, float]]
+) -> dict[tuple[float, float], tuple[bool | None, bool | None]]:
+    """Per span [a, z): (line high just before `a`, line high just after `z`), read from the
+    data words of the recorded events nearest the bounds outside the span. Every event, on any
+    line, carries the state of every line, so this is observed even where `line` has no edge
+    for a long time (vsync and camera events are a few ms apart: <= 6.2 ms from the bounds in
+    708020_2024-05-17 and 714748_2024-06-28). None where no event lies between the span and
+    its neighbour (or the file's start/end): the state isn't observed there (#201).
+
+    Before `a`: the state after the last event with t < a. After `z`: the state before the
+    first event with t >= z. Where that event is an edge on `line` (as the patched view keeps
+    them, `_measured_kept`), its kind gives the state, so the result agrees with the edges
+    around the span even where the recorded data inside it (replayed copies) doesn't."""
+    t = np.asarray(raw.get_all_times("seconds"), dtype=float)
+    bit = np.asarray(raw.get_bit(raw._line_to_bit(line)), dtype=np.int8)
+    rising, falling = _measured_kept(raw, line, spans)
+    ordered = sorted(spans)
+    out: dict[tuple[float, float], tuple[bool | None, bool | None]] = {}
+    for k, (a, z) in enumerate(ordered):
+        prev_z = ordered[k - 1][1] if k else -np.inf
+        next_a = ordered[k + 1][0] if k + 1 < len(ordered) else np.inf
+        i = int(np.searchsorted(t, a, side="left")) - 1
+        j = int(np.searchsorted(t, z, side="left"))
+        before: bool | None = None
+        if i >= 0 and t[i] >= prev_z:
+            high, last_r = _line_state_before(rising, falling, a)
+            last_f = falling[falling < a]
+            last_edge = max(last_r, float(last_f[-1]) if len(last_f) else -np.inf)
+            before = high if last_edge >= t[i] else bool(bit[i])
+        after: bool | None = None
+        if j < len(t) and t[j] < next_a:
+            r, f = rising[rising >= z], falling[falling >= z]
+            r0 = float(r[0]) if len(r) else np.inf
+            f0 = float(f[0]) if len(f) else np.inf
+            after = (f0 < r0) if min(r0, f0) <= t[j] else bool(bit[j])
+        out[(a, z)] = (before, after)
+    return out
+
+
+def _alternation_errors(
+    rising: npt.NDArray[np.float64],
+    falling: npt.NDArray[np.float64],
+    unknown: Sequence[tuple[float, float]] = (),
+) -> int:
+    """Number of adjacent same-kind edges (0 if the line alternates). Pairs with an
+    `unknown` span between them aren't counted: their edges there are missing.
+
+    >>> _alternation_errors(np.array([1.0, 3.0]), np.array([2.0, 4.0]))
+    0
+    >>> _alternation_errors(np.array([1.0, 2.0]), np.array([3.0]))
+    1
+    >>> _alternation_errors(np.array([1.0, 2.0]), np.array([3.0]), [(1.2, 1.5)])
+    0
+    """
+    t = np.concatenate([rising, falling])
+    order = np.argsort(t, kind="stable")
+    t = t[order]
+    k = np.r_[np.ones(len(rising)), np.zeros(len(falling))][order]
+    same = np.flatnonzero(k[1:] == k[:-1])
+    return sum(
+        1 for i in same if not any(t[i] < z and a < t[i + 1] for a, z in unknown)
+    )
 
 
 def predict_lick_onsets(
@@ -866,14 +924,26 @@ def reconstruct_lick_line(
     bounds, so downstream code pairs edges as usual. Lick durations on the line aren't
     reliable anyway, and the licks table marks interpolated edges.
 
+    The line state at each bound is read from the sync data words just outside the span
+    (`_line_states_at_bounds`), not inferred from the nearest measured lick edges: in a run of
+    spans with no lick edge between them, that inference gave every span the same synthetic
+    edge (fake licks, #201). Where no event separates two spans, the entry state is the
+    previous span's exit state and the exit state is low.
+
+    Checks: the patched line must alternate, else every span reconstructed here is left
+    unknown (and widened by `widen_unknown_lick_spans`): no fake licks. Synthetic onsets
+    without a `lickFrames` onset (a lick in progress at a span's end) are counted.
+
     Spans that no stim file covers stay unknown (see `widen_unknown_lick_spans`). Returns
     diagnostics.
     """
-    spans = [s.span for s in _unknown_spans(patch, LICK_LINE)]
-    if not spans:
+    unknown = [s.span for s in _unknown_spans(patch, LICK_LINE)]
+    if not unknown:
         return {}
-    rising, falling = _measured_outside(raw, LICK_LINE, spans)
+    all_spans = [s.span for s in patch.lines[LICK_LINE]]
+    rising, falling = _measured_kept(raw, LICK_LINE, all_spans)
     duration = _median_lick_duration(rising, falling)
+    bounds = _line_states_at_bounds(raw, LICK_LINE, all_spans)
     view = _patched_view(raw, patch)
     predictions = []
     for stim_path in stim_paths:
@@ -885,56 +955,90 @@ def reconstruct_lick_line(
         if np.isfinite(t0):
             predictions.append((npc_io.from_pathlike(stim_path).stem, onsets, t0, t1))
     info: dict[str, Any] = {"median_duration_sec": duration, "spans": []}
-    out = []
-    for s in patch.lines[LICK_LINE]:
-        if s.status != "unknown":
-            out.append(s)
-            continue
+    synth_r: list[float] = []
+    synth_f: list[float] = []
+    new: dict[tuple[float, float], npc_sync.SpanPatch] = {}
+    n_without_onset = 0
+    exit_high = False  # state at the end of the previous span
+    for s in sorted(patch.lines[LICK_LINE], key=lambda s: s.span):
         a, z = s.span
+        before, after = bounds[s.span]
+        high_at_entry = exit_high if before is None else before
+        high_at_exit = bool(after)
+        exit_high = high_at_exit
+        if s.status != "unknown":
+            r_s, f_s = np.asarray(s.rising), np.asarray(s.falling)
+            if after is None and (len(r_s) or len(f_s)):
+                exit_high = bool(
+                    (r_s.max() if len(r_s) else -np.inf)
+                    > (f_s.max() if len(f_s) else -np.inf)
+                )
+            continue
         source = next(
             ((n, on) for n, on, t0, t1 in predictions if t0 <= a and z <= t1), None
         )
         if source is None:
             info["spans"].append({"span": [a, z], "status": "unknown"})
-            out.append(s)
             continue
         name, onsets = source
-        high_at_entry, last_r = _line_state_before(rising, falling, a)
-        high_at_exit = _first_edge_after(rising, falling, z)[0] == "falling"
+        last_r = _line_state_before(
+            np.sort(np.r_[rising, synth_r]), np.sort(np.r_[falling, synth_f]), a
+        )[1]
         r, f = synthesize_lick_edges(
             onsets, (a, z), high_at_entry, last_r, high_at_exit, duration
         )
+        synth_r.extend(r.tolist())
+        synth_f.extend(f.tolist())
+        n_onsets = int(np.sum((onsets >= a) & (onsets < z)))
+        n_without_onset += len(r) - n_onsets
         n_checked, frac = _lick_frame_match_fraction(
-            onsets, rising, [*spans, *raw._mask_intervals]
+            onsets, rising, [*all_spans, *raw._mask_intervals]
         )
         diag = dict(
             stim=name,
-            n_onsets=int(np.sum((onsets >= a) & (onsets < z))),
+            n_onsets=n_onsets,
             high_at_entry=high_at_entry,
             high_at_exit=high_at_exit,
+            state_at_bounds=(
+                "observed" if before is not None and after is not None else "carried"
+            ),
             median_duration_sec=duration,
             n_lick_frames_checked=n_checked,
             fraction_lick_frames_within_1_frame=frac,
         )
         info["spans"].append({"span": [a, z], "status": "reconstructed", **diag})
-        out.append(
-            npc_sync.SpanPatch(
-                span=s.span,
-                status="reconstructed",
-                rising=r,
-                falling=f,
-                method="lick_frames",
-                error_bound_sec=LICK_FRAME_MAX_ERROR_SEC,
-                diagnostics=diag,
-                reason=(
-                    f"onsets from {name} lickFrames (midpoint of the frame interval before "
-                    "the input read, +-1/2 frame); offsets synthetic (onset + median measured "
-                    "lick duration, shortened to fit), plus a synthetic edge for a lick in "
-                    "progress at either bound, so the line alternates"
-                ),
-            )
+        new[s.span] = npc_sync.SpanPatch(
+            span=s.span,
+            status="reconstructed",
+            rising=r,
+            falling=f,
+            method="lick_frames",
+            error_bound_sec=LICK_FRAME_MAX_ERROR_SEC,
+            diagnostics=diag,
+            reason=(
+                f"onsets from {name} lickFrames (midpoint of the frame interval before "
+                "the input read, +-1/2 frame); offsets synthetic (onset + median measured "
+                "lick duration, shortened to fit), plus a synthetic edge for a lick in "
+                "progress at either bound (line state at the bounds from the sync data "
+                "words), so the line alternates"
+            ),
         )
-    patch.lines[LICK_LINE] = out
+    still_unknown = [sp for sp in unknown if sp not in new]
+    errors = _alternation_errors(
+        np.sort(np.r_[rising, synth_r]), np.sort(np.r_[falling, synth_f]), still_unknown
+    )
+    info["n_synthetic_onsets_without_lick_frame"] = n_without_onset
+    info["alternation_errors"] = errors
+    if errors:
+        msg = (
+            f"lick line not reconstructed: it would not alternate ({errors} adjacent "
+            "same-kind edges); spans left unknown"
+        )
+        logger.warning(f"{raw}: {msg}")
+        patch.notes.append(msg)
+        info["spans"] = [{**d, "status": "unknown"} for d in info["spans"]]
+        return info
+    patch.lines[LICK_LINE] = [new.get(s.span, s) for s in patch.lines[LICK_LINE]]
     return info
 
 
@@ -942,25 +1046,29 @@ def widen_unknown_lick_spans(
     raw: npc_sync.SyncDataset, patch: npc_sync.SyncPatch
 ) -> None:
     """Widen the lick line's remaining 'unknown' spans, in place, so the line is low at both
-    bounds. A lick in progress at the start (rising edge measured, falling edge in the span)
-    or at the end (falling edge is the first measured edge after the span) is included
-    whole, so the measured edges outside still alternate."""
+    bounds. A lick in progress at the start (line high before it: from the last measured
+    rising edge) or at the end (line high after it: to the first measured falling edge) is
+    included whole, so the measured edges outside still alternate. The state at the bounds is
+    read from the sync data words (`_line_states_at_bounds`)."""
     unknown = [s.span for s in _unknown_spans(patch, LICK_LINE)]
     if not unknown:
         return
-    rising, falling = _measured_outside(raw, LICK_LINE, unknown)
+    all_spans = [s.span for s in patch.lines[LICK_LINE]]
+    rising, falling = _measured_kept(raw, LICK_LINE, all_spans)
+    bounds = _line_states_at_bounds(raw, LICK_LINE, all_spans)
     out = []
     for s in patch.lines[LICK_LINE]:
         if s.status != "unknown":
             out.append(s)
             continue
         a, z = s.span
-        high, last_r = _line_state_before(rising, falling, a)
-        if high:
-            a = last_r
-        kind, t = _first_edge_after(rising, falling, z)
-        if kind == "falling":
-            z = t + 1 / raw.sample_freq
+        before, after = bounds[s.span]
+        r = rising[rising < a]
+        if before and len(r):
+            a = float(r[-1])
+        f = falling[falling >= z]
+        if after and len(f):
+            z = float(f[0]) + 1 / raw.sample_freq
         if (a, z) == tuple(s.span):
             out.append(s)
             continue

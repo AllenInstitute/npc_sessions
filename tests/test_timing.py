@@ -403,14 +403,26 @@ def test_edges_explained_and_span_replacement(files) -> None:
 
 
 class _FakeRaw:
-    """Minimal stand-in for a SyncDataset with one replayed interval on the lick line."""
+    """Minimal stand-in for a SyncDataset with replayed intervals on the lick line (bit 0).
+    `other`: times of events on another line (bit 1, e.g. vsync), whose data words also carry
+    the lick bit."""
 
     sample_freq = FS
 
-    def __init__(self, rising, falling, interval):
+    def __init__(self, rising, falling, interval, other=(), intervals=None):
         self.r, self.f = np.asarray(rising, float), np.asarray(falling, float)
-        self.invalid_intervals = (interval,)
-        self._mask_intervals = ((interval[0] - 1 / FS, interval[1]),)
+        self.invalid_intervals = tuple(intervals or (interval,))
+        self._mask_intervals = tuple((a - 1 / FS, z) for a, z in self.invalid_intervals)
+        ev = sorted(
+            [(t, 0, 1) for t in self.r] + [(t, 0, 0) for t in self.f]
+            + [(t, 1, i % 2) for i, t in enumerate(other)]
+        )
+        state, times, words = 0, [], []
+        for t, b, v in ev:
+            state = (state | (1 << b)) if v else (state & ~(1 << b))
+            times.append(t)
+            words.append(state)
+        self._t, self._w = np.asarray(times, float), np.asarray(words, np.int64)
 
     def get_rising_edges(self, line, units="seconds"):
         return self.r
@@ -418,14 +430,27 @@ class _FakeRaw:
     def get_falling_edges(self, line, units="seconds"):
         return self.f
 
+    def get_all_times(self, units="seconds"):
+        return self._t
 
-def _lick_patch(interval, status="unknown"):
-    a = interval[0] - 1 / FS
+    def _line_to_bit(self, line):
+        return 0
+
+    def get_bit(self, bit):
+        return ((self._w >> bit) & 1).astype(np.uint8)
+
+
+def _lick_patch(interval, status="unknown", intervals=None):
+    intervals = intervals or [interval]
     return npc_sync.SyncPatch(
         sync_content_hash="x",
         builder=timing.BUILDER,
-        invalid_intervals=(interval,),
-        lines={"lick_sensor": [npc_sync.SpanPatch(span=(a, interval[1]), status=status)]},
+        invalid_intervals=tuple(intervals),
+        lines={
+            "lick_sensor": [
+                npc_sync.SpanPatch(span=(a - 1 / FS, z), status=status) for a, z in intervals
+            ]
+        },
     )
 
 
@@ -474,6 +499,103 @@ def test_unknown_lick_span_widened_to_low_bounds() -> None:
     r = [t for t in rising if not a <= t < z]
     f = [t for t in falling if not a <= t < z]
     assert r == [8.0, 11.02] and f == [8.05, 11.08]
+
+
+RUN = [(10.0, 10.5), (11.0, 11.5), (12.5, 13.0), (13.5, 14.0)]
+"""A run of replayed spans with no lick edge between them (#201)."""
+
+
+def _patched_lick_line(raw, patch):
+    spans = [s.span for s in patch.lines["lick_sensor"]]
+    keep_r = [t for t in raw.r if not any(a <= t < z for a, z in spans)]
+    keep_f = [t for t in raw.f if not any(a <= t < z for a, z in spans)]
+    r = np.sort(np.r_[keep_r, *[s.rising for s in patch.lines["lick_sensor"]]])
+    f = np.sort(np.r_[keep_f, *[s.falling for s in patch.lines["lick_sensor"]]])
+    return r, f
+
+
+def _run_lick_reconstruction(monkeypatch, rising, falling, onsets=(), other=None, run=RUN):
+    if other is None:  # vsync-like events every ~16.7 ms
+        other = np.arange(5.0, 20.0, 1 / 60)
+    raw = _FakeRaw(rising, falling, None, other=other, intervals=run)
+    patch = _lick_patch(None, intervals=run)
+    monkeypatch.setattr(timing, "_patched_view", lambda raw, patch: raw)
+    monkeypatch.setattr(
+        timing, "predict_lick_onsets", lambda sync, path: (np.asarray(onsets, float), (5.0, 20.0))
+    )
+    info = timing.reconstruct_lick_line(raw, patch, ["DynamicRouting1_x.hdf5"])
+    return raw, patch, info
+
+
+def test_lick_run_in_progress_at_end_gets_one_rising_edge(monkeypatch) -> None:
+    # line low before the run, a lick in progress at its end (recorded rising edge inside the
+    # last span, falling edge 50 ms after it)
+    raw, patch, info = _run_lick_reconstruction(monkeypatch, [8.0, 13.9], [8.05, 14.05])
+    assert all(s.status == "reconstructed" for s in patch.lines["lick_sensor"])
+    synth = np.concatenate([s.rising for s in patch.lines["lick_sensor"]])
+    assert len(synth) == 1 and RUN[-1][0] <= synth[0] < RUN[-1][1]
+    assert not np.concatenate([s.falling for s in patch.lines["lick_sensor"]]).size
+    assert _alternates(*_patched_lick_line(raw, patch))
+    assert info["n_synthetic_onsets_without_lick_frame"] == 1 and info["alternation_errors"] == 0
+
+
+def test_lick_run_high_at_start_gets_one_falling_edge(monkeypatch) -> None:
+    # lick in progress at the start of the run, line low after it until 15 s
+    raw, patch, _ = _run_lick_reconstruction(monkeypatch, [9.98, 15.0], [10.1, 15.05])
+    synth_f = np.concatenate([s.falling for s in patch.lines["lick_sensor"]])
+    assert len(synth_f) == 1 and RUN[0][0] - 1 / FS <= synth_f[0] < RUN[0][1]
+    assert not np.concatenate([s.rising for s in patch.lines["lick_sensor"]]).size
+    assert _alternates(*_patched_lick_line(raw, patch))
+
+
+def test_lick_run_low_throughout_gets_no_edges(monkeypatch) -> None:
+    _, patch, _ = _run_lick_reconstruction(monkeypatch, [8.0, 15.0], [8.05, 15.05])
+    assert not any(len(s.rising) or len(s.falling) for s in patch.lines["lick_sensor"])
+    # with lickFrames onsets in two spans: exactly those licks, nothing else
+    raw, patch, _ = _run_lick_reconstruction(
+        monkeypatch, [8.0, 15.0], [8.05, 15.05], onsets=[11.2, 13.6]
+    )
+    r, f = _patched_lick_line(raw, patch)
+    assert r.tolist() == [8.0, 11.2, 13.6, 15.0] and _alternates(r, f)
+
+
+def test_lick_falling_edge_at_first_sample_of_span(monkeypatch) -> None:
+    # 714748_2024-06-28 3241.49999: a falling edge at +0.5 sample inside the span (removed by
+    # SyncPatch.apply) after a measured rising edge: the line falls once, inside that span
+    a = RUN[0][0] - 1 / FS
+    raw, patch, info = _run_lick_reconstruction(
+        monkeypatch, [8.0, 9.98], [8.05, a + 0.5 / FS]
+    )
+    assert info["spans"][0]["high_at_entry"] and not info["spans"][1]["high_at_entry"]
+    synth_f = np.concatenate([s.falling for s in patch.lines["lick_sensor"]])
+    assert len(synth_f) == 1 and a <= synth_f[0] < RUN[0][1]
+    assert _alternates(*_patched_lick_line(raw, patch))
+
+
+def test_lick_state_carried_when_no_event_between_spans(monkeypatch) -> None:
+    # no event of any line between the spans: the entry state is the previous exit state
+    run = [(10.0, 10.5), (10.6, 11.0)]
+    other = [t for t in np.arange(5.0, 20.0, 1 / 60) if not 10.0 - 1 / FS <= t < 11.0]
+    raw, patch, info = _run_lick_reconstruction(
+        monkeypatch, [8.0, 9.98], [8.05, 11.03], other=other, run=run
+    )
+    assert [d["state_at_bounds"] for d in info["spans"]] == ["carried", "carried"]
+    assert _alternates(*_patched_lick_line(raw, patch))
+
+
+def test_lick_run_widened_unknown_spans_alternate() -> None:
+    # no stim file: the spans stay unknown and are widened where a lick is in progress
+    raw = _FakeRaw(
+        [8.0, 9.98, 13.9], [8.05, 10.1, 14.05], None, other=np.arange(5.0, 20.0, 1 / 60),
+        intervals=RUN,
+    )
+    patch = _lick_patch(None, intervals=RUN)
+    timing.widen_unknown_lick_spans(raw, patch)
+    spans = [s.span for s in patch.lines["lick_sensor"]]
+    assert spans[0][0] == 9.98 and spans[-1][1] > 14.05
+    assert spans[1:-1] == [(a - 1 / FS, z) for a, z in RUN[1:-1]]  # not widened back to 9.98
+    r, f = _patched_lick_line(raw, patch)
+    assert r.tolist() == [8.0] and f.tolist() == [8.05]
 
 
 # ------------------------------------------------------------------ dropped buffers (timebase)

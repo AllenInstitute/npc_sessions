@@ -1,0 +1,34 @@
+Traceback (most recent call last):
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\lick-line-201\common.py", line 18, in load
+    sync_path = npc_lims.get_h5_sync_from_s3(sid)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\.venv\Lib\site-packages\npc_lims\paths\s3.py", line 290, in get_h5_sync_from_s3
+    raw_data_paths_s3 = get_raw_data_paths_from_s3(session)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\.venv\Lib\site-packages\npc_lims\paths\s3.py", line 62, in get_raw_data_paths_from_s3
+    raw_data_root = codeocean_utils.get_raw_data_root(session)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\.venv\Lib\site-packages\npc_lims\metadata\codeocean_utils.py", line 498, in get_raw_data_root
+    raw_asset = get_session_raw_data_asset(session)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\.venv\Lib\site-packages\npc_lims\metadata\codeocean_utils.py", line 348, in get_session_raw_data_asset
+    raise ValueError(f"Session {session} has no raw data assets")
+ValueError: Session 702131_2024-02-23 has no raw data assets
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\lick-line-201\evaluate.py", line 152, in <module>
+    main(sid)
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\lick-line-201\evaluate.py", line 119, in main
+    raw, stim_paths, base = load(sid)
+                            ^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\experiments\lick-line-201\common.py", line 20, in load
+    sync_path = npc_sessions.DynamicRoutingSession(sid).sync_path
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\src\npc_sessions\_lazy.py", line 127, in __get__
+    val = self.func(instance)
+          ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ben.hardcastle\github\npc_sessions\src\npc_sessions\sessions.py", line 2710, in sync_path
+    raise ValueError(f"{self.id} is not a session with sync data")
+ValueError: 702131_2024-02-23 is not a session with sync data

@@ -1,0 +1,118 @@
+{
+ "708020_2024-05-17": {
+  "injected_fake_kinds": {
+   "current": {},
+   "fixed": {}
+  },
+  "real_span_changes": {
+   "changed": 10,
+   "changed_first_in_group": 2,
+   "changed_later_in_group": 8
+  },
+  "n_real_spans": 140
+ },
+ "714748_2024-06-28": {
+  "injected_fake_kinds": {
+   "current": {
+    "no lick (spurious)": 14
+   },
+   "fixed": {}
+  },
+  "real_span_changes": {
+   "changed": 106,
+   "changed_first_in_group": 2,
+   "changed_later_in_group": 104
+  },
+  "n_real_spans": 263
+ },
+ "703880_2024-04-18": {
+  "injected_fake_kinds": {
+   "current": {
+    "no lick (spurious)": 2
+   },
+   "fixed": {}
+  },
+  "real_span_changes": {
+   "changed": 0,
+   "changed_first_in_group": 0,
+   "changed_later_in_group": 0
+  },
+  "n_real_spans": 58
+ },
+ "715709_2024-08-08": {
+  "injected_fake_kinds": {
+   "current": {
+    "lick in progress at span end": 1,
+    "no lick (spurious)": 9
+   },
+   "fixed": {
+    "lick in progress at span end": 1
+   }
+  },
+  "real_span_changes": {
+   "changed": 0,
+   "changed_first_in_group": 0,
+   "changed_later_in_group": 0
+  },
+  "n_real_spans": 2
+ },
+ "840160_2026-04-28": {
+  "injected_fake_kinds": {
+   "current": {
+    "no lick (spurious)": 3
+   },
+   "fixed": {}
+  },
+  "real_span_changes": {
+   "changed": 0,
+   "changed_first_in_group": 0,
+   "changed_later_in_group": 0
+  },
+  "n_real_spans": 1
+ },
+ "644867_2023-02-21": {
+  "injected_fake_kinds": {
+   "current": {
+    "lickFrames onset, no sync onset": 446,
+    "no lick (spurious)": 14
+   },
+   "fixed": {
+    "lickFrames onset, no sync onset": 446
+   }
+  },
+  "real_span_changes": {
+   "changed": 0,
+   "changed_first_in_group": 0,
+   "changed_later_in_group": 0
+  },
+  "n_real_spans": 7
+ },
+ "837959_2026-04-02": {
+  "injected_fake_kinds": {
+   "current": {
+    "no lick (spurious)": 12
+   },
+   "fixed": {}
+  },
+  "real_span_changes": {
+   "changed": 0,
+   "changed_first_in_group": 0,
+   "changed_later_in_group": 0
+  },
+  "n_real_spans": 2
+ },
+ "798632_2025-08-29": {
+  "injected_fake_kinds": {
+   "current": {
+    "no lick (spurious)": 4
+   },
+   "fixed": {}
+  },
+  "real_span_changes": {
+   "changed": 0,
+   "changed_first_in_group": 0,
+   "changed_later_in_group": 0
+  },
+  "n_real_spans": 1
+ }
+}

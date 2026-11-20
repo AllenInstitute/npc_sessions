@@ -1,0 +1,25 @@
+[
+ {
+  "session": "714748_2024-06-28",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 1026,
+  "n_falling": 1026,
+  "is_task": false,
+  "n_licks_table": null,
+  "timing_source": null,
+  "synthetic_without_lick_frame": 0
+ },
+ {
+  "session": "708020_2024-05-17",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 1992,
+  "n_falling": 1992,
+  "is_task": true,
+  "n_licks_table": 1992,
+  "timing_source": {
+   "sync": 1975,
+   "stim_frame": 17
+  },
+  "synthetic_without_lick_frame": 0
+ }
+]

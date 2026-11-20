@@ -1,0 +1,98 @@
+[
+ {
+  "session": "708020_2024-05-17",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 1992,
+  "n_falling": 1992,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 0,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 0
+ },
+ {
+  "session": "714748_2024-06-28",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 1026,
+  "n_falling": 1026,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 0,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 0
+ },
+ {
+  "session": "703880_2024-04-18",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 1360,
+  "n_falling": 1360,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 1,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 1
+ },
+ {
+  "session": "715709_2024-08-08",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 2009,
+  "n_falling": 2009,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 0,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 0
+ },
+ {
+  "session": "840160_2026-04-28",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 1906,
+  "n_falling": 1906,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 0,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 0
+ },
+ {
+  "session": "644867_2023-02-21",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 2275,
+  "n_falling": 2275,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 0,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 0
+ },
+ {
+  "session": "837959_2026-04-02",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 2582,
+  "n_falling": 2582,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 0,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 0
+ },
+ {
+  "session": "798632_2025-08-29",
+  "builder": "npc_sessions.timing 9",
+  "n_rising": 3202,
+  "n_falling": 3202,
+  "alternation_errors": 0,
+  "synthetic_without_lick_frame": 0,
+  "identical_to_prototype": true,
+  "notes": [],
+  "info_alternation_errors": 0,
+  "info_synthetic_without_onset": 0
+ }
+]

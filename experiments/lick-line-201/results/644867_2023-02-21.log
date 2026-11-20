@@ -1,0 +1,48 @@
+WARNING:npc_sync.sync:SyncDataset(s3://aind-ephys-data/ecephys_644867_2023-02-21_12-17-01/behavior/20230221T121701.h5): timebase: 17 dropped buffer(s) of 50000 samples at 7 place(s) (0 assumed at the start of a replayed run), 17 replayed copies; net shift +0.0 s
+WARNING:npc_sessions.sessions:Session 644867_2023-02-21 has known issues: ['https://github.com/AllenInstitute/npc_sessions/issues/28', 'https://github.com/AllenInstitute/npc_sessions/issues/117']
+{
+ "session": "644867_2023-02-21",
+ "raw_rising": 2275,
+ "raw_falling": 2275,
+ "raw_alternation_errors": 0,
+ "n_lick_spans": 7,
+ "real_current": {
+  "n_rising": 2275,
+  "n_falling": 2275,
+  "alternation_errors": 0,
+  "n_synthetic_rising": 0,
+  "n_synthetic_rising_without_lick_frame": 0,
+  "n_unknown_spans": 0
+ },
+ "real_fixed": {
+  "n_rising": 2275,
+  "n_falling": 2275,
+  "alternation_errors": 0,
+  "n_synthetic_rising": 0,
+  "n_synthetic_rising_without_lick_frame": 0,
+  "n_unknown_spans": 0,
+  "n_spans_lick_in_progress_at_exit_without_onset": 0
+ },
+ "inj_current": {
+  "n_true_onsets": 104,
+  "n_reconstructed_onsets": 626,
+  "n_matched": 164,
+  "n_fake": 462,
+  "n_missed": 0,
+  "state_agreement": 0.8735497835497835,
+  "alternation_errors": 47,
+  "n_runs": 40,
+  "n_spans": 231
+ },
+ "inj_fixed": {
+  "n_true_onsets": 104,
+  "n_reconstructed_onsets": 612,
+  "n_matched": 164,
+  "n_fake": 448,
+  "n_missed": 0,
+  "state_agreement": 0.9416796536796537,
+  "alternation_errors": 0,
+  "n_runs": 40,
+  "n_spans": 231
+ }
+}

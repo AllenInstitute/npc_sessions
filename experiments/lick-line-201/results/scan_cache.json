@@ -1,0 +1,587 @@
+[
+ {
+  "file": "628801_2022-09-20_e09a16338c33.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 0,
+  "n_lick_spans": 0,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "636397_2022-09-27_bd107f87e965.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "636766_2023-01-23_4ab3dedd8f0d.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 1,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "644867_2023-02-21_fed1bdc630af.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 7,
+  "n_lick_spans": 7,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "649943_2023-02-14_2ea188d59184.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "649943_2023-02-15_63a765b42926.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "666986_2023-08-14_02fc1655cfb9.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "670248_2023-08-01_a5fb6df0871a.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 0,
+  "n_lick_spans": 0,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "670248_2023-08-03_b759cbeea1b3.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 0,
+  "n_lick_spans": 0,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "676909_2023-12-13_ca703bc347a9.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 0,
+  "n_lick_spans": 0,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "703880_2024-04-18_326e488667f0.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 58,
+  "n_lick_spans": 58,
+  "n_reconstructed": 57,
+  "no_onset_with_rising": 1,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "708016_2024-04-30_b972a168063b.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "708020_2024-05-17_6dc0b1c21830.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 140,
+  "n_lick_spans": 140,
+  "n_reconstructed": 130,
+  "no_onset_with_rising": 5,
+  "no_onset_falling_only": 5
+ },
+ {
+  "file": "712141_2024-06-11_666c7eb19377.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "712815_2024-05-20_18dfa955725c.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "714748_2024-06-28_4a6e30b42aed.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 263,
+  "n_lick_spans": 263,
+  "n_reconstructed": 262,
+  "no_onset_with_rising": 82,
+  "no_onset_falling_only": 26
+ },
+ {
+  "file": "714753_2024-07-03_2522df306446.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "714753_2024-07-05_83fa31af22f2.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "715709_2024-08-08_c786c2f32ef7.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 2,
+  "n_lick_spans": 2,
+  "n_reconstructed": 2,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "715710_2024-07-19_678b104a1ff7.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "718283_2024-08-23_46b68f42d13e.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "733780_2024-08-30_dbe9201b3ed4.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "733780_2024-09-04_116b21fd1198.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "761583_2024-12-16_d2d9a2758ca5.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "761583_2024-12-17_f06227d0b486.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "761583_2024-12-18_fa0ba88de8cb.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "796012_2025-07-10_f86de375b751.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "798632_2025-08-29_a6420ebf4495.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 2,
+  "n_lick_spans": 2,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "798632_2025-09-02_1987a545b2f4.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "813586_2025-12-02_e94a1f5fbb3f.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "835598_2026-02-23_5011dc8f872d.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "835598_2026-02-27_8fbfa0821c98.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "836629_2026-04-30_726f94e12b43.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "836629_2026-05-01_2cec014acd53.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "836726_2026-02-13_7bddf45c3753.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "837230_2026-04-20_4b0c078e19bc.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "837959_2026-03-30_3eb4278944fb.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "837959_2026-03-31_3462f5cb3e75.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "837959_2026-04-02_bfd4603b9462.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 2,
+  "n_lick_spans": 2,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "839146_2026-05-18_8efe4a2b0f6c.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "840160_2026-04-28_60030a394068.json",
+  "builder": "npc_sessions.timing 8",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 1,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "840160_2026-04-29_4f3eaa36a567.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "841308_2026-05-11_6c34d8b9d2e9.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "847958_2026-04-13_0dab9797ec8f.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "847958_2026-04-15_f95a618e8393.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "850215_2026-03-18_a1b9f7264a81.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "850217_2026-04-02_965d1a12f11c.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "850217_2026-04-03_9877d2a1e392.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "854390_2026-04-22_29bbc9b404ce.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "854390_2026-04-23_f610e53646d4.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "854390_2026-04-27_1b63553c353f.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "856847_2026-06-02_4e4c00f05b0b.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "856847_2026-06-04_83555ede6083.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "856847_2026-06-05_300a5f044e5d.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "857681_2026-08-13_ee1124edcdbb.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "859582_2026-07-01_101c7cfe6ea2.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "859583_2026-05-15_003293bb0774.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "862025_2026-08-04_df7e67b1022f.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "862025_2026-08-05_3dc8ca310745.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "862025_2026-08-06_184726525a89.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "862027_2026-09-16_5a9bc98406b3.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "872697_2026-09-03_a9d850b9498f.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "873603_2026-09-14_c1bfcdb18220.json",
+  "builder": "npc_sessions.timing 4",
+  "n_invalid": 0,
+  "n_lick_spans": 0,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "s_504d112745a7.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 0,
+  "n_lick_spans": 0,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ },
+ {
+  "file": "s_e34376520b01.json",
+  "builder": "npc_sessions.timing 3",
+  "n_invalid": 1,
+  "n_lick_spans": 1,
+  "n_reconstructed": 0,
+  "no_onset_with_rising": 0,
+  "no_onset_falling_only": 0
+ }
+]
