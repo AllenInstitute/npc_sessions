@@ -1,0 +1,329 @@
+{
+ "slip_us_per_chunk": {
+  "DRpilot_703880_20240418": {
+   "beh": -12.1,
+   "face": -13.2,
+   "eye": -18.3
+  },
+  "DRpilot_840160_20260428": {
+   "face": -13.4,
+   "beh": -26.0,
+   "nose": -13.8,
+   "eye": -17.8
+  },
+  "DRpilot_715709_20240808": {
+   "beh": -26.4,
+   "face": -13.9,
+   "eye": -18.7
+  }
+ },
+ "fig1": {
+  "barcode_recorded_s": 926.49231,
+  "barcode_due_s": 927.4923899999998,
+  "early_by_s": 1.000079999999798,
+  "barcode_period_s": 30.965679999999793
+ },
+ "fig2_jumps": {
+  "DRpilot_703880_20240418": {
+   "n_observed": 15436,
+   "counts": {
+    "-1": 58,
+    "0": 15320,
+    "1": 58
+   },
+   "max_off_integer": 0.09669243313370901
+  },
+  "DRpilot_840160_20260428": {
+   "n_observed": 11589,
+   "counts": {
+    "0": 11588,
+    "2": 1
+   },
+   "max_off_integer": 0.0761892763658803
+  }
+ },
+ "fig3_barcodes": {
+  "DRpilot_708020_20240517": {
+   "recorded": {
+    "n": 176,
+    "n_off_by_over_10ms": 2,
+    "max_abs_s": 0.9958099999996648
+   },
+   "corrected": {
+    "n": 174,
+    "n_off_by_over_10ms": 0,
+    "max_abs_s": 0.00014500000003181412
+   }
+  },
+  "DRpilot_714748_20240628": {
+   "recorded": {
+    "n": 228,
+    "n_off_by_over_10ms": 6,
+    "max_abs_s": 1.500079999999798
+   },
+   "corrected": {
+    "n": 224,
+    "n_off_by_over_10ms": 0,
+    "max_abs_s": 0.00044999999863648554
+   }
+  },
+  "DRpilot_703880_20240418": {
+   "recorded": {
+    "n": 244,
+    "n_off_by_over_10ms": 4,
+    "max_abs_s": 1.5000299999996969
+   },
+   "corrected": {
+    "n": 242,
+    "n_off_by_over_10ms": 0,
+    "max_abs_s": 0.00014999999979181666
+   }
+  },
+  "DRpilot_715709_20240808": {
+   "recorded": {
+    "n": 127,
+    "n_off_by_over_10ms": 2,
+    "max_abs_s": 2.000139999999817
+   },
+   "corrected": {
+    "n": 127,
+    "n_off_by_over_10ms": 0,
+    "max_abs_s": 0.00016999999982658665
+   }
+  },
+  "DRpilot_840160_20260428": {
+   "recorded": {
+    "n": 187,
+    "n_off_by_over_10ms": 1,
+    "max_abs_s": 0.9999799999998231
+   },
+   "corrected": {
+    "n": 187,
+    "n_off_by_over_10ms": 0,
+    "max_abs_s": 0.00020000000017716957
+   }
+  }
+ },
+ "fig3_lags": {
+  "n": 1165,
+  "n_zero": 397,
+  "median_nonzero": 2.0,
+  "max": 20.5
+ },
+ "fig3_balance": {
+  "n_files": 152,
+  "n_equal": 151,
+  "total_copies": 1475,
+  "total_located": 1474,
+  "unequal": [
+   [
+    "DRpilot_759435_20250508",
+    1,
+    0
+   ]
+  ]
+ },
+ "fig3_vsync": {
+  "recorded": {
+   "n": 778,
+   "median_abs_ms": 0.3846,
+   "n_over_0p2": 453,
+   "n_over_1": 109
+  },
+  "timebase": {
+   "n": 1144,
+   "median_abs_ms": 0.024149999999999998,
+   "n_over_0p2": 12,
+   "n_over_1": 0
+  }
+ },
+ "fig4_sessions": {
+  "DRpilot_702131_20240223": {
+   "n_copies": 73,
+   "matched_recorded": 32,
+   "matched_corrected": 109,
+   "matched_on_time": 3341,
+   "n_displaced": 109,
+   "n_on_time": 3347,
+   "shifts": {
+    "0.5": 43,
+    "1.0": 22,
+    "1.5": 26,
+    "2.0": 17,
+    "3.5": 1
+   }
+  },
+  "DRpilot_712139_20240510": {
+   "n_copies": 39,
+   "matched_recorded": 30,
+   "matched_corrected": 125,
+   "matched_on_time": 5357,
+   "n_displaced": 126,
+   "n_on_time": 5372,
+   "shifts": {
+    "0.5": 76,
+    "1.0": 7,
+    "1.5": 9,
+    "2.0": 30,
+    "2.5": 4
+   }
+  },
+  "DRpilot_708020_20240517": {
+   "n_copies": 89,
+   "matched_recorded": 0,
+   "matched_corrected": 65,
+   "matched_on_time": 1520,
+   "n_displaced": 67,
+   "n_on_time": 1521,
+   "shifts": {
+    "0.5": 4,
+    "1.0": 13,
+    "1.5": 8,
+    "2.0": 10,
+    "2.5": 5,
+    "3.0": 5,
+    "3.5": 15,
+    "4.0": 7
+   }
+  },
+  "DRpilot_714748_20240628": {
+   "n_copies": 137,
+   "matched_recorded": 1,
+   "matched_corrected": 47,
+   "matched_on_time": 882,
+   "n_displaced": 48,
+   "n_on_time": 882,
+   "shifts": {
+    "0.5": 20,
+    "1.0": 4,
+    "1.5": 5,
+    "2.0": 2,
+    "2.5": 8,
+    "3.0": 2,
+    "3.5": 2,
+    "6.0": 5
+   }
+  },
+  "DRpilot_859582_20260612": {
+   "n_copies": 27,
+   "matched_recorded": 3,
+   "matched_corrected": 23,
+   "matched_on_time": 1625,
+   "n_displaced": 24,
+   "n_on_time": 1629,
+   "shifts": {
+    "0.5": 4,
+    "1.0": 6,
+    "1.5": 9,
+    "6.0": 1,
+    "6.5": 4
+   }
+  },
+  "DRpilot_708016_20240426": {
+   "n_copies": 30,
+   "matched_recorded": 3,
+   "matched_corrected": 18,
+   "matched_on_time": 4726,
+   "n_displaced": 18,
+   "n_on_time": 4741,
+   "shifts": {
+    "0.5": 17,
+    "1.5": 1
+   }
+  },
+  "DRpilot_708020_20240516": {
+   "n_copies": 41,
+   "matched_recorded": 2,
+   "matched_corrected": 23,
+   "matched_on_time": 1529,
+   "n_displaced": 24,
+   "n_on_time": 1530,
+   "shifts": {
+    "0.5": 12,
+    "1.0": 1,
+    "2.5": 11
+   }
+  },
+  "DRpilot_715709_20240808": {
+   "n_copies": 0,
+   "matched_recorded": 29,
+   "matched_corrected": 1858,
+   "matched_on_time": 132,
+   "n_displaced": 1864,
+   "n_on_time": 132,
+   "shifts": {
+    "2.0": 1038,
+    "2.5": 826
+   }
+  },
+  "DRpilot_840160_20260428": {
+   "n_copies": 0,
+   "matched_recorded": 136,
+   "matched_corrected": 1541,
+   "matched_on_time": 224,
+   "n_displaced": 1546,
+   "n_on_time": 224,
+   "shifts": {
+    "1.0": 1546
+   }
+  }
+ },
+ "fig4": {
+  "copies": {
+   "n_sessions": 7,
+   "n_displaced_licks": 416,
+   "matched_recorded": 71,
+   "matched_corrected": 410,
+   "matched_on_time": 18980,
+   "n_on_time": 19022,
+   "as recorded": {
+    "0.0": 82,
+    "-0.5": 214,
+    "-1.0": 156,
+    "-1.5": 148,
+    "-2.0": 135,
+    "-2.5": 103,
+    "-3.0": 72,
+    "-3.5": 76
+   },
+   "corrected clock": {
+    "0.0": 410,
+    "-0.5": 124,
+    "-1.0": 99,
+    "-1.5": 82,
+    "-2.0": 55,
+    "-2.5": 44,
+    "-3.0": 42,
+    "-3.5": 29
+   }
+  },
+  "pure": {
+   "n_sessions": 2,
+   "n_displaced_licks": 3410,
+   "matched_recorded": 165,
+   "matched_corrected": 3399,
+   "matched_on_time": 356,
+   "n_on_time": 356,
+   "as recorded": {
+    "0.0": 206,
+    "-0.5": 264,
+    "-1.0": 1648,
+    "-1.5": 519,
+    "-2.0": 1352,
+    "-2.5": 1171,
+    "-3.0": 330,
+    "-3.5": 122
+   },
+   "corrected clock": {
+    "0.0": 3404,
+    "-0.5": 673,
+    "-1.0": 305,
+    "-1.5": 149,
+    "-2.0": 78,
+    "-2.5": 77,
+    "-3.0": 80,
+    "-3.5": 74
+   }
+  }
+ }
+}

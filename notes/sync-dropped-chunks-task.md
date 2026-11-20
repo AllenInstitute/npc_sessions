@@ -57,3 +57,11 @@ Consistent with the survey: drops before a run are almost always single chunks, 
 
 - `write_h5_data` (`src/sync/datasets.py` line 124) stamps each event with the index of the last sample before the change, so every event in every file is one sample (10 us) early. This is why the event before a copy "already carried the copy's state".
 - Upstream fix, one line: `self.buffer_q.put((timestamp, self.daq_buffer.copy()))`. A slow writer then only delays the file.
+
+## Follow-up 2026-11-20: barcode line of the patched sync
+
+- Reported: 703880 patched line had double-length intervals and a small long/short pair
+- Cause: npc_sessions barcode spans (2 s padding "to where the line is low") cut a barcode to 2 pulses and removed complete barcodes. The timebase itself leaves 0 of 249 barcodes off the period
+- Fixed in builder 8 (npc_sessions 0.0.296): whole barcodes only; padding kept because npc_ephys cuts edges within 2 s of invalid intervals. Builders 6 and 7 (no padding) broke ephys timing on 3 sessions and were not released
+- Validated on the 5 sessions: `experiments/sync-timebase-drops/barcode_intervals.md`, `e2e_release3_vs_release.md`
+- Open: double-length intervals remain (complete barcodes within 2 s of a dropped interval are removed); needs a change in npc_ephys to recover them

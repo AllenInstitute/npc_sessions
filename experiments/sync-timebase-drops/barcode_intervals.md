@@ -1,0 +1,107 @@
+# 703880_2024-04-18
+== recorded: 249 barcodes, period 30.96568 s; multiples {1: 248}; |dev| > 1 ms: 8; max |dev| of the rest 0.150 ms
+     896.527 ->   926.492:  29.9656 s = 1 x period  -1000.08 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(923.0, 923.5), (926.5, 927.0)]
+     926.492 ->   958.458:  31.9656 s = 1 x period   +999.94 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(923.0, 923.5), (926.5, 927.0)]
+    1980.324 ->  2009.790:  29.4657 s = 1 x period  -1500.03 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(2003.5, 2004.0), (2005.5, 2006.0), (2007.5, 2008.0)]
+    2009.790 ->  2042.255:  32.4657 s = 1 x period  +1499.98 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(2007.5, 2008.0), (2013.0, 2013.5)]
+    3187.985 ->  3217.451:  29.4657 s = 1 x period  -1500.02 ms; rising edges in the barcode at the end: 5; dropped intervals within 3 s of either end: [(3201.0, 3201.5), (3205.5, 3206.0), (3209.0, 3209.5), (3214.5, 3215.0)]
+    3217.451 ->  3249.916:  32.4657 s = 1 x period  +1500.00 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(3214.5, 3215.0), (3215.5, 3216.0), (3219.0, 3219.5), (3222.5, 3223.0)]
+    3249.916 ->  3279.382:  29.4657 s = 1 x period  -1500.00 ms; rising edges in the barcode at the end: 16; dropped intervals within 3 s of either end: [(3264.0, 3264.5), (3266.5, 3267.0), (3270.0, 3270.5), (3275.5, 3276.0)]
+    3279.382 ->  3311.848:  32.4657 s = 1 x period  +1500.01 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(3276.5, 3277.0), (3277.5, 3278.0), (3280.0, 3280.5), (3281.0, 3281.5)]
+== timebase, unpatched: 249 barcodes, period 30.96568 s; multiples {1: 248}; |dev| > 1 ms: 0; max |dev| of the rest 0.150 ms
+== patched: 242 barcodes, period 30.96568 s; multiples {1: 234, 2: 7}; |dev| > 1 ms: 0; max |dev| of the rest 0.150 ms
+     896.527 ->   958.458:  61.9312 s = 2 x period     -0.14 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(923.0, 923.5), (926.5, 927.0)]
+    1608.736 ->  1670.667:  61.9313 s = 2 x period     -0.11 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(1642.5, 1643.0), (1643.5, 1644.0), (1646.0, 1646.5), (1650.5, 1651.0)]
+    1887.427 ->  1949.358:  61.9313 s = 2 x period     -0.04 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(1910.0, 1910.5), (1913.0, 1913.5), (1919.0, 1919.5), (1932.0, 1932.5)]
+    1980.324 ->  2042.255:  61.9313 s = 2 x period     -0.05 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(2003.5, 2004.0), (2005.5, 2006.0), (2007.5, 2008.0), (2013.0, 2013.5)]
+    3187.985 ->  3249.916:  61.9313 s = 2 x period     -0.02 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(3201.0, 3201.5), (3205.5, 3206.0), (3209.0, 3209.5), (3214.5, 3215.0)]
+    3249.916 ->  3311.848:  61.9314 s = 2 x period     +0.01 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(3264.0, 3264.5), (3266.5, 3267.0), (3270.0, 3270.5), (3275.5, 3276.0)]
+    3342.814 ->  3404.745:  61.9314 s = 2 x period     +0.01 ms; rising edges in the barcode at the end: 11; dropped intervals within 3 s of either end: [(3366.5, 3367.0), (3372.0, 3372.5)]
+# 708020_2024-05-17
+== recorded: 188 barcodes, period 30.96555 s; multiples {1: 187}; |dev| > 1 ms: 16; max |dev| of the rest 0.150 ms
+    1607.086 ->  1634.552:  27.4655 s = 1 x period  -3500.02 ms; rising edges in the barcode at the end: 12; dropped intervals within 3 s of either end: [(1628.5, 1629.0), (1630.0, 1630.5), (1631.5, 1632.0), (1633.0, 1633.5)]
+    1634.552 ->  1668.022:  33.4698 s = 1 x period  +2504.21 ms; rising edges in the barcode at the end: 5; dropped intervals within 3 s of either end: [(1631.5, 1632.0), (1633.0, 1633.5), (1634.5, 1635.0), (1635.5, 1636.0)]
+    1668.022 ->  1696.483:  28.4613 s = 1 x period  -2504.24 ms; rising edges in the barcode at the end: 16; dropped intervals within 3 s of either end: [(1667.0, 1667.5), (1669.0, 1669.5), (1670.0, 1670.5), (1672.0, 1672.5)]
+    1696.483 ->  1730.949:  34.4656 s = 1 x period  +3500.02 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(1693.0, 1693.5), (1695.0, 1695.5), (1696.0, 1696.5), (1697.5, 1698.0)]
+    2133.501 ->  2162.466:  28.9656 s = 1 x period  -2000.00 ms; rising edges in the barcode at the end: 5; dropped intervals within 3 s of either end: [(2152.5, 2153.0), (2154.0, 2154.5), (2156.0, 2156.5), (2157.0, 2157.5)]
+    2162.466 ->  2195.432:  32.9655 s = 1 x period  +1999.97 ms; rising edges in the barcode at the end: 11; dropped intervals within 3 s of either end: [(2160.5, 2161.0), (2163.5, 2164.0), (2166.0, 2166.5), (2168.0, 2168.5)]
+    3155.363 ->  3184.829:  29.4655 s = 1 x period  -1500.00 ms; rising edges in the barcode at the end: 5; dropped intervals within 3 s of either end: [(3157.0, 3157.5), (3158.0, 3158.5), (3160.0, 3160.5), (3167.0, 3167.5)]
+    3184.829 ->  3217.294:  32.4656 s = 1 x period  +1500.02 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(3183.0, 3183.5), (3184.0, 3184.5), (3200.5, 3201.0), (3203.0, 3203.5)]
+    3341.157 ->  3371.122:  29.9656 s = 1 x period   -999.99 ms; rising edges in the barcode at the end: 21; dropped intervals within 3 s of either end: [(3351.0, 3351.5), (3362.5, 3363.0), (3365.5, 3366.0), (3367.0, 3367.5)]
+    3371.122 ->  3403.088:  31.9656 s = 1 x period  +1000.02 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(3371.5, 3372.0), (3374.0, 3374.5)]
+    3526.950 ->  3557.572:  30.6216 s = 1 x period   -343.93 ms; rising edges in the barcode at the end: 5; dropped intervals within 3 s of either end: [(3532.0, 3532.5), (3533.5, 3534.0), (3541.5, 3542.0), (3545.0, 3545.5)]
+    3557.572 ->  3588.881:  31.3095 s = 1 x period   +343.94 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(3556.0, 3556.5), (3557.5, 3558.0), (3564.5, 3565.0), (3566.5, 3567.0)]
+    3681.778 ->  3711.743:  29.9656 s = 1 x period   -999.97 ms; rising edges in the barcode at the end: 5; dropped intervals within 3 s of either end: [(3709.5, 3710.0), (3711.5, 3712.0), (3713.0, 3713.5)]
+    3711.743 ->  3743.000:  31.2566 s = 1 x period   +291.01 ms; rising edges in the barcode at the end: 11; dropped intervals within 3 s of either end: [(3709.5, 3710.0), (3711.5, 3712.0), (3713.0, 3713.5), (3720.5, 3721.0)]
+    3743.000 ->  3772.675:  29.6746 s = 1 x period  -1290.96 ms; rising edges in the barcode at the end: 20; dropped intervals within 3 s of either end: [(3741.5, 3742.0), (3743.5, 3744.0), (3744.5, 3745.0), (3746.0, 3746.5)]
+    3772.675 ->  3805.640:  32.9656 s = 1 x period  +2000.03 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(3770.5, 3771.0), (3772.0, 3772.5), (3783.0, 3783.5), (3802.5, 3803.0)]
+== timebase, unpatched: 188 barcodes, period 30.96555 s; multiples {1: 187}; |dev| > 1 ms: 6; max |dev| of the rest 0.150 ms
+    1638.052 ->  1669.522:  31.4698 s = 1 x period   +504.21 ms; rising edges in the barcode at the end: 5; dropped intervals within 3 s of either end: [(1635.5, 1636.0), (1637.0, 1637.5), (1641.5, 1642.0), (1643.5, 1644.0)]
+    1669.522 ->  1699.983:  30.4613 s = 1 x period   -504.24 ms; rising edges in the barcode at the end: 11; dropped intervals within 3 s of either end: [(1667.0, 1667.5), (1669.0, 1669.5), (1670.0, 1670.5), (1672.0, 1672.5)]
+    3526.950 ->  3558.072:  31.1216 s = 1 x period   +156.07 ms; rising edges in the barcode at the end: 5; dropped intervals within 3 s of either end: [(3532.0, 3532.5), (3533.5, 3534.0), (3541.5, 3542.0), (3545.0, 3545.5)]
+    3558.072 ->  3588.881:  30.8095 s = 1 x period   -156.06 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(3556.0, 3556.5), (3557.5, 3558.0), (3564.5, 3565.0), (3566.5, 3567.0)]
+    3712.743 ->  3743.500:  30.7566 s = 1 x period   -208.99 ms; rising edges in the barcode at the end: 6; dropped intervals within 3 s of either end: [(3709.5, 3710.0), (3711.5, 3712.0), (3713.0, 3713.5), (3720.5, 3721.0)]
+    3743.500 ->  3774.675:  31.1746 s = 1 x period   +209.04 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(3741.5, 3742.0), (3743.5, 3744.0), (3744.5, 3745.0), (3746.0, 3746.5)]
+== patched: 175 barcodes, period 30.96555 s; multiples {1: 166, 2: 4, 3: 3, 4: 1}; |dev| > 1 ms: 0; max |dev| of the rest 0.150 ms
+    1607.086 ->  1730.949: 123.8622 s = 4 x period     -0.03 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(1628.5, 1629.0), (1630.0, 1630.5), (1631.5, 1632.0), (1633.0, 1633.5)]
+    2133.501 ->  2195.432:  61.9311 s = 2 x period     -0.03 ms; rising edges in the barcode at the end: 11; dropped intervals within 3 s of either end: [(2152.5, 2153.0), (2154.0, 2154.5), (2156.0, 2156.5), (2157.0, 2157.5)]
+    2814.742 ->  2876.673:  61.9311 s = 2 x period     +0.02 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(2847.5, 2848.0), (2849.5, 2850.0), (2854.0, 2854.5), (2855.5, 2856.0)]
+    3124.398 ->  3217.294:  92.8967 s = 3 x period     +0.04 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(3157.0, 3157.5), (3158.0, 3158.5), (3160.0, 3160.5), (3167.0, 3167.5)]
+    3341.157 ->  3403.088:  61.9311 s = 2 x period     +0.03 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(3351.0, 3351.5), (3362.5, 3363.0), (3365.5, 3366.0), (3367.0, 3367.5)]
+    3526.950 ->  3588.881:  61.9311 s = 2 x period     +0.01 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(3532.0, 3532.5), (3533.5, 3534.0), (3541.5, 3542.0), (3545.0, 3545.5)]
+    3681.778 ->  3774.675:  92.8967 s = 3 x period     +0.08 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(3709.5, 3710.0), (3711.5, 3712.0), (3713.0, 3713.5), (3720.5, 3721.0)]
+    3774.675 ->  3867.571:  92.8967 s = 3 x period     +0.05 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(3772.0, 3772.5), (3783.0, 3783.5), (3802.5, 3803.0), (3806.5, 3807.0)]
+# 714748_2024-06-28
+== recorded: 246 barcodes, period 30.96586 s; multiples {1: 245}; |dev| > 1 ms: 21; max |dev| of the rest 0.180 ms
+    3553.033 ->  3582.999:  29.9659 s = 1 x period  -1000.00 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(3561.5, 3562.0), (3570.0, 3570.5), (3572.5, 3573.0), (3574.0, 3574.5)]
+    3582.999 ->  3614.964:  31.9659 s = 1 x period  +1000.03 ms; rising edges in the barcode at the end: 6; dropped intervals within 3 s of either end: [(3579.5, 3580.0), (3581.5, 3582.0), (3583.0, 3583.5), (3585.0, 3585.5)]
+    3614.964 ->  3644.430:  29.4659 s = 1 x period  -1499.97 ms; rising edges in the barcode at the end: 26; dropped intervals within 3 s of either end: [(3641.0, 3641.5), (3643.0, 3643.5), (3644.5, 3645.0), (3647.0, 3647.5)]
+    3644.430 ->  3676.896:  32.4659 s = 1 x period  +1500.02 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(3641.0, 3641.5), (3643.0, 3643.5), (3644.5, 3645.0), (3647.0, 3647.5)]
+    5318.088 ->  5347.554:  29.4659 s = 1 x period  -1499.98 ms; rising edges in the barcode at the end: 4; dropped intervals within 3 s of either end: [(5340.5, 5341.0), (5345.0, 5345.5), (5346.5, 5347.0), (5348.0, 5348.5)]
+    5347.554 ->  5380.020:  32.4659 s = 1 x period  +1500.02 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(5345.0, 5345.5), (5346.5, 5347.0), (5348.0, 5348.5), (5349.5, 5350.0)]
+    5441.951 ->  5472.417:  30.4659 s = 1 x period   -499.96 ms; rising edges in the barcode at the end: 16; dropped intervals within 3 s of either end: [(5449.0, 5449.5), (5454.5, 5455.0), (5472.0, 5472.5)]
+    5472.417 ->  5503.883:  31.4659 s = 1 x period   +500.03 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(5472.0, 5472.5)]
+    5689.679 ->  5720.004:  30.3251 s = 1 x period   -640.78 ms; rising edges in the barcode at the end: 4; dropped intervals within 3 s of either end: [(5688.0, 5688.5), (5691.5, 5692.0), (5693.0, 5693.5), (5694.0, 5694.5)]
+    5720.004 ->  5749.610:  29.6068 s = 1 x period  -1359.09 ms; rising edges in the barcode at the end: 12; dropped intervals within 3 s of either end: [(5717.0, 5717.5), (5720.5, 5721.0), (5740.0, 5740.5), (5741.5, 5742.0)]
+    5749.610 ->  5782.076:  32.4659 s = 1 x period  +1500.07 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(5747.0, 5747.5), (5748.5, 5749.0), (5751.0, 5751.5), (5754.0, 5754.5)]
+    5782.076 ->  5810.542:  28.4659 s = 1 x period  -2499.95 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(5781.0, 5781.5), (5785.0, 5785.5), (5788.0, 5788.5), (5793.5, 5794.0)]
+    5810.542 ->  5843.008:  32.4659 s = 1 x period  +1500.07 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(5809.0, 5810.0), (5811.0, 5811.5), (5812.0, 5812.5), (5813.0, 5813.5)]
+    5843.008 ->  5875.474:  32.4659 s = 1 x period  +1500.08 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(5841.5, 5842.0), (5843.0, 5843.5), (5844.0, 5844.5), (5845.5, 5846.0)]
+    5875.474 ->  5899.940:  24.4659 s = 1 x period  -6499.95 ms; rising edges in the barcode at the end: 13; dropped intervals within 3 s of either end: [(5879.0, 5879.5), (5885.0, 5885.5), (5886.0, 5886.5), (5887.0, 5888.0)]
+    5899.940 ->  5937.406:  37.4659 s = 1 x period  +6500.05 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(5897.0, 5897.5), (5898.0, 5898.5), (5899.5, 5900.0), (5900.5, 5901.0)]
+    5999.338 ->  6025.304:  25.9659 s = 1 x period  -4999.91 ms; rising edges in the barcode at the end: 5; dropped intervals within 3 s of either end: [(6005.5, 6006.0), (6009.0, 6009.5), (6011.0, 6011.5), (6013.0, 6013.5)]
+    6025.304 ->  6061.042:  35.7381 s = 1 x period  +4772.19 ms; rising edges in the barcode at the end: 6; dropped intervals within 3 s of either end: [(6023.0, 6023.5), (6026.5, 6027.0), (6028.5, 6029.0), (6030.5, 6031.0)]
+    6061.042 ->  6092.236:  31.1938 s = 1 x period   +227.98 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(6059.0, 6059.5), (6061.0, 6061.5), (6062.0, 6062.5), (6077.0, 6077.5)]
+    6092.236 ->  6122.702:  30.4660 s = 1 x period   -499.90 ms; rising edges in the barcode at the end: 14; dropped intervals within 3 s of either end: [(6097.0, 6097.5), (6100.0, 6100.5), (6106.0, 6106.5), (6107.5, 6108.0)]
+    6122.702 ->  6154.168:  31.4659 s = 1 x period   +500.09 ms; rising edges in the barcode at the end: 9; dropped intervals within 3 s of either end: [(6120.5, 6121.0), (6128.5, 6129.0), (6130.0, 6130.5), (6131.5, 6132.0)]
+== timebase, unpatched: 246 barcodes, period 30.96587 s; multiples {1: 245}; |dev| > 1 ms: 4; max |dev| of the rest 0.190 ms
+    5689.679 ->  5721.004:  31.3251 s = 1 x period   +359.21 ms; rising edges in the barcode at the end: 4; dropped intervals within 3 s of either end: [(5688.0, 5688.5), (5691.5, 5692.0), (5693.0, 5693.5), (5694.0, 5694.5)]
+    5721.004 ->  5751.610:  30.6068 s = 1 x period   -359.10 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(5720.5, 5721.0), (5740.0, 5740.5), (5741.5, 5742.0), (5743.0, 5743.5)]
+    6030.304 ->  6061.542:  31.2381 s = 1 x period   +272.18 ms; rising edges in the barcode at the end: 6; dropped intervals within 3 s of either end: [(6028.5, 6029.0), (6030.5, 6031.0), (6032.0, 6032.5), (6041.0, 6041.5)]
+    6061.542 ->  6092.236:  30.6938 s = 1 x period   -272.03 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(6059.0, 6059.5), (6061.0, 6061.5), (6062.0, 6062.5), (6077.0, 6077.5)]
+== patched: 226 barcodes, period 30.96587 s; multiples {1: 215, 2: 5, 3: 3, 4: 1, 7: 1}; |dev| > 1 ms: 0; max |dev| of the rest 0.380 ms
+    2593.092 ->  2685.989:  92.8974 s = 3 x period     -0.24 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(2624.5, 2625.0), (2626.0, 2626.5), (2627.5, 2628.0), (2629.0, 2629.5)]
+    3212.408 ->  3274.340:  61.9317 s = 2 x period     -0.01 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(3230.0, 3230.5), (3232.0, 3232.5), (3233.0, 3233.5), (3234.5, 3235.0)]
+    3553.033 ->  3614.964:  61.9318 s = 2 x period     +0.01 ms; rising edges in the barcode at the end: 6; dropped intervals within 3 s of either end: [(3561.5, 3562.0), (3570.0, 3570.5), (3572.5, 3573.0), (3574.0, 3574.5)]
+    3614.964 ->  3707.862:  92.8976 s = 3 x period     +0.03 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(3641.0, 3641.5), (3643.0, 3643.5), (3644.5, 3645.0), (3647.0, 3647.5)]
+    5318.088 ->  5380.020:  61.9318 s = 2 x period     +0.02 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(5340.5, 5341.0), (5345.0, 5345.5), (5346.5, 5347.0), (5348.0, 5348.5)]
+    5441.951 ->  5503.883:  61.9318 s = 2 x period     +0.05 ms; rising edges in the barcode at the end: 7; dropped intervals within 3 s of either end: [(5449.0, 5449.5), (5454.5, 5455.0), (5472.0, 5472.5)]
+    5658.713 ->  5875.474: 216.7615 s = 7 x period     +0.38 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(5681.5, 5682.0), (5682.5, 5683.0), (5686.0, 5686.5), (5688.0, 5688.5)]
+    5875.474 ->  5999.338: 123.8637 s = 4 x period     +0.23 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(5879.0, 5879.5), (5885.0, 5885.5), (5886.0, 5886.5), (5887.0, 5888.0)]
+    5999.338 ->  6092.236:  92.8978 s = 3 x period     +0.23 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(6005.5, 6006.0), (6009.0, 6009.5), (6011.0, 6011.5), (6013.0, 6013.5)]
+    6123.202 ->  6185.134:  61.9319 s = 2 x period     +0.15 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(6120.5, 6121.0), (6128.5, 6129.0), (6130.0, 6130.5), (6131.5, 6132.0)]
+# 840160_2026-04-28
+== recorded: 188 barcodes, period 31.01452 s; multiples {1: 187}; |dev| > 1 ms: 1; max |dev| of the rest 0.200 ms
+    2458.560 ->  2488.575:  30.0145 s = 1 x period   -999.98 ms; rising edges in the barcode at the end: 11; dropped intervals within 3 s of either end: [(2472.0, 2473.0)]
+== timebase, unpatched: 188 barcodes, period 31.01452 s; multiples {1: 187}; |dev| > 1 ms: 0; max |dev| of the rest 0.200 ms
+== patched: 188 barcodes, period 31.01452 s; multiples {1: 187}; |dev| > 1 ms: 0; max |dev| of the rest 0.200 ms
+# 715709_2024-08-08
+== recorded: 129 barcodes, period 31.01510 s; multiples {1: 128}; |dev| > 1 ms: 3; max |dev| of the rest 0.165 ms
+       0.049 ->    30.239:  30.1902 s = 1 x period   -824.91 ms; rising edges in the barcode at the end: 12; dropped intervals within 3 s of either end: []
+     247.344 ->   276.359:  29.0150 s = 1 x period  -2000.13 ms; rising edges in the barcode at the end: 10; dropped intervals within 3 s of either end: [(258.5, 260.5)]
+    2075.231 ->  2105.747:  30.5151 s = 1 x period   -500.00 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(2080.0, 2080.5)]
+== timebase, unpatched: 129 barcodes, period 31.01511 s; multiples {1: 128}; |dev| > 1 ms: 1; max |dev| of the rest 0.170 ms
+       0.049 ->    30.239:  30.1902 s = 1 x period   -824.92 ms; rising edges in the barcode at the end: 12; dropped intervals within 3 s of either end: []
+== patched: 128 barcodes, period 31.01511 s; multiples {1: 126, 2: 1}; |dev| > 1 ms: 1; max |dev| of the rest 0.170 ms
+       0.049 ->    30.239:  30.1902 s = 1 x period   -824.92 ms; rising edges in the barcode at the end: 12; dropped intervals within 3 s of either end: []
+    2046.216 ->  2108.247:  62.0302 s = 2 x period     +0.00 ms; rising edges in the barcode at the end: 8; dropped intervals within 3 s of either end: [(2080.0, 2080.5)]

@@ -7,7 +7,7 @@ Date: 2026-11-19/20. Task: `notes/sync-dropped-chunks-task.md`. Evidence: `exper
 | Item | State |
 |---|---|
 | npc_sync | 0.3.8 on PyPI. CI: 72 passed, 16 skipped on ubuntu, macOS and windows (run 44695310796). |
-| npc_sessions | 0.0.294 on PyPI, floor `npc-sync>=0.3.8`. CI: mypy clean, 65 passed, 2 skipped (run 44695811631). |
+| npc_sessions | 0.0.294 on PyPI, floor `npc-sync>=0.3.8`. CI: mypy clean, 65 passed, 2 skipped (run 44695811631). **Superseded by 0.0.296** (builder 8, barcode spans; see "Follow-up: barcode line"). |
 | Patch cache | 5 sessions written to `s3://aind-scratch-data/dynamic-routing/cache/sync_patches/` with the released npc_sync, then reloaded from it in a new process (`e2e_release.json`, `e2e_release_reload.json`). |
 | Not done | See "Not fixed, and limits". npc_sessions_cache was not touched. |
 
@@ -89,6 +89,25 @@ These are the five npc_lims sessions among the 20 files with displaced data or a
 - No barcode discontinuity is left in any of the five on the timebase.
 - **714748 task block:** the vsync frames reconcile (230 spans, residual ≤ 0.30 ms), but the box-1 photodiode alignment leaves 4,072 diode edges unexplained. The first is at 4129.37 s, where a frame-signal edge is 22 ms late, with no dropped interval nearby. This is the existing alignment check being strict on a session with very irregular frame timing. It is not caused by the timebase, but I did not fix it.
 
+## Follow-up (2026-11-20): barcode line after the patch
+
+You saw double-length barcode intervals and a small long/short pair on the patched line of 703880. Both were real, and both came from the barcode-span step in npc_sessions, not from the timebase (`barcode_intervals.md`, all barcodes, none excluded):
+
+| 703880_2024-04-18 | Barcodes | Intervals off the period by > 1 ms |
+|---|---:|---:|
+| Recorded clock | 249 | 8 |
+| Corrected clock, spans not applied | 249 | 0 |
+| Patched, builder 5 (what you saw) | 244 | 2 (+765 / −765 ms), plus 5 double intervals |
+| Patched, builder 8 | 242 | 0, plus 7 double intervals |
+
+- **The pair** was a barcode cut to 2 of its 11 pulses. Builder 5 padded each dropped interval by 2 s and stopped where the line was low, which can be between two pulses of one barcode. My discontinuity check skips barcodes near invalid intervals, so it didn't see it.
+- **Builder 8** removes whole barcodes only: every barcode the padded span touches, any that may continue into a dropped interval, and the tail of one whose onset fell inside it (three such tails in 708020 and 714748).
+- **The double intervals remain, and are exact** (within 0.15 ms of 2 × the period). They are barcodes within 2 s of a dropped interval, removed although most are complete. The padding has to stay: npc_ephys drops barcode edges within 2 s of every invalid interval, one by one, and fails if that leaves a barcode half-cut.
+- **I got this wrong twice before getting it right.** Builders 6 and 7 dropped the padding, which kept the good barcodes but made npc_ephys fail on three of the five sessions ("on and off times should be same length"). The end-to-end rerun caught it; I cancelled the builder-7 CI run before it published. Neither was released.
+- **Result on all five sessions** (`e2e_release3_vs_release.md`): no off-period interval on the patched line, ephys devices all pass with the same residuals, block statuses and trial counts unchanged. Patches on S3 are builder 8 with npc_sync 0.3.9.
+- **One off-period interval is left in 715709**, the first barcode of the file (0.049 s): the recording starts mid-barcode. It has nothing to do with drops and I left it.
+- **To get the removed barcodes back**, npc_ephys would have to stop its own 2 s cut when the sync line is patched. I did not change npc_ephys.
+
 ## What changed in the code
 
 | Repo | Change |
@@ -110,7 +129,7 @@ On your point about order (replay patches first, then drop patches): the two tur
 - **Files with one camera or none** can't have drops located. Runs of copies fall back to the old model; pure drops stay refused through the barcode check.
 - **Behaviour-only files have no barcodes**, so a wrongly located drop would not be caught by them. None was found in 100 clean files, and a drop inside a stim block still has to pass the vsync frame solve.
 - **The cause in the sync program is still unknown.** The pattern (single buffers lost, made up for seconds later by copies) should help whoever looks at the acquisition code.
-- **Vsync rising edges don't alternate at a reconstructed span.** They are placed at falling edge − pulse width, which on real files (pulse ~15.9 ms) puts the first one next to the measured rising edge before the span and leaves none before the first measured frame after it: one rising–rising and one falling–falling pair per span, counts equal (`vsync_rising_check.md`: 840160, 715709). This predates this work. npc_stim only uses rising edges as a lower bound on display times, so the effect is a looser bound for one frame per span. Not fixed.
+- **Vsync rising edges don't alternate at a reconstructed span** (fixed since, in npc_sync 0.3.9, not by me). They are placed at falling edge − pulse width, which on real files (pulse ~15.9 ms) puts the first one next to the measured rising edge before the span and leaves none before the first measured frame after it: one rising–rising and one falling–falling pair per span, counts equal (`vsync_rising_check.md`: 840160, 715709). This predates this work. npc_stim only uses rising edges as a lower bound on display times, so the effect is a looser bound for one frame per span. Not fixed.
 
 ## Sources
 
