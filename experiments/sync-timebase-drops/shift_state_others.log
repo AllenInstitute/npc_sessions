@@ -1,0 +1,97 @@
+C:/data/t2p_cache/DRpilot_715709_20240808/20240808T150522.h5
+ lines ['beh_cam_exposing:r', 'beh_cam_exposing:f', 'face_cam_exposing:r', 'face_cam_exposing:f', 'eye_cam_exposing:r', 'eye_cam_exposing:f']
+ chunks with >= 2 lines: 7954 of 7983
+ |d - round(d)| percentiles (50, 99, 99.9, max): [0.007 0.044 0.06  0.079]
+ line spread percentiles (50, 99, 99.9, max): [0.066 0.349 1.021 1.65 ]
+ replay runs: 0
+ nonzero jumps: 2
+   boundary    258.5 s  J +4  d +4.01  spread 0.05 lines 5 
+   boundary   2078.0 s  J +1  d +0.97  spread 0.07 lines 6 
+ copy boundaries without J = -1: [] 0
+C:/data/t2p_cache/DRpilot_840160_20260428/20260428T103950.h5
+ lines ['face_cam_exposing:r', 'face_cam_exposing:f', 'beh_cam_exposing:r', 'beh_cam_exposing:f', 'nose_cam_exposing:r', 'nose_cam_exposing:f', 'eye_cam_exposing:r', 'eye_cam_exposing:f']
+ chunks with >= 2 lines: 11589 of 11626
+ |d - round(d)| percentiles (50, 99, 99.9, max): [0.007 0.038 0.054 0.076]
+ line spread percentiles (50, 99, 99.9, max): [0.076 0.603 1.348 1.89 ]
+ replay runs: 0
+ nonzero jumps: 1
+   boundary   2472.0 s  J +2  d +1.99  spread 0.03 lines 8 
+ copy boundaries without J = -1: [] 0
+//allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 Pilot/DRpilot_717473_20240916/20240916T095327.h5
+ lines ['beh_cam_exposing:r', 'beh_cam_exposing:f', 'face_cam_exposing:r', 'face_cam_exposing:f', 'eye_cam_exposing:r', 'eye_cam_exposing:f']
+ chunks with >= 2 lines: 10291 of 10319
+ |d - round(d)| percentiles (50, 99, 99.9, max): [0.007 0.044 0.06  0.072]
+ line spread percentiles (50, 99, 99.9, max): [0.065 0.371 1.082 1.759]
+ replay runs: 0
+ nonzero jumps: 1
+   boundary    782.5 s  J +3  d +3.01  spread 0.06 lines 6 
+ copy boundaries without J = -1: [] 0
+//allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 Pilot/DRpilot_832032_20260223/20260223T141650.h5
+ lines ['beh_cam_exposing:r', 'beh_cam_exposing:f', 'nose_cam_exposing:r', 'nose_cam_exposing:f', 'eye_cam_exposing:r', 'eye_cam_exposing:f']
+ chunks with >= 2 lines: 7331 of 7367
+ |d - round(d)| percentiles (50, 99, 99.9, max): [0.007 0.038 0.052 0.166]
+ line spread percentiles (50, 99, 99.9, max): [0.057 0.165 0.443 1.073]
+ replay runs: 0
+ nonzero jumps: 1
+   boundary   3598.0 s  J +3  d +3.01  spread 0.04 lines 6 
+ copy boundaries without J = -1: [] 0
+C:/data/t2p_cache/DRpilot_708020_20240517/20240517T100128.h5
+ lines ['beh_cam_exposing:r', 'beh_cam_exposing:f', 'face_cam_exposing:r', 'face_cam_exposing:f', 'eye_cam_exposing:r', 'eye_cam_exposing:f']
+ chunks with >= 2 lines: 11661 of 11691
+ |d - round(d)| percentiles (50, 99, 99.9, max): [0.009 0.053 0.07  0.07 ]
+ line spread percentiles (50, 99, 99.9, max): [0.06  0.167 0.195 0.22 ]
+ replay runs: 89
+ nonzero jumps: 280
+   boundary    936.0 s  J +1  d +0.99  spread 0.05 lines 6 
+   boundary    937.0 s  J +1  d +0.99  spread 0.08 lines 6 
+   boundary    937.5 s  J +1  d +0.99  spread 0.06 lines 6 
+   boundary    938.5 s  J +1  d +1.00  spread 0.07 lines 6 
+   boundary    939.0 s  J +1  d +0.98  spread 0.11 lines 6 
+   boundary    940.0 s  J +1  d +1.00  spread 0.11 lines 6 
+   boundary    943.0 s  J +1  d +1.00  spread 0.02 lines 6 
+   boundary    945.0 s  J +1  d +0.99  spread 0.07 lines 6 
+   boundary    947.5 s  J +1  d +0.99  spread 0.04 lines 6 
+   boundary    948.5 s  J +1  d +0.98  spread 0.04 lines 6 
+   boundary   1628.5 s  J +1  d +1.00  spread 0.08 lines 6 
+   boundary   1629.5 s  J +1  d +1.00  spread 0.13 lines 6 
+   boundary   1630.5 s  J +1  d +0.99  spread 0.04 lines 6 
+   boundary   1631.5 s  J +1  d +0.98  spread 0.12 lines 6 
+   boundary   1632.5 s  J +1  d +0.99  spread 0.08 lines 6 
+   boundary   1633.0 s  J +1  d +1.00  spread 0.08 lines 6 
+   boundary   1634.0 s  J +1  d +0.97  spread 0.07 lines 6 
+   boundary   1641.5 s  J +1  d +0.99  spread 0.09 lines 6 
+   boundary   1643.5 s  J +1  d +0.99  spread 0.04 lines 6 
+   boundary   1649.0 s  J +1  d +0.99  spread 0.04 lines 6 
+   boundary   1650.0 s  J +1  d +0.99  spread 0.02 lines 6 
+   boundary   1664.5 s  J +1  d +0.98  spread 0.09 lines 6 
+   boundary   1666.5 s  J +1  d +1.00  spread 0.08 lines 6 
+   boundary   1668.0 s  J +1  d +1.00  spread 0.11 lines 6 
+   boundary   1668.5 s  J +1  d +0.99  spread 0.11 lines 6 
+   boundary   1670.0 s  J +1  d +0.99  spread 0.08 lines 6 
+   boundary   1683.0 s  J +1  d +1.00  spread 0.09 lines 6 
+   boundary   1688.0 s  J +1  d +1.00  spread 0.03 lines 6 
+   boundary   1689.0 s  J +1  d +1.01  spread 0.07 lines 6 
+   boundary   1690.0 s  J +1  d +1.00  spread 0.03 lines 6 
+   boundary   1691.5 s  J +1  d +1.01  spread 0.05 lines 6 
+   boundary   1693.0 s  J +1  d +1.00  spread 0.08 lines 6 
+   boundary   1693.5 s  J +1  d +1.00  spread 0.07 lines 6 
+   boundary   1694.5 s  J +1  d +0.99  spread 0.08 lines 6 
+   boundary   1698.5 s  J +1  d +1.01  spread 0.04 lines 6 
+   boundary   1708.0 s  J +1  d +1.00  spread 0.03 lines 6 
+   boundary   1709.0 s  J +1  d +1.00  spread 0.09 lines 6 
+   boundary   1710.0 s  J +1  d +1.00  spread 0.08 lines 6 
+   boundary   1742.0 s  J +1  d +1.00  spread 0.03 lines 6 
+   boundary   1746.0 s  J +1  d +0.99  spread 0.08 lines 6 
+   boundary   1750.5 s  J +1  d +1.01  spread 0.03 lines 6 
+   boundary   1752.5 s  J +1  d +1.00  spread 0.13 lines 6 
+   boundary   2152.5 s  J +1  d +1.00  spread 0.08 lines 6 
+   boundary   2153.5 s  J +1  d +0.99  spread 0.06 lines 6 
+   boundary   2155.0 s  J +1  d +1.02  spread 0.06 lines 6 
+   boundary   2155.5 s  J +1  d +1.00  spread 0.14 lines 6 
+   boundary   2156.5 s  J +1  d +0.98  spread 0.06 lines 6 
+   boundary   2158.0 s  J +1  d +0.99  spread 0.09 lines 6 
+   boundary   2162.0 s  J +1  d +1.01  spread 0.13 lines 6 
+   boundary   2164.0 s  J +1  d +1.00  spread 0.07 lines 6 
+   boundary   2167.0 s  J +1  d +1.00  spread 0.14 lines 6 
+   boundary   2171.0 s  J +1  d +1.01  spread 0.13 lines 6 
+   boundary   2176.0 s  J +1  d +0.99  spread 0.04 lines 6 

@@ -1,0 +1,8 @@
+......................................                                   [100%]
+============================== warnings summary ===============================
+tests/test_task_trials.py: 32760 warnings
+  C:\Users\ben.hardcastle\github\npc_sessions\src\npc_sessions\trials\property_dict.py:90: DeprecationWarning: Converting `np.inexact` or `np.floating` to a dtype is deprecated. The current result is `float64` which is not strictly correct.
+    and a.dtype == np.floating
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+38 passed, 32760 warnings in 1177.46s (0:19:37)

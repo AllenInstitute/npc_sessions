@@ -2738,19 +2738,24 @@ class DynamicRoutingSession:
 
     @cached_property
     def _raw_sync_data(self) -> npc_sync.SyncDataset:
-        """The sync file as recorded, including any replayed (copied) buffers: only for
-        metadata and building the patch. Use `sync_data` for events."""
+        """The sync file as recorded, including any replayed (copied) buffers, on the
+        recorded sample clock: only for metadata and building the patch. Use `sync_data`
+        for events (true clock, see `npc_sessions.timing`)."""
         return npc_sync.SyncDataset(self.sync_path, on_invalid="ignore")
 
     @cached_property
     def sync_patch(self) -> npc_sync.SyncPatch | None:
         """Corrections to the sync file: photodiode phantom flicker and glitches removed (every
-        session), reconstructed/unknown edges inside replayed intervals (if any). See
+        session), the file's timebase (dropped and replayed acquisition buffers), and
+        reconstructed/unknown edges inside the intervals whose data was lost (if any). See
         `npc_sessions.timing`."""
         from npc_sessions import timing
 
         recording_dirs = None
-        if self._raw_sync_data.invalid_intervals and self.is_ephys:
+        if self.is_ephys and (
+            self._raw_sync_data.invalid_intervals
+            or self._raw_sync_data.timebase_discontinuities
+        ):
             # the NI-DAQ recording of the sound replaces the sync sound line there
             try:
                 recording_dirs = self.ephys_recording_dirs
@@ -2767,8 +2772,9 @@ class DynamicRoutingSession:
 
     @cached_property
     def sync_data(self) -> npc_sync.SyncDataset:
-        """Sync data with the session's `sync_patch` applied: edge queries return measured
-        edges, plus reconstructed edges inside replayed intervals; lines that can't be
+        """Sync data with the session's `sync_patch` applied, on the true clock (the
+        patch's timebase): edge queries return measured edges, plus reconstructed edges
+        inside the intervals lost to dropped acquisition buffers; lines that can't be
         reconstructed return nothing there (see `get_unknown_intervals`)."""
         return npc_sync.SyncDataset(
             self._raw_sync_data, patch=self.sync_patch, on_invalid="raise"
@@ -2784,7 +2790,9 @@ class DynamicRoutingSession:
             v for v in self._stim_display_times.values() if not isinstance(v, Exception)
         )
         by_block = {d.block_index: d for d in display}
-        blocks = self._raw_sync_data.vsync_times_in_blocks
+        blocks = npc_sync.SyncDataset(
+            self.sync_data, on_invalid="ignore"
+        ).vsync_times_in_blocks
         return timing.get_block_report(
             self.sync_data,
             self.stim_paths,

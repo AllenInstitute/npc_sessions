@@ -1,0 +1,25 @@
+files 256 errors 0
+
+== clean files (no replays, no barcode discontinuity in the P0 manifest): 100
+  with any drop found: []
+  with notes: []
+  with no camera lines: 0
+  boundaries observed: 818158 of 821818
+  max |jump - integer| over observed boundaries: median over files 0.082, max 0.152
+  boundaries with an estimate, not observed, |value| > 0.5: 0 []
+
+== files with replays or discontinuities: 156
+  replayed copies: 1475 | dropped chunks located on cameras: 1407 | assumed at run start: 81 | net shift chunks: 13
+  files with assumed drops: [('DRpilot_759435_20250508', 1, 6), ('DRpilot_764436_20250515', 1, 6), ('DRpilot_772656_20250225', 1, 8), ('DRpilot_807082_20250917', 1, 6), ('DRpilot_813586_20251117', 1, 6), ('DRpilot_836629_20260430', 1, 6), ('DRpilot_839146_20260518', 1, 8), ('DRpilot_856845_20260515', 1, 6)]
+  files with notes:
+  chunk sizes: Counter({50000: 155, 30000: 1})
+  lag from a located drop to the start of the next replayed run (s): n 1165; ==0: 398 (34%); >0: 767; median of >0 2.0; p90 7.0; max 20.5
+  lag histogram (s: count): {0.0: 398, 0.5: 106, 1.0: 123, 1.5: 93, 2.0: 75, 2.5: 60, 3.0: 49, 3.5: 43, 4.0: 36, 4.5: 31, 5.0: 24, 5.5: 21, 6.0: 11, 6.5: 13, 7.0: 19, 7.5: 9, 8.0: 10, 8.5: 4, 9.0: 7, 9.5: 4, 10.0: 29}
+  located drop sizes (chunks: count): {1: 1040, 2: 45, 3: 47, 4: 22, 5: 4, 7: 4}
+  |measured jump - integer| at located drops: median 0.012 p99 0.051 max 0.066
+  files with >= 1 displaced stretch (lag > 0): 15 of 152 files with replays
+  total recorded time between a drop and its run (upper bound of displaced data): 2360 s
+  barcode discontinuities: recorded clock 37 intervals in 11 files -> on the timebase 0 intervals in 0 files
+  net shift files: [('DRpilot_715709_20240808', 2.5, 0), ('DRpilot_717473_20240916', 1.5, 0), ('DRpilot_832032_20260223', 1.5, 0), ('DRpilot_840160_20260428', 1.0, 0)]
+  max |jump - integer| over observed boundaries: median 0.073 max 0.152
+  unobserved nonzero: [('DRpilot_764436_20250515', 2), ('DRpilot_813586_20251117', 1), ('DRpilot_856845_20260515', 2)]

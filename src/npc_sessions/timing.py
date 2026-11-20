@@ -9,11 +9,19 @@ Every session with stim files gets a patch (`get_sync_patch`):
   a block with unexplained edges is rejected (`SyncPatch.diode_blocks`). npc_stim uses a cleaned
   block as patched and removes nothing itself. Evidence: experiments/phantom-flicker,
   outputs/phantom-flicker-report.md.
-- Replayed acquisition buffers (`npc_sync.SyncDataset.invalid_intervals`): the copies overwrite
-  real events on every line. Instead of rejecting the session, the patch reconstructs the lines
-  that can be reconstructed within known error (vsync from the stim file's `frameIntervals`, the
-  digital photodiode from reconstructed vsyncs, camera exposures from their fixed period) and
-  marks the rest 'unknown' (see `npc_sync.patch.build_sync_patch`).
+- Dropped and replayed acquisition buffers (`npc_sync.timebase`): the sync program drops
+  0.5 s buffers without leaving a gap in sample numbers, so later data is recorded early, and
+  writes runs of identical buffers that make up for buffers dropped up to ~20 s earlier. The
+  patch carries the file's timebase (dropped buffers located on the camera exposing lines):
+  recorded data is moved to its true time, copies are removed, and the intervals that no
+  recorded buffer holds are `npc_sync.SyncDataset.invalid_intervals`. There, instead of
+  rejecting the session, the patch reconstructs the lines that can be reconstructed within
+  known error (vsync from the stim file's `frameIntervals`, the digital photodiode from
+  reconstructed vsyncs, camera exposures from their fixed period) and marks the rest
+  'unknown' (see `npc_sync.patch.build_sync_patch`). Every time in a patch, and every time
+  from `DynamicRoutingSession.sync_data`, is on that true clock. "Replayed interval" below
+  means such an interval, whether its data was lost to a drop with or without copies.
+  Evidence: experiments/sync-timebase-drops, outputs/sync-dropped-chunks-report.md.
 
 This module adds what npc_sync can't know about a session:
 
@@ -44,8 +52,9 @@ This module adds what npc_sync can't know about a session:
 
 Policy decisions (outputs/sync-frame-timing-upgrade-plan.md, notes/sync-patching-handoff-2.md):
 
-- files with a timebase discontinuity (dropped or displaced buffers) are not patched: npc_stim
-  still refuses them, so they stay rejected
+- dropped buffers are corrected by the patch's timebase (builder 5). A file whose barcode
+  onset intervals are still irregular on that timebase (`timebase_discontinuities`: a drop
+  the cameras couldn't locate) is not corrected: npc_stim still refuses it
 - replayed intervals are NOT `invalid_times` (decided 2026-11-18): frame times are
   reconstructed there, so trials overlapping them are kept
 - licks inside replayed intervals are reconstructed from `lickFrames` (+-1/2 frame) on the
@@ -85,7 +94,7 @@ import upath
 
 logger = logging.getLogger(__name__)
 
-BUILDER = "npc_sessions.timing 4"
+BUILDER = "npc_sessions.timing 5"
 """Recorded in each patch. Bump when the builder's output would change: cached patches with
 another builder are rebuilt.
 
@@ -96,6 +105,10 @@ another builder are rebuilt.
 - 4: lick line reconstructed from the stim files' `lickFrames` inside replayed intervals,
   with synthetic falling edges so that the line alternates; lick spans that stay unknown are
   widened so that the line is low at both bounds (`reconstruct_lick_line`)
+- 5: patches are built on the file's timebase (`npc_sync.SyncDataset.find_timebase`):
+  dropped buffers located on camera lines, data recorded between a drop and the replayed
+  run that makes up for it moved to its true time, and the dropped intervals reconstructed
+  like replayed ones were
 """
 
 PATCH_DIR_ENV_VAR = "NPC_SESSIONS_SYNC_PATCH_DIR"
@@ -163,7 +176,8 @@ def match_stims_to_blocks(
 ) -> tuple[dict[int, StimMatch], list[tuple[upath.UPath, str]]]:
     """Exact one-to-one matching of stim files to vsync blocks by start time only.
 
-    `sync` should be an unpatched view (`on_invalid='ignore'`): blocks are as recorded.
+    `sync` should be an unpatched view (`on_invalid='ignore'`) on the file's timebase
+    (`true_clock_view`): blocks are as measured, at their true times.
 
     Returns (block index -> match, unmatched stims with reasons). A block claimed by more than
     one stim file matches none of them.
@@ -224,6 +238,22 @@ def get_stim_blocks(
 # -------------------------------------------------------------------------- patch
 
 
+def true_clock_view(sync: npc_sync.SyncPathOrDataset) -> npc_sync.SyncDataset:
+    """Unpatched view (`on_invalid='ignore'`) of a sync file on its timebase
+    (`npc_sync.SyncDataset.find_timebase`, from the recorded data): measured events at
+    their true times, without replayed copies. The view patches are built on."""
+    recorded = npc_sync.SyncDataset(
+        npc_sync.get_sync_data(sync), on_invalid="ignore", timebase=False
+    )
+    try:
+        timebase: npc_sync.Timebase | None = recorded.find_timebase()
+    except NotImplementedError:  # not a 32-bit counter file: as recorded
+        timebase = None
+    return npc_sync.SyncDataset(
+        recorded, on_invalid="ignore", timebase=timebase if timebase else False
+    )
+
+
 def build_session_sync_patch(
     sync: npc_sync.SyncPathOrDataset,
     stim_paths: Iterable[npc_io.PathLike],
@@ -235,7 +265,7 @@ def build_session_sync_patch(
     from the NI-DAQ recording (`reconstruct_sound_line`). Laser lines are reconstructed
     from the stim files' opto trigger frames where possible (`reconstruct_opto_lines`).
     """
-    raw = npc_sync.SyncDataset(npc_sync.get_sync_data(sync), on_invalid="ignore")
+    raw = true_clock_view(sync)
     stim_paths = tuple(stim_paths)
     try:
         stim_blocks = get_stim_blocks(raw, stim_paths)
@@ -1217,8 +1247,9 @@ def get_block_report(
 
 
 def get_replayed_intervals(sync: npc_sync.SyncDataset) -> list[dict[str, Any]]:
-    """One entry per replayed interval of a patched file: `start_time`, `stop_time` and a
-    `reason` listing the lines whose events are unknown there and those reconstructed.
+    """One entry per interval of a patched file whose sync data was lost to dropped
+    acquisition buffers (`sync.invalid_intervals`): `start_time`, `stop_time` and a `reason`
+    listing the lines whose events are unknown there and those reconstructed.
 
     Not `invalid_times` (see module docstring): for notes, and for the trials tables, which
     NaN the affected events (`unknown_overlap_mask`)."""
@@ -1247,7 +1278,7 @@ def get_replayed_intervals(sync: npc_sync.SyncDataset) -> list[dict[str, Any]]:
                 start_time=float(a),
                 stop_time=float(z),
                 reason=(
-                    "replayed sync data (copied acquisition buffers)"
+                    "sync data not recorded (dropped acquisition buffers)"
                     + (f": events unknown on {fmt(unknown)}" if unknown else "")
                     + (
                         f"; reconstructed: {fmt(reconstructed)}"

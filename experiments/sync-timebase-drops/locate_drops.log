@@ -1,0 +1,122 @@
+====================================================================================================
+Q5 shift quantization, all files with discontinuities (P0 manifest)
+session                      n_inv     start      stop     shift    /0.5    /0.1
+DRpilot_702131_20240223         73    280.23    308.20   -3.0002  -0.000  -0.002
+DRpilot_702131_20240223         73    308.20    342.16   +2.9998  -0.000  -0.002
+DRpilot_702131_20240223         73   1704.64   1764.57   -1.9959  +0.008  +0.041
+DRpilot_702131_20240223         73   1764.57   1796.53   +0.9957  -0.009  -0.043
+DRpilot_702131_20240223         73   1796.53   1828.50   +0.9999  -0.000  -0.001
+DRpilot_702131_20240223         73   2014.29   2043.75   -1.5000  -0.000  -0.000
+DRpilot_702131_20240223         73   2043.75   2076.05   +1.3301  -0.340  +0.301
+DRpilot_702131_20240223         73   2076.05   2169.12   +0.1696  +0.339  -0.304
+DRpilot_703880_20240418         47    896.53    926.49   -1.0001  -0.000  -0.001
+DRpilot_703880_20240418         47    926.49    958.46   +0.9999  -0.000  -0.001
+DRpilot_703880_20240418         47   1980.32   2009.79   -1.5000  -0.000  -0.000
+DRpilot_703880_20240418         47   2009.79   2042.26   +1.5000  -0.000  -0.000
+DRpilot_703880_20240412        122   1009.74   1039.00   -1.7035  -0.407  -0.035
+DRpilot_703880_20240412        122   1039.00   1071.67   +1.7033  +0.407  +0.033
+DRpilot_703880_20240412        122   1319.39   1348.36   -2.0000  -0.000  -0.000
+DRpilot_703880_20240412        122   1348.36   1380.00   +0.6749  +0.350  -0.251
+DRpilot_703880_20240412        122   1380.00   1409.79   -1.1749  -0.350  +0.251
+DRpilot_703880_20240412        122   1409.79   1474.22   +2.5000  -0.000  -0.000
+DRpilot_703880_20240412        122   1876.78   1906.74   -0.9999  +0.000  +0.001
+DRpilot_703880_20240412        122   1906.74   2062.57   +1.0001  +0.000  +0.001
+DRpilot_712139_20240510         39   2165.34   2194.50   -1.8049  +0.390  -0.049
+DRpilot_712139_20240510         39   2194.50   2227.27   +1.8049  -0.390  +0.049
+DRpilot_708020_20240517         89   1607.09   1668.02   -0.9958  +0.008  +0.042
+DRpilot_708020_20240517         89   1668.02   1730.95   +0.9958  -0.008  -0.042
+DRpilot_715709_20240808          0    247.34    276.36   -2.0001  -0.000  -0.001
+DRpilot_715709_20240808          0   2075.23   2105.75   -0.5000  +0.000  +0.000
+DRpilot_717473_20240916          0    780.21    809.73   -1.5001  -0.000  -0.001
+DRpilot_714748_20240628        137   3553.03   3583.00   -1.0000  +0.000  +0.000
+DRpilot_714748_20240628        137   3583.00   3614.96   +1.0000  +0.000  +0.000
+DRpilot_714748_20240628        137   5318.09   5347.55   -1.5000  +0.000  +0.000
+DRpilot_714748_20240628        137   5347.55   5380.02   +1.5000  +0.000  +0.000
+DRpilot_714748_20240628        137   5658.71   5843.01   -1.4996  +0.001  +0.004
+DRpilot_714748_20240628        137   5843.01   5875.47   +1.5001  +0.000  +0.001
+DRpilot_832032_20260223          0   3587.68   3617.19   -1.5000  -0.000  -0.000
+DRpilot_840160_20260428          0   2458.56   2488.58   -1.0000  +0.000  +0.000
+DRpilot_859582_20260612         27   4953.58   4983.55   -1.0000  +0.000  +0.000
+DRpilot_859582_20260612         27   4983.55   5046.48   +1.0000  +0.000  +0.000
+(columns /0.5, /0.1: shift in buffers minus nearest integer)
+====================================================================================================
+Q1-Q4 on files with discontinuities and no replays: ['DRpilot_715709_20240808', 'DRpilot_717473_20240916', 'DRpilot_832032_20260223', 'DRpilot_840160_20260428']
+----------------------------------------------------------------------------------------------------
+DRpilot_715709_20240808 C:\data\t2p_cache\DRpilot_715709_20240808\20240808T150522.h5
+ discontinuity 247.344-276.359 s, shift -2.00014 s: Q1 -4.0003 x 0.5 s buffers (off by 0.140 ms)
+  Q2 block 0 also spans discontinuities [(2075.23149, 2105.7466, -0.5)]: single-drop fit invalid, skipped
+  Q3 beh_cam_frame_readout   : period 16.66579 ms, jitter MAD 0.0000 ms, expected slip -0.2457 ms (245685618.5 MAD); top |res| (t, ms): [(258.489, -0.1058), (246.173, 0.0142), (256.056, -0.0058)]
+  Q3 face_cam_frame_readout  : period 16.66619 ms, jitter MAD 0.0000 ms, expected slip -0.1975 ms (197525083.4 MAD); top |res| (t, ms): [(258.49, -0.0462), (255.673, -0.0162), (261.673, 0.0138)]
+  Q3 eye_cam_frame_readout   : period 16.66605 ms, jitter MAD 0.0100 ms, expected slip -0.2136 ms (21.4 MAD); top |res| (t, ms): [(258.487, -0.0661), (270.719, 0.0239), (259.853, -0.0161)]
+  Q3 beh_cam_exposing        : period 16.66582 ms, jitter MAD 0.0000 ms, expected slip -0.2417 ms (241672240.6 MAD); top |res| (t, ms): [(258.486, -0.1058), (268.869, -0.0058), (279.502, -0.0058)]
+  Q3 face_cam_exposing       : period 16.66622 ms, jitter MAD 0.0000 ms, expected slip -0.1935 ms (193511705.5 MAD); top |res| (t, ms): [(258.487, -0.0462), (279.319, -0.0162), (274.87, -0.0162)]
+  Q3 eye_cam_exposing        : period 16.66605 ms, jitter MAD 0.0100 ms, expected slip -0.2136 ms (21.4 MAD); top |res| (t, ms): [(258.487, -0.0661), (263.687, -0.0161), (262.97, -0.0161)]
+  Q3 camera consensus: top anomaly of 6/6 lines snaps to 258.5 s (on 0.5 s grid: True); all: [258.486, 258.487, 258.487, 258.487, 258.489, 258.49]
+  Q4 boundary sample 25850000 (mod 10000 = 0, mod 50000 = 0); all-line event gap straddling it 0.830 ms; local max gap 6.460 ms, median 0.460 ms
+  Q4 lines with same-polarity edges either side of boundary: none
+ discontinuity 2075.231-2105.747 s, shift -0.50000 s: Q1 -1.0000 x 0.5 s buffers (off by 0.000 ms)
+  Q2 block 0 also spans discontinuities [(247.34379, 276.35876, -2.000139999999817)]: single-drop fit invalid, skipped
+  Q3 beh_cam_frame_readout   : period 16.66582 ms, jitter MAD 0.0000 ms, expected slip -0.0254 ms (25418060.2 MAD); top |res| (t, ms): [(2077.996, -0.0258), (2090.545, 0.0142), (2077.629, 0.0142)]
+  Q3 face_cam_frame_readout  : period 16.66579 ms, jitter MAD 0.0000 ms, expected slip -0.0264 ms (26421404.7 MAD); top |res| (t, ms): [(2077.993, -0.0258), (2109.758, -0.0158), (2072.093, -0.0158)]
+  Q3 eye_cam_frame_readout   : period 16.66605 ms, jitter MAD 0.0100 ms, expected slip -0.0184 ms (1.8 MAD); top |res| (t, ms): [(2097.654, -0.0361), (2090.438, -0.0361), (2107.354, -0.0361)]
+  Q3 beh_cam_exposing        : period 16.66582 ms, jitter MAD 0.0000 ms, expected slip -0.0254 ms (25418060.2 MAD); top |res| (t, ms): [(2077.993, -0.0258), (2083.159, -0.0058), (2077.693, -0.0058)]
+  Q3 face_cam_exposing       : period 16.66622 ms, jitter MAD 0.0000 ms, expected slip -0.0134 ms (13377926.4 MAD); top |res| (t, ms): [(2081.171, 0.0138), (2070.704, 0.0138), (2081.254, 0.0138)]
+  Q3 eye_cam_exposing        : period 16.66605 ms, jitter MAD 0.0100 ms, expected slip -0.0184 ms (1.8 MAD); top |res| (t, ms): [(2095.388, -0.0161), (2078.472, -0.0161), (2107.321, -0.0161)]
+  Q3 camera consensus: top anomaly of 3/6 lines snaps to 2078.0 s (on 0.5 s grid: True); all: [2077.993, 2077.993, 2077.996, 2081.171, 2095.388, 2097.654]
+  Q4 boundary sample 207800000 (mod 10000 = 0, mod 50000 = 0); all-line event gap straddling it 2.450 ms; local max gap 3.990 ms, median 0.690 ms
+  Q4 lines with same-polarity edges either side of boundary: none
+----------------------------------------------------------------------------------------------------
+DRpilot_717473_20240916 \\allen\programs\mindscope\workgroups\dynamicrouting\PilotEphys\Task 2 Pilot\DRpilot_717473_20240916\20240916T095327.h5
+ discontinuity 780.212-809.727 s, shift -1.50008 s: Q1 -3.0002 x 0.5 s buffers (off by 0.080 ms)
+  Q2 block 0 (RFMapping_717473_20240916_095351): 88 vsyncs missing, stim-minus-sync duration +1.5013 s (barcode shift -1.5001)
+     w=600: 295 candidates; best 782.5 s (0.0578 ms), runner-up 782.3 s (0.0598 ms), ratio 1.03, median 0.5766 ms; best on 0.5 s grid: True
+            5 best: [(782.5, 0.05776504232407629), (782.3, 0.05978156372010993), (782.4, 0.05979328325738073), (782.2, 0.05983981914757031), (782.1, 0.05988009179844497)]
+     w= 30: 295 candidates; best 784.8 s (0.0315 ms), runner-up 807.0 s (0.0356 ms), ratio 1.13, median 0.0624 ms; best on 0.5 s grid: False
+            5 best: [(784.8, 0.03147195429794491), (807.0, 0.035612873864465655), (782.5, 0.035728392003091296), (780.5, 0.03654425232151953), (799.2, 0.0365806898168986)]
+  Q3 beh_cam_frame_readout   : period 16.66622 ms, jitter MAD 0.0100 ms, expected slip -0.1201 ms (12.0 MAD); top |res| (t, ms): [(814.401, -2.5062), (814.648, 2.5038), (814.415, 2.5038)]; interval straddling 782.5: -0.0362 ms (rank 444/2370)
+  Q3 face_cam_frame_readout  : period 16.66622 ms, jitter MAD 0.0100 ms, expected slip -0.1201 ms (12.0 MAD); top |res| (t, ms): [(805.137, -0.0962), (807.454, 0.0938), (777.371, 0.0938)]; interval straddling 782.5: -0.0362 ms (rank 570/2370)
+  Q3 eye_cam_frame_readout   : period 16.66605 ms, jitter MAD 0.0100 ms, expected slip -0.1352 ms (13.5 MAD); top |res| (t, ms): [(782.489, -0.0461), (808.605, 0.0239), (780.939, -0.0161)]; interval straddling 782.5: -0.0461 ms (rank 1/2370)
+  Q3 beh_cam_exposing        : period 16.66579 ms, jitter MAD 0.0000 ms, expected slip -0.1593 ms (159264214.2 MAD); top |res| (t, ms): [(782.497, -0.0758), (775.214, -0.0058), (803.862, -0.0058)]; interval straddling 782.5: -0.0758 ms (rank 1/2370)
+  Q3 face_cam_exposing       : period 16.66625 ms, jitter MAD 0.0000 ms, expected slip -0.1171 ms (117123746.0 MAD); top |res| (t, ms): [(782.485, -0.0363), (797.418, -0.0163), (790.768, -0.0163)]; interval straddling 782.5: -0.0363 ms (rank 1/2370)
+  Q3 eye_cam_exposing        : period 16.66612 ms, jitter MAD 0.0100 ms, expected slip -0.1292 ms (12.9 MAD); top |res| (t, ms): [(782.49, -0.0661), (786.64, -0.0161), (800.789, -0.0161)]; interval straddling 782.5: -0.0661 ms (rank 1/2370)
+  Q3 camera consensus: top anomaly of 4/6 lines snaps to 782.5 s (on 0.5 s grid: True); all: [782.485, 782.489, 782.49, 782.497, 805.137, 814.401]
+  vsync vs camera: 782.5 vs 782.5 s -> AGREE
+  Q4 boundary sample 78250000 (mod 10000 = 0, mod 50000 = 0); all-line event gap straddling it 1.720 ms; local max gap 3.970 ms, median 0.830 ms
+  Q4 lines with same-polarity edges either side of boundary: none
+----------------------------------------------------------------------------------------------------
+DRpilot_832032_20260223 \\allen\programs\mindscope\workgroups\dynamicrouting\PilotEphys\Task 2 Pilot\DRpilot_832032_20260223\20260223T141650.h5
+ discontinuity 3587.680-3617.194 s, shift -1.50001 s: Q1 -3.0000 x 0.5 s buffers (off by 0.010 ms)
+  Q2 block 0 (DynamicRouting1_832032_20260223_141715): 89 vsyncs missing, stim-minus-sync duration +1.5026 s (barcode shift -1.5000)
+     w=600: 295 candidates; best 3598.0 s (0.0668 ms), runner-up 3597.9 s (0.0891 ms), ratio 1.34, median 0.3242 ms; best on 0.5 s grid: True
+            5 best: [(3598.0, 0.06676453095960282), (3597.9, 0.08914982837852006), (3598.1, 0.08944679701470853), (3596.8, 0.11687308068460053), (3596.9, 0.11692723937314697)]
+     w= 30: 295 candidates; best 3609.9 s (0.0399 ms), runner-up 3604.3 s (0.0410 ms), ratio 1.03, median 0.0708 ms; best on 0.5 s grid: False
+            5 best: [(3609.9, 0.0399281370355102), (3604.3, 0.04103317069898001), (3606.0, 0.04186043685103345), (3603.0, 0.04203946660636156), (3595.0, 0.04212324979405445)]
+  Q3 beh_cam_frame_readout   : period 16.66582 ms, jitter MAD 0.0000 ms, expected slip -0.0863 ms (86254180.8 MAD); top |res| (t, ms): [(3597.99, -0.0758), (3610.706, -0.0358), (3610.672, -0.0358)]; interval straddling 3598.0: -0.0758 ms (rank 1/2370)
+  Q3 nose_cam_frame_readout  : period 16.66582 ms, jitter MAD 0.0100 ms, expected slip -0.0863 ms (8.6 MAD); top |res| (t, ms): [(3597.987, -0.0358), (3592.237, -0.0358), (3592.137, 0.0342)]; interval straddling 3598.0: -0.0358 ms (rank 1/2370)
+  Q3 eye_cam_frame_readout   : period 16.66615 ms, jitter MAD 0.0100 ms, expected slip -0.0562 ms (5.6 MAD); top |res| (t, ms): [(3597.99, -0.0462), (3584.907, -0.0162), (3601.106, -0.0162)]; interval straddling 3598.0: -0.0462 ms (rank 1/2370)
+  Q3 beh_cam_exposing        : period 16.66579 ms, jitter MAD 0.0000 ms, expected slip -0.0893 ms (89264214.3 MAD); top |res| (t, ms): [(3597.987, -0.0758), (3582.688, -0.0058), (3600.387, -0.0058)]; interval straddling 3598.0: -0.0758 ms (rank 1/2370)
+  Q3 nose_cam_exposing       : period 16.66622 ms, jitter MAD 0.0000 ms, expected slip -0.0501 ms (50133779.4 MAD); top |res| (t, ms): [(3597.986, -0.0462), (3610.102, -0.0162), (3592.969, -0.0162)]; interval straddling 3598.0: -0.0462 ms (rank 1/2370)
+  Q3 eye_cam_exposing        : period 16.66609 ms, jitter MAD 0.0100 ms, expected slip -0.0622 ms (6.2 MAD); top |res| (t, ms): [(3597.99, -0.0661), (3604.64, -0.0161), (3604.94, -0.0161)]; interval straddling 3598.0: -0.0661 ms (rank 1/2370)
+  Q3 camera consensus: top anomaly of 6/6 lines snaps to 3598.0 s (on 0.5 s grid: True); all: [3597.986, 3597.987, 3597.987, 3597.99, 3597.99, 3597.99]
+  vsync vs camera: 3598.0 vs 3598.0 s -> AGREE
+  Q4 boundary sample 359800000 (mod 10000 = 0, mod 50000 = 0); all-line event gap straddling it 0.340 ms; local max gap 5.350 ms, median 0.390 ms
+  Q4 lines with same-polarity edges either side of boundary: none
+----------------------------------------------------------------------------------------------------
+DRpilot_840160_20260428 C:\data\t2p_cache\DRpilot_840160_20260428\20260428T103950.h5
+ discontinuity 2458.560-2488.575 s, shift -0.99998 s: Q1 -2.0000 x 0.5 s buffers (off by 0.020 ms)
+  Q2 block 3 (DynamicRouting1_840160_20260428_111539): 58 vsyncs missing, stim-minus-sync duration +1.0037 s (barcode shift -1.0000)
+     w=600: 300 candidates; best 2472.0 s (0.0586 ms), runner-up 2471.8 s (0.0603 ms), ratio 1.03, median 0.1371 ms; best on 0.5 s grid: True
+            5 best: [(2472.0, 0.05862210669158628), (2471.8, 0.06033909603454676), (2471.9, 0.06040423833368677), (2471.7, 0.06042383184347578), (2472.3, 0.0616297382629939)]
+     w= 30: 300 candidates; best 2472.0 s (0.0405 ms), runner-up 2475.7 s (0.0434 ms), ratio 1.07, median 0.0836 ms; best on 0.5 s grid: True
+            5 best: [(2472.0, 0.040465884077856645), (2475.7, 0.04339558256586984), (2477.8, 0.051247168670900345), (2478.8, 0.05180491653197675), (2478.1, 0.05329110559489044)]
+  Q3 beh_cam_frame_readout   : period 16.66583 ms, jitter MAD 0.0000 ms, expected slip -0.0300 ms (29999999.7 MAD); top |res| (t, ms): [(2471.993, -0.0558), (2463.477, -0.0158), (2490.725, -0.0158)]; interval straddling 2472.0: -0.0558 ms (rank 1/2400)
+  Q3 nose_cam_frame_readout  : period 16.66622 ms, jitter MAD 0.0000 ms, expected slip -0.0068 ms (6755852.6 MAD); top |res| (t, ms): [(2471.995, -0.0262), (2466.362, 0.0138), (2474.912, 0.0138)]; interval straddling 2472.0: -0.0262 ms (rank 1/2400)
+  Q3 eye_cam_frame_readout   : period 16.66612 ms, jitter MAD 0.0100 ms, expected slip -0.0128 ms (1.3 MAD); top |res| (t, ms): [(2483.291, -0.0361), (2474.974, -0.0361), (2454.925, -0.0361)]; interval straddling 2472.0: -0.0361 ms (rank 9/2400)
+  Q3 face_cam_exposing       : period 16.66622 ms, jitter MAD 0.0000 ms, expected slip -0.0068 ms (6755852.6 MAD); top |res| (t, ms): [(2471.994, -0.0262), (2493.41, 0.0238), (2493.377, -0.0162)]; interval straddling 2472.0: -0.0262 ms (rank 1/2400)
+  Q3 beh_cam_exposing        : period 16.66582 ms, jitter MAD 0.0000 ms, expected slip -0.0308 ms (30836120.2 MAD); top |res| (t, ms): [(2471.99, -0.0458), (2473.557, -0.0058), (2470.573, -0.0058)]; interval straddling 2472.0: -0.0458 ms (rank 1/2400)
+  Q3 nose_cam_exposing       : period 16.66622 ms, jitter MAD 0.0000 ms, expected slip -0.0068 ms (6755852.6 MAD); top |res| (t, ms): [(2471.994, -0.0262), (2467.144, -0.0162), (2468.028, -0.0162)]; interval straddling 2472.0: -0.0262 ms (rank 1/2400)
+  Q3 eye_cam_exposing        : period 16.66612 ms, jitter MAD 0.0100 ms, expected slip -0.0128 ms (1.3 MAD); top |res| (t, ms): [(2471.992, -0.0461), (2490.974, -0.0161), (2461.792, -0.0161)]; interval straddling 2472.0: -0.0461 ms (rank 1/2400)
+  Q3 camera consensus: top anomaly of 6/7 lines snaps to 2472.0 s (on 0.5 s grid: True); all: [2471.99, 2471.992, 2471.993, 2471.994, 2471.994, 2471.995, 2483.291]
+  vsync vs camera: 2472.0 vs 2472.0 s -> AGREE
+  Q4 boundary sample 247200000 (mod 10000 = 0, mod 50000 = 0); all-line event gap straddling it 0.710 ms; local max gap 3.450 ms, median 1.000 ms
+  Q4 lines with same-polarity edges either side of boundary: none

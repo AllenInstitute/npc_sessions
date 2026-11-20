@@ -1,0 +1,10 @@
+Released packages (npc_sync 0.3.7, npc_stim 0.1.26): npc_stim.assert_sync_frame_timing_is_valid
+raises on any timebase discontinuity, with or without a patch (display_times.py: `if
+sync_data.timebase_discontinuities: raise AssertionError`). Recorded-clock discontinuities:
+npc_sync 0.3.7
+npc_stim raises on discontinuities: True
+DRpilot_703880_20240418 discontinuities: [(896.53, 926.49, -1.0), (926.49, 958.46, 1.0), (1980.32, 2009.79, -1.5), (2009.79, 2042.26, 1.5)]
+DRpilot_708020_20240517 discontinuities: [(1607.09, 1668.02, -1.0), (1668.02, 1730.95, 1.0)]
+DRpilot_714748_20240628 discontinuities: [(3553.03, 3583.0, -1.0), (3583.0, 3614.96, 1.0), (5318.09, 5347.55, -1.5), (5347.55, 5380.02, 1.5), (5658.71, 5843.01, -1.5), (5843.01, 5875.47, 1.5)]
+DRpilot_715709_20240808 discontinuities: [(247.34, 276.36, -2.0), (2075.23, 2105.75, -0.5)]
+DRpilot_840160_20260428 discontinuities: [(2458.56, 2488.58, -1.0)]

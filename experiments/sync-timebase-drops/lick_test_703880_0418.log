@@ -1,0 +1,10 @@
+DRpilot_703880_20240418 task block 4 2509.97 6140.16 stim frames 216923 vsyncs 216923 stim licks 1193 sync licks in block 1195
+ run  29 X  2892.5 R  2894.0 n 1 lag  1.5 dchi2     9398 | before -0.0197 (4/9 licks)  stretch    none (0/0)  after    none (0/0) | model predicts stretch -0.5197
+ run  33 X  3201.0 R  3202.0 n 1 lag  1.0 dchi2     2430 | before -0.1311 (1/2 licks)  stretch -0.5326 (1/1)  after    none (0/0) | model predicts stretch -0.6311
+ run  35 X  3217.5 R  3218.0 n 4 lag  0.5 dchi2      797 | before    none (0/0 licks)  stretch    none (0/0)  after    none (0/0) | model predicts stretch    none
+ run  36 X  3222.5 R  3223.5 n 1 lag  1.0 dchi2     6245 | before    none (0/0 licks)  stretch    none (0/0)  after    none (0/0) | model predicts stretch    none
+ run  37 X  3264.0 R  3265.5 n 1 lag  1.5 dchi2      218 | before    none (0/0 licks)  stretch    none (0/0)  after    none (0/0) | model predicts stretch    none
+ run  38 X  3269.5 R  3273.5 n 1 lag  4.0 dchi2     3465 | before    none (0/0 licks)  stretch    none (0/0)  after    none (0/0) | model predicts stretch    none
+ run  41 X  3277.0 R  3279.0 n 1 lag  2.0 dchi2     1628 | before    none (0/0 licks)  stretch    none (0/0)  after -0.0202 (1/1) | model predicts stretch    none
+ run  43 X  3282.5 R  3283.0 n 1 lag  0.5 dchi2     1343 | before    none (0/0 licks)  stretch    none (0/0)  after -0.0202 (1/1) | model predicts stretch    none
+ run  45 X  3366.5 R  3369.0 n 1 lag  2.5 dchi2    15865 | before    none (0/0 licks)  stretch    none (0/0)  after    none (0/0) | model predicts stretch    none

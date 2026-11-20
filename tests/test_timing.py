@@ -473,3 +473,124 @@ def test_unknown_lick_span_widened_to_low_bounds() -> None:
     r = [t for t in rising if not a <= t < z]
     f = [t for t in falling if not a <= t < z]
     assert r == [8.0, 11.02] and f == [8.05, 11.08]
+
+
+# ------------------------------------------------------------------ dropped buffers (timebase)
+
+
+@pytest.fixture(scope="module")
+def dropped_files(tmp_path_factory):
+    """One block; buffers written out of step with time, as the sync program does:
+    - true 30.0-31.0 s dropped (2 buffers), nothing makes up for it: later data is 1 s early
+    - true 40.0-40.5 s dropped, made up for by a copy recorded 3 s later: the data in
+      between is recorded 0.5 s early
+    Two cameras, so that the drops can be located on their exposing lines."""
+    tmp = tmp_path_factory.mktemp("timing_dropped")
+    rng = np.random.default_rng(2)
+    labels = list(LABELS)
+    labels[29] = "eye_cam_exposing"
+    n = 3300
+    fi = np.full(n - 1, 1 / 59.95) + rng.normal(0, 2e-5, n - 1)
+    for i in (700, 1500, 2400):
+        fi[i] = 3 / 59.95
+    frames = 5.0 + np.r_[0, np.cumsum(fi)]
+    edges = []
+    for t in frames:
+        edges += [(t - 0.002, 2, 1), (t, 2, 0)]
+    pol = 1
+    for f in range(0, n, 3):
+        edges.append((frames[f] + (0.020 if pol else 0.024), 4, pol))
+        pol ^= 1
+    edges += [(4.95, 5, 1), (frames[-1] + 0.05, 5, 0)]
+    for bit, hz in ((27, 60.0027), (29, 60.0012)):
+        for t in np.arange(1.0 + bit * 1e-3, 64.0, 1 / hz):
+            edges += [(t, bit, 1), (t + 0.003, bit, 0)]
+    lick_frames = np.sort(rng.choice(np.arange(10, n - 10), 300, replace=False))
+    lick_frames = lick_frames[np.r_[True, np.diff(lick_frames) > 6]]
+    lick_onsets = frames[lick_frames - 2] + rng.uniform(0.001, 0.015, len(lick_frames))
+    for t in lick_onsets:
+        edges += [(t, 31, 1), (t + 0.03, 31, 0)]
+    items = sorted((int(round(t * FS)), b, v) for t, b, v in edges)
+    times, states, state = [0], [0], 0
+    for smp, b, v in items:
+        state = (state | (1 << b)) if v else (state & ~(1 << b))
+        if times[-1] == smp:
+            states[-1] = state
+        else:
+            times.append(smp)
+            states.append(state)
+    t, s = np.asarray(times, np.int64), np.asarray(states, np.int64)
+    # recorded buffer p <- true buffer source[p]
+    source = [c for c in range(130) if c not in (60, 61, 80)]  # 30-31 s and 40-40.5 s dropped
+    p_copy = source.index(87)  # true 43.5 s: 3 s after the second drop
+    source.insert(p_copy, 87)  # a copy of the buffer that follows it
+    out_t, out_s, last = [], [], 0
+    for p, c in enumerate(source):
+        i, j = np.searchsorted(t, [c * BUFFER, (c + 1) * BUFFER])
+        start_state = int(s[np.searchsorted(t, c * BUFFER, side="right") - 1])
+        if (i == j or t[i] != c * BUFFER) and start_state != last:
+            out_t.append(p * BUFFER)
+            out_s.append(start_state)
+        out_t += (t[i:j] - c * BUFFER + p * BUFFER).tolist()
+        out_s += s[i:j].tolist()
+        last = int(s[j - 1]) if j > i else start_state
+    sync = tmp / "20260101T100000.h5"
+    meta = {
+        "ni_daq": {"sample_freq": float(FS), "counter_bits": 32, "event_bits": 32},
+        "start_time": "2026-01-01 10:00:00.000000",
+        "stop_time": "2026-01-01 10:01:05.000000",
+        "line_labels": labels,
+        "timeouts": [],
+        "version": "synthetic",
+        "total_samples": len(source) * BUFFER,
+    }
+    with h5py.File(sync, "w") as f:
+        f["data"] = np.c_[np.asarray(out_t, np.uint32), np.asarray(out_s, np.uint32)]
+        f["meta"] = str(meta)
+    stim = tmp / "DynamicRouting1_000000_20260101_100004.hdf5"
+    with h5py.File(stim, "w") as f:
+        f["frameIntervals"] = fi
+        f["startTime"] = b"20260101_100004"
+        f["diodeBoxFrameInterval"] = 3
+        f["lickFrames"] = lick_frames
+    return dict(sync=sync, stim=stim, frames=frames, lick_onsets=lick_onsets)
+
+
+def test_dropped_buffers_are_located_and_reconstructed(dropped_files) -> None:
+    f = dropped_files
+    recorded = npc_sync.SyncDataset(f["sync"], on_invalid="ignore")
+    assert recorded.invalid_intervals == ((42.0, 42.5),)  # the copy, on the recorded clock
+    raw = timing.true_clock_view(f["sync"])
+    assert raw.invalid_intervals == ((30.0, 31.0), (40.0, 40.5))
+    matches, unmatched = timing.match_stims_to_blocks(raw, [f["stim"]])
+    assert list(matches) == [0] and not unmatched
+    patch = timing.get_sync_patch("s", f["sync"], [f["stim"]])
+    assert patch.timebase == raw.timebase
+    assert [(j.n_chunks, j.source) for j in patch.timebase.drops] == [
+        (2, "periodic_lines"),
+        (1, "periodic_lines"),
+    ]
+    sync = npc_sync.SyncDataset(recorded, patch=patch, on_invalid="raise")
+    assert sync.invalid_intervals == raw.invalid_intervals and sync.total_seconds == 65.0
+    report = timing.get_block_report(sync, [f["stim"]])
+    assert report.status.tolist() == ["patched"]
+    # frames: measured ones at their true times (those recorded after the first drop are
+    # 1 s late on the recorded clock, 1.5 s between the second drop and its copy), the
+    # rest reconstructed
+    v = sync.get_falling_edges("vsync_stim", units="seconds")
+    assert len(v) == len(f["frames"]) and np.max(np.abs(v - f["frames"])) < 2 / FS
+    (display,) = npc_stim.get_display_times(sync, [f["stim"]])
+    assert display.source == "photodiode" and len(display.display_times) == len(f["frames"])
+    # licks: measured at their true times outside the dropped intervals, from lickFrames
+    # (+- 1/2 frame) inside
+    licks = sync.get_rising_edges("lick_sensor", units="seconds")
+    assert not sync.get_unknown_intervals("lick_sensor")
+    truth = f["lick_onsets"]
+    inside = npc_sync.in_intervals(truth, sync.invalid_intervals)
+    assert inside.sum() >= 3
+    err = np.array([np.min(np.abs(licks - t)) for t in truth])
+    assert np.max(err[~inside]) < 1.5 / FS and np.max(err[inside]) < 0.02
+    assert len(licks) == len(truth)
+    replayed = timing.get_replayed_intervals(sync)
+    assert [(r["start_time"], r["stop_time"]) for r in replayed] == [(30.0, 31.0), (40.0, 40.5)]
+    assert "dropped acquisition buffers" in replayed[0]["reason"]

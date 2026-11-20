@@ -1,0 +1,18 @@
+session                    displaced licks  H0 within 25 ms  H1 within 25 ms | on-time licks  within 25 ms | shifts of displaced licks (s: n)
+DRpilot_702131_20240223                109               33              108 |          3347          3342 | {0.5: 43, 1.0: 22, 1.5: 26, 2.0: 17, 3.5: 1}
+DRpilot_703880_20240418                  1                0                1 |          1193          1191 | {0.5: 1}
+DRpilot_703880_20240412    (block start offset -0.38 s applied: first frames of the block are in a dropped interval)
+DRpilot_703880_20240412                 74                1               73 |          1746          1746 | {0.5: 15, 1.0: 19, 1.5: 6, 2.0: 17, 2.5: 8, 3.0: 7, 3.5: 2}
+DRpilot_708016_20240426                 18                3               18 |          4741          4724 | {0.5: 17, 1.5: 1}
+DRpilot_708020_20240516                 24                2               23 |          1530          1529 | {0.5: 12, 1.0: 1, 2.5: 11}
+DRpilot_712139_20240510                126               28              125 |          5372          5354 | {0.5: 76, 1.0: 7, 1.5: 9, 2.0: 30, 2.5: 4}
+DRpilot_708020_20240517                 67                0               65 |          1521          1519 | {0.5: 4, 1.0: 13, 1.5: 8, 2.0: 10, 2.5: 5, 3.0: 5, 3.5: 15, 4.0: 7}
+DRpilot_714748_20240628                 48                1               47 |           882           882 | {0.5: 20, 1.0: 4, 1.5: 5, 2.0: 2, 2.5: 8, 3.0: 2, 3.5: 2, 6.0: 5}
+DRpilot_859582_20260612                 24                3               23 |          1629          1629 | {0.5: 4, 1.0: 6, 1.5: 9, 6.0: 1, 6.5: 4}
+DRpilot_872974_20261105                  0                0                0 |          2076          2076 | {}
+DRpilot_839144_20260429                  0                0                0 |          3512          3502 | {}
+DRpilot_715709_20240808               1864               30             1855 |           132           132 | {2.0: 1038, 2.5: 826}
+DRpilot_840160_20260428               1546              136             1536 |           224           224 | {1.0: 1546}
+DRpilot_717473_20240916    only 0 on-time licks in the task block (drop before it): no reference, skipped
+
+TOTAL displaced licks 3901: within 25 ms of a stim lick at recorded time (H0) 237 (6%), at true time (H1) 3874 (99%); on-time reference 27850/27905 (100%)

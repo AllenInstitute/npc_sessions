@@ -1,0 +1,16 @@
+rows 1095 errors 1 ['636397_2022-09-27']
+blocks with a stim file under both models: 547 in 154 files
+blocks with a fault or a count mismatch: 160
+  recorded : reconcilable 128/160; balance {'0': 138, 'nonzero': 22}; gaps 778; |residual| ms: median 0.3846 p95 2.625 p99 6.614 max 16.684; > 0.2 ms: 453; > 1 ms: 109
+  timebase : reconcilable 157/160; balance {'0': 159, 'nonzero': 1}; gaps 1144; |residual| ms: median 0.0241 p95 0.087 p99 0.202 max 0.434; > 0.2 ms: 12; > 1 ms: 0
+
+change per block (recorded -> timebase): {(True, True): 128, (False, False): 3, (False, True): 29}
+
+blocks not reconcilable on the timebase:
+  DRpilot_644867_20230221 RFMapping_644867_20230221_121904         stim 51336 rec 50830 spans 7 balance 0 boundary_gap False max|res| 0.4345 n>0.2: 3 | recorded model ok: False balance 0
+  DRpilot_703880_20240412 DynamicRouting1_703880_20240412_100321   stim 217029 rec 212814 spans 141 balance 16 boundary_gap False max|res| 0.3637 n>0.2: 5 | recorded model ok: False balance -24
+  DRpilot_714748_20240628 DynamicRouting1_714748_20240628_103944   stim 217089 rec 210131 spans 230 balance 0 boundary_gap False max|res| 0.2987 n>0.2: 4 | recorded model ok: False balance -20
+
+blocks reconcilable on the recorded clock but not on the timebase: []
+
+timebase, 1 ms gate (used where every drop is located): reconcilable 159 / 160

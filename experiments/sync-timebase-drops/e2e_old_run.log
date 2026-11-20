@@ -1,0 +1,3 @@
+npc_sync C:\Users\ben.hardcastle\github\npc_sessions\.venv\Lib\site-packages\npc_sync\__init__.py | npc_sessions C:\data\t2p_qc\npcs_head\src\npc_sessions\__init__.py | builder npc_sessions.timing 4 | patch root C:\data\t2p_qc\sync_patches_old
+840160_2026-04-28 AssertionError("SyncDataset(//allen/programs/mindscope/workgroups/dynamicrouting/PilotEphys/Task 2 pilot/DRpilot_840160_20260428/20260428T103950.h5) has a timebase discontinuity (all lines affected, later events shifted) between barcode onsets at 2458.560-2488.575 s (-1.000 s): frame display times can't be computed reliably") 30 s
+715709_2024-08-08 ok 25 s

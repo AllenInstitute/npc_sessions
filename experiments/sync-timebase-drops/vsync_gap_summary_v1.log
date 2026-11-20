@@ -1,0 +1,15 @@
+rows 1095 errors 1 ['636397_2022-09-27']
+blocks with a stim file under both models: 547 in 154 files
+blocks with a fault or a count mismatch: 160
+  recorded : reconcilable 128/160; balance {'0': 138, 'nonzero': 22}; gaps 778; |residual| ms: median 0.3853 p95 2.625 p99 6.614 max 16.684; > 0.2 ms: 455; > 1 ms: 110
+  timebase : reconcilable 156/160; balance {'0': 159, 'nonzero': 1}; gaps 1144; |residual| ms: median 0.0241 p95 0.088 p99 0.229 max 4.159; > 0.2 ms: 14; > 1 ms: 2
+
+change per block (recorded -> timebase): {(True, True): 128, (False, False): 4, (False, True): 28}
+
+blocks not reconcilable on the timebase:
+  DRpilot_644867_20230221 RFMapping_644867_20230221_121904         stim 51336 rec 50830 spans 7 balance 0 boundary_gap False max|res| 0.4345 n>0.2: 3 | recorded model ok: False balance 0
+  DRpilot_703880_20240412 DynamicRouting1_703880_20240412_100321   stim 217029 rec 212814 spans 141 balance 16 boundary_gap False max|res| 0.3637 n>0.2: 5 | recorded model ok: False balance -24
+  DRpilot_714748_20240628 DynamicRouting1_714748_20240628_103944   stim 217089 rec 210131 spans 230 balance 0 boundary_gap False max|res| 4.1586 n>0.2: 5 | recorded model ok: False balance -20
+  DRpilot_714748_20240628 SpontaneousRewards_714748_20240628_11403 stim 36000 rec 35130 spans 28 balance 0 boundary_gap False max|res| 1.0217 n>0.2: 1 | recorded model ok: False balance 0
+
+blocks reconcilable on the recorded clock but not on the timebase: []
