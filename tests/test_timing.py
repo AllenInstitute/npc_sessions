@@ -600,18 +600,35 @@ def test_dropped_buffers_are_located_and_reconstructed(dropped_files) -> None:
 def test_barcode_spans_take_whole_barcodes_only() -> None:
     """703880_2024-04-18: with 2 s of padding to where the line is low, a span ended between
     two pulses of a barcode that started 1.3 s after a dropped interval (2 of 11 pulses left,
-    onset 765 ms late), and barcodes that didn't touch a dropped interval were removed."""
-    onsets = 5.0 + 31.0 * np.arange(4)
+    onset 765 ms late), and barcodes that didn't touch a dropped interval were removed.
+    708020_2024-05-17: the tail of a barcode whose onset fell inside a dropped interval."""
+    onsets = 5.0 + 31.0 * np.arange(6)
     rising = np.concatenate([t + 0.09 * np.arange(11) for t in onsets])
     falling = rising + 0.03
-    # dropped interval ending 1.3 s before the second barcode: nothing to remove
+
+    def n_in(spans, x=rising) -> int:
+        return int(npc_sync.in_intervals(x, spans).sum())
+
+    # dropped interval ending 1.3 s before the second barcode, which is on time: kept
     span = (34.2, 34.7)
-    assert timing._span_over_whole_barcodes(span, rising, falling) == span
+    assert timing.barcode_spans([span], rising, falling) == [span]
     old = timing._span_with_line_low_at_bounds((span[0] - 2, span[1] + 2), rising, falling)
     kept = rising[~npc_sync.in_intervals(rising, [old])]
     assert 0 < ((kept >= 36.0) & (kept < 38.0)).sum() < 11  # what builder 5 left: a fragment
     # dropped interval inside the third barcode: all of it goes, the others stay
-    a, z = timing._span_over_whole_barcodes((67.3, 67.8), rising, falling)
-    gone = npc_sync.in_intervals(rising, [(a, z)])
-    assert gone.sum() == 11 and np.all((rising[gone] >= 67.0) & (rising[gone] < 68.0))
-    assert npc_sync.in_intervals(falling, [(a, z)]).sum() == 11
+    got = timing.barcode_spans([(67.3, 67.8)], rising, falling)
+    assert n_in(got) == 11 and n_in(got, falling) == 11 and n_in([(67.0, 68.0)]) == 11
+    # the fourth barcode's first 0.5 s is lost in a dropped interval: its tail goes too
+    lost = (97.9, 98.5)
+    r2 = rising[~npc_sync.in_intervals(rising, [lost])]
+    f2 = falling[~npc_sync.in_intervals(falling, [lost])]
+    n_tail = n_in([(98.5, 100.0)], r2)
+    assert 0 < n_tail < 11
+    got = timing.barcode_spans([lost], r2, f2)
+    assert n_in(got, r2) == n_tail and n_in(got, f2) == n_in([(98.5, 100.0)], f2)
+    # a barcode that starts 1 s before a dropped interval may continue into it: removed
+    got = timing.barcode_spans([(130.0, 130.5)], rising, falling)
+    assert n_in(got) == 11
+    # several spans at once: only the incomplete barcodes go
+    got = timing.barcode_spans([span, (67.3, 67.8), (130.0, 130.5)], rising, falling)
+    assert n_in(got) == 22

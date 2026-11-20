@@ -94,7 +94,7 @@ import upath
 
 logger = logging.getLogger(__name__)
 
-BUILDER = "npc_sessions.timing 6"
+BUILDER = "npc_sessions.timing 7"
 """Recorded in each patch. Bump when the builder's output would change: cached patches with
 another builder are rebuilt.
 
@@ -109,10 +109,12 @@ another builder are rebuilt.
   dropped buffers located on camera lines, data recorded between a drop and the replayed
   run that makes up for it moved to its true time, and the dropped intervals reconstructed
   like replayed ones were
-- 6: barcode spans take in whole barcodes only. Builder 5 still padded every dropped interval
-  by 2 s and stopped where the line was low, which removed good barcodes and could stop
-  between two pulses of one (703880_2024-04-18: 5 barcodes removed, one cut to 2 pulses,
-  onset 765 ms late)
+- 6, 7: barcode spans take in whole barcodes only (`barcode_spans`). Builder 5 still padded
+  every dropped interval by 2 s and stopped where the line was low, which removed good
+  barcodes and could stop between two pulses of one (703880_2024-04-18: 5 barcodes removed,
+  one cut to 2 pulses, onset 765 ms late). 7: also removes the tail of a barcode whose onset
+  fell inside a dropped interval (708020_2024-05-17, 714748_2024-06-28: 3 tails that 6 kept),
+  and a barcode that may continue into one
 """
 
 PATCH_DIR_ENV_VAR = "NPC_SESSIONS_SYNC_PATCH_DIR"
@@ -142,7 +144,7 @@ experiments/sync-patch-manifest/README.md."""
 
 BARCODE_SPAN_PADDING_SEC = npc_sync.sync.BARCODE_MAX_DURATION_SEC
 """Without a timebase (replayed copies still in the data), barcode 'unknown' spans are widened
-by this on both sides before whole barcodes are taken in (`_span_over_whole_barcodes`). On a
+by this on both sides before whole barcodes are taken in (`barcode_spans`). On a
 timebase no padding is needed: data outside a dropped interval is measured."""
 
 LICK_FRAME_MAX_ERROR_SEC = 1 / 120
@@ -290,16 +292,21 @@ def build_session_sync_patch(
         rising = raw.get_rising_edges("barcode_ephys", units="seconds")
         falling = raw.get_falling_edges("barcode_ephys", units="seconds")
         padding = 0.0 if raw.timebase is not None else BARCODE_SPAN_PADDING_SEC
+        old_spans = patch.lines["barcode_ephys"]
         patch.lines["barcode_ephys"] = [
             dataclasses.replace(
                 s,
-                span=_span_over_whole_barcodes(s.span, rising, falling, padding),
+                span=span,
                 reason=s.reason
-                + "; widened over every barcode it overlaps"
+                + "; widened over every barcode that may be incomplete"
                 + (f" (after {padding} s padding)" if padding else "")
                 + ": no partial barcodes, rising/falling edges removed in pairs",
             )
-            for s in patch.lines["barcode_ephys"]
+            for s, span in zip(
+                old_spans,
+                barcode_spans([s.span for s in old_spans], rising, falling, padding),
+                strict=True,
+            )
         ]
     if patch.invalid_intervals and stim_paths:
         steps: list[tuple[Any, dict[str, Any]]] = [
@@ -961,42 +968,87 @@ def widen_unknown_lick_spans(
     patch.lines[LICK_LINE] = out
 
 
-def _span_over_whole_barcodes(
-    span: tuple[float, float],
-    rising: npt.NDArray[np.float64],
-    falling: npt.NDArray[np.float64],
+def barcode_spans(
+    spans: Sequence[tuple[float, float]],
+    rising: npt.ArrayLike,
+    falling: npt.ArrayLike,
     padding: float = 0.0,
-) -> tuple[float, float]:
-    """`span`, padded, then widened to take in every barcode it overlaps, whole; barcodes it
-    doesn't overlap are left alone. A barcode is a group of pulses whose rising edges are
-    less than `npc_sync.sync.BARCODE_MIN_GAP_SEC` apart. Groups longer than a barcode can be
-    (not barcodes) are not taken in whole. The bounds end where the line is low.
+) -> list[tuple[float, float]]:
+    """Each span (an interval without real data on the barcode line), widened to take in,
+    whole, every barcode that isn't certainly complete; other barcodes are left alone.
 
-    >>> r = np.r_[10 + 0.1 * np.arange(8), 41 + 0.1 * np.arange(8)]  # barcodes at 10 and 41 s
+    A barcode is a group of pulses whose rising edges are less than
+    `npc_sync.sync.BARCODE_MIN_GAP_SEC` apart and that lasts at most
+    `BARCODE_MAX_DURATION_SEC` (longer groups aren't barcodes: only a pulse in progress at a
+    bound is taken in). A barcode is removed if
+
+    - it overlaps the span, or
+    - it starts less than the maximum barcode duration before the span: it may continue
+      into it, or
+    - it starts less than that after the span and its onset is off the barcode period
+      (`BARCODE_INTERVAL_TOLERANCE_SEC`), measured from the nearest barcode that is far from
+      every span: it is the tail of a barcode that started inside the span. If no such
+      reference exists, it is removed.
+
+    >>> r = np.concatenate([t + 0.1 * np.arange(8) for t in (10, 41, 72, 103)])
     >>> f = r + 0.04
-    >>> a, z = _span_over_whole_barcodes((10.35, 10.5), r, f)  # inside the first: all of it
-    >>> a, round(z, 6)
-    (10.0, 10.74)
-    >>> _span_over_whole_barcodes((11.0, 11.5), r, f)  # 0.26 s after it: untouched
-    (11.0, 11.5)
-    >>> _span_over_whole_barcodes((11.0, 11.5), r, f, padding=2.0)
-    (9.0, 13.5)
+    >>> [(a, round(z, 6)) for a, z in barcode_spans([(10.35, 10.5)], r, f)]  # inside the first
+    [(10.0, 10.74)]
+    >>> barcode_spans([(40.2, 40.7)], r, f)  # ends 0.3 s before the second, on time: kept
+    [(40.2, 40.7)]
+    >>> tail = r[~((r >= 41) & (r < 41.25))]  # the second's onset was lost in the span
+    >>> [(a, round(z, 6)) for a, z in barcode_spans([(40.75, 41.25)], tail, tail + 0.04)]
+    [(40.75, 41.74)]
+    >>> [(a, round(z, 6)) for a, z in barcode_spans([(42.0, 42.5)], r, f)]  # may continue into it
+    [(41.0, 42.5)]
     """
-    a, z = max(0.0, span[0] - padding), span[1] + padding
     r = np.sort(np.asarray(rising, dtype=float))
     f = np.sort(np.asarray(falling, dtype=float))
+    max_dur = npc_sync.sync.BARCODE_MAX_DURATION_SEC
+    padded = [(max(0.0, a - padding), z + padding) for a, z in spans]
+    onsets = np.array([])
+    ends = np.array([])
     if r.size:
-        first = np.flatnonzero(np.r_[True, np.diff(r) > npc_sync.sync.BARCODE_MIN_GAP_SEC])
-        starts = r[first]
+        first = np.flatnonzero(
+            np.r_[True, np.diff(r) > npc_sync.sync.BARCODE_MIN_GAP_SEC]
+        )
         last_rising = r[np.r_[first[1:] - 1, r.size - 1]]
-        for b0, lr in zip(starts, last_rising, strict=True):
-            after = f[f >= lr]
-            b1 = float(after[0]) if after.size else float(lr)
-            if b1 - b0 > npc_sync.sync.BARCODE_MAX_DURATION_SEC:
-                continue
-            if b1 >= a and b0 < z:
-                a, z = min(a, float(b0)), max(z, b1 + 1e-9)
-    return _span_with_line_low_at_bounds((a, z), r, f)
+        j = np.searchsorted(f, last_rising)
+        end = np.where(j < f.size, f[np.clip(j, 0, max(f.size - 1, 0))], last_rising)
+        is_barcode = end - r[first] <= max_dur
+        onsets, ends = r[first][is_barcode], end[is_barcode]
+    far = np.ones(onsets.size, dtype=bool)
+    for a, z in padded:
+        far &= (onsets + max_dur <= a) | (onsets >= z + max_dur)
+    ref = onsets[far]
+    # period from all barcodes: most intervals are one period, whatever is wrong with a few
+    period = np.nan
+    if onsets.size >= 3 and ref.size:
+        d = np.diff(onsets)
+        single = np.abs(d / np.median(d) - 1) < 0.05
+        if single.any():
+            period = float(np.median(d[single]))
+
+    def on_period(t: float) -> bool:
+        if not np.isfinite(period):
+            return False
+        dt = t - ref[np.argmin(np.abs(ref - t))]
+        dev = dt - round(dt / period) * period
+        return bool(abs(dev) <= npc_sync.sync.BARCODE_INTERVAL_TOLERANCE_SEC)
+
+    out = []
+    for a, z in padded:
+        lo, hi = a, z
+        for b0, b1 in zip(onsets, ends, strict=True):
+            remove = (
+                (b1 >= a and b0 < z)
+                or (b0 < a < b0 + max_dur)
+                or (z <= b0 < z + max_dur and not on_period(float(b0)))
+            )
+            if remove:
+                lo, hi = min(lo, float(b0)), max(hi, float(b1) + 1e-9)
+        out.append(_span_with_line_low_at_bounds((lo, hi), r, f))
+    return out
 
 
 def _span_with_line_low_at_bounds(
