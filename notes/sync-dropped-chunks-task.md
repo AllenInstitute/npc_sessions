@@ -27,3 +27,33 @@ Report: `outputs/sync-dropped-chunks-report.md`. Evidence: `experiments/sync-tim
 - npc_sessions_cache: not touched. NWB/cache regeneration for the affected sessions not done
 - The 15 share-only files with displaced data were surveyed but not run end to end
 - The local npc_sessions venv was synced to `uv.lock` during the release (polars 0.20.28 -> 1.39.3, ruff)
+
+## Cause in the sync program (added 2026-11-20)
+
+From reading the local clone `../sync` (`git describe`: 4.1.0-8-g1614844; the affected files were written by 4.3.0-4.3.2, which is not in the clone). Inferred from the code and matched to the data; the program was not run.
+
+**One shared buffer, queued by reference.**
+
+- `src/sync/ni/DIU32.py` line 21: `self.daq_buffer` is one array for the whole recording.
+- Line 44: `ReadDigitalU32` overwrites it in place on every callback.
+- Line 46: `self.buffer_q.put((timestamp, self.daq_buffer))` queues a reference, not a copy.
+- `src/sync/sync_controller.py` lines 300-305: the writer thread copies the data only when it writes (`data[1].astype(np.uint32).tostring()`), and reopens the `.sync` and `_timestamps.txt` files for every chunk.
+
+So file position p gets whatever is in the buffer when item p is written. If the writer is behind by s callbacks, position p holds chunk p + s. That is the shift state measured from the cameras.
+
+| Writer behaviour | What the file gets | What was observed |
+|---|---|---|
+| Keeps up | chunk p at position p | clean file |
+| Falls one further behind | the chunk about to be written is overwritten first, and is lost | a +1 jump (single dropped chunk) |
+| Stays behind by s | each position holds the chunk s later | displaced stretch, early by s x 0.5 s |
+| Catches up by one | two consecutive items written before the next callback hold the same chunk | one copy (-1) |
+| Stalls for n chunks, then drains the queue | n + 1 items all hold the newest chunk | run of n copies with the drop at its start |
+
+Consistent with the survey: drops before a run are almost always single chunks, every copy is identical to the chunk after it, the shift state is never negative, and copies equal drops in every replay file.
+
+**Not explained: the four pure drops** (840160_20260428, 715709_20240808, 717473_20240916, 832032_20260223). The writer drains the queue at stop, so a backlog always ends in copies. A net shift needs callbacks that never queued anything. Candidate (unverified, from `../npc_sync/outputs/sync-dropped-data.md`): `ReadDigitalU32` raises inside the callback, so `put` is never reached. `_timestamps.txt` would settle it: the timestamp is taken in the callback, so a pure drop shows a gap of k x 0.5 s there and writer lag shows nothing.
+
+**Side points.**
+
+- `write_h5_data` (`src/sync/datasets.py` line 124) stamps each event with the index of the last sample before the change, so every event in every file is one sample (10 us) early. This is why the event before a copy "already carried the copy's state".
+- Upstream fix, one line: `self.buffer_q.put((timestamp, self.daq_buffer.copy()))`. A slow writer then only delays the file.
