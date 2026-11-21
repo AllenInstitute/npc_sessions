@@ -1324,7 +1324,12 @@ class DynamicRoutingSession:
             stim_filename = stim_path.stem
             kwargs: dict[str, Any] = {}
             if self.is_sync:
-                kwargs |= {"sync": self.sync_data}
+                kwargs |= {
+                    "sync": self.sync_data,
+                    # the session's display times (with the constant-lag fallback and its
+                    # provenance in the epochs table), rather than recomputing them per stim
+                    "vis_display_times": self.stim_frame_times[stim_filename],
+                }
             if self.is_ephys and self.is_sync:
                 kwargs |= {"ephys_recording_dirs": self.ephys_recording_dirs}
             if (
@@ -1384,6 +1389,18 @@ class DynamicRoutingSession:
             description="names of other intervals tables that contain trial data from the epoch",
             index=True,
         )
+        epochs.add_column(
+            "display_time_source",
+            description=(
+                "how the frame display times (and so visual stimulus times in the epoch's "
+                "intervals tables, and the epoch's start/stop times) were estimated: "
+                "'photodiode' (from the diode-measured sync square; `notes` lists any frames "
+                "given vsync + constant lag instead), 'constant_lag' (photodiode unusable: vsync "
+                f"+ {npc_stim.CONSTANT_MONITOR_LAG * 1e3:.2f} ms, typically within ~5 ms of the "
+                "photodiode; the reason is in `notes`; tagged 'no_photodiode'), or 'no_sync' "
+                "(no sync recording: times from the stim file)"
+            ),
+        )
 
         def get_epoch_record(stim_file: npc_io.PathLike) -> dict[str, Any]:
             stim_file = npc_io.from_pathlike(stim_file)
@@ -1432,6 +1449,22 @@ class DynamicRoutingSession:
 
             invalid_times_notes: list[str] = []
             replayed_notes: list[str] = []
+            display_time_notes: list[str] = []
+            display_time_source = "no_sync"
+            if self.is_sync and isinstance(
+                block := self._stim_display_times.get(stim_file.stem),
+                npc_stim.BlockDisplayTimes,
+            ):
+                display_time_source = block.source
+                if block.source == "constant_lag":
+                    tags.append("no_photodiode")
+                    display_time_notes.append(
+                        f"frame display times are vsync + constant lag "
+                        f"({npc_stim.CONSTANT_MONITOR_LAG * 1e3:.2f} ms), photodiode not used: "
+                        f"{block.reason}"
+                    )
+                elif block.notes:
+                    display_time_notes.append(f"frame display times: {block.notes}")
             if not self.is_sync:
                 # only one stim, so we use its frame times as recorded on stim computer
                 start_time = 0.0
@@ -1475,8 +1508,10 @@ class DynamicRoutingSession:
                     if stim_file.stem in self.stim_data_without_timing_issues
                     else []
                 ),
+                "display_time_source": display_time_source,
                 "notes": "; ".join(
-                    (
+                    display_time_notes
+                    + (
                         [f"includes invalid times: {'; '.join(invalid_times_notes)}"]
                         if invalid_times_notes
                         else []
@@ -3024,17 +3059,30 @@ class DynamicRoutingSession:
         self,
     ) -> dict[str, Exception | npc_stim.BlockDisplayTimes]:
         """Display times with provenance (`source`, matched sync block) for all stims, or
-        Exceptions."""
+        Exceptions.
+
+        Every stim (not just the task) falls back to vsync + `npc_stim.CONSTANT_MONITOR_LAG`
+        (`source='constant_lag'`) where the photodiode can't be used, as npc_sync <= 0.1.x
+        (npc_sessions <= 0.0.274) always did: without it, one bad photodiode block removes
+        the stim's epoch and intervals table (the whole trials table, for the task), although
+        most of their columns don't use display times, and constant lag is within ~5 ms of
+        the photodiode (block median latencies 27.2-32.5 ms across 1,899 blocks). The source
+        is recorded in the epochs table (`display_time_source`, tag 'no_photodiode') and in
+        `sync_timing_report`. Stims whose block overlaps a replayed sync interval that
+        couldn't be reconstructed still get no display times."""
         display_times = npc_stim.get_stim_display_times(
             *self.stim_paths,  # no longer using cached data
             sync=self.sync_data,
+            fallback="constant_lag",
         )
         return {npc_io.from_pathlike(k).stem: v for k, v in display_times.items()}
 
     @property
     def stim_frame_time_sources(self) -> dict[str, npt.NDArray[np.int8]]:
         """Per-frame timing source for each stim with frame times: 0 = measured, 1 =
-        interpolated inside a replayed sync interval (see `sync_patch`)."""
+        interpolated inside a replayed sync interval (see `sync_patch`), 2 = vsync + constant
+        lag in a photodiode block (the frame's diode flip was misassigned; see
+        `npc_stim.BlockDisplayTimes.frame_source`)."""
         return {
             k: (
                 np.zeros(len(v.display_times), dtype=np.int8)
@@ -3058,7 +3106,8 @@ class DynamicRoutingSession:
         """Frame (display) times for the stims that have them.
 
         Stims without usable frame times are left out (logged once, with the reason; see
-        `sync_timing_report`): they get no epoch, intervals table or trials table.
+        `sync_timing_report`): they get no epoch, intervals table or trials table. Stims
+        whose photodiode can't be used have vsync + constant lag (see `_stim_display_times`).
         """
         out: dict[str, npt.NDArray[np.float64]] = {}
         for k, v in self._stim_frame_times.items():

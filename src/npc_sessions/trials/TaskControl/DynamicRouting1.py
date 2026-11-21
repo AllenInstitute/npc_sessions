@@ -505,7 +505,7 @@ class DynamicRouting1(TaskControl):
 
     @cached_property
     def stim_start_time(self) -> npt.NDArray[np.float64]:
-        """onset of visual or auditory stimulus"""
+        """onset of visual or auditory stimulus (visual: the frame's display time on the monitor, estimated as in the epochs table's `display_time_source` for the task epoch)"""
         starts = np.full(self._len, np.nan)
         for idx in range(self._len):
             if self.is_vis_stim[idx] or self.is_catch[idx]:
@@ -518,7 +518,7 @@ class DynamicRouting1(TaskControl):
 
     @cached_property
     def stim_stop_time(self) -> npt.NDArray[np.float64]:
-        """offset of visual or auditory stimulus"""
+        """offset of visual or auditory stimulus (visual: the frame's display time on the monitor, estimated as in the epochs table's `display_time_source` for the task epoch)"""
         ends = np.full(self._len, np.nan)
         for idx in range(self._len):
             if self.is_vis_stim[idx] or self.is_catch[idx]:

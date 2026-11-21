@@ -352,6 +352,24 @@ def test_phantom_flicker_patch_for_a_session_without_replays(flicker_files) -> N
     # unpatched, npc_stim rejects the block (flip count)
     (unpatched,) = npc_stim.get_display_times(npc_sync.SyncDataset(flicker_files["sync"]), [flicker_files["stim"]])
     assert unpatched.source == "unavailable"
+    assert row["n_constant_lag_frames"] == 0 and row["display_time_notes"] is None
+
+
+@pytest.mark.skipif(not hasattr(npc_sync, "align_diode_toggles"), reason="npc_sync without phantom-flicker removal")
+def test_report_records_constant_lag_for_a_patch_rejected_block(flicker_files) -> None:
+    """As DynamicRoutingSession: fallback='constant_lag' also covers blocks whose photodiode
+    edges the SyncPatch rejected (14 task sessions had no trials table in v0.0.298)."""
+    patch = timing.get_sync_patch("s", flicker_files["sync"], [flicker_files["stim"]])
+    assert patch is not None
+    patch.diode_blocks[0].status = "rejected"
+    patch.diode_blocks[0].reason = "test"
+    patch.removed = {}
+    sync = npc_sync.SyncDataset(flicker_files["sync"], patch=patch)
+    display = npc_stim.get_display_times(sync, [flicker_files["stim"]], fallback="constant_lag")
+    (row,) = timing.get_block_report(sync, [flicker_files["stim"]], display).to_dict("records")
+    assert row["display_time_source"] == "constant_lag"
+    assert row["n_constant_lag_frames"] == row["n_vsyncs_recorded"]
+    assert row["status"] == "rejected" and "not explained" in row["reason"]
 
 
 def test_predict_opto_line_from_trigger_frames() -> None:

@@ -1403,6 +1403,11 @@ def get_block_report(
     """One row per vsync block: matched stim, status ('clean' / 'patched' / 'rejected'),
     reason, frame counts and the gate values from the patch.
 
+    With `display_times`: their source ('photodiode' / 'constant_lag' / 'unavailable'), the
+    number of interpolated and constant-lag frames, and `npc_stim.BlockDisplayTimes.notes`.
+    A block whose photodiode wasn't used is 'rejected' (the reason says why) even if it has
+    constant-lag display times.
+
     `display_time_errors` (stim file stem -> Exception, as returned for stims without
     display times) gives the reason for a matched block whose `display_times` entry has
     no stim file."""
@@ -1450,6 +1455,8 @@ def get_block_report(
             dt = display_times[j]
             row["display_time_source"] = dt.source
             row["n_interpolated_frames"] = dt.n_interpolated
+            row["n_constant_lag_frames"] = dt.n_constant_lag_frames
+            row["display_time_notes"] = dt.notes
         if m is None:
             row["status"], row["reason"] = "rejected", "no stim file matched to block"
         elif unknown:

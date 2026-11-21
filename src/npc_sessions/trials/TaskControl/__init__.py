@@ -112,5 +112,10 @@ class TaskControl(property_dict.PropertyDict):
 
     @cached_property
     def _vis_display_times(self) -> npt.NDArray[np.float64]:
-        """Best-estimate time of monitor update. Without sync, this equals frame times."""
+        """Best-estimate time of monitor update. Without sync, this equals frame times.
+
+        Pass `vis_display_times=` to the constructor to use precomputed display times (as
+        `DynamicRoutingSession` does: `stim_frame_times`, which fall back to vsync + constant
+        lag where the photodiode can't be used); otherwise they're computed from sync
+        without a fallback."""
         return npc_stim.get_vis_display_times(self._hdf5_path, self._sync)
