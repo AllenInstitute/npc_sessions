@@ -3975,16 +3975,23 @@ class DynamicRoutingSession:
             frames,
         )
         sorted_unique_times = np.sort(np.unique(times))
-        df = pd.DataFrame(dict(timestamps=sorted_unique_times))
-        if df.empty:
-            df = pd.DataFrame({"timestamps": pd.Series(dtype=float)})
+        name = "quiescent_interval_violations"
+        table_description = "times at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial"
+        column_description = "time at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial"
+        if len(sorted_unique_times) == 0:
+            # DynamicTable.from_dataframe fails on an empty dataframe
+            table = pynwb.core.DynamicTable(name=name, description=table_description)
+            table.add_column(
+                name="timestamps",
+                description=column_description,
+                data=np.array([], dtype=np.float64),
+            )
+            return table
         return pynwb.core.DynamicTable.from_dataframe(
-            df=df,
-            name="quiescent_interval_violations",
-            table_description="times at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial",
-            column_descriptions={
-                "timestamps": "time at which the subject made contact with the lick spout during a pre-trial quiescent interval, triggering a restart of the trial"
-            },
+            df=pd.DataFrame(dict(timestamps=sorted_unique_times)),
+            name=name,
+            table_description=table_description,
+            column_descriptions={"timestamps": column_description},
         )
 
     @cached_property
