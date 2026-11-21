@@ -2495,7 +2495,7 @@ wheels = [
 
 [[package]]
 name = "npc-sessions"
-version = "0.0.298"
+version = "0.0.299"
 source = { editable = "." }
 default-groups = "all"
 dependencies = [
