@@ -204,6 +204,28 @@ def _n_trials_in_stim_file(trials: TaskControl.TaskControl) -> int:
     return int(index.max()) + 1 if index.size else 0
 
 
+
+def _dynamic_table_from_dataframe(**kwargs: Any) -> pynwb.core.DynamicTable:
+    """`pynwb.core.DynamicTable.from_dataframe`, but also for an empty dataframe (hdmf fails
+    on `df[col].iloc[0]`): the table is built with typed, empty columns (#202)."""
+    df: pd.DataFrame = kwargs["df"]
+    if len(df) > 0:
+        return pynwb.core.DynamicTable.from_dataframe(**kwargs)
+    column_descriptions = kwargs.get("column_descriptions") or {}
+    table = pynwb.core.DynamicTable(
+        name=kwargs["name"], description=kwargs["table_description"]
+    )
+    for col in df.columns:
+        dtype = df[col].dtype
+        if not isinstance(dtype, np.dtype) or dtype == object:
+            dtype = np.dtype(str)
+        table.add_column(
+            name=col,
+            description=column_descriptions.get(col, "no description"),
+            data=np.array([], dtype=dtype),
+        )
+    return table
+
 class DynamicRoutingSession:
     """Class for fetching & processing raw data for a session, making
     NWB modules and an NWBFile instance available as attributes.
@@ -3547,7 +3569,7 @@ class DynamicRoutingSession:
                 )
         else:
             df = pd.DataFrame(dict(timestamps=self.sam.lickTimes))
-        licks = pynwb.core.DynamicTable.from_dataframe(
+        licks = _dynamic_table_from_dataframe(
             name="licks",
             table_description="times at which the subject made contact with a combined lick sensor + water spout: putatively the starts of licks, but may include other events such as grooming",
             df=df,
@@ -3636,7 +3658,7 @@ class DynamicRoutingSession:
     ) -> tuple[pynwb.core.DynamicTable, ...]:
         cam_to_frametimes = self.mvr.frame_times
         return tuple(
-            pynwb.core.DynamicTable.from_dataframe(
+            _dynamic_table_from_dataframe(
                 df=pd.DataFrame(dict(timestamps=timestamps)),
                 name=f"frametimes_{self.mvr_to_nwb_camera_name[camera_name]}",
                 table_description=f"start time of each frame exposure in {self.mvr.video_paths[camera_name].stem}",
@@ -3717,7 +3739,7 @@ class DynamicRoutingSession:
                 ". See original publication for further details: https://doi.org/10.1038/s41592-024-02319-1"
             )
             LP_face_parts_dynamic_tables.append(
-                pynwb.core.DynamicTable.from_dataframe(
+                _dynamic_table_from_dataframe(
                     name=name, table_description=table_description, df=df
                 )
             )
@@ -3752,7 +3774,7 @@ class DynamicRoutingSession:
             }.items():
                 column_descriptions[column_name] = description
 
-        return pynwb.core.DynamicTable.from_dataframe(
+        return _dynamic_table_from_dataframe(
             name=name,
             df=df,
             columns=None,
@@ -3883,7 +3905,7 @@ class DynamicRoutingSession:
                     .reset_index()
                     .drop("frame_index", axis=1)
                 )
-                table = pynwb.core.DynamicTable.from_dataframe(
+                table = _dynamic_table_from_dataframe(
                     name=f"dlc_{nwb_camera_name}",
                     df=df,
                     columns=None,
@@ -4004,7 +4026,7 @@ class DynamicRoutingSession:
                 name="rewards",
                 description="water rewards delivered to the subject",
             )
-        return pynwb.core.DynamicTable.from_dataframe(
+        return _dynamic_table_from_dataframe(
             df=df,
             name="rewards",
             table_description="water rewards delivered to the subject",
@@ -4036,7 +4058,7 @@ class DynamicRoutingSession:
                 data=np.array([], dtype=np.float64),
             )
             return table
-        return pynwb.core.DynamicTable.from_dataframe(
+        return _dynamic_table_from_dataframe(
             df=pd.DataFrame(dict(timestamps=sorted_unique_times)),
             name=name,
             table_description=table_description,
