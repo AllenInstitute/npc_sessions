@@ -1905,7 +1905,12 @@ class DynamicRoutingSession:
                 for col in ("waveform_mean", "waveform_sd"):
                     d = np.array(row[col])  # time, electrodes
                     a = np.zeros((d.shape[0], 384), dtype=np.float64)
-                    a[:, row["channels"]] = d
+                    # `channels` include the offset (surface recording: 384-767), the
+                    # dense array is per probe channel (0-383)
+                    a[
+                        :,
+                        np.asarray(row["channels"]) - self.electrode_channel_idx_offset,
+                    ] = d
                     row[col] = a
             ## for ref:
             # add_unit(spike_times=None, obs_intervals=None, electrodes=None, electrode_group=None, waveform_mean=None, waveform_sd=None, waveforms=None, id=None)
