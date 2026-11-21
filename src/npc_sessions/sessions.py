@@ -2795,7 +2795,9 @@ class DynamicRoutingSession:
             v for v in self._stim_display_times.values() if not isinstance(v, Exception)
         )
         errors = {
-            k: v for k, v in self._stim_display_times.items() if isinstance(v, Exception)
+            k: v
+            for k, v in self._stim_display_times.items()
+            if isinstance(v, Exception)
         }
         by_block = {d.block_index: d for d in display}
         blocks = npc_sync.SyncDataset(
