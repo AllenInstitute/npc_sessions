@@ -180,7 +180,10 @@ class PropertyDict(collections.abc.Mapping):
                 # pandas will raise an error if they don't
                 df = df.explode(explode_cols, ignore_index=True)
         for col in df.columns:
-            if df[col].dtype == object:
+            if pd.api.types.is_string_dtype(df[col]) and df[col].dtype != object:
+                # pandas>=3 infers `str` dtype for string columns: missing values are NaN
+                df[col] = df[col].fillna("")
+            elif df[col].dtype == object:
                 if any(isinstance(v, str) for v in df[col].values):
                     df[col] = df[col].fillna("")
                 elif all(isinstance(v, int) for v in df[col].values if not np.isnan(v)):
