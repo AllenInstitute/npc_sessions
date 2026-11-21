@@ -80,8 +80,9 @@ import json
 import logging
 import os
 import pathlib
+import re
 import subprocess
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
 import npc_io
@@ -1397,9 +1398,14 @@ def get_block_report(
     sync: npc_sync.SyncDataset,
     stim_paths: Iterable[npc_io.PathLike],
     display_times: Sequence[npc_stim.BlockDisplayTimes] | None = None,
+    display_time_errors: Mapping[str, Exception] | None = None,
 ) -> pd.DataFrame:
     """One row per vsync block: matched stim, status ('clean' / 'patched' / 'rejected'),
-    reason, frame counts and the gate values from the patch."""
+    reason, frame counts and the gate values from the patch.
+
+    `display_time_errors` (stim file stem -> Exception, as returned for stims without
+    display times) gives the reason for a matched block whose `display_times` entry has
+    no stim file."""
     raw = npc_sync.SyncDataset(sync, on_invalid="ignore")
     matches, _ = match_stims_to_blocks(raw, stim_paths)
     patch = sync.patch
@@ -1468,9 +1474,27 @@ def get_block_report(
             and display_times[j].source != "photodiode"
         ):
             row["status"] = "rejected"
-            row["reason"] = f"display times: {display_times[j].reason}"
+            reason = display_times[j].reason
+            if (
+                display_times[j].stim_path is None
+                and display_time_errors
+                and m.stim_path.stem in display_time_errors
+            ):
+                reason = _display_time_error_reason(
+                    display_time_errors[m.stim_path.stem]
+                )
+            row["reason"] = f"display times: {reason}"
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+def _display_time_error_reason(exc: Exception) -> str:
+    """The reason in an npc_stim 'No frame display times for <stim> (sync block n): <reason>'
+    error, else the error's repr."""
+    match = re.match(
+        r"No frame display times for .*?\(sync block \d+\): (.*)", str(exc), re.S
+    )
+    return match.group(1) if match else repr(exc)
 
 
 def get_replayed_intervals(sync: npc_sync.SyncDataset) -> list[dict[str, Any]]:

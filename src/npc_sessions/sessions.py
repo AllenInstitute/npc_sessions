@@ -2794,6 +2794,9 @@ class DynamicRoutingSession:
         display = tuple(
             v for v in self._stim_display_times.values() if not isinstance(v, Exception)
         )
+        errors = {
+            k: v for k, v in self._stim_display_times.items() if isinstance(v, Exception)
+        }
         by_block = {d.block_index: d for d in display}
         blocks = npc_sync.SyncDataset(
             self.sync_data, on_invalid="ignore"
@@ -2805,11 +2808,17 @@ class DynamicRoutingSession:
                 by_block.get(
                     i,
                     npc_stim.BlockDisplayTimes(
-                        i, None, b, None, "unavailable", reason="no stim file matched"
+                        i,
+                        None,
+                        b,
+                        None,
+                        "unavailable",
+                        reason="no display times for block",
                     ),
                 )
                 for i, b in enumerate(blocks)
             ],
+            display_time_errors=errors,
         )
 
     @property
