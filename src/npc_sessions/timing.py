@@ -1478,6 +1478,7 @@ def get_block_report(
             if (
                 display_times[j].stim_path is None
                 and display_time_errors
+                and m is not None
                 and m.stim_path.stem in display_time_errors
             ):
                 reason = _display_time_error_reason(
