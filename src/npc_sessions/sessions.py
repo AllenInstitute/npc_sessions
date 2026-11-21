@@ -204,7 +204,6 @@ def _n_trials_in_stim_file(trials: TaskControl.TaskControl) -> int:
     return int(index.max()) + 1 if index.size else 0
 
 
-
 def _dynamic_table_from_dataframe(**kwargs: Any) -> pynwb.core.DynamicTable:
     """`pynwb.core.DynamicTable.from_dataframe`, but also for an empty dataframe (hdmf fails
     on `df[col].iloc[0]`): the table is built with typed, empty columns (#202)."""
@@ -225,6 +224,7 @@ def _dynamic_table_from_dataframe(**kwargs: Any) -> pynwb.core.DynamicTable:
             data=np.array([], dtype=dtype),
         )
     return table
+
 
 class DynamicRoutingSession:
     """Class for fetching & processing raw data for a session, making
