@@ -1031,9 +1031,7 @@ def reconstruct_photodiode_line(
             + (f"failed ({nidaq.reason})" if not nidaq.is_valid else "has lost samples")
         )
         return out
-    data = npc_ephys.get_pxi_nidaq_data(
-        *recording_dirs, device_name=device.device.name
-    )
+    data = npc_ephys.get_pxi_nidaq_data(*recording_dirs, device_name=device.device.name)
     n_samples = int(data.shape[0])
     measured = {}
     for kind in ("rising", "falling"):
