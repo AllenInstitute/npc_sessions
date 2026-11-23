@@ -76,6 +76,9 @@ import npc_sessions.trials as TaskControl
 import npc_sessions.trials.sam as sam_utils
 import npc_sessions.utils as utils
 
+if typing.TYPE_CHECKING:
+    from npc_sessions import qc
+
 logger = logging.getLogger(__name__)
 
 
@@ -284,6 +287,12 @@ class DynamicRoutingSession:
     excluded_stim_file_names = ["DynamicRouting1_670248_20230802_120703"]
     """File names (or substrings) that should never be considered as valid stim
     files, for example they are known to be corrupt and cannot be opened"""
+
+    MAX_EPOCH_BLOCK_START_DIFF_SEC = 30.0
+    """For the epoch of a stim file without frame times: the sync vsync block that starts
+    closest to the stim file's start time gives the epoch's start/stop times, if it starts
+    within this many seconds of it (the stim computer's clock, and the time from the start
+    of the script to its first frame, are within seconds)"""
 
     mvr_to_nwb_camera_name = {
         "eye": "eye_camera",
@@ -533,6 +542,25 @@ class DynamicRoutingSession:
                     ),
                 ]
             )
+        try:
+            invalid_stims = {
+                stim: validity
+                for stim, validity in self.stim_validity.items()
+                if not validity.is_valid
+            }
+        except Exception as exc:
+            logger.warning(
+                f"{self.id} could not check stim validity for notes: {exc!r}"
+            )
+            invalid_stims = {}
+        for stim, validity in invalid_stims.items():
+            if self.task_stim_name in stim:
+                what = "task excluded (no trials or performance tables)"
+            elif validity.usable_intervals:
+                what = "visual stimuli excluded"
+            else:
+                what = "excluded"
+            notes = "; ".join([notes, f"{stim} {what}: {validity.reason}"])
         return notes.strip("; ") or None
 
     @property
@@ -737,6 +765,9 @@ class DynamicRoutingSession:
                 self.keywords.append("issues")
             if self.is_task:
                 self.keywords.append("task")
+            elif self.task_exclusion_reason is not None:
+                # has a task stim file that can't be used: see `notes` and `epochs`
+                self.keywords.append("task_excluded")
             if self.is_sync:
                 self.keywords.append("sync")
             if self.is_video:
@@ -778,7 +809,9 @@ class DynamicRoutingSession:
             if self.is_sync and self.is_task and not self.is_photodiode:
                 self.keywords.append("no_photodiode")
             for t in self.epoch_tags:
-                if t not in self.keywords:
+                # 'invalid', 'timing_issues': about one epoch, not the session. The other
+                # tags of an invalid epoch don't include 'task' (see `epochs`)
+                if t not in self.keywords and t not in ("invalid", "timing_issues"):
                     self.keywords.append(t)
             if self.info and self.info.experiment_day is not None:
                 self.keywords.append(f"day_{self.info.experiment_day}")
@@ -1344,6 +1377,11 @@ class DynamicRoutingSession:
         for stim_path in stim_paths:
             assert isinstance(stim_path, upath.UPath)
             stim_filename = stim_path.stem
+            validity = self.stim_validity[stim_filename]
+            if not validity.is_valid and not validity.usable_intervals:
+                # e.g. the task with `is_task=False`; with sync, invalid stims have no frame
+                # times, so aren't in `stim_paths` here
+                continue
             kwargs: dict[str, Any] = {}
             if self.is_sync:
                 kwargs |= {
@@ -1367,6 +1405,13 @@ class DynamicRoutingSession:
                     stim_path=stim_path,
                     taskcontrol_kwargs=kwargs,
                 )
+                if not validity.is_valid:
+                    # constant-lag display times that failed the checks (`stim_validity`):
+                    # no visual table for this block. Sound onsets don't use display times
+                    assert validity.usable_intervals == (
+                        utils.get_taskcontrol_intervals_table_name("AudRFMapping"),
+                    )
+                    continue
                 set_lazy_eval(
                     key=f"Vis{stim_filename}",
                     cls=TaskControl.VisRFMapping,
@@ -1396,7 +1441,7 @@ class DynamicRoutingSession:
     def epochs(self) -> pynwb.file.TimeIntervals:
         epochs = pynwb.file.TimeIntervals(
             name="epochs",
-            description="time intervals corresponding to different phases of the session; each epoch corresponds to one TaskControl subclass that controlled stimulus presentation during the epoch, which corresponds to one .hdf5 stimulus file",
+            description="time intervals corresponding to different phases of the session; each epoch corresponds to one TaskControl subclass that controlled stimulus presentation during the epoch, which corresponds to one .hdf5 stimulus file. Every stimulus file recorded during the session has a row, including those whose data isn't used: filter on `is_qc_pass`",
         )
         epochs.add_column(
             "script_name",
@@ -1419,29 +1464,150 @@ class DynamicRoutingSession:
                 "'photodiode' (from the diode-measured sync square; `notes` lists any frames "
                 "given vsync + constant lag instead), 'constant_lag' (photodiode unusable: vsync "
                 f"+ {npc_stim.CONSTANT_MONITOR_LAG * 1e3:.2f} ms, typically within ~5 ms of the "
-                "photodiode; the reason is in `notes`; tagged 'no_photodiode'), or 'no_sync' "
-                "(no sync recording: times from the stim file)"
+                "photodiode; the reason is in `notes`, with the acceptance checks that decide "
+                "`is_qc_pass`; tagged 'no_photodiode'), 'unavailable' (no frame times on sync: the "
+                "epoch is invalid, and `notes` gives the source of its start/stop times) or "
+                "'no_sync' (no sync recording: times from the stim file)"
             ),
         )
 
+        epochs.add_column(
+            "is_qc_pass",
+            description=(
+                "whether the epoch's data can be used: filter on `is_qc_pass == True`. False "
+                "for stim blocks that are in the table as a record only (tagged 'invalid', "
+                "with the reason in `notes`): no frame times on sync, visual stimulus times "
+                "that can't be measured or verified (photodiode unusable, and vsync + constant "
+                "lag failed the acceptance checks), or excluded for the session. Their trials "
+                "aren't in any intervals table, except those named in `interval_names` "
+                "(auditory RF mapping trials don't use display times)"
+            ),
+        )
+
+        def get_stim_file_data(stim_file: upath.UPath) -> h5py.File | None:
+            try:
+                if stim_file.stem in self.stim_data:
+                    return self.stim_data[stim_file.stem]
+                return npc_stim.get_h5_stim_data(stim_file)
+            except Exception as exc:
+                logger.warning(f"{self.id}: {stim_file.name} can't be opened: {exc!r}")
+                return None
+
+        def get_times_without_frame_times(
+            stim_file: upath.UPath, h5: h5py.File | None
+        ) -> tuple[float, float, str]:
+            """(start, stop, note on their source) for the epoch of a stim without frame
+            display times, on the sync clock. In order of preference:
+
+            1. first and last vsync of the sync block that starts closest to the stim file's
+               start time (within `MAX_EPOCH_BLOCK_START_DIFF_SEC`), if no other stim file
+               has that block
+            2. the stim file's start time, on the sync clock via the two computers' clocks
+               (seconds apart, at most), and its duration
+            3. if the stim file can't be read: the start time in its name, to the start of
+               the next stim file or the end of the sync recording (an upper bound)
+            """
+            start_dt = None
+            duration = None
+            if h5 is not None:
+                with contextlib.suppress(Exception):
+                    start_dt = npc_stim.get_stim_start_time(h5)
+                with contextlib.suppress(Exception):
+                    duration = float(npc_stim.get_stim_duration(h5))
+            if start_dt is None:
+                start_dt = npc_session.DatetimeRecord(stim_file.stem).dt
+            sync_start = self.sync_data.start_time
+            sync_stop = float(self.sync_data.total_seconds)
+            start = (start_dt - sync_start).total_seconds()
+            # 1. vsync block
+            try:
+                blocks = npc_sync.SyncDataset(
+                    self.sync_data, on_invalid="ignore"
+                ).vsync_times_in_blocks
+                claimed = {
+                    v.block_index
+                    for k, v in self._stim_display_times.items()
+                    if k != stim_file.stem and isinstance(v, npc_stim.BlockDisplayTimes)
+                }
+                candidates = [
+                    (abs(float(b[0]) - start), i)
+                    for i, b in enumerate(blocks)
+                    if i not in claimed and len(b)
+                ]
+            except Exception as exc:
+                logger.warning(f"{self.id}: no vsync blocks for epoch times: {exc!r}")
+                candidates = []
+            if candidates:
+                diff, i = min(candidates)
+                if diff <= self.MAX_EPOCH_BLOCK_START_DIFF_SEC:
+                    return (
+                        float(blocks[i][0]),
+                        float(blocks[i][-1]),
+                        f"start/stop times are the first/last vsync of sync block {i} "
+                        "(no frame display times)",
+                    )
+            # 2. stim file's clock
+            start = float(min(max(start, 0.0), sync_stop))
+            if duration is not None:
+                return (
+                    start,
+                    float(min(start + duration, sync_stop)),
+                    "start/stop times are from the stim file's start time and duration "
+                    "(stim computer's clock: not aligned to sync)",
+                )
+            # 3. stim file's name
+            later = [
+                t
+                for p in (*self.stim_paths, *self.excluded_stim_paths)
+                if (
+                    t := (
+                        npc_session.DatetimeRecord(p.stem).dt - sync_start
+                    ).total_seconds()
+                )
+                > start
+            ]
+            return (
+                start,
+                float(min([*later, sync_stop])),
+                "start time is from the stim file's name (stim computer's clock: not "
+                "aligned to sync); stop time unknown: it is the start of the next stim "
+                "file, or the end of the sync recording",
+            )
+
         def get_epoch_record(stim_file: npc_io.PathLike) -> dict[str, Any]:
             stim_file = npc_io.from_pathlike(stim_file)
-            h5 = self.stim_data[stim_file.stem]
+            h5 = get_stim_file_data(stim_file)
             stim_name = stim_file.stem.split("_")[0]
+            validity = self.stim_validity[stim_file.stem]
+            block = (
+                self._stim_display_times.get(stim_file.stem) if self.is_sync else None
+            )
+            if (
+                not isinstance(block, npc_stim.BlockDisplayTimes)
+                or block.display_times is None
+            ):
+                block = None
+            has_frame_times = block is not None or not self.is_sync
 
             tags = []
             if self.task_stim_name in stim_file.name:
-                tags.append("task")
-                if npc_samstim.is_opto(h5) or npc_samstim.is_galvo_opto(h5):
-                    if self.is_opto:
-                        tags.append("opto_perturbation")
-                    else:
-                        tags.append("opto_control")
-            if (rewards := h5.get("rewardFrames", None)) is not None and any(
-                rewards[:]
+                if validity.is_valid and self.is_task:
+                    tags.append("task")
+                    if npc_samstim.is_opto(h5) or npc_samstim.is_galvo_opto(h5):
+                        if self.is_opto:
+                            tags.append("opto_perturbation")
+                        else:
+                            tags.append("opto_control")
+                else:
+                    # not 'task': session keywords include the epochs' tags
+                    tags.append("task_excluded")
+            if (
+                h5 is not None
+                and (rewards := h5.get("rewardFrames", None)) is not None
+                and any(rewards[:])
             ):
                 tags.append("rewards")
-            if stim_file.stem not in self.stim_data_without_timing_issues:
+            if not has_frame_times:
                 tags.append("timing_issues")
             for tag in ("spontaneous", "mapping"):
                 if tag in stim_name.lower():
@@ -1451,9 +1617,13 @@ class DynamicRoutingSession:
                     tags.append("optotagging_control")
                 else:
                     tags.append("optotagging")
+            if not validity.is_valid:
+                tags.append("invalid")
 
-            interval_names = []
-            if "RFMapping" in stim_name:
+            interval_names: list[str] = []
+            if not validity.is_valid:
+                interval_names.extend(validity.usable_intervals)
+            elif "RFMapping" in stim_name:
                 interval_names.extend(
                     [
                         utils.get_taskcontrol_intervals_table_name(n)
@@ -1472,11 +1642,8 @@ class DynamicRoutingSession:
             invalid_times_notes: list[str] = []
             replayed_notes: list[str] = []
             display_time_notes: list[str] = []
-            display_time_source = "no_sync"
-            if self.is_sync and isinstance(
-                block := self._stim_display_times.get(stim_file.stem),
-                npc_stim.BlockDisplayTimes,
-            ):
+            display_time_source = "unavailable" if self.is_sync else "no_sync"
+            if block is not None:
                 display_time_source = block.source
                 if block.source == "constant_lag":
                     tags.append("no_photodiode")
@@ -1487,15 +1654,29 @@ class DynamicRoutingSession:
                     )
                 elif block.notes:
                     display_time_notes.append(f"frame display times: {block.notes}")
+            if validity.summary:
+                # invalid: the reason first. Valid with constant lag: the checks, after why
+                # the photodiode wasn't used
+                if validity.is_valid:
+                    display_time_notes.append(validity.summary)
+                else:
+                    display_time_notes.insert(0, validity.summary)
             if not self.is_sync:
                 # only one stim, so we use its frame times as recorded on stim computer
                 start_time = 0.0
                 stop_time = npc_stim.get_stim_duration(h5)
+            elif block is not None:
+                # also for an invalid block with (constant-lag) display times: the vsyncs
+                # are fine
+                assert block.display_times is not None
+                start_time = block.display_times[0]
+                stop_time = block.display_times[-1]
             else:
-                frame_times = self.stim_frame_times[stim_file.stem]
-                start_time = frame_times[0]
-                stop_time = frame_times[-1]
-            assert start_time != stop_time
+                start_time, stop_time, note = get_times_without_frame_times(
+                    stim_file, h5
+                )
+                display_time_notes.append(note)
+            assert start_time != stop_time or not validity.is_valid
             if self.is_sync and self.sync_patch is not None:
                 from npc_sessions import timing
 
@@ -1525,12 +1706,9 @@ class DynamicRoutingSession:
                 "stop_time": stop_time,
                 "script_name": stim_name,
                 "tags": tags,
-                "interval_names": (
-                    interval_names
-                    if stim_file.stem in self.stim_data_without_timing_issues
-                    else []
-                ),
+                "interval_names": interval_names,
                 "display_time_source": display_time_source,
+                "is_qc_pass": bool(validity.is_valid),
                 "notes": "; ".join(
                     display_time_notes
                     + (
@@ -1546,20 +1724,21 @@ class DynamicRoutingSession:
                 ),
             }
 
-        records = []
-        valid_sync_stim_names = (
-            self.stim_data_without_timing_issues.keys() if self.is_sync else None
-        )
-        for stim in self.stim_paths:
-            if (
-                valid_sync_stim_names is not None
-                and stim.stem not in valid_sync_stim_names
-            ):
-                continue
-            records.append(get_epoch_record(stim))
-
+        # every stim file of the session gets a row, usable or not (`stim_validity`)
+        records = [
+            get_epoch_record(stim)
+            for stim in (*self.stim_paths, *self.excluded_stim_paths)
+        ]
         for record in sorted(records, key=lambda _: _["start_time"]):
             epochs.add_interval(**record)
+        for name in ("interval_names", "tags"):
+            if name in epochs.colnames and len(epochs[name].target.data) == 0:
+                # every row has an empty list (e.g. no valid epoch): hdmf can't infer the
+                # column's dtype on write ("could not resolve dtype for VectorData"), so
+                # give it an empty str array
+                object.__setattr__(
+                    epochs[name].target, "_Data__data", np.array([], dtype="U1")
+                )
         return epochs
 
     # probes, devices, units ---------------------------------------------------- #
@@ -2209,14 +2388,38 @@ class DynamicRoutingSession:
 
     @cached_property
     def is_task(self) -> bool:
-        if (v := getattr(self, "_is_task", None)) is not None:
-            return v
+        """Whether the session has a usable behavior task: a task stim file that is valid
+        (`stim_validity`: it has usable frame times, and passed the checks if they are
+        vsync + constant lag), unless disabled with `is_task=False`. Without, there's no
+        trials or performance table, or anything derived from them, and no 'task' keyword
+        ('task_excluded' instead, if there is a task stim file: the reason is in `notes`
+        and in the stim's row in `epochs`)."""
+        v = getattr(self, "_is_task", None)
+        if v is False:
+            return False
         with contextlib.suppress(
             FileNotFoundError, ValueError, StopIteration, npc_lims.MissingCredentials
         ):
             _ = self.task_data
             return True
+        if v:
+            # validity is decided from the data: it can't be forced
+            logger.warning(
+                f"{self.id}: `is_task=True` was set, but there is no usable task stim file: "
+                "is_task is False"
+            )
         return False
+
+    @property
+    def task_exclusion_reason(self) -> str | None:
+        """Why a session with a task stim file has no task data (`is_task` False): None if
+        it has task data, or if there is no task stim file."""
+        if self.is_task:
+            return None
+        for stim, validity in self.stim_validity.items():
+            if self.task_stim_name in stim:
+                return validity.reason or "unknown"
+        return None
 
     @cached_property
     def is_sync(self) -> bool:
@@ -2886,43 +3089,101 @@ class DynamicRoutingSession:
 
     @cached_property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
-        def is_valid_stim_file(p) -> bool:
+        """Stim files used for the session. Stim files recorded during the session that
+        aren't used are in `excluded_stim_paths`, with the reason."""
+        return self._stim_paths_and_exclusions[0]
+
+    @property
+    def excluded_stim_paths(self) -> dict[upath.UPath, str]:
+        """{stim file: reason} for stim files that started during the session's sync
+        recording but aren't used (not in `stim_paths`): named in
+        `excluded_stim_file_names`, cut short by the end of the sync recording, or an extra
+        task file. They get an invalid row in `epochs` and an entry in `stim_validity`.
+
+        Not included, as they aren't part of the recorded session: stim files of the same
+        subject and day that started before the sync recording started or after it stopped,
+        and, without sync (no common clock), any stim file other than the one task file
+        used."""
+        return self._stim_paths_and_exclusions[1]
+
+    @cached_property
+    def _stim_paths_and_exclusions(
+        self,
+    ) -> tuple[tuple[upath.UPath, ...], dict[upath.UPath, str]]:
+        def get_exclusion(p: upath.UPath) -> str | None:
+            """None: stim file is used. '': not a stim file of this session. Otherwise the
+            reason a stim file recorded during the session isn't used."""
             if not utils.is_stim_file(
                 p, subject_spec=self.id.subject, date_spec=self.id.date
             ):
-                return False
-            if any(e in p.as_posix() for e in self.excluded_stim_file_names):
-                return False
+                return ""
+            is_excluded_name = any(
+                e in p.as_posix() for e in self.excluded_stim_file_names
+            )
             if not self.is_sync:
-                if self.task_stim_name not in p.stem:
-                    return (
-                        False  # only analyse the task stim file if we have no sync data
-                    )
-                return True
+                if self.task_stim_name not in p.stem or is_excluded_name:
+                    return ""  # only analyse the task stim file if we have no sync data
+                return None
+            dt = npc_session.DatetimeRecord(p.stem).dt
             if (
-                dt := npc_session.DatetimeRecord(p.stem).dt
-            ) < self._raw_sync_data.start_time:
-                return False
-            if (
-                dt
+                dt < self._raw_sync_data.start_time
+                or dt
                 > self._raw_sync_data.stop_time  # this check first can save opening file
-                or dt + datetime.timedelta(seconds=npc_stim.get_stim_duration(p))
+            ):
+                return ""
+            if is_excluded_name:
+                return (
+                    "stim file excluded by name (`excluded_stim_file_names`: files known "
+                    "to be unusable, from the class or the session's config)"
+                )
+            if (
+                dt + datetime.timedelta(seconds=npc_stim.get_stim_duration(p))
                 > self._raw_sync_data.stop_time
             ):
-                return False
-            return True
+                return "the sync recording stopped before the stim ended"
+            return None
 
         # look for stim files in raw data folder, then in stim file repo if none
         # are found. Rationale is that raw data folder may have curated set,
         # with some unwanted stim files removed
+        stim_paths: list[upath.UPath] = []
+        excluded: dict[upath.UPath, str] = {}
+        is_from_raw_data = True
         for raw_data_paths in (self.raw_data_paths, self.stim_path_root.iterdir()):
-            stim_paths = [p for p in raw_data_paths if is_valid_stim_file(p)]
+            exclusions = {p: get_exclusion(p) for p in raw_data_paths}
+            stim_paths = [p for p, reason in exclusions.items() if reason is None]
+            excluded = {p: reason for p, reason in exclusions.items() if reason}
             if stim_paths:
                 break
+            is_from_raw_data = False
         if not stim_paths:
             raise FileNotFoundError(
                 f"Could not find stim files for {self.id} in raw data paths or {self.stim_path_root}"
             )
+        if is_from_raw_data and self.is_sync:
+            # stim files that started during the sync recording, but were left out of (or
+            # removed from) the session's raw data: not used, but part of the record
+            names = {p.name for p in (*stim_paths, *excluded)}
+            try:
+                for p in self.stim_path_root.iterdir():
+                    if p.name in names:
+                        continue
+                    try:
+                        reason = get_exclusion(p)
+                    except Exception as exc:
+                        reason = f"stim file can't be read ({exc!r})"
+                    if reason == "":
+                        continue
+                    excluded[p] = (
+                        "stim file isn't in the session's raw data (only in the stim file "
+                        "repository): removed from the session, or not uploaded with it"
+                        + (f"; {reason}" if reason else "")
+                    )
+            except Exception as exc:
+                logger.warning(
+                    f"{self.id}: could not list {self.stim_path_root} for stim files "
+                    f"missing from the raw data: {exc!r}"
+                )
         if len(tasks := [p for p in stim_paths if self.task_stim_name in p.stem]) > 1:
             # ensure only one task file (e.g. 676909_2023-11-09 has two)
             logger.warning(
@@ -2932,9 +3193,16 @@ class DynamicRoutingSession:
                 _size = lambda p: p.stat()["size"]
             else:
                 _size = lambda p: p.stat().st_size
-            for extra_task in sorted(tasks, key=_size, reverse=True)[1:]:
+            tasks = sorted(tasks, key=_size, reverse=True)
+            for extra_task in tasks[1:]:
                 stim_paths.remove(extra_task)
-        return tuple(stim_paths)
+                if not self.is_sync:
+                    continue  # no common clock: not part of this session's record
+                excluded[extra_task] = (
+                    f"more than one {self.task_stim_name} stim file in the session: "
+                    f"only the largest is used ({tasks[0].stem})"
+                )
+        return tuple(stim_paths), excluded
 
     @cached_property
     def rig(self) -> str:
@@ -3116,20 +3384,114 @@ class DynamicRoutingSession:
         }
 
     @cached_property
+    def stim_validity(self) -> dict[str, qc.StimValidity]:
+        """{stim file stem: `npc_sessions.qc.StimValidity`} for every stim file of the
+        session, including those that aren't used (`excluded_stim_paths`): whether the stim
+        block can be used (`is_valid`), the `reason` if not, and the checks behind it. The
+        `epochs` table has one row per entry, with `is_qc_pass` equal to its `is_valid`.
+
+        Decided from the data, not from a list:
+
+        - photodiode display times: valid, no checks (nothing extra is loaded)
+        - no frame times on sync (see `_stim_display_times`), or not in `stim_paths`: invalid
+        - vsync + constant lag display times (`source='constant_lag'`): valid if the block
+          has no visual stims timed by display times (OptoTagging, Spontaneous,
+          SpontaneousRewards, LuminanceTest), otherwise (the task, RFMapping) valid only if
+          it passes the checks in `npc_sessions.qc.get_stim_validity`. They use the sorted
+          spike times, loaded here for such blocks only (not via `units`, which needs
+          `trials`). An invalid task block means `is_task` is False; an invalid RFMapping
+          block only loses its visual table (`StimValidity.usable_intervals`)
+        - the task stim of a session with `is_task=False` (config) is invalid: not checked
+        """
+        from npc_sessions import qc
+
+        if self.__dict__.get("_is_evaluating_stim_validity"):
+            raise RuntimeError(
+                f"{self.id}: `stim_validity` needs itself: something used to check "
+                "constant-lag display times depends on trials, `is_task` or frame times"
+            )
+        self.__dict__["_is_evaluating_stim_validity"] = True
+        try:
+            out: dict[str, qc.StimValidity] = {}
+            display_times = (
+                self._stim_display_times if self.stim_paths and self.is_sync else {}
+            )
+            for path in self.stim_paths:
+                stim = path.stem
+                if (
+                    self.task_stim_name in stim
+                    and getattr(self, "_is_task", None) is False
+                ):
+                    out[stim] = qc.StimValidity(
+                        stim,
+                        False,
+                        "task disabled for the session (`is_task=False`, from the "
+                        "session's config)",
+                        (
+                            "no_sync"
+                            if not self.is_sync
+                            else getattr(
+                                display_times.get(stim), "source", "unavailable"
+                            )
+                        ),
+                    )
+                elif not self.is_sync:
+                    out[stim] = qc.StimValidity(stim, True, "", "no_sync")
+                elif (block := display_times.get(stim)) is None:
+                    out[stim] = qc.StimValidity(
+                        stim,
+                        False,
+                        "no usable frame times: stim file not matched to sync",
+                    )
+                elif isinstance(block, Exception):
+                    out[stim] = qc.StimValidity(
+                        stim, False, f"no usable frame times: {block}"
+                    )
+                else:
+                    out[stim] = qc.get_stim_validity(self, stim, block)
+                    if block.source == "constant_lag":
+                        logger.log(
+                            logging.INFO if out[stim].is_valid else logging.WARNING,
+                            f"{self.id} {stim}: {out[stim].summary}",
+                        )
+            for path, reason in self.excluded_stim_paths.items():
+                out[path.stem] = qc.StimValidity(path.stem, False, reason)
+            return out
+        finally:
+            self.__dict__["_is_evaluating_stim_validity"] = False
+
+    @cached_property
     def _stim_frame_times(self) -> dict[str, Exception | npt.NDArray[np.float64]]:
-        """Frame times dict for all stims, containing time arrays or Exceptions."""
-        return {
-            k: v if isinstance(v, Exception) else v.display_times  # type: ignore[misc]
-            for k, v in self._stim_display_times.items()
-        }
+        """Frame times dict for all stims in `stim_paths`, containing time arrays or
+        Exceptions: for stims without display times (`_stim_display_times`), and for stims
+        with display times that are invalid (`stim_validity`: constant-lag display times that
+        failed the checks, or the task with `is_task=False`) - except an invalid RFMapping
+        block, which keeps its (constant-lag) display times here: they aren't used for its
+        auditory table, the only one made."""
+        out: dict[str, Exception | npt.NDArray[np.float64]] = {}
+        for path in self.stim_paths:
+            k = path.stem
+            v = self._stim_display_times.get(k)
+            validity = self.stim_validity[k]
+            if v is None:
+                out[k] = ValueError(validity.reason)
+            elif isinstance(v, Exception):
+                out[k] = v
+            elif not validity.is_valid and not validity.usable_intervals:
+                out[k] = ValueError(f"{k} is invalid: {validity.reason}")
+            else:
+                assert v.display_times is not None
+                out[k] = v.display_times
+        return out
 
     @property
     def stim_frame_times(self) -> dict[str, npt.NDArray[np.float64]]:
         """Frame (display) times for the stims that have them.
 
         Stims without usable frame times are left out (logged once, with the reason; see
-        `sync_timing_report`): they get no epoch, intervals table or trials table. Stims
-        whose photodiode can't be used have vsync + constant lag (see `_stim_display_times`).
+        `sync_timing_report` and `stim_validity`): they get no intervals table or trials
+        table, and an invalid row in `epochs`. Stims whose photodiode can't be used have
+        vsync + constant lag (see `_stim_display_times`), if valid (`stim_validity`).
         """
         out: dict[str, npt.NDArray[np.float64]] = {}
         for k, v in self._stim_frame_times.items():
@@ -4206,6 +4568,10 @@ class DynamicRoutingSurfaceRecording(DynamicRoutingSession):
     @cached_property
     def stim_paths(self) -> tuple[upath.UPath, ...]:
         return ()
+
+    @property
+    def excluded_stim_paths(self) -> dict[upath.UPath, str]:
+        return {}
 
     class AP(DynamicRoutingSession.AP):
         def __init__(self, *args, **kwargs) -> None:

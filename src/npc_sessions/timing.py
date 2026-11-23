@@ -41,6 +41,12 @@ This module adds what npc_sync can't know about a session:
   - opto (laser lines): from the stim files' opto trigger frames (npc_stim) + the measured
     latency, +-1/2 frame (`reconstruct_opto_lines`). This keeps edge counts and
     index-based trial/stim mapping consistent; trial opto times are NaN there anyway
+  - photodiode: npc_sync predicts the digital photodiode edges there from reconstructed
+    vsyncs + the measured latency (in effect a constant lag). For ephys sessions whose
+    NI-DAQ records the analog photodiode (from 2025-01), they are replaced by the edges
+    the comparator would have produced from the analog trace
+    (`reconstruct_photodiode_line`; gates: <= 1 ms against every measured edge around the
+    span, and one-to-one with npc_sync's prediction). Otherwise npc_sync's edges are kept
 - persistence: the patch is cached as JSON keyed by session and sync content hash, with the
   builder and the versions of the packages that build it (`PATCH_DEPENDENCIES`); a cached
   patch is rebuilt (and overwritten, if writable) when the builder or the version of any
@@ -95,7 +101,7 @@ import upath
 
 logger = logging.getLogger(__name__)
 
-BUILDER = "npc_sessions.timing 9"
+BUILDER = "npc_sessions.timing 10"
 """Recorded in each patch. Bump when the builder's output would change: cached patches with
 another builder are rebuilt.
 
@@ -127,6 +133,10 @@ another builder are rebuilt.
   state across the gap; synthesized edges have distinct times (onsets deduplicated, an onset
   at the start of a span the line is already high in is the lick in progress). Asserted
   (`LickLineReconstructionError`, not caught)
+- 10: photodiode edges inside replayed intervals from the NI-DAQ analog photodiode where it
+  is recorded and passes its gates (`reconstruct_photodiode_line`). Patches of sessions
+  without replayed intervals, without ephys, or without an analog photodiode channel are
+  the same as with builder 9
 """
 
 PATCH_DIR_ENV_VAR = "NPC_SESSIONS_SYNC_PATCH_DIR"
@@ -286,7 +296,8 @@ def build_session_sync_patch(
     """Patch for a sync file (see module docstring).
 
     With `ephys_recording_dirs`, the sound line is reconstructed inside replayed intervals
-    from the NI-DAQ recording (`reconstruct_sound_line`). Laser lines are reconstructed
+    from the NI-DAQ recording (`reconstruct_sound_line`), and the photodiode line from the
+    NI-DAQ analog photodiode (`reconstruct_photodiode_line`). Laser lines are reconstructed
     from the stim files' opto trigger frames where possible (`reconstruct_opto_lines`).
     """
     raw = true_clock_view(sync)
@@ -330,6 +341,10 @@ def build_session_sync_patch(
             (reconstruct_lick_line, {}),
             (reconstruct_opto_lines, {}),
             (reconstruct_sound_line, {"ephys_recording_dirs": ephys_recording_dirs}),
+            (
+                reconstruct_photodiode_line,
+                {"ephys_recording_dirs": ephys_recording_dirs},
+            ),
         ]
         for fn, kwargs in steps:
             try:
@@ -586,6 +601,524 @@ def reconstruct_sound_line(
         "line; offsets = onset + waveform duration + median measured excess width",
     )
     return diagnostics
+
+
+# ---------------------------------------------------------------- analog photodiode
+
+DIODE_LINE = "stim_photodiode"
+ANALOG_DIODE_METHOD = "nidaq_analog_photodiode"
+"""`SpanPatch.method` of photodiode spans whose edges come from the NI-DAQ analog photodiode."""
+
+ANALOG_DIODE_WINDOW_SEC = 10.0
+"""Measured photodiode edges up to this long before and after a replayed span calibrate the
+comparator model (thresholds, offsets) and gate it."""
+
+ANALOG_DIODE_MIN_EDGES = 10
+"""Measured edges needed per polarity on each side of the span."""
+
+ANALOG_DIODE_MAX_DEVIATION_SEC = 0.001
+"""Gate: every measured photodiode edge within `ANALOG_DIODE_WINDOW_SEC` of the span must have
+an analog-derived edge of the same polarity within this, and vice versa (observed values:
+hub/experiments/analog-photodiode-patch/README.md)."""
+
+ANALOG_DIODE_SMOOTH_SEC = 0.0003
+"""Boxcar applied to the analog trace before thresholding (9 samples at 30 kHz): the falling
+phase is slow (~40 counts/ms at the comparator's threshold, with ~10 counts of noise)."""
+
+ANALOG_DIODE_MIN_CORRELATION = 0.5
+"""The photodiode channel is the NI-DAQ channel that correlates best with the digital line's
+state around the span, if at least this (observed: 0.80-0.95 on AI0, |r| < 0.01 on the
+others), ..."""
+ANALOG_DIODE_MIN_CORRELATION_MARGIN = 0.2
+"""... and at least this much above every other channel."""
+
+
+def _diode_state_at(
+    t: npt.NDArray[np.float64],
+    rising: npt.NDArray[np.float64],
+    falling: npt.NDArray[np.float64],
+) -> npt.NDArray[np.bool_]:
+    """Line state at times `t` from its edges (low before the first edge if it is rising)."""
+    e = np.concatenate([rising, falling])
+    pol = np.concatenate([np.ones(len(rising), bool), np.zeros(len(falling), bool)])
+    order = np.argsort(e, kind="stable")
+    e, pol = e[order], pol[order]
+    if not len(e):
+        return np.zeros(len(t), dtype=bool)
+    j = np.searchsorted(e, t, side="right") - 1
+    return np.where(j >= 0, pol[np.clip(j, 0, None)], ~pol[0])
+
+
+def _unobserved_state_mask(
+    t: npt.NDArray[np.float64],
+    rising: npt.NDArray[np.float64],
+    falling: npt.NDArray[np.float64],
+    spans: Iterable[tuple[float, float]],
+) -> npt.NDArray[np.bool_]:
+    """True where the line state can't be read from the measured edges: inside each span,
+    and after it until the first measured edge."""
+    e = np.sort(np.concatenate([rising, falling]))
+    mask = np.zeros(len(t), dtype=bool)
+    for a, z in spans:
+        j = int(np.searchsorted(e, z))
+        mask |= (t >= a) & (t < (e[j] if j < len(e) else np.inf))
+    return mask
+
+
+def analog_diode_channel_correlations(
+    t: npt.NDArray[np.float64],
+    x: npt.NDArray[Any],
+    rising: npt.ArrayLike,
+    falling: npt.ArrayLike,
+    spans: Iterable[tuple[float, float]] = (),
+) -> list[float | None]:
+    """Per channel (column of `x`, sampled at sync times `t`): correlation with the state of
+    the digital photodiode line (measured `rising`/`falling` edges), outside `spans` (where
+    the state is unknown). None for a constant channel (e.g. at the rail), or if the digital
+    line doesn't change."""
+    r = np.sort(np.asarray(rising, dtype=float))
+    f = np.sort(np.asarray(falling, dtype=float))
+    keep = ~_unobserved_state_mask(t, r, f, spans)
+    state = _diode_state_at(t, r, f)[keep].astype(float)
+    out: list[float | None] = []
+    for ch in range(x.shape[1]):
+        y = np.asarray(x[:, ch], dtype=float)[keep]
+        if not len(y) or y.std() == 0 or state.std() == 0:
+            out.append(None)
+        else:
+            out.append(float(np.corrcoef(y, state)[0, 1]))
+    return out
+
+
+def select_analog_diode_channel(
+    correlations: Sequence[float | None],
+    min_correlation: float = ANALOG_DIODE_MIN_CORRELATION,
+    min_margin: float = ANALOG_DIODE_MIN_CORRELATION_MARGIN,
+) -> int | None:
+    """Index of the analog photodiode channel, or None if no channel stands out.
+
+    >>> select_analog_diode_channel([0.92, -0.01, None, 0.0])
+    0
+    >>> select_analog_diode_channel([None, 0.9, 0.02])
+    1
+    >>> select_analog_diode_channel([0.3, 0.0]), select_analog_diode_channel([0.9, 0.8])
+    (None, None)
+    """
+    c = np.array([-np.inf if v is None else v for v in correlations], dtype=float)
+    if not len(c):
+        return None
+    best = int(np.argmax(c))
+    others = np.delete(c, best)
+    if c[best] < min_correlation:
+        return None
+    if len(others) and c[best] - others.max() < min_margin:
+        return None
+    return best
+
+
+def schmitt_trigger_edges(
+    y: npt.NDArray[np.float64], rise_level: float, fall_level: float
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """(rising, falling) edge positions, in fractional samples, of a comparator with
+    hysteresis on `y`: it goes high when `y` rises through `rise_level` and low when `y`
+    falls through `fall_level`.
+
+    The state changes when `y` passes the outer of the two levels (so noise at one level
+    can't toggle it), and each edge is timed at the last crossing of its own level before
+    that, linearly interpolated.
+
+    >>> y = np.array([0, 0, 4, 8, 8, 8, 6, 2, 0, 0, 8, 8], dtype=float)
+    >>> r, f = schmitt_trigger_edges(y, rise_level=6, fall_level=3)
+    >>> r.tolist(), f.tolist()
+    ([2.5, 9.75], [6.75])
+    """
+    hi, lo = max(rise_level, fall_level), min(rise_level, fall_level)
+    state = np.full(len(y), -1, dtype=np.int8)
+    state[y > hi] = 1
+    state[y < lo] = 0
+    known = state >= 0
+    if not known.any():
+        return np.array([]), np.array([])
+    idx = np.where(known, np.arange(len(y)), 0)
+    np.maximum.accumulate(idx, out=idx)
+    st = state[idx]
+    first = int(np.argmax(known))
+    change = np.flatnonzero(np.diff(st[first:]) != 0) + first + 1
+    below_rise = np.flatnonzero(y < rise_level)
+    above_fall = np.flatnonzero(y > fall_level)
+    rising: list[float] = []
+    falling: list[float] = []
+    for i in change:
+        up = st[i] == 1
+        level = rise_level if up else fall_level
+        other = below_rise if up else above_fall
+        k = int(np.searchsorted(other, i)) - 1
+        if k < 0:
+            continue
+        j = int(other[k])  # last sample on the far side of the edge's own level
+        d = y[j + 1] - y[j]
+        pos = j + ((level - y[j]) / d if d != 0 else 0.5)
+        (rising if up else falling).append(float(pos))
+    return np.asarray(rising, dtype=float), np.asarray(falling, dtype=float)
+
+
+def _nearest_diff(
+    x: npt.NDArray[np.float64], ref: npt.NDArray[np.float64]
+) -> npt.NDArray[np.float64]:
+    """x - nearest value in sorted `ref`, per x (inf if `ref` is empty)."""
+    if not len(ref):
+        return np.full(len(x), np.inf)
+    j = np.searchsorted(ref, x)
+    d0 = x - ref[np.clip(j - 1, 0, len(ref) - 1)]
+    d1 = x - ref[np.clip(j, 0, len(ref) - 1)]
+    return np.where(np.abs(d0) <= np.abs(d1), d0, d1)
+
+
+def reconstruct_diode_edges_from_analog(
+    t: npt.NDArray[np.float64],
+    y: npt.NDArray[np.float64],
+    rising: npt.ArrayLike,
+    falling: npt.ArrayLike,
+    span: tuple[float, float],
+    predicted_rising: npt.ArrayLike,
+    predicted_falling: npt.ArrayLike,
+    other_spans: Iterable[tuple[float, float]] = (),
+    window_sec: float = ANALOG_DIODE_WINDOW_SEC,
+    max_deviation_sec: float = ANALOG_DIODE_MAX_DEVIATION_SEC,
+    min_edges: int = ANALOG_DIODE_MIN_EDGES,
+    smooth_sec: float = ANALOG_DIODE_SMOOTH_SEC,
+) -> dict[str, Any]:
+    """Digital photodiode edges inside `span` from the analog photodiode trace `y` (sampled
+    at sync times `t`, evenly), as the comparator that makes the sync line would have
+    produced them.
+
+    The comparator is modelled as a threshold with hysteresis, measured from the data: the
+    rising (falling) level is the median of the smoothed trace at the measured rising
+    (falling) edges within `window_sec` of the span, and a per-polarity offset (median
+    measured - analog-derived edge time) takes up what is left (the comparator's delay, the
+    local error of the NI-DAQ -> sync time map).
+
+    Returns a dict with `status`:
+
+    - 'reconstructed', with `rising` and `falling` (sync seconds) to replace the predicted
+      edges, if all gates pass:
+      1. at least `min_edges` measured edges of each polarity on each side of the span
+      2. around the span (the same windows), every measured edge has an analog-derived edge
+         of its polarity within `max_deviation_sec`, and every analog-derived edge a
+         measured one: the model reproduces the sync line there, edge for edge
+      3. inside the span, the analog-derived edges are one-to-one with `predicted_rising`
+         / `predicted_falling` (the patch's vsync-based reconstruction): same count per
+         polarity, each less than half the shortest interval between predicted edges from
+         its own predicted edge, and alternating with the measured edges on both sides. So
+         the frame <-> edge assignment downstream is unchanged, only the edge times are
+      4. no edge more than `max_deviation_sec` outside the span (edges less than that
+         outside are put at its bound: the line was recorded there, without them)
+    - 'failed', with `reason`, otherwise.
+
+    Other keys are diagnostics (JSON-serialisable). `other_spans`: other replayed spans,
+    where the line has no measured edges (not used for calibration or the gates).
+    """
+    a, z = span
+    r = np.sort(np.asarray(rising, dtype=float))
+    f = np.sort(np.asarray(falling, dtype=float))
+    pred = {
+        True: np.sort(np.asarray(predicted_rising, dtype=float)),
+        False: np.sort(np.asarray(predicted_falling, dtype=float)),
+    }
+    info: dict[str, Any] = {"status": "failed"}
+
+    def failed(reason: str) -> dict[str, Any]:
+        info["reason"] = reason
+        return info
+
+    if len(t) < 3:
+        return failed("no analog samples")
+    dt = float((t[-1] - t[0]) / (len(t) - 1))
+    k = max(int(round(smooth_sec / dt)), 1)
+    k += (k + 1) % 2  # odd: no shift
+    ys = np.convolve(np.asarray(y, dtype=float), np.ones(k) / k, mode="same")
+    edge_pad = (k + 2) * dt
+    t_lo, t_hi = float(t[0]) + edge_pad, float(t[-1]) - edge_pad
+    other_spans = list(other_spans)
+    excluded = [(a, z), *other_spans]
+    all_e = np.sort(np.concatenate([r, f]))
+    before = all_e[all_e < a]
+    after = all_e[all_e >= z]
+    if not len(before) or not len(after):
+        return failed("no measured photodiode edges on one side of the span")
+    last_before, first_after = float(before[-1]), float(after[0])
+    # calibration/gate windows: up to `window_sec` on each side, inside the analog segment
+    windows = [
+        (max(a - window_sec, t_lo), a),
+        (z, min(z + window_sec, t_hi)),
+    ]
+
+    def in_windows(x: npt.NDArray[np.float64], shrink: float = 0.0) -> list[Any]:
+        # `shrink`: away from the window bounds and the spans, where an edge's counterpart
+        # can be on the other side
+        out = npc_sync.in_intervals(x, [(u - shrink, v + shrink) for u, v in excluded])
+        return [(x >= w0 + shrink) & (x < w1 - shrink) & ~out for w0, w1 in windows]
+
+    measured = {True: r, False: f}
+    sides = {p: in_windows(measured[p]) for p in (True, False)}
+    counts = [int(m.sum()) for p in (True, False) for m in sides[p]]
+    info["n_calibration_edges"] = counts  # rising before/after, falling before/after
+    if min(counts) < min_edges:
+        return failed(
+            f"too few measured photodiode edges around the span (rising before/after, "
+            f"falling before/after: {counts}; {min_edges} needed)"
+        )
+    cal = {p: measured[p][sides[p][0] | sides[p][1]] for p in (True, False)}
+    level = {p: float(np.median(np.interp(cal[p], t, ys))) for p in (True, False)}
+    lo_level, hi_level = (float(v) for v in np.percentile(ys, [1, 99]))
+    info.update(
+        rise_level=level[True],
+        fall_level=level[False],
+        black_level=lo_level,
+        white_level=hi_level,
+        smooth_samples=k,
+    )
+    if not (lo_level < min(level.values()) and max(level.values()) < hi_level):
+        return failed("comparator levels are outside the range of the analog trace")
+    pos_r, pos_f = schmitt_trigger_edges(ys, level[True], level[False])
+    analog = {
+        True: np.interp(pos_r, np.arange(len(t)), t),
+        False: np.interp(pos_f, np.arange(len(t)), t),
+    }
+    # offsets, then gate 2: the model reproduces the measured line around the span
+    worst = 0.0
+    for p, name in ((True, "rising"), (False, "falling")):
+        if not len(analog[p]):
+            return failed(f"no {name} edges in the analog trace")
+        d = _nearest_diff(cal[p], analog[p])
+        offset = float(np.median(d))
+        analog[p] = analog[p] + offset
+        resid = d - offset
+        extra = analog[p][np.logical_or(*in_windows(analog[p], 2 * max_deviation_sec))]
+        resid_extra = _nearest_diff(extra, cal[p])
+        info[f"{name}_offset_sec"] = offset
+        info[f"{name}_residual_ms"] = {
+            "n": int(len(resid)),
+            "median_abs": float(np.median(np.abs(resid)) * 1e3),
+            "p99_abs": float(np.percentile(np.abs(resid), 99) * 1e3),
+            "max_abs": float(np.max(np.abs(resid)) * 1e3),
+        }
+        n_bad = int((np.abs(resid) > max_deviation_sec).sum())
+        n_extra = int((np.abs(resid_extra) > max_deviation_sec).sum())
+        if n_bad or n_extra:
+            return failed(
+                f"analog photodiode doesn't reproduce the measured {name} edges around the "
+                f"span: {n_bad} of {len(resid)} measured edges without an analog edge within "
+                f"{max_deviation_sec * 1e3:.1f} ms (max {np.max(np.abs(resid)) * 1e3:.2f} "
+                f"ms), {n_extra} analog edges without a measured one"
+            )
+        worst = max(worst, float(np.max(np.abs(resid))))
+    info["max_abs_residual_sec"] = worst
+    # gate 3: inside the span, one-to-one with the predicted edges
+    margin = 2 * max_deviation_sec
+    new = {
+        p: analog[p][
+            (analog[p] > last_before + margin) & (analog[p] < first_after - margin)
+        ]
+        for p in (True, False)
+    }
+    info["n_edges"] = [int(len(new[True])), int(len(new[False]))]
+    info["n_predicted"] = [int(len(pred[True])), int(len(pred[False]))]
+    if info["n_edges"] != info["n_predicted"]:
+        return failed(
+            f"{info['n_edges']} (rising, falling) analog photodiode edges in the span, "
+            f"{info['n_predicted']} predicted from vsyncs"
+        )
+    all_pred = np.sort(np.concatenate([pred[True], pred[False]]))
+    tol = 0.5 * float(np.min(np.diff(all_pred))) if len(all_pred) > 1 else 1 / 120
+    dev = np.concatenate([new[p] - pred[p] for p in (True, False)])
+    if len(dev):
+        info["analog_minus_predicted_ms"] = {
+            "min": float(dev.min() * 1e3),
+            "median": float(np.median(dev) * 1e3),
+            "max": float(dev.max() * 1e3),
+        }
+        if np.max(np.abs(dev)) >= tol:
+            return failed(
+                f"analog photodiode edges are up to {np.max(np.abs(dev)) * 1e3:.1f} ms from "
+                f"the edges predicted from vsyncs (>= {tol * 1e3:.1f} ms: assignment "
+                "ambiguous)"
+            )
+    kept_r = r[(r <= last_before) | (r >= first_after)]
+    kept_f = f[(f <= last_before) | (f >= first_after)]
+
+    def local(x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        return np.sort(x[(x >= a - 1.0) & (x < z + 1.0)])
+
+    if _alternation_errors(
+        local(np.r_[kept_r, new[True]]), local(np.r_[kept_f, new[False]]), other_spans
+    ) > _alternation_errors(
+        local(np.r_[kept_r, pred[True]]), local(np.r_[kept_f, pred[False]]), other_spans
+    ):
+        return failed(
+            "analog photodiode edges don't alternate with the measured edges around the span"
+        )
+    # the line was recorded outside [a, z) and has no such edge there: an analog-derived edge
+    # just outside (by less than the model's error) is put at the bound. This also keeps it
+    # inside the span for consumers that go by time (npc_stim's `frame_source`)
+    clamped = {p: np.clip(new[p], a, np.nextafter(z, -np.inf)) for p in (True, False)}
+    moved = np.concatenate([np.abs(clamped[p] - new[p]) for p in (True, False)])
+    info["n_moved_to_span_bounds"] = int((moved > 0).sum())
+    info["max_moved_to_span_bounds_sec"] = float(moved.max()) if len(moved) else 0.0
+    if len(moved) and moved.max() > max_deviation_sec:
+        return failed(
+            f"an analog photodiode edge is {moved.max() * 1e3:.2f} ms outside the span, "
+            "where the line was recorded without it"
+        )
+    info.update(status="reconstructed", rising=clamped[True], falling=clamped[False])
+    return info
+
+
+def reconstruct_photodiode_line(
+    raw: npc_sync.SyncDataset,
+    patch: npc_sync.SyncPatch,
+    stim_paths: Sequence[npc_io.PathLike] = (),
+    ephys_recording_dirs: Iterable[npc_io.PathLike] | None = None,
+) -> dict[str, Any]:
+    """Replace, in place, the photodiode edges that npc_sync predicted inside replayed
+    intervals (reconstructed vsync + measured latency: `npc_sync.patch.predict_diode_edges`
+    / `predict_box1_diode_edges`) with edges from the analog photodiode recorded on the
+    ephys NI-DAQ, so that frames there get measured display times.
+
+    The NI-DAQ runs on its own clock and isn't affected by the sync program's dropped
+    buffers. Its samples are mapped to sync time by npc_ephys' fit to the barcodes of the
+    whole recording (those within 2 s of a replayed interval excluded), so the map doesn't
+    depend on the lost sync data; its local error is taken up by the offsets measured
+    around each span (`reconstruct_diode_edges_from_analog`).
+
+    Per span with predicted edges: the channel is found by correlation with the digital
+    line around the span (`select_analog_diode_channel`: AI0 in every session checked, but
+    not assumed; if no channel stands out around the first span, the recording has no
+    analog photodiode and the other spans aren't read), and the span's edges are replaced
+    only if every gate of
+    `reconstruct_diode_edges_from_analog` passes; the new `SpanPatch` has method
+    `ANALOG_DIODE_METHOD`, the model's parameters and residuals in `diagnostics`, and the
+    edges it replaces in `diagnostics['replaced']`. Otherwise the span is left as it was,
+    with a note. Nothing is read, and nothing changes, without `ephys_recording_dirs` or
+    without such spans. Sessions before 2025-01, whose AI0 is at the rail, keep npc_sync's
+    prediction (no channel correlates), as do spans npc_sync left 'unknown'.
+
+    `stim_paths` isn't used (same signature as the other steps). Returns diagnostics per
+    span.
+    """
+    out: dict[str, Any] = {}
+    spans = patch.lines.get(DIODE_LINE, [])
+    targets = [
+        s
+        for s in spans
+        if s.status == "reconstructed"
+        and s.method not in ("no_edges", ANALOG_DIODE_METHOD)
+        and (len(s.rising) or len(s.falling))
+    ]
+    if not targets or not ephys_recording_dirs:
+        return out
+    import npc_ephys
+
+    recording_dirs = tuple(ephys_recording_dirs)
+    view = _patched_view(raw, patch)
+    device = npc_ephys.get_pxi_nidaq_info(recording_dirs)
+    nidaq = npc_ephys.get_ephys_timing_on_sync(
+        sync=view, recording_dirs=recording_dirs, devices=(device,)
+    )[0]
+    if not nidaq.is_valid or nidaq.drops:
+        patch.notes.append(
+            f"{DIODE_LINE}: analog photodiode not used: NI-DAQ timing "
+            + (f"failed ({nidaq.reason})" if not nidaq.is_valid else "has lost samples")
+        )
+        return out
+    data = npc_ephys.get_pxi_nidaq_data(
+        *recording_dirs, device_name=device.device.name
+    )
+    n_samples = int(data.shape[0])
+    measured = {}
+    for kind in ("rising", "falling"):
+        e = np.asarray(view.get_edges(kind, DIODE_LINE, units="seconds"), dtype=float)
+        measured[kind] = e[view.get_edge_sources(DIODE_LINE, kind) == npc_sync.MEASURED]
+    all_spans = [s.span for s in spans]
+    new_spans = []
+    no_channel = False
+    for s in spans:
+        if no_channel or not any(s is x for x in targets):
+            new_spans.append(s)
+            continue
+        a, z = s.span
+        key = f"{a:.3f}-{z:.3f} s"
+        pad = ANALOG_DIODE_WINDOW_SEC + 0.5
+        k0 = max(int((a - pad - nidaq.start_time) * nidaq.sampling_rate), 0)
+        k1 = min(int((z + pad - nidaq.start_time) * nidaq.sampling_rate), n_samples)
+        result: dict[str, Any]
+        channel = None
+        if k1 - k0 < 2:
+            result = {"status": "failed", "reason": "span outside the NI-DAQ recording"}
+        else:
+            x = np.asarray(data[k0:k1])
+            t = np.asarray(nidaq.to_sync_time(np.arange(k0, k1)), dtype=float)
+            correlations = analog_diode_channel_correlations(
+                t, x, measured["rising"], measured["falling"], all_spans
+            )
+            channel = select_analog_diode_channel(correlations)
+            if channel is None:
+                no_channel = s is targets[0]
+                result = {
+                    "status": "failed",
+                    "reason": "no NI-DAQ channel follows the digital photodiode line "
+                    f"(correlations: {[None if c is None else round(c, 3) for c in correlations]})",
+                }
+            else:
+                result = reconstruct_diode_edges_from_analog(
+                    t,
+                    x[:, channel].astype(float),
+                    measured["rising"],
+                    measured["falling"],
+                    (a, z),
+                    s.rising,
+                    s.falling,
+                    other_spans=[sp for sp in all_spans if sp != s.span],
+                )
+            result["channel_correlations"] = correlations
+        diag = {k: v for k, v in result.items() if k not in ("rising", "falling")}
+        diag.update(
+            nidaq_device=device.device.name,
+            nidaq_channel=channel,
+            nidaq_sampling_rate=nidaq.sampling_rate,
+            nidaq_start_time=nidaq.start_time,
+        )
+        out[key] = diag
+        if result["status"] != "reconstructed":
+            patch.notes.append(
+                f"{DIODE_LINE} {key}: analog photodiode not used ({s.method} kept): "
+                f"{result['reason']}"
+            )
+            new_spans.append(s)
+            continue
+        diag["replaced"] = {
+            "method": s.method,
+            "error_bound_sec": s.error_bound_sec,
+            "rising": [float(v) for v in s.rising],
+            "falling": [float(v) for v in s.falling],
+            "diagnostics": s.diagnostics,
+        }
+        new_spans.append(
+            npc_sync.SpanPatch(
+                span=s.span,
+                status="reconstructed",
+                rising=np.asarray(result["rising"], dtype=float),
+                falling=np.asarray(result["falling"], dtype=float),
+                method=ANALOG_DIODE_METHOD,
+                error_bound_sec=ANALOG_DIODE_MAX_DEVIATION_SEC,
+                diagnostics=diag,
+                reason="edges of the NI-DAQ analog photodiode (comparator thresholds and "
+                "offsets measured from the edges around the span), replacing the edges "
+                f"predicted from vsyncs ({s.method})",
+            )
+        )
+    patch.lines[DIODE_LINE] = new_spans
+    return out
 
 
 def _opto_triggers(
@@ -1451,6 +1984,18 @@ def get_block_report(
             for s in spans
             if s.method == "frame_intervals"
         ]
+        # how the photodiode edges inside the block's replayed spans were obtained
+        # (`ANALOG_DIODE_METHOD`: measured on the NI-DAQ analog photodiode; the frames are
+        # still counted in `n_interpolated_frames`: their vsyncs are reconstructed)
+        row["photodiode_span_methods"] = (
+            [
+                s.method
+                for s in patch.lines.get(DIODE_LINE, [])
+                if s.span[0] <= b[-1] and s.span[1] >= b[0]
+            ]
+            if patch is not None
+            else []
+        )
         if display_times is not None and j < len(display_times):
             dt = display_times[j]
             row["display_time_source"] = dt.source
