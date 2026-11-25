@@ -1976,6 +1976,7 @@ class DynamicRoutingSession:
                 units=units,
                 annotated_electrodes=utils.get_electrodes_table(self.id),
             )
+            units = utils.add_atlas_labels_to_units(units)
         if self.is_task:
             # obs_intervals are needed for calculating spike-counts correctly
             units = utils.add_activity_drift_metric(
@@ -2087,6 +2088,7 @@ class DynamicRoutingSession:
             "electrodes": "indices in `electrodes` table of channels on the probe that the unit was recorded on",
             "channels": "1-indexed channel numbers on the probe that the unit was recorded on (1 is the tip of the probe)",
             "device_name": "name in `devices` table of the probe that the unit was recorded on",
+            **(utils.UNITS_ATLAS_COLUMN_DESCRIPTIONS if self.is_annotated else {}),
             # TODO add descriptions for other columns
         }
         for column in sorted(set(self._units.columns) | set(description_map.keys())):
