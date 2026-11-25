@@ -2462,7 +2462,7 @@ wheels = [
 
 [[package]]
 name = "npc-mvr"
-version = "0.1.20"
+version = "0.1.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "npc-io" },
@@ -2470,9 +2470,9 @@ dependencies = [
     { name = "opencv-python-headless" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/65/ef/25f677ac7fe2fb9a7fcc95eaf631936fdeb88740df3f2b5486e28ab89513/npc_mvr-0.1.20.tar.gz", hash = "sha256:56e1474db6b745b5077f4b23f8821df7a450313865808c35c2c7495261a764c5", size = 23855, upload-time = "2026-11-25T21:34:17.174Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/18/1a0f5d99443a4f439fa4feeffc603660ca4eb6c0ab5f6b4ab04bdb1b80f9/npc_mvr-0.1.21.tar.gz", hash = "sha256:ae23f2b838740f18c151f51d908fba8a92db256dd35bfe7cae74aa5719423c1c", size = 24385, upload-time = "2026-11-25T23:48:36.853Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/b6/0d5b325dba9bcaa0194877cef22140905245d8a5e9683f7cbf0cbdd125fa/npc_mvr-0.1.20-py3-none-any.whl", hash = "sha256:b1060722a62e104dcef05ab43a5cfa437273fa6709db46c3d51688b6a3a4f675", size = 20868, upload-time = "2026-11-25T21:34:16.356Z" },
+    { url = "https://files.pythonhosted.org/packages/51/e1/c39c53d30ea45a7240e81144829a0b10cf2b764bec1bd5dcfcbd657abb36/npc_mvr-0.1.21-py3-none-any.whl", hash = "sha256:7119afcf1ce35ed9064608a1c83e25c624d3375e97e30cff02a0ede861443b97", size = 21336, upload-time = "2026-11-25T23:48:36.048Z" },
 ]
 
 [[package]]
@@ -2580,7 +2580,7 @@ requires-dist = [
     { name = "npc-ephys", extras = ["nwb"], specifier = ">=0.1.54" },
     { name = "npc-io", specifier = ">=0.1.34" },
     { name = "npc-lims", specifier = ">=0.1.206" },
-    { name = "npc-mvr", specifier = ">=0.1.20" },
+    { name = "npc-mvr", specifier = ">=0.1.21" },
     { name = "npc-samstim", specifier = ">=0.1.19" },
     { name = "npc-session", specifier = ">=0.1.41" },
     { name = "npc-stim", specifier = ">=0.1.30" },
