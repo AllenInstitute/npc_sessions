@@ -913,7 +913,13 @@ class DynamicRoutingSession:
         modules.append(self._reward_frame_times)
         if self.is_video:
             if self.info and self.info.is_dlc_eye:
-                modules.append(self._eye_tracking)
+                if "eye" in self.mvr.video_paths:
+                    modules.append(self._eye_tracking)
+                else:
+                    logger.warning(
+                        f"{self.id} eye camera not available (excluded: "
+                        f"{getattr(self.mvr, 'excluded_cameras', {}).get('eye')}): skipping eye tracking"
+                    )
             modules.extend(self._dlc)
             modules.extend(self._facemap)
             modules.extend(self._lp)
