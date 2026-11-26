@@ -4328,30 +4328,40 @@ class DynamicRoutingSession:
             rising = self.sync_data.get_rising_edges(15, units="seconds")
             falling = self.sync_data.get_falling_edges(15, units="seconds")
             if falling.size != 0 and rising.size != 0:
-                if falling[0] < rising[0]:
-                    falling = falling[1:]
-                if rising[-1] > falling[-1]:
-                    rising = rising[:-1]
-                assert len(rising) == len(falling)
+                from npc_sessions import timing
+
+                # don't assume edges alternate: an edge can be lost in a replayed sync
+                # interval (e.g. 714748_2024-06-28: solenoid opened 6 ms before a replayed
+                # interval, its falling edge lost). Unpaired falling edges are dropped (the
+                # onset is lost - rewards inside unknown intervals are reconstructed below);
+                # unpaired rising edges are real onsets, kept with NaN duration
+                ri, fi = timing.pair_edge_indices(rising, falling)
+                duration = np.full(rising.size, np.nan)
+                duration[ri] = falling[fi] - rising[ri]
+                unpaired = np.isnan(duration)
+                if unpaired.any():
+                    logger.warning(
+                        f"{self.id} reward line: {unpaired.sum()} rising edge(s) with no "
+                        f"falling edge at {rising[unpaired].round(3).tolist()} s: kept with "
+                        "NaN duration"
+                    )
                 df = pd.DataFrame(
                     dict(
                         timestamps=rising,
-                        duration=falling - rising,
+                        duration=duration,
                         is_solenoid_time=True,
                         timing_source="sync",
                     )
                 )
                 column_descriptions["duration"] = (
                     "length of time the solenoid valve controlling water reward delivery to the subject was opened, in seconds"
-                    " (NaN where `timing_source` is 'stim_frame')"
+                    " (NaN where `timing_source` is 'stim_frame', or where the closing edge was not recorded on sync)"
                 )
                 column_descriptions["timing_source"] = (
                     "'sync': solenoid line edge on sync; 'stim_frame': inside a replayed sync interval (solenoid line unknown), "
                     "reconstructed from the stim file's reward frames + the session's median measured frame-to-solenoid latency"
                 )
                 if self.sync_data.get_unknown_intervals(15):
-                    from npc_sessions import timing
-
                     extra: list[float] = []
                     for stim_file in self.stim_data_without_timing_issues:
                         if any(
