@@ -2087,11 +2087,14 @@ class DynamicRoutingSession:
         description_map = {
             "activity_drift": (
                 "a measure of activity drift over the behavior task trials (epochs.script_name == DynamicRouting1); "
-                "`scipy.stats.anderson_ksamp()` is used to test whether spike counts within the interval [-1: 2] s around the stimulus start time "
-                "in each block (grouped by context and stimulus) are drawn from the same distribution; "
-                "the test statistic is normalized by dividing by 100 and clipping values to [0, 1], with 0 being the lowest activity drift; "
-                f"it is recommended to filter for units with a value below {utils.ACTIVITY_DRIFT_THRESHOLD} for analyses that depend on stationary activity across the behvior task; "
-                "for a manually-annotated subset of unit activity rasters, thresholding at 0.1 resulted in a true-positive rate of 70% and false-positive rate of 2%; "
+                "spike counts in [-1.5, 2) s around stimulus onset on each non-catch trial are grouped by context (rewarded modality) and stimulus, "
+                "and within each group `scipy.stats.anderson_ksamp(midrank=True)` tests whether counts in each block are drawn from the same distribution "
+                "(sessions without context blocks are split into 3 consecutive chunks of trials); "
+                "the value is the maximum standardized test statistic across groups, divided by 100 and clipped to [0, 1], with 0 being the lowest activity drift; "
+                "it is approximately linear in the test's asymptotic -log10(p-value) (-log10(p) ~= 45.5 * activity_drift + 0.3), so 0.1 corresponds to p ~= 1e-5 per group, "
+                "but trials are not independent, so this should be treated as a strength-of-evidence scale rather than a calibrated false-positive rate; "
+                f"it is recommended to filter for units with a value below {utils.ACTIVITY_DRIFT_THRESHOLD} for analyses that depend on stationary activity across the behavior task; "
+                "against manual drift ratings of unit rasters (4791 units, 149 sessions), a threshold of 0.1 passes 63% of units rated as not drifting and 1.8% of units rated as drifting; "
                 "nan values indicate either that the unit had too few spikes to calculate the metric, or that the session had no behavior task trials"
             ),
             "is_not_drift": f"whether the unit has low activity drift (`activity_drift < {utils.ACTIVITY_DRIFT_THRESHOLD}`); false wherever `activity_drift` is nan",
