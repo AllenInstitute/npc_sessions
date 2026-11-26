@@ -1926,6 +1926,19 @@ class DynamicRoutingSession:
                     "reference": "tip",
                     "location": "unannotated",
                 }
+                if self.is_annotated:
+                    # sentinels for channels without CCF annotation (e.g. a
+                    # probe annotated for 384 channels only, viewed from a
+                    # surface recording with channel offset): all rows must
+                    # have the same set of columns
+                    row_kwargs |= {
+                        "structure": "unannotated",
+                        "x": np.nan,
+                        "y": np.nan,
+                        "z": np.nan,
+                    }
+                    if "raw_structure" in column_names:
+                        row_kwargs["raw_structure"] = "unannotated"
                 if self.is_annotated and any(
                     (
                         annotated_probes := ccf_df.query(
